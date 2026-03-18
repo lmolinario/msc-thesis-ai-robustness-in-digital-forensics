@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository contains the public research pipeline developed for an MSc thesis in *Computer Engineering, Cybersecurity and Artificial Intelligence*. The project focuses on evaluating the operational robustness of AI-based image classification systems used in digital forensic contexts.
+The repository mirrors a structured and reproducible experimental pipeline designed to evaluate the robustness of AI-based systems under controlled yet realistic perturbation scenarios.
 
 The study is conducted under realistic experimental conditions, where AI models are exposed to both adversarial and anti-forensic perturbations designed to degrade classification performance while preserving visual plausibility.
 
@@ -21,6 +21,19 @@ The work aims to answer the following research questions:
 
 ---
 
+
+## Contributions
+
+This work provides the following contributions:
+
+- A structured experimental pipeline for evaluating the robustness of AI-based image classification systems in digital forensic scenarios.
+- A realistic dataset construction methodology combining heterogeneous sources (e.g., public datasets, OSINT, and web scraping).
+- A comparative evaluation of multiple AI models under both adversarial and anti-forensic perturbations.
+- An analysis of the impact of visually plausible manipulations on classification reliability.
+- An explainability-driven investigation of model behavior under perturbed inputs.
+
+---
+  
 ## Pipeline Overview
 
 The repository mirrors the methodological structure of the experimental pipeline and is organized into the following stages:
@@ -52,18 +65,34 @@ The repository is structured to reflect the full experimental workflow:
 
 ---
 
-## Dataset Note
+## Dataset Availability
 
-Due to legal, ethical, and operational constraints, the full dataset used in the thesis is not publicly distributed.  
+Due to legal, ethical, and operational constraints, the full dataset used in this study cannot be publicly released.
 
-This repository includes:
+However, this repository provides:
 
-- dataset structure and schema  
-- metadata examples  
-- sample data where permissible  
-- detailed documentation of the dataset construction process  
+- Dataset structure and schema
+- Metadata examples
+- Sample images where permissible
+- Detailed documentation of the dataset construction process
+
+This ensures methodological transparency while respecting data governance constraints typical of forensic contexts.
 
 ---
+
+
+## Threat Model
+
+The experimental setup assumes a threat model in which an adversary can manipulate input images with the goal of inducing misclassification, while maintaining high visual plausibility.
+
+Two classes of perturbations are considered:
+
+- Adversarial attacks: small, often imperceptible perturbations optimized to exploit model vulnerabilities.
+- Anti-forensic transformations: realistic image manipulations (e.g., compression, resizing, filtering) that may occur in real-world forensic scenarios.
+
+The attacker is assumed to have limited or no knowledge of the internal model parameters (black-box or gray-box setting).
+
+--- 
 
 ## Reproducibility
 
