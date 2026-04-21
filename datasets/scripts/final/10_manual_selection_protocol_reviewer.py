@@ -8,13 +8,24 @@ Official manual selection protocol reviewer for the FAIR-Lab public thesis pipel
 
 Purpose
 -------
-This script provides a single, documented, human-in-the-loop reviewer used to
-manually select the final 1500 images from the full prepared review manifest
-according to the thesis methodology.
+This script provides a documented, human-in-the-loop reviewer used to inspect,
+refine, and extend the final manual image selection process according to the
+thesis methodology.
+
+The reviewer supports two explicit operating modes:
+
+1. review_selection
+   - inspect already assigned images from one selected class
+   - remove the current class assignment and send the image back to pending
+
+2. review_pending
+   - inspect pending images from one selected source dataset
+   - assign weapon / non_weapon / ood / exclude manually
 
 Input
 -----
 - datasets/prepared/manifests/review_manifest_full.csv
+- datasets/final/manifests/manual_selection_protocol_db.csv
 
 Outputs
 -------
@@ -34,14 +45,12 @@ Reports:
 Methodological notes
 --------------------
 - The process is manual, not fully automatic.
-- The script documents every decision with logs and timestamps.
-- Global targets are enforced:
-    * 500 weapon
-    * 500 non_weapon
-    * 500 ood
-- Excluded items are tracked explicitly.
-- The adversarial subset is derived automatically from the final 1500 by keeping
-  only weapon and non_weapon samples.
+- All reviewer actions are logged.
+- The script can be re-opened and resumed.
+- Global targets are enforced for weapon / non_weapon / ood.
+- Existing assigned classes can be explicitly reviewed and cleared.
+- Pending images can be reviewed source by source.
+- No automatic scoring or automatic class suggestion is used in the reviewer UI.
 """
 
 from __future__ import annotations
@@ -54,15 +63,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 import matplotlib
 matplotlib.use("TkAgg")
+
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.backend_bases import MouseButton
 
-from datasets.scripts.utils.paths import PREPARED_DATASETS_DIR, repo_relative_path
+from datasets.scripts.utils.paths import PREPARED_DATASETS_DIR
 
 
 # =============================================================================
@@ -98,13 +107,13 @@ TARGET_NON_WEAPON = 500
 TARGET_OOD = 500
 
 VALID_FINAL_LABELS = {"weapon", "non_weapon", "ood", "exclude"}
+VALID_SELECTION_CLASSES = {"weapon", "non_weapon", "ood"}
+VALID_SESSION_MODES = {"review_pending", "review_selection"}
 
-BATCH_SIZE = 12
-N_COLS = 4
-FIG_W = 16
-FIG_H = 10
-
-VIEW_MODES = {"pending", "reviewed", "selected", "excluded"}
+BATCH_SIZE = 10
+N_COLS = 5
+FIG_W = 18
+FIG_H = 9
 
 LABEL_COLORS = {
     "": "gray",
@@ -125,37 +134,33 @@ SOURCE_PRIORITY = {
 HELP_TEXT = """
 OFFICIAL MANUAL SELECTION PROTOCOL REVIEWER
 
-GOAL
-- Build the final 1500-image dataset manually, according to the thesis methodology.
+SESSION MODES
+- review_selection
+  Inspect already assigned images from one selected class.
+  Main action: remove current assignment and return the image to pending.
 
-FINAL TARGETS
+- review_pending
+  Inspect pending images from one selected source dataset.
+  Main actions: assign weapon / non_weapon / ood / exclude.
+
+GLOBAL TARGETS
 - weapon      : 500
 - non_weapon  : 500
 - ood         : 500
 
-LABELS
-- WEAPON
-  Real individual firearm, clearly visible, coherent with the main task.
-- NON_WEAPON
-  Clean realistic negative sample, no weapon present.
-- OOD
-  Out-of-distribution / borderline / semantically ambiguous sample.
-- EXCLUDE
-  Unusable, unreliable, or intentionally excluded from the final release.
-
-MOUSE
+PENDING MODE MOUSE
 - Left click   = WEAPON
 - Right click  = NON_WEAPON
 - Middle click = OOD
 
 KEYS
-- w = WEAPON
-- n = NON_WEAPON
-- o = OOD
-- e / x = EXCLUDE
-- a = clear current decision (back to pending)
+- w = WEAPON               [pending mode only]
+- n = NON_WEAPON           [pending mode only]
+- o = OOD                  [pending mode only]
+- e / x = EXCLUDE          [pending mode only]
+- a = clear pending decision / remove current assignment
 - u = undo last action
-- r = toggle view mode
+- m = change session mode / filter
 - s = save
 - q = save + quit
 - h = help
@@ -163,13 +168,13 @@ KEYS
 - Enter = zoom selected image
 - Right / Space = next batch
 - Left / Backspace = previous batch
-- 1..9 = select image in current batch
+- 1..9 = select image 1..9
+- 0 = select image 10
 
 NOTES
-- Global class targets are hard-enforced.
-- Source distribution is monitored, but not hard-blocked.
-- All decisions are logged.
-- Final exports are regenerated automatically after each save.
+- review_selection shows only one already assigned class at a time.
+- review_pending shows only pending images from one selected source dataset.
+- All decisions are logged and exports are regenerated automatically.
 """.strip()
 
 
@@ -204,12 +209,16 @@ def safe_write_csv(df: pd.DataFrame, path: Path, make_backup: bool = True) -> No
     path.parent.mkdir(parents=True, exist_ok=True)
 
     if make_backup and path.exists():
-        backup_path = BACKUP_DIR / f"{path.stem}_backup_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}{path.suffix}"
+        backup_path = BACKUP_DIR / (
+            f"{path.stem}_backup_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}{path.suffix}"
+        )
         shutil.copy2(path, backup_path)
 
     tmp_path = path.with_suffix(".tmp.csv")
     df.to_csv(tmp_path, index=False, encoding="utf-8")
     tmp_path.replace(path)
+
+
 
 
 def safe_write_json(data: dict, path: Path) -> None:
@@ -229,15 +238,15 @@ def append_session_log(row: dict[str, Any]) -> None:
             fieldnames=[
                 "timestamp",
                 "reviewer_id",
+                "session_mode",
+                "review_class",
+                "review_source",
                 "image_id",
                 "source_dataset",
                 "relative_path",
                 "action",
                 "previous_label",
                 "new_label",
-                "auto_label",
-                "auto_confidence",
-                "score_margin",
                 "selected_for_final",
             ],
         )
@@ -262,15 +271,6 @@ def resolve_image_path(relative_path_value: str) -> Path | None:
     return candidates[0]
 
 
-def to_float(value: Any, default: float) -> float:
-    try:
-        if pd.isna(value):
-            return default
-        return float(value)
-    except Exception:
-        return default
-
-
 # =============================================================================
 # DB initialization
 # =============================================================================
@@ -282,11 +282,6 @@ def ensure_protocol_columns(df: pd.DataFrame) -> pd.DataFrame:
         "source_dataset": "",
         "source_group": "",
         "sha256": "",
-        "auto_label": "",
-        "auto_confidence": "",
-        "score_margin": "",
-        "weapon_score": "",
-        "non_weapon_score": "",
         "selection_label": "",
         "selection_status": "pending",
         "selected_for_final": "",
@@ -323,11 +318,6 @@ def build_initial_protocol_db(manifest_df: pd.DataFrame) -> pd.DataFrame:
         "source_dataset",
         "source_group",
         "sha256",
-        "auto_label",
-        "auto_confidence",
-        "score_margin",
-        "weapon_score",
-        "non_weapon_score",
         "selection_label",
         "selection_status",
         "selected_for_final",
@@ -341,8 +331,7 @@ def build_initial_protocol_db(manifest_df: pd.DataFrame) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = ""
 
-    df = df[protocol_cols].copy()
-    return df
+    return df[protocol_cols].copy()
 
 
 # =============================================================================
@@ -378,9 +367,111 @@ class ManualSelectionProtocolReviewer:
         self.ax_to_df_index: dict[Any, int] = {}
 
         self.last_action_stack: list[dict[str, Any]] = []
-        self.view_mode = "pending"
+
+        self.session_mode = "review_pending"
+        self.review_class = ""
+        self.review_source = ""
 
         self.load_state()
+
+    # -------------------------------------------------------------------------
+    # Session mode and filters
+    # -------------------------------------------------------------------------
+    def ask_review_class(self, default: str = "weapon") -> str:
+        raw = input(
+            f"Class to review [weapon/non_weapon/ood] (default: {default}): "
+        ).strip().lower() or default
+        if raw not in VALID_SELECTION_CLASSES:
+            print(f"[WARN] Invalid class: {raw}. Using default: {default}")
+            return default
+        return raw
+
+    def available_sources(self) -> list[str]:
+        if "source_dataset" not in self.df.columns:
+            return []
+        return sorted(
+            [s for s in self.df["source_dataset"].dropna().astype(str).unique().tolist() if s.strip()]
+        )
+
+    def ask_review_source(self, default: str | None = None) -> str:
+        sources = self.available_sources()
+        if not sources:
+            raise ValueError("No source_dataset values available in the protocol DB.")
+
+        print("\nAvailable source datasets:")
+        for i, src in enumerate(sources, start=1):
+            print(f"{i}. {src}")
+
+        prompt_default = default or sources[0]
+        raw = input(
+            f"Source to review [name or index] (default: {prompt_default}): "
+        ).strip()
+
+        if raw == "":
+            return prompt_default
+
+        if raw.isdigit():
+            idx = int(raw) - 1
+            if 0 <= idx < len(sources):
+                return sources[idx]
+
+        if raw in sources:
+            return raw
+
+        print(f"[WARN] Invalid source: {raw}. Using default: {prompt_default}")
+        return prompt_default
+
+    def choose_review_session(self) -> None:
+        self.print_status()
+
+        raw = input(
+            "\nChoose workflow [review_pending/review_selection] "
+            "(default: review_pending): "
+        ).strip().lower() or "review_pending"
+
+        if raw not in {"review_pending", "review_selection"}:
+            print(f"[WARN] Invalid workflow: {raw}. Using review_pending.")
+            raw = "review_pending"
+
+        if raw == "review_pending":
+            self.session_mode = "review_pending"
+            self.review_class = ""
+            self.review_source = self.ask_review_source(default=self.review_source or None)
+        else:
+            self.session_mode = "review_selection"
+            self.review_source = ""
+            self.review_class = self.ask_review_class(default=self.review_class or "weapon")
+
+        self.current_start = 0
+        self.selected_pos = 0
+
+        print(
+            f"\n[OK] session_mode={self.session_mode} | "
+            f"review_class={self.review_class or '-'} | "
+            f"review_source={self.review_source or '-'}"
+        )
+
+    def change_review_class(self) -> None:
+        """
+        Change only the currently reviewed assigned class inside review_selection mode.
+        """
+        if self.session_mode != "review_selection":
+            print("[INFO] change_review_class() is available only in review_selection mode.")
+            return
+
+        new_class = self.ask_review_class(default=self.review_class or "weapon")
+        self.review_class = new_class
+        self.current_start = 0
+        self.selected_pos = 0
+        self.save_state(last_action=f"change_review_class_{new_class}")
+        self.draw_batch()
+        print(f"[OK] review_class={self.review_class}")
+
+
+    def change_session_mode(self) -> None:
+        self.choose_review_session()
+        self.save_state(last_action=f"change_session_mode_{self.session_mode}")
+        self.draw_batch()
 
     # -------------------------------------------------------------------------
     # Counts and summaries
@@ -410,10 +501,6 @@ class ManualSelectionProtocolReviewer:
             "ood": max(0, TARGET_OOD - counts["ood"]),
         }
 
-    def all_targets_reached(self) -> bool:
-        rem = self.remaining_targets()
-        return rem["weapon"] <= 0 and rem["non_weapon"] <= 0 and rem["ood"] <= 0
-
     def source_status(self) -> pd.DataFrame:
         tmp = self.df.copy()
         tmp["_label"] = tmp["selection_label"].map(norm)
@@ -432,8 +519,29 @@ class ManualSelectionProtocolReviewer:
                 "reviewed": int((g["_status"] == "reviewed").sum()),
             })
         if not rows:
-            return pd.DataFrame(columns=["source_dataset", "rows", "weapon", "non_weapon", "ood", "exclude", "pending", "reviewed"])
+            return pd.DataFrame(
+                columns=["source_dataset", "rows", "weapon", "non_weapon", "ood", "exclude", "pending", "reviewed"]
+            )
         return pd.DataFrame(rows).sort_values("source_dataset").reset_index(drop=True)
+
+    def current_subset_status(self) -> dict[str, Any]:
+        if self.session_mode == "review_selection":
+            tmp = self.df[self.df["selection_label"].map(norm) == self.review_class].copy()
+            return {
+                "session_mode": self.session_mode,
+                "review_class": self.review_class,
+                "rows": int(len(tmp)),
+            }
+
+        tmp = self.df[
+            (self.df["selection_status"].map(norm) != "reviewed")
+            & (self.df["source_dataset"].astype(str) == self.review_source)
+        ].copy()
+        return {
+            "session_mode": self.session_mode,
+            "review_source": self.review_source,
+            "rows": int(len(tmp)),
+        }
 
     def print_status(self) -> None:
         counts = self.final_counts()
@@ -478,14 +586,15 @@ class ManualSelectionProtocolReviewer:
             "current_start": self.current_start,
             "selected_df_index": selected_df_index,
             "last_action": last_action,
-            "view_mode": self.view_mode,
             "last_action_stack": self.last_action_stack[-20:],
+            "session_mode": self.session_mode,
+            "review_class": self.review_class,
+            "review_source": self.review_source,
         }
         safe_write_json(state, STATE_PATH)
 
     def load_state(self) -> None:
         if not STATE_PATH.exists():
-            self.print_status()
             return
 
         try:
@@ -495,7 +604,9 @@ class ManualSelectionProtocolReviewer:
 
             self.current_start = int(state.get("current_start", 0) or 0)
             self.selected_pos = 0
-            self.view_mode = state.get("view_mode", "pending") or "pending"
+            self.session_mode = state.get("session_mode", "review_pending") or "review_pending"
+            self.review_class = state.get("review_class", "") or ""
+            self.review_source = state.get("review_source", "") or ""
 
             raw_stack = state.get("last_action_stack", [])
             if isinstance(raw_stack, list):
@@ -503,108 +614,42 @@ class ManualSelectionProtocolReviewer:
         except Exception as exc:
             print(f"[WARN] Could not load previous state: {exc}")
 
-        self.print_status()
-
     # -------------------------------------------------------------------------
-    # Priority and batch construction
+    # Subset construction
     # -------------------------------------------------------------------------
-    def infer_preferred_class(self, row: pd.Series) -> str:
-        remaining = self.remaining_targets()
-
-        auto_label = norm(row.get("auto_label", ""))
-        auto_conf = to_float(row.get("auto_confidence", ""), -1.0)
-        score_margin = to_float(row.get("score_margin", ""), 999.0)
-        source = norm(row.get("source_dataset", ""))
-
-        class_score = {
-            "weapon": 500,
-            "non_weapon": 500,
-            "ood": 500,
-        }
-
-        if remaining["weapon"] > 0:
-            score = 100
-            if auto_label == "weapon":
-                score = 0
-            elif source in {"01_kaggle_weapon", "02_deepfirearm"}:
-                score = 10
-            elif auto_conf >= 0.80:
-                score = 15
-            class_score["weapon"] = score
-
-        if remaining["non_weapon"] > 0:
-            score = 100
-            if auto_label == "non_weapon":
-                score = 0
-            elif source in {"05_deepweb", "04_telegram_youtube", "03_google_scraped"}:
-                score = 10
-            elif auto_conf >= 0.75:
-                score = 15
-            class_score["non_weapon"] = score
-
-        if remaining["ood"] > 0:
-            score = 100
-            if auto_conf < 0.60:
-                score = 0
-            elif score_margin < 0.10:
-                score = 5
-            elif source in {"05_deepweb", "04_telegram_youtube"}:
-                score = 10
-            class_score["ood"] = score
-
-        preferred_class = min(class_score, key=lambda c: (class_score[c], -remaining[c]))
-        return preferred_class
-
-    def pending_priority_score(self, row: pd.Series) -> tuple:
-        preferred_class = self.infer_preferred_class(row)
-
-        pr = row.get("selection_source_priority", 999)
-        try:
-            pr = int(pr)
-        except Exception:
-            pr = 999
-
-        auto_conf = to_float(row.get("auto_confidence", ""), -1.0)
-        score_margin = to_float(row.get("score_margin", ""), 999.0)
-        image_id = safe_str(row.get("image_id", ""))
-
-        preference_rank = {
-            "weapon": 0,
-            "non_weapon": 1,
-            "ood": 2,
-        }
-
-        return (
-            preference_rank.get(preferred_class, 9),
-            pr,
-            score_margin,
-            -auto_conf,
-            image_id,
-        )
-
     def get_indices_for_current_view(self) -> list[int]:
-        status = self.df["selection_status"].map(norm)
-        labels = self.df["selection_label"].map(norm)
+        if self.session_mode == "review_selection":
+            tmp = self.df[self.df["selection_label"].map(norm) == self.review_class].copy()
+            if tmp.empty:
+                return []
 
-        if self.view_mode == "reviewed":
-            view_df = self.df[status == "reviewed"].copy()
-            return list(view_df.index)
+            tmp["_source_priority"] = pd.to_numeric(
+                tmp["selection_source_priority"], errors="coerce"
+            ).fillna(999).astype(int)
 
-        if self.view_mode == "selected":
-            view_df = self.df[labels.isin({"weapon", "non_weapon", "ood"})].copy()
-            return list(view_df.index)
+            tmp = tmp.sort_values(
+                ["_source_priority", "source_dataset", "image_id"],
+                kind="stable",
+            )
+            return list(tmp.index)
 
-        if self.view_mode == "excluded":
-            view_df = self.df[labels == "exclude"].copy()
-            return list(view_df.index)
+        tmp = self.df[
+            (self.df["selection_status"].map(norm) != "reviewed")
+            & (self.df["source_dataset"].astype(str) == self.review_source)
+        ].copy()
 
-        view_df = self.df[status != "reviewed"].copy()
-        if view_df.empty:
+        if tmp.empty:
             return []
 
-        view_df["_priority"] = view_df.apply(self.pending_priority_score, axis=1)
-        view_df = view_df.sort_values("_priority", kind="stable")
-        return list(view_df.index)
+        tmp["_source_priority"] = pd.to_numeric(
+            tmp["selection_source_priority"], errors="coerce"
+        ).fillna(999).astype(int)
+
+        tmp = tmp.sort_values(
+            ["_source_priority", "source_dataset", "image_id"],
+            kind="stable",
+        )
+        return list(tmp.index)
 
     def update_batch_indices(self, preserve_image_id: str | None = None) -> None:
         indices = self.get_indices_for_current_view()
@@ -645,13 +690,21 @@ class ManualSelectionProtocolReviewer:
         labels = self.df["selection_label"].map(norm)
 
         final_df = self.df[labels.isin({"weapon", "non_weapon", "ood"})].copy()
-        final_df = final_df.sort_values(["selection_label", "source_dataset", "image_id"], kind="stable").reset_index(drop=True)
+        final_df = final_df.sort_values(
+            ["selection_label", "source_dataset", "image_id"], kind="stable"
+        ).reset_index(drop=True)
 
         removed_df = self.df[labels == "exclude"].copy()
-        removed_df = removed_df.sort_values(["source_dataset", "image_id"], kind="stable").reset_index(drop=True)
+        removed_df = removed_df.sort_values(
+            ["source_dataset", "image_id"], kind="stable"
+        ).reset_index(drop=True)
 
-        adversarial_df = final_df[final_df["selection_label"].map(norm).isin({"weapon", "non_weapon"})].copy()
-        adversarial_df = adversarial_df.sort_values(["selection_label", "source_dataset", "image_id"], kind="stable").reset_index(drop=True)
+        adversarial_df = final_df[
+            final_df["selection_label"].map(norm).isin({"weapon", "non_weapon"})
+        ].copy()
+        adversarial_df = adversarial_df.sort_values(
+            ["selection_label", "source_dataset", "image_id"], kind="stable"
+        ).reset_index(drop=True)
 
         safe_write_csv(final_df, OUT_FINAL_1500_CSV)
         safe_write_csv(removed_df, OUT_REMOVED_CSV)
@@ -665,6 +718,9 @@ class ManualSelectionProtocolReviewer:
             "reviewer_id": self.reviewer_id,
             "input_manifest": str(PREPARED_MANIFEST_PATH),
             "work_db": str(WORK_DB_PATH),
+            "session_mode": self.session_mode,
+            "review_class": self.review_class,
+            "review_source": self.review_source,
             "outputs": {
                 "final_1500_csv": str(OUT_FINAL_1500_CSV),
                 "removed_csv": str(OUT_REMOVED_CSV),
@@ -684,7 +740,11 @@ class ManualSelectionProtocolReviewer:
             },
             "remaining_targets": rem,
             "checks": {
-                "final_1500_exact": counts["weapon"] == TARGET_WEAPON and counts["non_weapon"] == TARGET_NON_WEAPON and counts["ood"] == TARGET_OOD,
+                "final_1500_exact": (
+                    counts["weapon"] == TARGET_WEAPON
+                    and counts["non_weapon"] == TARGET_NON_WEAPON
+                    and counts["ood"] == TARGET_OOD
+                ),
                 "adversarial_subset_1000_exact": (counts["weapon"] + counts["non_weapon"]) == 1000,
             },
             "source_distribution": self.source_status().to_dict(orient="records"),
@@ -704,15 +764,37 @@ class ManualSelectionProtocolReviewer:
         rem = self.remaining_targets()
 
         if label == "weapon" and rem["weapon"] <= 0:
-            return False, f"Target weapon già raggiunto ({TARGET_WEAPON})."
+            return False, f"Weapon target already reached ({TARGET_WEAPON})."
         if label == "non_weapon" and rem["non_weapon"] <= 0:
-            return False, f"Target non_weapon già raggiunto ({TARGET_NON_WEAPON})."
+            return False, f"Non-weapon target already reached ({TARGET_NON_WEAPON})."
         if label == "ood" and rem["ood"] <= 0:
-            return False, f"Target ood già raggiunto ({TARGET_OOD})."
+            return False, f"OOD target already reached ({TARGET_OOD})."
 
         return True, ""
 
+    def log_action(self, df_index: int, action: str, previous_label: str, new_label: str) -> None:
+        append_session_log(
+            {
+                "timestamp": now_iso(),
+                "reviewer_id": self.reviewer_id,
+                "session_mode": self.session_mode,
+                "review_class": self.review_class,
+                "review_source": self.review_source,
+                "image_id": safe_str(self.df.loc[df_index, "image_id"]),
+                "source_dataset": safe_str(self.df.loc[df_index, "source_dataset"]),
+                "relative_path": safe_str(self.df.loc[df_index, "relative_path"]),
+                "action": action,
+                "previous_label": previous_label,
+                "new_label": new_label,
+                "selected_for_final": safe_str(self.df.loc[df_index, "selected_for_final"]),
+            }
+        )
+
     def set_label(self, df_index: int, label: str) -> None:
+        if self.session_mode != "review_pending":
+            print("[INFO] Label assignment is available only in review_pending mode.")
+            return
+
         if label not in VALID_FINAL_LABELS:
             return
 
@@ -722,7 +804,6 @@ class ManualSelectionProtocolReviewer:
             return
 
         ts = now_iso()
-
         prev_label = safe_str(self.df.loc[df_index, "selection_label"])
         image_id = safe_str(self.df.loc[df_index, "image_id"])
 
@@ -732,6 +813,7 @@ class ManualSelectionProtocolReviewer:
                 "image_id": image_id,
                 "previous_label": prev_label,
                 "previous_status": safe_str(self.df.loc[df_index, "selection_status"]),
+                "previous_selected_for_final": safe_str(self.df.loc[df_index, "selected_for_final"]),
             }
         )
         self.last_action_stack = self.last_action_stack[-100:]
@@ -742,28 +824,15 @@ class ManualSelectionProtocolReviewer:
         self.df.at[df_index, "selection_timestamp"] = ts
         self.df.at[df_index, "selected_for_final"] = "yes" if label in {"weapon", "non_weapon", "ood"} else "no"
 
-        append_session_log(
-            {
-                "timestamp": ts,
-                "reviewer_id": self.reviewer_id,
-                "image_id": image_id,
-                "source_dataset": safe_str(self.df.loc[df_index, "source_dataset"]),
-                "relative_path": safe_str(self.df.loc[df_index, "relative_path"]),
-                "action": "assign_label",
-                "previous_label": prev_label,
-                "new_label": label,
-                "auto_label": safe_str(self.df.loc[df_index, "auto_label"]),
-                "auto_confidence": safe_str(self.df.loc[df_index, "auto_confidence"]),
-                "score_margin": safe_str(self.df.loc[df_index, "score_margin"]),
-                "selected_for_final": self.df.at[df_index, "selected_for_final"],
-            }
-        )
-
+        self.log_action(df_index, "assign_label", prev_label, label)
         self.auto_save(last_action=f"assign_{label}")
         self.draw_batch(preserve_image_id=image_id)
 
-    def clear_label(self, df_index: int) -> None:
-        ts = now_iso()
+    def clear_pending_decision(self, df_index: int) -> None:
+        if self.session_mode != "review_pending":
+            print("[INFO] This action is available only in review_pending mode.")
+            return
+
         prev_label = safe_str(self.df.loc[df_index, "selection_label"])
         image_id = safe_str(self.df.loc[df_index, "image_id"])
 
@@ -773,6 +842,7 @@ class ManualSelectionProtocolReviewer:
                 "image_id": image_id,
                 "previous_label": prev_label,
                 "previous_status": safe_str(self.df.loc[df_index, "selection_status"]),
+                "previous_selected_for_final": safe_str(self.df.loc[df_index, "selected_for_final"]),
             }
         )
         self.last_action_stack = self.last_action_stack[-100:]
@@ -783,64 +853,72 @@ class ManualSelectionProtocolReviewer:
         self.df.at[df_index, "selection_timestamp"] = ""
         self.df.at[df_index, "selected_for_final"] = ""
 
-        append_session_log(
+        self.log_action(df_index, "clear_pending_decision", prev_label, "")
+        self.auto_save(last_action="clear_pending_decision")
+        self.draw_batch(preserve_image_id=image_id)
+
+    def remove_existing_assignment(self, df_index: int) -> None:
+        if self.session_mode != "review_selection":
+            print("[INFO] This action is available only in review_selection mode.")
+            return
+
+        prev_label = safe_str(self.df.loc[df_index, "selection_label"])
+        image_id = safe_str(self.df.loc[df_index, "image_id"])
+
+        if norm(prev_label) not in VALID_SELECTION_CLASSES:
+            print("[INFO] The selected image does not currently belong to a reviewable class.")
+            return
+
+        self.last_action_stack.append(
             {
-                "timestamp": ts,
-                "reviewer_id": self.reviewer_id,
+                "df_index": int(df_index),
                 "image_id": image_id,
-                "source_dataset": safe_str(self.df.loc[df_index, "source_dataset"]),
-                "relative_path": safe_str(self.df.loc[df_index, "relative_path"]),
-                "action": "clear_label",
                 "previous_label": prev_label,
-                "new_label": "",
-                "auto_label": safe_str(self.df.loc[df_index, "auto_label"]),
-                "auto_confidence": safe_str(self.df.loc[df_index, "auto_confidence"]),
-                "score_margin": safe_str(self.df.loc[df_index, "score_margin"]),
-                "selected_for_final": "",
+                "previous_status": safe_str(self.df.loc[df_index, "selection_status"]),
+                "previous_selected_for_final": safe_str(self.df.loc[df_index, "selected_for_final"]),
             }
         )
+        self.last_action_stack = self.last_action_stack[-100:]
 
-        self.auto_save(last_action="clear_label")
+        self.df.at[df_index, "selection_label"] = ""
+        self.df.at[df_index, "selection_status"] = "pending"
+        self.df.at[df_index, "selection_reviewer_id"] = ""
+        self.df.at[df_index, "selection_timestamp"] = ""
+        self.df.at[df_index, "selected_for_final"] = ""
+
+        self.log_action(df_index, "remove_existing_assignment", prev_label, "")
+        self.auto_save(last_action="remove_existing_assignment")
         self.draw_batch(preserve_image_id=image_id)
 
     def undo_last_action(self) -> None:
         if not self.last_action_stack:
-            print("[INFO] Nessuna azione recente da annullare.")
+            print("[INFO] No recent action to undo.")
             return
 
         item = self.last_action_stack.pop()
         df_index = item["df_index"]
         image_id = item["image_id"]
 
-        prev_label = item["previous_label"]
-        prev_status = item["previous_status"]
+        current_label = safe_str(self.df.loc[df_index, "selection_label"])
+        previous_label = item["previous_label"]
+        previous_status = item["previous_status"]
+        previous_selected_for_final = item["previous_selected_for_final"]
 
-        self.df.at[df_index, "selection_label"] = prev_label
-        self.df.at[df_index, "selection_status"] = prev_status if prev_status else "pending"
-        self.df.at[df_index, "selection_reviewer_id"] = self.reviewer_id if prev_label else ""
-        self.df.at[df_index, "selection_timestamp"] = now_iso() if prev_label else ""
-        self.df.at[df_index, "selected_for_final"] = "yes" if prev_label in {"weapon", "non_weapon", "ood"} else ("no" if prev_label == "exclude" else "")
+        self.df.at[df_index, "selection_label"] = previous_label
+        self.df.at[df_index, "selection_status"] = previous_status if previous_status else "pending"
+        self.df.at[df_index, "selected_for_final"] = previous_selected_for_final
 
-        append_session_log(
-            {
-                "timestamp": now_iso(),
-                "reviewer_id": self.reviewer_id,
-                "image_id": image_id,
-                "source_dataset": safe_str(self.df.loc[df_index, "source_dataset"]),
-                "relative_path": safe_str(self.df.loc[df_index, "relative_path"]),
-                "action": "undo_last_action",
-                "previous_label": safe_str(self.df.loc[df_index, "selection_label"]),
-                "new_label": prev_label,
-                "auto_label": safe_str(self.df.loc[df_index, "auto_label"]),
-                "auto_confidence": safe_str(self.df.loc[df_index, "auto_confidence"]),
-                "score_margin": safe_str(self.df.loc[df_index, "score_margin"]),
-                "selected_for_final": self.df.at[df_index, "selected_for_final"],
-            }
-        )
+        if previous_label:
+            self.df.at[df_index, "selection_reviewer_id"] = self.reviewer_id
+            self.df.at[df_index, "selection_timestamp"] = now_iso()
+        else:
+            self.df.at[df_index, "selection_reviewer_id"] = ""
+            self.df.at[df_index, "selection_timestamp"] = ""
 
+        self.log_action(df_index, "undo_last_action", current_label, previous_label)
         self.auto_save(last_action="undo_last_action")
         self.draw_batch(preserve_image_id=image_id)
-        print(f"[OK] Undo eseguito su {image_id}.")
+        print(f"[OK] Undo executed on {image_id}.")
 
     # -------------------------------------------------------------------------
     # Figure and display
@@ -866,6 +944,7 @@ class ManualSelectionProtocolReviewer:
     def open_summary_window(self) -> None:
         counts = self.final_counts()
         rem = self.remaining_targets()
+        subset = self.current_subset_status()
 
         lines = [
             "OFFICIAL MANUAL SELECTION SUMMARY",
@@ -877,7 +956,11 @@ class ManualSelectionProtocolReviewer:
             "",
             f"pending       : {self.count_pending()}",
             f"reviewed      : {self.count_reviewed()}",
-            f"view_mode     : {self.view_mode}",
+            "",
+            f"session_mode  : {self.session_mode}",
+            f"review_class  : {self.review_class or '-'}",
+            f"review_source : {self.review_source or '-'}",
+            f"subset_rows   : {subset['rows']}",
             "",
             "SOURCE STATUS",
             "",
@@ -918,9 +1001,28 @@ class ManualSelectionProtocolReviewer:
                 figsize=(FIG_W, FIG_H),
             )
             self.fig.canvas.manager.set_window_title("Official Manual Selection Protocol Reviewer")
+
+            try:
+                manager = self.fig.canvas.manager
+                window = manager.window
+                window.geometry("1600x950+50+50")
+                window.attributes("-topmost", True)
+                window.update()
+                window.attributes("-topmost", False)
+                window.deiconify()
+                window.lift()
+                window.focus_force()
+            except Exception as exc:
+                print(f"[WARN] Could not force window geometry/visibility: {exc}", flush=True)
+
             self.axes = self.axes.flatten()
             self.fig.canvas.mpl_connect("key_press_event", self.on_key)
             self.fig.canvas.mpl_connect("button_press_event", self.on_click)
+
+            try:
+                self.fig.canvas.draw()
+            except Exception as exc:
+                print(f"[WARN] Could not draw main figure: {exc}", flush=True)
 
     def draw_batch(self, preserve_image_id: str | None = None) -> None:
         self.update_batch_indices(preserve_image_id=preserve_image_id)
@@ -931,10 +1033,17 @@ class ManualSelectionProtocolReviewer:
             ax.axis("off")
 
         if not self.batch_indices:
-            self.fig.suptitle("Official Manual Selection Protocol Reviewer [NO IMAGES IN CURRENT VIEW]", fontsize=12)
+            mode_title = (
+                f"review_selection:{self.review_class}"
+                if self.session_mode == "review_selection"
+                else f"review_pending:{self.review_source}"
+            )
+            self.fig.suptitle(
+                f"Official Manual Selection Protocol Reviewer [{mode_title}] [NO IMAGES IN CURRENT VIEW]",
+                fontsize=12,
+            )
             self.fig.tight_layout(rect=[0, 0.03, 1, 0.92])
             self.fig.canvas.draw_idle()
-            self.open_summary_window()
             return
 
         self.ax_to_df_index.clear()
@@ -956,18 +1065,21 @@ class ManualSelectionProtocolReviewer:
             label = safe_str(row.get("selection_label", ""))
             src = safe_str(row.get("source_dataset", ""))
             img_id = safe_str(row.get("image_id", ""))
-            auto_label = safe_str(row.get("auto_label", ""))
-            auto_conf = safe_str(row.get("auto_confidence", ""))
-            margin = safe_str(row.get("score_margin", ""))
-            preferred_class = self.infer_preferred_class(row)
-            status = safe_str(row.get("selection_status", ""))
 
-            title = (
-                f"{i+1}. {img_id}\n"
-                f"{src}\n"
-                f"auto={auto_label} | conf={auto_conf} | m={margin}\n"
-                f"pref={preferred_class} | final={label or '-'} | {status}"
-            )
+            if self.session_mode == "review_pending":
+                title = (
+                    f"{i+1}. {img_id}\n"
+                    f"{src}\n"
+                    f"final={label or '-'} | status=pending"
+                )
+            else:
+                title = (
+                    f"{i + 1}. {img_id}\n"
+                    f"{src}\n"
+                    f"assigned={label or '-'}\n"
+                    f"mouse: L=remove R=undo M=change-class"
+                )
+
             ax.set_title(title, fontsize=8, color=self.title_color(label))
 
             if i == self.selected_pos:
@@ -988,14 +1100,21 @@ class ManualSelectionProtocolReviewer:
         total_pages = max(1, math.ceil(max(1, len(indices)) / BATCH_SIZE))
         current_page = (self.current_start // BATCH_SIZE) + 1
 
+        if self.session_mode == "review_selection":
+            mode_txt = f"review_selection | class={self.review_class}"
+            actions_txt = "Mouse: L=remove R=undo M=change-class | Keys: a=remove u=undo c=change-class m=change-workflow"
+        else:
+            mode_txt = f"review_pending | source={self.review_source}"
+            actions_txt = "Mouse: left=weapon right=non_weapon middle=ood | Keys: w n o e/x a=clear u=undo m=change-mode"
+
         self.fig.suptitle(
-            f"Official Manual Selection Protocol Reviewer [{self.view_mode.upper()}] | page {current_page}/{total_pages}\n"
-            f"Mouse: left=WEAPON right=NON_WEAPON middle=OOD | Keys: w n o e/x a u r h t s q enter zoom →/space next ←/backspace prev",
+            f"Official Manual Selection Protocol Reviewer [{mode_txt}] | page {current_page}/{total_pages}\n"
+            f"{actions_txt} | 1..9 select | 0=10th | enter=zoom →/space next ←/backspace prev",
             fontsize=10,
         )
+
         self.fig.tight_layout(rect=[0, 0.03, 1, 0.90])
         self.fig.canvas.draw_idle()
-        self.open_summary_window()
 
     # -------------------------------------------------------------------------
     # Navigation and interaction
@@ -1018,19 +1137,6 @@ class ManualSelectionProtocolReviewer:
         self.save_state(last_action="prev_batch")
         self.draw_batch()
 
-    def toggle_view_mode(self) -> None:
-        current_order = ["pending", "reviewed", "selected", "excluded"]
-        try:
-            idx = current_order.index(self.view_mode)
-        except ValueError:
-            idx = 0
-        self.view_mode = current_order[(idx + 1) % len(current_order)]
-        self.current_start = 0
-        self.selected_pos = 0
-        self.save_state(last_action=f"toggle_view_{self.view_mode}")
-        self.draw_batch()
-        print(f"[OK] View mode: {self.view_mode}")
-
     def open_zoom(self) -> None:
         if not self.batch_indices:
             return
@@ -1049,8 +1155,7 @@ class ManualSelectionProtocolReviewer:
             plt.imshow(img)
             plt.title(
                 f"{row.get('image_id', '')} | {row.get('source_dataset', '')}\n"
-                f"auto={row.get('auto_label', '')} | conf={row.get('auto_confidence', '')} | "
-                f"margin={row.get('score_margin', '')} | final={row.get('selection_label', '') or '-'}"
+                f"final={row.get('selection_label', '') or '-'}"
             )
             plt.axis("off")
             plt.show()
@@ -1066,15 +1171,28 @@ class ManualSelectionProtocolReviewer:
             self.selected_pos = self.batch_indices.index(df_index)
 
         button = event.button
-        if button == MouseButton.LEFT or button == 1:
-            self.set_label(df_index, "weapon")
-            return
-        if button == MouseButton.RIGHT or button == 3:
-            self.set_label(df_index, "non_weapon")
-            return
-        if button == MouseButton.MIDDLE or button == 2:
-            self.set_label(df_index, "ood")
-            return
+
+        if self.session_mode == "review_pending":
+            if button == MouseButton.LEFT or button == 1:
+                self.set_label(df_index, "weapon")
+                return
+            if button == MouseButton.RIGHT or button == 3:
+                self.set_label(df_index, "non_weapon")
+                return
+            if button == MouseButton.MIDDLE or button == 2:
+                self.set_label(df_index, "ood")
+                return
+
+        if self.session_mode == "review_selection":
+            if button == MouseButton.LEFT or button == 1:
+                self.remove_existing_assignment(df_index)
+                return
+            if button == MouseButton.RIGHT or button == 3:
+                self.undo_last_action()
+                return
+            if button == MouseButton.MIDDLE or button == 2:
+                self.change_review_class()
+                return
 
         self.save_state(last_action="select_click")
         self.draw_batch()
@@ -1104,9 +1222,6 @@ class ManualSelectionProtocolReviewer:
             print("[OK] Saved. Exiting.")
             plt.close(self.fig)
             return
-        if key == "r":
-            self.toggle_view_mode()
-            return
         if key == "h":
             self.open_help_window()
             return
@@ -1116,9 +1231,16 @@ class ManualSelectionProtocolReviewer:
         if key == "u":
             self.undo_last_action()
             return
+        if key == "m":
+            self.change_session_mode()
+            return
 
         if key.isdigit():
-            pos = int(key) - 1
+            if key == "0":
+                pos = 9
+            else:
+                pos = int(key) - 1
+
             if 0 <= pos < len(self.batch_indices):
                 self.selected_pos = pos
                 self.save_state(last_action=f"select_{key}")
@@ -1133,43 +1255,36 @@ class ManualSelectionProtocolReviewer:
 
         df_index = self.batch_indices[self.selected_pos]
 
-        if key == "w":
-            self.set_label(df_index, "weapon")
-            return
-        if key == "n":
-            self.set_label(df_index, "non_weapon")
-            return
-        if key == "o":
-            self.set_label(df_index, "ood")
-            return
-        if key in {"e", "x"}:
-            self.set_label(df_index, "exclude")
-            return
-        if key == "a":
-            self.clear_label(df_index)
-            return
+        if self.session_mode == "review_pending":
+            if key == "w":
+                self.set_label(df_index, "weapon")
+                return
+            if key == "n":
+                self.set_label(df_index, "non_weapon")
+                return
+            if key == "o":
+                self.set_label(df_index, "ood")
+                return
+            if key in {"e", "x"}:
+                self.set_label(df_index, "exclude")
+                return
+            if key == "a":
+                self.clear_pending_decision(df_index)
+                return
+
+        if self.session_mode == "review_selection":
+            if key == "a":
+                self.remove_existing_assignment(df_index)
+                return
+            if key == "c":
+                self.change_review_class()
+                return
 
     def run(self) -> None:
+        self.choose_review_session()
         self.draw_batch()
-        self.open_help_window()
-        self.open_summary_window()
-
-        try:
-            self.fig.show()
-        except Exception:
-            pass
-
-        try:
-            self.help_fig.show()
-        except Exception:
-            pass
-
-        try:
-            self.summary_fig.show()
-        except Exception:
-            pass
-
         plt.show(block=True)
+
 
 # =============================================================================
 # Main
