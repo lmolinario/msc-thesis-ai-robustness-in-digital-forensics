@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-20_manual_selection_protocol_reviewer.py
+10_manual_selection_protocol_reviewer.py
 
 Official manual selection protocol reviewer for the FAIR-Lab public thesis pipeline.
 
@@ -54,6 +54,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+
+import matplotlib
+matplotlib.use("TkAgg")
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -1150,8 +1153,23 @@ class ManualSelectionProtocolReviewer:
         self.draw_batch()
         self.open_help_window()
         self.open_summary_window()
-        plt.show()
 
+        try:
+            self.fig.show()
+        except Exception:
+            pass
+
+        try:
+            self.help_fig.show()
+        except Exception:
+            pass
+
+        try:
+            self.summary_fig.show()
+        except Exception:
+            pass
+
+        plt.show(block=True)
 
 # =============================================================================
 # Main
