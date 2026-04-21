@@ -1,0 +1,45 @@
+{
+  "total_candidate_files": 19769,
+  "valid_unique_images": 15318,
+  "invalid_images": 3128,
+  "duplicates_discarded": 1323,
+  "min_width": 300,
+  "min_height": 300,
+  "source_datasets_processed": 5,
+  "per_dataset_stats": {
+    "01_kaggle_weapon": {
+      "candidate_files": 719,
+      "valid_unique_images": 462,
+      "invalid_images": 69,
+      "duplicates_discarded": 188
+    },
+    "02_deepfirearm": {
+      "candidate_files": 15755,
+      "valid_unique_images": 12158,
+      "invalid_images": 2565,
+      "duplicates_discarded": 1032
+    },
+    "03_google_scraped": {
+      "candidate_files": 903,
+      "valid_unique_images": 844,
+      "invalid_images": 54,
+      "duplicates_discarded": 5
+    },
+    "04_telegram_youtube": {
+      "candidate_files": 973,
+      "valid_unique_images": 897,
+      "invalid_images": 21,
+      "duplicates_discarded": 55
+    },
+    "05_deepweb": {
+      "candidate_files": 1419,
+      "valid_unique_images": 957,
+      "invalid_images": 419,
+      "duplicates_discarded": 43
+    }
+  },
+  "output_dir": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/prepared/final_pool",
+  "metadata_csv": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/prepared/final_pool/metadata.csv",
+  "invalid_report_csv": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/prepared/final_pool/reports/invalid_images.csv",
+  "duplicates_report_csv": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/prepared/final_pool/reports/duplicates_discarded.csv"
+}
