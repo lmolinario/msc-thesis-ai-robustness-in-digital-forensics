@@ -1,5 +1,5 @@
 """
-this script is used to provide retrieval model.
+this scripts is used to provide retrieval model.
 
 use model fine-tuned on firearm dataset using classification task instead of
 original vgg pretrained on ImageNet

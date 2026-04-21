@@ -1,5 +1,5 @@
 """
-this script implement some custom transform functions
+this scripts implement some custom transform functions
 """
 
 from PIL import Image, ImageOps, ImageEnhance
