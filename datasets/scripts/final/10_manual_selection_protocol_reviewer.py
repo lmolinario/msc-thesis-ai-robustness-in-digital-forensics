@@ -16,6 +16,7 @@ The reviewer supports two explicit operating modes:
 
 1. review_selection
    - inspect already assigned images from one selected class
+   - optionally filter them by one selected source dataset
    - remove the current class assignment and send the image back to pending
 
 2. review_pending
@@ -58,6 +59,7 @@ import csv
 import json
 import math
 import shutil
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -82,7 +84,6 @@ PREPARED_MANIFEST_PATH = PREPARED_DATASETS_DIR / "manifests" / "review_manifest_
 FINAL_DIR = PREPARED_DATASETS_DIR.parent / "final"
 FINAL_MANIFESTS_DIR = FINAL_DIR / "manifests"
 FINAL_REPORTS_DIR = FINAL_DIR / "reports"
-
 
 WORK_DB_PATH = FINAL_MANIFESTS_DIR / "manual_selection_protocol_db.csv"
 
@@ -141,6 +142,7 @@ OFFICIAL MANUAL SELECTION PROTOCOL REVIEWER
 SESSION MODES
 - review_selection
   Inspect already assigned images from one selected class.
+  Optional source filter available.
   Main action: remove current assignment and return the image to pending.
 
 - review_pending
@@ -171,13 +173,13 @@ KEYS
 - u = undo last action
 - m = change session mode / filter
 - c = change class         [review_selection only]
+- f = change source filter [review_selection only]
 - k = open criteria / class definitions
 - g = go to page
 - s = save
 - q = save + quit
 - h = help
 - t = summary
-
 - Enter = zoom selected image
 - Right / Space = next batch
 - Left / Backspace = previous batch
@@ -185,7 +187,7 @@ KEYS
 - 0 = select image 10
 
 NOTES
-- review_selection shows only one already assigned class at a time.
+- review_selection shows one selected class at a time, optionally filtered by source.
 - review_pending shows only pending images from one selected source dataset.
 - Soft source targets are advisory only and never block the reviewer.
 - All decisions are logged and exports are regenerated automatically.
@@ -285,13 +287,10 @@ def safe_str(x: Any) -> str:
 def ensure_dirs() -> None:
     FINAL_MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
     FINAL_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def safe_write_csv(df: pd.DataFrame, path: Path, make_backup: bool = True) -> None:
-    import time
-
     path.parent.mkdir(parents=True, exist_ok=True)
 
     if make_backup and path.exists():
@@ -315,6 +314,7 @@ def safe_write_csv(df: pd.DataFrame, path: Path, make_backup: bool = True) -> No
     raise PermissionError(
         f"Could not replace target CSV because it appears to be locked: {path}"
     ) from last_exc
+
 
 def safe_write_json(data: dict, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -516,6 +516,38 @@ class ManualSelectionProtocolReviewer:
         print(f"[WARN] Invalid source: {raw}. Using default: {prompt_default}")
         return prompt_default
 
+    def ask_optional_review_source(self, default: str = "") -> str:
+        sources = self.available_sources()
+        if not sources:
+            return ""
+
+        print("\nAvailable source datasets for review_selection:")
+        print("0. ALL SOURCES")
+        for i, src in enumerate(sources, start=1):
+            print(f"{i}. {src}")
+
+        prompt_default = default if default else "ALL"
+        raw = input(
+            f"Source filter for review_selection [name/index/0] (default: {prompt_default}): "
+        ).strip()
+
+        if raw == "":
+            return default
+
+        if raw == "0":
+            return ""
+
+        if raw.isdigit():
+            idx = int(raw) - 1
+            if 0 <= idx < len(sources):
+                return sources[idx]
+
+        if raw in sources:
+            return raw
+
+        print(f"[WARN] Invalid source filter: {raw}. Using default: {prompt_default}")
+        return default
+
     def go_to_page(self) -> None:
         indices = self.get_indices_for_current_view()
         if not indices:
@@ -544,7 +576,6 @@ class ManualSelectionProtocolReviewer:
         self.draw_batch()
         print(f"[OK] Moved to page {page}/{total_pages}.")
 
-
     def choose_review_session(self) -> None:
         self.print_status()
 
@@ -563,8 +594,8 @@ class ManualSelectionProtocolReviewer:
             self.review_source = self.ask_review_source(default=self.review_source or None)
         else:
             self.session_mode = "review_selection"
-            self.review_source = ""
             self.review_class = self.ask_review_class(default=self.review_class or "weapon")
+            self.review_source = self.ask_optional_review_source(default=self.review_source or "")
 
         self.current_start = 0
         self.selected_pos = 0
@@ -572,7 +603,7 @@ class ManualSelectionProtocolReviewer:
         print(
             f"\n[OK] session_mode={self.session_mode} | "
             f"review_class={self.review_class or '-'} | "
-            f"review_source={self.review_source or '-'}"
+            f"review_source={self.review_source or 'ALL'}"
         )
 
     def change_review_class(self) -> None:
@@ -587,6 +618,19 @@ class ManualSelectionProtocolReviewer:
         self.save_state(last_action=f"change_review_class_{new_class}")
         self.draw_batch()
         print(f"[OK] review_class={self.review_class}")
+
+    def change_review_source(self) -> None:
+        if self.session_mode != "review_selection":
+            print("[INFO] change_review_source() is available only in review_selection mode.")
+            return
+
+        new_source = self.ask_optional_review_source(default=self.review_source or "")
+        self.review_source = new_source
+        self.current_start = 0
+        self.selected_pos = 0
+        self.save_state(last_action=f"change_review_source_{self.review_source or 'ALL'}")
+        self.draw_batch()
+        print(f"[OK] review_source={self.review_source or 'ALL'}")
 
     def change_session_mode(self) -> None:
         self.choose_review_session()
@@ -693,9 +737,14 @@ class ManualSelectionProtocolReviewer:
     def current_subset_status(self) -> dict[str, Any]:
         if self.session_mode == "review_selection":
             tmp = self.df[self.df["final_label"].map(norm) == self.review_class].copy()
+
+            if self.review_source:
+                tmp = tmp[tmp["source_dataset"].astype(str) == self.review_source].copy()
+
             return {
                 "session_mode": self.session_mode,
                 "review_class": self.review_class,
+                "review_source": self.review_source or "ALL",
                 "rows": int(len(tmp)),
             }
 
@@ -786,6 +835,10 @@ class ManualSelectionProtocolReviewer:
     def get_indices_for_current_view(self) -> list[int]:
         if self.session_mode == "review_selection":
             tmp = self.df[self.df["final_label"].map(norm) == self.review_class].copy()
+
+            if self.review_source:
+                tmp = tmp[tmp["source_dataset"].astype(str) == self.review_source].copy()
+
             if tmp.empty:
                 return []
 
@@ -1153,7 +1206,7 @@ class ManualSelectionProtocolReviewer:
             "",
             f"session_mode  : {self.session_mode}",
             f"review_class  : {self.review_class or '-'}",
-            f"review_source : {self.review_source or '-'}",
+            f"review_source : {self.review_source or 'ALL'}",
             f"subset_rows   : {subset['rows']}",
             "",
             "SOURCE STATUS",
@@ -1211,6 +1264,15 @@ class ManualSelectionProtocolReviewer:
 
             self.status_ax = self.fig.add_subplot(gs[rows, :])
             self.status_ax.axis("off")
+
+            self.fig.subplots_adjust(
+                left=0.03,
+                right=0.99,
+                top=0.90,
+                bottom=0.05,
+                wspace=0.08,
+                hspace=0.35,
+            )
 
             self.fig.canvas.manager.set_window_title("Official Manual Selection Protocol Reviewer")
 
@@ -1302,7 +1364,7 @@ class ManualSelectionProtocolReviewer:
 
         if not self.batch_indices:
             mode_title = (
-                f"review_selection:{self.review_class}"
+                f"review_selection:{self.review_class}:{self.review_source or 'ALL'}"
                 if self.session_mode == "review_selection"
                 else f"review_pending:{self.review_source}"
             )
@@ -1310,10 +1372,7 @@ class ManualSelectionProtocolReviewer:
                 f"Official Manual Selection Protocol Reviewer [{mode_title}] [NO IMAGES IN CURRENT VIEW]",
                 fontsize=12,
             )
-
             self.draw_realtime_status_panel()
-            self.fig.tight_layout(rect=[0, 0.03, 1, 0.92])
-
             self.fig.canvas.draw_idle()
             return
 
@@ -1380,8 +1439,8 @@ class ManualSelectionProtocolReviewer:
         current_page = (self.current_start // BATCH_SIZE) + 1
 
         if self.session_mode == "review_selection":
-            mode_txt = f"review_selection | class={self.review_class}"
-            actions_txt = "Mouse: L=remove R=undo M=change-class | Keys: a=remove u=undo c=change-class m=change-workflow k=criteria"
+            mode_txt = f"review_selection | class={self.review_class} | source={self.review_source or 'ALL'}"
+            actions_txt = "Mouse: L=remove R=undo M=change-class | Keys: a=remove u=undo c=change-class f=change-source g=go-to-page m=change-workflow k=criteria"
         else:
             actions_txt = (
                 "Mouse: left=weapon right=non_weapon middle=ood | "
@@ -1400,7 +1459,6 @@ class ManualSelectionProtocolReviewer:
             fontsize=10,
         )
         self.draw_realtime_status_panel()
-        self.fig.tight_layout(rect=[0, 0.03, 1, 0.90])
         self.fig.canvas.draw_idle()
 
     # -------------------------------------------------------------------------
@@ -1526,6 +1584,9 @@ class ManualSelectionProtocolReviewer:
             return
         if key == "k":
             self.open_criteria_window()
+            return
+        if key == "f":
+            self.change_review_source()
             return
 
         if key.isdigit():
