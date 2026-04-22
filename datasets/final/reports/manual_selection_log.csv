@@ -924,3 +924,12 @@ timestamp,reviewer_id,session_mode,review_class,review_source,image_id,source_da
 2026-04-22T10:23:37+00:00,Lello,review_selection,weapon,,img_00013482,04_telegram_youtube,images/img_00013482.jpg,remove_existing_assignment,weapon,,pending
 2026-04-22T10:25:36+00:00,Lello,review_selection,weapon,,img_00000034,01_kaggle_weapon,images/img_00000034.jpeg,remove_existing_assignment,weapon,,pending
 2026-04-22T10:50:25+00:00,Lello,review_selection,weapon,03_google_scraped,img_00012679,03_google_scraped,images/img_00012679.jpg,remove_existing_assignment,weapon,,pending
+2026-04-22T10:53:05+00:00,Lello,review_pending,,03_google_scraped,img_00013210,03_google_scraped,images/img_00013210.png,assign_label,,weapon,reviewed
+2026-04-22T10:54:36+00:00,Lello,review_selection,weapon,03_google_scraped,img_00012921,03_google_scraped,images/img_00012921.jpg,remove_existing_assignment,weapon,,pending
+2026-04-22T10:55:39+00:00,Lello,review_pending,,01_kaggle_weapon,img_00000340,01_kaggle_weapon,images/img_00000340.jpeg,assign_label,,weapon,reviewed
+2026-04-22T10:56:17+00:00,Lello,review_pending,,04_telegram_youtube,img_00013647,04_telegram_youtube,images/img_00013647.jpg,assign_label,,weapon,reviewed
+2026-04-22T10:56:21+00:00,Lello,review_pending,,04_telegram_youtube,img_00013649,04_telegram_youtube,images/img_00013649.jpg,assign_label,,weapon,reviewed
+2026-04-22T10:56:23+00:00,Lello,review_pending,,04_telegram_youtube,img_00013652,04_telegram_youtube,images/img_00013652.jpg,assign_label,,weapon,reviewed
+2026-04-22T10:56:27+00:00,Lello,review_pending,,04_telegram_youtube,img_00013644,04_telegram_youtube,images/img_00013644.jpg,assign_label,,weapon,reviewed
+2026-04-22T10:56:42+00:00,Lello,review_pending,,05_deepweb,img_00014531,05_deepweb,images/img_00014531.jpeg,assign_label,,weapon,reviewed
+2026-04-22T10:56:45+00:00,Lello,review_pending,,05_deepweb,img_00014530,05_deepweb,images/img_00014530.jpeg,assign_label,,weapon,reviewed

@@ -1415,7 +1415,7 @@ class ManualSelectionProtocolReviewer:
                     f"{i + 1}. {img_id}\n"
                     f"{src}\n"
                     f"assigned={label or '-'}\n"
-                    f"mouse: L=remove R=undo M=change-class"
+                    f"mouse: L=remove R=undo M=change-class | key f=change-source"
                 )
 
             ax.set_title(title, fontsize=8, color=self.title_color(label))

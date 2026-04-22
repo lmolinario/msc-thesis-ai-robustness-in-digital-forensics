@@ -1,64 +1,10 @@
 {
-  "timestamp": "2026-04-22T10:50:35+00:00",
+  "timestamp": "2026-04-22T10:56:50+00:00",
   "reviewer_id": "Lello",
-  "current_start": 10,
-  "selected_df_index": 12681,
+  "current_start": 0,
+  "selected_df_index": 14531,
   "last_action": "quit",
   "last_action_stack": [
-    {
-      "df_index": 14510,
-      "image_id": "img_00014511",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 14511,
-      "image_id": "img_00014512",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 14512,
-      "image_id": "img_00014513",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 14513,
-      "image_id": "img_00014514",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 14514,
-      "image_id": "img_00014515",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 14515,
-      "image_id": "img_00014516",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 14516,
-      "image_id": "img_00014517",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 14517,
-      "image_id": "img_00014518",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 14518,
-      "image_id": "img_00014519",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
     {
       "df_index": 14519,
       "image_id": "img_00014520",
@@ -124,9 +70,63 @@
       "image_id": "img_00012679",
       "previous_label": "weapon",
       "previous_state": "reviewed"
+    },
+    {
+      "df_index": 13209,
+      "image_id": "img_00013210",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 12920,
+      "image_id": "img_00012921",
+      "previous_label": "weapon",
+      "previous_state": "reviewed"
+    },
+    {
+      "df_index": 339,
+      "image_id": "img_00000340",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 13646,
+      "image_id": "img_00013647",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 13648,
+      "image_id": "img_00013649",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 13651,
+      "image_id": "img_00013652",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 13643,
+      "image_id": "img_00013644",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 14530,
+      "image_id": "img_00014531",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 14529,
+      "image_id": "img_00014530",
+      "previous_label": "",
+      "previous_state": "pending"
     }
   ],
-  "session_mode": "review_selection",
-  "review_class": "weapon",
-  "review_source": "03_google_scraped"
+  "session_mode": "review_pending",
+  "review_class": "",
+  "review_source": "05_deepweb"
 }
