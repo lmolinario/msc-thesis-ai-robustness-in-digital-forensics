@@ -582,11 +582,23 @@ class ManualSelectionProtocolReviewer:
         raw = input(
             "\nChoose workflow [review_pending/review_selection] "
             "(default: review_pending): "
-        ).strip().lower() or "review_pending"
+        ).strip().lower()
 
-        if raw not in {"review_pending", "review_selection"}:
+        workflow_aliases = {
+            "": "review_pending",
+            "p": "review_pending",
+            "pending": "review_pending",
+            "review_pending": "review_pending",
+            "s": "review_selection",
+            "selection": "review_selection",
+            "review_selection": "review_selection",
+        }
+
+        if raw not in workflow_aliases:
             print(f"[WARN] Invalid workflow: {raw}. Using review_pending.")
             raw = "review_pending"
+        else:
+            raw = workflow_aliases[raw]
 
         if raw == "review_pending":
             self.session_mode = "review_pending"
