@@ -1,127 +1,127 @@
 {
-  "timestamp": "2026-04-22T11:53:13+00:00",
+  "timestamp": "2026-04-22T15:48:22+00:00",
   "reviewer_id": "Lello",
-  "current_start": 70,
-  "selected_df_index": 13832,
+  "current_start": 0,
+  "selected_df_index": 13469,
   "last_action": "quit",
   "last_action_stack": [
     {
+      "df_index": 229,
+      "image_id": "img_00000230",
+      "previous_label": "weapon",
+      "previous_state": "reviewed"
+    },
+    {
+      "df_index": 238,
+      "image_id": "img_00000239",
+      "previous_label": "weapon",
+      "previous_state": "reviewed"
+    },
+    {
+      "df_index": 255,
+      "image_id": "img_00000256",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 322,
+      "image_id": "img_00000323",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 321,
+      "image_id": "img_00000322",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 317,
+      "image_id": "img_00000318",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 331,
+      "image_id": "img_00000332",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 320,
+      "image_id": "img_00000321",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 215,
+      "image_id": "img_00000216",
+      "previous_label": "ood",
+      "previous_state": "reviewed"
+    },
+    {
+      "df_index": 216,
+      "image_id": "img_00000217",
+      "previous_label": "ood",
+      "previous_state": "reviewed"
+    },
+    {
+      "df_index": 14120,
+      "image_id": "img_00014121",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 13967,
+      "image_id": "img_00013968",
+      "previous_label": "",
+      "previous_state": "pending"
+    },
+    {
+      "df_index": 13467,
+      "image_id": "img_00013468",
+      "previous_label": "ood",
+      "previous_state": "reviewed"
+    },
+    {
+      "df_index": 13735,
+      "image_id": "img_00013736",
+      "previous_label": "ood",
+      "previous_state": "reviewed"
+    },
+    {
       "df_index": 13762,
       "image_id": "img_00013763",
+      "previous_label": "ood",
+      "previous_state": "reviewed"
+    },
+    {
+      "df_index": 66,
+      "image_id": "img_00000067",
       "previous_label": "",
       "previous_state": "pending"
     },
     {
-      "df_index": 13773,
-      "image_id": "img_00013774",
+      "df_index": 70,
+      "image_id": "img_00000071",
       "previous_label": "",
       "previous_state": "pending"
     },
     {
-      "df_index": 13775,
-      "image_id": "img_00013776",
+      "df_index": 68,
+      "image_id": "img_00000069",
       "previous_label": "",
       "previous_state": "pending"
     },
     {
-      "df_index": 13784,
-      "image_id": "img_00013785",
-      "previous_label": "",
-      "previous_state": "pending"
+      "df_index": 8,
+      "image_id": "img_00000009",
+      "previous_label": "ood",
+      "previous_state": "reviewed"
     },
     {
-      "df_index": 13787,
-      "image_id": "img_00013788",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13789,
-      "image_id": "img_00013790",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13791,
-      "image_id": "img_00013792",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13797,
-      "image_id": "img_00013798",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13798,
-      "image_id": "img_00013799",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13799,
-      "image_id": "img_00013800",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13804,
-      "image_id": "img_00013805",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13806,
-      "image_id": "img_00013807",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13807,
-      "image_id": "img_00013808",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13812,
-      "image_id": "img_00013813",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13813,
-      "image_id": "img_00013814",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13820,
-      "image_id": "img_00013821",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13823,
-      "image_id": "img_00013824",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13828,
-      "image_id": "img_00013829",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13829,
-      "image_id": "img_00013830",
-      "previous_label": "",
-      "previous_state": "pending"
-    },
-    {
-      "df_index": 13831,
-      "image_id": "img_00013832",
+      "df_index": 13467,
+      "image_id": "img_00013468",
       "previous_label": "",
       "previous_state": "pending"
     }
