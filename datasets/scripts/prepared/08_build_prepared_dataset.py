@@ -12,6 +12,12 @@ Builds the prepared/final_pool dataset from datasets/raw by:
 - copying valid unique images into datasets/prepared/final_pool/images
 - generating metadata.csv
 - generating reports for invalid images, discarded duplicates, and build summary
+
+Methodological note
+-------------------
+This script is intentionally limited to the technical preparation stage of the dataset.
+It does NOT perform semantic annotation, manual review, or final selection.
+All review-related fields belong to downstream scripts in the annotation pipeline.
 """
 
 from __future__ import annotations
@@ -28,7 +34,11 @@ from typing import Iterable
 
 from PIL import Image, UnidentifiedImageError
 
-from datasets.scripts.utils.paths  import RAW_DATASETS_DIR, PREPARED_DATASETS_DIR, repo_relative_path
+from datasets.scripts.utils.paths import (
+    RAW_DATASETS_DIR,
+    PREPARED_DATASETS_DIR,
+    repo_relative_path,
+)
 
 VALID_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tif", ".tiff"}
 
@@ -64,10 +74,6 @@ class ValidImageRecord:
     size_bytes: int
     extension: str
     is_valid_image: bool
-    selected_for_manual_review: bool
-    manual_label: str
-    review_status: str
-    review_notes: str
 
 
 @dataclass
@@ -329,10 +335,6 @@ def main() -> None:
                 size_bytes=prepared_file_path.stat().st_size,
                 extension=extension,
                 is_valid_image=True,
-                selected_for_manual_review=True,
-                manual_label="",
-                review_status="pending",
-                review_notes="",
             )
 
             kept_by_sha256[sha256] = record
@@ -357,10 +359,6 @@ def main() -> None:
             "size_bytes",
             "extension",
             "is_valid_image",
-            "selected_for_manual_review",
-            "manual_label",
-            "review_status",
-            "review_notes",
         ],
         rows=[row.__dict__ for row in metadata_rows],
     )

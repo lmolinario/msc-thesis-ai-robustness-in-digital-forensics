@@ -25,7 +25,6 @@ The reviewer supports two explicit operating modes:
 Input
 -----
 - datasets/prepared/manifests/review_manifest_full.csv
-- datasets/final/manifests/manual_selection_protocol_db.csv
 
 Outputs
 -------
@@ -83,7 +82,7 @@ PREPARED_MANIFEST_PATH = PREPARED_DATASETS_DIR / "manifests" / "review_manifest_
 FINAL_DIR = PREPARED_DATASETS_DIR.parent / "final"
 FINAL_MANIFESTS_DIR = FINAL_DIR / "manifests"
 FINAL_REPORTS_DIR = FINAL_DIR / "reports"
-FINAL_EXPORTS_DIR = FINAL_DIR / "exports"
+
 
 WORK_DB_PATH = FINAL_MANIFESTS_DIR / "manual_selection_protocol_db.csv"
 
@@ -108,7 +107,6 @@ TARGET_OOD = 500
 
 VALID_FINAL_LABELS = {"weapon", "non_weapon", "ood", "exclude"}
 VALID_SELECTION_CLASSES = {"weapon", "non_weapon", "ood"}
-VALID_SESSION_MODES = {"review_pending", "review_selection"}
 
 BATCH_SIZE = 10
 N_COLS = 5
@@ -131,6 +129,12 @@ SOURCE_PRIORITY = {
     "02_deepfirearm": 5,
 }
 
+SOURCE_SOFT_TARGETS = {
+    "weapon": 100,
+    "non_weapon": 100,
+    "ood": 100,
+}
+
 HELP_TEXT = """
 OFFICIAL MANUAL SELECTION PROTOCOL REVIEWER
 
@@ -148,6 +152,11 @@ GLOBAL TARGETS
 - non_weapon  : 500
 - ood         : 500
 
+SOFT SOURCE TARGETS
+- weapon      : 100 per source (soft alert only)
+- non_weapon  : 100 per source (soft alert only)
+- ood         : 100 per source (soft alert only)
+
 PENDING MODE MOUSE
 - Left click   = WEAPON
 - Right click  = NON_WEAPON
@@ -161,10 +170,14 @@ KEYS
 - a = clear pending decision / remove current assignment
 - u = undo last action
 - m = change session mode / filter
+- c = change class         [review_selection only]
+- k = open criteria / class definitions
+- g = go to page
 - s = save
 - q = save + quit
 - h = help
 - t = summary
+
 - Enter = zoom selected image
 - Right / Space = next batch
 - Left / Backspace = previous batch
@@ -174,7 +187,78 @@ KEYS
 NOTES
 - review_selection shows only one already assigned class at a time.
 - review_pending shows only pending images from one selected source dataset.
+- Soft source targets are advisory only and never block the reviewer.
 - All decisions are logged and exports are regenerated automatically.
+""".strip()
+
+CRITERIA_TEXT = """
+FAIR-LAB MANUAL SELECTION CRITERIA
+
+OBJECTIVE
+The reviewer is building the final manually selected image pool for the thesis.
+
+CLASS DEFINITIONS
+
+1. weapon
+Assign 'weapon' only if:
+- the image contains a real weapon as the main relevant object
+- the weapon is visually recognizable with sufficient clarity
+- the image is semantically coherent with the task of weapon image classification
+- the weapon is not merely marginal, tiny, heavily occluded, or ambiguous
+
+Examples typically included:
+- pistols
+- rifles
+- submachine guns
+- shotguns
+- clearly visible real firearms
+
+Do NOT assign weapon if:
+- the object is too small to support reliable classification
+- the image is excessively blurred, corrupted, or unusable
+- the object is ambiguous or not confidently recognizable
+- the content is clearly synthetic, toy-like, or not a real target object
+
+2. non_weapon
+Assign 'non_weapon' only if:
+- no real weapon is present
+- the image is a realistic negative example
+- the content is semantically plausible as a negative sample for the task
+- the image is usable and visually interpretable
+
+Examples typically included:
+- people, rooms, vehicles, objects, environments, scenes
+- realistic internet/social/web images not containing weapons
+
+Do NOT assign non_weapon if:
+- the image is too anomalous or semantically out-of-task
+- the image is synthetic, bizarre, borderline, or distributionally strange
+- the image contains knives, replicas, videogame weapons, rendered guns, or similar borderline content
+
+3. ood
+Assign 'ood' if the image is out-of-distribution, borderline, or not a clean positive/negative sample.
+
+Examples typically included:
+- knives or swords
+- replicas / toys / airsoft
+- videogame or CGI weapons
+- synthetic or generated images
+- tanks, missiles, explosions, war scenes
+- extremely degraded, anomalous, bizarre, or semantically borderline images
+- images that are related to violence/weapons contextually, but not valid clean target samples
+
+4. exclude
+Assign 'exclude' only if:
+- the image is unusable
+- the image is broken, unreadable, or semantically irrelevant
+- the image should not be part of the final selection at all
+
+GENERAL RULE
+When in doubt:
+- prefer semantic rigor
+- do not force borderline samples into weapon/non_weapon
+- use ood for uncertain boundary cases
+- use exclude for clearly unusable content
 """.strip()
 
 
@@ -201,11 +285,13 @@ def safe_str(x: Any) -> str:
 def ensure_dirs() -> None:
     FINAL_MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
     FINAL_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    FINAL_EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def safe_write_csv(df: pd.DataFrame, path: Path, make_backup: bool = True) -> None:
+    import time
+
     path.parent.mkdir(parents=True, exist_ok=True)
 
     if make_backup and path.exists():
@@ -216,10 +302,19 @@ def safe_write_csv(df: pd.DataFrame, path: Path, make_backup: bool = True) -> No
 
     tmp_path = path.with_suffix(".tmp.csv")
     df.to_csv(tmp_path, index=False, encoding="utf-8")
-    tmp_path.replace(path)
 
+    last_exc = None
+    for _ in range(10):
+        try:
+            tmp_path.replace(path)
+            return
+        except PermissionError as exc:
+            last_exc = exc
+            time.sleep(0.2)
 
-
+    raise PermissionError(
+        f"Could not replace target CSV because it appears to be locked: {path}"
+    ) from last_exc
 
 def safe_write_json(data: dict, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -247,7 +342,7 @@ def append_session_log(row: dict[str, Any]) -> None:
                 "action",
                 "previous_label",
                 "new_label",
-                "selected_for_final",
+                "review_state",
             ],
         )
         if not file_exists:
@@ -282,13 +377,12 @@ def ensure_protocol_columns(df: pd.DataFrame) -> pd.DataFrame:
         "source_dataset": "",
         "source_group": "",
         "sha256": "",
-        "selection_label": "",
-        "selection_status": "pending",
-        "selected_for_final": "",
-        "selection_notes": "",
-        "selection_reviewer_id": "",
-        "selection_timestamp": "",
-        "selection_source_priority": "",
+        "final_label": "",
+        "review_state": "pending",
+        "review_notes": "",
+        "reviewer_id": "",
+        "review_timestamp": "",
+        "source_priority": "",
     }
 
     for col, default in defaults.items():
@@ -303,9 +397,9 @@ def build_initial_protocol_db(manifest_df: pd.DataFrame) -> pd.DataFrame:
     df = ensure_protocol_columns(df)
 
     if "source_dataset" in df.columns:
-        df["selection_source_priority"] = df["source_dataset"].map(SOURCE_PRIORITY).fillna(999).astype(int)
+        df["source_priority"] = df["source_dataset"].map(SOURCE_PRIORITY).fillna(999).astype(int)
     else:
-        df["selection_source_priority"] = 999
+        df["source_priority"] = 999
 
     if "image_id" not in df.columns:
         raise ValueError("The manifest must contain 'image_id'.")
@@ -318,13 +412,12 @@ def build_initial_protocol_db(manifest_df: pd.DataFrame) -> pd.DataFrame:
         "source_dataset",
         "source_group",
         "sha256",
-        "selection_label",
-        "selection_status",
-        "selected_for_final",
-        "selection_notes",
-        "selection_reviewer_id",
-        "selection_timestamp",
-        "selection_source_priority",
+        "final_label",
+        "review_state",
+        "review_notes",
+        "reviewer_id",
+        "review_timestamp",
+        "source_priority",
     ]
 
     for col in protocol_cols:
@@ -356,10 +449,12 @@ class ManualSelectionProtocolReviewer:
         self.df = ensure_protocol_columns(self.df)
         self.df["image_id"] = self.df["image_id"].astype(str)
 
+        self.status_ax = None
         self.fig = None
         self.axes = []
         self.help_fig = None
         self.summary_fig = None
+        self.criteria_fig = None
 
         self.current_start = 0
         self.selected_pos = 0
@@ -421,6 +516,35 @@ class ManualSelectionProtocolReviewer:
         print(f"[WARN] Invalid source: {raw}. Using default: {prompt_default}")
         return prompt_default
 
+    def go_to_page(self) -> None:
+        indices = self.get_indices_for_current_view()
+        if not indices:
+            print("[INFO] No images available in the current view.")
+            return
+
+        total_pages = max(1, math.ceil(len(indices) / BATCH_SIZE))
+        current_page = (self.current_start // BATCH_SIZE) + 1
+
+        raw = input(f"Go to page [1-{total_pages}] (current: {current_page}): ").strip()
+        if not raw:
+            return
+
+        if not raw.isdigit():
+            print(f"[WARN] Invalid page value: {raw}")
+            return
+
+        page = int(raw)
+        if page < 1 or page > total_pages:
+            print(f"[WARN] Page out of range: {page}. Valid range is 1-{total_pages}.")
+            return
+
+        self.current_start = (page - 1) * BATCH_SIZE
+        self.selected_pos = 0
+        self.save_state(last_action=f"go_to_page_{page}")
+        self.draw_batch()
+        print(f"[OK] Moved to page {page}/{total_pages}.")
+
+
     def choose_review_session(self) -> None:
         self.print_status()
 
@@ -452,9 +576,6 @@ class ManualSelectionProtocolReviewer:
         )
 
     def change_review_class(self) -> None:
-        """
-        Change only the currently reviewed assigned class inside review_selection mode.
-        """
         if self.session_mode != "review_selection":
             print("[INFO] change_review_class() is available only in review_selection mode.")
             return
@@ -467,7 +588,6 @@ class ManualSelectionProtocolReviewer:
         self.draw_batch()
         print(f"[OK] review_class={self.review_class}")
 
-
     def change_session_mode(self) -> None:
         self.choose_review_session()
         self.save_state(last_action=f"change_session_mode_{self.session_mode}")
@@ -477,13 +597,20 @@ class ManualSelectionProtocolReviewer:
     # Counts and summaries
     # -------------------------------------------------------------------------
     def count_label(self, label: str) -> int:
-        return int((self.df["selection_label"].map(norm) == label).sum())
+        return int((self.df["final_label"].map(norm) == label).sum())
+
+    def count_label_in_source(self, source_dataset: str, label: str) -> int:
+        tmp = self.df[
+            (self.df["source_dataset"].astype(str) == source_dataset)
+            & (self.df["final_label"].map(norm) == label)
+        ]
+        return int(len(tmp))
 
     def count_pending(self) -> int:
-        return int((self.df["selection_status"].map(norm) != "reviewed").sum())
+        return int((self.df["review_state"].map(norm) != "reviewed").sum())
 
     def count_reviewed(self) -> int:
-        return int((self.df["selection_status"].map(norm) == "reviewed").sum())
+        return int((self.df["review_state"].map(norm) == "reviewed").sum())
 
     def final_counts(self) -> dict[str, int]:
         return {
@@ -501,10 +628,49 @@ class ManualSelectionProtocolReviewer:
             "ood": max(0, TARGET_OOD - counts["ood"]),
         }
 
+    def soft_source_target_message(self, source_dataset: str, label: str) -> str:
+        if label not in SOURCE_SOFT_TARGETS:
+            return ""
+
+        current = self.count_label_in_source(source_dataset, label)
+        target = SOURCE_SOFT_TARGETS[label]
+
+        if current < target:
+            return f"[INFO] Source '{source_dataset}' -> {label}: {current}/{target} selected."
+
+        if current == target:
+            return (
+                f"[ALERT] Soft source target reached for '{source_dataset}' -> {label}: "
+                f"{current}/{target}. Consider reviewing another source, if appropriate."
+            )
+
+        return (
+            f"[ALERT] Soft source target exceeded for '{source_dataset}' -> {label}: "
+            f"{current}/{target}. You may continue, but consider balancing with other sources."
+        )
+
+    def suggest_alternative_source(self, label: str, exclude_source: str = "") -> str:
+        candidates = []
+
+        for src in self.available_sources():
+            if src == exclude_source:
+                continue
+            count = self.count_label_in_source(src, label)
+            target = SOURCE_SOFT_TARGETS.get(label, 0)
+            if count < target:
+                candidates.append((count, src))
+
+        if not candidates:
+            return ""
+
+        candidates.sort(key=lambda x: (x[0], x[1]))
+        _, best_src = candidates[0]
+        return best_src
+
     def source_status(self) -> pd.DataFrame:
         tmp = self.df.copy()
-        tmp["_label"] = tmp["selection_label"].map(norm)
-        tmp["_status"] = tmp["selection_status"].map(norm)
+        tmp["_label"] = tmp["final_label"].map(norm)
+        tmp["_state"] = tmp["review_state"].map(norm)
 
         rows = []
         for src, g in tmp.groupby("source_dataset", dropna=False):
@@ -515,8 +681,8 @@ class ManualSelectionProtocolReviewer:
                 "non_weapon": int((g["_label"] == "non_weapon").sum()),
                 "ood": int((g["_label"] == "ood").sum()),
                 "exclude": int((g["_label"] == "exclude").sum()),
-                "pending": int((g["_status"] != "reviewed").sum()),
-                "reviewed": int((g["_status"] == "reviewed").sum()),
+                "pending": int((g["_state"] != "reviewed").sum()),
+                "reviewed": int((g["_state"] == "reviewed").sum()),
             })
         if not rows:
             return pd.DataFrame(
@@ -526,7 +692,7 @@ class ManualSelectionProtocolReviewer:
 
     def current_subset_status(self) -> dict[str, Any]:
         if self.session_mode == "review_selection":
-            tmp = self.df[self.df["selection_label"].map(norm) == self.review_class].copy()
+            tmp = self.df[self.df["final_label"].map(norm) == self.review_class].copy()
             return {
                 "session_mode": self.session_mode,
                 "review_class": self.review_class,
@@ -534,7 +700,7 @@ class ManualSelectionProtocolReviewer:
             }
 
         tmp = self.df[
-            (self.df["selection_status"].map(norm) != "reviewed")
+            (self.df["review_state"].map(norm) != "reviewed")
             & (self.df["source_dataset"].astype(str) == self.review_source)
         ].copy()
         return {
@@ -564,9 +730,9 @@ class ManualSelectionProtocolReviewer:
                 print(
                     f"{str(r['source_dataset']):<24} "
                     f"rows={int(r['rows']):>5} | "
-                    f"W={int(r['weapon']):>4} | "
-                    f"NW={int(r['non_weapon']):>4} | "
-                    f"OOD={int(r['ood']):>4} | "
+                    f"W={int(r['weapon']):>4}/{SOURCE_SOFT_TARGETS['weapon']} | "
+                    f"NW={int(r['non_weapon']):>4}/{SOURCE_SOFT_TARGETS['non_weapon']} | "
+                    f"OOD={int(r['ood']):>4}/{SOURCE_SOFT_TARGETS['ood']} | "
                     f"EX={int(r['exclude']):>4} | "
                     f"P={int(r['pending']):>5} | "
                     f"R={int(r['reviewed']):>5}"
@@ -619,12 +785,12 @@ class ManualSelectionProtocolReviewer:
     # -------------------------------------------------------------------------
     def get_indices_for_current_view(self) -> list[int]:
         if self.session_mode == "review_selection":
-            tmp = self.df[self.df["selection_label"].map(norm) == self.review_class].copy()
+            tmp = self.df[self.df["final_label"].map(norm) == self.review_class].copy()
             if tmp.empty:
                 return []
 
             tmp["_source_priority"] = pd.to_numeric(
-                tmp["selection_source_priority"], errors="coerce"
+                tmp["source_priority"], errors="coerce"
             ).fillna(999).astype(int)
 
             tmp = tmp.sort_values(
@@ -634,7 +800,7 @@ class ManualSelectionProtocolReviewer:
             return list(tmp.index)
 
         tmp = self.df[
-            (self.df["selection_status"].map(norm) != "reviewed")
+            (self.df["review_state"].map(norm) != "reviewed")
             & (self.df["source_dataset"].astype(str) == self.review_source)
         ].copy()
 
@@ -642,7 +808,7 @@ class ManualSelectionProtocolReviewer:
             return []
 
         tmp["_source_priority"] = pd.to_numeric(
-            tmp["selection_source_priority"], errors="coerce"
+            tmp["source_priority"], errors="coerce"
         ).fillna(999).astype(int)
 
         tmp = tmp.sort_values(
@@ -687,11 +853,11 @@ class ManualSelectionProtocolReviewer:
     # Export outputs
     # -------------------------------------------------------------------------
     def export_outputs(self) -> None:
-        labels = self.df["selection_label"].map(norm)
+        labels = self.df["final_label"].map(norm)
 
         final_df = self.df[labels.isin({"weapon", "non_weapon", "ood"})].copy()
         final_df = final_df.sort_values(
-            ["selection_label", "source_dataset", "image_id"], kind="stable"
+            ["final_label", "source_dataset", "image_id"], kind="stable"
         ).reset_index(drop=True)
 
         removed_df = self.df[labels == "exclude"].copy()
@@ -700,10 +866,10 @@ class ManualSelectionProtocolReviewer:
         ).reset_index(drop=True)
 
         adversarial_df = final_df[
-            final_df["selection_label"].map(norm).isin({"weapon", "non_weapon"})
+            final_df["final_label"].map(norm).isin({"weapon", "non_weapon"})
         ].copy()
         adversarial_df = adversarial_df.sort_values(
-            ["selection_label", "source_dataset", "image_id"], kind="stable"
+            ["final_label", "source_dataset", "image_id"], kind="stable"
         ).reset_index(drop=True)
 
         safe_write_csv(final_df, OUT_FINAL_1500_CSV)
@@ -739,6 +905,7 @@ class ManualSelectionProtocolReviewer:
                 "adversarial_subset_total": counts["weapon"] + counts["non_weapon"],
             },
             "remaining_targets": rem,
+            "soft_source_targets": SOURCE_SOFT_TARGETS,
             "checks": {
                 "final_1500_exact": (
                     counts["weapon"] == TARGET_WEAPON
@@ -786,7 +953,7 @@ class ManualSelectionProtocolReviewer:
                 "action": action,
                 "previous_label": previous_label,
                 "new_label": new_label,
-                "selected_for_final": safe_str(self.df.loc[df_index, "selected_for_final"]),
+                "review_state": safe_str(self.df.loc[df_index, "review_state"]),
             }
         )
 
@@ -804,7 +971,7 @@ class ManualSelectionProtocolReviewer:
             return
 
         ts = now_iso()
-        prev_label = safe_str(self.df.loc[df_index, "selection_label"])
+        prev_label = safe_str(self.df.loc[df_index, "final_label"])
         image_id = safe_str(self.df.loc[df_index, "image_id"])
 
         self.last_action_stack.append(
@@ -812,17 +979,26 @@ class ManualSelectionProtocolReviewer:
                 "df_index": int(df_index),
                 "image_id": image_id,
                 "previous_label": prev_label,
-                "previous_status": safe_str(self.df.loc[df_index, "selection_status"]),
-                "previous_selected_for_final": safe_str(self.df.loc[df_index, "selected_for_final"]),
+                "previous_state": safe_str(self.df.loc[df_index, "review_state"]),
             }
         )
         self.last_action_stack = self.last_action_stack[-100:]
 
-        self.df.at[df_index, "selection_label"] = label
-        self.df.at[df_index, "selection_status"] = "reviewed"
-        self.df.at[df_index, "selection_reviewer_id"] = self.reviewer_id
-        self.df.at[df_index, "selection_timestamp"] = ts
-        self.df.at[df_index, "selected_for_final"] = "yes" if label in {"weapon", "non_weapon", "ood"} else "no"
+        self.df.at[df_index, "final_label"] = label
+        self.df.at[df_index, "review_state"] = "reviewed"
+        self.df.at[df_index, "reviewer_id"] = self.reviewer_id
+        self.df.at[df_index, "review_timestamp"] = ts
+
+        source_dataset = safe_str(self.df.loc[df_index, "source_dataset"])
+        msg = self.soft_source_target_message(source_dataset, label)
+        if msg:
+            print(msg)
+
+        alt_source = self.suggest_alternative_source(label, exclude_source=source_dataset)
+        if alt_source:
+            print(
+                f"[SUGGESTION] For label '{label}', another source still below soft target is: {alt_source}"
+            )
 
         self.log_action(df_index, "assign_label", prev_label, label)
         self.auto_save(last_action=f"assign_{label}")
@@ -833,7 +1009,7 @@ class ManualSelectionProtocolReviewer:
             print("[INFO] This action is available only in review_pending mode.")
             return
 
-        prev_label = safe_str(self.df.loc[df_index, "selection_label"])
+        prev_label = safe_str(self.df.loc[df_index, "final_label"])
         image_id = safe_str(self.df.loc[df_index, "image_id"])
 
         self.last_action_stack.append(
@@ -841,17 +1017,15 @@ class ManualSelectionProtocolReviewer:
                 "df_index": int(df_index),
                 "image_id": image_id,
                 "previous_label": prev_label,
-                "previous_status": safe_str(self.df.loc[df_index, "selection_status"]),
-                "previous_selected_for_final": safe_str(self.df.loc[df_index, "selected_for_final"]),
+                "previous_state": safe_str(self.df.loc[df_index, "review_state"]),
             }
         )
         self.last_action_stack = self.last_action_stack[-100:]
 
-        self.df.at[df_index, "selection_label"] = ""
-        self.df.at[df_index, "selection_status"] = "pending"
-        self.df.at[df_index, "selection_reviewer_id"] = ""
-        self.df.at[df_index, "selection_timestamp"] = ""
-        self.df.at[df_index, "selected_for_final"] = ""
+        self.df.at[df_index, "final_label"] = ""
+        self.df.at[df_index, "review_state"] = "pending"
+        self.df.at[df_index, "reviewer_id"] = ""
+        self.df.at[df_index, "review_timestamp"] = ""
 
         self.log_action(df_index, "clear_pending_decision", prev_label, "")
         self.auto_save(last_action="clear_pending_decision")
@@ -862,7 +1036,7 @@ class ManualSelectionProtocolReviewer:
             print("[INFO] This action is available only in review_selection mode.")
             return
 
-        prev_label = safe_str(self.df.loc[df_index, "selection_label"])
+        prev_label = safe_str(self.df.loc[df_index, "final_label"])
         image_id = safe_str(self.df.loc[df_index, "image_id"])
 
         if norm(prev_label) not in VALID_SELECTION_CLASSES:
@@ -874,17 +1048,15 @@ class ManualSelectionProtocolReviewer:
                 "df_index": int(df_index),
                 "image_id": image_id,
                 "previous_label": prev_label,
-                "previous_status": safe_str(self.df.loc[df_index, "selection_status"]),
-                "previous_selected_for_final": safe_str(self.df.loc[df_index, "selected_for_final"]),
+                "previous_state": safe_str(self.df.loc[df_index, "review_state"]),
             }
         )
         self.last_action_stack = self.last_action_stack[-100:]
 
-        self.df.at[df_index, "selection_label"] = ""
-        self.df.at[df_index, "selection_status"] = "pending"
-        self.df.at[df_index, "selection_reviewer_id"] = ""
-        self.df.at[df_index, "selection_timestamp"] = ""
-        self.df.at[df_index, "selected_for_final"] = ""
+        self.df.at[df_index, "final_label"] = ""
+        self.df.at[df_index, "review_state"] = "pending"
+        self.df.at[df_index, "reviewer_id"] = ""
+        self.df.at[df_index, "review_timestamp"] = ""
 
         self.log_action(df_index, "remove_existing_assignment", prev_label, "")
         self.auto_save(last_action="remove_existing_assignment")
@@ -899,21 +1071,19 @@ class ManualSelectionProtocolReviewer:
         df_index = item["df_index"]
         image_id = item["image_id"]
 
-        current_label = safe_str(self.df.loc[df_index, "selection_label"])
+        current_label = safe_str(self.df.loc[df_index, "final_label"])
         previous_label = item["previous_label"]
-        previous_status = item["previous_status"]
-        previous_selected_for_final = item["previous_selected_for_final"]
+        previous_state = item["previous_state"]
 
-        self.df.at[df_index, "selection_label"] = previous_label
-        self.df.at[df_index, "selection_status"] = previous_status if previous_status else "pending"
-        self.df.at[df_index, "selected_for_final"] = previous_selected_for_final
+        self.df.at[df_index, "final_label"] = previous_label
+        self.df.at[df_index, "review_state"] = previous_state if previous_state else "pending"
 
         if previous_label:
-            self.df.at[df_index, "selection_reviewer_id"] = self.reviewer_id
-            self.df.at[df_index, "selection_timestamp"] = now_iso()
+            self.df.at[df_index, "reviewer_id"] = self.reviewer_id
+            self.df.at[df_index, "review_timestamp"] = now_iso()
         else:
-            self.df.at[df_index, "selection_reviewer_id"] = ""
-            self.df.at[df_index, "selection_timestamp"] = ""
+            self.df.at[df_index, "reviewer_id"] = ""
+            self.df.at[df_index, "review_timestamp"] = ""
 
         self.log_action(df_index, "undo_last_action", current_label, previous_label)
         self.auto_save(last_action="undo_last_action")
@@ -940,6 +1110,30 @@ class ManualSelectionProtocolReviewer:
         ax.axis("off")
         ax.text(0.02, 0.98, HELP_TEXT, va="top", ha="left", fontsize=11, family="monospace", wrap=True)
         self.help_fig.tight_layout()
+
+    def open_criteria_window(self) -> None:
+        if self.criteria_fig is not None:
+            try:
+                plt.figure(self.criteria_fig.number)
+                self.criteria_fig.canvas.draw_idle()
+                return
+            except Exception:
+                self.criteria_fig = None
+
+        self.criteria_fig, ax = plt.subplots(figsize=(10, 12))
+        self.criteria_fig.canvas.manager.set_window_title("Selection Criteria")
+        ax.axis("off")
+        ax.text(
+            0.02,
+            0.98,
+            CRITERIA_TEXT,
+            va="top",
+            ha="left",
+            fontsize=10,
+            family="monospace",
+            wrap=True,
+        )
+        self.criteria_fig.tight_layout()
 
     def open_summary_window(self) -> None:
         counts = self.final_counts()
@@ -969,11 +1163,16 @@ class ManualSelectionProtocolReviewer:
         src_df = self.source_status()
         if not src_df.empty:
             for _, r in src_df.iterrows():
+                src = str(r["source_dataset"])
+                w = int(r["weapon"])
+                nw = int(r["non_weapon"])
+                ood = int(r["ood"])
+
                 lines.append(
-                    f"{str(r['source_dataset']):<24} "
-                    f"W={int(r['weapon']):>3} "
-                    f"NW={int(r['non_weapon']):>3} "
-                    f"OOD={int(r['ood']):>3} "
+                    f"{src:<24} "
+                    f"W={w:>3}/{SOURCE_SOFT_TARGETS['weapon']} "
+                    f"NW={nw:>3}/{SOURCE_SOFT_TARGETS['non_weapon']} "
+                    f"OOD={ood:>3}/{SOURCE_SOFT_TARGETS['ood']} "
                     f"EX={int(r['exclude']):>3} "
                     f"P={int(r['pending']):>4} "
                     f"R={int(r['reviewed']):>4}"
@@ -982,7 +1181,7 @@ class ManualSelectionProtocolReviewer:
         text = "\n".join(lines)
 
         if self.summary_fig is None:
-            self.summary_fig, ax = plt.subplots(figsize=(8, 10))
+            self.summary_fig, ax = plt.subplots(figsize=(9, 11))
             self.summary_fig.canvas.manager.set_window_title("Manual Selection Summary")
         else:
             ax = self.summary_fig.axes[0]
@@ -995,17 +1194,30 @@ class ManualSelectionProtocolReviewer:
 
     def _init_main_figure_if_needed(self) -> None:
         if self.fig is None:
-            self.fig, self.axes = plt.subplots(
-                math.ceil(BATCH_SIZE / N_COLS),
-                N_COLS,
-                figsize=(FIG_W, FIG_H),
+            rows = math.ceil(BATCH_SIZE / N_COLS)
+
+            self.fig = plt.figure(figsize=(FIG_W, FIG_H))
+            gs = self.fig.add_gridspec(
+                nrows=rows + 1,
+                ncols=N_COLS,
+                height_ratios=[1] * rows + [1.2],
             )
+
+            self.axes = []
+            for r in range(rows):
+                for c in range(N_COLS):
+                    ax = self.fig.add_subplot(gs[r, c])
+                    self.axes.append(ax)
+
+            self.status_ax = self.fig.add_subplot(gs[rows, :])
+            self.status_ax.axis("off")
+
             self.fig.canvas.manager.set_window_title("Official Manual Selection Protocol Reviewer")
 
             try:
                 manager = self.fig.canvas.manager
                 window = manager.window
-                window.geometry("1600x950+50+50")
+                window.geometry("1700x1000+50+50")
                 window.attributes("-topmost", True)
                 window.update()
                 window.attributes("-topmost", False)
@@ -1015,7 +1227,6 @@ class ManualSelectionProtocolReviewer:
             except Exception as exc:
                 print(f"[WARN] Could not force window geometry/visibility: {exc}", flush=True)
 
-            self.axes = self.axes.flatten()
             self.fig.canvas.mpl_connect("key_press_event", self.on_key)
             self.fig.canvas.mpl_connect("button_press_event", self.on_click)
 
@@ -1023,6 +1234,63 @@ class ManualSelectionProtocolReviewer:
                 self.fig.canvas.draw()
             except Exception as exc:
                 print(f"[WARN] Could not draw main figure: {exc}", flush=True)
+
+    def build_realtime_status_text(self) -> str:
+        counts = self.final_counts()
+        rem = self.remaining_targets()
+
+        lines = [
+            "=== OFFICIAL MANUAL SELECTION STATUS ===",
+            (
+                f"weapon={counts['weapon']}/{TARGET_WEAPON} (remaining={rem['weapon']}) | "
+                f"non_weapon={counts['non_weapon']}/{TARGET_NON_WEAPON} (remaining={rem['non_weapon']}) | "
+                f"ood={counts['ood']}/{TARGET_OOD} (remaining={rem['ood']}) | "
+                f"exclude={counts['exclude']} | "
+                f"pending={self.count_pending()} | "
+                f"reviewed={self.count_reviewed()}"
+            ),
+            "",
+            "=== SOURCE STATUS ===",
+        ]
+
+        src_df = self.source_status()
+        if src_df.empty:
+            lines.append("No source status available.")
+            return "\n".join(lines)
+
+        for _, r in src_df.iterrows():
+            src = str(r["source_dataset"])
+            lines.append(
+                f"{src:<24} "
+                f"W={int(r['weapon']):>3}/{SOURCE_SOFT_TARGETS['weapon']} | "
+                f"NW={int(r['non_weapon']):>3}/{SOURCE_SOFT_TARGETS['non_weapon']} | "
+                f"OOD={int(r['ood']):>3}/{SOURCE_SOFT_TARGETS['ood']} | "
+                f"EX={int(r['exclude']):>3} | "
+                f"P={int(r['pending']):>5} | "
+                f"R={int(r['reviewed']):>5}"
+            )
+
+        return "\n".join(lines)
+
+    def draw_realtime_status_panel(self) -> None:
+        if not hasattr(self, "status_ax") or self.status_ax is None:
+            return
+
+        self.status_ax.clear()
+        self.status_ax.axis("off")
+
+        status_text = self.build_realtime_status_text()
+
+        self.status_ax.text(
+            0.01,
+            0.98,
+            status_text,
+            va="top",
+            ha="left",
+            fontsize=10,
+            family="monospace",
+            transform=self.status_ax.transAxes,
+        )
 
     def draw_batch(self, preserve_image_id: str | None = None) -> None:
         self.update_batch_indices(preserve_image_id=preserve_image_id)
@@ -1042,7 +1310,10 @@ class ManualSelectionProtocolReviewer:
                 f"Official Manual Selection Protocol Reviewer [{mode_title}] [NO IMAGES IN CURRENT VIEW]",
                 fontsize=12,
             )
+
+            self.draw_realtime_status_panel()
             self.fig.tight_layout(rect=[0, 0.03, 1, 0.92])
+
             self.fig.canvas.draw_idle()
             return
 
@@ -1062,15 +1333,23 @@ class ManualSelectionProtocolReviewer:
             else:
                 ax.text(0.5, 0.5, "IMG NOT FOUND", ha="center", va="center", fontsize=10)
 
-            label = safe_str(row.get("selection_label", ""))
+            label = safe_str(row.get("final_label", ""))
             src = safe_str(row.get("source_dataset", ""))
             img_id = safe_str(row.get("image_id", ""))
 
             if self.session_mode == "review_pending":
+                source_count_w = self.count_label_in_source(src, "weapon")
+                source_count_nw = self.count_label_in_source(src, "non_weapon")
+                source_count_ood = self.count_label_in_source(src, "ood")
+
+                state = safe_str(row.get("review_state", ""))
                 title = (
-                    f"{i+1}. {img_id}\n"
+                    f"{i + 1}. {img_id}\n"
                     f"{src}\n"
-                    f"final={label or '-'} | status=pending"
+                    f"final={label or '-'} | state={state or '-'}\n"
+                    f"W={source_count_w}/{SOURCE_SOFT_TARGETS['weapon']} "
+                    f"NW={source_count_nw}/{SOURCE_SOFT_TARGETS['non_weapon']} "
+                    f"OOD={source_count_ood}/{SOURCE_SOFT_TARGETS['ood']}"
                 )
             else:
                 title = (
@@ -1102,17 +1381,25 @@ class ManualSelectionProtocolReviewer:
 
         if self.session_mode == "review_selection":
             mode_txt = f"review_selection | class={self.review_class}"
-            actions_txt = "Mouse: L=remove R=undo M=change-class | Keys: a=remove u=undo c=change-class m=change-workflow"
+            actions_txt = "Mouse: L=remove R=undo M=change-class | Keys: a=remove u=undo c=change-class m=change-workflow k=criteria"
         else:
-            mode_txt = f"review_pending | source={self.review_source}"
-            actions_txt = "Mouse: left=weapon right=non_weapon middle=ood | Keys: w n o e/x a=clear u=undo m=change-mode"
+            actions_txt = (
+                "Mouse: left=weapon right=non_weapon middle=ood | "
+                "Keys: w n o e/x a=clear u=undo m=change-mode k=criteria"
+            )
+            mode_txt = (
+                f"review_pending | source={self.review_source} | "
+                f"soft targets per source: W={SOURCE_SOFT_TARGETS['weapon']} "
+                f"NW={SOURCE_SOFT_TARGETS['non_weapon']} "
+                f"OOD={SOURCE_SOFT_TARGETS['ood']}"
+            )
 
         self.fig.suptitle(
             f"Official Manual Selection Protocol Reviewer [{mode_txt}] | page {current_page}/{total_pages}\n"
             f"{actions_txt} | 1..9 select | 0=10th | enter=zoom →/space next ←/backspace prev",
             fontsize=10,
         )
-
+        self.draw_realtime_status_panel()
         self.fig.tight_layout(rect=[0, 0.03, 1, 0.90])
         self.fig.canvas.draw_idle()
 
@@ -1155,7 +1442,7 @@ class ManualSelectionProtocolReviewer:
             plt.imshow(img)
             plt.title(
                 f"{row.get('image_id', '')} | {row.get('source_dataset', '')}\n"
-                f"final={row.get('selection_label', '') or '-'}"
+                f"final={row.get('final_label', '') or '-'}"
             )
             plt.axis("off")
             plt.show()
@@ -1225,6 +1512,9 @@ class ManualSelectionProtocolReviewer:
         if key == "h":
             self.open_help_window()
             return
+        if key == "g":
+            self.go_to_page()
+            return
         if key == "t":
             self.open_summary_window()
             return
@@ -1233,6 +1523,9 @@ class ManualSelectionProtocolReviewer:
             return
         if key == "m":
             self.change_session_mode()
+            return
+        if key == "k":
+            self.open_criteria_window()
             return
 
         if key.isdigit():
@@ -1283,6 +1576,7 @@ class ManualSelectionProtocolReviewer:
     def run(self) -> None:
         self.choose_review_session()
         self.draw_batch()
+        self.open_criteria_window()
         plt.show(block=True)
 
 
