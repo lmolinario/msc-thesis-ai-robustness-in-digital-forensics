@@ -1,0 +1,16 @@
+\chapter*{Abstract}	\label{chap:abstract}
+
+\textit{\textbf{DA FARE COME PENULTIMA COSA}}
+
+
+L’applicazione dell’Intelligenza Artificiale (AI) nella Digital Forensics ha introdotto strumenti altamente automatizzati per il supporto alle indagini digitali, capaci di analizzare in modo efficiente grandi volumi di dati testuali e visivi. Tuttavia, la crescente dipendenza da modelli di Machine Learning (ML) e Deep Learning (DL) solleva importanti questioni in merito alla loro affidabilità, in particolare di fronte a input manipolati intenzionalmente. I modelli AI sono infatti vulnerabili agli attacchi adversariali: perturbazioni minime dei dati di input, spesso impercettibili per l’utente umano, che possono indurre i sistemi a classificare erroneamente contenuti sensibili.
+
+Questa tesi si propone di valutare la robustezza operativa di XXXXXXX strumenti AI-based utilizzati in ambito forense: \textbf{XXXXXXX}, dedicato all'analisi semantica di contenuti testuali, ed \textbf{XXXXXXX}, orientato alla classificazione automatizzata di immagini. Lo studio si focalizza su un contesto sperimentale realistico, in cui entrambi gli strumenti vengono esposti a input manipolati con finalità anti-forensiche.
+
+Per l’analisi  visiva, sono state utilizzare immagini di armi da fuoco alterarate artificialmente mediante tecniche adversariali e mediante l’impiego di diverse tecniche di perturbazione, tra cui: \textit{Fast Gradient Sign Method (FGSM)}, \textit{Projected Gradient Descent (PGD)}, \textit{Gaussian blur}, \textit{pixel dropout}, e manipolazioni nel dominio del colore o della compressione.
+
+L’obiettivo è valutare se e in che misura questi strumenti riescano a identificare correttamente contenuti sensibili o se siano suscettibili a elusioni sistematiche. Le performance dei modelli sono state analizzate utilizzando metriche standard (accuratezza, FPR, FNR) e confrontate tra versioni originali e manipolate dei dati.
+
+I risultati evidenziano significative limitazioni nella robustezza dei modelli: in presenza di alterazioni minimali, entrambi gli strumenti tendono a generare falsi negativi, omettendo contenuti rilevanti per l’indagine. In particolare, XXXXXXX  evidenzia vulnerabilità a perturbazioni impercettibili nella componente visiva.
+
+La tesi conclude proponendo possibili contromisure tecniche per l’irrobustimento dei modelli AI in Digital Forensics, tra cui l’integrazione di tecniche di \textit{adversarial training}, l’adozione di modelli interpretabili (\textit{Explainable AI}) e la definizione di benchmark forensi specifici per la valutazione della resilienza ai tentativi di elusione.

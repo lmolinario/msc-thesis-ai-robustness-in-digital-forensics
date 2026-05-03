@@ -1,0 +1,336 @@
+\glsdefs@newdocentry{ai}%
+{%
+name={\acronymfont {\glsentryshort {ai}}},%
+sort={AI},%
+type={acronym},%
+first={AI},%
+firstplural={AIs},%
+text={AI},%
+plural={AIs},%
+description={Artificial Intelligence},%
+descriptionplural={Artificial Intelligence},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Artificial Intelligence},%
+longplural={Artificial Intelligences},%
+short={AI},%
+shortplural={AIs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{ml}%
+{%
+name={\acronymfont {\glsentryshort {ml}}},%
+sort={ML},%
+type={acronym},%
+first={ML},%
+firstplural={MLs},%
+text={ML},%
+plural={MLs},%
+description={Machine Learning},%
+descriptionplural={Machine Learning},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Machine Learning},%
+longplural={Machine Learnings},%
+short={ML},%
+shortplural={MLs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{dl}%
+{%
+name={\acronymfont {\glsentryshort {dl}}},%
+sort={DL},%
+type={acronym},%
+first={DL},%
+firstplural={DLs},%
+text={DL},%
+plural={DLs},%
+description={Deep Learning},%
+descriptionplural={Deep Learning},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Deep Learning},%
+longplural={Deep Learnings},%
+short={DL},%
+shortplural={DLs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{df}%
+{%
+name={\acronymfont {\glsentryshort {df}}},%
+sort={DF},%
+type={acronym},%
+first={DF},%
+firstplural={DFs},%
+text={DF},%
+plural={DFs},%
+description={Digital Forensics},%
+descriptionplural={Digital Forensics},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Digital Forensics},%
+longplural={Digital Forensicss},%
+short={DF},%
+shortplural={DFs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{dfir}%
+{%
+name={\acronymfont {\glsentryshort {dfir}}},%
+sort={DFIR},%
+type={acronym},%
+first={DFIR},%
+firstplural={DFIRs},%
+text={DFIR},%
+plural={DFIRs},%
+description={Digital Forensics and Incident Response},%
+descriptionplural={Digital Forensics and Incident Response},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Digital Forensics and Incident Response},%
+longplural={Digital Forensics and Incident Responses},%
+short={DFIR},%
+shortplural={DFIRs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{cnn}%
+{%
+name={\acronymfont {\glsentryshort {cnn}}},%
+sort={CNN},%
+type={acronym},%
+first={CNN},%
+firstplural={CNNs},%
+text={CNN},%
+plural={CNNs},%
+description={Convolutional Neural Network},%
+descriptionplural={Convolutional Neural Network},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Convolutional Neural Network},%
+longplural={Convolutional Neural Networks},%
+short={CNN},%
+shortplural={CNNs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{svm}%
+{%
+name={\acronymfont {\glsentryshort {svm}}},%
+sort={SVM},%
+type={acronym},%
+first={SVM},%
+firstplural={SVMs},%
+text={SVM},%
+plural={SVMs},%
+description={Support Vector Machine},%
+descriptionplural={Support Vector Machine},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Support Vector Machine},%
+longplural={Support Vector Machines},%
+short={SVM},%
+shortplural={SVMs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{fgsm}%
+{%
+name={\acronymfont {\glsentryshort {fgsm}}},%
+sort={FGSM},%
+type={acronym},%
+first={FGSM},%
+firstplural={FGSMs},%
+text={FGSM},%
+plural={FGSMs},%
+description={Fast Gradient Sign Method},%
+descriptionplural={Fast Gradient Sign Method},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Fast Gradient Sign Method},%
+longplural={Fast Gradient Sign Methods},%
+short={FGSM},%
+shortplural={FGSMs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{pgd}%
+{%
+name={\acronymfont {\glsentryshort {pgd}}},%
+sort={PGD},%
+type={acronym},%
+first={PGD},%
+firstplural={PGDs},%
+text={PGD},%
+plural={PGDs},%
+description={Projected Gradient Descent},%
+descriptionplural={Projected Gradient Descent},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Projected Gradient Descent},%
+longplural={Projected Gradient Descents},%
+short={PGD},%
+shortplural={PGDs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{clip}%
+{%
+name={\acronymfont {\glsentryshort {clip}}},%
+sort={CLIP},%
+type={acronym},%
+first={CLIP},%
+firstplural={CLIPs},%
+text={CLIP},%
+plural={CLIPs},%
+description={Contrastive Language-Image Pre-training},%
+descriptionplural={Contrastive Language-Image Pre-training},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Contrastive Language-Image Pre-training},%
+longplural={Contrastive Language-Image Pre-trainings},%
+short={CLIP},%
+shortplural={CLIPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{blip}%
+{%
+name={\acronymfont {\glsentryshort {blip}}},%
+sort={BLIP},%
+type={acronym},%
+first={BLIP},%
+firstplural={BLIPs},%
+text={BLIP},%
+plural={BLIPs},%
+description={Bootstrapping Language-Image Pre-training},%
+descriptionplural={Bootstrapping Language-Image Pre-training},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Bootstrapping Language-Image Pre-training},%
+longplural={Bootstrapping Language-Image Pre-trainings},%
+short={BLIP},%
+shortplural={BLIPs},%
+counter={page},%
+parent={},%
+%
+}%
+
+\glsdefs@newdocentry{xai}%
+{%
+name={\acronymfont {\glsentryshort {xai}}},%
+sort={xAI},%
+type={acronym},%
+first={xAI},%
+firstplural={xAIs},%
+text={xAI},%
+plural={xAIs},%
+description={Explainable Artificial Intelligence},%
+descriptionplural={Explainable Artificial Intelligence},%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Explainable Artificial Intelligence},%
+longplural={Explainable Artificial Intelligences},%
+short={xAI},%
+shortplural={xAIs},%
+counter={page},%
+parent={},%
+%
+}%
+

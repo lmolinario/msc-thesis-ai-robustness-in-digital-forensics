@@ -1,0 +1,78 @@
+\chapter{Limits, Future Work and Conclusions}	\label{chap:conclusions}
+
+\begin{comment}
+Qui spiegare i limiti del lavoro (sicuramente dataset, tool, tecniche). 
+Future work, sicuramente consigliare di aggiungere xAI ai tool o almeno definire che tipo di xAI dovrebbero "seguire". 
+Conclusioni ricapitolare tutto.
+\end{comment}
+
+Il lavoro svolto in questa tesi si colloca all’intersezione tra Digital Forensics, tecniche antiforensi e Intelligenza Artificiale, con l’obiettivo di indagare la robustezza dei moderni strumenti AI-based impiegati nella classificazione automatica di immagini in contesti investigativi. In particolare, l’approccio seguito ha previsto un percorso metodologico che parte dallo studio delle tecniche antiforensi tradizionali, orientate a eludere o confondere gli strumenti di analisi classici, fino ad arrivare all’applicazione sistematica di attacchi adversarial propri del campo dell’Adversarial Machine Learning (AML).
+
+Nella prima fase, si è proceduto all’identificazione e categorizzazione delle perturbazioni visive che, pur non nate in ambito AML, possono alterare significativamente l’efficacia degli strumenti forensi. Ne sono esempio l’occlusione parziale, la compressione JPEG o lo sfocamento, che si configurano come tecniche antiforensi operative, capaci di compromettere l'integrità del dato visivo senza apparire come vere e proprie manipolazioni malevole.
+
+Successivamente, l’analisi si è concentrata sull’utilizzo di attacchi adversarial propriamente detti, quali FGSM, DeepFool, One Pixel Attack, ecc., con l’intento di testare la vulnerabilità di classificatori basati su reti neurali convoluzionali (CNN) o modelli multimodali come CLIP. L’obiettivo non era solo misurare la precisione in condizioni avverse, ma valutare la resilienza operativa in scenari forensi, dove l’accuratezza del riconoscimento può avere implicazioni giudiziarie dirette.
+
+I risultati sperimentali hanno evidenziato:
+
+\begin{itemize}
+\item Una marcata vulnerabilità dei modelli anche a perturbazioni minime, apparentemente trascurabili per l’occhio umano, ma capaci di causare errori gravi nella classificazione automatica.
+\item L’assenza di contromisure integrate nei tool forensi testati, che risultano esposti a tecniche antiforensi moderne basate su perturbazioni invisibili.
+\item La necessità di integrare nelle pipeline operative meccanismi di rilevamento delle immagini fuori distribuzione (OOD) e di valutazione della robustezza dei modelli AI.
+\end{itemize}
+
+
+\subsection*{Contributo della tesi}
+
+Il contributo principale di questa tesi consiste nel proporre un quadro sperimentale realistico e riproducibile per valutare la robustezza di modelli AI applicati alla Digital Forensics. Tale contributo include:
+
+\begin{itemize}
+\item La definizione di un insieme eterogeneo di perturbazioni, sia antiforensi che adversariali, classificabili secondo finalità, livello di conoscenza richiesto e grado di visibilità.
+\item La costruzione di un dataset composito, realisticamente variegato, derivato da più fonti (Kaggle, scraping web, deep web, social) e suddiviso in classi rilevanti per il contesto forense.
+\item L’impiego del modello CLIP ViT-B/32 per il filtering OOD e l’integrazione di attacchi automatici orientati alla verifica della resilienza dei classificatori.
+\end{itemize}
+
+
+
+\section*{Limiti del lavoro}
+
+Nonostante il contributo sperimentale e l’approccio metodologico orientato alla robustezza, il presente lavoro presenta alcune limitazioni che è opportuno considerare nell’interpretazione dei risultati ottenuti.
+
+\begin{itemize}
+  \item \textbf{Limitazioni dei dataset}: I dataset utilizzati, seppur eterogenei e ottenuti da fonti realistiche (Kaggle, scraping da Google, Telegram, YouTube e deep web), non coprono l’intera variabilità delle situazioni operative forensi. Aspetti come il bilanciamento tra classi, il numero di immagini per ciascuna categoria e la presenza di casi-limite (es. armi parzialmente occluse, immagini ambigue) possono influire sulla generalizzabilità dei risultati.
+  
+  \item \textbf{Limitazioni degli strumenti}: L’analisi è stata condotta utilizzando un insieme limitato di strumenti forensi AI-based e modelli open source (es. CLIP ViT-B/32, ResNet), escludendo strumenti commerciali o proprietari le cui architetture interne non sono accessibili. Ciò ha limitato la possibilità di effettuare test in condizioni full black-box o ibride.
+  
+  \item \textbf{Portata delle tecniche impiegate}: Le tecniche adversariali selezionate, sebbene rappresentative (FGSM, DeepFool, One Pixel Attack, Color Shifting, ecc.), non coprono l’intero spettro degli attacchi presenti in letteratura. Per motivi di costo computazionale, ad esempio, l’attacco PGD è stato escluso. Inoltre, non sono state analizzate in dettaglio tecniche difensive come l’adversarial training, la randomizzazione o i metodi certificati.
+\end{itemize}
+
+\section*{Lavori futuri}
+
+Gli sviluppi futuri potranno estendere e approfondire le analisi proposte, affrontando i limiti evidenziati e arricchendo la pipeline sperimentale con componenti aggiuntive, al fine di garantire l’affidabilità operativa degli strumenti AI in contesti investigativi reali.
+
+\begin{itemize}
+  \item \textbf{Espansione e standardizzazione dei dataset}: È auspicabile la creazione di benchmark condivisi in ambito forense, standardizzati per distribuzione delle classi, condizioni di acquisizione e annotazioni, per facilitare confronti tra modelli e migliorare la replicabilità degli esperimenti.
+  
+  \item \textbf{Integrazione di tecniche di Explainable AI (xAI)}: Si consiglia fortemente l’integrazione di meccanismi di spiegabilità nei tool AI-based impiegati in ambito forense. In contesti ad alto impatto decisionale come le indagini giudiziarie, è essenziale che i modelli forniscano motivazioni interpretabili per le proprie decisioni. Tecniche post-hoc locali (come LIME, SHAP), mappe di attenzione visiva (es. Grad-CAM) o metodi basati su attributi concettuali possono rendere il comportamento dei modelli più trasparente e verificabile. Idealmente, tali approcci dovrebbero rispettare i principi di tracciabilità e verificabilità propri della prassi forense.
+  
+  \item \textbf{Valutazione di strategie difensive}: Sarà utile esplorare l’efficacia di contromisure come l’adversarial training, la randomizzazione dell’input, le tecniche di smoothing o i modelli ensemble, valutandone la compatibilità con i requisiti di integrità e riproducibilità dell’analisi forense.
+  
+  \item \textbf{Estensione alla forense multimodale}: In prospettiva, si potrebbe estendere l’analisi della robustezza a compiti forensi multimodali (immagini + metadati, audio, testi, log), più coerenti con la natura composita delle evidenze trattate nei casi reali.
+\end{itemize}
+
+\section*{Conclusioni}
+
+La presente tesi ha analizzato la robustezza operativa degli strumenti basati su Intelligenza Artificiale per la classificazione automatica di immagini in ambito forense, focalizzandosi sul loro comportamento in presenza di perturbazioni antiforensi e attacchi adversariali.
+
+Il lavoro ha seguito un percorso che parte dalle tecniche antiforensi tradizionali, finalizzate a ingannare l’analisi visiva e algoritmica, fino ad arrivare all’applicazione sistematica di tecniche proprie dell’Adversarial Machine Learning, mettendo in evidenza vulnerabilità strutturali dei modelli neurali utilizzati nei tool forensi.
+
+I principali contributi della tesi includono:
+
+\begin{itemize}
+  \item La definizione e implementazione di una pipeline sperimentale per la valutazione della robustezza dei modelli AI in scenari investigativi, con perturbazioni mirate e realistiche;
+  \item La costruzione di cinque dataset tematici, realistici e diversificati, derivati da fonti pubbliche e canali meno convenzionali (es. deep web);
+  \item L’utilizzo del modello CLIP ViT-B/32 per il rilevamento automatico delle immagini fuori distribuzione, migliorando la coerenza del dataset e l’efficacia della classificazione.
+\end{itemize}
+
+I risultati sperimentali hanno dimostrato che anche piccoli interventi, spesso invisibili all’occhio umano, possono compromettere significativamente la correttezza delle decisioni dei modelli, sollevando interrogativi critici sull’affidabilità degli strumenti AI in contesti giudiziari.
+
+In conclusione, questo lavoro si propone di contribuire a un cambio di paradigma nella progettazione di strumenti AI per la Digital Forensics: dall’enfasi sulla sola accuratezza alla centralità della robustezza, della trasparenza e della verificabilità, affinché l’Intelligenza Artificiale possa diventare non solo uno strumento efficace, ma anche affidabile e giustificabile nel servizio della giustizia.

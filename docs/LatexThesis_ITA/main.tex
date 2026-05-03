@@ -1,0 +1,74 @@
+\documentclass{report}
+% !TeX root = main_ver1.tex
+
+% ----------------- Pacchetti ----------------------
+\usepackage{titlesec}
+\usepackage{packages}
+\usepackage{fancyhdr}
+\usepackage{import}
+\usepackage{afterpage}
+\usepackage{verbatim}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{fontawesome5}
+\usepackage{subcaption}
+\usepackage{smartdiagram}
+\usesmartdiagramlibrary{additions}
+
+% ----------------- Info Tesi ----------------------
+\title{Experimental Evaluation of the Robustness of AI-Based Forensic Tools for Automated Image Classification Under Adversarial and Anti-Forensic Attacks}
+\author{Lello Molinario}
+\date{25/05/2025}
+
+\begin{document}
+
+% ----------------- Frontespizio ----------------------
+\pagenumbering{roman}
+
+\import{./}{title}
+
+\afterpage{\null\thispagestyle{empty}\newpage}
+
+% ----------------- Indice e liste ----------------------
+\cleardoublepage
+\tableofcontents
+\newpage
+
+\cleardoublepage
+\listoffigures
+\newpage
+
+\cleardoublepage
+\input{sections/000_acronyms}
+\glsaddall
+\printglossary[type=\acronymtype,title={Acronyms}]
+\newpage
+
+\cleardoublepage
+\listoftables
+\newpage
+
+% ----------------- Corpo Tesi ----------------------
+\pagenumbering{arabic}
+
+% Attivo ora
+\input{sections/01_introduction}
+
+% Attiverai questi capitoli man mano
+% \input{sections/02_background}
+% \input{sections/03_StateoftheArt}
+% \input{sections/04_methodology}
+% \input{sections/05_implementation_&_experiments}
+% \input{sections/06_conclusions}
+% \input{sections/07_appendix}
+
+% ----------------- Bibliografia ----------------------
+\cleardoublepage
+\printbibliography[heading=bibintoc, title={References}]
+
+\end{document}

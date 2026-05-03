@@ -1,0 +1,30 @@
+\babel@toc {british}{}\relax 
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Pipeline forense secondo le linee guida NIST SP 800-86 e ACPO: fasi operative principali dalla raccolta dell’evidenza alla presentazione in giudizio.}}{13}{figure.caption.9}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Timeline di adozione dei principali standard e modelli forensi.}}{14}{figure.caption.10}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Fasi della catena di custodia nell’ambito della digital forensics.Fonte: \blx@tocontentsinit {0}\cite {fynd2024chain}.}}{19}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Catena di custodia}}{20}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Principali tool AI-based in digital forensics e tipologie di task supportati.}}{23}{figure.caption.17}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Fasi generali di un attacco adversarial: dal calcolo o stima del gradiente, alla generazione e applicazione della perturbazione, fino all’analisi della predizione.}}{28}{figure.caption.24}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Classificazione degli attacchi adversariali in base alla conoscenza del modello (white-box vs black-box) e all'obiettivo (targeted vs untargeted).}}{29}{figure.caption.26}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Principali applicazioni dell'Intelligenza Artificiale nella Digital Forensics}}{38}{figure.caption.34}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Schema semplificato di generazione di un input avversario. A partire da un’immagine pulita $x$, viene calcolata una perturbazione $\delta $ tale che l’input risultante $x^* = x + \delta $ induca il classificatore $f(\cdot )$ a produrre una predizione errata, mantenendo la distanza percettiva tra $x$ e $x^*$ minima.}}{43}{figure.caption.38}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Principali categorie di difesa contro attacchi adversariali: vantaggi e limiti in contesto forense.}}{48}{figure.caption.42}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Esempi tipici di classificazione: (a) arma reale, (b) replica giocattolo, (c) immagine ambigua esclusa con criterio conservativo.}}{65}{figure.caption.69}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Interfaccia principale di Magnet AXIOM all'avvio del software.}}{81}{figure.caption.119}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Interfaccia iniziale di X-Ways Forensics con vista file system.}}{82}{figure.caption.120}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Dashboard iniziale di Cellebrite UFED con riepilogo dei dispositivi acquisiti.}}{82}{figure.caption.121}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Vista iniziale della suite Oxygen Forensics Detective.}}{83}{figure.caption.122}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Flusso decisionale della pipeline sperimentale adottata}}{85}{figure.caption.123}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Pipeline sperimentale: dalla raccolta dati alla valutazione della robustezza dei modelli AI.}}{86}{figure.caption.124}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces Distribuzione delle classi ARMA e NON ARMA nei 5 test set bilanciati.}}{88}{figure.caption.125}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }

@@ -1,0 +1,637 @@
+
+\begin{comment}
+Tutto quello che c'è nella letteratura (già pubblicato)
+
+- digital forensics in generale (analisi, come viene fatta di solito)
+- AI nella digital forensics (quali tool usano cosa e per cosa)
+- perturbazioni alle immagini per creazione di sample adversarial
+- algoritmi adversarial per image detection/classification
+- test di robustness, spiegare le contromisure esistenti
+
+Qui è importante evidenziare i limiti dei lavori attuali e spiegare come e perchè questo lavoro può portare un contributo aggiuntivo
+
+\end{comment}
+
+
+
+
+
+\chapter{State of the Art}	\label{chap:stateoftheart}
+In questo capitolo viene analizzata la letteratura scientifica e tecnica esistente riguardante i principali ambiti della tesi: le tecniche tradizionali e moderne della Digital Forensics, l’impiego dell’Intelligenza Artificiale in questo contesto, gli attacchi adversariali orientati alle immagini, le principali tecniche di perturbazione e le metodologie di valutazione della robustezza. L’obiettivo è delineare lo stato dell’arte, individuare le principali criticità ancora aperte e motivare il contributo innovativo del presente lavoro.
+
+
+\section{Digital Forensics: tecniche e pratiche attuali}
+
+La \textbf{Digital Forensics} (DF) rappresenta oggi una disciplina chiave nelle indagini penali e civili che coinvolgono dispositivi digitali, ambienti informatici distribuiti e piattaforme online. Essa si occupa dell’intero ciclo di vita dell’evidenza digitale — dall’identificazione iniziale fino alla sua presentazione in sede giudiziaria — con l’obiettivo di garantirne l’ammissibilità processuale secondo criteri tecnico-scientifici consolidati~\cite{yaacoub2021digital, costantini2019digitaldigital}.
+
+Affinché un procedimento forense possa essere considerato valido, è necessario che vengano rispettati una serie di principi fondamentali, definiti dagli standard internazionali come quelli dell’ENFSI (European Network of Forensic Science Institutes), del NIST (National Institute of Standards and Technology) e del protocollo ACPO (Association of Chief Police Officers). Tali principi sono sintetizzati nella Tabella~\ref{tab:principi-df}.
+
+
+\subsection*{Linee guida e tendenze recenti nella Digital Forensics}
+
+Negli ultimi anni, la disciplina della \textbf{Digital Forensics} ha dovuto adattarsi a scenari tecnologici sempre più complessi, caratterizzati dalla crescente diffusione di servizi \textit{cloud}, dispositivi \textit{Internet of Things} (IoT) e sistemi basati su \textit{Intelligenza Artificiale} (AI). Le metodologie tradizionali, incentrate sull'acquisizione e analisi di dispositivi fisici, sono oggi integrate da procedure e standard aggiornati per garantire la validità probatoria in contesti distribuiti e ad alta dinamicità \cite{martini2022cloud, daryabar2021cloud, tawalbeh2022iotforensics}.
+
+Un contributo rilevante in tal senso è fornito dal documento \textbf{ENFSI Guidelines for Forensic Digital Imaging and Video Analysis} (2020)~\cite{enfsi2020guidelines}, che definisce criteri operativi per l’acquisizione, il trattamento e l’analisi di immagini e video digitali, includendo raccomandazioni specifiche per preservare l’integrità del materiale probatorio in ambienti eterogenei. Le linee guida pongono particolare enfasi sulla \textit{catena di custodia}, la documentazione meticolosa dei processi e l’uso di strumenti forensi convalidati, ribadendo la necessità di standardizzazione per garantire la riproducibilità delle analisi.
+
+\paragraph{Digital Forensics in ambienti \textit{cloud}.}
+La \textbf{cloud forensics} rappresenta una delle aree più sfidanti per l’investigazione digitale contemporanea. In ambienti multi‑tenant, dove le risorse fisiche sono condivise da più utenti, diventa complesso garantire l’isolamento delle evidenze e la non contaminazione dei dati~\cite{martini2022cloud}. Inoltre, l’assenza di un accesso fisico diretto all’hardware complica le operazioni di acquisizione bit‑a‑bit tipiche delle metodologie tradizionali~\cite{daryabar2021cloud}. Le indagini in cloud richiedono quindi procedure cooperative con i fornitori di servizi, l’utilizzo di API forensi e l’adozione di protocolli di autenticazione e verifica che preservino l’integrità e l’autenticità delle evidenze \cite{martini2022cloud, daryabar2021cloud}. Sfide ulteriori includono:
+\begin{itemize}
+    \item la distribuzione geografica dei dati su più giurisdizioni, con implicazioni legali e di sovranità;
+    \item la volatilità delle informazioni, legata a processi di allocazione dinamica delle risorse e politiche di retention limitate;
+    \item la necessità di logging e monitoraggio continuo per garantire la tracciabilità delle operazioni.
+\end{itemize}
+
+\paragraph{IoT Forensics.}
+L’espansione dell’ecosistema \textbf{Internet of Things} ha introdotto nuove superfici di acquisizione probatoria, comprendenti sensori, wearable devices, sistemi di videosorveglianza smart e veicoli connessi~\cite{tawalbeh2022iotforensics}. La peculiarità dell’IoT forensics risiede nella natura distribuita e resource‑constrained dei dispositivi, che impone strategie di acquisizione spesso \textit{live} e con capacità di memorizzazione limitata. I framework recenti suggeriscono approcci ibridi, basati su acquisizioni dirette dai dispositivi quando possibile e, in alternativa, su raccolta centralizzata dei dati dai gateway o dalle piattaforme cloud a cui essi si connettono. La preservazione della \textit{chain of custody} in contesti IoT è particolarmente complessa a causa della varietà di protocolli e standard di comunicazione impiegati \cite{tawalbeh2022iotforensics}.
+
+\paragraph{Integrazione dell’AI nelle pratiche forensi.}
+L’applicazione dell’\textbf{Intelligenza Artificiale} nella Digital Forensics sta progressivamente migrando dalle sperimentazioni accademiche a soluzioni operative, specialmente per il \textit{triage} rapido di grandi moli di dati multimediali e la classificazione automatica di contenuti~\cite{yaacoub2021digital}. Tuttavia, documenti recenti sottolineano la necessità di sviluppare linee guida specifiche per l’impiego di sistemi AI in ambito forense, considerando la loro vulnerabilità ad attacchi adversariali e la natura opaca dei processi decisionali~\cite{nowroozi2024robustnessrobustness}. Le buone pratiche emergenti suggeriscono:
+\begin{itemize}
+    \item validazione preventiva dei modelli AI su dataset rappresentativi del contesto operativo;
+    \item tracciabilità e auditabilità delle decisioni algoritmiche;
+    \item integrazione di moduli di rilevamento di input anomali o potenzialmente manipolati.
+\end{itemize}
+
+In sintesi, l’evoluzione recente delle linee guida forensi riflette un passaggio da un approccio prevalentemente tecnico a uno multidimensionale, che integra aspetti tecnologici, procedurali e legali per rispondere alle sfide poste dai moderni scenari digitali \cite{nowroozi2024robustnessrobustness}.
+
+
+
+
+\begin{table}[H]
+\centering
+
+\begin{tabular}{|p{3cm}|p{11cm}|}
+\hline
+\textbf{Principio} & \textbf{Descrizione} \\
+\hline
+\textbf{Integrità} & I dati digitali originali non devono essere alterati durante le fasi di acquisizione e analisi. Devono essere applicati metodi di verifica (es. hash crittografici) per garantirne l’autenticità. \\
+\hline
+\textbf{Tracciabilità} & Ogni operazione compiuta sull’evidenza deve essere documentata accuratamente, garantendo la ricostruzione completa della \textit{catena di custodia}. \\
+\hline
+\textbf{Riproducibilità} & Le analisi forensi devono essere replicabili da altri esperti indipendenti, a parità di dati e strumenti, così da assicurare l’obiettività del risultato. \\
+\hline
+\textbf{Validità scientifica} & Le tecniche e gli strumenti utilizzati devono essere fondati su basi teoriche e sperimentali solide, preferibilmente convalidati dalla comunità scientifica~\cite{costantini2019digitaldigital, rogers2020ai}. \\
+\hline
+\end{tabular}
+\caption{Principi fondamentali della Digital Forensics secondo gli standard internazionali}
+\label{tab:principi-df}
+\end{table}
+
+
+
+
+\subsection*{Modello operativo della Digital Forensics}
+
+Il processo di Digital Forensics si fonda su una sequenza metodologica ben definita, la cui applicazione rigorosa è essenziale per garantire l’affidabilità dell’intero procedimento investigativo. Le fasi operative tradizionali riflettono una standardizzazione internazionale (es. ISO/IEC 27037, NIST SP 800-86), la cui adozione consente una gestione strutturata delle evidenze digitali.
+
+La Tabella~\ref{tab:modello-operativo-df} sintetizza le quattro fasi principali comunemente adottate nei flussi di lavoro forense.
+
+\begin{table}[H]
+\centering
+
+\begin{tabular}{|p{3cm}|p{11cm}|}
+\hline
+\textbf{Fase} & \textbf{Descrizione} \\
+\hline
+\textbf{Identificazione} & Riconoscimento delle possibili fonti di evidenza digitale, incluse memorie di massa, dispositivi mobili, ambienti cloud, reti e servizi online. Questa fase è cruciale per delimitare correttamente il perimetro dell’indagine. \\
+\hline
+\textbf{Acquisizione} & Creazione di una copia forense dei dati mediante tecniche come l’imaging bit-a-bit e l’uso di hash (MD5, SHA-256) per garantire l’integrità. È fondamentale l’impiego di dispositivi write-blocker per evitare modifiche accidentali. \\
+\hline
+\textbf{Analisi} & Estrazione, correlazione e interpretazione delle informazioni digitali attraverso strumenti automatizzati e competenze esperte. Include tecniche come file carving, analisi dei log, metadata extraction, memory forensics e timeline reconstruction. \\
+\hline
+\textbf{Reporting} & Documentazione tecnica e legale dei risultati dell’analisi. Il report deve essere chiaro, replicabile e comprensibile anche a figure non tecniche (es. giudici, avvocati), rispettando i requisiti di validità probatoria. \\
+\hline
+\end{tabular}
+\caption{Fasi operative del processo di Digital Forensics}
+\label{tab:modello-operativo-df}
+\end{table}
+
+\subsection*{Strumenti utilizzati}
+
+L’analisi forense digitale si fonda sull’utilizzo di strumenti software specializzati che supportano le diverse fasi dell’investigazione: dall’acquisizione dei dati alla loro analisi e successiva presentazione in sede giudiziaria. Tali strumenti si distinguono principalmente in due categorie: soluzioni commerciali (\textit{Commercial Off-The-Shelf}, COTS) e soluzioni open-source, ciascuna con vantaggi e limitazioni che ne influenzano l’adozione in contesti operativi.
+
+Tra le soluzioni commerciali più consolidate vi è \textbf{X-Ways Forensics}, noto per le sue prestazioni elevate in termini di efficienza e capacità di lavorare con immagini forensi di grandi dimensioni. Il software offre funzionalità avanzate come l’analisi di file system, la ricostruzione di timeline e il carving di file cancellati. Un’altra piattaforma largamente utilizzata è \textbf{Magnet AXIOM}, particolarmente apprezzata per la sua interfaccia intuitiva e per l’integrazione di moduli basati su Intelligenza Artificiale, in grado di automatizzare la classificazione di immagini e contenuti multimediali sospetti.
+
+\textbf{Cellebrite UFED} rappresenta lo standard di riferimento per l’estrazione di dati da dispositivi mobili, utilizzato in ambito investigativo e forense da numerose forze dell’ordine a livello internazionale. La sua efficacia nel decifrare e analizzare contenuti protetti, come quelli provenienti da app di messaggistica cifrata, lo rende uno strumento fondamentale nelle indagini su smartphone. Complementare è \textbf{Oxygen Forensic Detective}, anch’esso dedicato all’analisi di dispositivi mobili e ambienti cloud, con funzionalità specifiche per il tracciamento di comunicazioni, geolocalizzazioni e profili utente.
+
+Sul versante open-source, uno degli strumenti più diffusi è \textbf{Autopsy}, un’interfaccia grafica che facilita l’utilizzo del toolkit \textbf{The Sleuth Kit}. Quest’ultimo fornisce una suite di strumenti a riga di comando per l’analisi di dischi e file system, ed è alla base di molte distribuzioni forensi. Autopsy è ampiamente utilizzato in ambito accademico e investigativo, grazie alla sua capacità di gestire evidenze provenienti da diverse fonti e alla modularità che consente l’integrazione di plugin personalizzati.
+
+Per l’analisi della memoria volatile, fondamentale in scenari di analisi post-compromissione o di malware forensics, viene frequentemente impiegato \textbf{Volatility}. Si tratta di un framework flessibile in grado di estrarre strutture complesse dalla RAM, come processi attivi, connessioni di rete, credenziali, e persino code di esecuzione. Infine, \textbf{Plaso (log2timeline)} consente la creazione automatizzata di timeline forensi a partire da una molteplicità di log di sistema, browser, dispositivi USB, e altre fonti temporali, facilitando l’identificazione di eventi critici in sequenze temporali complesse.
+
+L’utilizzo combinato di strumenti commerciali e open-source è spesso strategico: i primi garantiscono affidabilità certificata e aggiornamenti costanti, mentre i secondi offrono maggiore trasparenza, personalizzazione e possibilità di integrazione in pipeline di analisi più flessibili. In contesti ad alta sensibilità, come la digital forensics applicata alla sicurezza nazionale o alle indagini su reati informatici gravi, questa sinergia diventa fondamentale per garantire l’efficacia investigativa e la robustezza delle conclusioni prodotte~\cite{phd_unisi_068552}.
+
+
+\subsection*{Limiti delle tecniche attuali e sfide emergenti}
+
+L’integrazione di tecniche di \textit{Machine Learning} (ML) nella Digital Forensics ha portato vantaggi in termini di automazione e scalabilità, ma ha anche introdotto nuove vulnerabilità. In particolare, i modelli basati su reti neurali profonde (Deep Learning) risultano altamente sensibili a perturbazioni artificiali anche minime, note come \textit{adversarial examples}~\cite{phd_unisi_068552}.
+
+Queste perturbazioni, spesso invisibili all’occhio umano, sono in grado di eludere i sistemi di classificazione automatica, compromettendo così la validità probatoria dell’evidenza. Secondo Nowroozi, la facilità con cui tali attacchi possono essere generati rende problematica l’adozione di strumenti AI-based in scenari forensi reali~\cite{phd_unisi_068552}.
+
+\begin{quote}
+    “The easiness with which it is possible to disable ML tools and in particular DL tools makes it very hard to exploit these tools in a multimedia forensic scenario and more in general for security-oriented applications.”~\cite{phd_unisi_068552}
+\end{quote}
+
+L’autore sottolinea inoltre come la maggior parte dei tool attuali non sia progettata per operare in ambienti ostili. Di conseguenza, diventa cruciale lo sviluppo di strumenti \textbf{robusti e consapevoli dell’avversario} (\textit{adversary-aware}), in grado di resistere a manipolazioni mirate dei dati in ingresso.
+
+\subsection*{Verso l’intelligenza artificiale nella DF}
+
+In risposta alle sfide emergenti — come l’aumento dei volumi di dati, la diffusione di tecniche anti-forensi, la crittografia avanzata e la distribuzione delle evidenze su più dispositivi — la comunità scientifica ha iniziato a introdurre approcci basati su AI all’interno del workflow forense.
+
+L’Intelligenza Artificiale può essere utilizzata per:
+\begin{itemize}
+    \item Automatizzare il \textbf{triage} di grandi moli di dati multimediali;
+    \item Eseguire \textbf{classificazione semantica} di contenuti (armi, volti, testo);
+    \item Abilitare tecniche di \textbf{profilazione comportamentale} e correlazione temporale;
+    \item Supportare il \textbf{decision making} investigativo attraverso modelli predittivi~\cite{costantini2019digitaldigital, phd_unisi_068552}.
+\end{itemize}
+
+Tuttavia, come sarà analizzato nei prossimi paragrafi, l’affidabilità di tali sistemi resta un punto critico, specialmente in presenza di input manipolati con finalità anti-forense~\cite{nowroozi2024robustnessrobustness}.
+
+
+Come illustrato in Figura~\ref{fig:ai-df-applications}, 
+l’AI può intervenire in diverse fasi del processo forense: 
+dal triage iniziale dei contenuti digitali, 
+fino alla classificazione semantica, clustering di immagini sospette 
+e correlazione di eventi. 
+L’efficacia di queste attività dipende dalla robustezza dei modelli 
+e dalla qualità del dataset.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      node distance=2.2cm,
+      every node/.style={font=\small, align=center, thick},
+      central/.style={rectangle, draw=black, fill=orange!30, rounded corners, minimum width=4.5cm, minimum height=1.2cm},
+      app/.style={rectangle, draw=black, fill=blue!15, rounded corners, minimum width=4.5cm, minimum height=1.2cm}
+  ]
+  
+  % Nodo centrale
+  \node[central] (central) {AI nella Digital Forensics};
+  
+  % Nodi applicazioni
+  \node[app, above left=of central] (triage) {Triage automatico\\di dati multimediali};
+  \node[app, above right=of central] (classificazione) {Classificazione semantica\\(armi, volti, testo)};
+  \node[app, below left=of central] (profilazione) {Profilazione comportamentale\\e correlazione temporale};
+  \node[app, below right=of central] (decision) {Supporto al decision making\\investigativo};
+  
+  % Collegamenti
+  \draw[->, thick] (central) -- (triage);
+  \draw[->, thick] (central) -- (classificazione);
+  \draw[->, thick] (central) -- (profilazione);
+  \draw[->, thick] (central) -- (decision);
+  
+  \end{tikzpicture}
+  \caption{Principali applicazioni dell'Intelligenza Artificiale nella Digital Forensics}
+  \label{fig:ai-df-applications}
+\end{figure}
+
+
+\section{AI nella Digital Forensics: strumenti e applicazioni}
+
+Negli ultimi anni, l’Intelligenza Artificiale (AI) ha assunto un ruolo sempre più rilevante nel panorama della Digital Forensics, contribuendo in maniera sostanziale alla modernizzazione dei processi investigativi. La sua introduzione risponde all’esigenza crescente di gestire volumi sempre maggiori di dati digitali, spesso non strutturati, provenienti da dispositivi eterogenei e in tempi estremamente ridotti. L’AI, e in particolare il \textit{Machine Learning} (ML), consente di automatizzare fasi critiche dell’analisi forense e di identificare correlazioni complesse e pattern nascosti difficilmente rilevabili con metodi tradizionali~\cite{costantini2019digitaldigital}.
+
+Tra le principali applicazioni AI-driven in ambito forense si possono identificare:
+
+\begin{itemize}
+    \item \textbf{Classificazione automatica di immagini e video}, finalizzata all’identificazione di contenuti rilevanti per l’indagine (es. armi da fuoco, contenuti violenti o illeciti, presenza di minori). Le reti neurali convoluzionali (CNN), in particolare architetture come ResNet, VGG o EfficientNet, sono state ampiamente utilizzate per addestrare classificatori capaci di analizzare grandi corpus multimediali con elevata accuratezza~\cite{marra2019gans}.
+
+    \item \textbf{Riconoscimento facciale e di oggetti}, spesso utilizzato in contesti investigativi e di intelligence per identificare soggetti coinvolti, tracciare interazioni o rintracciare volti già presenti in banche dati. Tecnologie come \textit{YOLOv5}, \textit{FaceNet} e \textit{OpenFace} sono comunemente impiegate nei sistemi di sorveglianza intelligenti e nei software forensi di nuova generazione.
+
+    \item \textbf{Analisi forense su dispositivi mobili}, ambito in cui l’AI è integrata all’interno di strumenti commerciali come \textbf{Magnet AXIOM} e \textbf{Cellebrite UFED}, con funzionalità di categorizzazione automatica di immagini e messaggi, rilevamento di contenuti sospetti e suggerimenti basati su similarità semantica tra elementi multimediali.
+
+    \item \textbf{Triage multimediale e content-based filtering}, utile per l’analisi preliminare di grandi dataset, ad esempio in operazioni di digital triage su sistemi compromessi o dispositivi sequestrati. Algoritmi AI-based permettono di scartare in modo automatico contenuti irrilevanti e concentrare l’attenzione su quelli di interesse investigativo.
+\end{itemize}
+
+Oltre alle CNN, altre classi di modelli come le \textit{Recurrent Neural Networks} (RNN) o gli \textit{Transformer}-based (es. Vision Transformer, BERT applicato a metadati testuali) stanno progressivamente emergendo nella digital forensics, specialmente in task come la ricostruzione automatica di eventi o l’analisi di log complessi.
+
+
+
+\subsection*{Esperienze sperimentali e benchmark disponibili}
+
+Nonostante il crescente interesse accademico e industriale per l'integrazione dell'Intelligenza Artificiale nei flussi di lavoro forensi, la letteratura scientifica che documenta \textbf{pipeline AI-based operative e valutate in scenari realistici} rimane sorprendentemente limitata. Alcuni contributi recenti rappresentano però tentativi significativi in questa direzione.
+
+Costantini et al.~\cite{costantini2019digitaldigital} hanno proposto un framework per la \textit{multimedia forensics} basato su reti neurali profonde, integrando moduli di classificazione delle immagini e rilevamento di manipolazioni in un contesto simulato di indagine. L'architettura è stata progettata per combinare tecniche tradizionali di analisi forense con modelli di \textit{deep learning} in grado di automatizzare la fase di triage, riducendo i tempi di identificazione di contenuti sospetti.
+
+Più recentemente, Nowroozi et al.~\cite{nowroozi2024robustnessrobustness} hanno analizzato la robustezza di modelli di \textit{intrusion detection} e classificazione forense basati su AI quando esposti a perturbazioni intenzionali, inclusi attacchi \textit{adversarial}. Il lavoro evidenzia come, anche in pipeline costruite con attenzione alla validazione tecnica, perturbazioni minime possano degradare drasticamente le prestazioni dei classificatori, compromettendo l’affidabilità dell’analisi in contesti investigativi.
+
+Questi studi sottolineano una criticità importante: \textbf{la carenza di benchmark pubblici e specifici per la valutazione dell’AI in Digital Forensics} \cite{hendrycks2019benchmarking}. A differenza di altri domini del machine learning, dove dataset di riferimento come ImageNet, COCO o CIFAR-10 hanno permesso un’evoluzione rapida e comparabile delle tecniche, in ambito forense i dataset disponibili sono spesso:
+\begin{itemize}
+    \item di dimensioni ridotte e non rappresentativi della varietà di scenari reali;
+    \item vincolati da restrizioni legali e di privacy che ne impediscono la condivisione;
+    \item eterogenei per formato, qualità e tipologia di contenuti.
+\end{itemize}
+
+Questa mancanza di standardizzazione rende difficile confrontare le prestazioni di diversi modelli e metodologie, ostacolando l’avanzamento coordinato della ricerca. La definizione di benchmark realistici e condivisibili rappresenta pertanto una priorità strategica per il futuro della disciplina.
+
+
+
+
+\subsection*{Strumenti AI-oriented e contesto operativo}
+
+Nel contesto applicativo reale, l’integrazione di modelli AI avviene tramite componenti embedded all’interno di strumenti già in uso nelle attività investigative. Cellebrite, ad esempio, utilizza il motore di riconoscimento delle immagini per suggerire automaticamente categorie come “nudo”, “arma”, “droga”, riducendo il carico cognitivo sull’analista umano. Allo stesso modo, Magnet AXIOM consente di eseguire clustering automatici di conversazioni e immagini per agevolare l’analisi contestuale.
+
+Queste funzioni, pur essendo estremamente utili in termini di efficienza, sollevano anche importanti questioni di affidabilità e trasparenza, specie se i modelli vengono utilizzati come base per decisioni probatorie. Infatti, la natura opaca (\textit{black-box}) dei modelli deep learning, unita alla loro vulnerabilità a perturbazioni ad-hoc, rappresenta un potenziale rischio per la validità delle evidenze forensi.
+
+\subsection*{Vulnerabilità e rischi associati}
+
+Uno degli aspetti più critici dell’introduzione dell’AI in ambito forense riguarda la sua esposizione ad attacchi adversariali: input manipolati in modo impercettibile possono ingannare il modello, generando classificazioni errate senza che l’analista se ne accorga. Questo rischio è stato ampiamente dimostrato nella letteratura recente~\cite{phd_unisi_068552, nowroozi2024robustnessrobustness}, e risulta particolarmente grave nel contesto forense, dove l’accuratezza e la riproducibilità delle analisi sono fondamentali.
+
+Tali vulnerabilità non si limitano agli attacchi esterni, ma possono manifestarsi anche in condizioni operative normali: immagini degradate, compressioni JPEG, sfocature, cropping o interferenze dovute a pre-elaborazioni automatiche possono anch’esse alterare il comportamento del modello, con conseguenze potenzialmente gravi sul piano legale.
+
+Per questi motivi, il presente lavoro si propone di analizzare criticamente l’efficacia e la robustezza degli strumenti AI-based adottati in ambito forense, ponendo particolare attenzione alla loro resistenza a manipolazioni intenzionali — un tema ancora largamente sottovalutato nella pratica operativa e nella letteratura tecnica esistente.
+
+
+\subsection*{Modelli CNN vs Transformer nella digital forensics}
+
+Nel presente lavoro sono stati valutati sia modelli basati su \textbf{Convolutional Neural Networks (CNN)} che modelli \textbf{Transformer-based} per la classificazione automatica di immagini a contenuto potenzialmente sospetto.
+
+Le \textbf{CNN} (es. ResNet18, EfficientNetB0) si basano su convoluzioni locali e sono ottimizzate per estrarre feature gerarchiche da immagini statiche. Sono più leggere, facilmente interpretabili, e si prestano bene ad ambienti operativi con risorse computazionali limitate.
+
+I \textbf{modelli Transformer} (es. CLIP, BLIP) si fondano su meccanismi di attenzione e sono pre-addestrati su task multimodali (immagine-testo). Presentano un’elevata capacità di generalizzazione e resistenza ad alcune perturbazioni semantiche, ma richiedono risorse computazionali più elevate e mostrano comportamenti meno prevedibili in presenza di perturbazioni low-level o steganografiche.
+
+La combinazione dei due approcci ha permesso di confrontare la robustezza tra modelli leggeri e altamente specializzati, valutandone l’efficacia in condizioni realistiche.
+
+
+
+\section{Perturbazioni e attacchi adversarial su immagini}
+
+Gli attacchi adversariali rappresentano una delle minacce più insidiose per i modelli di classificazione basati su apprendimento automatico, in particolare per quelli applicati all’analisi delle immagini. Si tratta di tecniche che introducono perturbazioni mirate, spesso impercettibili all’occhio umano, in input legittimi al fine di indurre il modello a produrre predizioni errate~\cite{szegedy2013intriguing,ford2019adversarial}. L’impatto di tali manipolazioni è amplificato nel contesto della \textbf{Digital Forensics}, dove un errore nella classificazione può compromettere l’integrità probatoria di un’evidenza digitale, con potenziali ripercussioni legali significative.
+
+Queste perturbazioni vengono generate sfruttando la sensibilità locale dei modelli deep learning rispetto a variazioni dello spazio delle caratteristiche, e si basano su gradienti, euristiche di ottimizzazione o modifiche pixel-level. La loro efficacia è stata dimostrata su una vasta gamma di architetture, incluse CNN standard (come ResNet, VGG, DenseNet) e più recentemente anche modelli basati su transformer visivi (ViT).
+
+
+
+\subsection*{Tecniche di attacco più comuni}
+
+Le principali tecniche di attacco adversariale su immagini possono essere classificate in due macro-categorie: \textit{attacchi ottimizzati numericamente} e \textit{attacchi naturali o di tipo low-level}. Ciascuna tipologia sfrutta meccanismi differenti per compromettere il comportamento del modello di classificazione.
+
+\paragraph{Attacchi ottimizzati numericamente.} Questi attacchi si basano su tecniche di ottimizzazione, spesso fondate sul calcolo del gradiente della funzione di perdita rispetto all’input o sull’uso di algoritmi evolutivi. Sono tipicamente impiegati in contesti white-box, dove l’attaccante ha accesso all’architettura e ai parametri del modello. Tra i principali si annoverano:
+
+\begin{itemize}
+  \item \textbf{Fast Gradient Sign Method (FGSM)}~\cite{goodfellow2014explaining}: calcola il gradiente della funzione di perdita rispetto all’input e genera una perturbazione diretta lungo il segno del gradiente, scalata da un parametro $\epsilon$, con l’obiettivo di massimizzare l’errore del classificatore in una singola iterazione.
+
+  \item \textbf{One Pixel Attack}~\cite{su2019onepixel}: modifica un solo pixel dell’immagine, selezionato tramite un processo di ottimizzazione evolutiva (differential evolution), in modo da generare un errore di classificazione, anche in scenari black-box.
+
+  \item \textbf{DeepFool}~\cite{moosavi2016deepfool}: attacco iterativo che calcola la minima perturbazione necessaria per spostare l’input oltre il confine decisionale del classificatore, risultando spesso più impercettibile di FGSM.
+
+  \item \textbf{SuperDeepFool}~\cite{zhang2024superdeepfool}: evoluzione di DeepFool che incorpora strategie multi-classe e multi-layer, migliorando la capacità di elusione su modelli complessi e ottenendo un equilibrio tra efficacia e invisibilità.
+\end{itemize}
+
+
+\subsection*{Classificazione delle perturbazioni e contesto scientifico}
+
+La letteratura recente distingue due macro-categorie di perturbazioni che possono compromettere le prestazioni di un modello di classificazione di immagini: le \textbf{perturbazioni intenzionali}, generate deliberatamente per indurre errori di predizione, e le \textbf{perturbazioni naturali}, dovute a degradazioni accidentali o condizioni operative non ottimali.
+
+Le \textbf{perturbazioni intenzionali} comprendono gli attacchi \textit{adversariali} in senso stretto, progettati per massimizzare la probabilità di classificazione errata pur mantenendo l’alterazione visivamente impercettibile~\cite{szegedy2013intriguing, goodfellow2014explaining}. Questi attacchi sfruttano la sensibilità locale dei modelli deep learning rispetto a variazioni nello spazio delle feature, applicando tecniche di ottimizzazione basate su gradienti, strategie evolutive o modifiche strutturate a livello pixel. In contesti forensi, tali perturbazioni vengono considerate una forma di \textbf{anti-forensics attivo}, in quanto mirano a eludere il rilevamento o a mascherare contenuti di interesse probatorio.
+
+Le \textbf{perturbazioni naturali}, al contrario, derivano da fattori non intenzionali ma comunque potenzialmente critici per la robustezza del modello: compressioni lossy (es. JPEG a bassa qualità), variazioni di illuminazione, sfocature dovute a movimento o messa a fuoco imperfetta, rumore di sensore, occlusioni parziali dell’oggetto. Sebbene non siano generate con finalità malevole, esse condividono con le perturbazioni intenzionali la capacità di alterare significativamente le predizioni, specie in modelli non addestrati a gestire condizioni \textit{out-of-distribution} (OOD).
+
+In questo contesto, studi come quello di Hendrycks e Dietterich~\cite{hendrycks2019benchmarking, michaelis2019winter} hanno evidenziato come la robustezza ai dati OOD sia strettamente connessa alla capacità di resistere anche a perturbazioni naturali. Gli autori propongono benchmark specifici per testare la \textit{corruption robustness}, dimostrando che degradazioni comunemente riscontrabili in scenari reali possono produrre effetti paragonabili, in termini di errore di classificazione, a quelli degli attacchi adversariali più noti. Questi risultati sottolineano l’importanza di trattare la problematica della robustezza in maniera unificata, considerando sia le perturbazioni naturali sia quelle intenzionali come parte di uno spettro continuo di possibili degradazioni dell’input.
+
+L’analisi combinata di perturbazioni intenzionali e naturali risulta particolarmente rilevante nella \textbf{Digital Forensics}, dove le evidenze digitali possono essere soggette a entrambe le tipologie di degrado: da un lato, manipolazioni volontarie operate da un attore ostile; dall’altro, artefatti dovuti alla catena di acquisizione, trasmissione e memorizzazione dell’immagine. Comprendere e classificare correttamente queste perturbazioni è un passo preliminare essenziale per sviluppare sistemi di rilevamento e classificazione robusti e affidabili in scenari operativi complessi.
+
+
+\paragraph{Attacchi naturali o low-level.} A differenza dei precedenti, questi attacchi non richiedono accesso interno al modello e si basano su trasformazioni visive realistiche, spesso indistinguibili da alterazioni legittime. Sono particolarmente rilevanti in ambito forense, dove possono simulare degradazioni introdotte volontariamente da soggetti ostili:
+
+\begin{itemize}
+  \item \textbf{Color Shifting}: alterazione intenzionale del bilanciamento dei colori, che può compromettere il riconoscimento degli oggetti.
+
+  \item \textbf{Gaussian Blur}: sfocatura dell’immagine che riduce la nitidezza dei dettagli rilevanti per la classificazione.
+
+  \item \textbf{Occlusion Patch}: inserimento di blocchi visivi (es. neri o mimetici) su aree salienti, simile a forme di censura o mascheramento.
+
+  \item \textbf{JPEG Compression (ad alta perdita)}: ri-compressione dell’immagine a qualità ridotta, che distrugge pattern strutturali sfruttati dai modelli AI per riconoscere i contenuti.
+\end{itemize}
+
+Queste tecniche, pur non richiedendo sofisticati algoritmi di ottimizzazione, si dimostrano altamente efficaci in contesti pratici e rappresentano una sfida concreta per la robustezza dei modelli AI impiegati in scenari forensi reali.
+
+
+
+
+
+
+\paragraph{Attacchi steganografici.} Una terza categoria di perturbazioni, meno esplorata ma di particolare interesse in ambito forense, comprende le tecniche steganografiche. Questi attacchi non mirano tanto a generare una predizione errata quanto a nascondere informazioni all’interno delle immagini in modo invisibile, eludendo il rilevamento da parte di classificatori automatici o strumenti di ispezione visiva.
+
+In contesto adversariale, la steganografia può essere impiegata con due finalità principali:
+
+\begin{itemize}
+  \item \textbf{Ocultamento semantico}: l’immagine viene modificata in modo da mantenere un aspetto innocuo, mentre al suo interno viene codificato un contenuto sensibile o illegale (es. mediante tecniche LSB, DCT o metodi neural-based), aggirando i sistemi di content moderation o analisi automatica.
+
+  \item \textbf{Evasione forense}: sfruttando la steganografia, un attore malevolo può mascherare la presenza di contenuti proibiti o eludere sistemi AI addestrati su immagini “esplicite”, evitando che il contenuto nascosto venga analizzato o rilevato.
+
+\end{itemize}
+
+Tecniche comuni includono:
+
+\begin{itemize}
+  \item \textbf{LSB (Least Significant Bit)}: i bit meno significativi di alcuni pixel vengono modificati per codificare un messaggio, senza alterare visibilmente l’immagine originale.
+  \item \textbf{Steganografia differenziale neurale}: sfrutta reti neurali addestrate per incorporare messaggi in modo impercettibile, mantenendo elevata qualità visiva e resistenza a compressione o ridimensionamento.
+  \item \textbf{Payload mimetico}: impiega pattern visivi ad hoc (es. QR degradati, texture a bassa frequenza) per inserire segnali difficili da identificare ma riconoscibili da sistemi pre-accordati.
+\end{itemize}
+
+Nel contesto della presente tesi, le tecniche steganografiche vengono considerate come possibili vettori di attacco anti-forense, poiché alterano in modo mirato le proprietà semantiche dell’immagine, senza innescare alert nei sistemi di classificazione automatica. La loro inclusione nelle perturbazioni testate consente di valutare la robustezza dei modelli AI anche rispetto a forme più sofisticate e subdole di manipolazione.
+
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      font=\small,
+      node distance=2cm,
+      block/.style={rectangle, draw=black, fill=red!10, rounded corners, minimum width=4cm, minimum height=1.2cm, align=center},
+      arrow/.style={thick, ->, >=stealth}
+  ]
+
+  % Nodi
+  \node[block, fill=green!15] (clean) {Immagine pulita $x$};
+  \node[block, fill=yellow!20, below=of clean] (perturb) {Perturbazione $\delta$};
+  \node[block, fill=orange!20, below=of perturb] (adv) {Input avversario $x^* = x + \delta$};
+  \node[block, fill=blue!15, below=of adv, text width=4cm] (model) {Classificatore $f(\cdot)$};
+  \node[block, fill=red!20, below=of model, text width=4cm] (error) {Predizione errata};
+
+  % Frecce
+  \draw[arrow] (clean) -- (perturb) node[midway, right] {$+$};
+  \draw[arrow] (perturb) -- (adv);
+  \draw[arrow] (adv) -- (model);
+  \draw[arrow] (model) -- (error);
+
+  \end{tikzpicture}
+  \caption{Schema semplificato di generazione di un input avversario. A partire da un’immagine pulita $x$, viene calcolata una perturbazione $\delta$ tale che l’input risultante $x^* = x + \delta$ induca il classificatore $f(\cdot)$ a produrre una predizione errata, mantenendo la distanza percettiva tra $x$ e $x^*$ minima.}
+  \label{fig:adv-pipeline-tikz}
+\end{figure}
+
+
+\subsection*{Classificazione: White-box vs. Black-box}
+
+Gli attacchi adversariali si distinguono in due grandi classi, a seconda del livello di conoscenza che l’attaccante ha sul modello:
+
+\begin{itemize}
+  \item \textbf{White-box}: l’attaccante ha accesso completo all’architettura, ai pesi e alla funzione di perdita del modello. Questo consente l’uso di tecniche basate su gradienti, come FGSM, DeepFool o Projected Gradient Descent (PGD), ottenendo perturbazioni altamente efficaci ma meno realistiche dal punto di vista operativo.
+
+  \item \textbf{Black-box}: l’attaccante non ha visibilità interna sul modello, ma può inviare input e osservare le uscite. In questo caso si utilizzano approcci di ottimizzazione evolutiva, surrogate models o tecniche transfer-based. Gli attacchi black-box sono di maggiore interesse in ambito forense, dove il sistema di classificazione (es. Magnet, Cellebrite) è spesso una black-box proprietaria non accessibile direttamente.
+\end{itemize}
+
+\subsection*{Implicazioni in ambito forense}
+
+Nel contesto della Digital Forensics, la presenza di attacchi adversariali può compromettere la fiducia nei sistemi di classificazione automatica, con effetti potenzialmente disastrosi. Ad esempio, un’immagine contenente un’arma potrebbe essere classificata erroneamente come innocua, oppure viceversa, generando falsi positivi. L’utilizzo di tali tecniche come strumenti anti-forensi rappresenta un vettore emergente di manipolazione digitale intenzionale, che si colloca a metà tra l’offuscamento e l’elusione.
+
+Inoltre, la difficoltà nel rilevare e mitigare questi attacchi — specialmente quelli più “naturali” come il blur o il cropping intenzionale — rende la valutazione della robustezza dei sistemi AI un elemento imprescindibile per garantirne l’affidabilità operativa. La presente tesi si colloca in questo contesto, con l’obiettivo di valutare sistematicamente la capacità degli strumenti AI-based adottati in ambito forense di resistere a perturbazioni intenzionali e realistiche.
+
+
+
+
+
+
+\section{Robustezza e contromisure}
+
+\subsection*{Valutazione della robustezza: metriche e protocolli}
+
+La valutazione della \textbf{robustezza} di un modello di apprendimento automatico in presenza di perturbazioni intenzionali o naturali richiede un insieme di metriche e protocolli di test che siano allo stesso tempo riproducibili e rappresentativi del contesto applicativo. In letteratura, le metriche più comunemente utilizzate includono:
+
+\begin{itemize}
+    \item \textbf{Accuracy under attack} (AUA): misura la percentuale di campioni classificati correttamente in presenza di un attacco specifico, mantenendo le stesse condizioni di test dei dati “puliti”.
+    \item \textbf{Robust Accuracy} (RA): variante dell’accuratezza che considera l’insieme combinato di campioni originali e perturbati, fornendo una visione complessiva della resilienza del modello~\cite{madry2018towards}.
+    \item \textbf{Mean Corruption Error} (mCE): introdotta da Hendrycks e Dietterich~\cite{hendrycks2019benchmarking}, misura l’errore medio normalizzato su un insieme di corruzioni naturali standardizzate, consentendo un confronto cross‑dataset e cross‑modello.
+    \item \textbf{Perturbation Norms} ($L_p$ norms): quantificano l’entità della perturbazione in termini di distanza nello spazio dell’input, con $L_2$, $L_\infty$ e $L_0$ come misure più comuni. Queste norme sono particolarmente utili per confrontare attacchi ottimizzati numericamente.
+    \item \textbf{Attack Success Rate} (ASR): percentuale di campioni per i quali l’attacco ha prodotto una modifica dell’output del classificatore rispetto al dato originale, indipendentemente dalla classe di destinazione.
+\end{itemize}
+
+Nonostante l’ampio uso di tali metriche, \textbf{manca una standardizzazione dei protocolli di valutazione} nel contesto specifico della \textit{Digital Forensics}. La maggior parte degli studi si basa su benchmark di dominio generale (es. CIFAR‑10, ImageNet) o su dataset sintetici, spesso in condizioni controllate e non rappresentative della complessità dei dati forensi reali. 
+
+Alcune problematiche ricorrenti includono:
+\begin{itemize}
+    \item l’uso di scenari di test poco realistici rispetto alle condizioni operative sul campo;
+    \item la limitata disponibilità di dataset pubblici bilanciati e diversificati per il dominio forense;
+    \item la difficoltà di replicare esperimenti a causa di vincoli legali e di privacy sulle evidenze digitali.
+\end{itemize}
+
+Come sottolineato anche da Nowroozi et al.~\cite{nowroozi2024robustnessrobustness}, la mancanza di protocolli comuni ostacola il confronto diretto tra metodologie, impedendo una valutazione chiara dei progressi nel tempo. Questo rende urgente la definizione di \textbf{framework di testing condivisi e aperti} per la valutazione della robustezza dei sistemi AI-based in scenari forensi, che includano sia perturbazioni intenzionali (\textit{adversarial}) sia naturali (\textit{corruption robustness}), in linea con le raccomandazioni di benchmarking OOD proposte in letteratura \cite{croce2020robustbench}.
+
+
+Il concetto di \textbf{robustezza} di un modello di apprendimento automatico si riferisce alla sua capacità di mantenere prestazioni affidabili anche in presenza di perturbazioni sugli input, intenzionali o accidentali. Nel contesto della Digital Forensics, tale robustezza è fondamentale, poiché l’analisi di immagini o contenuti multimediali manipolati può determinare l’ammissione o il rigetto di una prova in sede giudiziaria.
+
+\subsection{Explainable Artificial Intelligence (XAI)}
+
+Un aspetto cruciale nell’utilizzo di strumenti di intelligenza artificiale in ambito
+forense è la capacità non solo di ottenere prestazioni elevate, ma anche di
+\textbf{spiegare e giustificare} le decisioni dei modelli. Tale esigenza nasce
+dalla natura stessa del contesto forense, in cui la prova digitale deve essere
+non soltanto accurata, ma anche trasparente, ripetibile e interpretabile da parte
+di investigatori, consulenti tecnici e magistrati. La cosiddetta
+\textbf{Explainable Artificial Intelligence (XAI)} si propone di affrontare il problema
+della “scatola nera” dei modelli complessi, rendendo interpretabili i risultati
+dei classificatori e permettendo di comprendere quali caratteristiche di input
+abbiano influenzato maggiormente una decisione \cite{Adadi2018,Guidotti2019}.
+
+Negli ultimi anni sono state proposte numerose tecniche di XAI, sia \emph{model-agnostic},
+cioè indipendenti dall’architettura sottostante, sia \emph{model-specific}, cioè concepite
+per particolari famiglie di modelli come le reti neurali profonde \cite{Carvalho2019}.
+Tra i metodi più rilevanti, utilizzati anche in ambito di computer vision e sicurezza, si ricordano:
+
+\begin{itemize}
+    \item \textbf{SHAP (SHapley Additive Explanations)}: basato sulla teoria dei giochi,
+    assegna un contributo positivo o negativo a ciascun attributo, sia a livello globale
+    (importanza media di una feature) sia locale (spiegazione della singola predizione).
+    È considerato uno dei metodi più solidi in termini teorici \cite{Lundberg2017}.
+    
+    \item \textbf{LIME (Local Interpretable Model-agnostic Explanations)}:
+    approssima localmente il comportamento di un modello complesso con un classificatore
+    interpretabile (es. regressione lineare o alberi decisionali), evidenziando quali
+    feature abbiano influenzato la decisione in uno specifico caso \cite{Ribeiro2016}.
+    
+    \item \textbf{Class Activation Mapping (CAM)}: metodo sviluppato per le reti neurali
+    convoluzionali, che consente di generare mappe di attivazione evidenziando le regioni
+    di un’immagine maggiormente rilevanti per la classificazione \cite{Zhou2016}.
+    
+    \item \textbf{Integrated Gradients (IG)}: tecnica gradient-based che consente di stimare
+    l’impatto dei singoli pixel integrando i gradienti della funzione di predizione lungo
+    un percorso continuo che va da un input di riferimento (baseline) all’immagine reale.
+    IG garantisce proprietà di completezza e coerenza, risultando particolarmente adatto
+    all’analisi forense di immagini \cite{Sundararajan2017}.
+\end{itemize}
+
+Nel contesto di questa tesi, la XAI è stata impiegata con tre obiettivi principali:
+\begin{enumerate}
+    \item Analizzare le differenze di attenzione dei modelli tra immagini originali e perturbate
+    da attacchi adversariali e anti-forensici, evidenziando come tali perturbazioni possano
+    spostare il focus del classificatore verso regioni irrilevanti.
+    \item Confrontare il comportamento di modelli di diversa complessità architetturale
+    (ResNet, EfficientNet, CLIP, BLIP, SVM), valutando non solo l’accuratezza numerica
+    ma anche la coerenza semantica delle spiegazioni.
+    \item Fornire un livello di trasparenza necessario per la \textbf{validazione forense} dei modelli,
+    rendendo espliciti punti di forza e vulnerabilità dei classificatori e supportando così
+    l’adozione di AI in ambito probatorio secondo criteri di affidabilità e accountability
+    \cite{Doshi-Velez2017,Barredo2018}.
+\end{enumerate}
+
+La spiegabilità diventa quindi non solo uno strumento tecnico per comprendere
+i modelli, ma anche un requisito metodologico ed epistemologico per integrare
+l’intelligenza artificiale nei flussi investigativi e giudiziari, in linea con le
+raccomandazioni delle linee guida europee su AI e affidabilità \cite{EUAI2020}.
+In sintesi, l’Explainable AI non rappresenta una difesa diretta contro attacchi adversariali o anti-forensici, ma costituisce uno strumento fondamentale per comprendere e validare i processi decisionali dei modelli. 
+La letteratura mostra un crescente interesse verso queste tecniche, ma mancano ancora studi che ne valutino l’efficacia in scenari forensi realistici, specialmente in presenza di input manipolati. 
+La presente tesi intende colmare questa lacuna sperimentando l’applicazione di metodologie XAI a modelli di classificazione di immagini in condizioni ostili.
+
+
+\subsection*{Classificazione delle strategie difensive}
+
+Le contromisure sviluppate per mitigare l’impatto delle perturbazioni sugli input — siano esse intenzionali o naturali — possono essere suddivise in due grandi famiglie concettuali: \textbf{difese proattive} e \textbf{difese reattive}~\cite{yuan2019adversarial, akhtar2018threat, }.
+
+\paragraph{Difese proattive.}  
+Sono progettate per aumentare intrinsecamente la robustezza del modello durante la fase di addestramento o costruzione dell’architettura. Rientrano in questa categoria:
+\begin{itemize}
+    \item l’\textit{adversarial training}, che include nel set di addestramento esempi perturbati per rendere il modello meno sensibile a variazioni malevole~\cite{madry2018towards};
+    \item le tecniche di \textit{data augmentation} mirate, che introducono corruzioni naturali o simulate per migliorare la \textit{corruption robustness}~\cite{hendrycks2019benchmarking};
+    \item la progettazione di architetture con meccanismi intrinseci di regolarizzazione e attenuazione della sensibilità ai cambiamenti locali nello spazio delle feature.
+\end{itemize}
+L’obiettivo delle difese proattive è ridurre la superficie d’attacco prima che il modello venga distribuito in ambiente operativo.
+
+\paragraph{Difese reattive.}  
+Agiscono sugli input o sulle decisioni del modello \textit{a posteriori}, ovvero dopo la fase di addestramento, per individuare o neutralizzare perturbazioni potenzialmente dannose. Tra le strategie più comuni vi sono:
+\begin{itemize}
+    \item la \textit{pre-elaborazione dell’input} (es. filtraggio, riduzione della profondità di bit, compressione JPEG) per eliminare parte della perturbazione;
+    \item i \textit{moduli di rilevamento} (\textit{adversarial example detectors}) basati su inconsistenze interne del modello o su modelli ausiliari per discriminare input anomali;
+    \item la \textit{randomizzazione controllata}, che introduce variabilità nel preprocessing o nell’architettura in fase di inferenza per ridurre la trasferibilità degli attacchi.
+\end{itemize}
+Le difese reattive sono particolarmente utili quando il modello è già in uso e non è possibile eseguire un riaddestramento completo.
+
+\paragraph{Applicazioni in scenari anti-forensi.}  
+Nel dominio della \textbf{Digital Forensics}, l’adozione di difese proattive e reattive richiede un’attenzione particolare. Studi recenti, come quello di Nowroozi et al.~\cite{nowroozi2024robustnessrobustness}, evidenziano come difese pensate per contesti generici di computer vision possano non essere direttamente trasferibili a scenari forensi, a causa della diversa distribuzione dei dati, della criticità probatoria e della presenza di attacchi specificamente progettati per eludere il rilevamento (\textit{anti-forensics aware attacks}).  
+Alcuni approcci emergenti propongono quindi l’addestramento congiunto su perturbazioni adversariali e anti-forensi, oppure l’integrazione di moduli di \textit{forensic fingerprinting} capaci di rilevare manipolazioni anche in condizioni di degrado severo~\cite{cozzolino2017recasting}.
+
+Questa distinzione tra difese proattive e reattive fornisce un quadro di riferimento utile per analizzare le tecniche esistenti e per valutare l’adeguatezza delle soluzioni sviluppate nel presente lavoro rispetto al contesto forense.
+
+
+
+
+Negli ultimi anni sono state proposte numerose strategie difensive per mitigare l’impatto degli attacchi adversariali, ciascuna con caratteristiche e limitazioni specifiche. Tali strategie si dividono principalmente in tre macro-categorie: \textit{difese basate sull’addestramento}, \textit{difese basate sulla trasformazione dell’input}, e \textit{meccanismi di rilevamento}.
+
+\subsection*{Difese basate sull’addestramento}
+
+Una delle tecniche più note è l’\textbf{Adversarial Training}~\cite{madry2018towards}, che consiste nell’includere durante la fase di training anche esempi avversari generati dinamicamente. Questo approccio consente al modello di imparare a riconoscere e neutralizzare le perturbazioni note, migliorando la sua resilienza a input manipolati. Tuttavia, l’addestramento adversariale è spesso costoso in termini computazionali, può ridurre l’accuratezza sui dati “puliti” e tende a sovra-specializzarsi rispetto a specifici tipi di attacchi.
+
+\subsection*{Difese basate sulla trasformazione dell’input}
+
+Un’altra categoria di tecniche mira a \textbf{pre-elaborare l’input} prima della classificazione, con l’obiettivo di annullare o attenuare l’effetto delle perturbazioni. Tra queste si annoverano la \textbf{JPEG compression}, il \textbf{denoising}, il \textbf{bit-depth reduction} e il \textbf{total variance minimization}~\cite{guo2017countering}. Questi metodi possono essere efficaci contro attacchi generati in white-box, ma risultano meno efficienti in scenari realistici o black-box, dove l’attaccante può adattare le perturbazioni per sopravvivere a tali trasformazioni.
+
+\subsection*{Meccanismi di rilevamento}
+
+Sono stati inoltre sviluppati moduli di \textbf{adversarial example detection}, che cercano di distinguere gli input puliti da quelli manipolati prima della fase di classificazione vera e propria. Tali approcci si basano su misure di inconsistenza, distribuzioni delle attivazioni interne, autoencoder, e tecniche di outlier detection. In alcuni casi, possono essere efficaci nel bloccare attacchi noti, ma restano vulnerabili a tecniche di \textit{adaptive attack} e possono introdurre falsi positivi, compromettendo l’usabilità del sistema.
+
+\subsection*{Difese basate sulla randomizzazione e distillazione}
+
+Altri approcci mirano a rendere più imprevedibile il comportamento del modello o a regolarizzarne la sensibilità. La \textbf{randomizzazione} dell’input (es. ridimensionamento casuale, dropout al test-time) mira a ridurre l’efficacia degli attacchi generati per un’unica configurazione di rete. La \textbf{defensive distillation}, proposta inizialmente come metodo di compressione dei modelli, si è rivelata utile per ridurre la reattività dei classificatori a variazioni minime degli input, attenuando la vulnerabilità a FGSM e simili. Tuttavia, anche queste strategie si sono dimostrate insufficienti contro attacchi più sofisticati.
+
+\subsection*{Criticità nel contesto forense}
+
+Nonostante la ricchezza di approcci sviluppati, \textbf{nessuna difesa si è dimostrata universalmente efficace}. Per ogni strategia pubblicata, la comunità di ricerca ha rapidamente proposto un metodo per aggirarla, evidenziando la fragilità strutturale dei modelli deep learning in ambienti ostili. Inoltre, la quasi totalità degli studi esistenti si basa su benchmark accademici (come CIFAR-10, MNIST, ImageNet), in condizioni fortemente controllate e lontane dalla complessità operativa della Digital Forensics.
+
+In ambito forense, la posta in gioco è ben più alta: un errore di classificazione può avere ripercussioni giudiziarie, legali e reputazionali. Eppure, pochi lavori hanno indagato sistematicamente la robustezza dei modelli AI integrati in strumenti realmente utilizzati dagli investigatori digitali. Tale lacuna costituisce uno dei principali motivi che hanno spinto allo sviluppo del presente studio sperimentale, orientato a valutare la tenuta dei sistemi AI-based forensi contro manipolazioni realistiche e mirate \cite{carlini2017towards}.
+
+
+La Figura~\ref{fig:defense-comparison-tikz} riassume le principali tecniche difensive discusse, mettendo in evidenza vantaggi, limitazioni e scenari di applicabilità. Nessuna tecnica si è dimostrata universalmente efficace, sottolineando la necessità di strategie difensive adattive e contestualizzate all’ambito forense.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      font=\small,
+      node distance=2.2cm,
+      block/.style={rectangle, draw=black, fill=blue!10, rounded corners, text width=5.5cm, minimum height=1.4cm, align=left},
+      arrow/.style={thick, ->, >=stealth}
+  ]
+  
+  % Nodo centrale
+  \node[rectangle, draw=black, fill=orange!30, rounded corners, minimum width=6cm, minimum height=1.4cm, align=center] (central) {Categorie di difese AI-based in Digital Forensics};
+  
+  % Nodi principali
+  \node[block, below left=1.5cm and -1cm of central, fill=green!15] (training) {\textbf{Difese basate sull’addestramento}\\
+  \textbf{Vantaggi:} Aumentano la robustezza intrinseca del modello.\\
+  \textbf{Limiti:} Costose, spesso specifiche per un attacco.};
+  
+  \node[block, below=4cm of central, fill=yellow!20] (preproc) {\textbf{Difese basate sulla trasformazione dell’input}\\
+  \textbf{Vantaggi:} Facili da implementare, non richiedono riaddestramento.\\
+  \textbf{Limiti:} Attacchi adattivi possono aggirarle.};
+  
+  \node[block, below right=1.5cm and -1cm of central, fill=red!15] (detection) {\textbf{Meccanismi di rilevamento}\\
+  \textbf{Vantaggi:} Possono bloccare input sospetti prima della classificazione.\\
+  \textbf{Limiti:} Possibili falsi positivi, vulnerabili ad attacchi mirati.};
+  
+  % Collegamenti
+  \draw[arrow] (central.south west) -- (training.north);
+  \draw[arrow] (central.south) -- (preproc.north);
+  \draw[arrow] (central.south east) -- (detection.north);
+  
+  \end{tikzpicture}
+  \caption{Principali categorie di difesa contro attacchi adversariali: vantaggi e limiti in contesto forense.}
+  \label{fig:defense-comparison-tikz}
+  \end{figure}
+  
+
+
+\section{Limiti della letteratura esistente e contributo della presente tesi}
+
+La revisione critica della letteratura attuale mette in evidenza alcune lacune rilevanti che limitano la generalizzabilità e l'applicabilità dei risultati ottenuti nel campo dell’Intelligenza Artificiale applicata alla Digital Forensics. Nonostante il crescente interesse per l’uso di tecniche AI-based nell’analisi automatizzata di contenuti digitali, diverse problematiche risultano ancora irrisolte, soprattutto in ottica operativa.
+
+In particolare, si osservano i seguenti limiti:
+
+\begin{itemize}
+\item \textbf{Scarsa attenzione al contesto forense reale}: la maggior parte dei lavori esistenti è focalizzata su modelli teorici o ambienti controllati, mentre pochi studi affrontano l’uso effettivo dell’AI all’interno di strumenti forensi operativi, valutandone la sicurezza in presenza di input ostili o manipolati~\cite{phd_unisi_068552}.
+
+\item \textbf{Assenza di benchmark realistici}: i dataset utilizzati in letteratura sono spesso costruiti artificialmente (es. CIFAR-10, ImageNet) e non riflettono la complessità delle immagini che si incontrano nelle indagini forensi, dove i contenuti provengono da fonti eterogenee come social media, dark web, piattaforme di messaggistica e archivi personali.
+
+\item \textbf{Focalizzazione su attacchi sintetici}: molti esperimenti utilizzano perturbazioni standardizzate e facilmente rilevabili, trascurando le tecniche anti-forensi concrete che un attore malevolo potrebbe impiegare per eludere i sistemi di classificazione (es. compressioni lossy, cropping mirato, occlusioni strategiche, mimetizzazione semantica).
+
+\item \textbf{Mancanza di valutazioni sui tool realmente in uso}: strumenti largamente impiegati in ambito investigativo — come \textit{Magnet AXIOM}, \textit{Cellebrite UFED}, \textit{X-Ways Forensics} — non vengono quasi mai analizzati in letteratura per quanto riguarda la loro resistenza ad attacchi adversariali o a input corrotti da manipolazioni sofisticate.
+
+\item \textbf{Scarsa considerazione delle tecniche steganografiche come vettori di attacco}: benché largamente impiegate per occultare informazioni, le tecniche steganografiche sono raramente trattate come perturbazioni anti-forensi attive, in grado di eludere sistemi AI-based simulando contenuti apparentemente innocui ma semanticamente alterati.
+\end{itemize}
+
+Alla luce di tali lacune, il presente lavoro si propone di fornire un contributo concreto e sistematico attraverso un approccio sperimentale innovativo, articolato secondo i seguenti obiettivi:
+
+\begin{itemize}
+\item \textbf{Costruzione di un dataset composito e realistico}, costituito da immagini provenienti da fonti variegate (dataset pubblici, motori di ricerca, social network, deep web), in modo da rappresentare in maniera più fedele gli scenari tipici delle indagini digitali.
+
+\item \textbf{Applicazione mirata di attacchi adversariali, anti-forensi e steganografici}, con l’obiettivo di simulare perturbazioni realistiche e operative, testando la tenuta dei classificatori in condizioni avverse e ad alta criticità.
+
+\item \textbf{Valutazione comparativa della robustezza di strumenti AI-based utilizzati in ambito forense}, esaminando le prestazioni dei modelli integrati in software di uso professionale in presenza di immagini manipolate.
+\end{itemize}
+
+Questo approccio consente non solo di colmare un vuoto evidente nella letteratura, ma anche di offrire una valutazione concreta e riproducibile della \textbf{solidità operativa} dei sistemi di classificazione automatica nel dominio forense. I risultati ottenuti possono contribuire a sensibilizzare la comunità scientifica e investigativa sull’importanza della robustezza nei sistemi AI e a stimolare lo sviluppo di metodologie più resilienti, trasparenti e “avversario-consapevoli” (\textit{adversary-aware}).
+
+
+
+Un’ulteriore considerazione emersa dalla revisione della letteratura riguarda la quasi totale assenza di studi che analizzino in maniera sistematica \textbf{difese “adversary-aware”} progettate specificamente per il contesto della Digital Forensics. Sebbene in ambito di computer vision generale siano state proposte diverse strategie di robustezza, queste soluzioni raramente tengono conto delle peculiarità probatorie e operative delle indagini digitali, come la necessità di preservare l’integrità dell’evidenza, garantire la riproducibilità dell’analisi e operare in scenari ostili dove gli attacchi possono essere mirati a eludere controlli forensi.
+
+Tale lacuna si accompagna alla mancanza di \textbf{protocolli comuni di valutazione} che permettano di confrontare in modo oggettivo le difese implementate in diversi strumenti AI-based forensi. In assenza di benchmark e metodologie condivise, risulta difficile misurare in maniera comparabile la reale efficacia delle contromisure, limitando la possibilità di trasferire le migliori pratiche dal contesto di ricerca a quello operativo. Questa constatazione rafforza ulteriormente la necessità di un approccio strutturato e riproducibile, come quello adottato nella presente tesi, che possa costituire un riferimento per studi futuri nel settore.
+
+
+
+
+
+\section{Sintesi comparativa dei contributi scientifici}
+% (oppure: "Contributi significativi in letteratura")
+
+La Tabella~\ref{tab:sota} riassume i principali contributi accademici rilevanti per questo studio, mettendo in evidenza:
+\begin{itemize}
+  \item le tecniche proposte,
+  \item l’ambito di applicazione,
+  \item i limiti riscontrati in scenari con input manipolati.
+\end{itemize}
+
+\vspace{0.5em}
+
+\begin{table}[H]
+\centering
+\caption{Sintesi dei principali contributi in letteratura sulla robustezza del Machine Learning in ambito forense}
+\label{tab:sota}
+\begin{tabular}{|p{3cm}|p{4cm}|p{4cm}|p{4cm}|}
+\hline
+\textbf{Autore} & \textbf{Tecnica / Approccio} & \textbf{Applicazione} & \textbf{Limiti in scenari avversariali} \\ \hline
+Biggio \& Roli (2018) \cite{biggio2018wild} & Definizione threat models, attacchi di evasione e poisoning & Classificatori di pattern, visione artificiale, cybersecurity & Modelli vulnerabili ad attacchi mirati anche con perturbazioni minime \\ \hline
+Nowroozi et al. (2020, 2024) \cite{nowroozi2020phd, nowroozi2024robustness} & Adversarial ML per image forensics e intrusion detection & Rilevazione manipolazioni, intrusion detection AI-based & Mancanza di validazione su dataset realistici in ambito forense operativo \\ \hline
+Costantini et al. (2019) \cite{costantini2019digital} & Answer Set Programming (ASP) per analisi automatizzata delle evidenze & Supporto investigativo e ricostruzione scenari probatori & Non affronta la robustezza dei modelli AI a manipolazioni intenzionali \\ \hline
+Hewling (2013) \cite{hewling2013} & Framework integrato per digital forensics & Standardizzazione processi di acquisizione e analisi & Focus su processi e metodologie, non su AI e vulnerabilità avversariali \\ \hline
+\end{tabular}
+\end{table}
+
+\noindent
+Questa analisi mostra come, nonostante l’elevato numero di studi teorici e framework proposti, manchi ancora una validazione sistematica su dataset realistici e in contesti operativi. Il presente lavoro intende colmare parzialmente questa lacuna attraverso un’analisi sperimentale controllata della robustezza di modelli AI-based in contesto forense.

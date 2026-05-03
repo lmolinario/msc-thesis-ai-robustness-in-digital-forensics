@@ -1,0 +1,958 @@
+\begin{comment}
+  Spiegazione lato tecnico
+
+- attuali tecniche di analisi nella digital forensics
+- utilizzo di AI nella digital forensics (tipo elenco dei tool che usano l'AI e per cosa)
+
+- immagini adversarial, perturbazioni, tipologie di attacco
+
+- tecniche di acquisizione forense e di analisi. Spiegazione anche dell'intera pipeline forense (collection, examination, analysis, reporting).
+ - aspetti legali
+
+\end{comment}
+
+
+\chapter{Technical Background Concepts} \label{chap:background}
+
+Questo capitolo fornisce una panoramica tecnica dei concetti fondamentali alla base dello studio, con particolare riferimento alle tecniche attualmente impiegate nella \textit{digital forensics}, all'integrazione dell’intelligenza artificiale in tale contesto, alle immagini adversarial e alle tecniche di perturbazione, nonché all'intera pipeline forense.
+
+Viene inoltre presentata una breve introduzione ai principali riferimenti normativi e ai concetti fondamentali di \textit{Computer Law} applicati all’ambito forense digitale, con particolare attenzione agli aspetti giuridici della prova digitale, alla sua acquisizione, conservazione e valutazione nel contesto investigativo e processuale.
+
+
+
+\section{Introduzione alla Computer Law}
+
+Il termine \textbf{Computer Law} designa quell’insieme di norme giuridiche e principi interpretativi che disciplinano l’utilizzo delle tecnologie informatiche, con particolare attenzione ai profili di responsabilità, sicurezza e protezione dei dati digitali \cite{hewling2013towards}. In ambito forense, tale disciplina si intreccia in modo indissolubile con la \textbf{Digital Forensics}, ossia la scienza che si occupa dell’individuazione, acquisizione, conservazione e analisi delle prove digitali ai fini processuali \cite{casey2011digital}.
+
+L’evoluzione tecnologica ha reso la prova digitale un elemento sempre più centrale nel processo penale contemporaneo, tanto che il legislatore e la giurisprudenza hanno progressivamente ampliato i confini della sua utilizzabilità. In particolare, gli articoli \textbf{234 c.p.p.} (documenti) e \textbf{189 c.p.p.} (prove atipiche) costituiscono le principali basi normative per l’ammissione di evidenze elettroniche in giudizio \cite{gambini2019informatica}. La giurisprudenza ha chiarito che i dati informatici possono essere acquisiti e valutati come prova purché siano rispettati i principi di integrità, autenticità e tracciabilità, che garantiscono la loro attendibilità \cite{voigt2017eu}.
+
+Un punto di particolare rilievo è rappresentato dal \textbf{principio di legalità della prova}, secondo cui solo gli elementi probatori raccolti secondo modalità previste dalla legge possono essere utilizzati dal giudice nella formazione del convincimento. Questo principio, tradizionalmente applicato alle prove tradizionali, ha trovato progressiva estensione anche in relazione alle prove digitali, che richiedono un grado di garanzia aggiuntivo a causa della loro intangibilità e della facilità con cui possono essere alterate \cite{biasiotti2018handling}.
+
+La \textbf{Corte di Cassazione} ha più volte sottolineato la necessità di una \emph{motivazione rafforzata} quando la decisione giudiziaria si fonda in modo significativo su dati digitali (cfr. Cass. pen., sez. VI, n. 17677/2025). Tale orientamento contribuisce a delineare un quadro giuridico in cui il valore della prova digitale non è solo tecnico, ma anche strettamente connesso al rispetto delle garanzie costituzionali di difesa e al principio del giusto processo \cite{clough2015principles}.
+
+
+\section{La prova digitale e i requisiti di ammissibilità}
+
+La \textbf{prova digitale} si caratterizza per una serie di peculiarità che la distinguono dalle prove tradizionali:
+essa è \emph{immateriale}, in quanto rappresentata da bit piuttosto che da oggetti fisici;
+è \emph{replicabile} all’infinito senza degradazione;
+è \emph{volatile}, poiché può essere facilmente alterata o cancellata;
+e presenta una particolare vulnerabilità alle manipolazioni \cite{casey2011digital, clough2015principles}.
+Tali caratteristiche rendono indispensabile il rispetto di requisiti stringenti per assicurarne l’\textbf{ammissibilità processuale}.
+
+Secondo la dottrina e la giurisprudenza, i principali requisiti che la prova digitale deve soddisfare sono i seguenti \cite{biasiotti2018handling, voigt2017eu}:
+
+\begin{itemize}
+    \item \textbf{Integrità}: la prova deve essere preservata da alterazioni, volontarie o accidentali. A tal fine è fondamentale l’uso di procedure di \textit{catena di custodia}, corredate da registri dettagliati e hash crittografici (MD5, SHA-256), che consentano di dimostrare la corrispondenza tra il dato acquisito e quello analizzato.
+
+    \item \textbf{Autenticità}: l’evidenza deve poter essere attribuita con certezza ad un determinato soggetto, dispositivo o contesto. Ciò implica la tracciabilità delle operazioni e la documentazione delle modalità di acquisizione \cite{gambini2019informatica}.
+
+    \item \textbf{Affidabilità}: gli strumenti e le metodologie impiegate devono essere validati e scientificamente riconosciuti. La comunità internazionale ha prodotto standard come \textit{ISO/IEC 27037:2012}, che definisce le linee guida per l’identificazione, la raccolta e la conservazione delle prove digitali.
+
+    \item \textbf{Pertinenza e rilevanza}: la prova deve essere pertinente rispetto al fatto da accertare e rilevante ai fini della decisione giudiziaria, in conformità ai principi generali del processo penale.
+\end{itemize}
+
+Sul piano giurisprudenziale, la \textbf{Corte di Cassazione} ha ribadito la necessità che l’acquisizione e l’utilizzo della prova digitale rispettino pienamente tali requisiti, pena l’inammissibilità o la perdita di efficacia probatoria. In particolare, è stato affermato che il giudice deve fornire una \textbf{motivazione rafforzata} qualora fondi la decisione su evidenze digitali potenzialmente manipolabili (Cass. pen., sez. VI, n. 17677/2025).
+
+Anche sul piano sovranazionale, le \textbf{Linee guida Eurojust} e le raccomandazioni dell’\textbf{ENFSI Forensic IT Working Group} sottolineano la centralità di integrità, autenticità e tracciabilità per garantire l’uso transfrontaliero delle prove digitali \cite{enfsi2022}.
+Tali documenti promuovono inoltre l’armonizzazione delle pratiche tra Stati membri, al fine di rafforzare la cooperazione giudiziaria europea in materia di criminalità informatica.
+
+
+
+
+\section{Normativa e giurisprudenza di riferimento}
+
+Il quadro normativo e giurisprudenziale che disciplina la prova digitale e le decisioni algoritmiche in ambito forense è estremamente articolato, coinvolgendo fonti nazionali, europee e internazionali.
+In questa sezione vengono analizzati i riferimenti principali, con attenzione agli aspetti maggiormente rilevanti per l’ammissibilità della prova digitale e per la legittimità delle decisioni basate su AI.
+
+\subsection{Italia}
+
+Nel sistema processuale italiano, la disciplina della prova digitale si fonda principalmente sul \textbf{Codice di procedura penale}:
+\begin{itemize}
+    \item \textbf{Art. 234 c.p.p.} -- ammette come prova i documenti, categoria oggi estesa anche ai dati informatici.
+    \item \textbf{Art. 189 c.p.p.} -- consente l’ingresso di \emph{prove atipiche}, purché rispettose dei diritti fondamentali e dei principi generali del processo.
+    \item \textbf{Artt. 247--254 c.p.p.} -- disciplinano le perquisizioni, i sequestri e l’acquisizione di dati informatici, con particolare attenzione alla garanzia dell’integrità e della catena di custodia.
+\end{itemize}
+
+La \textbf{Corte di Cassazione} ha elaborato il principio della \emph{motivazione rafforzata} per le decisioni che si basano su dati digitali, sottolineando come la loro vulnerabilità a manipolazioni richieda un vaglio particolarmente attento da parte del giudice (Cass. pen., sez. VI, n. 17677/2025).
+Questo orientamento si colloca nella più ampia cornice costituzionale di tutela del diritto di difesa (art. 24 Cost.) e del giusto processo (art. 111 Cost.).
+
+\subsection{Europa}
+
+A livello europeo, le principali fonti normative sono:
+\begin{itemize}
+    \item \textbf{Regolamento (UE) 2016/679 – GDPR}: in particolare, l’art. 22 sancisce il diritto a non essere sottoposti a decisioni unicamente automatizzate, mentre l’art. 35 introduce l’obbligo di valutazioni d’impatto (DPIA) per trattamenti ad alto rischio \cite{voigt2017eu}.
+    \item \textbf{AI Act (Reg. UE 2024/1689)}: introduce un sistema di classificazione dei sistemi di AI basato sul rischio. I sistemi ad alto rischio, tra cui quelli usati in ambito investigativo e giudiziario, devono rispettare requisiti di robustezza, trasparenza, supervisione umana e tracciabilità.
+    \item \textbf{Direttiva 2013/40/UE} sugli attacchi contro i sistemi informatici, che stabilisce misure minime di acquisizione e conservazione delle prove digitali a livello europeo.
+    \item \textbf{Linee guida Eurojust} e \textbf{ENFSI Forensic IT Working Group}: raccomandazioni operative per l’acquisizione, la conservazione e lo scambio di prove digitali, volte ad armonizzare le pratiche investigative tra Stati membri \cite{enfsi2022}.
+\end{itemize}
+
+\subsection{Standard internazionali}
+
+Sul piano internazionale, si evidenziano tre principali riferimenti:
+\begin{itemize}
+    \item \textbf{Convenzione di Budapest sul cybercrime (2001)}: primo trattato internazionale in materia, che disciplina la cooperazione giudiziaria per la raccolta e la trasmissione di prove elettroniche \cite{budapest2001convention}.
+    \item \textbf{ISO/IEC 27037:2012}: linee guida per l’identificazione, la raccolta e la conservazione delle prove digitali, con enfasi sulla catena di custodia \cite{iso27037}.
+    \item \textbf{Daubert standard}: criterio di ammissibilità della prova scientifica nei sistemi di common law, richiamato anche dalla dottrina europea come parametro per valutare la solidità scientifica delle metodologie digitali \cite{clough2015principles}.
+\end{itemize}
+Questi riferimenti dimostrano come il riconoscimento giuridico della prova digitale e delle decisioni algoritmiche richieda un approccio multilivello, che integri standard tecnici, normative nazionali e linee guida sovranazionali.
+
+
+
+
+\section{Decisioni algoritmiche e implicazioni giuridiche}
+
+L’impiego di \textbf{sistemi di intelligenza artificiale (AI)} nelle indagini forensi sta assumendo un ruolo sempre più rilevante, in particolare attraverso strumenti di \textit{pattern recognition}, classificazione automatica di immagini e analisi predittiva di log digitali \cite{costantini2019digital, rogers2020ai}.
+Tale evoluzione, se da un lato consente una significativa riduzione dei tempi di analisi e una maggiore capacità di trattare grandi volumi di dati, dall’altro solleva questioni giuridiche di primaria importanza.
+
+Tra i principali rischi identificati in dottrina e giurisprudenza si segnalano:
+
+\begin{itemize}
+    \item \textbf{Errore giudiziario}: un modello non robusto, vulnerabile a perturbazioni adversariali o bias di addestramento, può indurre classificazioni errate. Se tali classificazioni costituiscono la base di un’accusa o di una decisione giudiziaria, vi è un rischio concreto di compromettere il giusto processo \cite{biggio2018wild, nowroozi2024robustness}.
+
+    \item \textbf{Opacità algoritmica}: i modelli di deep learning, spesso configurati come \textit{black-box}, rendono difficile comprendere le logiche decisionali interne. Ciò contrasta con il principio del contraddittorio e con il diritto di difesa, poiché le parti devono poter verificare le basi della decisione giudiziaria.
+
+    \item \textbf{Necessità di motivazione rafforzata}: analogamente a quanto affermato dalla Corte di Cassazione per l’utilizzo della prova digitale, anche per le decisioni basate su AI è richiesta una motivazione particolarmente accurata, che dia conto dell’affidabilità e della validità degli strumenti impiegati.
+
+    \item \textbf{Trasparenza e accountability}: le moderne linee guida europee sottolineano l’importanza di implementare approcci di \textit{Explainable AI} (XAI), al fine di rendere tracciabili e interpretabili i processi decisionali automatici \cite{phd_unisi_068552}.
+\end{itemize}
+
+Il \textbf{Regolamento (UE) 2016/679 – GDPR} affronta esplicitamente il tema delle decisioni automatizzate: l’art. 22 sancisce il diritto a non essere sottoposti a decisioni basate unicamente su trattamenti automatizzati, comprese quelle fondate sulla profilazione, salvo specifiche eccezioni; l’art. 35 prevede l’obbligo di una valutazione d’impatto (DPIA) per trattamenti ad alto rischio \cite{voigt2017eu}.
+
+Il recente \textbf{AI Act} (Regolamento UE 2024/1689) rappresenta un ulteriore passo avanti, introducendo una classificazione dei sistemi di AI in base al livello di rischio. I sistemi ad alto rischio, tra cui rientrano quelli impiegati in ambito investigativo e giudiziario, sono soggetti a obblighi stringenti in termini di robustezza, tracciabilità e trasparenza.
+In particolare, l’AI Act impone che tali sistemi siano progettati per ridurre al minimo i rischi di errore e garantire meccanismi di supervisione umana, rendendo così le decisioni algoritmiche compatibili con i principi del giusto processo.
+
+
+
+
+
+\section{Introduzione alla Digital Forensics} \label{sec:df_pipeline}
+
+La \textbf{Digital Forensics} è una disciplina scientifica che si occupa dell'identificazione, acquisizione, conservazione, analisi e presentazione di dati digitali utilizzabili come prova in ambito legale. La sua applicazione è cruciale in indagini penali, civili, amministrative e aziendali, ed è regolata da standard tecnici e normativi internazionali, tra cui le linee guida del NIST (National Institute of Standards and Technology), del SANS Institute e dei gruppi di lavoro SWGDE (Scientific Working Group on Digital Evidence) e ACPO (Association of Chief Police Officers).
+
+Secondo la definizione ufficiale del NIST SP 800-86, la digital forensics consiste in:
+
+\begin{quote}
+\emph{“The application of science to the identification, collection, examination, and analysis of data while preserving the integrity of the information and maintaining a strict chain of custody for the data.”} \cite{kent2006nist}
+\end{quote}
+
+L'intero processo di indagine digitale può essere modellato attraverso una pipeline metodologica ben definita, generalmente articolata in quattro fasi principali \cite{carrier2005filesystem,casey2011digital}:
+
+\begin{enumerate}
+    \item \textbf{Collection} (Raccolta): rappresenta il primo passo operativo e consiste nell'acquisizione dei dati digitali rilevanti da dispositivi, server, archivi cloud, reti, memorie volatili (RAM) o dispositivi mobili. È fondamentale utilizzare strumenti che garantiscano l’integrità della fonte, come write-blocker hardware o software e strumenti di imaging forense come \texttt{dd}, \texttt{FTK Imager}, \texttt{Guymager} o \texttt{EnCase}.
+    
+    \item \textbf{Examination} (Esame): in questa fase si procede all'identificazione di file significativi e alla localizzazione di tracce digitali. Le tecniche includono il file carving, il recupero di file cancellati, l’analisi dei metadata, la ricostruzione della cronologia e l’estrazione di artefatti. L’obiettivo è isolare informazioni potenzialmente probatorie.
+    
+    \item \textbf{Analysis} (Analisi): consiste nell’interpretazione approfondita dei dati ottenuti nella fase precedente. Comprende la correlazione temporale tra eventi, il confronto tra fonti differenti e la ricostruzione di attività sospette. In contesti moderni, questa fase può essere assistita da strumenti basati su intelligenza artificiale (AI), per il riconoscimento di pattern, la classificazione automatica di contenuti e la rilevazione di anomalie.
+    
+    \item \textbf{Reporting} (Redazione del report): tutte le attività svolte devono essere documentate in modo dettagliato, trasparente e replicabile. Il report forense deve includere una descrizione delle procedure utilizzate, i risultati ottenuti, la giustificazione delle scelte tecniche, ed eventuali limitazioni. Questo documento può essere utilizzato in sede giudiziaria come elemento di prova.
+\end{enumerate}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      node distance=1.5cm,
+      phase/.style={
+        rectangle,
+        draw,
+        rounded corners=4pt,
+        text width=6cm,
+        align=center,
+        minimum height=1.5cm,
+        fill=blue!10,
+        font=\bfseries
+      },
+      arrow/.style={->, thick}
+  ]
+  
+  % Nodi verticali
+  \node[phase] (collection) {\textbf{Collection}\\Raccolta dell’evidenza digitale da sistemi, reti o cloud, garantendo l’integrità (es. imaging forense, acquisizione live)};
+  \node[phase, below=of collection] (examination) {\textbf{Examination}\\Estrazione dei dati rilevanti: recupero file cancellati, analisi metadati, carving, estrazione di artefatti};
+  \node[phase, below=of examination] (analysis) {\textbf{Analysis}\\Correlazione, interpretazione e ricostruzione eventi con strumenti forensi e AI-based};
+  \node[phase, below=of analysis] (reporting) {\textbf{Reporting}\\Documentazione tecnica e legale dei risultati, conforme a standard e requisiti probatori};
+  
+  % Frecce verticali
+  \draw[arrow] (collection) -- (examination);
+  \draw[arrow] (examination) -- (analysis);
+  \draw[arrow] (analysis) -- (reporting);
+  
+  \end{tikzpicture}
+  \caption{Pipeline forense secondo le linee guida NIST SP 800-86 e ACPO: fasi operative principali dalla raccolta dell’evidenza alla presentazione in giudizio.}
+  \label{fig:forensic_pipeline}
+\end{figure}
+
+
+
+\subsection*{Modelli e standard di riferimento}
+
+Nel campo della digital forensics, l’impiego di modelli strutturati e standard condivisi è essenziale per garantire uniformità, affidabilità e validità giuridica nei processi di acquisizione, analisi e conservazione delle evidenze digitali. Numerosi enti istituzionali e gruppi di lavoro hanno contribuito nel tempo allo sviluppo di linee guida e framework metodologici, alcuni dei quali rappresentano oggi riferimenti fondamentali per la comunità forense a livello internazionale.
+
+Tra i principali modelli di riferimento si annoverano:
+
+\begin{itemize}
+    \item \textbf{NIST SP 800-86 (Guide to Integrating Forensic Techniques into Incident Response)}: sviluppato dal \textit{National Institute of Standards and Technology}, questo documento definisce un framework operativo per l’integrazione delle tecniche forensi all'interno delle attività di risposta agli incidenti informatici. Il modello distingue tra le fasi di raccolta, esame, analisi e reporting, fornendo indicazioni pratiche su strumenti e documentazione necessari \cite{kent2006nist}.
+
+    \item \textbf{SWGDE Recommendations (Scientific Working Group on Digital Evidence)}: si tratta di una serie di raccomandazioni tecniche e operative pubblicate da un consorzio di esperti statunitensi. Le SWGDE Guidelines coprono un ampio spettro di ambiti — dall’analisi di dispositivi mobili all’autenticazione di immagini — e definiscono requisiti minimi per garantire l’integrità delle procedure nei laboratori forensi digitali.
+
+    \item \textbf{DIFC Framework (Digital Investigation Framework for Cloud)}: progettato specificamente per ambienti cloud e infrastrutture distribuite, questo modello fornisce un’architettura modulare per la conduzione di indagini digitali in contesti in cui i dati non risiedono in ambienti controllati. Include meccanismi per la gestione delle istanze virtuali, la preservazione dei log e la validazione delle prove attraverso tecniche crittografiche.
+
+    \item \textbf{ACPO Principles (Association of Chief Police Officers)}: rappresentano lo standard adottato nel Regno Unito per le indagini digitali. Il principio guida stabilisce che “nessuna azione intrapresa da chiunque coinvolto nell'investigazione deve modificare i dati contenuti in un dispositivo elettronico o sistema informatico”, a meno che non sia inevitabile. Ogni intervento deve essere giustificabile, tracciato e replicabile. Tali principi hanno influenzato anche le linee guida europee e sono oggi ampiamente riconosciuti in ambito internazionale.
+\end{itemize}
+
+L’adozione di tali modelli non solo assicura la conformità normativa e il rispetto dei diritti processuali, ma costituisce anche un prerequisito per la validazione scientifica delle metodologie forensi adottate.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      node distance=1.5cm and 2.5cm,
+      every node/.style={
+          align=center, % testo centrato
+          rectangle,
+          draw,
+          fill=gray!15,
+          text width=4cm, % larghezza uniforme dei nodi
+          minimum height=1cm
+      }
+  ]
+  
+  % Eventi
+  \node (1999) {\textbf{1999}\\ACPO Principles};
+  \node (2002) [below=of 1999] {\textbf{2002}\\Inizio attività SWGDE};
+  \node (2006) [below=of 2002] {\textbf{2006}\\NIST SP 800-86};
+  \node (2017) [below=of 2006] {\textbf{2017}\\DIFC Framework};
+  
+  % Frecce
+  \draw[->, thick] (1999) -- (2002);
+  \draw[->, thick] (2002) -- (2006);
+  \draw[->, thick] (2006) -- (2017);
+  
+  \end{tikzpicture}
+  \caption{Timeline di adozione dei principali standard e modelli forensi.}
+  \label{fig:timeline_modelli}
+  \end{figure}
+  
+
+
+\section{Tecniche di acquisizione e analisi forense} \label{sec:acquisition_analysis}
+
+Nell’ambito della digital forensics, la fase di \textbf{acquisizione} dell’evidenza digitale costituisce uno dei momenti più delicati e critici dell’intero processo investigativo. Essa rappresenta l’atto iniziale attraverso cui si effettua la raccolta dei dati da un dispositivo elettronico, con l’obiettivo di garantirne l’integrità, la completezza e la futura ripetibilità dell’analisi.
+
+A seconda dello stato operativo del sistema oggetto di indagine, le tecniche di acquisizione si suddividono in due categorie principali \cite{casey2011digital}:
+
+\begin{itemize}
+  \item \textbf{Live Acquisition} (\textit{acquisizione a caldo}): viene effettuata su dispositivi in esecuzione, ovvero ancora attivi al momento dell’intervento. Questa modalità consente la cattura di informazioni volatili, come:
+  \begin{itemize}
+    \item Contenuto della memoria RAM
+    \item Processi in esecuzione
+    \item Connessioni di rete attive
+    \item Tabelle ARP, DNS cache e routing
+    \item Chiavi crittografiche temporanee o sessioni utente
+  \end{itemize}
+  Tali elementi, essendo transitori, non sono recuperabili una volta che il sistema viene spento, rendendo la live acquisition fondamentale in scenari come analisi di malware attivi, indagini post-compromissione o risposta a incidenti. Tuttavia, l’esecuzione di strumenti sul sistema target introduce il rischio di contaminazione dell’evidenza: ogni operazione può alterare lo stato del dispositivo, violando il principio di non modificabilità.
+
+  \item \textbf{Dead Acquisition} (\textit{acquisizione a freddo}): viene realizzata su dispositivi spenti, previa rimozione fisica del supporto di memorizzazione o utilizzo di ambienti controllati (es. write-blocker hardware). Consiste nella creazione di un’immagine forense completa (bitstream copy), che riproduce byte per byte il contenuto del supporto, compresi settori non allocati, partizioni nascoste e aree di slack space. Questa tecnica è la più diffusa nei laboratori forensi, poiché garantisce un elevato livello di integrità, replicabilità e ammissibilità legale. Tra gli strumenti maggiormente impiegati si annoverano:
+  \begin{itemize}
+    \item \texttt{FTK Imager}: tool GUI-based per Windows, molto usato per acquisizioni rapide e compatibili.
+    \item \texttt{Guymager}: tool open source per ambienti Linux, noto per la sua affidabilità e leggerezza.
+    \item \texttt{dd} e \texttt{dcfldd}: strumenti a linea di comando per copie bitstream, con opzioni avanzate di logging e verifica.
+    \item \texttt{EnCase Forensic}: soluzione commerciale avanzata per imaging e validazione forense certificata.
+  \end{itemize}
+\end{itemize}
+
+Oltre all’acquisizione, la fase di \textbf{analisi forense} comprende una serie di tecniche e strumenti volti a estrarre, correlare e interpretare le informazioni rilevanti. Essa può includere:
+
+\begin{itemize}
+  \item \textbf{Analisi del file system}: ricostruzione della struttura logica dei file (NTFS, EXT4, APFS, HFS+) e recupero di dati cancellati o nascosti.
+  \item \textbf{Analisi del registro di sistema} (Windows Registry): utile per determinare attività recenti, utenti attivi, dispositivi connessi.
+  \item \textbf{Analisi di artefatti digitali}: cronologia del browser, file temporanei, log di sistema, timestamp, cronologia delle esecuzioni.
+  \item \textbf{Mobile forensics}: estrazione di dati da smartphone e tablet mediante strumenti dedicati come \texttt{UFED}, \texttt{Magnet AXIOM} e \texttt{Oxygen Forensics}, in grado di ricostruire comunicazioni, contenuti multimediali, posizione e social network.
+  \item \textbf{Timeline reconstruction}: generazione di una sequenza temporale coerente degli eventi digitali basata su timestamp, file system e log.
+\end{itemize}
+
+La correttezza di questa fase è fondamentale: ogni errore metodologico o alterazione accidentale potrebbe compromettere la validità probatoria dell’intera indagine. Per questo motivo, i laboratori forensi adottano protocolli standardizzati, hash crittografici (MD5, SHA256) e sistemi di audit trail per certificare ogni passaggio.
+
+\subsection*{Tecniche di analisi}
+
+Una volta completata la fase di acquisizione, l’analisi forense si concentra sull’\textbf{estrazione, interpretazione e correlazione} dei dati digitali contenuti nei supporti acquisiti. Questa fase è cruciale per trasformare l’evidenza grezza in informazioni comprensibili e rilevanti per l’indagine, sia in ambito giudiziario che investigativo.
+
+Le tecniche di analisi più rilevanti comprendono:
+
+\begin{itemize}
+  \item \textbf{File System Analysis}: consente di ricostruire e interpretare la struttura logica dei file system utilizzati nei dispositivi, come \texttt{NTFS}, \texttt{FAT32}, \texttt{EXT4}, \texttt{HFS+}, \texttt{APFS}. L’analisi permette di recuperare file eliminati, accedere a directory nascoste, esplorare settori non allocati, identificare partizioni nascoste e analizzare i record di journaling (es. USN Journal in NTFS).
+
+  \item \textbf{Registry Analysis}: tecnica specifica per sistemi Windows, che consente di esaminare il registro di sistema, struttura che conserva impostazioni di configurazione, informazioni su software installati, dispositivi USB collegati, cronologie utente, chiavi di esecuzione automatica (\texttt{Run/RunOnce}) e molto altro. L’analisi del registry è utile per ricostruire il comportamento dell’utente o la presenza di attività sospette.
+
+  \item \textbf{Artefact Analysis}: si riferisce all’identificazione e interpretazione di artefatti digitali, ovvero tracce lasciate dall’attività dell’utente e dal sistema operativo. Tra gli artefatti più comuni si trovano: cronologie dei browser, file temporanei e recenti, log di sistema, sessioni di login/logout, timestamp alterati, file di swap e hibernation, e metadati dei file (exif, MAC times).
+
+  \item \textbf{Mobile Forensics}: comprende sia l’acquisizione che l’analisi dei dispositivi mobili come smartphone, tablet e SIM card. Le tecniche possono variare in base al sistema operativo (iOS, Android), al tipo di blocco presente e al livello di cifratura del dispositivo. Strumenti professionali come \texttt{UFED Cellebrite}, \texttt{Magnet AXIOM} e \texttt{Oxygen Forensics} permettono di estrarre dati da immagini fisiche o logiche, comprese chat (WhatsApp, Telegram), fotografie, posizionamenti GPS, cronologie di navigazione, contatti e applicazioni installate, anche da dispositivi danneggiati o cifrati.
+\end{itemize}
+
+È fondamentale che ogni operazione sia eseguita nel rispetto di metodologie documentate e replicabili, e che siano impiegati software certificati in grado di generare log e report validi in sede giudiziaria. La tracciabilità delle operazioni e l’integrità dei dati analizzati rappresentano requisiti imprescindibili per garantire l’ammissibilità probatoria delle evidenze digitali.
+
+Le informazioni così ottenute costituiscono la base per la fase successiva di correlazione e reporting, in cui le evidenze digitali vengono strutturate e presentate in forma comprensibile per i soggetti giudicanti.
+
+
+
+
+\section{Aspetti legali della Digital Forensics} \label{sec:legal_aspects}
+
+L’attività di digital forensics è strettamente legata alla normativa giuridica, poiché si fonda sulla possibilità di trasformare dati digitali in prove utilizzabili in sede giudiziaria. È pertanto essenziale che tutte le operazioni tecniche vengano svolte nel rispetto dei diritti fondamentali, tra cui la privacy, la tutela della difesa, la proporzionalità e il diritto al giusto processo \cite{hewling2013towards}.
+
+Le principali fonti normative a livello europeo e internazionale che regolano l’attività di digital forensics includono:
+
+\begin{itemize}
+  \item \textbf{Regolamento (UE) 2016/679 – GDPR}: disciplina il trattamento dei dati personali, imponendo principi di liceità, limitazione delle finalità, minimizzazione dei dati e responsabilizzazione. In ambito forense, è fondamentale dimostrare la necessità e proporzionalità del trattamento, nonché adottare misure tecniche adeguate per la protezione dei dati \cite{voigt2017eu}.
+  
+  \item \textbf{Direttiva 2013/40/UE}: stabilisce norme minime relative agli attacchi contro i sistemi informatici e impone agli Stati membri l’adozione di misure per la raccolta e conservazione delle prove elettroniche, in un’ottica di armonizzazione della normativa penale europea.
+
+  \item \textbf{Convenzione di Budapest (2001)}: primo trattato internazionale sulla criminalità informatica, promuove la cooperazione tra Stati nella raccolta di prove digitali e nella definizione di standard comuni per la loro conservazione, autenticazione e trasmissione. Fornisce le basi giuridiche per richieste di collaborazione transfrontaliera \cite{budapest2001convention}.
+
+  \item \textbf{Codice di procedura penale italiano}: articoli come il 220-bis e 359 disciplinano l'acquisizione, l’analisi e la perizia tecnica delle fonti informatiche, sottolineando l’importanza della \textbf{catena di custodia} e del principio del \emph{contraddittorio tecnico}. Le evidenze devono essere acquisite e analizzate in modo da garantirne autenticità, integrità e ripetibilità, pena l’inammissibilità in giudizio \cite{gambini2019informatica}.
+\end{itemize}
+
+\subsection*{Implicazioni cross-border e cooperazione internazionale}
+
+Con la crescente adozione di servizi cloud e infrastrutture distribuite, la Digital Forensics si confronta sempre più frequentemente con scenari in cui l’evidenza digitale è distribuita su server situati in giurisdizioni differenti. Questo fenomeno solleva complessi problemi di natura giuridica e operativa legati alla \textbf{giurisdizione}, alla \textbf{cooperazione internazionale} e alla \textbf{conservazione dell'integrità probatoria} \cite{biasiotti2018handling,clough2015principles}.
+
+In particolare, i principali ostacoli includono:
+\begin{itemize}
+    \item \textbf{Conflitti normativi}: le normative sulla protezione dei dati e sulla privacy variano sensibilmente da un Paese all’altro, creando potenziali incompatibilità tra l’ordinamento del richiedente e quello dell’hosting provider.
+    \item \textbf{Limiti di giurisdizione}: un’autorità giudiziaria nazionale può non avere il potere di imporre la consegna di dati conservati all’estero senza ricorrere a strumenti di mutua assistenza legale.
+    \item \textbf{Tempi e modalità di cooperazione}: l’uso di procedure formali come le rogatorie internazionali o i Mutual Legal Assistance Treaties (MLATs) può richiedere tempi incompatibili con le esigenze di indagini urgenti, rischiando la perdita di dati volatili.
+    \item \textbf{Integrità e catena di custodia}: il trasferimento di prove digitali attraverso confini giurisdizionali deve garantire l’immutabilità dei dati e la tracciabilità delle operazioni eseguite, rispettando sia gli standard tecnici (es. NIST SP 800-86) sia quelli legali applicabili.
+\end{itemize}
+
+Per affrontare tali problematiche, strumenti come la \textbf{Convenzione di Budapest sul cybercrime} e le iniziative dell’\textit{European Union Agency for Cybersecurity} (ENISA) promuovono linee guida e protocolli comuni per l’acquisizione e lo scambio di evidenze digitali in contesti transfrontalieri. Tuttavia, l’eterogeneità normativa e la mancanza di un quadro giuridico globale unificato rendono ancora oggi la \textit{cross-border digital forensics} un ambito critico che richiede competenze tecniche e giuridiche integrate.
+
+\begin{table}[H]
+  \centering
+  \rowcolors{2}{gray!10}{white}
+  \begin{tabularx}{\textwidth}{>{\bfseries}c X}
+  \rowcolor{gray!25}
+  \# & Fase \\
+  1 & \textbf{Richiesta ufficiale di acquisizione dati} \\ 
+     & (Autorità giudiziaria nazionale $\rightarrow$ Paese ospitante) \\
+  2 & \textbf{Autorizzazione legale} \\
+     & (es. MLAT, rogatoria internazionale, convenzioni come Budapest) \\
+  3 & \textbf{Trasferimento sicuro dell’evidenza digitale} \\
+     & (canali cifrati, protocolli autenticati) \\
+  4 & \textbf{Verifica integrità e catena di custodia} \\
+     & (hash crittografici, documentazione delle operazioni) \\
+  5 & \textbf{Utilizzo in sede processuale} \\
+     & (ammissibilità secondo norme del Paese richiedente) \\
+  \end{tabularx}
+  \caption{Flusso tipico di acquisizione e gestione di un’evidenza digitale in scenari cross-border.}
+  \label{tab:crossborder_flow}
+  \end{table}
+  
+
+È fondamentale che l'intera attività forense sia documentata nel rispetto della catena di custodia, affinché le prove possano essere ammesse in sede processuale.
+
+\begin{table}[H]
+\centering
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.5cm} X >{\raggedright\arraybackslash}p{3.5cm} X}
+\toprule
+\textbf{Normativa} & \textbf{Ambito} & \textbf{Vincoli} & \textbf{Rilevanza in DF} \\
+\midrule
+GDPR (Reg. UE 2016/679) & Protezione dei dati personali & Minimizzazione, liceità, accountability & Garantire proporzionalità e tracciabilità nel trattamento dei dati digitali \\
+Direttiva 2013/40/UE & Reati informatici & Standard di raccolta, penalizzazione attacchi ai sistemi & Uniformità giuridica europea nella raccolta e conservazione delle evidenze \\
+Convenzione di Budapest (2001) & Cybercrime internazionale & Integrità, autenticazione, cooperazione transfrontaliera & Supporto legale alla cooperazione tra Stati per l'acquisizione di prove digitali \\
+Codice di procedura penale (Italia) & Processo penale & Catena di custodia, perizia, contraddittorio tecnico & Fondamentale per la validità processuale dell'evidenza digitale in giudizio \\
+\bottomrule
+\end{tabularx}
+\caption{Confronto tra principali normative internazionali rilevanti per la digital forensics.}
+\label{tab:normative_df}
+\end{table}
+
+
+
+\subsection*{Catena di custodia e validità probatoria}
+
+La \textbf{catena di custodia} è l’insieme delle procedure formali e documentate finalizzate a garantire che un’evidenza digitale mantenga la propria integrità, autenticità e tracciabilità dal momento della raccolta fino alla sua eventuale presentazione in sede giudiziaria. Ogni operazione — acquisizione, copia, analisi, trasferimento o conservazione — deve essere tracciata in modo preciso, con registrazione dell’identità dell’operatore, data, scopo dell’attività e strumenti utilizzati.
+
+Secondo i principi definiti dall’\textit{Association of Chief Police Officers} (ACPO) \cite{acpo_guidelines} nel Regno Unito e riconosciuti a livello internazionale, nessuna azione dovrebbe alterare i dati originali. Qualora ciò sia necessario, la modifica deve essere giustificata, esplicitamente documentata e tecnicamente riproducibile. In ambito europeo, tali prescrizioni si intrecciano con le disposizioni del \textbf{Regolamento (UE) 2016/679 (GDPR)} e delle normative penali nazionali, che impongono ulteriori vincoli sulla liceità, la proporzionalità e la conservazione dei dati digitali.
+
+Un’interruzione o una mancata documentazione della catena di custodia può compromettere la validità dell’intera evidenza, rendendola potenzialmente inammissibile in sede processuale.
+
+Come illustrato nella Figura~\ref{fig:chain_of_custody_image}, il processo forense prevede una serie di fasi distinte ma collegate, ciascuna delle quali deve essere registrata in modo da assicurare la trasparenza e la responsabilità del trattamento probatorio.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{images/chain_of_custody.jpg}
+    \caption{Fasi della catena di custodia nell’ambito della digital forensics.Fonte: \cite{fynd2024chain}.}
+    \label{fig:chain_of_custody_image}
+\end{figure}
+
+oppure
+Come alternativa visiva compatta, la Figura~\ref{fig:chain_of_custody_vertical} illustra la catena di custodia in formato verticale, adatta a layout stretti o a sezioni di dettaglio.
+
+
+
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=1.4cm,
+  every node/.style={draw, rectangle, align=center, font=\footnotesize, minimum width=4.2cm, minimum height=1.1cm},
+  every path/.style={draw, ->, thick, >=Stealth}
+  ]
+  \node (s1) {Sequestro \\ (sul campo)};
+  \node (s2) [below=of s1] {Acquisizione \\ (bitstream copy)};
+  \node (s3) [below=of s2] {Trasferimento \\ (supporto sicuro)};
+  \node (s4) [below=of s3] {Analisi tecnica \\ (lab forense)};
+  \node (s5) [below=of s4] {Report finale \\ (documentazione)};
+  \node (s6) [below=of s5] {Deposito \\ (archivio sicuro)};
+  
+  \path (s1) -- (s2);
+  \path (s2) -- (s3);
+  \path (s3) -- (s4);
+  \path (s4) -- (s5);
+  \path (s5) -- (s6);
+\end{tikzpicture}
+\caption{Catena di custodia}
+\label{fig:chain_of_custody_vertical}
+\end{figure}
+
+
+\subsection*{Standard operativi e best practices}
+
+Per garantire l’integrità, l’affidabilità e l’ammissibilità delle evidenze digitali in sede giudiziaria, è essenziale adottare standard operativi riconosciuti a livello internazionale. Tali standard forniscono linee guida metodologiche e tecniche per ogni fase dell’attività forense, dalla raccolta dei dati all’analisi, dalla conservazione alla documentazione.
+
+Tra i riferimenti più autorevoli si annoverano:
+
+\begin{itemize}
+  \item \textit{SWGDE Guidelines (Scientific Working Group on Digital Evidence)}: una serie di raccomandazioni pubblicate da un consorzio internazionale di esperti, finalizzate a promuovere pratiche forensi solide e riproducibili. Le linee guida coprono ambiti quali l’analisi di dispositivi mobili, l’acquisizione di immagini forensi e la validazione degli strumenti impiegati \cite{swgde_guidelines}.
+  
+  \item \textit{ISO/IEC 27037:2012} – \textit{Guidelines for identification, collection and preservation of digital evidence}: standard ISO che definisce procedure dettagliate per l’identificazione, la raccolta, l’acquisizione e la conservazione delle prove digitali, con particolare attenzione alla catena di custodia, alla documentazione e ai ruoli degli operatori coinvolti \cite{iso27037}.
+  
+  \item \textit{ENFSI Forensic IT Working Group Guidelines}: raccomandazioni tecniche elaborate dal \textit{European Network of Forensic Science Institutes}, focalizzate sulla standardizzazione delle pratiche forensi nei laboratori europei. Le linee guida promuovono interoperabilità, trasparenza e coerenza metodologica tra le diverse giurisdizioni europee \cite{enfsi2022}.
+\end{itemize}
+
+L’adesione a tali standard non costituisce soltanto una buona prassi tecnica, ma è considerata oggi un requisito essenziale per garantire:
+
+\begin{itemize}
+  \item la \textbf{validità probatoria} delle evidenze raccolte;
+  \item la \textbf{trasparenza} e la replicabilità delle metodologie impiegate;
+  \item la \textbf{tutela dei diritti fondamentali} delle persone coinvolte nell’indagine, come sancito dalle normative europee (es. GDPR, Direttiva 2016/680/UE).
+\end{itemize}
+
+L’implementazione rigorosa di questi standard consente di ridurre al minimo il rischio di contestazioni legali e di garantire che i risultati delle analisi forensi siano accettabili e credibili in ambito processuale.
+
+La Tabella~\ref{tab:standard_comparison} riassume le principali caratteristiche dei tre standard operativi più rilevanti per la gestione e analisi delle evidenze digitali.
+
+\begin{table}[H]
+\centering
+\rowcolors{2}{gray!10}{white}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X X X}
+\rowcolor{gray!25}
+Caratteristica & SWGDE Guidelines & ISO/IEC 27037:2012 & ENFSI Forensic IT WG \\
+\textbf{Origine} & USA (gruppo di lavoro scientifico federale) & International Organization for Standardization (ISO) & Unione Europea (rete di istituti forensi) \\
+\textbf{Ambito} & Raccomandazioni pratiche per investigatori digitali e laboratori & Linee guida per identificazione, raccolta e conservazione di evidenze digitali & Manuali tecnici per laboratori forensi europei \\
+\textbf{Finalità} & Promuovere l'affidabilità operativa e la documentazione dei processi & Garantire la tracciabilità e l’integrità dell’evidenza in contesti legali & Uniformare le pratiche nei Paesi membri ENFSI \\
+\textbf{Applicabilità} & Indagini digitali, dispositivi mobili, imaging, validazione strumenti & Qualsiasi contesto di gestione di prove digitali, anche al di fuori della forensics & Laboratori accreditati o affiliati a ENFSI, uso in ambito penale europeo \\
+\textbf{Aggiornamenti} & Aggiornamenti periodici disponibili pubblicamente & Standard fisso (2012), ma compatibile con audit ISO & Revisioni periodiche interne e pubblicazioni sul sito ENFSI \\
+\end{tabularx}
+\caption{Confronto tra principali standard e linee guida operative in ambito digital forensics.}
+\label{tab:standard_comparison}
+\end{table}
+
+
+
+
+\section{AI nella Digital Forensics} \label{sec:ai_df}
+
+L’introduzione dell’Intelligenza Artificiale (AI) nel campo della digital forensics ha trasformato radicalmente molte operazioni di indagine, aumentando la capacità di elaborazione di grandi volumi di dati e migliorando l’automazione di compiti complessi e ripetitivi. In particolare, le tecniche di \textit{Machine Learning} (ML) e \textit{Deep Learning} (DL) si sono dimostrate estremamente efficaci in diversi ambiti investigativi.
+
+Secondo Rogers e Seigfried-Spellar \cite{rogers2020ai}, l’AI consente una significativa riduzione dei tempi di analisi, una maggiore precisione nella classificazione automatica e una migliore capacità di identificare pattern anomali rispetto alle metodologie tradizionali. Queste tecnologie sono oggi utilizzate per:
+
+\begin{itemize}
+  \item \textbf{Classificazione automatica di immagini e video}: rilevamento di contenuti illeciti o sensibili tramite CNN (Convolutional Neural Networks) \cite{le2020survey};
+  \item \textbf{Segmentazione semantica}: distinzione automatica tra regioni rilevanti in immagini/video (es. arma vs sfondo);
+  \item \textbf{Riconoscimento facciale}: identificazione di soggetti in database investigativi o feed video \cite{lawrence2020facial};
+  \item \textbf{Analisi di log e file di sistema}: individuazione di attività sospette o accessi anomali tramite anomaly detection e clustering \cite{brown2023anomaly};
+  \item \textbf{Raggruppamento di evidenze}: tecniche non supervisionate per clusterizzare immagini, conversazioni o file in base a similarità.
+\end{itemize}
+
+\subsection{Evoluzione e motivazioni dell’uso dell’AI nella Digital Forensics}
+
+L’applicazione dell’Intelligenza Artificiale (AI) in ambito forense digitale è il risultato di un’evoluzione metodologica che, negli ultimi due decenni, ha visto un progressivo spostamento dall’analisi manuale a processi automatizzati e scalabili. In origine, le attività di digital forensics si basavano prevalentemente su competenze umane e strumenti a basso livello, richiedendo tempi di elaborazione elevati e limitando la capacità di esaminare grandi volumi di dati in tempi compatibili con le esigenze investigative \cite{casey2011digital, rogers2020ai}.
+
+La crescente pervasività delle tecnologie digitali, l’aumento esponenziale delle fonti di evidenza (dispositivi mobili, cloud, social media, IoT) e la complessità intrinseca dei dati multimediali hanno reso necessario adottare approcci più rapidi e intelligenti. In questo contesto, il \textit{Machine Learning} (ML) e, più recentemente, il \textit{Deep Learning} (DL) hanno introdotto nuove possibilità, consentendo di automatizzare compiti complessi quali la classificazione di immagini e video, l’estrazione di pattern, l’analisi semantica e la correlazione temporale di eventi \cite{costantini2019digital, le2020survey}.
+
+L’integrazione dell’AI nella digital forensics risponde a tre esigenze principali:
+\begin{enumerate}
+    \item \textbf{Scalabilità}: gestione efficiente di dataset composti da milioni di file multimediali, con capacità di filtrare e indicizzare automaticamente contenuti rilevanti \cite{magnet}.
+    \item \textbf{Accuratezza}: miglioramento delle prestazioni in compiti di riconoscimento e classificazione rispetto agli approcci basati su regole statiche.
+    \item \textbf{Supporto decisionale}: fornitura di risultati strutturati e priorità di analisi, riducendo il carico cognitivo sugli investigatori e permettendo loro di concentrarsi sugli elementi critici \cite{phd_unisi_068552}.
+\end{enumerate}
+
+Questo passaggio evolutivo non è privo di criticità: la natura opaca dei modelli di DL (\textit{black box}) solleva interrogativi sulla trasparenza e sulla spiegabilità delle decisioni, mentre la vulnerabilità a input manipolati (\textit{adversarial examples}) pone problemi di affidabilità probatoria, che saranno approfonditi nei capitoli successivi \cite{nowroozi2024robustness, biggio2018wild}.
+
+
+
+\subsection{Strumenti AI-based in ambito forense}
+
+Come illustrato nella Tabella~\ref{tab:ai_tools_forensics}, numerosi strumenti forensi commerciali e accademici integrano oggi moduli di Intelligenza Artificiale per automatizzare e velocizzare l’analisi di grandi volumi di dati.  
+
+Tali strumenti combinano tecniche di \textit{Computer Vision}, \textit{Natural Language Processing} e \textit{Pattern Recognition} per supportare compiti come:
+\begin{itemize}
+  \item filtraggio e categorizzazione di contenuti multimediali;
+  \item rilevamento di manipolazioni e anomalie;
+  \item estrazione di pattern e relazioni tra entità digitali;
+  \item segmentazione temporale e semantica di grandi dataset.
+\end{itemize}
+
+L’efficacia operativa di questi tool dipende non solo dalla qualità dei modelli e dei dataset di addestramento, ma anche dalla loro \textbf{robustezza} rispetto ad attacchi mirati o perturbazioni non intenzionali, tema che sarà analizzato nei capitoli successivi.
+
+\begin{table}[H]
+  \centering
+  \rowcolors{2}{gray!10}{white}
+  \begin{tabularx}{\textwidth}{
+      >{\bfseries}p{3cm} % Nome tool
+      X                % Tipo AI / Modello
+      X                % Funzionalità principali
+      X                % Contesto d'uso forense
+  }
+  \rowcolor{gray!25}
+  Strumento & Tipo di AI / Modello & Funzionalità principali & Contesto forense \\
+  \midrule
+  Magnet.AI & NLP, CNN per immagini & Classificazione automatica di immagini, video, messaggi; categorizzazione per temi (armi, abusi, violenza) & Analisi di grandi volumi di dati multimediali in indagini su reati contro la persona e reati informatici \\
+  Cellebrite UFED & Pattern recognition, clustering & Raggruppamento automatico di contatti, chat, immagini; riconoscimento contenuti sensibili & Mobile forensics e recupero dati da dispositivi mobili, anche cifrati \\
+  Amped Authenticate & Modelli ML per rilevamento manipolazioni & Analisi autenticità immagini; rilevamento compressioni anomale, manipolazioni e incoerenze nei metadati & Verifica di prove fotografiche e video in indagini giudiziarie \\
+  X-Ways Forensics + plugin AI & Classificatori esterni integrabili via API & Analisi di pattern ricorrenti in filesystem; segmentazione timeline; ricerca automatica di contenuti sospetti & Indagini informatiche complesse su dischi e sistemi operativi, con estensioni AI custom \\
+  \end{tabularx}
+  \caption{Confronto tra principali strumenti forensi AI-based: tecnologie impiegate, funzionalità e contesto operativo.}
+  \label{tab:ai_tools_forensics}
+  \end{table}
+  \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        tool/.style={draw, rounded corners=3pt, fill=gray!15, text width=3.6cm, align=center, minimum height=1cm},
+        task/.style={draw, rounded corners=3pt, fill=blue!10, text width=4cm, align=center, minimum height=1cm},
+        arrow/.style={->, thick}
+    ]
+    
+    % Tools (sinistra)
+    \node[tool] (magnet) {Magnet.AI};
+    \node[tool, below=0.8cm of magnet] (cellebrite) {Cellebrite UFED};
+    \node[tool, below=0.8cm of cellebrite] (amped) {Amped Authenticate};
+    \node[tool, below=0.8cm of amped] (xways) {X-Ways + Plugin AI};
+    
+    % Tasks (destra)
+    \node[task, right=5cm of magnet] (class) {Classificazione automatica di immagini e video};
+    \node[task, below=0.8cm of class] (cluster) {Clustering e correlazione di dati multimediali};
+    \node[task, below=0.8cm of cluster] (detect) {Rilevamento di manipolazioni e anomalie};
+    \node[task, below=0.8cm of detect] (timeline) {Segmentazione temporale e semantica};
+    
+    % Connections
+    \draw[arrow] (magnet.east) -- (class.west);
+    \draw[arrow] (magnet.east) -- (cluster.west);
+    \draw[arrow] (cellebrite.east) -- (cluster.west);
+    \draw[arrow] (cellebrite.east) -- (timeline.west);
+    \draw[arrow] (amped.east) -- (detect.west);
+    \draw[arrow] (xways.east) -- (timeline.west);
+    \draw[arrow] (xways.east) -- (detect.west);
+    
+    \end{tikzpicture}
+    \caption{Principali tool AI-based in digital forensics e tipologie di task supportati.}
+    \label{fig:ai_tools_tasks}
+    \end{figure}
+    
+
+\section{Attacchi adversariali nei sistemi di Machine Learning}
+
+Negli ultimi anni i modelli di \textit{Machine Learning} (ML) e \textit{Deep Learning} (DL) hanno raggiunto prestazioni estremamente elevate in numerosi ambiti applicativi, tra cui computer vision, riconoscimento vocale, analisi di rete, cybersecurity e digital forensics. Tuttavia, numerosi studi hanno dimostrato che tali modelli sono vulnerabili a input opportunamente manipolati, progettati per indurre errori di classificazione pur mantenendo modifiche minime e spesso impercettibili per un osservatore umano.
+
+Questi input manipolati sono noti come \textit{adversarial examples}. Essi consistono in campioni di input modificati tramite perturbazioni intenzionali, generalmente di piccola entità, che alterano il comportamento del modello inducendolo a produrre predizioni errate. Il fenomeno ha dato origine a un importante filone di ricerca noto come \textit{Adversarial Machine Learning}, che studia le vulnerabilità dei sistemi di apprendimento automatico in presenza di avversari attivi.
+
+Sebbene il tema abbia acquisito grande visibilità a partire dal 2014 con la dimostrazione della vulnerabilità delle reti neurali profonde alla manipolazione degli input, le radici di questo ambito di ricerca sono precedenti. Già nei primi anni 2000 era stato dimostrato che classificatori utilizzati nel filtraggio dello spam potevano essere aggirati tramite modifiche minime ai messaggi di posta elettronica, evidenziando come gli algoritmi di apprendimento automatico possano essere vulnerabili in ambienti ostili \cite{biggio2018wild}. Tali studi hanno evidenziato la necessità di sviluppare metodologie sistematiche per la valutazione della sicurezza dei sistemi basati su machine learning.
+
+In questo contesto, l'\textit{adversarial machine learning} si propone di analizzare e comprendere il comportamento dei sistemi di apprendimento automatico quando operano in ambienti adversariali, nei quali gli attaccanti cercano deliberatamente di manipolare i dati di input o il processo di apprendimento per compromettere l'affidabilità del sistema.
+
+\subsection{Modello di minaccia negli attacchi adversariali}
+
+L'analisi degli attacchi adversariali si basa generalmente sulla definizione di un \textit{modello di minaccia} (\textit{threat model}), che descrive formalmente le capacità, gli obiettivi e il livello di conoscenza dell'attaccante. La definizione di un threat model consente di valutare in modo sistematico le vulnerabilità di un sistema di machine learning e di simulare scenari di attacco realistici.
+
+Il modello di minaccia viene generalmente descritto attraverso tre dimensioni principali: gli obiettivi dell'attaccante, il livello di conoscenza del modello e le capacità di manipolazione dei dati.
+
+\subsubsection{Obiettivi dell'attaccante}
+
+Gli attacchi adversariali possono perseguire diversi obiettivi, a seconda del contesto applicativo. In generale si distinguono tre principali categorie:
+
+\begin{itemize}
+
+\item \textbf{Attacchi di integrità} (\textit{integrity attacks})
+l'obiettivo dell'attaccante è indurre il sistema a classificare erroneamente uno specifico input, senza necessariamente compromettere il funzionamento complessivo del modello.
+
+\item \textbf{Attacchi di disponibilità} (\textit{availability attacks})
+l'attaccante mira a degradare le prestazioni complessive del modello, causando un elevato numero di errori di classificazione.
+
+\item \textbf{Attacchi alla privacy} (\textit{privacy attacks})
+l'obiettivo consiste nell'estrarre informazioni sensibili dal modello, come dati di addestramento o parametri interni.
+
+\end{itemize}
+
+Nel contesto della classificazione di immagini, gli attacchi di integrità rappresentano lo scenario più comune, poiché l'attaccante tenta tipicamente di far classificare un'immagine appartenente a una classe come appartenente a un'altra.
+
+\subsubsection{Conoscenza dell'attaccante}
+
+L'efficacia di un attacco adversariale dipende fortemente dal livello di conoscenza che l'attaccante possiede rispetto al sistema bersaglio. In letteratura si distinguono tre principali scenari:
+
+\begin{itemize}
+
+\item \textbf{Attacchi white-box}
+l'attaccante possiede piena conoscenza del modello, inclusi architettura, parametri, funzione di perdita e dati di addestramento.
+
+\item \textbf{Attacchi black-box}
+l'attaccante non ha accesso diretto al modello ma può osservare soltanto gli output generati dal sistema, ad esempio tramite interrogazioni.
+
+\item \textbf{Attacchi gray-box}
+l'attaccante dispone di informazioni parziali sul sistema, come l'architettura del modello o il dataset utilizzato per l'addestramento.
+
+\end{itemize}
+
+Gli attacchi black-box sono particolarmente rilevanti nei contesti reali, dove i modelli sono spesso implementati come servizi proprietari o integrati in strumenti software chiusi.
+
+\subsection{Tipologie di attacchi adversariali}
+
+Gli attacchi adversariali possono essere classificati in base alla fase del ciclo di apprendimento in cui avviene la manipolazione dei dati. In particolare si distinguono due principali categorie: \textit{poisoning attacks} ed \textit{evasion attacks}.
+
+\subsubsection{Poisoning attacks}
+
+I \textit{poisoning attacks} colpiscono la fase di addestramento del modello. In questo scenario l'attaccante introduce nel dataset di training campioni manipolati con l'obiettivo di influenzare il processo di apprendimento.
+
+Tali attacchi possono indurre il modello a sviluppare vulnerabilità specifiche oppure a degradare significativamente le proprie prestazioni. I poisoning attacks risultano particolarmente rilevanti nei sistemi che apprendono continuamente da nuovi dati o che utilizzano dataset provenienti da fonti esterne non controllate.
+
+Tra le strategie più comuni si possono citare:
+
+\begin{itemize}
+
+\item manipolazione delle etichette (\textit{label flipping})
+\item inserimento di dati malevoli nel dataset
+\item tecniche di poisoning basate su ottimizzazione del gradiente
+
+\end{itemize}
+
+\subsubsection{Evasion attacks}
+
+Gli \textit{evasion attacks}, detti anche \textit{test-time attacks}, rappresentano la forma più diffusa di attacco adversariale. In questo caso l'attaccante modifica direttamente i dati di input durante la fase di inferenza, senza alterare il modello.
+
+Formalmente, dato un classificatore
+
+\[
+f(x)
+\]
+
+l'obiettivo dell'attaccante è trovare un input perturbato \(x'\) tale che
+
+\[
+f(x') \neq f(x)
+\]
+
+dove
+
+\[
+x' = x + \delta
+\]
+
+e la perturbazione \(\delta\) è limitata da un vincolo sulla sua norma:
+
+\[
+||\delta|| < \epsilon
+\]
+
+dove \(\epsilon\) rappresenta la massima intensità della perturbazione consentita.
+
+\subsection{Adversarial examples nei sistemi di computer vision}
+
+Nel contesto dei sistemi di computer vision, gli adversarial examples vengono generalmente generati applicando piccole perturbazioni ai valori dei pixel dell'immagine. Nonostante tali modifiche siano spesso impercettibili all'occhio umano, esse possono alterare in modo significativo la predizione del modello.
+
+Questo fenomeno evidenzia una proprietà fondamentale delle reti neurali profonde: la loro elevata sensibilità a piccole variazioni nello spazio delle feature. Anche modifiche minime dei dati di input possono produrre variazioni significative nelle rappresentazioni interne apprese dalla rete.
+
+Un ulteriore aspetto rilevante degli adversarial examples è la loro \textit{transferability}. In molti casi, perturbazioni generate per ingannare un modello risultano efficaci anche contro altri modelli addestrati sullo stesso task, anche quando presentano architetture differenti.
+
+
+
+
+
+\subsection{Implicazioni di sicurezza}
+
+La presenza di attacchi adversariali solleva importanti questioni relative all'affidabilità dei sistemi basati su machine learning, soprattutto quando tali sistemi vengono utilizzati in contesti critici per la sicurezza.
+
+In ambito cybersecurity e digital forensics, i modelli di deep learning sono sempre più utilizzati per analizzare automaticamente grandi volumi di dati, come immagini, traffico di rete e artefatti digitali. Tuttavia, la vulnerabilità di questi sistemi alle perturbazioni adversariali può consentire agli attaccanti di manipolare i risultati delle analisi automatiche o di eludere i sistemi di rilevazione.
+
+Per questo motivo, la valutazione sistematica della robustezza dei modelli di machine learning rappresenta oggi una delle principali sfide di ricerca nel campo della sicurezza dei sistemi intelligenti.
+
+
+
+
+\section{Immagini adversariali e tecniche di perturbazione} \label{sec:adv_attacks}
+
+Le immagini \textit{adversariali} sono input visivi manipolati in maniera impercettibile all’occhio umano, ma costruiti con precisione matematica per indurre in errore i modelli di classificazione automatica. Tali perturbazioni, anche se minime, possono compromettere la predizione del modello, alterando l’esito di un’analisi investigativa basata su AI \cite{goodfellow2014explaining}.
+
+Nel contesto della \textbf{digital forensics}, queste tecniche assumono un duplice ruolo:
+
+\begin{itemize}
+    \item come strumenti di \textbf{anti-forensics}, utilizzati per ostacolare l’attribuzione, la rilevazione automatica o la ricostruzione dei contenuti;
+    \item come \textbf{minacce alla robustezza} dei sistemi AI-based, che devono dimostrare affidabilità anche in presenza di input alterati in modo intenzionale.
+\end{itemize}
+
+
+\subsection{Concetti fondamentali negli attacchi adversariali}
+
+Nel contesto della visione artificiale e, più in generale, dell’apprendimento automatico, gli \textit{attacchi adversariali} consistono nella generazione intenzionale di input modificati in modo da indurre un modello a produrre una predizione errata. Tali modifiche sono spesso impercettibili all’osservatore umano, ma risultano efficaci nello sfruttare la sensibilità dei modelli di \textit{deep learning} a variazioni specifiche nello spazio delle feature \cite{szegedy2013intriguing, goodfellow2014explaining}.
+
+\paragraph{White-box vs. Black-box}
+Una prima distinzione tra tipologie di attacco si basa sul livello di conoscenza che l’attaccante possiede del modello bersaglio:
+\begin{itemize}
+    \item \textbf{White-box}: l’attaccante ha accesso completo all’architettura, ai pesi e alla funzione di perdita del modello. Questo scenario consente l’utilizzo di tecniche basate su gradienti (es. FGSM, SuperDeepFool), capaci di generare perturbazioni ad alta efficacia e bassa entropia visiva.
+    \item \textbf{Black-box}: l’attaccante non dispone di informazioni interne sul modello, ma può inviare input e osservare le uscite. Gli attacchi black-box si basano su approcci euristici, di ottimizzazione evolutiva o su \textit{transfer attacks} da modelli surrogate \cite{papernot2017practical}.
+\end{itemize}
+
+\paragraph{Targeted vs. Untargeted}
+Gli attacchi adversariali possono essere ulteriormente classificati in base all’obiettivo della manipolazione:
+\begin{itemize}
+    \item \textbf{Targeted}: la perturbazione è progettata per indurre il modello a classificare l’input in una classe specifica scelta dall’attaccante (es. un’immagine di pistola classificata come “cellulare”).
+    \item \textbf{Untargeted}: l’obiettivo è semplicemente quello di far produrre al modello una predizione errata, senza controllo diretto sulla classe di uscita (es. pistola classificata come qualsiasi oggetto non-arma).
+\end{itemize}
+
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      node distance=1.8cm,
+      process/.style={rectangle, draw, rounded corners=3pt, text width=4.8cm, align=center, minimum height=1cm, fill=blue!10},
+      decision/.style={diamond, draw, aspect=2, align=center, text width=3.8cm, fill=yellow!20},
+      arrow/.style={->, thick}
+  ]
+  
+  % Nodes
+  \node[process] (input) {Input immagine originale};
+  \node[process, below=of input] (grad) {Calcolo del gradiente rispetto all'input (white-box) \\ oppure stima tramite query (black-box)};
+  \node[process, below=of grad] (pert) {Generazione perturbazione secondo la strategia scelta (es. FGSM, evolutiva, ottimizzazione iterativa)};
+  \node[process, below=of pert] (apply) {Applicazione perturbazione all'input};
+  \node[process, below=of apply] (adv) {Immagine adversariale generata};
+  \node[process, below=of adv] (pred) {Predizione del modello su immagine perturbata};
+  
+  % Connections
+  \draw[arrow] (input) -- (grad);
+  \draw[arrow] (grad) -- (pert);
+  \draw[arrow] (pert) -- (apply);
+  \draw[arrow] (apply) -- (adv);
+  \draw[arrow] (adv) -- (pred);
+  
+  \end{tikzpicture}
+  \caption{Fasi generali di un attacco adversarial: dal calcolo o stima del gradiente, alla generazione e applicazione della perturbazione, fino all’analisi della predizione.}
+  \label{fig:adversarial_flow}
+  \end{figure}
+
+  
+
+
+\paragraph{Rilevanza in ambito forense}
+Nel contesto della \textit{digital forensics}, la distinzione tra white-box e black-box è particolarmente rilevante poiché molti strumenti commerciali basati su AI operano come \textit{black-box proprietarie}, accessibili solo tramite interfacce o moduli interni. Allo stesso modo, la distinzione targeted/untargeted permette di inquadrare meglio scenari reali: dagli attacchi mirati a nascondere specifiche tipologie di contenuto (targeted), fino a perturbazioni generalizzate per degradare l’accuratezza complessiva di un sistema (untargeted) \cite{biggio2018wild, nowroozi2024robustness}.
+
+Questo quadro concettuale consente di interpretare le tecniche adottate in questo lavoro sperimentale, che includono attacchi white-box (FGSM, SuperDeepFool) e black-box (One Pixel Attack, Sigma Zero Attack), nonché trasformazioni anti-forensi a carattere più “naturale” (Color Shifting, JPEG Recompression, ecc.), alcune delle quali possono essere impiegate sia in scenari targeted che untargeted.
+
+
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      box/.style={
+        draw,
+        rounded corners=4pt,
+        text width=5.2cm,
+        align=center,
+        minimum height=1.5cm,
+        font=\footnotesize
+      },
+      arrow/.style={-latex, thick},
+      column sep=1.2cm, % distanza orizzontale ridotta
+      row sep=1.8cm % distanza verticale
+  ]
+  
+  % White-box row
+  \node[box, fill=blue!10] (wb_t) {\textbf{White-box Targeted} \\ Accesso completo al modello; perturbazione mirata a far classificare l'input in una classe specifica. Esempio: arma $\rightarrow$ cellulare};
+  \node[box, fill=blue!5, right=of wb_t] (wb_u) {\textbf{White-box Untargeted} \\ Accesso completo; perturbazione che causa errore generico senza imporre classe di destinazione.};
+  
+  % Black-box row
+  \node[box, fill=green!10, below=of wb_t] (bb_t) {\textbf{Black-box Targeted} \\ Nessun accesso interno; query e osservazione output per spingere verso una classe specifica. Esempio: arma $\rightarrow$ libro};
+  \node[box, fill=green!5, right=of bb_t] (bb_u) {\textbf{Black-box Untargeted} \\ Nessun accesso interno; perturbazione che riduce l’accuratezza globale del modello senza target preciso.};
+  
+  % Labels sopra le colonne
+  \node[above=0.2cm of wb_t, font=\bfseries] {Targeted};
+  \node[above=0.2cm of wb_u, font=\bfseries] {Untargeted};
+  
+  % Labels a sinistra, allineate al centro verticale dei nodi
+  \node[left=0.6cm of wb_t, rotate=90, font=\bfseries, anchor=center] {White-box};
+  \node[left=0.6cm of bb_t, rotate=90, font=\bfseries, anchor=center] {Black-box};
+  
+  % Frecce verticali
+  \draw[arrow] (wb_t.south) -- (bb_t.north);
+  \draw[arrow] (wb_u.south) -- (bb_u.north);
+  
+  \end{tikzpicture}
+  \caption{Classificazione degli attacchi adversariali in base alla conoscenza del modello (white-box vs black-box) e all'obiettivo (targeted vs untargeted).}
+  \label{fig:wb_bb_targeting}
+\end{figure}
+
+
+
+In questo lavoro sono state selezionate e sperimentate dieci tecniche di perturbazione, suddivise in due categorie distinte:
+\begin{itemize}
+    \item \textbf{Adversarial attacks}, ottimizzati per ingannare il classificatore;
+    \item \textbf{Anti-forensic transformations}, orientate a degradare o alterare l’input in maniera semantica o strutturale.
+\end{itemize}
+
+La Tabella~\ref{tab:attacchi_comparativi} sintetizza le tecniche adottate, descrivendone il meccanismo, l’obiettivo e il livello di visibilità.
+\begin{table}[H]
+  \centering
+  \rowcolors{2}{gray!10}{white}
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabularx}{\textwidth}{
+    >{\bfseries}p{2.2cm}   % Tipo
+    >{\raggedright\arraybackslash}p{2.8cm} % Tecnica
+    >{\raggedright\arraybackslash}p{2.8cm}   % Meccanismo
+    >{\raggedright\arraybackslash}p{3 cm} % Obiettivo
+    >{\raggedright\arraybackslash}p{1.8cm} % Riferimento
+    >{\raggedright\arraybackslash}p{1.8cm} % Visibilità
+  }
+  \rowcolor{gray!25}
+  Tipo & Tecnica & Meccanismo & Obiettivo & Riferimento & Visibilità \\
+  \midrule
+
+  Anti-forense & JPEG Recompression & Ricompressione lossy & Degradare i coefficienti DCT e ostacolare l’analisi & \cite{shan2020fawkes} & Media \\
+
+  Anti-forense & Resample \& Resize & Interpolazione / ridimensionamento & Falsare PRNU o scala per ridurre l’attribuibilità & \cite{hewling2018anti} & Media \\
+
+  Anti-forense & Gaussian Blur & Sfocatura spaziale & Offuscare bordi e dettagli utili alla classificazione & \cite{costantini2019digital} & Media \\
+
+  Anti-forense & Histogram Modification & Alterazione istogramma & Cambiare la distribuzione dei colori per ingannare il modello & \cite{phd_unisi_068552} & Variabile \\
+
+  Anti-forense & Contrast Stretching & Espansione del contrasto & Mascherare o enfatizzare pattern visivi locali & \cite{phd_unisi_068552} & Media \\
+
+  Adversarial & FGSM & Gradiente singolo & Indurre errore con minima perturbazione & \cite{goodfellow2014explaining} & Bassa \\
+
+  Adversarial & SuperDeepFool & Ottimizzazione iterativa & Spostare l’input oltre il confine decisionale del modello & \cite{zhang2024superdeepfool} & Bassa \\
+
+  Adversarial & One Pixel Attack & Ottimizzazione evolutiva & Forzare errore modificando un solo pixel & \cite{su2019onepixel} & Molto bassa \\
+
+  Adversarial & Sigma Zero Attack & Sparsity-based, black-box & Evasione stealth in scenari realistici con accesso limitato & \cite{phd_unisi_068552} & Bassa \\
+
+  Adversarial & Color Shifting & Alterazione HSV / RGB & Simulare modifiche cromatiche plausibili & \cite{phd_unisi_068552} & Media \\
+
+  \end{tabularx}
+  \caption{Confronto tra tecniche di perturbazione anti-forense e adversarial: meccanismo, obiettivo, visibilità.}
+  \label{tab:attacchi_comparativi}
+\end{table}
+
+
+
+\subsection{Applicazioni forensi}
+
+Nel contesto della digital forensics, le immagini adversariali assumono un ruolo controverso, potendo essere impiegate sia per ostacolare le indagini, sia per tutelare diritti fondamentali come la privacy. Le principali applicazioni si possono ricondurre a due scenari contrapposti:
+
+\begin{itemize}
+  \item \textbf{Attacchi anti-forensi}: l'obiettivo è eludere o compromettere i sistemi automatizzati di classificazione basati su AI. Ad esempio, un’immagine contenente un’arma da fuoco potrebbe essere intenzionalmente perturbata affinché venga identificata come oggetto neutro, invalidando il riconoscimento automatizzato e compromettendo l'integrità delle prove raccolte \cite{goodfellow2014explaining, moosavi2016deepfool, biggio2018wild}.
+  
+  \item \textbf{Difesa della privacy}: in scenari di sorveglianza diffusa o analisi automatizzata non autorizzata, le perturbazioni adversariali possono essere utilizzate per impedire la corretta identificazione di volti, oggetti o contesti sensibili. In questo senso, l’adversarial machine learning diventa uno strumento di \textit{resistenza etica} e \textit{privacy by design}, orientato alla protezione dei dati personali contro analisi invasive \cite{su2019onepixel, biggio2018wild}.
+\end{itemize}
+
+Queste due prospettive evidenziano una tensione irrisolta tra esigenze investigative e tutela dei diritti digitali. Inoltre, sollevano interrogativi cruciali sulla \textbf{robustezza} e \textbf{affidabilità} dei sistemi AI impiegati nei contesti forensi, la cui vulnerabilità a input manipolati può compromettere l’intero processo probatorio. Tali aspetti saranno analizzati in dettaglio nei capitoli successivi.
+
+\section{Robustezza dei Sistemi AI-based} \label{sec:robustezza_ai}
+
+Nel contesto della digital forensics, la robustezza dei sistemi basati su Intelligenza Artificiale rappresenta un requisito fondamentale, specialmente quando tali sistemi sono impiegati per l’analisi automatica di contenuti sensibili o potenzialmente manipolati. Un modello AI è considerato \textit{robusto} se è in grado di mantenere prestazioni affidabili anche in presenza di perturbazioni non previste, input degradati o veri e propri attacchi adversariali.
+
+Secondo Biggio e Roli \cite{biggio2018wild}, la crescente dipendenza da modelli di deep learning in scenari critici ha reso la robustezza una priorità progettuale, sia in ambito di sicurezza informatica che forense. Un sistema robusto dovrebbe idealmente:
+
+\begin{itemize}
+  \item \textbf{Mantenere l’accuratezza} predittiva anche in presenza di rumore, distorsioni o attacchi mirati;
+  \item \textbf{Garantire trasparenza e tracciabilità} del processo decisionale, a supporto dell’ammissibilità probatoria in sede giudiziaria;
+  \item \textbf{Essere verificabile e riproducibile} tramite tecniche di validazione esterna e testing controllato.
+\end{itemize}
+
+\subsection{Contromisure e difese}
+
+Negli ultimi anni sono state sviluppate numerose strategie per aumentare la resilienza dei modelli AI contro manipolazioni intenzionali. Tali difese possono essere classificate in base all’approccio (proattivo, reattivo, formale) e al livello d’integrazione nel sistema.
+
+Tra le principali contromisure si annoverano \cite{biggio2018wild, carlini2017towards}:
+
+\begin{itemize}
+  \item \textbf{Adversarial Training}: consiste nell’arricchire il dataset di addestramento con esempi perturbati in modo controllato, costringendo il modello a riconoscere e ignorare tali deviazioni.
+  
+  \item \textbf{Certified Defenses}: approcci formali che garantiscono, tramite bounding geometrico o analisi matematica, che il modello rimane invariato entro determinati limiti di perturbazione (es. norme $L_\infty$, $L_2$).
+  
+  \item \textbf{Preprocessing degli input}: tecniche come compressione JPEG, denoising e normalizzazione spaziale mirano a “ripulire” l’input prima della classificazione, riducendo l’effetto delle perturbazioni.
+  
+  \item \textbf{Rilevatori adversariali}: moduli secondari addestrati per riconoscere input sospetti tramite metodi statistici, inconsistenze semantiche o reti autoencoder.
+\end{itemize}
+
+Nonostante l’efficacia parziale di questi approcci, \textbf{nessuna difesa risulta universalmente efficace}. La combinazione di più strategie (approccio ensemble) e la validazione su scenari realistici rimangono essenziali nei contesti ad alta criticità, come quelli forensi.
+
+La Tabella~\ref{tab:defense_techniques} riassume e confronta le principali difese disponibili.
+
+\begin{table}[H]
+\centering
+\rowcolors{2}{gray!10}{white}
+\begin{tabularx}{\textwidth}{>{\bfseries}l X X X}
+\rowcolor{gray!25}
+Tecnica di difesa & Descrizione & Vantaggi & Limiti \\
+Adversarial Training & 
+Addestramento con esempi perturbati per migliorare la resilienza del modello. & 
+Robustezza diretta contro pattern noti; facile da implementare. & 
+Può ridurre l'accuratezza su dati puliti; non generalizza bene. \\
+
+Certified Defenses & 
+Tecniche formali che garantiscono la robustezza entro certe perturbazioni. & 
+Offre garanzie teoriche utili in ambito forense. & 
+Alto costo computazionale; limitato a modelli semplici. \\
+
+Preprocessing degli input & 
+Rimozione delle perturbazioni tramite compressione, denoising, ecc. & 
+Compatibile con modelli esistenti; implementazione leggera. & 
+Poco efficace contro attacchi invisibili sofisticati. \\
+
+Rilevatori adversariali & 
+Moduli aggiuntivi per identificare input avversari. & 
+Non richiede modifica del modello principale. & 
+Falsi positivi elevati; vulnerabilità ad attacchi adattivi. \\
+\end{tabularx}
+\caption{Confronto tra principali tecniche di difesa contro input adversariali.}
+\label{tab:defense_techniques}
+\end{table}
+
+
+\section{Criticità probatorie nell’uso di AI nella Digital Forensics}
+\label{sec:motivazione_giuridica_ai}
+
+Nonostante l’enorme potenziale operativo degli strumenti AI-based nella digital forensics, la loro applicazione in ambito giudiziario solleva interrogativi cruciali sul piano della validità probatoria. Modelli di classificazione automatica non robusti, opachi o vulnerabili ad attacchi mirati rappresentano un rischio concreto per l’integrità del processo, specialmente se le loro decisioni influenzano la selezione, l’interpretazione o l’esclusione di evidenze digitali.
+
+L’integrazione di tali strumenti deve confrontarsi con i principi fondamentali del giusto processo, tra cui:
+\begin{itemize}
+    \item il diritto alla verifica e alla contestazione tecnica (principio del contraddittorio);
+    \item l’onere della prova e la riproducibilità delle analisi;
+    \item la tutela dalla manipolazione dell’evidenza, anche in forma digitale.
+\end{itemize}
+
+In particolare, l’utilizzo di modelli “black-box” suscita preoccupazioni rispetto alla loro trasparenza, spiegabilità e affidabilità. Le tecniche adversariali e anti-forensi descritte nei capitoli successivi mostrano come sia possibile alterare in modo impercettibile un’immagine o un contenuto, inducendo il sistema AI a classificazioni errate, potenzialmente fuorvianti in ambito giudiziario.
+
+Alla luce di tali considerazioni, questo lavoro sperimentale mira a valutare empiricamente la \textbf{robustezza operativa} di alcuni tra i principali strumenti AI per la classificazione automatica di immagini in ambito forense, esponendoli a perturbazioni realistiche e osservandone l’impatto sulle decisioni del sistema.
+
+
+\section{Conclusioni critiche}
+
+L’analisi condotta mette in evidenza come la validità e l’ammissibilità della \textbf{prova digitale} non possano essere considerate esclusivamente una questione tecnica, ma debbano essere inquadrate all’interno di un solido quadro giuridico.
+La disciplina della \textit{Computer Law}, nelle sue declinazioni nazionali, europee e internazionali, evidenzia come l’integrità, l’autenticità, l’affidabilità e la pertinenza dell’evidenza costituiscano condizioni imprescindibili per il suo utilizzo processuale.
+
+Parallelamente, l’introduzione crescente di \textbf{sistemi AI-based} nella digital forensics apre nuove prospettive ma anche rischi significativi.
+La possibilità che un modello vulnerabile a bias o attacchi adversariali generi classificazioni errate pone il problema della \textbf{robustezza tecnica} come condizione di validità giuridica.
+In tal senso, la Cassazione ha richiesto una \emph{motivazione rafforzata} per l’impiego di prove digitali, mentre il legislatore europeo — attraverso il GDPR e l’AI Act — ha imposto requisiti di trasparenza, spiegabilità e tracciabilità delle decisioni algoritmiche.
+
+Ne deriva la necessità di un \textbf{approccio integrato tecnico-legale}, che combini le garanzie probatorie tradizionali (catena di custodia, standard ISO, convenzioni internazionali) con nuovi requisiti derivanti dall’uso dell’intelligenza artificiale (robustezza, accountability, explainability).
+Così come il diritto processuale impone che il giudice motivi adeguatamente le decisioni fondate su dati digitali, la comunità scientifica e normativa richiede oggi che i sistemi AI siano spiegabili, verificabili e sottoponibili a controllo esterno.
+
+In conclusione, il parallelismo tra \textbf{solidità giuridica della prova} e \textbf{robustezza tecnica del modello AI} rappresenta la chiave di volta per garantire l’ammissibilità e la credibilità delle evidenze digitali in sede giudiziaria.
+Questo lavoro di ricerca si colloca esattamente in tale prospettiva, proponendo una valutazione sperimentale della robustezza operativa di strumenti AI-based in ambito forense, al fine di contribuire alla costruzione di un modello probatorio affidabile e conforme ai principi del giusto processo.
+
