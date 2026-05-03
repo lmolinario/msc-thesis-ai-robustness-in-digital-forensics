@@ -1,0 +1,80 @@
+{
+  "script": "datasets/scripts/splits/11_generate_clean_and_ood_splits.py",
+  "seed": 42,
+  "n_folds": 5,
+  "inputs": {
+    "final_manifest": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/final/manifests/manual_selection_final_1500.csv",
+    "adversarial_subset": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/final/manifests/manual_selection_adversarial_subset.csv"
+  },
+  "outputs": {
+    "clean_splits_dir": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/clean",
+    "ood_splits_dir": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/ood",
+    "clean_folds_manifest": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/manifests/clean_folds_manifest.csv",
+    "ood_eval_manifest": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/manifests/ood_eval_manifest.csv",
+    "summary_json": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/manifests/split_generation_summary.json"
+  },
+  "counts": {
+    "clean_total": 1000,
+    "ood_total": 500,
+    "clean_label_counts": {
+      "non_weapon": 500,
+      "weapon": 500
+    },
+    "clean_fold_counts": {
+      "fold_1": {
+        "non_weapon": 100,
+        "weapon": 100
+      },
+      "fold_2": {
+        "non_weapon": 100,
+        "weapon": 100
+      },
+      "fold_3": {
+        "non_weapon": 100,
+        "weapon": 100
+      },
+      "fold_4": {
+        "non_weapon": 100,
+        "weapon": 100
+      },
+      "fold_5": {
+        "non_weapon": 100,
+        "weapon": 100
+      }
+    },
+    "clean_source_counts": {
+      "01_kaggle_weapon": {
+        "weapon": 100
+      },
+      "02_deepfirearm": {
+        "weapon": 100
+      },
+      "03_google_scraped": {
+        "non_weapon": 30,
+        "weapon": 100
+      },
+      "04_telegram_youtube": {
+        "non_weapon": 57,
+        "weapon": 100
+      },
+      "05_deepweb": {
+        "non_weapon": 413,
+        "weapon": 100
+      }
+    },
+    "ood_source_counts": {
+      "01_kaggle_weapon": 100,
+      "03_google_scraped": 71,
+      "04_telegram_youtube": 225,
+      "05_deepweb": 104
+    }
+  },
+  "checks": {
+    "clean_total_1000": true,
+    "ood_total_500": true,
+    "clean_sha256_unique": true,
+    "ood_sha256_unique": true,
+    "clean_image_id_unique": true,
+    "ood_image_id_unique": true
+  }
+}
