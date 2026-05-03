@@ -19,6 +19,88 @@ In questo quadro, l'automazione assume un ruolo sempre più rilevante. La cresci
 Questa esigenza diventa particolarmente critica quando l'automazione riguarda contenuti visivi. Nei casi in cui immagini o video vengano classificati automaticamente come rilevanti per l'indagine, l'errore di un modello può determinare falsi negativi, con conseguente mancata individuazione di materiale probatorio, oppure falsi positivi, con possibile sovraccarico analitico e rischio di interpretazioni improprie. Per tale ragione, la classificazione automatizzata di immagini in ambito forense deve essere studiata non solo in termini di accuratezza nominale, ma anche rispetto alla sua robustezza in presenza di degradazioni, manipolazioni anti-forensi e perturbazioni adversariali. Questo collegamento tra prova digitale, automazione e affidabilità dei modelli costituisce il punto di partenza per le sezioni successive del capitolo.
 
 
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[
+        >=Latex,
+        font=\small,
+        block/.style={
+            rectangle,
+            rounded corners,
+            draw=black!70,
+            thick,
+            align=center,
+            minimum height=2.1cm,
+            minimum width=3.1cm,
+            fill=gray!10
+        },
+        note/.style={
+            rectangle,
+            rounded corners,
+            draw=black!70,
+            dashed,
+            align=center,
+            minimum height=1.2cm,
+            minimum width=7.4cm,
+            fill=gray!5
+        },
+        arrow/.style={
+            ->,
+            thick,
+            draw=black!70
+        }
+    ]
+
+    \node[block] (collection) at (0,0)
+    {\shortstack{
+        \textbf{Identification}\\
+        \textbf{and Collection}\\[1mm]
+        \scriptsize Acquisition and preservation\\
+        \scriptsize of digital evidence
+    }};
+
+    \node[block] (examination) at (3.8,0)
+    {\shortstack{
+        \textbf{Examination}\\[1mm]
+        \scriptsize Extraction, parsing,\\
+        \scriptsize indexing, and filtering
+    }};
+
+    \node[block] (analysis) at (7.6,0)
+    {\shortstack{
+        \textbf{Analysis}\\[1mm]
+        \scriptsize Interpretation and\\
+        \scriptsize correlation of\\
+        \scriptsize relevant artefacts
+    }};
+
+    \node[block] (reporting) at (11.4,0)
+    {\shortstack{
+        \textbf{Reporting}\\[1mm]
+        \scriptsize Documentation of\\
+        \scriptsize findings and limitations
+    }};
+
+    \draw[arrow] (collection) -- (examination);
+    \draw[arrow] (examination) -- (analysis);
+    \draw[arrow] (analysis) -- (reporting);
+
+    \node[note] (thesisfocus) at (5.7,-2.35)
+    {\shortstack{
+        \textbf{Focus of this thesis}\\
+        \scriptsize Evaluation of the robustness of AI-based image classification tools,\\
+        \scriptsize mainly within the \emph{Examination} and \emph{Analysis} phases
+    }};
+
+    \draw[arrow, dashed] (thesisfocus.north west) -- (examination.south);
+    \draw[arrow, dashed] (thesisfocus.north east) -- (analysis.south);
+
+    \end{tikzpicture}
+    \caption{Simplified digital forensic workflow and positioning of the present thesis within the examination and analysis phases \cite{nist2006guide,casey2011digital,reith2002examining}.}
+    \label{fig:df_workflow}
+\end{figure}
+
+
 
 \section{Artificial Intelligence nella Digital Forensics}
 \label{sec:background_ai_digital_forensics}
@@ -91,6 +173,16 @@ La perturbazione \(\delta\) è spesso vincolata mediante metriche di distanza o 
 
 Questa formulazione evidenzia la natura duale dell'attacco: da un lato la perturbazione deve essere limitata, dall'altro deve essere abbastanza efficace da modificare la decisione del sistema.
 
+
+\begin{figure}[htbp]
+    \centering
+    % Sostituisci con il tuo file grafico (es. png o pdf)
+    \includegraphics[width=0.9\textwidth]{images/adversarial_example_logic}
+    \caption{Rappresentazione concettuale di un attacco di \textit{evasion}. Una perturbazione invisibile $\delta$, ottimizzata matematicamente, viene sommata all'input originale $x$ per indurre il classificatore in errore, pur mantenendo l'immagine visivamente coerente per un analista umano.}
+    \label{fig:adv_example}
+\end{figure}
+
+
 Gli attacchi adversariali possono essere classificati secondo diversi criteri. Una prima distinzione riguarda la fase del ciclo di vita del modello in cui l'attacco viene condotto. Gli attacchi di poisoning intervengono durante la fase di addestramento, alterando i dati o le etichette con l'obiettivo di compromettere il modello risultante. Gli attacchi di evasion, invece, avvengono in fase di inferenza e consistono nella manipolazione degli input sottoposti a un modello già addestrato \cite{biggio2018wild,papernot2016limitations}. Nel contesto della classificazione automatica di immagini in ambito forense, il focus principale è sugli attacchi di evasion, poiché lo scenario più rilevante è quello in cui immagini già presenti in un dispositivo, archivio o evidenza digitale vengano alterate per ridurre la probabilità di essere correttamente individuate da uno strumento automatico.
 
 Una seconda distinzione riguarda il livello di conoscenza disponibile all'attaccante. Negli scenari white-box, l'attaccante dispone di informazioni complete o estese sul modello, inclusi architettura, parametri, funzione di perdita e gradienti. In questi casi, la perturbazione può essere ottimizzata direttamente rispetto al comportamento interno del classificatore. Negli scenari black-box, invece, l'attaccante non conosce i dettagli del modello e può basarsi soltanto sugli output osservabili, su query ripetute, su modelli surrogati o sulla trasferibilità degli esempi adversariali tra classificatori differenti \cite{papernot2016limitations,carlini2017towards,yuan2019adversarial}. Questa distinzione è particolarmente importante nei contesti forensi, nei quali gli strumenti commerciali sono spesso sistemi chiusi e non consentono l'accesso diretto ai parametri del modello.
@@ -116,6 +208,24 @@ Un aspetto ulteriore riguarda la conoscenza del dominio forense da parte dell'at
 
 La definizione del threat model consente infine di collegare gli attacchi adversariali alle trasformazioni anti-forensi discusse nella sezione successiva. Sebbene entrambe le categorie possano alterare il comportamento di un sistema di classificazione, esse rispondono a logiche differenti. L'attacco adversarial è progettato rispetto al comportamento del modello, mentre la manipolazione anti-forense può mirare più in generale a degradare, mascherare o rendere meno informativa l'evidenza digitale. Questa distinzione è metodologicamente rilevante perché permette di valutare separatamente la robustezza del classificatore contro perturbazioni ottimizzate e contro trasformazioni realistiche che possono emergere nei normali flussi di acquisizione, condivisione o occultamento dei contenuti visivi.
 
+
+\begin{table}[htbp]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{@{}lp{5cm}p{5cm}@{}}
+        \toprule
+        \textbf{Dimensione} & \textbf{Scenari Teorici} & \textbf{Focus della Tesi} \\
+        \midrule
+        \textbf{Fase dell'attacco} & Poisoning vs Evasion & \textbf{Evasion} (inferenza su dati acquisiti). \\
+        \textbf{Conoscenza} & White-box vs Black-box & \textbf{Black-box} (tool commerciali chiusi). \\
+        \textbf{Obiettivo} & Targeted vs Untargeted & \textbf{Untargeted} (degradazione delle performance). \\
+        \bottomrule
+    \end{tabular}
+    \caption{Inquadramento del Threat Model adottato per la valutazione sperimentale.}
+    \label{tab:threat_model}
+\end{table}
+
+
 \section{Tecniche anti-forensi su immagini digitali}
 \label{sec:background_antiforensics_images}
 
@@ -140,6 +250,23 @@ Nel caso della classificazione automatica di immagini, le tecniche anti-forensi 
 Dal punto di vista forense, questa ambiguità richiede una valutazione prudente. Non ogni immagine compressa, ridimensionata o degradata può essere considerata il risultato di una condotta anti-forense; al contrario, molte trasformazioni sono conseguenze ordinarie dell'uso di dispositivi mobili, social network, applicazioni di messaggistica e sistemi di archiviazione. Tuttavia, quando l'obiettivo è valutare l'affidabilità di strumenti automatici, è necessario includere tali trasformazioni nello spazio degli scenari realistici. La robustezza di un classificatore forense non dipende soltanto dalla sua accuratezza su immagini pulite, ma anche dalla capacità di mantenere un comportamento stabile in presenza di degradazioni plausibili, intenzionali o accidentali.
 
 In questa prospettiva, le tecniche anti-forensi su immagini digitali costituiscono un ponte tra l'image forensics tradizionale e la valutazione della robustezza dei modelli di computer vision. Esse evidenziano che l'immagine non è un input statico e neutro, ma un artefatto digitale soggetto a trasformazioni tecniche che possono incidere sia sulla sua interpretabilità umana sia sulla sua elaborazione automatica. Per tale ragione, la valutazione di strumenti \gls{ai}-based in ambito forense deve considerare non solo attacchi adversariali formalmente definiti, ma anche manipolazioni e degradazioni compatibili con scenari operativi realistici.
+
+\begin{table}[htbp]
+    \centering
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{@{}p{3.5cm}p{5cm}p{5cm}@{}}
+        \toprule
+        \textbf{Caratteristica} & \textbf{Attacchi Adversariali} & \textbf{Trasformazioni Anti-Forensi} \\
+        \midrule
+        \textbf{Bersaglio} & Logica matematica del modello \gls{ai}. & Integrità e tracce del file digitale. \\
+        \textbf{Natura} & Perturbazione ottimizzata (rumore). & Manipolazioni reali (JPEG, resizing, filtri). \\
+        \textbf{Dipendenza} & Alta (legata ai gradienti/pesi). & Nulla (indipendente dal classificatore). \\
+        \textbf{Visibilità} & Spesso impercettibile all'uomo. & Spesso rilevabile (degradazione qualitativa). \\
+        \bottomrule
+    \end{tabular}
+    \caption{Confronto tra le due categorie di manipolazioni analizzate nella tesi.}
+    \label{tab:adv_vs_antiforensics}
+\end{table}
 
 
 \section{Explainability, robustezza e affidabilità dei modelli}
