@@ -14,6 +14,7 @@ I requisiti di integrità, autenticità e tracciabilità costituiscono quindi il
 
 Dal punto di vista operativo, la letteratura e le linee guida tecniche descrivono il processo forense digitale attraverso una sequenza di fasi logicamente distinte: raccolta, esame, analisi e reporting. La fase di raccolta riguarda l'individuazione e l'acquisizione delle fonti digitali rilevanti, con particolare attenzione alla preservazione dello stato dell'evidenza. La fase di esame comprende l'estrazione e l'organizzazione dei dati potenzialmente pertinenti, ad esempio mediante analisi del file system, recupero di artefatti, indicizzazione e filtraggio. La fase di analisi consiste nell'interpretazione tecnica dei dati estratti, nella correlazione tra fonti differenti e nella ricostruzione di eventi o comportamenti rilevanti. La fase di reporting, infine, richiede la documentazione chiara, verificabile e comprensibile delle attività svolte, degli strumenti impiegati, dei risultati ottenuti e delle limitazioni riscontrate \cite{reith2002examining,nist2006guide,casey2011digital}.
 
+Figure~\ref{fig:df_workflow} sintetizza questo workflow generale e colloca la presente tesi principalmente nelle fasi di examination e analysis.
 
 
 
@@ -97,10 +98,9 @@ Dal punto di vista operativo, la letteratura e le linee guida tecniche descrivon
 
     \end{tikzpicture}%
     }
-    \caption{Simplified digital forensic workflow and positioning of the present thesis within the examination and analysis phases \cite{nist2006guide,casey2011digital,reith2002examining}.}
+    \caption{Simplified digital forensic workflow.}
     \label{fig:df_workflow}
 \end{figure}
-
 
 
 In questo quadro, l'automazione assume un ruolo sempre più rilevante. La crescita del volume dei dati sequestrati o acquisiti nelle indagini digitali rende spesso impraticabile un'analisi esclusivamente manuale. Strumenti forensi commerciali e open source integrano quindi funzionalità di indicizzazione, ricerca, classificazione, correlazione temporale e, più recentemente, moduli basati su \gls{ai} per supportare l'analista nell'individuazione di contenuti rilevanti. Tuttavia, l'automazione non elimina la responsabilità interpretativa dell'operatore forense. Al contrario, introduce la necessità di valutare in modo esplicito l'affidabilità degli strumenti, la robustezza dei modelli e il rischio che errori, bias o manipolazioni intenzionali influenzino la selezione delle evidenze.
@@ -181,13 +181,15 @@ La perturbazione \(\delta\) è spesso vincolata mediante metriche di distanza o 
 
 Questa formulazione evidenzia la natura duale dell'attacco: da un lato la perturbazione deve essere limitata, dall'altro deve essere abbastanza efficace da modificare la decisione del sistema.
 
+La Figura~\ref{fig:adv_example} rappresenta in forma concettuale questo meccanismo nel contesto di un attacco di evasion.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.9\textwidth]{images/adversarial_example_logic}
-    \caption{Conceptual representation of an evasion attack. A bounded perturbation \(\delta\) is added to the original input \(x\) to obtain an adversarial image \(x'\), which induces a wrong classifier prediction while preserving visual coherence for a human analyst.}
+    \caption[\gls{aml} and conceptual representation of an evasion attack]{\gls{aml} and conceptual representation of an evasion attack. A bounded perturbation \(\delta\) is added to the original input \(x\) to obtain an adversarial image \(x'\), which induces a wrong classifier prediction while preserving visual coherence for a human analyst.}
     \label{fig:adv_example}
 \end{figure}
+
 
 Gli attacchi adversariali possono essere classificati secondo diversi criteri. Una prima distinzione riguarda la fase del ciclo di vita del modello in cui l'attacco viene condotto. Gli attacchi di poisoning intervengono durante la fase di addestramento, alterando i dati o le etichette con l'obiettivo di compromettere il modello risultante. Gli attacchi di evasion, invece, avvengono in fase di inferenza e consistono nella manipolazione degli input sottoposti a un modello già addestrato \cite{biggio2018wild,papernot2016limitations}. Nel contesto della classificazione automatica di immagini in ambito forense, il focus principale è sugli attacchi di evasion, poiché lo scenario più rilevante è quello in cui immagini già presenti in un dispositivo, archivio o evidenza digitale vengano alterate per ridurre la probabilità di essere correttamente individuate da uno strumento automatico.
 
@@ -214,6 +216,7 @@ Un aspetto ulteriore riguarda la conoscenza del dominio forense da parte dell'at
 
 La definizione del threat model consente infine di collegare gli attacchi adversariali alle trasformazioni anti-forensi discusse nella sezione successiva. Sebbene entrambe le categorie possano alterare il comportamento di un sistema di classificazione, esse rispondono a logiche differenti. L'attacco adversarial è progettato rispetto al comportamento del modello, mentre la manipolazione anti-forense può mirare più in generale a degradare, mascherare o rendere meno informativa l'evidenza digitale. Questa distinzione è metodologicamente rilevante perché permette di valutare separatamente la robustezza del classificatore contro perturbazioni ottimizzate e contro trasformazioni realistiche che possono emergere nei normali flussi di acquisizione, condivisione o occultamento dei contenuti visivi.
 
+La Tabella~\ref{tab:threat_model} sintetizza le principali dimensioni del threat model adottato nella valutazione sperimentale, distinguendo tra la formulazione teorica degli attacchi e il focus operativo-forense della presente tesi.
 
 \begin{table}[htbp]
     \centering
@@ -221,20 +224,20 @@ La definizione del threat model consente infine di collegare gli attacchi advers
     \renewcommand{\arraystretch}{1.25}
     \begin{tabular}{@{}p{0.24\textwidth}p{0.34\textwidth}p{0.34\textwidth}@{}}
         \toprule
-        \textbf{Dimension} & \textbf{Theoretical scenarios} & \textbf{Thesis focus} \\
+        \textbf{Dimension} & \textbf{Theoretical scenarios} & \textbf{Thesis operational focus} \\
         \midrule
         \textbf{Attack phase} &
         Poisoning vs evasion &
-        \textbf{Evasion}, since the manipulation affects acquired images at inference time. \\
+        \textbf{Evasion}, since the manipulation affects already acquired or analysed images at inference time. \\
         \textbf{Adversary knowledge} &
         White-box vs black-box &
-        \textbf{Black-box}, consistently with closed commercial forensic tools. \\
+        \textbf{Primarily black-box at the forensic-tool level}, consistently with closed commercial forensic tools and limited knowledge of their internal classification logic. \\
         \textbf{Attack objective} &
         Targeted vs untargeted &
-        \textbf{Untargeted}, with emphasis on performance degradation and missed detection. \\
+        \textbf{Untargeted}, with emphasis on performance degradation, missed detection, and reduced classification reliability. \\
         \bottomrule
     \end{tabular}
-    \caption{Threat model adopted for the experimental robustness evaluation.}
+    \caption{Threat model dimensions considered in the experimental robustness evaluation.}
     \label{tab:threat_model}
 \end{table}
 
@@ -265,6 +268,7 @@ Dal punto di vista forense, questa ambiguità richiede una valutazione prudente.
 
 In questa prospettiva, le tecniche anti-forensi su immagini digitali costituiscono un ponte tra l'image forensics tradizionale e la valutazione della robustezza dei modelli di computer vision. Esse evidenziano che l'immagine non è un input statico e neutro, ma un artefatto digitale soggetto a trasformazioni tecniche che possono incidere sia sulla sua interpretabilità umana sia sulla sua elaborazione automatica. Per tale ragione, la valutazione di strumenti \gls{ai}-based in ambito forense deve considerare non solo attacchi adversariali formalmente definiti, ma anche manipolazioni e degradazioni compatibili con scenari operativi realistici.
 
+Table~\ref{tab:adv_vs_antiforensics} sintetizza la distinzione concettuale tra adversarial attacks e anti-forensic transformations nel contesto della classificazione automatizzata di immagini.
 
 \begin{table}[htbp]
     \centering
@@ -272,30 +276,28 @@ In questa prospettiva, le tecniche anti-forensi su immagini digitali costituisco
     \renewcommand{\arraystretch}{1.25}
     \begin{tabular}{@{}p{0.22\textwidth}p{0.34\textwidth}p{0.34\textwidth}@{}}
         \toprule
-        \textbf{Feature} & \textbf{Adversarial attacks} & \textbf{Anti-forensic transformations} \\
+        \textbf{Dimension} & \textbf{Adversarial attacks} & \textbf{Anti-forensic transformations} \\
         \midrule
         \textbf{Primary target} &
-        Decision function of the AI-based model. &
+        Decision function of the \gls{ai}-based model. &
         Visual, statistical, or structural properties of the digital image file. \\
         \textbf{Nature} &
         Perturbations designed to alter the model prediction. &
-        Manipulations or degradations such as JPEG recompression, resizing, blur, or contrast modification. \\
+        Manipulations or degradations such as \gls{jpeg} recompression, resizing, blur, or contrast modification. \\
         \textbf{Model dependency} &
-        Usually high, especially in white-box settings. &
-        Usually absent or indirect, since the transformation can be applied without knowing the classifier. \\
+        Usually direct or surrogate-based, especially in white-box or transfer-based settings. &
+        Usually low or indirect, since the transformation can often be applied without knowing the classifier. \\
         \textbf{Visibility} &
-        Often designed to be imperceptible or localized. &
+        Often designed to be imperceptible, sparse, or localized. &
         Often compatible with visible degradations or ordinary image processing operations. \\
         \textbf{Forensic relevance} &
         May affect automated evidence selection by inducing false positives or false negatives. &
-        May alter the evidential quality of the image and reduce the reliability of automated analysis. \\
+        May alter the evidentiary quality of the image and reduce the reliability of automated analysis. \\
         \bottomrule
     \end{tabular}
     \caption{Comparison between adversarial attacks and anti-forensic transformations in the context of automated image classification.}
     \label{tab:adv_vs_antiforensics}
 \end{table}
-
-
 
 
 \section{Explainability, robustezza e affidabilità dei modelli}
