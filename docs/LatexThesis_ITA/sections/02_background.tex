@@ -189,11 +189,12 @@ La Figura~\ref{fig:adv_example} rappresenta in forma concettuale questo meccanis
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.9\textwidth]{images/adversarial_example_logic}
+    \resizebox{\textwidth}{!}{%
+        \includegraphics{images/adversarial_example_logic}
+    }
     \caption[\gls{aml} and conceptual representation of an evasion attack]{\gls{aml} and conceptual representation of an evasion attack. A bounded perturbation \(\delta\) is added to the original input \(x\) to obtain an adversarial image \(x'\), which induces a wrong classifier prediction while preserving visual coherence for a human analyst.}
     \label{fig:adv_example}
 \end{figure}
-
 
 Gli attacchi adversariali possono essere classificati secondo diversi criteri. Una prima distinzione riguarda la fase del ciclo di vita del modello in cui l'attacco viene condotto. Gli attacchi di poisoning intervengono durante la fase di addestramento, alterando i dati o le etichette con l'obiettivo di compromettere il modello risultante. Gli attacchi di evasion, invece, avvengono in fase di inferenza e consistono nella manipolazione degli input sottoposti a un modello già addestrato \cite{biggio2018wild,papernot2016limitations}. Nel contesto della classificazione automatica di immagini in ambito forense, il focus principale è sugli attacchi di evasion, poiché lo scenario più rilevante è quello in cui immagini già presenti in un dispositivo, archivio o evidenza digitale vengano alterate per ridurre la probabilità di essere correttamente individuate da uno strumento automatico.
 
