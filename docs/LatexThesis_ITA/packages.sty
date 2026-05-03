@@ -1,11 +1,9 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{packages}[2025/03/03 Packages]
-\usepackage[utf8]{inputenc} % Character encoding
-\usepackage{afterpage}
-\usepackage[bottom]{footmisc}
 
 % ------ Contents -------
 % Appendices
+% Acronyms
 % Bibliography & References
 % Flow charts
 % Front matter
@@ -15,143 +13,147 @@
 % Main matter
 % Mathematics
 % Page setup
-% Chapter title's format
-% Python code 
-
+% Tables
+% Chapter title format
+% Code listings
+% Header and footer
 % -----------------------
+
+% --- Encoding ---
+\usepackage[utf8]{inputenc}
 
 % --- Appendices ---
 \usepackage{appendix}
-\newcommand{\addappendix}{   % Self-created command to insert appendix with predefined settings
+\newcommand{\addappendix}{
     \newpage
     \appendix
-    \section*{Appendix}   % Name of appendix
-    \addcontentsline{toc}{section}{Appendix}  % Add appendix name to table of contents
-    \renewcommand{\thesubsection}{\Alph{subsection}}    % Change numbering of section to upper-case letters.
+    \section*{Appendix}
+    \addcontentsline{toc}{section}{Appendix}
+    \renewcommand{\thesubsection}{\Alph{subsection}}
 }
 
-% --- Acronym ---
-%\usepackage[acronym]{glossaries}  % Carica il pacchetto glossaries con supporto per acronimi
-%\makeglossaries  % Abilita la gestione degli acronimi
-% --- Acronym ---
+% --- Acronyms ---
 \usepackage[acronym,nonumberlist,nopostdot]{glossaries}
 \makeglossaries
 
-
-% --- Bibliography & References---  
+% --- Bibliography & References ---
 \usepackage[
 backend=biber,
 style=numeric,
-sorting=none    % cosiì ordina per citazione nel documento... altrimenti rivedere
+sorting=none
 ]{biblatex}
-
-\addbibresource{tesi.bib}     % Adding our file containing the references
-\usepackage{caption}        % Enables controlling the look and feel of captions, see package documentation
-\usepackage{subcaption}     % Recommended when making sub-figures
-\usepackage[nottoc]{tocbibind}  % Includes Bibliography, Index, list of Listing etc. to table of contents
-\newcommand{\source}[1]{\vspace{-4pt} \caption*{\hfill \footnotesize{Source: {#1}} } }   % Easily insert sources in images
-\usepackage{graphicx}
-\usepackage[utf8]{inputenc} % Character encoding
-\usepackage{import} % For \import command
-
-% --- Flow Charts ---
-% Keep in mind that you may customize these flow chart settings to fit your own preferences.
-\usepackage{tikz}
-\usetikzlibrary{shapes,arrows}
-\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
-    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
-\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
-    text width=5em, text centered, rounded corners, minimum height=4em]
-\tikzstyle{line} = [draw, -latex']
-\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
-    minimum height=2em]
-
-% --- Front matter ---
-% Front matter is located before the table of contents, e.g. preface (Norsk: forord) and often has separate settings
-\newcommand{\frontmatter}{
-    \pagenumbering{roman}   % Setting page numbering to lower-case roman
-}
+\addbibresource{tesi.bib}
+\usepackage{csquotes}
+\usepackage[nottoc]{tocbibind}
+\usepackage{caption}
+\usepackage{subcaption}
+\newcommand{\source}[1]{\vspace{-4pt} \caption*{\hfill \footnotesize{Source: {#1}}}}
 
 % --- General ---
-\usepackage{import}     % Enable importing of sections
-\usepackage{csquotes}   % Provides international handling of quote marks. Especially useful for bibliography management using BibLaTeX
-\usepackage{hyperref}   % Hyper-references, possible to change color
-\hypersetup{    % Color of hyper-references
-    colorlinks,
-    citecolor = black,
-    filecolor = black,
-    linkcolor = black,
-    urlcolor = black
-}
-\usepackage{comment}    % Comment blocks of text using \begin{comment} ... \end{comment}
-\usepackage{pdfpages}   % Enables import of pdf-pages using e.g. \includepdf[pages=-]{./my_pdf.pdf}
+\usepackage{import}
+\usepackage{afterpage}
+\usepackage[bottom]{footmisc}
+\usepackage{comment}
+\usepackage{verbatim}
+\usepackage{pdfpages}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{fontawesome5}
 
 % --- Image ---
-\usepackage{graphicx}   % Handle images
-\usepackage{wrapfig}    % Wrap text around images
-\usepackage{float}      % Force image location using "H"
-\usepackage{url}        % Insert urls
-\urlstyle{sf}           % Set url-style as "sans-serif". Other options are e.g. "same" or "rm"
-\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}   % Ruler
+\usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{url}
+\urlstyle{sf}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+% --- Flow Charts and Diagrams ---
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,arrows.meta,positioning}
+\tikzstyle{decision} = [diamond, draw, fill=blue!20,
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20,
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse, fill=red!20, node distance=3cm,
+    minimum height=2em]
+\usepackage{smartdiagram}
+\usesmartdiagramlibrary{additions}
+
+% --- Front matter ---
+\newcommand{\frontmatter}{
+    \pagenumbering{roman}
+}
 
 % --- Language ---
-\usepackage{siunitx}    % Enable SI units
-\usepackage[british]{babel}     % Defining UK English as language. This will among other things ensure that dates are displayed as 24/03/1997 rather than 03/24/1997 in the bibliography.
-\addto\extrasbritish{   % Change naming of different functions, e.g. figure references.
-    \renewcommand*\contentsname{Table of Contents}  % Rename table of contents
-    \renewcommand{\listfigurename}{List of Figures} % Rename list of figures
-    \renewcommand{\listtablename}{List of Tables}   % Rename list of tables
-    \def\equationautorefname{Equation}              % Autoref-name for equations
-    \def\figureautorefname{Figure}                  % Autoref-name for figures
-    \def\tableautorefname{Table}                    % Autoref-name for tables
-    \def\sectionautorefname{Section}                % Autoref-name for sections
-    \def\subsectionautorefname{\sectionautorefname} % Autoref-name for subsections
-    \def\subsubsectionautorefname{\sectionautorefname} % Autoref-name for subsubsections
+\usepackage{siunitx}
+\usepackage[british]{babel}
+\addto\extrasbritish{
+    \renewcommand*\contentsname{Table of Contents}
+    \renewcommand{\listfigurename}{List of Figures}
+    \renewcommand{\listtablename}{List of Tables}
+    \def\equationautorefname{Equation}
+    \def\figureautorefname{Figure}
+    \def\tableautorefname{Table}
+    \def\sectionautorefname{Section}
+    \def\subsectionautorefname{\sectionautorefname}
+    \def\subsubsectionautorefname{\sectionautorefname}
 }
 
 % --- Main matter ---
-% This is the main part of the paper.
 \newcommand{\mainmatter}{
     \newpage
-    \pagenumbering{arabic}  % Setting page numbering to normal integers
+    \pagenumbering{arabic}
 }
 
 % --- Mathematics ---
-\usepackage{bm}         % Bold text in math mode
-\usepackage{amsmath}    % Math formulas and improved typographical quality of their output
-\usepackage{amssymb}    % Extended symbol collection
-\usepackage{amsthm}     % Helps define theorem-like structures
-\usepackage{textcomp}   % Used in the package "gensymb" (below), which will give warnings if "textcomp" is not imported in advance
-\usepackage{gensymb}    % Adds extra generic symbols for math and text mode, e.g. \degree
-
+\usepackage{bm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{textcomp}
+\usepackage{gensymb}
 
 % --- Page setup ---
 \usepackage[a4paper,top=3cm,bottom=3cm,left=3.5cm,right=3cm]{geometry}
-\usepackage{parskip}  % Disabilita la rientranza e aggiunge spazio tra i paragrafi
+\usepackage{parskip}
+
+% --- Tables ---
 \usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{booktabs}
 
+% --- Chapter title format ---
+\usepackage{titlesec}
 
-
-% --- Chapter title's format ---
-
-% Formattazione del codice python
+% --- Code listings ---
 \usepackage{listings}
-\usepackage{xcolor} 
 \lstset{
-    language=Python,                 % Linguaggio del codice
-    basicstyle=\ttfamily\small,      % Font (tipo e dimensione)
-    keywordstyle=\color{blue},       % Colore delle parole chiave
-    commentstyle=\color{gray},       % Colore dei commenti
-    stringstyle=\color{red},         % Colore delle stringhe
-    showstringspaces=false,          % Non mostra gli spazi nelle stringhe
-    numbers=left,                    % Mostra i numeri di linea
-    numberstyle=\small\color{gray},  % Stile dei numeri di linea
-    frame=single,                    % Bordo intorno al codice
-    breaklines=true,                 % Spezza le righe lunghe
-    captionpos=b                     % Posizione della didascalia (b sotto, t sopra)
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\small\color{gray},
+    frame=single,
+    breaklines=true,
+    captionpos=b
 }
 
-% --- Customized header and footer ---
+% --- Hyperlinks ---
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+
+% --- Header and footer ---
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
