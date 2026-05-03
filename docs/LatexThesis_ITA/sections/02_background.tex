@@ -1,1 +1,48 @@
-$(cat /mnt/data/02_background_updated.tex)
+\chapter{Technical Background Concepts}\label{chap:background}
+
+Questo capitolo introduce i concetti teorici necessari per comprendere la valutazione della robustezza operativa di strumenti \gls{ai}-based impiegati nella classificazione automatizzata di immagini in ambito forense. Il quadro teorico è costruito a partire dai fondamenti della \gls{df} e della prova digitale, per poi restringere progressivamente l'attenzione verso l'image forensics, l'analisi automatica di immagini mediante \gls{ml} e \gls{dl}, l'\gls{aml}, le tecniche anti-forensi applicate a contenuti visivi e il ruolo dell'\gls{xai} nella valutazione dell'affidabilità dei modelli. La trattazione mantiene un livello concettuale e definitorio: la descrizione della pipeline sperimentale, dei dataset, dei modelli e degli strumenti utilizzati è demandata ai capitoli metodologici successivi.
+
+\section{Digital Forensics e prova digitale}
+\label{sec:background_digital_forensics}
+
+La \gls{df} è la disciplina tecnico-scientifica che si occupa dell'identificazione, acquisizione, conservazione, esame, analisi e presentazione di dati digitali potenzialmente rilevanti in un contesto investigativo o giudiziario. Essa nasce dall'esigenza di trattare informazioni memorizzate o trasmesse mediante dispositivi elettronici secondo procedure idonee a preservarne il valore probatorio. In tale prospettiva, il dato digitale non assume automaticamente il ruolo di prova: esso deve essere raccolto, documentato e interpretato mediante procedure controllabili, ripetibili e compatibili con i requisiti di integrità, autenticità e tracciabilità richiesti dall'indagine forense \cite{casey2011digital,garfinkel2010digital,nist2006guide}.
+
+La prova digitale presenta caratteristiche peculiari rispetto alle evidenze fisiche tradizionali. Essa è immateriale, facilmente replicabile, spesso distribuita tra dispositivi, servizi cloud, supporti rimovibili e sistemi di comunicazione, e può essere alterata anche da operazioni apparentemente ordinarie, come l'accensione di un dispositivo, l'apertura di un file o l'esecuzione di un'applicazione. Questa fragilità rende necessario distinguere tra semplice disponibilità tecnica del dato e sua utilizzabilità forense. Un'immagine, un log, un messaggio o un file multimediale possono contribuire alla ricostruzione di un fatto solo se il loro ciclo di vita investigativo è documentato in modo da consentire la verifica delle operazioni compiute e delle eventuali trasformazioni subite.
+
+I requisiti di integrità, autenticità e tracciabilità costituiscono quindi il fondamento metodologico della \gls{df}. L'integrità riguarda la capacità di dimostrare che il dato analizzato non sia stato modificato in modo non controllato rispetto alla fonte acquisita. L'autenticità attiene alla possibilità di collegare l'evidenza a un determinato dispositivo, soggetto, sistema o contesto operativo. La tracciabilità, infine, richiede che ogni fase dell'attività forense sia documentata mediante registri, log, annotazioni tecniche, valori hash e procedure di catena di custodia. Tali elementi non hanno soltanto una funzione amministrativa, ma permettono di rendere verificabile il percorso che conduce dal reperto digitale originario all'informazione presentata in sede investigativa o processuale \cite{iso27037,enfsi2022,swgde_guidelines}.
+
+Dal punto di vista operativo, la letteratura e le linee guida tecniche descrivono il processo forense digitale attraverso una sequenza di fasi logicamente distinte: raccolta, esame, analisi e reporting. La fase di raccolta riguarda l'individuazione e l'acquisizione delle fonti digitali rilevanti, con particolare attenzione alla preservazione dello stato dell'evidenza. La fase di esame comprende l'estrazione e l'organizzazione dei dati potenzialmente pertinenti, ad esempio mediante analisi del file system, recupero di artefatti, indicizzazione e filtraggio. La fase di analisi consiste nell'interpretazione tecnica dei dati estratti, nella correlazione tra fonti differenti e nella ricostruzione di eventi o comportamenti rilevanti. La fase di reporting, infine, richiede la documentazione chiara, verificabile e comprensibile delle attività svolte, degli strumenti impiegati, dei risultati ottenuti e delle limitazioni riscontrate \cite{reith2002examining,nist2006guide,casey2011digital}.
+
+In questo quadro, l'automazione assume un ruolo sempre più rilevante. La crescita del volume dei dati sequestrati o acquisiti nelle indagini digitali rende spesso impraticabile un'analisi esclusivamente manuale. Strumenti forensi commerciali e open source integrano quindi funzionalità di indicizzazione, ricerca, classificazione, correlazione temporale e, più recentemente, moduli basati su \gls{ai} per supportare l'analista nell'individuazione di contenuti rilevanti. Tuttavia, l'automazione non elimina la responsabilità interpretativa dell'operatore forense. Al contrario, introduce la necessità di valutare in modo esplicito l'affidabilità degli strumenti, la robustezza dei modelli e il rischio che errori, bias o manipolazioni intenzionali influenzino la selezione delle evidenze.
+
+Questa esigenza diventa particolarmente critica quando l'automazione riguarda contenuti visivi. Nei casi in cui immagini o video vengano classificati automaticamente come rilevanti per l'indagine, l'errore di un modello può determinare falsi negativi, con conseguente mancata individuazione di materiale probatorio, oppure falsi positivi, con possibile sovraccarico analitico e rischio di interpretazioni improprie. Per tale ragione, la classificazione automatizzata di immagini in ambito forense deve essere studiata non solo in termini di accuratezza nominale, ma anche rispetto alla sua robustezza in presenza di degradazioni, manipolazioni anti-forensi e perturbazioni adversariali. Questo collegamento tra prova digitale, automazione e affidabilità dei modelli costituisce il punto di partenza per le sezioni successive del capitolo.
+
+\section{Image forensics e classificazione automatica di immagini}
+\label{sec:background_image_forensics}
+
+% Sezione da rivedere nel prossimo passaggio.
+
+\section{Machine Learning e Deep Learning per l'analisi di immagini}
+\label{sec:background_ml_dl_images}
+
+% Sezione da rivedere nel prossimo passaggio.
+
+\section{Adversarial Machine Learning}
+\label{sec:background_adversarial_ml}
+
+% Sezione da rivedere nel prossimo passaggio.
+
+\section{Tecniche anti-forensi su immagini digitali}
+\label{sec:background_antiforensics_images}
+
+% Sezione da rivedere nel prossimo passaggio.
+
+\section{Explainability, robustezza e affidabilità dei modelli}
+\label{sec:background_xai_robustness}
+
+% Sezione da rivedere nel prossimo passaggio.
+
+\section{Profili giuridici essenziali della prova digitale e dell'AI}
+\label{sec:background_legal_profiles}
+
+% Sezione da rivedere nel prossimo passaggio.
