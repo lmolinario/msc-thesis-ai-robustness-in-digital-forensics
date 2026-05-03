@@ -87,7 +87,7 @@ x' = x + \delta
 f(x') \neq y.
 \]
 
-La perturbazione \(\delta\) è spesso vincolata mediante metriche di distanza o vincoli di tipo \(\ell_p\), espressi nella forma \(\|\delta\|_p \leq \epsilon\), dove \(\epsilon\) rappresenta il budget massimo di perturbazione ammesso e \(p\) può assumere valori comunemente associati a vincoli \(\ell_0\), \(\ell_2\) o \(\ell_\infty\). Tali vincoli permettono di formalizzare rispettivamente attacchi sparsi, perturbazioni di energia limitata o modifiche limitate uniformemente sui pixel, pur non esaurendo il problema della percettibilità visiva in scenari reali \cite{carlini2017towards,akhtar2018threat}.
+La perturbazione \(\delta\) è spesso vincolata mediante metriche di distanza o vincoli di tipo \(\ell_p\), espressi nella forma \(\|\delta\|_p \leq \epsilon\), dove \(\epsilon\) rappresenta il budget massimo di perturbazione ammesso e, nei casi più comuni, \(p \in \{0,2,\infty\}\). Tali vincoli permettono di formalizzare rispettivamente attacchi sparsi, perturbazioni di energia limitata o modifiche limitate uniformemente sui pixel, pur non esaurendo il problema della percettibilità visiva in scenari reali \cite{carlini2017towards,akhtar2018threat}.
 
 Questa formulazione evidenzia la natura duale dell'attacco: da un lato la perturbazione deve essere limitata, dall'altro deve essere abbastanza efficace da modificare la decisione del sistema.
 
