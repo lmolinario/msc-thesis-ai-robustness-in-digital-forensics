@@ -8,8 +8,8 @@ Official split-generation script for the FAIR-Lab thesis pipeline.
 
 Purpose
 -------
-This script creates the clean binary evaluation folds and the OOD evaluation set
-from the final human-reviewed dataset artifacts.
+Create the clean binary evaluation folds and the OOD evaluation set from the
+final human-reviewed dataset artifacts.
 
 Inputs
 ------
@@ -18,17 +18,10 @@ Inputs
 
 Outputs
 -------
-Clean binary folds:
-- datasets/splits/clean/fold_1/weapon/
-- datasets/splits/clean/fold_1/non_weapon/
+- datasets/splits/clean/fold_1/{weapon,non_weapon}/
 - ...
-- datasets/splits/clean/fold_5/weapon/
-- datasets/splits/clean/fold_5/non_weapon/
-
-OOD evaluation set:
+- datasets/splits/clean/fold_5/{weapon,non_weapon}/
 - datasets/splits/ood/ood_eval_set/ood/
-
-Manifests:
 - datasets/splits/manifests/clean_folds_manifest.csv
 - datasets/splits/manifests/ood_eval_manifest.csv
 - datasets/splits/manifests/split_generation_summary.json
@@ -36,12 +29,13 @@ Manifests:
 Methodological notes
 --------------------
 - The binary weapon/non_weapon subset is split into five deterministic folds.
-- The split is class-stratified and source-aware: each class/source group is
-  shuffled deterministically and distributed across folds in round-robin order.
+- Each fold contains exactly 100 weapon and 100 non_weapon images.
+- The assignment is class-stratified and source-aware: source balance is
+  approximated while the class-per-fold constraint is enforced strictly.
 - OOD samples are not split into folds. They are copied into a single OOD
   evaluation set and tracked through a dedicated manifest.
-- Each copied file is hashed with SHA256 and MD5 to support forensic traceability
-  and later matching against forensic tool exports.
+- Each copied file is hashed with SHA256 and MD5 to support forensic
+  traceability and later matching against forensic tool exports.
 - This script does not modify the final manual-selection manifests.
 """
 
@@ -65,6 +59,7 @@ from datasets.scripts.utils.paths import (
     FINAL_DATASETS_DIR,
     OOD_SPLITS_DIR,
     PREPARED_DATASETS_DIR,
+    REPO_ROOT,
     SPLIT_MANIFESTS_DIR,
     repo_relative_path,
 )
@@ -165,9 +160,9 @@ def compute_hashes(file_path: Path) -> tuple[str, str]:
     """
     Compute SHA256 and MD5 hashes for a file.
 
-    SHA256 is the primary integrity hash for this pipeline. MD5 is also stored
-    because several forensic tools can expose or use MD5 values in reports and
-    hash sets.
+    SHA256 is the primary integrity hash for the thesis pipeline. MD5 is also
+    stored because several forensic tools can expose or use MD5 values in
+    reports and hash sets.
     """
     sha256 = hashlib.sha256()
     md5 = hashlib.md5()
@@ -181,11 +176,7 @@ def compute_hashes(file_path: Path) -> tuple[str, str]:
 
 
 def repo_relative_string(path: Path) -> str:
-    """
-    Return a repository-relative POSIX path when possible.
-    """
-    from datasets.scripts.utils.paths import REPO_ROOT
-
+    """Return a repository-relative POSIX path when possible."""
     resolved = path.resolve()
     try:
         return str(resolved.relative_to(REPO_ROOT)).replace("\\", "/")
@@ -232,11 +223,11 @@ def clear_outputs(force: bool) -> None:
     """
     output_roots = [CLEAN_SPLITS_DIR, OOD_SPLITS_DIR, SPLIT_MANIFESTS_DIR]
 
-    existing = [p for p in output_roots if p.exists()]
+    existing = [path for path in output_roots if path.exists()]
     if existing and not force:
         raise FileExistsError(
             "Split outputs already exist. Use --force to rebuild them. Existing paths: "
-            + ", ".join(str(p) for p in existing)
+            + ", ".join(str(path) for path in existing)
         )
 
     if force:
@@ -303,14 +294,9 @@ def validate_input_manifests(final_df: pd.DataFrame, adversarial_df: pd.DataFram
     for label in sorted(VALID_BINARY_LABELS):
         actual = int(adv_counts.get(label, 0))
         if actual != 500:
-            raise ValueError(
-                f"Expected 500 samples for binary label={label}, found {actual}"
-            )
+            raise ValueError(f"Expected 500 samples for binary label={label}, found {actual}")
 
-    for manifest_name, df in [
-        ("final", final_df),
-        ("adversarial", adversarial_df),
-    ]:
+    for manifest_name, df in [("final", final_df), ("adversarial", adversarial_df)]:
         duplicated_image_ids = int(df["image_id"].duplicated().sum())
         duplicated_sha256 = int(df["sha256"].duplicated().sum())
 
@@ -347,10 +333,15 @@ def assign_source_aware_folds(adversarial_df: pd.DataFrame, n_folds: int, seed: 
     """
     Assign deterministic, class-stratified, source-aware folds.
 
-    For each (final_label, source_dataset) group, rows are shuffled using a
-    deterministic seed and distributed in round-robin order across the folds.
-    This preserves class balance and approximates source balance whenever the
-    source distribution allows it.
+    The previous pure round-robin strategy could create small class imbalance
+    when source groups were not divisible by the number of folds. This version
+    enforces the hard class constraint first:
+
+        each fold = 100 weapon + 100 non_weapon
+
+    Source balance is approximated as a secondary criterion by assigning each
+    sample to the fold with the lowest current count for that source within the
+    same class, while never exceeding the class-per-fold quota.
     """
     if n_folds <= 1:
         raise ValueError("n_folds must be greater than 1.")
@@ -359,23 +350,62 @@ def assign_source_aware_folds(adversarial_df: pd.DataFrame, n_folds: int, seed: 
     df["_label_norm"] = df["final_label"].map(norm)
     df["fold"] = ""
 
-    grouped_indices: dict[tuple[str, str], list[int]] = defaultdict(list)
-    for idx, row in df.iterrows():
-        key = (safe_str(row["_label_norm"]), safe_str(row["source_dataset"]))
-        grouped_indices[key].append(idx)
+    label_counts_total = df["_label_norm"].value_counts().to_dict()
+    target_per_label_per_fold: dict[str, int] = {}
 
-    for key, indices in sorted(grouped_indices.items()):
-        local_rng = random.Random(f"{seed}:{key[0]}:{key[1]}")
-        shuffled = indices[:]
-        local_rng.shuffle(shuffled)
+    for label in sorted(VALID_BINARY_LABELS):
+        total = int(label_counts_total.get(label, 0))
+        if total % n_folds != 0:
+            raise ValueError(
+                f"Label '{label}' has {total} samples, which is not divisible by n_folds={n_folds}."
+            )
+        target_per_label_per_fold[label] = total // n_folds
 
-        for pos, idx in enumerate(shuffled):
-            fold_number = (pos % n_folds) + 1
-            df.at[idx, "fold"] = f"fold_{fold_number}"
+    fold_names = [f"fold_{idx}" for idx in range(1, n_folds + 1)]
+    label_fold_counts: dict[str, Counter] = {label: Counter() for label in VALID_BINARY_LABELS}
+    source_fold_counts: dict[tuple[str, str], Counter] = defaultdict(Counter)
+
+    for label in sorted(VALID_BINARY_LABELS):
+        label_df = df[df["_label_norm"] == label].copy()
+        sources = sorted(label_df["source_dataset"].astype(str).unique().tolist())
+
+        for source in sources:
+            source_indices = label_df[label_df["source_dataset"].astype(str) == source].index.tolist()
+            local_rng = random.Random(f"{seed}:{label}:{source}")
+            local_rng.shuffle(source_indices)
+
+            for idx in source_indices:
+                eligible_folds = [
+                    fold
+                    for fold in fold_names
+                    if label_fold_counts[label][fold] < target_per_label_per_fold[label]
+                ]
+
+                if not eligible_folds:
+                    raise RuntimeError(
+                        f"No eligible fold available while assigning label={label}, source={source}."
+                    )
+
+                # Primary objective: keep each source as evenly distributed as possible.
+                # Secondary objective: keep the class counts balanced during assignment.
+                chosen_fold = min(
+                    eligible_folds,
+                    key=lambda fold: (
+                        source_fold_counts[(label, source)][fold],
+                        label_fold_counts[label][fold],
+                        fold,
+                    ),
+                )
+
+                df.at[idx, "fold"] = chosen_fold
+                label_fold_counts[label][chosen_fold] += 1
+                source_fold_counts[(label, source)][chosen_fold] += 1
+
+    if (df["fold"].astype(str).str.strip() == "").any():
+        missing = df[df["fold"].astype(str).str.strip() == ""]["image_id"].tolist()
+        raise RuntimeError(f"Some rows were not assigned to any fold: {missing[:20]}")
 
     df = df.drop(columns=["_label_norm"])
-
-    # Stable ordering improves reviewability of the generated manifest.
     df = df.sort_values(["fold", "final_label", "source_dataset", "image_id"], kind="stable")
     df = df.reset_index(drop=True)
     return df
@@ -406,15 +436,19 @@ def validate_fold_distribution(df: pd.DataFrame, n_folds: int) -> None:
                     f"expected={expected_per_label_per_fold}, actual={actual}"
                 )
 
+        expected_fold_total = expected_per_label_per_fold * len(VALID_BINARY_LABELS)
+        if len(fold_df) != expected_fold_total:
+            raise ValueError(
+                f"Invalid total count in {fold_name}: expected={expected_fold_total}, actual={len(fold_df)}"
+            )
+
 
 # =============================================================================
 # Copy operations and manifest construction
 # =============================================================================
 
 def copy_with_traceability(src_path: Path, dst_path: Path) -> tuple[str, str, int, str]:
-    """
-    Copy a file and return SHA256, MD5, size_bytes, and extension of the copy.
-    """
+    """Copy a file and return SHA256, MD5, size_bytes, and extension of the copy."""
     dst_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src_path, dst_path)
 
@@ -561,6 +595,7 @@ def write_summary(clean_rows: list[dict[str, Any]], ood_rows: list[dict[str, Any
             "ood_splits_dir": str(OOD_SPLITS_DIR),
             "clean_folds_manifest": str(CLEAN_FOLDS_MANIFEST_PATH),
             "ood_eval_manifest": str(OOD_EVAL_MANIFEST_PATH),
+            "summary_json": str(SUMMARY_JSON_PATH),
         },
         "counts": {
             "clean_total": len(clean_rows),
@@ -585,10 +620,7 @@ def write_summary(clean_rows: list[dict[str, Any]], ood_rows: list[dict[str, Any
     }
 
     SUMMARY_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
-    SUMMARY_JSON_PATH.write_text(
-        json.dumps(summary, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
+    SUMMARY_JSON_PATH.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 # =============================================================================
