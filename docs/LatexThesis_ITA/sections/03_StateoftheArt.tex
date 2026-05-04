@@ -168,61 +168,70 @@ La revisione condotta nelle sezioni precedenti mostra che la letteratura ha prod
 
 Un secondo insieme di contributi riguarda le minacce che possono alterare il comportamento dei sistemi automatici. La letteratura sull'\gls{aml} ha mostrato che perturbazioni costruite intenzionalmente possono indurre errori anche in modelli ad alte prestazioni~\cite{szegedy2014intriguing,goodfellow2015explaining,papernot2016limitations,carlini2017towards,biggio2018wild}. I lavori più vicini all'image forensics hanno poi evidenziato che anche modelli progettati per compiti forensi possono essere vulnerabili in scenari adversariali~\cite{barni2018cf,nowroozi2020phd}. In parallelo, la letteratura anti-forense ha studiato trasformazioni applicate direttamente all'artefatto digitale, come ricompressione, ricampionamento, alterazioni statistiche e modifiche della qualità visiva, mostrando che tali operazioni possono incidere sia sulle tracce forensi sia sulla rappresentazione digitale dell'immagine~\cite{stamm2010anti,stamm2013information,farid2016photo,popescu2005exposing}. Infine, la letteratura sull'\gls{xai} ha fornito strumenti utili per analizzare qualitativamente il comportamento dei modelli, ma tali tecniche sono state raramente integrate in protocolli forensi completi di valutazione della robustezza~\cite{Adadi2018,Doshi-Velez2017,Ribeiro2016,Sundararajan2017,Zhou2016}.
 
-Il limite principale che emerge da questo quadro non è l'assenza di ricerca sui singoli temi, ma la mancanza di una valutazione integrata. In particolare, la letteratura disponibile tende a separare la valutazione dei modelli accademici dalla validazione degli strumenti operativi, gli attacchi adversariali dalle trasformazioni anti-forensi, le metriche quantitative dall'analisi spiegabile del comportamento del modello, e i benchmark generici di computer vision dagli scenari investigativi realistici. Questa frammentazione rende difficile comprendere in che misura un sistema \gls{ai}-based possa essere considerato affidabile quando viene impiegato per supportare la classificazione automatizzata di immagini all'interno di un workflow forense.
-
+Il limite principale che emerge da questo quadro non è l'assenza di ricerca
+sui singoli temi, ma la mancanza di una valutazione integrata.
+La Figura~\ref{fig:sota-literature-gap} visualizza sinteticamente questa
+frammentazione: i sette filoni recensiti convergono ciascuno verso uno spazio
+metodologico che nessuno di essi affronta in modo unitario.
 
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
-    node distance=1.5cm and 2.0cm,
     every node/.style={font=\small, align=center},
     field/.style={
-        rectangle,
-        rounded corners,
-        draw=black,
-        thick,
+        rectangle, rounded corners,
+        draw=black, thick,
         fill=gray!10,
-        minimum width=3.6cm,
+        minimum width=3.4cm,
         minimum height=1.0cm
     },
     gap/.style={
-        rectangle,
-        rounded corners,
-        draw=black,
-        thick,
+        rectangle, rounded corners,
+        draw=black, very thick,
         fill=orange!20,
-        minimum width=4.3cm,
-        minimum height=1.2cm
+        minimum width=4.8cm,
+        minimum height=1.4cm
     },
-    arrow/.style={->, thick}
+    arrow/.style={->, thick, >=stealth}
 ]
 
-\node[field] (ai_df) {Automazione\\nella \gls{df}};
-\node[field, right=of ai_df] (tools) {Tool forensi\\\gls{ai}-based};
-\node[field, below=of ai_df] (classification) {Classificazione\\automatica di immagini};
-\node[field, right=of classification] (robustness) {Valutazione\\della robustezza};
-\node[field, below=of classification] (aml) {\gls{aml}\\su immagini};
-\node[field, right=of aml] (antiforensics) {Anti-forensics\\su immagini};
-\node[field, below=of robustness] (xai) {\gls{xai}\\e affidabilità};
+%% Riga alta (y=6)
+\node[field] (ai_df)          at (0,   6) {Automazione\\nella \gls{df}};
+\node[field] (robustness)     at (9,   6) {Valutazione\\della robustezza};
 
-\node[gap, below right=1.2cm and -0.8cm of classification] (gap) {Gap metodologico:\\valutazione integrata\\della robustezza operativa};
+%% Riga media (y=4)
+\node[field] (tools)          at (0,   4) {Tool forensi\\\gls{ai}-based};
+\node[field] (aml)            at (4.5, 4) {\gls{aml}\\su immagini};
+\node[field] (antiforensics)  at (9,   4) {Anti-forensics\\su immagini};
 
-\draw[arrow] (ai_df) -- (tools);
-\draw[arrow] (classification) -- (robustness);
-\draw[arrow] (aml) -- (gap);
+%% Riga bassa (y=2)
+\node[field] (classification) at (0,   2) {Classificazione\\automatica immagini};
+\node[field] (xai)            at (9,   2) {\gls{xai}\\e affidabilità};
+
+%% Gap — nodo terminale, sotto tutto (y=0)
+\node[gap]   (gap)            at (4.5, 0) {Gap metodologico:\\valutazione integrata\\della robustezza operativa};
+
+%% Frecce verso il gap (convergenza)
+\draw[arrow] (ai_df)         -- (gap);
+\draw[arrow] (tools)         -- (gap);
+\draw[arrow] (classification)-- (gap);
+\draw[arrow] (robustness)    -- (gap);
+\draw[arrow] (aml)           -- (gap);
 \draw[arrow] (antiforensics) -- (gap);
-\draw[arrow] (xai) -- (gap);
-\draw[arrow] (tools) -- (gap);
-\draw[arrow] (classification) -- (gap);
-\draw[arrow] (robustness) -- (gap);
+\draw[arrow] (xai)           -- (gap);
 
 \end{tikzpicture}
-\caption{Relazione tra i principali filoni della letteratura e gap metodologico affrontato dalla presente tesi.}
+\caption{Convergenza dei principali filoni della letteratura verso il gap
+metodologico affrontato dalla presente tesi. Ciascun filone contribuisce
+parzialmente al problema della robustezza operativa dei sistemi \gls{ai}-based
+in \gls{df}, senza che nessuno lo affronti in modo integrato.}
+
 \label{fig:sota-literature-gap}
 \end{figure}
 
-
-La Tabella~\ref{tab:sota-gap-summary} sintetizza i principali filoni emersi dalla revisione e il limite che ciascuno lascia aperto rispetto al problema affrontato nella presente tesi.
+La Tabella~\ref{tab:sota-gap-summary} dettaglia analiticamente, per ciascun
+filone, il contributo principale e il limite specifico rispetto al problema
+affrontato nella presente tesi.
 
 \begin{table}[H]
 \centering
@@ -243,7 +252,9 @@ Valutazione della robustezza & Documenta degradi sistematici delle prestazioni i
 \hline
 Anti-forensics su immagini & Analizza trasformazioni che alterano tracce, qualità e struttura statistica dell'immagine. & L'impatto di tali trasformazioni sulla classificazione automatizzata forense è ancora poco integrato con l'analisi adversariale. \\
 \hline
-\gls{xai} & Offre strumenti per interpretare qualitativamente il comportamento dei modelli. & Le spiegazioni visuali sono raramente integrate in protocolli completi di robustezza forense. \\
+\gls{xai} & Documenta tecniche di attribuzione visuale capaci di evidenziare
+le regioni dell'immagine che influenzano la predizione,
+con applicazione a modelli di classificazione profonda.. & Le spiegazioni visuali sono raramente integrate in protocolli completi di robustezza forense. \\
 \hline
 \end{tabular}
 \caption{Sintesi dei principali filoni della letteratura e dei limiti rilevanti rispetto alla valutazione della robustezza operativa di sistemi \gls{ai}-based in \gls{df}.}
