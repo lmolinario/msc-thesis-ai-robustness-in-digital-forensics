@@ -2,10 +2,10 @@
 
 Questo capitolo introduce i concetti teorici necessari per comprendere la valutazione della robustezza operativa di strumenti \gls{ai}-based impiegati nella classificazione automatizzata di immagini in ambito forense. Il quadro teorico è costruito a partire dai fondamenti della \gls{df} e della prova digitale, per poi esaminare il ruolo dell'\gls{ai} nei workflow forensi, la rilevanza delle immagini come evidenze digitali, i principi di \gls{ml} e \gls{dl} applicati alla computer vision, l'\gls{aml}, le tecniche anti-forensi applicate a contenuti visivi e il ruolo dell'\gls{xai} nella valutazione dell'affidabilità dei modelli. La trattazione mantiene un livello concettuale e definitorio: la descrizione della pipeline sperimentale, dei dataset, dei modelli e degli strumenti utilizzati è demandata ai capitoli metodologici successivi.
 
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Digital Forensics e prova digitale}
 \label{sec:background_df_evidence}
-
+% ─────────────────────────────────────────────────────────────────────────────
 La \gls{df} è la disciplina tecnico-scientifica che si occupa dell'identificazione, acquisizione, conservazione, esame, analisi e presentazione di dati digitali potenzialmente rilevanti in un contesto investigativo o giudiziario. Essa nasce dall'esigenza di trattare informazioni memorizzate o trasmesse mediante dispositivi elettronici secondo procedure idonee a preservarne il valore probatorio. In tale prospettiva, il dato digitale non assume automaticamente il ruolo di prova: esso deve essere raccolto, documentato e interpretato mediante procedure controllabili, ripetibili e compatibili con i requisiti di integrità, autenticità e tracciabilità richiesti dall'indagine forense \cite{casey2011digital,garfinkel2010digital,nist2006guide}.
 
 La prova digitale presenta caratteristiche peculiari rispetto alle evidenze fisiche tradizionali. Essa è immateriale, facilmente replicabile, spesso distribuita tra dispositivi, servizi cloud, supporti rimovibili e sistemi di comunicazione, e può essere alterata anche da operazioni apparentemente ordinarie, come l'accensione di un dispositivo, l'apertura di un file o l'esecuzione di un'applicazione. Questa fragilità rende necessario distinguere tra semplice disponibilità tecnica del dato e sua utilizzabilità forense. Un'immagine, un log, un messaggio o un file multimediale possono contribuire alla ricostruzione di un fatto solo se il loro ciclo di vita investigativo è documentato in modo da consentire la verifica delle operazioni compiute e delle eventuali trasformazioni subite.
@@ -109,10 +109,10 @@ Questa esigenza diventa particolarmente critica quando l'automazione riguarda co
 
 
 
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Artificial Intelligence nella Digital Forensics}
 \label{sec:background_ai_digital_forensics}
-
+% ─────────────────────────────────────────────────────────────────────────────
 L'integrazione dell'\gls{ai} nella \gls{df} risponde alla crescente complessità quantitativa e qualitativa delle indagini digitali. L'aumento del volume dei dati acquisiti da dispositivi personali, infrastrutture cloud, sistemi mobili, applicazioni di messaggistica e archivi multimediali rende progressivamente meno sostenibile un'analisi esclusivamente manuale. In questo scenario, tecniche di automazione, indicizzazione intelligente e classificazione assistita possono supportare l'analista nella selezione preliminare delle informazioni potenzialmente rilevanti, riducendo il carico operativo e accelerando le fasi di esame e analisi dell'evidenza digitale \cite{garfinkel2010digital,costantini2019digital}.
 
 Nel contesto forense, l'\gls{ai} può essere impiegata per compiti eterogenei, tra cui il riconoscimento di pattern, il raggruppamento di contenuti simili, la ricerca semantica, la classificazione automatica di immagini e documenti, l'identificazione di anomalie e la prioritizzazione degli artefatti da sottoporre a revisione umana. Tali funzionalità non sostituiscono l'attività valutativa dell'operatore, ma possono costituire un supporto alla navigazione di grandi insiemi di dati, specialmente quando l'evidenza contiene quantità elevate di contenuti multimediali o informazioni scarsamente strutturate. La rilevanza dell'\gls{ai} nella \gls{df} deve quindi essere intesa in termini di assistenza investigativa e non come delega automatica della decisione probatoria \cite{costantini2019digital,faqir2023digital}.
@@ -126,10 +126,10 @@ La letteratura recente ha evidenziato come l'impiego di funzionalità \gls{ai}-b
 Per queste ragioni, l'adozione dell'\gls{ai} nella \gls{df} deve essere accompagnata da un paradigma di supervisione umana, documentazione tecnica e valutazione sperimentale della robustezza. L'analista deve poter comprendere il ruolo svolto dal sistema automatico, i limiti della classificazione prodotta e le condizioni nelle quali il modello può generare errori. In questa prospettiva, l'\gls{ai} non rappresenta un sostituto della competenza forense, ma uno strumento di supporto la cui utilità dipende dalla possibilità di verificarne prestazioni, stabilità e affidabilità nel contesto operativo in cui viene impiegato.
 
 Il caso della classificazione automatica di immagini costituisce un dominio particolarmente significativo per analizzare tali problematiche. Le immagini possono contenere informazioni direttamente rilevanti per l'indagine, ma sono anche soggette a trasformazioni tecniche e manipolazioni che possono modificarne l'aspetto, i metadati o le caratteristiche statistiche. Per questo motivo, prima di introdurre i principi di \gls{ml} e \gls{dl} applicati alla computer vision, è necessario chiarire il ruolo delle immagini come evidenze digitali e il significato della loro classificazione automatica nel contesto dell'image forensics.
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Image Forensics e classificazione automatica}
 \label{sec:background_image_forensics}
-
+% ─────────────────────────────────────────────────────────────────────────────
 Le immagini digitali rappresentano una categoria di evidenza particolarmente rilevante nelle indagini forensi contemporanee. Esse possono documentare luoghi, oggetti, persone, condotte, strumenti o circostanze potenzialmente significative per la ricostruzione di un fatto. A differenza di altri artefatti digitali, tuttavia, l'immagine combina una dimensione visiva immediatamente interpretabile dall'osservatore umano con una struttura tecnica complessa, costituita da valori di pixel, metadati, parametri di compressione, informazioni sul dispositivo di acquisizione e possibili tracce di elaborazione successiva. Per questo motivo, l'analisi forense delle immagini richiede di considerare sia il contenuto raffigurato sia le proprietà digitali del file che lo rappresenta \cite{farid2016photo,stamm2013information}.
 
 L'image forensics si occupa dello studio delle immagini digitali con l'obiettivo di valutarne origine, integrità, autenticità e possibili manipolazioni. Le tecniche classiche di questo dominio includono, tra le altre, l'analisi dei metadati, lo studio degli artefatti di compressione, la ricerca di incoerenze statistiche, l'identificazione di tracce di ricampionamento e l'esame di caratteristiche legate al sensore o al processo di acquisizione. Tali analisi non mirano soltanto a stabilire se un'immagine sia visivamente plausibile, ma a verificare se il file presenti elementi tecnici compatibili con una determinata origine o con una determinata storia di elaborazione \cite{popescu2005exposing,farid2016photo}.
@@ -143,10 +143,10 @@ L'affidabilità della classificazione automatica dipende anche dalle caratterist
 Questa sensibilità è particolarmente critica in ambito forense, perché un errore di classificazione può incidere sul processo di selezione preliminare delle evidenze. Un falso negativo può impedire che un'immagine rilevante venga portata all'attenzione dell'analista, mentre un falso positivo può aumentare il carico di revisione e generare percorsi investigativi non pertinenti. In entrambi i casi, il problema non riguarda soltanto la prestazione tecnica del classificatore, ma anche il rapporto tra automazione, priorità investigativa e affidabilità del workflow forense.
 
 Pertanto, la classificazione automatica di immagini in ambito forense deve essere valutata considerando non solo la correttezza della predizione su dati puliti, ma anche la sua stabilità rispetto a condizioni realistiche di acquisizione, compressione, degradazione e manipolazione. Questo aspetto collega direttamente l'image forensics alla valutazione della robustezza dei modelli \gls{ai}-based. Prima di discutere attacchi adversariali e tecniche anti-forensi, è necessario introdurre i principi di \gls{ml} e \gls{dl} che consentono ai sistemi di computer vision di apprendere rappresentazioni visive e produrre classificazioni automatiche.
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Machine Learning e Deep Learning per la Computer Vision}
 \label{sec:background_ml_dl_cv}
-
+% ─────────────────────────────────────────────────────────────────────────────
 La computer vision comprende l'insieme di metodi computazionali finalizzati all'analisi automatica di immagini e video, con l'obiettivo di estrarre informazioni strutturate da contenuti visivi. In questo ambito, le tecniche di \gls{ml} e \gls{dl} hanno progressivamente sostituito o affiancato approcci basati su feature progettate manualmente, consentendo ai modelli di apprendere rappresentazioni visive direttamente dai dati. Nel caso della classificazione di immagini, il problema consiste nell'associare a un'immagine una o più etichette semantiche sulla base delle caratteristiche osservabili nel contenuto visivo \cite{bishop2006pattern,gonzalez2018digital}.
 
 Nel paradigma supervisionato, un modello viene addestrato su un insieme di esempi annotati, ciascuno costituito da un input e da una corrispondente etichetta di classe. Durante l'addestramento, il modello apprende una funzione decisionale capace di associare nuovi input a una delle classi previste dal task. L'obiettivo non è memorizzare gli esempi osservati, ma generalizzare correttamente su dati non visti. Questa distinzione è centrale in ambito forense, poiché un classificatore utilizzato su evidenze reali può incontrare immagini diverse da quelle presenti nei dati di addestramento, per qualità, provenienza, risoluzione, compressione, contesto visivo o distribuzione semantica.
@@ -168,10 +168,10 @@ Questa impostazione giustifica, sul piano metodologico, l'introduzione di una cl
 Un ulteriore aspetto riguarda l'interpretazione probabilistica degli output. Molti modelli di classificazione producono score o probabilità associate alle classi, ma tali valori non corrispondono necessariamente a una misura diretta di affidabilità probatoria. Un'elevata confidenza può essere il risultato di correlazioni spurie, bias del dataset o sovra-adattamento alla distribuzione di addestramento. Per questo motivo, l'uso di modelli \gls{ml} e \gls{dl} in un workflow forense richiede una valutazione prudente, nella quale le predizioni automatiche siano considerate come supporto analitico e non come determinazioni autonome.
 
 La computer vision forense deve quindi confrontarsi con una tensione metodologica: da un lato, i modelli \gls{dl} consentono di analizzare grandi quantità di immagini con prestazioni spesso superiori agli approcci tradizionali; dall'altro, la loro affidabilità può ridursi in presenza di variazioni visive, trasformazioni anti-forensi, perturbazioni adversariali o input fuori distribuzione. Questa tensione giustifica la necessità di studiare la robustezza dei classificatori non soltanto in condizioni pulite e controllate, ma anche in scenari realistici nei quali il contenuto visivo può essere degradato, manipolato o deliberatamente alterato.
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial Machine Learning}
 \label{sec:background_adversarial_ml}
-
+% ─────────────────────────────────────────────────────────────────────────────
 L'\gls{aml} studia il comportamento dei sistemi di apprendimento automatico in presenza di input costruiti o modificati con l'obiettivo di alterarne il funzionamento. A differenza degli errori dovuti a rumore casuale, scarsa qualità dei dati o limiti di generalizzazione, gli attacchi adversariali presuppongono la presenza di un attore che modifica deliberatamente l'input per indurre il modello a produrre una predizione errata. Nel dominio della computer vision, questo problema assume particolare rilevanza perché piccole variazioni del contenuto digitale possono essere sufficienti a modificare la classificazione prodotta da un modello, anche quando l'immagine resta apparentemente simile per un osservatore umano \cite{szegedy2014intriguing,goodfellow2015explaining}.
 
 Un adversarial example può essere descritto, in termini generali, come un input modificato rispetto a un campione originario, ma costruito in modo tale da indurre il classificatore a produrre un'etichetta non corretta. Indicando con \(x\) l'immagine originale, con \(y\) la sua classe corretta e con \(f(\cdot)\) il classificatore, l'obiettivo dell'attaccante è generare una versione perturbata \(x'\), tale che \(x'\) rimanga sufficientemente vicina a \(x\) secondo un vincolo di distanza o percettibilità, ma venga classificata in modo diverso dal modello. In forma semplificata, il problema può essere espresso come la ricerca di una perturbazione \(\delta\) tale che:
@@ -205,10 +205,10 @@ Un'ulteriore distinzione riguarda l'obiettivo dell'attacco. Negli attacchi untar
 La letteratura ha proposto numerose tecniche per generare esempi adversariali, differenziate per vincolo di perturbazione, costo computazionale, conoscenza richiesta e trasferibilità. Metodi basati sul gradiente, come il \gls{fgsm}, sfruttano l'informazione fornita dalla funzione di perdita per individuare una direzione di perturbazione efficace \cite{goodfellow2015explaining}. Altri approcci mirano a produrre perturbazioni più ottimizzate, più sparse o localizzate, riducendo il numero di pixel modificati o approssimando perturbazioni minime capaci di attraversare il confine decisionale del classificatore \cite{carlini2017towards,su2019onepixel,moosavi2016deepfool,zhang2024superdeepfool}. Nel presente capitolo tali tecniche sono richiamate soltanto come fondamento teorico; la selezione e l'applicazione degli attacchi nella pipeline sperimentale vengono discusse nel capitolo metodologico.
 
 In ambito forense, il problema adversarial non riguarda soltanto la vulnerabilità astratta dei modelli, ma la loro affidabilità operativa all'interno di un processo investigativo. Se un sistema \gls{ai}-based viene utilizzato per filtrare o classificare grandi quantità di immagini, una perturbazione capace di alterarne la predizione può ridurre la probabilità che un contenuto rilevante venga sottoposto tempestivamente all'attenzione dell'analista. Il rischio non consiste necessariamente nella produzione automatica di una decisione giudiziaria errata, ma nella possibilità che l'automazione modifichi il percorso di scoperta, prioritizzazione e interpretazione dell'evidenza. Per questo motivo, la robustezza adversarial deve essere considerata come una componente della più ampia affidabilità tecnico-forense del sistema.
-
+% ─────────────────────────────────────────────────────────────────────────────
 \subsection{Threat model e assunzioni dell'attaccante}
 \label{subsec:background_threat_model}
-
+% ─────────────────────────────────────────────────────────────────────────────
 Il threat model definisce le assunzioni relative alle capacità, agli obiettivi e ai vincoli dell'attaccante. In \gls{aml}, esso è necessario per delimitare in modo rigoroso lo scenario di attacco e per evitare valutazioni di robustezza prive di un contesto operativo. Senza un threat model esplicito, il risultato di un test adversarial rischia di essere difficilmente interpretabile, poiché non è chiaro quale tipo di avversario il sistema sia in grado di tollerare e quali condizioni siano invece escluse dall'analisi \cite{carlini2017towards,yuan2019adversarial}.
 
 Nel contesto della classificazione automatica di immagini in ambito forense, l'attaccante può essere modellato come un soggetto interessato a ridurre la probabilità che determinati contenuti vengano correttamente identificati da uno strumento automatico. L'obiettivo principale non è necessariamente compromettere l'intero workflow forense, ma alterare la risposta del classificatore su specifici input visivi. In termini operativi, ciò può tradursi nella volontà di trasformare un'immagine rilevante in un'immagine classificata come non rilevante, ambigua o appartenente a una categoria diversa da quella attesa. Questo scenario è coerente con un attacco di evasion, poiché la manipolazione avviene sull'input analizzato e non sulla fase di addestramento del modello.
@@ -247,10 +247,10 @@ La Tabella~\ref{tab:threat_model} sintetizza le principali dimensioni del threat
 \end{table}
 
 
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Tecniche anti-forensi su immagini digitali}
 \label{sec:background_antiforensics_images}
-
+% ─────────────────────────────────────────────────────────────────────────────
 Le tecniche anti-forensi comprendono l'insieme di strategie finalizzate a ostacolare, degradare o rendere meno affidabile l'analisi forense di un contenuto digitale. Nel dominio delle immagini, tali tecniche possono intervenire sia sulle proprietà visive del contenuto sia sulle caratteristiche statistiche e strutturali del file, con l'obiettivo di ridurre la possibilità di ricostruire la storia dell'immagine, rilevare manipolazioni, identificare tracce di acquisizione o classificare correttamente il contenuto raffigurato. In termini generali, l'anti-forensics non coincide necessariamente con la falsificazione esplicita dell'immagine, ma include anche trasformazioni capaci di alterare o mascherare informazioni rilevanti per l'analisi tecnica \cite{stamm2010anti,yaacoub2021digital}.
 
 Nel contesto dell'image forensics, molte analisi si basano sulla presenza di tracce statistiche, artefatti di compressione, pattern di ricampionamento, caratteristiche del sensore o incoerenze tra regioni dell'immagine. Le trasformazioni anti-forensi mirano spesso a ridurre la visibilità di tali tracce o a introdurre modifiche che rendano più difficile distinguere tra contenuti originali, degradati o manipolati. Ad esempio, la ricompressione \gls{jpeg} può modificare gli artefatti prodotti da precedenti operazioni di salvataggio, il ricampionamento può alterare le correlazioni spaziali introdotte da operazioni di ridimensionamento, mentre modifiche dell'istogramma o del contrasto possono cambiare la distribuzione dei valori di intensità dell'immagine \cite{popescu2005exposing,farid2016photo}.
@@ -304,10 +304,10 @@ La Tabella~\ref{tab:adv_vs_antiforensics} sintetizza la distinzione concettuale 
     \label{tab:adv_vs_antiforensics}
 \end{table}
 
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability, robustezza e affidabilità dei modelli}
 \label{sec:background_xai_robustness}
-
+% ─────────────────────────────────────────────────────────────────────────────
 La valutazione di un modello \gls{ai}-based non può essere ricondotta esclusivamente alla misurazione della sua accuratezza media. In un contesto forense, infatti, l'utilità di un sistema automatico dipende anche dalla stabilità delle sue predizioni, dalla capacità di gestire input degradati o fuori distribuzione, dalla trasparenza delle informazioni fornite all'analista e dalla possibilità di documentare in modo verificabile il ruolo svolto dal modello nel workflow investigativo. Accuratezza, robustezza, interpretabilità e affidabilità sono quindi dimensioni complementari, che devono essere considerate congiuntamente quando un sistema di classificazione automatica viene impiegato a supporto dell'analisi di evidenze digitali \cite{Adadi2018,Doshi-Velez2017}.
 
 La robustezza può essere definita, in termini generali, come la capacità di un modello di mantenere un comportamento stabile e coerente in presenza di variazioni dell'input. Tali variazioni possono essere accidentali, come rumore, compressione, bassa risoluzione o condizioni di acquisizione non ideali, oppure intenzionali, come perturbazioni adversariali e trasformazioni anti-forensi. Nel dominio della computer vision, la robustezza non riguarda soltanto la resistenza a piccole perturbazioni numeriche, ma anche la capacità del classificatore di gestire cambiamenti realistici nelle proprietà visive dell'immagine, nella distribuzione dei dati e nella qualità del contenuto analizzato \cite{hendrycks2019benchmarking,ford2019adversarial}.
@@ -328,10 +328,10 @@ Nel quadro della presente tesi, explainability, robustezza e affidabilità sono 
 
 
 
-
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Profili giuridici e normativi dell'AI in ambito forense}
 \label{sec:background_legal_profiles}
-
+% ─────────────────────────────────────────────────────────────────────────────
 L'impiego dell'\gls{ai} in ambito forense non solleva soltanto questioni tecniche, ma incide anche sui presupposti di affidabilità, verificabilità e controllo che caratterizzano la prova digitale. Nei procedimenti investigativi e giudiziari, un sistema automatico può contribuire alla selezione, classificazione o prioritizzazione di contenuti rilevanti, ma non può sostituire la valutazione dell'operatore forense né quella dell'autorità giudiziaria. La dimensione giuridica dell'\gls{ai} nella \gls{df} deve quindi essere ricondotta al principio secondo cui ogni risultato tecnico utilizzato a fini probatori deve poter essere documentato, contestualizzato e, per quanto possibile, verificato mediante procedure trasparenti e ripetibili \cite{casey2011digital,iso27037,biasiotti2018handling}.
 
 La prova digitale è caratterizzata da una particolare vulnerabilità alla modifica, alla perdita di contesto e alla difficoltà di attribuzione. Per tale ragione, gli standard e le linee guida internazionali insistono sulla necessità di preservare integrità, autenticità, tracciabilità e catena di custodia lungo l'intero ciclo di gestione dell'evidenza \cite{iso27037,enfsi2022}. Quando l'analisi è supportata da moduli \gls{ai}-based, questi requisiti non vengono meno, ma si estendono anche al funzionamento dello strumento automatico. Diventa quindi necessario documentare non soltanto l'origine e il trattamento del dato, ma anche il ruolo svolto dal modello, le condizioni di utilizzo, le metriche disponibili, i limiti noti e l'eventuale intervento umano nella valutazione del risultato.
