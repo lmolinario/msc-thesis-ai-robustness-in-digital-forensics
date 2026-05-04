@@ -65,11 +65,11 @@ def ask_yes_no(prompt: str, default: bool = True) -> bool:
         answer = input(f"{prompt} {suffix}: ").strip().lower()
         if not answer:
             return default
-        if answer in {"y", "yes", "s", "si", "sì"}:
+        if answer in {"y", "yes"}:
             return True
         if answer in {"n", "no"}:
             return False
-        print("Risposta non valida. Inserisci y/n.")
+        print("Invalid answer. Please enter y or n.")
 
 
 def ask_choice(prompt: str, options: list[str], default_index: int = 0) -> str:
@@ -79,14 +79,14 @@ def ask_choice(prompt: str, options: list[str], default_index: int = 0) -> str:
         print(f"  {index}. {option}{marker}")
 
     while True:
-        answer = input("Selezione: ").strip()
+        answer = input("Selection: ").strip()
         if not answer:
             return options[default_index]
         if answer.isdigit():
             selected = int(answer)
             if 1 <= selected <= len(options):
                 return options[selected - 1]
-        print(f"Selezione non valida. Inserisci un numero tra 1 e {len(options)}.")
+        print(f"Invalid selection. Please enter a number between 1 and {len(options)}.")
 
 
 def ask_multi_choice(
@@ -99,10 +99,10 @@ def ask_multi_choice(
         print(f"  {index}. {option}")
 
     default_text = "all" if default_all else ""
-    print("\nEsempi: 1 | 1 2 | 1,2,3 | all")
+    print("\nExamples: 1 | 1 2 | 1,2,3 | all")
 
     while True:
-        answer = input(f"Selezione [{default_text}]: ").strip().lower()
+        answer = input(f"Selection [{default_text}]: ").strip().lower()
         if not answer and default_all:
             return options.copy()
         if answer == "all":
@@ -110,7 +110,7 @@ def ask_multi_choice(
 
         normalized = answer.replace(",", " ").split()
         if not normalized:
-            print("Selezione vuota non valida.")
+            print("Empty selection is not valid.")
             continue
 
         selected: list[str] = []
@@ -130,11 +130,11 @@ def ask_multi_choice(
         if valid and selected:
             return selected
 
-        print(f"Selezione non valida. Usa numeri tra 1 e {len(options)} oppure 'all'.")
+        print(f"Invalid selection. Use numbers between 1 and {len(options)} or 'all'.")
 
 
 def ask_path(prompt: str, default_path: Path) -> Path:
-    answer = input(f"{prompt}\nDefault: {default_path}\nPercorso: ").strip()
+    answer = input(f"{prompt}\nDefault: {default_path}\nPath: ").strip()
     if not answer:
         return default_path
     path = Path(answer).expanduser()
@@ -151,7 +151,7 @@ def ask_float(prompt: str, default_value: float) -> float:
         try:
             return float(answer)
         except ValueError:
-            print("Valore non valido. Inserisci un numero.")
+            print("Invalid value. Please enter a number.")
 
 
 def ask_int(prompt: str, default_value: int) -> int:
@@ -162,7 +162,7 @@ def ask_int(prompt: str, default_value: int) -> int:
         try:
             return int(answer)
         except ValueError:
-            print("Valore non valido. Inserisci un intero.")
+            print("Invalid value. Please enter an integer.")
 
 
 def relative_or_absolute(path: Path) -> str:
@@ -178,18 +178,18 @@ def relative_or_absolute(path: Path) -> str:
 
 def choose_attacks() -> list[str]:
     mode = ask_choice(
-        prompt="Cosa vuoi generare?",
+        prompt="What do you want to generate?",
         options=[
-            "Solo color_shift (model-agnostic, non richiede checkpoint)",
-            "Solo fgsm (model-dependent, richiede checkpoint)",
+            "Only color_shift (model-agnostic, no checkpoints required)",
+            "Only fgsm (model-dependent, checkpoints required)",
             "color_shift + fgsm",
         ],
         default_index=0,
     )
 
-    if mode.startswith("Solo color_shift"):
+    if mode.startswith("Only color_shift"):
         return ["color_shift"]
-    if mode.startswith("Solo fgsm"):
+    if mode.startswith("Only fgsm"):
         return ["fgsm"]
     return ["color_shift", "fgsm"]
 
@@ -199,7 +199,7 @@ def choose_target_models(attacks: list[str]) -> list[str]:
         return SUPPORTED_TARGET_MODELS.copy()
 
     return ask_multi_choice(
-        prompt="Seleziona i target model per FGSM:",
+        prompt="Select target models for FGSM:",
         options=SUPPORTED_TARGET_MODELS,
         default_all=True,
     )
@@ -210,22 +210,26 @@ def collect_checkpoint_args(target_models: list[str], attacks: list[str]) -> lis
         return []
 
     args: list[str] = []
-    print_header("Checkpoint per FGSM")
+    print_header("FGSM checkpoints")
+
+    print(
+        "FGSM requires trained binary checkpoints. If a selected checkpoint is "
+        "missing, the official generator cannot run."
+    )
 
     for model_name in target_models:
         checkpoint_path = ask_path(
-            prompt=f"Checkpoint per {model_name}",
+            prompt=f"Checkpoint for {model_name}",
             default_path=DEFAULT_CHECKPOINTS[model_name],
         )
 
         if not checkpoint_path.exists():
-            print(f"\nATTENZIONE: checkpoint non trovato: {checkpoint_path}")
-            proceed = ask_yes_no(
-                "Vuoi continuare comunque? Lo script ufficiale si fermerà se il file manca.",
-                default=False,
+            print(f"\nERROR: checkpoint not found: {checkpoint_path}")
+            print(
+                "Create or copy the checkpoint before running FGSM, or select "
+                "only color_shift / a target model with an existing checkpoint."
             )
-            if not proceed:
-                raise SystemExit("Esecuzione annullata: checkpoint mancante.")
+            raise SystemExit("Execution cancelled: missing checkpoint.")
 
         if model_name == "resnet18":
             args.extend(["--checkpoint-resnet18", relative_or_absolute(checkpoint_path)])
@@ -262,20 +266,20 @@ def build_command() -> list[str]:
         command.extend(["--fgsm-epsilon", str(epsilon)])
 
         device = ask_choice(
-            prompt="Device per model-dependent attacks:",
+            prompt="Device for model-dependent attacks:",
             options=["auto", "cpu", "cuda"],
             default_index=0,
         )
         command.extend(["--device", device])
 
-        input_size = ask_int("Input size quadrato per gli adapter", 224)
+        input_size = ask_int("Square input size for adapters", 224)
         command.extend(["--input-size", str(input_size)])
 
-    jpeg_quality = ask_int("JPEG quality output", 95)
+    jpeg_quality = ask_int("Output JPEG quality", 95)
     command.extend(["--jpeg-quality", str(jpeg_quality)])
 
     if "color_shift" in attacks:
-        print_header("Parametri color_shift")
+        print_header("color_shift parameters")
         red_shift = ask_int("Red channel shift", 12)
         green_shift = ask_int("Green channel shift", 0)
         blue_shift = ask_int("Blue channel shift", -12)
@@ -297,21 +301,21 @@ def build_command() -> list[str]:
             ]
         )
 
-    if ask_yes_no("Vuoi rigenerare sovrascrivendo le cartelle degli attacchi selezionati?", default=True):
+    if ask_yes_no("Regenerate and overwrite selected attack output directories?", default=True):
         command.append("--force")
 
-    if ask_yes_no("Vuoi logging verbose?", default=False):
+    if ask_yes_no("Enable verbose logging?", default=False):
         command.append("--verbose")
 
     return command
 
 
 def run_command(command: list[str]) -> int:
-    print_header("Comando generato")
+    print_header("Generated command")
     print(" ".join(shlex.quote(part) for part in command))
 
-    if not ask_yes_no("Eseguire ora questo comando?", default=True):
-        print("Esecuzione annullata. Puoi copiare il comando qui sopra e lanciarlo manualmente.")
+    if not ask_yes_no("Run this command now?", default=True):
+        print("Execution cancelled. You can copy the command above and run it manually.")
         return 0
 
     env = os.environ.copy()
