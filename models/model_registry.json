@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "task": "binary_weapon_classification",
+  "label_mapping": {
+    "non_weapon": 0,
+    "weapon": 1
+  },
+  "fold_protocol": "leave_one_fold_out_proxy_training",
+  "input_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
+  "checkpoint_root": "models/checkpoints",
+  "models": {
+    "resnet18": {
+      "architecture": "torchvision.resnet18",
+      "pretrained_weights": "IMAGENET1K_V1",
+      "classifier": "Linear(in_features, 2)",
+      "input_size": 224,
+      "normalization": "imagenet",
+      "checkpoint_pattern": "models/checkpoints/resnet18/{fold}.pt",
+      "download_url": "",
+      "sha256": {}
+    },
+    "efficientnet_b0": {
+      "architecture": "torchvision.efficientnet_b0",
+      "pretrained_weights": "IMAGENET1K_V1",
+      "classifier": "Linear(in_features, 2)",
+      "input_size": 224,
+      "normalization": "imagenet",
+      "checkpoint_pattern": "models/checkpoints/efficientnet_b0/{fold}.pt",
+      "download_url": "",
+      "sha256": {}
+    },
+    "clip": {
+      "architecture": "open_clip.ViT-B-32",
+      "pretrained_weights": "openai",
+      "classifier": "frozen_visual_encoder_plus_binary_head",
+      "input_size": 224,
+      "normalization": "clip",
+      "checkpoint_pattern": "models/checkpoints/clip/{fold}.pt",
+      "download_url": "",
+      "sha256": {}
+    }
+  }
+}
