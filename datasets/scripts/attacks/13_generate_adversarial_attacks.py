@@ -59,9 +59,14 @@ from datasets.scripts.attacks.adversarial_model_interface import (
     MODEL_AGNOSTIC_TARGET,
     PLANNED_ATTACK_NAMES,
     SUPPORTED_TARGET_MODELS,
+    TargetModelConfig,
     VALID_BINARY_LABELS,
     expected_generation_count,
+    is_model_dependent_attack,
     validate_target_model_names,
+)
+from datasets.scripts.attacks.adversarial_torch_model_adapters import (
+    build_target_model_adapter,
 )
 from datasets.scripts.utils.paths import (
     ADVERSARIAL_DIR,
@@ -126,6 +131,46 @@ def parse_args() -> argparse.Namespace:
             "This option is recorded for reproducibility and ignored by "
             "model-agnostic attacks such as color_shift."
         ),
+    )
+    parser.add_argument(
+        "--checkpoint-resnet18",
+        type=str,
+        default="",
+        help=(
+            "Path to the trained binary ResNet18 checkpoint. Required only when "
+            "a model-dependent attack targets resnet18."
+        ),
+    )
+    parser.add_argument(
+        "--checkpoint-efficientnet-b0",
+        type=str,
+        default="",
+        help=(
+            "Path to the trained binary EfficientNet-B0 checkpoint. Required only "
+            "when a model-dependent attack targets efficientnet_b0."
+        ),
+    )
+    parser.add_argument(
+        "--checkpoint-clip",
+        type=str,
+        default="",
+        help=(
+            "Path to the trained CLIP binary-head checkpoint. Required only when "
+            "a model-dependent attack targets clip."
+        ),
+    )
+    parser.add_argument(
+        "--device",
+        type=str,
+        default="auto",
+        choices=["auto", "cpu", "cuda"],
+        help="Execution device for model-dependent attacks (default: auto).",
+    )
+    parser.add_argument(
+        "--input-size",
+        type=int,
+        default=224,
+        help="Square input size used by target-model adapters (default: 224).",
     )
     parser.add_argument(
         "--force",
@@ -209,6 +254,12 @@ def repo_relative_string(path: Path) -> str:
         return str(resolved).replace("\\", "/")
 
 
+def optional_repo_relative_string(path: Path | None) -> str:
+    if path is None:
+        return ""
+    return repo_relative_string(path)
+
+
 def compute_hashes(file_path: Path) -> tuple[str, str]:
     sha256 = hashlib.sha256()
     md5 = hashlib.md5()
@@ -239,6 +290,10 @@ def validate_selected_attacks(selected_attacks: list[str]) -> None:
             "Enable them only after the target-model interface is finalized "
             "and concrete target-model adapters are validated."
         )
+
+
+def selected_attacks_require_models(selected_attacks: list[str]) -> bool:
+    return any(is_model_dependent_attack(attack) for attack in selected_attacks)
 
 
 def load_manifest(path: Path) -> pd.DataFrame:
@@ -363,6 +418,101 @@ def save_jpeg(img: Image.Image, output_path: Path, quality: int = 95) -> None:
         optimize=True,
         progressive=False,
     )
+
+
+# =============================================================================
+# Target-model adapter helpers
+# =============================================================================
+
+def checkpoint_arg_for_model(model_name: str, args: argparse.Namespace) -> str:
+    if model_name == "resnet18":
+        return safe_str(args.checkpoint_resnet18)
+    if model_name == "efficientnet_b0":
+        return safe_str(args.checkpoint_efficientnet_b0)
+    if model_name == "clip":
+        return safe_str(args.checkpoint_clip)
+    raise ValueError(f"Unsupported target model: {model_name}")
+
+
+def resolve_optional_checkpoint(path_str: str) -> Path | None:
+    if not path_str:
+        return None
+    return repo_relative_path(path_str)
+
+
+def build_target_model_configs(
+    selected_target_models: list[str],
+    args: argparse.Namespace,
+    require_checkpoints: bool,
+) -> dict[str, TargetModelConfig]:
+    if args.input_size <= 0:
+        raise ValueError("--input-size must be greater than 0.")
+
+    configs: dict[str, TargetModelConfig] = {}
+
+    for model_name in selected_target_models:
+        checkpoint_path = resolve_optional_checkpoint(
+            checkpoint_arg_for_model(model_name, args)
+        )
+
+        if require_checkpoints and checkpoint_path is None:
+            raise FileNotFoundError(
+                f"Missing checkpoint for target model {model_name!r}. "
+                "Provide the corresponding --checkpoint-* argument."
+            )
+
+        configs[model_name] = TargetModelConfig(
+            name=model_name,
+            checkpoint_path=checkpoint_path,
+            device=args.device,
+            input_size=args.input_size,
+        )
+
+    return configs
+
+
+def load_required_target_model_adapters(
+    configs: dict[str, TargetModelConfig],
+    should_load: bool,
+) -> dict[str, Any]:
+    """
+    Build and optionally load target-model adapters.
+
+    For now, this function is intentionally inactive for color_shift-only runs.
+    It becomes operational when the first model-dependent attack, FGSM, is added
+    to IMPLEMENTED_ATTACK_NAMES.
+    """
+    adapters: dict[str, Any] = {}
+
+    if not should_load:
+        return adapters
+
+    for model_name, config in configs.items():
+        logging.info("Loading target-model adapter: %s", model_name)
+        adapter = build_target_model_adapter(config)
+        adapter.load_model()
+        adapters[model_name] = adapter
+        logging.info("Loaded target-model adapter: %s on %s", model_name, adapter.device)
+
+    return adapters
+
+
+def summarize_target_model_configs(
+    configs: dict[str, TargetModelConfig],
+    adapters_loaded: bool,
+) -> dict[str, dict[str, Any]]:
+    summary: dict[str, dict[str, Any]] = {}
+
+    for model_name, config in configs.items():
+        summary[model_name] = {
+            "checkpoint_provided": config.checkpoint_path is not None,
+            "checkpoint_path": optional_repo_relative_string(config.checkpoint_path),
+            "device": config.device,
+            "input_size": config.input_size,
+            "adapter_loaded": adapters_loaded,
+        }
+
+    return summary
 
 
 # =============================================================================
@@ -544,6 +694,8 @@ def build_summary(
     input_manifest: Path,
     selected_attacks: list[str],
     selected_target_models: list[str],
+    target_model_configs: dict[str, TargetModelConfig],
+    adapters_loaded: bool,
     args: argparse.Namespace,
     created_at: str,
 ) -> dict[str, Any]:
@@ -577,8 +729,14 @@ def build_summary(
         "supported_target_models": list(SUPPORTED_TARGET_MODELS),
         "selected_attacks": selected_attacks,
         "selected_target_models": selected_target_models,
+        "target_model_configuration": summarize_target_model_configs(
+            target_model_configs,
+            adapters_loaded=adapters_loaded,
+        ),
         "parameters": {
             "jpeg_quality": args.jpeg_quality,
+            "device": args.device,
+            "input_size": args.input_size,
             "color_red_shift": args.color_red_shift,
             "color_green_shift": args.color_green_shift,
             "color_blue_shift": args.color_blue_shift,
@@ -610,7 +768,7 @@ def build_summary(
         },
         "methodological_status": {
             "color_shift": "implemented_as_model_agnostic_color_space_perturbation",
-            "fgsm": "planned_requires_concrete_target_model_adapter",
+            "fgsm": "planned_requires_attack_generation_logic_after_adapter_integration",
             "sigma_zero": "planned_requires_reference_implementation_or_stable_adapter",
             "one_pixel": "planned_requires_black_box_or_surrogate_model_interface",
             "superdeepfool": "planned_requires_reference_implementation_or_stable_adapter",
@@ -633,7 +791,19 @@ def main() -> None:
 
     selected_attacks = list(dict.fromkeys(args.attack))
     selected_target_models = validate_target_model_names(args.target_model)
+    require_model_adapters = selected_attacks_require_models(selected_attacks)
+
     validate_selected_attacks(selected_attacks)
+
+    target_model_configs = build_target_model_configs(
+        selected_target_models=selected_target_models,
+        args=args,
+        require_checkpoints=require_model_adapters,
+    )
+    target_model_adapters = load_required_target_model_adapters(
+        configs=target_model_configs,
+        should_load=require_model_adapters,
+    )
 
     input_manifest = repo_relative_path(args.input_manifest)
     created_at = utc_now_iso()
@@ -641,6 +811,8 @@ def main() -> None:
     logging.info("Input manifest: %s", input_manifest)
     logging.info("Selected attacks: %s", ", ".join(selected_attacks))
     logging.info("Selected target models: %s", ", ".join(selected_target_models))
+    logging.info("Model adapters required: %s", require_model_adapters)
+    logging.info("Model adapters loaded: %d", len(target_model_adapters))
     logging.info("Output root: %s", ADVERSARIAL_DIR)
 
     df = load_manifest(input_manifest)
@@ -677,6 +849,8 @@ def main() -> None:
         input_manifest=input_manifest,
         selected_attacks=selected_attacks,
         selected_target_models=selected_target_models,
+        target_model_configs=target_model_configs,
+        adapters_loaded=require_model_adapters,
         args=args,
         created_at=created_at,
     )
