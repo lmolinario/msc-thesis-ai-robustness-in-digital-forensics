@@ -1,0 +1,99 @@
+{
+  "script": "datasets/scripts/attacks/12_generate_anti_forensic_attacks.py",
+  "created_at": "2026-05-04T19:54:03+00:00",
+  "input_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
+  "output_root": "attacks/anti_forensic",
+  "manifest_csv": "attacks/manifests/anti_forensic_attacks_manifest.csv",
+  "summary_json": "attacks/manifests/anti_forensic_generation_summary.json",
+  "selected_attacks": [
+    "jpeg_recompression",
+    "resample_resize",
+    "gaussian_blur",
+    "histogram_modification",
+    "contrast_stretching"
+  ],
+  "parameters": {
+    "jpeg_quality": 70,
+    "resample_scale": 0.5,
+    "blur_radius": 1.5,
+    "contrast_cutoff": 1.0
+  },
+  "counts": {
+    "input_images": 1000,
+    "selected_attack_count": 5,
+    "expected_generated_images": 5000,
+    "actual_generated_images": 5000,
+    "per_attack_counts": {
+      "contrast_stretching": 1000,
+      "gaussian_blur": 1000,
+      "histogram_modification": 1000,
+      "jpeg_recompression": 1000,
+      "resample_resize": 1000
+    },
+    "per_fold_counts": {
+      "contrast_stretching": {
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
+      },
+      "gaussian_blur": {
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
+      },
+      "histogram_modification": {
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
+      },
+      "jpeg_recompression": {
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
+      },
+      "resample_resize": {
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
+      }
+    },
+    "per_label_counts": {
+      "contrast_stretching": {
+        "non_weapon": 500,
+        "weapon": 500
+      },
+      "gaussian_blur": {
+        "non_weapon": 500,
+        "weapon": 500
+      },
+      "histogram_modification": {
+        "non_weapon": 500,
+        "weapon": 500
+      },
+      "jpeg_recompression": {
+        "non_weapon": 500,
+        "weapon": 500
+      },
+      "resample_resize": {
+        "non_weapon": 500,
+        "weapon": 500
+      }
+    }
+  },
+  "checks": {
+    "expected_total_generated": true,
+    "generated_image_id_unique": true,
+    "perturbed_sha256_unique": true,
+    "manifest_written": true
+  }
+}

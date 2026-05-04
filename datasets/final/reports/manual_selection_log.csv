@@ -1593,3 +1593,11 @@ timestamp,reviewer_id,session_mode,review_class,review_source,image_id,source_da
 2026-05-03T09:52:27+00:00,Lello,review_pending,,05_deepweb,img_00014620,05_deepweb,images/img_00014620.jpeg,assign_label,,ood,reviewed
 2026-05-03T09:52:37+00:00,Lello,review_pending,,05_deepweb,img_00014648,05_deepweb,images/img_00014648.jpeg,assign_label,,ood,reviewed
 2026-05-03T09:53:10+00:00,Lello,review_pending,,05_deepweb,img_00014872,05_deepweb,images/img_00014872.jpeg,assign_label,,ood,reviewed
+2026-05-04T18:17:00+00:00,Lello,review_selection,weapon,01_kaggle_weapon,img_00000151,01_kaggle_weapon,images/img_00000151.jpeg,remove_existing_assignment,weapon,,pending
+2026-05-04T18:19:31+00:00,Lello,review_selection,non_weapon,05_deepweb,img_00014683,05_deepweb,images/img_00014683.jpeg,remove_existing_assignment,non_weapon,,pending
+2026-05-04T18:21:32+00:00,Lello,review_pending,,01_kaggle_weapon,img_00000243,01_kaggle_weapon,images/img_00000243.jpeg,assign_label,,weapon,reviewed
+2026-05-04T18:23:09+00:00,Lello,review_pending,,05_deepweb,img_00015293,05_deepweb,images/img_00015293.webp,assign_label,,non_weapon,reviewed
+2026-05-04T19:49:42+00:00,Lello,review_selection,non_weapon,05_deepweb,img_00014788,05_deepweb,images/img_00014788.png,remove_existing_assignment,non_weapon,,pending
+2026-05-04T19:50:17+00:00,Lello,review_selection,non_weapon,05_deepweb,img_00014578,05_deepweb,images/img_00014578.png,remove_existing_assignment,non_weapon,,pending
+2026-05-04T19:51:50+00:00,Lello,review_pending,,05_deepweb,img_00015306,05_deepweb,images/img_00015306.jpeg,assign_label,,non_weapon,reviewed
+2026-05-04T19:52:06+00:00,Lello,review_pending,,05_deepweb,img_00015288,05_deepweb,images/img_00015288.jpeg,assign_label,,non_weapon,reviewed
