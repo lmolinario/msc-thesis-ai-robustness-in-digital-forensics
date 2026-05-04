@@ -1,0 +1,255 @@
+
+\chapter{State of the Art}\label{chap:state-of-the-art}
+
+In questo capitolo viene analizzata la letteratura scientifica e tecnica rilevante per gli assi tematici della tesi: l'automazione basata su \gls{ai} nei workflow di \gls{df}, gli strumenti forensi commerciali con moduli \gls{ai}-based, la classificazione automatica di immagini in scenari investigativi, la robustezza operativa dei modelli di computer vision, gli attacchi di adversarial machine learning, le manipolazioni anti-forensi su immagini digitali e le metodologie di spiegabilità. L'obiettivo non è ripercorrere la \gls{df} nella sua interezza, ma posizionare con precisione il contributo del presente lavoro rispetto agli sviluppi più recenti della letteratura, evidenziando le lacune che ne motivano l'approccio sperimentale.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{AI e automazione nella Digital Forensics}
+\label{sec:ai-df}
+% ─────────────────────────────────────────────────────────────────────────────
+
+L'ingresso dell'\gls{ai} nei workflow di \gls{df} risponde a una necessità concreta: i volumi di dati digitali sequestrati durante le indagini sono cresciuti in modo esponenziale, e le tecniche di analisi manuale non riescono più a scalare con la velocità e la varietà dei contenuti da esaminare~\cite{garfinkel2010digital, costantini2019digital}. Immagini, video, messaggi, metadati e log di sistema si accumulano in quantità che rendono il triage manuale impraticabile già nelle indagini di media entità. La letteratura ha risposto proponendo l'uso di \gls{ml} e \gls{dl} come strumenti di supporto all'analisi, con l'obiettivo di automatizzare le fasi più ripetitive e di concentrare l'attenzione dell'analista sui contenuti di maggiore rilevanza probatoria.
+
+I contributi pionieristici in questo senso, a partire da Marturana et al.~\cite{marturana2011digital} e poi da Costantini et al.~\cite{costantini2019digital}, hanno mostrato come tecniche di classificazione automatica, ragionamento automatico e correlazione di eventi potessero essere integrate in un framework forense senza snaturarne i principi fondamentali: integrità dei dati, tracciabilità delle operazioni e riproducibilità dei risultati. Le principali funzioni in cui l'\gls{ai} ha trovato spazio nei workflow forensi sono schematizzabili come segue:
+
+\begin{itemize}
+    \item \textbf{Triage multimediale}: classificazione preliminare di grandi corpus di immagini e video per separare i contenuti rilevanti da quelli irrilevanti, riducendo il carico cognitivo e il tempo di analisi~\cite{le2020survey}.
+    \item \textbf{Evidence analysis e correlazione}: identificazione automatica di pattern ricorrenti tra elementi distinti (volti, oggetti, localizzazioni, timestamp), utile per ricostruire cronologie o connessioni tra soggetti~\cite{costantini2019digital}.
+    \item \textbf{Classificazione semantica}: assegnazione di categorie a contenuti visivi o testuali (es.\ armi, materiale illecito, conversazioni di interesse) tramite modelli addestrati su task di riconoscimento~\cite{faqir2023digital}.
+    \item \textbf{Anomaly detection}: rilevamento di comportamenti o contenuti anomali nei log di sistema, nelle comunicazioni o nelle sequenze temporali di eventi~\cite{brown2023anomaly}.
+\end{itemize}
+
+Un punto critico che la letteratura ha messo progressivamente a fuoco è che l'\gls{ai} non sostituisce l'analista forense, ma agisce come strumento di supporto operativo~\cite{rogers2020ai}. Le decisioni probatorie rimangono responsabilità umana; il modello automatico riduce lo spazio di ricerca e suggerisce priorità, ma non può generare conclusioni legalmente vincolanti in autonomia. Questa distinzione è rilevante non solo sul piano metodologico, ma anche su quello giuridico, in particolare alla luce delle recenti normative europee sull'uso dell'\gls{ai} in ambiti ad alto impatto~\cite{aiact2024}.
+
+Un secondo nodo, emerso con forza nella letteratura più recente, riguarda la \textbf{validità delle conclusioni prodotte da modelli AI in contesti forensi}. Nowroozi~\cite{nowroozi2020phd} ha evidenziato come la facilità con cui i modelli di \gls{dl} possono essere ingannati da perturbazioni mirate renda problematica la loro adozione in scenari dove l'accuratezza delle classificazioni ha conseguenze giudiziarie. La robustezza operativa dei sistemi \gls{ai}-based in \gls{df} non è, dunque, solo una questione tecnica, ma un requisito metodologico e probatorio.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      node distance=2.2cm,
+      every node/.style={font=\small, align=center, thick},
+      central/.style={rectangle, draw=black, fill=orange!30, rounded corners,
+                      minimum width=4.5cm, minimum height=1.2cm},
+      app/.style={rectangle, draw=black, fill=blue!15, rounded corners,
+                  minimum width=4.5cm, minimum height=1.2cm}
+  ]
+  \node[central] (central) {AI nella Digital Forensics};
+  \node[app, above left=of central]  (triage)         {Triage automatico\\di dati multimediali};
+  \node[app, above right=of central] (classificazione) {Classificazione semantica\\(armi, volti, testo)};
+  \node[app, below left=of central]  (profilazione)   {Correlazione di eventi\\e profilazione};
+  \node[app, below right=of central] (decision)       {Supporto al\\decision making};
+  \draw[->, thick] (central) -- (triage);
+  \draw[->, thick] (central) -- (classificazione);
+  \draw[->, thick] (central) -- (profilazione);
+  \draw[->, thick] (central) -- (decision);
+  \end{tikzpicture}
+  \caption{Principali aree applicative dell'Intelligenza Artificiale nella Digital Forensics.}
+  \label{fig:ai-df-applications}
+\end{figure}
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{AI-based forensic tools e validazione operativa}
+\label{sec:ai-tools}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Parallelamente alla ricerca accademica, il mercato degli strumenti forensi commerciali ha integrato progressivamente moduli basati su \gls{ai}. Piattaforme come \textbf{Magnet AXIOM}~\cite{magnet}, \textbf{Cellebrite \gls{ufed}}~\cite{ufed}, \textbf{X-Ways Forensics}~\cite{xways} e \textbf{Oxygen Forensic Detective}~\cite{oxygen} offrono funzionalità di classificazione automatica di immagini, suggerimento di categorie di contenuto (es.\ nudità, armi, droghe), clustering semantico di conversazioni e prioritizzazione degli elementi rilevanti. Questi strumenti sono largamente impiegati dalle forze dell'ordine e dai consulenti tecnici in contesti operativi reali.
+
+Il problema centrale che la letteratura ha iniziato ad affrontare — ma ancora in modo frammentario — riguarda la \textbf{validazione indipendente} di tali strumenti, in particolare quando i loro moduli \gls{ai} sono opachi, proprietari o non documentati a sufficienza per consentire una verifica esterna~\cite{sanna2024preliminary}. In un contesto forense, la natura \textit{black-box} di un classificatore crea tensioni con principi fondamentali come la riproducibilità dell'analisi e la possibilità di sottoporre le conclusioni al contraddittorio tecnico. Se il modello non è ispezionabile, è impossibile stabilire con certezza perché abbia prodotto una determinata classificazione, il che ne compromette l'uso come fondamento probatorio.
+
+Sanna et al.~\cite{sanna2024preliminary} hanno condotto uno studio preliminare sistematico sulla robustezza di strumenti \gls{ai}-based forensi in presenza di input manipolati, evidenziando che le performance dichiarate dai vendor in condizioni operative standard crollano significativamente quando le immagini vengono sottoposte a perturbazioni anche moderate. Un risultato analogo emerge dal lavoro su deepfake e immagini morfate~\cite{sanna2025pixelperfect}: strumenti costruiti per l'analisi forense di materiale multimediale mostrano vulnerabilità concrete quando esposti a contenuti manipolati con tecniche relativamente accessibili.
+
+Le criticità identificabili in letteratura per questa categoria di strumenti possono essere sintetizzate in quattro dimensioni:
+
+\begin{enumerate}
+    \item \textbf{Trasparenza}: i modelli integrati nei tool commerciali sono spesso chiusi; le architetture, i dataset di addestramento e le soglie di decisione non sono pubblicamente documentati.
+    \item \textbf{Riproducibilità}: versioni diverse dello stesso software possono produrre risultati diversi, rendendo difficile replicare l'analisi in sede di perizia o appello.
+    \item \textbf{Robustezza}: l'assenza di test sistematici su input degradati, manipolati o fuori distribuzione lascia aperta la domanda su quanto le classificazioni automatiche siano affidabili al di fuori delle condizioni di laboratorio.
+    \item \textbf{Verificabilità}: senza accesso ai parametri interni, non è possibile applicare metodologie di \gls{xai} per spiegare o contestare le singole decisioni del classificatore.
+\end{enumerate}
+
+Questi limiti non rendono i tool inutilizzabili, ma impongono un approccio critico al loro impiego: l'output del classificatore automatico deve essere trattato come un'ipotesi da verificare, non come un risultato definitivo~\cite{rogers2020ai, sanna2025cybercrime}.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Classificazione automatica di immagini in scenari forensi}
+\label{sec:image-classification}
+% ─────────────────────────────────────────────────────────────────────────────
+
+La computer vision applicata alla \gls{df} si è consolidata come uno degli ambiti di ricerca più attivi nell'ultimo decennio. Il problema di classificare automaticamente immagini per stabilirne la rilevanza investigativa — distinguendo, ad esempio, contenuti relativi ad armi, materiale illecito, volti di interesse o scene di reato — è stato affrontato con architetture e paradigmi molto diversi tra loro.
+
+\paragraph{Reti convoluzionali per la classificazione forense.}
+Le \gls{cnn} hanno rappresentato il riferimento dominante nella classificazione di immagini a partire dalla metà degli anni Dieci. Architetture come ResNet~\cite{he2016deep} ed EfficientNet~\cite{tan2019efficientnet} hanno dimostrato capacità di generalizzazione notevoli su task di riconoscimento visivo, incluse applicazioni forensi come il rilevamento di armi da fuoco, la classificazione di materiale illegale e il filtering di contenuti per la prioritizzazione del triage. La struttura a strati convoluzionali permette di estrarre feature gerarchiche — bordi, texture, forme, oggetti — in modo efficiente, rendendo questi modelli particolarmente adatti a scenari operativi con vincoli computazionali.
+
+Per il rilevamento di armi da fuoco in contesti forensi e di videosorveglianza, Hao et al.~\cite{Hao2018DeepFirearm} hanno proposto DeepFirearm, un sistema basato su \gls{cnn} per il riconoscimento fine-grained di armi da fuoco, evidenziando come la discriminazione tra varianti morfologicamente simili richieda feature di alto livello difficili da ottenere con tecniche tradizionali.
+
+\paragraph{Modelli multimodali e Vision-Language.}
+Più recentemente, l'introduzione di modelli pre-addestrati su larga scala come \gls{clip}~\cite{radford2021learning}, BLIP~\cite{li2022blip} e Vision Transformer (ViT)~\cite{dosovitskiy2020image} ha ampliato le possibilità di classificazione zero-shot e few-shot, riducendo la dipendenza da dataset etichettati specifici per il dominio. Questi modelli, addestrati su miliardi di coppie immagine-testo, sono in grado di classificare immagini rispetto a categorie semantiche arbitrarie senza richiedere un fine-tuning dedicato. In ambito forense, questo apre prospettive interessanti per il triage di contenuti in categorie non predefinite al momento dell'addestramento.
+
+Tuttavia, la generalizzazione semantica di questi modelli introduce anche nuove incertezze: la classificazione avviene attraverso un confronto tra embedding testuali e visivi la cui interpretazione non è sempre trasparente, e la robustezza a input degradati o fuori distribuzione è meno studiata rispetto ai modelli \gls{cnn} standard.
+
+\paragraph{Visual evidence prioritization e multimedia triage.}
+In ambito forense, la classificazione automatica è raramente fine a se stessa: il suo obiettivo è filtrare e prioritizzare le evidenze visive per orientare il lavoro dell'analista. Questo implica che gli errori di classificazione abbiano asimmetrie importanti: un falso negativo — un'arma classificata come oggetto innocuo — ha conseguenze potenzialmente gravi sull'esito dell'indagine, mentre un falso positivo genera carico di lavoro aggiuntivo ma non compromette la prova. Le metriche di valutazione devono tenere conto di questa asimmetria, privilegiando recall elevata sulle classi di interesse a discapito di una precision perfetta.
+
+Il task specifico della presente tesi — classificazione di immagini nelle classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{\gls{ood}} — si colloca esattamente in questo quadro: non si tratta di costruire un classificatore di immagini generiche, ma di valutare quanto modelli diversi siano in grado di discriminare contenuti forensicamente rilevanti in condizioni operative realistiche, incluse degradazioni e manipolazioni.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Robustezza dei modelli di Computer Vision}
+\label{sec:robustness}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Uno dei risultati più consolidati nella letteratura recente è che un modello con elevata accuratezza su un test set standard non è necessariamente affidabile in scenari realistici. La performance su dati puliti e provenienti dalla stessa distribuzione dell'addestramento costituisce una misura necessaria ma insufficiente della qualità operativa di un classificatore~\cite{hendrycks2019benchmarking}.
+
+\paragraph{Dataset shift e corruption robustness.}
+Hendrycks e Dietterich~\cite{hendrycks2019benchmarking} hanno introdotto il benchmark ImageNet-C, una collezione sistematica di 75 corruzioni applicate alle immagini di ImageNet (noise, blur, compressione, degradazioni meteorologiche, ecc.), dimostrando che modelli con accuratezza quasi identica su dati puliti possono divergere drasticamente in presenza di corruzioni moderate. La metrica \textit{Mean Corruption Error} (mCE) proposta dagli autori è diventata un riferimento standard per la valutazione della \textit{corruption robustness}.
+
+Michaelis et al.~\cite{michaelis2019winter} hanno esteso questo approccio al dominio dell'object detection, mostrando che i modelli addestrati su condizioni ottimali perdono significativamente efficacia in scenari reali con variazioni di illuminazione, precipitazioni o occlusioni parziali. Questi risultati sono direttamente pertinenti alla \gls{df}: le immagini acquisite durante le indagini provengono da fonti eterogenee, con qualità variabile, compressioni successive e artefatti da acquisizione, e non corrispondono quasi mai alle distribuzioni dei dataset di addestramento.
+
+\paragraph{Out-of-Distribution detection.}
+Un problema correlato ma distinto è quello dell'\gls{ood} detection: la capacità di un modello di riconoscere che un input non appartiene alle categorie su cui è stato addestrato, invece di assegnarlo comunque a una delle classi note con falsa confidenza. Hendrycks e Gimpel~\cite{hendrycks2017baseline} hanno proposto una baseline di riferimento basata sul massimo delle probabilità softmax, mostrando che i modelli tendono a essere eccessivamente confidenti anche su input anomali.
+
+Fort et al.~\cite{fort2021exploring} hanno esplorato i limiti delle tecniche \gls{ood} detection più avanzate, evidenziando che nessun approccio generalizza perfettamente a tutti i tipi di distribuzione anomala. Questo è particolarmente rilevante in un contesto forense dove possono comparire immagini completamente fuori dal dominio operativo atteso — ad esempio, illustrazioni, screenshot, immagini sintetiche — che un classificatore ingenuo assegna comunque a una delle classi di interesse con alta confidenza.
+
+\paragraph{Relazione tra corruption robustness e adversarial robustness.}
+Ford et al.~\cite{ford2019adversarial} hanno mostrato che la robustezza alle corruzioni naturali e quella agli attacchi adversariali non sono indipendenti: modelli più robusti alle perturbazioni naturali tendono a essere anche meno vulnerabili agli attacchi intenzionali, suggerendo che le due forme di robustezza condividano una radice comune nella generalizzazione del modello. Questo risultato supporta l'approccio unificato della presente tesi, che valuta il comportamento del classificatore sia su degradazioni realistiche sia su attacchi intenzionali.
+
+Croce e Hein~\cite{croce2020robustbench} hanno proposto RobustBench, un benchmark standardizzato per la valutazione della robustezza adversariale, che permette di confrontare metodologie diverse su condizioni di test comuni. L'assenza di un equivalente specifico per la \gls{df} è una delle lacune che il presente lavoro intende contribuire a colmare.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Adversarial Machine Learning applicato alle immagini}
+\label{sec:adversarial}
+% ─────────────────────────────────────────────────────────────────────────────
+
+L'adversarial machine learning studia come costruire input deliberatamente progettati per ingannare i modelli di apprendimento automatico. Il contributo fondativo di Szegedy et al.~\cite{szegedy2013intriguing} ha mostrato per la prima volta che reti neurali profonde altamente accurate possono essere ingannate da perturbazioni impercettibili all'occhio umano, aprendo un filone di ricerca che negli anni successivi ha prodotto centinaia di lavori su attacchi e difese.
+
+Il motivo per cui questo campo è rilevante per la \gls{df} non è solo teorico: un attore malevolo con accesso a un sistema di classificazione forense potrebbe, in linea di principio, manipolare le immagini in modo da eludere il rilevamento automatico, alterando così il risultato del triage senza che l'analista se ne accorga. Biggio e Roli~\cite{biggio2018wild} hanno formalizzato questa prospettiva nel framework dell'\textit{adversary-aware security}, mostrando come la valutazione realistica di un sistema sicuro non possa prescindere dalla modellazione esplicita dell'avversario.
+
+\paragraph{Attacchi gradient-based.}
+Goodfellow et al.~\cite{goodfellow2015explaining} hanno introdotto il \textbf{Fast Gradient Sign Method (FGSM)}, che calcola il gradiente della funzione di perdita rispetto all'input e genera una perturbazione lungo il segno del gradiente, scalata da un parametro $\epsilon$. L'efficacia di FGSM è sorprendente per la sua semplicità: in una singola iterazione, produce perturbazioni che inducono classificazioni errate su quasi tutti i modelli standard. Madry et al.~\cite{madry2018towards} hanno esteso questo approccio con il \textbf{Projected Gradient Descent (PGD)}, un attacco iterativo e più potente che proietta ogni aggiornamento sull'insieme ammissibile delle perturbazioni.
+
+Papernot et al.~\cite{papernot2016limitations} hanno generalizzato l'analisi agli attacchi \textit{crafted} in diverse configurazioni di accesso al modello, mostrando come anche in scenari con accesso limitato sia possibile costruire perturbazioni efficaci sfruttando approssimazioni del gradiente.
+
+\paragraph{Attacchi di minima perturbazione.}
+\textbf{DeepFool}~\cite{moosavi2016deepfool} è un attacco iterativo che calcola la minima perturbazione geometrica necessaria per spostare l'input oltre il confine decisionale del classificatore, producendo esempi adversariali con distanza $L_2$ tipicamente inferiore a quella di FGSM e più vicina alla soglia di percettibilità umana. \textbf{SuperDeepFool}~\cite{zhang2024superdeepfool}, una sua evoluzione recente presentata a NeurIPS 2024, incorpora strategie multi-classe e migliora l'efficienza dell'ottimizzazione, ottenendo perturbazioni di norma ancora minore con un numero ridotto di iterazioni.
+
+\paragraph{Attacchi sparsi e black-box.}
+\textbf{One Pixel Attack}~\cite{su2019onepixel} rappresenta un caso estremo di attacco sparso: modifica un singolo pixel dell'immagine, selezionato tramite ottimizzazione evolutiva (differential evolution), inducendo errori di classificazione anche in scenari black-box dove l'attaccante non ha accesso al gradiente del modello. Zhao et al.~\cite{zhao2024sigmazero} hanno recentemente proposto Sigma-Zero, un approccio basato su regolarizzazione $\ell_0$ del gradiente per la generazione di perturbazioni sparse più efficienti.
+
+Gli attacchi \textbf{transfer-based} sfruttano la proprietà di trasferibilità degli adversarial examples: perturbazioni generate su un modello surrogato sono spesso efficaci anche su modelli diversi~\cite{yuan2019adversarial, akhtar2018threat}. Questo è particolarmente rilevante nel contesto forense, dove i tool commerciali non espongono i loro parametri interni: un attaccante può costruire la perturbazione su un modello open-source e verificarne il trasferimento sul sistema target. Zhu et al.~\cite{zhu2024geadvgan} hanno proposto GE-AdvGAN, un approccio basato su reti generative per aumentare la trasferibilità degli adversarial examples modificando il processo di ottimizzazione del gradiente.
+
+\paragraph{Adversarial ML applicato all'image forensics.}
+Nowroozi~\cite{nowroozi2020phd} e Barni et al.~\cite{barni2018cf} hanno analizzato specificamente la vulnerabilità dei modelli di \gls{dl} usati per il rilevamento di manipolazioni di immagini (splicing, copy-move, ecc.) agli attacchi adversariali, mostrando che anche classificatori addestrati su task forensi sono altamente vulnerabili a perturbazioni ottimizzate. Questo risultato chiude un cerchio importante: non solo i modelli generici di computer vision usati come strumenti forensi sono vulnerabili, ma anche i modelli progettati nativamente per la \gls{df} lo sono.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Anti-forensics e manipolazioni realistiche delle immagini}
+\label{sec:antiforensics}
+% ─────────────────────────────────────────────────────────────────────────────
+
+La sezione precedente ha analizzato attacchi adversariali progettati \textit{contro il modello}, cioè ottimizzati rispetto alla funzione di perdita del classificatore con l'obiettivo di massimizzare l'errore di predizione. Questa sezione tratta una categoria distinta di manipolazioni: le \textbf{trasformazioni anti-forensi e realistiche} applicate all'immagine come artefatto digitale, indipendentemente dalla conoscenza del classificatore che verrà usato per analizzarla.
+
+\paragraph{Anti-forensics come disciplina.}
+Yaacoub et al.~\cite{yaacoub2021digital} definiscono l'anti-digital forensics come l'insieme delle tecniche usate per ostacolare, rallentare o invalidare le indagini forensi digitali. Nel dominio delle immagini, questo comprende operazioni intenzionali di modifica del file per rimuovere o alterare metadati (EXIF, GPS), cancellare tracce di elaborazione, oscurare dettagli identificativi o rendere irriconoscibili contenuti di interesse. Hewling e Schwenk~\cite{hewling2018anti} hanno analizzato il panorama delle contromisure anti-forensi più comuni, evidenziando come molte di esse siano accessibili senza competenze specialistiche.
+
+\paragraph{JPEG recompression.}
+La ri-compressione JPEG è una delle manipolazioni più comuni e difficili da gestire nella \gls{df}. Stamm e Liu~\cite{stamm2010anti} hanno dimostrato che la ri-compressione a qualità ridotta può cancellare le tracce lasciate da una precedente elaborazione dell'immagine, rendendo difficile stabilire l'autenticità dell'artefatto digitale. Dal punto di vista della robustezza del classificatore, la compressione JPEG distrugge pattern strutturali ad alta frequenza che i modelli \gls{cnn} usano per estrarre feature discriminative, producendo effetti paragonabili a quelli di alcune perturbazioni naturali testate nei benchmark di corruption robustness~\cite{hendrycks2019benchmarking}.
+
+\paragraph{Resizing e resampling.}
+Il ridimensionamento e il ricampionamento dell'immagine modificano la risoluzione effettiva e introducono artefatti interpolativi che possono alterare sia le feature visive di basso livello sia quelle semantiche. Popescu e Farid~\cite{popescu2005exposing} hanno mostrato che il resampling lascia tracce statistiche rilevabili nell'immagine, ma tali tracce possono essere attenuate con post-elaborazioni successive. Per i classificatori, il resizing aggrava il problema del dataset shift se le immagini di test hanno risoluzioni molto diverse da quelle di addestramento.
+
+\paragraph{Blur, noise e alterazioni tonali.}
+La sfocatura gaussiana, il rumore di sensore, la modifica dell'istogramma e le alterazioni del contrasto sono trasformazioni comunemente applicate sia in buona fede (per migliorare la leggibilità di un'immagine) sia con finalità anti-forensi (per oscurare dettagli identificativi o ridurre la qualità di un contenuto illecito). Gonzalez e Woods~\cite{gonzalez2018digital} forniscono un quadro sistematico di queste trasformazioni nel contesto del processing digitale delle immagini; Stamm et al.~\cite{stamm2013information} ne analizzano le implicazioni specifiche per la forensics informativa.
+
+L'aspetto critico per la presente tesi è che queste trasformazioni non richiedono l'accesso ai parametri del classificatore: un attore malevolo può applicarle a qualsiasi immagine prima che venga acquisita o analizzata dal sistema forense, senza conoscere il modello che verrà usato. Questo le distingue dagli attacchi adversariali propriamente detti e le rende particolarmente rilevanti in scenari operativi reali.
+
+\paragraph{Steganografia come contesto laterale.}
+La steganografia — l'occultamento di informazioni all'interno di un artefatto digitale — è talvolta citata in letteratura come tecnica anti-forense. Nel contesto di questa tesi, essa è menzionata come possibile vettore di manipolazione ma non costituisce un asse sperimentale: le trasformazioni testate appartengono alle categorie descritte sopra, più immediatamente rilevanti per il triage automatico di immagini.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Explainability e affidabilità dei sistemi AI-based}
+\label{sec:xai}
+% ─────────────────────────────────────────────────────────────────────────────
+
+L'integrazione di sistemi \gls{ai} in flussi investigativi e giudiziari pone una questione che va oltre la semplice accuratezza: la necessità di rendere \textbf{comprensibili e verificabili} le decisioni dei modelli. La cosiddetta \textbf{Explainable Artificial Intelligence (\gls{xai})} si propone di affrontare il problema della \textit{black-box} nei modelli complessi, rendendo interpretabili i risultati dei classificatori e permettendo di identificare quali caratteristiche dell'input abbiano influenzato maggiormente una predizione~\cite{Adadi2018}.
+
+In ambito forense, la spiegabilità non è un requisito accessorio ma una condizione necessaria per l'uso probatorio di un sistema automatico: le conclusioni devono poter essere sottoposte al contraddittorio tecnico, e l'analista deve poter giustificare — davanti a un giudice o a una controparte — perché il classificatore ha prodotto un determinato output~\cite{Doshi-Velez2017}.
+
+\paragraph{Gradient-based attribution.}
+Le tecniche di \textit{gradient-based attribution} calcolano il contributo di ciascun pixel (o feature) all'output del modello attraverso i gradienti della funzione di predizione. \textbf{Integrated Gradients}~\cite{Sundararajan2017} è uno dei metodi più solidi teoricamente: integra i gradienti lungo un percorso continuo dall'input di riferimento (baseline) all'immagine reale, garantendo proprietà di completezza e coerenza che lo rendono particolarmente adatto all'analisi forense di immagini. A differenza dei semplici saliency map basati sul gradiente puntuale, IG non è soggetto a problemi di saturazione del gradiente e fornisce attribuzioni più stabili.
+
+\paragraph{Class Activation Mapping.}
+\textbf{CAM}~\cite{Zhou2016} e la sua generalizzazione \textbf{Grad-CAM} producono mappe di attivazione che evidenziano le regioni dell'immagine maggiormente rilevanti per la classificazione, sfruttando l'attivazione degli ultimi strati convoluzionali pesata dai gradienti rispetto alla classe di interesse. Questi metodi sono ampiamente usati per verificare visivamente se il modello stia classificando per le ragioni semanticamente corrette — riconoscendo l'arma nell'immagine, non uno sfondo casualmente correlato — o se stia sfruttando artefatti spurii del dataset.
+
+\paragraph{LIME e SHAP.}
+\textbf{LIME}~\cite{Ribeiro2016} approssima localmente il comportamento di un modello complesso con un classificatore interpretabile (es.\ regressione lineare), evidenziando le feature che influenzano la decisione in un singolo caso. \textbf{SHAP}~\cite{Lundberg2017}, basato sulla teoria dei giochi cooperativi, assegna un contributo additivo a ciascuna feature con proprietà di consistenza globale. Entrambi sono \textit{model-agnostic} e quindi applicabili anche ai modelli proprietari integrati nei tool commerciali, purché sia possibile interrogarli con input di test~\cite{guidotti2018survey}.
+
+\paragraph{Limiti delle spiegazioni visuali.}
+La letteratura ha messo in luce limiti importanti delle metodologie \gls{xai} che è essenziale considerare in un contesto forense. Primo, le spiegazioni visuali non sono deterministiche: LIME, ad esempio, introduce randomizzazione nel campionamento locale e può produrre mappe di importanza diverse per lo stesso input. Secondo, le saliency map possono essere manipolate: un attaccante sofisticato può costruire perturbazioni che alterano le spiegazioni mantenendo invariata la predizione del modello~\cite{Carvalho2019}. Terzo, la coerenza semantica di una spiegazione non implica la correttezza della classificazione: una mappa che evidenzia la regione dell'arma nell'immagine è visivamente convincente, ma non garantisce che il modello stia riconoscendo quella specifica caratteristica in modo affidabile su tutti gli input simili.
+
+Per queste ragioni, la \gls{xai} nel presente lavoro è trattata come strumento di \textbf{analisi critica del comportamento del modello}, non come prova autonoma né come garanzia di correttezza. Le mappe di attivazione e le attribuzioni consentono di identificare anomalie nel processo decisionale — ad esempio, un modello che dopo una perturbazione adversariale focalizza l'attenzione su regioni irrilevanti — ma non sostituiscono una valutazione quantitativa sistematica della robustezza.
+
+Le raccomandazioni delle linee guida europee sull'\gls{ai}~\cite{aiact2024, EUAI2020} enfatizzano la necessità di sistemi trasparenti e auditabili negli ambiti ad alto impatto, includendo esplicitamente le applicazioni nel settore della sicurezza e della giustizia. In questo quadro normativo, la spiegabilità è un requisito che i sistemi \gls{ai}-based forensi dovranno sempre più soddisfare, rendendo la ricerca in \gls{xai} non solo un tema accademico ma un'esigenza operativa concreta.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Gap della letteratura e posizionamento della tesi}
+\label{sec:gap}
+% ─────────────────────────────────────────────────────────────────────────────
+
+La revisione critica della letteratura mostra un panorama in cui numerosi filoni di ricerca affrontano separatamente temi che, in ambito operativo, sono profondamente interconnessi. Come illustrato nella Tabella~\ref{tab:sota}, i principali contributi esistenti riguardano: l'uso dell'\gls{ai} nella \gls{df} in senso ampio, la classificazione automatica di immagini, la robustezza dei modelli di computer vision, gli attacchi adversariali, le tecniche anti-forensi e la spiegabilità. Ciascuno di questi filoni ha prodotto risultati significativi, ma tendenzialmente in isolamento dagli altri.
+
+\begin{table}[H]
+\centering
+\caption{Sintesi dei principali contributi in letteratura e loro limitazioni rispetto al contesto della presente tesi.}
+\label{tab:sota}
+\small
+\begin{tabular}{|p{3.2cm}|p{3.6cm}|p{3.6cm}|p{4cm}|}
+\hline
+\textbf{Autore/i} & \textbf{Tecnica / Approccio} & \textbf{Applicazione} & \textbf{Limitazione rilevante} \\
+\hline
+Biggio \& Roli (2018)~\cite{biggio2018wild}
+  & Threat model formale, attacchi di evasione e poisoning
+  & Classificatori di pattern, visione artificiale, cybersecurity
+  & Non applicato a tool forensi commerciali né a dataset investigativi \\
+\hline
+Nowroozi et al.\ (2020, 2024)~\cite{nowroozi2020phd, nowroozi2024verifying}
+  & Adversarial ML per image forensics e intrusion detection
+  & Rilevazione manipolazioni, IDS AI-based
+  & Nessuna valutazione su strumenti forensi operativi; dataset non congelati \\
+\hline
+Costantini et al.\ (2019)~\cite{costantini2019digital}
+  & ASP e \gls{dl} per analisi automatizzata delle evidenze
+  & Supporto investigativo e ricostruzione scenari probatori
+  & Non affronta robustezza a manipolazioni né validazione human-in-the-loop \\
+\hline
+Hendrycks \& Dietterich (2019)~\cite{hendrycks2019benchmarking}
+  & Benchmark sistematico su corruzioni naturali (ImageNet-C)
+  & Valutazione corruption robustness di modelli CV
+  & Dominio generico; nessun adattamento a scenari o classi forensi \\
+\hline
+Sanna et al.\ (2024, 2025)~\cite{sanna2024preliminary, sanna2025pixelperfect}
+  & Robustezza di tool forensi \gls{ai}-based su deepfake e immagini morfate
+  & Digital forensics operativa, analisi di immagini facciali
+  & Focalizzato su volti/deepfake; non include classificazione di armi né attacchi sparsi \\
+\hline
+\end{tabular}
+\end{table}
+
+\noindent Il \textbf{gap specifico} che emerge da questa analisi è l'assenza di una \textbf{pipeline integrata} che valuti la robustezza operativa di strumenti e modelli \gls{ai}-based per la classificazione automatizzata di immagini in un contesto forense realistico, combinando contemporaneamente:
+
+\begin{itemize}
+    \item un \textbf{dataset congelato e validato} da analisti forensi umani (\textit{human-in-the-loop}), con classi semanticamente rilevanti per le indagini (\texttt{weapon}, \texttt{non\_weapon}, \gls{ood});
+    \item la \textbf{valutazione comparativa} di modelli eterogenei — architetture \gls{cnn} (ResNet, EfficientNet), modelli \gls{svm} e modelli \gls{vll} multimodali (\gls{clip}, BLIP) — sulle stesse condizioni di test;
+    \item l'applicazione sistematica di \textbf{attacchi adversariali} di diversa natura (FGSM, DeepFool, SuperDeepFool, One Pixel Attack) e modalità (white-box, black-box, transfer-based);
+    \item l'applicazione di \textbf{trasformazioni anti-forensi realistiche} (JPEG recompression, blur, resizing, alterazioni tonali), distinte dagli attacchi adversariali per natura e finalità;
+    \item l'uso di metodologie di \textbf{\gls{xai}} per l'analisi critica del comportamento dei modelli in presenza di input manipolati;
+    \item la \textbf{valutazione di strumenti forensi commerciali} (Magnet AXIOM, Cellebrite \gls{ufed}) nelle stesse condizioni sperimentali, per consentire un confronto diretto con i modelli open-source.
+\end{itemize}
+
+Nessuno dei lavori esaminati affronta contemporaneamente tutti questi elementi. La presente tesi intende colmare questa lacuna proponendo una metodologia sperimentale riproducibile, fondata su un dataset congelato e su protocolli di test documentati, che possa costituire un riferimento per studi futuri sulla robustezza dei sistemi \gls{ai}-based in \gls{df}.
+
+Il contributo non si limita alla valutazione delle performance in condizioni avverse, ma include anche un'analisi qualitativa del comportamento dei modelli tramite \gls{xai}, con l'obiettivo di identificare le vulnerabilità strutturali che rendono determinati classificatori meno adatti all'uso forense. I risultati ottenuti possono informare sia la comunità scientifica — in merito alle lacune metodologiche da colmare — sia gli operatori del settore — in merito ai criteri da adottare nella scelta e nella validazione degli strumenti \gls{ai}-based per le indagini digitali.
