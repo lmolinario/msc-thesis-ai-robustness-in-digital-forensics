@@ -1,0 +1,54 @@
+\chapter{Methodology}	\label{chap:methodology}
+
+
+
+\begin{comment}
+    
+    \begin{enumerate}
+        \item dataset: abbiamo scelto questo perchè;
+        \item algoritmi utilizzati per perturbare le immagini: abbiamo scelto queste perchè
+        \item tool forensi utilizzati e "perchè";
+        \item pipeline completa flow metodologico.
+    \end{enumerate}
+
+
+Qui è importante descriverla in generale a grandi linee in modo che chiunque possa replicarlo anche con altri strumenti, seguendo la stessa procedura ad alto livello
+
+---------------------------------------
+\end{comment}
+
+
+
+Questo capitolo illustra l'impostazione metodologica adottata per valutare la robustezza operativa di strumenti basati su Intelligenza Artificiale impiegati nel contesto della digital forensics. L'obiettivo è esaminare in modo sistematico la resistenza di tali strumenti a manipolazioni intenzionali delle immagini, in particolare in presenza di tecniche adversariali e anti-forensi. La metodologia è stata progettata per essere generalizzabile e replicabile, in modo da poter essere riutilizzata anche con differenti dataset, strumenti investigativi e scenari operativi. Tale approccio mira a garantire la validità sperimentale e a favorire il confronto tra risultati ottenuti con strumenti diversi.
+
+L'intero framework sperimentale è stato articolato in quattro componenti fondamentali, ciascuna delle quali affronta un aspetto specifico del processo di valutazione:
+
+\begin{enumerate}
+\item \textbf{Dataset}: vengono definite le scelte effettuate in merito alle fonti dei dati visivi, ai criteri di selezione delle immagini, alla loro eterogeneità e alla rappresentatività rispetto a scenari realistici. La costruzione del dataset mira a riprodurre le condizioni operative tipiche delle indagini digitali.
+\item \textbf{Tecniche di perturbazione}: si descrivono gli algoritmi e le strategie impiegate per alterare le immagini in modo controllato, includendo sia approcci ben noti nel campo degli attacchi adversariali, sia tecniche ispirate a pratiche anti-forensi documentate. L'obiettivo è simulare condizioni ostili in cui il sistema AI possa fallire nella classificazione.
+\item \textbf{Strumenti forensi}: vengono analizzati i software investigativi impiegati per la classificazione automatica delle immagini, evidenziando le funzionalità AI-based, le modalità di impiego, e la loro diffusione nelle pratiche di digital forensics. La scelta di strumenti reali in uso operazionale rafforza la rilevanza applicativa dello studio.
+\item \textbf{Pipeline sperimentale}: viene delineato il flusso complessivo che unisce le fasi di raccolta, addestramento, manipolazione, test e valutazione. Tale pipeline è pensata per offrire un modello metodologico replicabile, utile anche in contesti futuri e per esperimenti comparativi.
+\end{enumerate}
+
+Ciascuna di queste componenti è approfondita nei paragrafi successivi del presente capitolo:
+
+\begin{itemize}
+\item \textbf{Paragrafo \ref{chap:dataset} – Dataset}  \
+Descrive nel dettaglio le sorgenti, le modalità di raccolta e le caratteristiche salienti delle immagini utilizzate negli esperimenti, soffermandosi su aspetti quali la varietà semantica, la qualità visiva e l'origine eterogenea dei dati.
+
+\item \textbf{Paragrafo \ref{chap:algoritmi} – Tecniche di perturbazione (anti-forensi e adversarial)} \\
+Illustra le tecniche implementate per generare immagini modificate, motivando le scelte in relazione alla letteratura scientifica e alla plausibilità operativa nel contesto forense.
+
+\item \textbf{Paragrafo \ref{chap:strumenti} – Strumenti forensi testati} \\
+Fornisce una panoramica dei tool investigativi utilizzati nell'analisi sperimentale, con particolare attenzione alla loro capacità di classificazione automatica e alla rilevanza nel panorama attuale della digital forensics.
+
+\item \textbf{Paragrafo \ref{chap:pipeline} – Pipeline metodologica generale} \\
+Definisce l'architettura operativa del flusso sperimentale, delineando le fasi di preprocessamento, addestramento, attacco e valutazione, al fine di favorire la replicabilità dello studio e l'adozione futura in contesti analoghi.
+\end{itemize}
+
+
+\include{methodology/dataset}
+\include{methodology/Algoritmi}
+\include{methodology/Strumenti}
+\include{methodology/Pipeline}
+
