@@ -13,8 +13,8 @@ This module defines the common contract that model-dependent adversarial attacks
 must use before they are enabled in the official generation script.
 
 It intentionally does not load PyTorch, torchvision, CLIP, or any other heavy
-machine-learning dependency. Concrete adapters will be added only when the
-corresponding target models and checkpoints are fixed.
+machine-learning dependency. Concrete adapters are kept in a separate optional
+module.
 
 Design principles
 -----------------
@@ -68,6 +68,7 @@ PLANNED_ATTACK_NAMES: Final[tuple[str, ...]] = (
 )
 
 IMPLEMENTED_ATTACK_NAMES: Final[tuple[str, ...]] = (
+    "fgsm",
     "color_shift",
 )
 
@@ -87,9 +88,7 @@ class TargetModelConfig:
         Canonical target-model name. Must belong to SUPPORTED_TARGET_MODELS.
 
     checkpoint_path:
-        Optional path to a trained binary classifier checkpoint. This is optional
-        at the interface level because CLIP-like adapters may use a different
-        loading strategy.
+        Optional path to a trained binary classifier checkpoint.
 
     device:
         Device selector. The concrete adapter should interpret "auto" as CUDA
@@ -287,14 +286,12 @@ def expected_generation_count(
 
 def load_model(config: TargetModelConfig) -> TargetModelAdapter:
     """
-    Load a concrete target-model adapter.
+    Legacy placeholder retained for compatibility.
 
-    This function is intentionally not implemented yet. It is the future stable
-    entry point for ResNet18, EfficientNet-B0, and CLIP adapters once their
-    checkpoints, preprocessing, normalization, and device management are fixed.
+    Concrete target-model adapters are built by
+    datasets.scripts.attacks.adversarial_torch_model_adapters.build_target_model_adapter.
     """
     raise NotImplementedError(
-        "Concrete target-model adapters are not implemented yet. "
-        "Do not enable FGSM, Sigma-Zero, One Pixel, or SuperDeepFool before "
-        "adding validated adapters for resnet18, efficientnet_b0, and clip."
+        "Use adversarial_torch_model_adapters.build_target_model_adapter(config) "
+        "to construct validated target-model adapters."
     )
