@@ -28,6 +28,12 @@ Supported models
 - clip
 
 CLIP is implemented as a frozen visual encoder plus a trained binary head.
+
+Execution modes
+---------------
+- CLI mode: pass explicit arguments for fully reproducible runs.
+- Interactive mode: run the script without arguments, e.g. from PyCharm, and use
+  the guided menu. The generated configuration is printed before training.
 """
 
 from __future__ import annotations
@@ -38,6 +44,7 @@ import hashlib
 import json
 import logging
 import random
+import shlex
 import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -92,7 +99,7 @@ class TrainConfig:
 
 
 # =============================================================================
-# Argument parsing and logging
+# Argument parsing and interactive launcher
 # =============================================================================
 
 def parse_args() -> argparse.Namespace:
@@ -151,6 +158,233 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--verbose", action="store_true", help="Enable verbose logging.")
     return parser.parse_args()
+
+
+def print_header(title: str) -> None:
+    print("\n" + "=" * 78)
+    print(title)
+    print("=" * 78)
+
+
+def ask_yes_no(prompt: str, default: bool = True) -> bool:
+    suffix = "[Y/n]" if default else "[y/N]"
+    while True:
+        answer = input(f"{prompt} {suffix}: ").strip().lower()
+        if not answer:
+            return default
+        if answer in {"y", "yes"}:
+            return True
+        if answer in {"n", "no"}:
+            return False
+        print("Invalid answer. Please enter y or n.")
+
+
+def ask_choice(prompt: str, options: list[str], default_index: int = 0) -> str:
+    print(f"\n{prompt}")
+    for index, option in enumerate(options, start=1):
+        marker = " [default]" if index - 1 == default_index else ""
+        print(f"  {index}. {option}{marker}")
+
+    while True:
+        answer = input("Selection: ").strip()
+        if not answer:
+            return options[default_index]
+        if answer.isdigit():
+            selected = int(answer)
+            if 1 <= selected <= len(options):
+                return options[selected - 1]
+        print(f"Invalid selection. Please enter a number between 1 and {len(options)}.")
+
+
+def ask_multi_choice(prompt: str, options: list[str], default_all: bool = False) -> list[str]:
+    print(f"\n{prompt}")
+    for index, option in enumerate(options, start=1):
+        print(f"  {index}. {option}")
+
+    default_text = "all" if default_all else ""
+    print("\nExamples: 1 | 1 2 | 1,2,3 | all")
+
+    while True:
+        answer = input(f"Selection [{default_text}]: ").strip().lower()
+        if not answer and default_all:
+            return options.copy()
+        if answer == "all":
+            return options.copy()
+
+        tokens = answer.replace(",", " ").split()
+        selected: list[str] = []
+        valid = bool(tokens)
+
+        for token in tokens:
+            if not token.isdigit():
+                valid = False
+                break
+            index = int(token)
+            if not (1 <= index <= len(options)):
+                valid = False
+                break
+            value = options[index - 1]
+            if value not in selected:
+                selected.append(value)
+
+        if valid and selected:
+            return selected
+
+        print(f"Invalid selection. Use numbers between 1 and {len(options)} or 'all'.")
+
+
+def ask_int(prompt: str, default_value: int) -> int:
+    while True:
+        answer = input(f"{prompt} [{default_value}]: ").strip()
+        if not answer:
+            return default_value
+        try:
+            return int(answer)
+        except ValueError:
+            print("Invalid value. Please enter an integer.")
+
+
+def ask_float(prompt: str, default_value: float) -> float:
+    while True:
+        answer = input(f"{prompt} [{default_value}]: ").strip()
+        if not answer:
+            return default_value
+        try:
+            return float(answer)
+        except ValueError:
+            print("Invalid value. Please enter a number.")
+
+
+def interactive_args() -> argparse.Namespace:
+    print_header("FAIR-Lab proxy model training launcher")
+    print(f"Repository root: {REPO_ROOT}")
+    print(f"Default manifest: {INPUT_MANIFEST_PATH}")
+
+    scenario = ask_choice(
+        prompt="What training scenario do you want to run?",
+        options=[
+            "Smoke test: resnet18 on fold_1 for 2 epochs",
+            "Train ResNet18 on all folds",
+            "Train EfficientNet-B0 on all folds",
+            "Train CLIP binary head on all folds",
+            "Custom selection",
+        ],
+        default_index=0,
+    )
+
+    if scenario.startswith("Smoke test"):
+        model = ["resnet18"]
+        fold = ["fold_1"]
+        epochs = 2
+        batch_size = 16
+        learning_rate = 1e-4
+        freeze_backbone = False
+    elif scenario.startswith("Train ResNet18"):
+        model = ["resnet18"]
+        fold = ["all"]
+        epochs = 10
+        batch_size = 16
+        learning_rate = 1e-4
+        freeze_backbone = False
+    elif scenario.startswith("Train EfficientNet"):
+        model = ["efficientnet_b0"]
+        fold = ["all"]
+        epochs = 10
+        batch_size = 16
+        learning_rate = 1e-4
+        freeze_backbone = False
+    elif scenario.startswith("Train CLIP"):
+        model = ["clip"]
+        fold = ["all"]
+        epochs = 10
+        batch_size = 32
+        learning_rate = 1e-4
+        freeze_backbone = True
+    else:
+        model = ask_multi_choice(
+            prompt="Select proxy model(s) to train:",
+            options=list(SUPPORTED_MODELS),
+            default_all=False,
+        )
+        fold = ask_multi_choice(
+            prompt="Select target fold(s):",
+            options=list(SUPPORTED_FOLD_SELECTION),
+            default_all=False,
+        )
+        epochs = ask_int("Training epochs", 10)
+        batch_size = ask_int("Batch size", 16)
+        learning_rate = ask_float("Learning rate", 1e-4)
+        freeze_backbone = ask_yes_no("Freeze backbone and train only classifier head?", default=False)
+
+    print_header("Training parameters")
+    epochs = ask_int("Training epochs", epochs)
+    batch_size = ask_int("Batch size", batch_size)
+    learning_rate = ask_float("Learning rate", learning_rate)
+    weight_decay = ask_float("Weight decay", 1e-4)
+    validation_ratio = ask_float("Validation ratio", 0.15)
+    seed = ask_int("Random seed", 42)
+    input_size = ask_int("Input size", 224)
+    num_workers = ask_int("DataLoader workers", 2)
+    device = ask_choice("Training device:", ["auto", "cpu", "cuda"], default_index=0)
+    force = ask_yes_no("Overwrite existing checkpoints if present?", default=True)
+    verbose = ask_yes_no("Enable verbose logging?", default=False)
+
+    command_preview = [
+        sys.executable,
+        str(Path(__file__).resolve()),
+        "--model",
+        *model,
+        "--fold",
+        *fold,
+        "--epochs",
+        str(epochs),
+        "--batch-size",
+        str(batch_size),
+        "--learning-rate",
+        str(learning_rate),
+        "--weight-decay",
+        str(weight_decay),
+        "--validation-ratio",
+        str(validation_ratio),
+        "--seed",
+        str(seed),
+        "--device",
+        device,
+        "--input-size",
+        str(input_size),
+        "--num-workers",
+        str(num_workers),
+    ]
+    if freeze_backbone:
+        command_preview.append("--freeze-backbone")
+    if force:
+        command_preview.append("--force")
+    if verbose:
+        command_preview.append("--verbose")
+
+    print_header("Equivalent reproducible command")
+    print(" ".join(shlex.quote(part) for part in command_preview))
+
+    if not ask_yes_no("Start training now?", default=True):
+        raise SystemExit("Execution cancelled by user.")
+
+    return argparse.Namespace(
+        manifest=str(INPUT_MANIFEST_PATH),
+        model=model,
+        fold=fold,
+        epochs=epochs,
+        batch_size=batch_size,
+        learning_rate=learning_rate,
+        weight_decay=weight_decay,
+        validation_ratio=validation_ratio,
+        seed=seed,
+        device=device,
+        input_size=input_size,
+        num_workers=num_workers,
+        freeze_backbone=freeze_backbone,
+        force=force,
+        verbose=verbose,
+    )
 
 
 def setup_logging(verbose: bool) -> None:
@@ -726,7 +960,7 @@ def update_registry(records: list[dict[str, Any]]) -> None:
 # =============================================================================
 
 def main() -> None:
-    args = parse_args()
+    args = interactive_args() if len(sys.argv) == 1 else parse_args()
     setup_logging(args.verbose)
     set_reproducibility(args.seed)
 
