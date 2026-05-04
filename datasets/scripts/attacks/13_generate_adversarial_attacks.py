@@ -54,6 +54,15 @@ import numpy as np
 import pandas as pd
 from PIL import Image, ImageEnhance, ImageOps, UnidentifiedImageError
 
+from datasets.scripts.attacks.adversarial_model_interface import (
+    IMPLEMENTED_ATTACK_NAMES,
+    MODEL_AGNOSTIC_TARGET,
+    PLANNED_ATTACK_NAMES,
+    SUPPORTED_TARGET_MODELS,
+    VALID_BINARY_LABELS,
+    expected_generation_count,
+    validate_target_model_names,
+)
 from datasets.scripts.utils.paths import (
     ADVERSARIAL_DIR,
     ATTACKS_DIR,
@@ -75,21 +84,7 @@ ATTACK_MANIFESTS_DIR = ATTACKS_DIR / "manifests"
 ADVERSARIAL_MANIFEST_PATH = ATTACK_MANIFESTS_DIR / "adversarial_attacks_manifest.csv"
 ADVERSARIAL_SUMMARY_PATH = ATTACK_MANIFESTS_DIR / "adversarial_generation_summary.json"
 
-VALID_LABELS = {"weapon", "non_weapon"}
-
-PLANNED_ATTACK_NAMES = [
-    "fgsm",
-    "sigma_zero",
-    "one_pixel",
-    "color_shift",
-    "superdeepfool",
-]
-
-IMPLEMENTED_ATTACK_NAMES = [
-    "color_shift",
-]
-
-MODEL_AGNOSTIC_TARGET = "model_agnostic"
+VALID_LABELS = set(VALID_BINARY_LABELS)
 
 
 # =============================================================================
@@ -113,11 +108,23 @@ def parse_args() -> argparse.Namespace:
         "--attack",
         nargs="+",
         choices=PLANNED_ATTACK_NAMES,
-        default=IMPLEMENTED_ATTACK_NAMES,
+        default=list(IMPLEMENTED_ATTACK_NAMES),
         help=(
             "One or more adversarial attacks to generate. "
             "Currently implemented: color_shift. "
             "Planned: fgsm, sigma_zero, one_pixel, superdeepfool."
+        ),
+    )
+    parser.add_argument(
+        "--target-model",
+        nargs="+",
+        choices=SUPPORTED_TARGET_MODELS,
+        default=list(SUPPORTED_TARGET_MODELS),
+        help=(
+            "Target proxy model(s) for model-dependent adversarial attacks. "
+            "Currently accepted values: resnet18, efficientnet_b0, clip. "
+            "This option is recorded for reproducibility and ignored by "
+            "model-agnostic attacks such as color_shift."
         ),
     )
     parser.add_argument(
@@ -229,7 +236,8 @@ def validate_selected_attacks(selected_attacks: list[str]) -> None:
         raise NotImplementedError(
             "The following adversarial attacks are planned but not implemented yet: "
             f"{', '.join(not_implemented)}. "
-            "Enable them only after the target-model interface is finalized."
+            "Enable them only after the target-model interface is finalized "
+            "and concrete target-model adapters are validated."
         )
 
 
@@ -535,6 +543,7 @@ def build_summary(
     rows: list[dict[str, Any]],
     input_manifest: Path,
     selected_attacks: list[str],
+    selected_target_models: list[str],
     args: argparse.Namespace,
     created_at: str,
 ) -> dict[str, Any]:
@@ -549,7 +558,12 @@ def build_summary(
 
     unique_generated_ids = {row["generated_image_id"] for row in rows}
     unique_perturbed_hashes = {row["sha256_perturbed"] for row in rows}
-    expected_total = len(pd.read_csv(input_manifest)) * len(selected_attacks)
+    input_image_count = len(pd.read_csv(input_manifest))
+    expected_total = expected_generation_count(
+        input_image_count=input_image_count,
+        selected_attacks=selected_attacks,
+        selected_target_models=selected_target_models,
+    )
 
     return {
         "script": SCRIPT_NAME,
@@ -558,9 +572,11 @@ def build_summary(
         "output_root": repo_relative_string(ADVERSARIAL_DIR),
         "manifest_csv": repo_relative_string(ADVERSARIAL_MANIFEST_PATH),
         "summary_json": repo_relative_string(ADVERSARIAL_SUMMARY_PATH),
-        "planned_attacks": PLANNED_ATTACK_NAMES,
-        "implemented_attacks": IMPLEMENTED_ATTACK_NAMES,
+        "planned_attacks": list(PLANNED_ATTACK_NAMES),
+        "implemented_attacks": list(IMPLEMENTED_ATTACK_NAMES),
+        "supported_target_models": list(SUPPORTED_TARGET_MODELS),
         "selected_attacks": selected_attacks,
+        "selected_target_models": selected_target_models,
         "parameters": {
             "jpeg_quality": args.jpeg_quality,
             "color_red_shift": args.color_red_shift,
@@ -570,8 +586,9 @@ def build_summary(
             "color_contrast_factor": args.color_contrast_factor,
         },
         "counts": {
-            "input_images": expected_total // len(selected_attacks) if selected_attacks else 0,
+            "input_images": input_image_count,
             "selected_attack_count": len(selected_attacks),
+            "selected_target_model_count": len(selected_target_models),
             "expected_generated_images": expected_total,
             "actual_generated_images": len(rows),
             "per_attack_counts": dict(sorted(per_attack_counts.items())),
@@ -593,7 +610,7 @@ def build_summary(
         },
         "methodological_status": {
             "color_shift": "implemented_as_model_agnostic_color_space_perturbation",
-            "fgsm": "planned_requires_target_model_interface",
+            "fgsm": "planned_requires_concrete_target_model_adapter",
             "sigma_zero": "planned_requires_reference_implementation_or_stable_adapter",
             "one_pixel": "planned_requires_black_box_or_surrogate_model_interface",
             "superdeepfool": "planned_requires_reference_implementation_or_stable_adapter",
@@ -615,6 +632,7 @@ def main() -> None:
     setup_logging(args.verbose)
 
     selected_attacks = list(dict.fromkeys(args.attack))
+    selected_target_models = validate_target_model_names(args.target_model)
     validate_selected_attacks(selected_attacks)
 
     input_manifest = repo_relative_path(args.input_manifest)
@@ -622,6 +640,7 @@ def main() -> None:
 
     logging.info("Input manifest: %s", input_manifest)
     logging.info("Selected attacks: %s", ", ".join(selected_attacks))
+    logging.info("Selected target models: %s", ", ".join(selected_target_models))
     logging.info("Output root: %s", ADVERSARIAL_DIR)
 
     df = load_manifest(input_manifest)
@@ -629,7 +648,11 @@ def main() -> None:
     prepare_output_dirs(selected_attacks=selected_attacks, force=args.force)
 
     rows: list[dict[str, Any]] = []
-    total_expected = len(df) * len(selected_attacks)
+    total_expected = expected_generation_count(
+        input_image_count=len(df),
+        selected_attacks=selected_attacks,
+        selected_target_models=selected_target_models,
+    )
     progress_counter = 0
 
     for attack_name in selected_attacks:
@@ -653,6 +676,7 @@ def main() -> None:
         rows=rows,
         input_manifest=input_manifest,
         selected_attacks=selected_attacks,
+        selected_target_models=selected_target_models,
         args=args,
         created_at=created_at,
     )
