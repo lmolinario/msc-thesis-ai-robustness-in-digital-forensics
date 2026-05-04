@@ -208,3 +208,9 @@ __marimo__/
 
 #LatexOutDirectory
 /out/
+
+# PyCharm local source-root detection
+.idea/pySourceRootDetection.xml
+
+# Local/generated manual-selection backups
+datasets/final/reports/backups/
