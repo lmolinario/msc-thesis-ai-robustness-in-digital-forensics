@@ -78,7 +78,7 @@ Risultati analoghi sono emersi nel dominio dell'object detection. Michaelis et a
 
 Un secondo filone della letteratura riguarda la rilevazione di input fuori distribuzione. Hendrycks e Gimpel~\cite{hendrycks2017baseline} hanno mostrato che i classificatori neurali possono produrre predizioni ad alta confidenza anche su input che non appartengono alle classi previste dal task. Questo comportamento è problematico in contesti operativi, poiché un sistema automatico può assegnare forzatamente un'immagine anomala a una classe nota invece di segnalarne l'incertezza. Fort et al.~\cite{fort2021exploring} hanno ulteriormente evidenziato i limiti degli approcci di \gls{ood} detection, mostrando che la capacità di riconoscere input anomali dipende fortemente dal tipo di distribuzione considerata e dal grado di distanza rispetto ai dati di addestramento. Per la \gls{df}, ciò implica che immagini borderline, sintetiche, fortemente degradate o non pertinenti al task non dovrebbero essere trattate come semplici errori di classificazione, ma come una componente strutturale della valutazione di affidabilità.
 
-La letteratura sui benchmark di robustezza ha inoltre contribuito a distinguere tra forme diverse di instabilità del modello. Da un lato, la \textit{corruption robustness} riguarda la capacità di mantenere prestazioni accettabili in presenza di degradazioni realistiche o non necessariamente ostili. Dall'altro, la robustezza adversariale riguarda la capacità di resistere a perturbazioni costruite intenzionalmente per alterare la decisione del classificatore. Ford et al.~\cite{ford2019adversarial} hanno discusso il rapporto tra errore su dati rumorosi e vulnerabilità adversariale, suggerendo che la fragilità dei modelli rispetto a perturbazioni intenzionali non sia completamente separabile dalla loro sensibilità a variazioni naturali o realistiche dell'input. Questa relazione è importante per la presente tesi, perché giustifica una valutazione integrata che consideri sia trasformazioni anti-forensi sia attacchi adversariali.
+La letteratura sui benchmark di robustezza ha inoltre evidenziato che l'instabilità dei modelli può emergere sia in presenza di degradazioni realistiche sia in presenza di perturbazioni costruite intenzionalmente. Ford et al.~\cite{ford2019adversarial} hanno discusso il rapporto tra errore su dati rumorosi e vulnerabilità adversariale, suggerendo che la fragilità dei modelli rispetto ad attacchi intenzionali non sia completamente separabile dalla loro sensibilità a variazioni naturali o realistiche dell'input. Questa relazione è importante per la presente tesi, perché giustifica una valutazione integrata che consideri sia trasformazioni anti-forensi sia attacchi adversariali.
 
 Un ulteriore contributo rilevante è rappresentato da RobustBench~\cite{croce2020robustbench}, che ha fornito un riferimento standardizzato per confrontare modelli e difese rispetto ad attacchi adversariali. Sebbene tale benchmark appartenga al dominio generale della computer vision e non sia progettato per scenari forensi, esso mostra l'importanza di protocolli condivisi, metriche comparabili e condizioni sperimentali controllate. L'assenza di un equivalente specifico per la \gls{df} costituisce una lacuna rilevante: i modelli e gli strumenti utilizzati in ambito investigativo vengono spesso valutati con criteri non uniformi, su dataset difficilmente comparabili e senza una verifica sistematica della loro robustezza rispetto a manipolazioni realistiche o ostili.
 
@@ -93,7 +93,7 @@ Nel complesso, la letteratura sui benchmark di robustezza fornisce tre indicazio
 
 La letteratura sull'\gls{aml} ha mostrato che i classificatori di immagini basati su \gls{ml} e \gls{dl} possono essere vulnerabili a input costruiti intenzionalmente per alterarne la predizione. Nel Capitolo~\ref{chap:background} sono stati introdotti i concetti fondamentali di adversarial example, threat model e perturbazione dell'input; in questa sezione l'attenzione è invece rivolta ai principali risultati della letteratura e alla loro rilevanza per i classificatori visuali impiegabili in scenari forensi.
 
-Il punto di svolta del settore è rappresentato dal lavoro di Szegedy et al.~\cite{szegedy2014intriguing}, che ha dimostrato come reti neurali profonde ad alte prestazioni possano produrre classificazioni errate in presenza di perturbazioni molto piccole, spesso difficili da percepire per un osservatore umano. Questo risultato ha evidenziato una fragilità strutturale dei modelli di computer vision: l'elevata accuratezza su dati puliti non implica necessariamente stabilità rispetto a variazioni intenzionalmente costruite. Goodfellow et al.~\cite{goodfellow2015explaining} hanno successivamente proposto il \gls{fgsm}, mostrando che perturbazioni ottenute sfruttando l'informazione del gradiente possono essere generate in modo computazionalmente efficiente e risultare comunque efficaci contro modelli profondi. La rilevanza di questi contributi per la \gls{df} risiede nel fatto che un classificatore utilizzato per il triage automatico può essere indotto a sottostimare o ignorare contenuti rilevanti, se l'input è stato alterato prima dell'acquisizione o dell'analisi.
+I lavori seminali di Szegedy et al.~\cite{szegedy2014intriguing} e Goodfellow et al.~\cite{goodfellow2015explaining} hanno stabilito che classificatori profondi ad alta accuratezza possono produrre decisioni errate in presenza di perturbazioni intenzionalmente costruite, anche quando tali alterazioni risultano limitate sul piano percettivo. Per la \gls{df}, questo risultato è rilevante perché mostra che un sistema automatico impiegato nel triage visuale può essere indotto a sottostimare o ignorare contenuti investigativamente rilevanti qualora l'input sia stato manipolato prima dell'acquisizione o dell'analisi.
 
 Un secondo filone della letteratura ha approfondito la costruzione di attacchi più precisi, iterativi o ottimizzati rispetto alla minima perturbazione necessaria per modificare la decisione del modello. DeepFool~\cite{moosavi2016deepfool} ha mostrato che è possibile stimare perturbazioni di piccola ampiezza capaci di spostare l'immagine oltre il confine decisionale del classificatore, contribuendo a rendere più sistematica la valutazione della distanza tra input pulito e input adversariale. SuperDeepFool~\cite{zajac2020superdeepfool} si colloca nello stesso filone, proponendo un'evoluzione orientata a generare perturbazioni efficaci rispetto a modelli profondi con un processo di ottimizzazione più mirato. Questi lavori non sono nati specificamente per la \gls{df}, ma sono rilevanti perché forniscono una base metodologica per misurare quanto un classificatore visuale possa essere instabile rispetto a variazioni non casuali dell'immagine.
 
@@ -126,7 +126,7 @@ Un secondo gruppo di lavori riguarda resizing, resampling e trasformazioni geome
 
 La letteratura sulle trasformazioni realistiche dell'immagine ha inoltre considerato alterazioni quali blur, rumore, variazioni cromatiche, modifiche dell'istogramma e contrast stretching. Tali trasformazioni non sono necessariamente anti-forensi in senso stretto: possono derivare da acquisizioni di bassa qualità, inoltro tramite piattaforme di messaggistica, caricamento su social network, salvataggi ripetuti o normali processi di editing. Tuttavia, la loro rilevanza per la robustezza dei classificatori è stata evidenziata dai benchmark sulle corruzioni comuni, nei quali degradazioni di questo tipo producono riduzioni significative delle prestazioni anche in modelli ad alta accuratezza su dati puliti~\cite{hendrycks2019benchmarking}. In ambito forense, questa evidenza assume un significato operativo: le trasformazioni realistiche non rappresentano casi marginali, ma condizioni frequenti nei materiali digitali effettivamente sottoposti ad analisi.
 
-Un ulteriore tema, spesso associato all'anti-forensics, è l'information hiding. La steganografia consente di occultare informazioni all'interno di contenuti apparentemente innocui e costituisce un problema rilevante per l'analisi forense di file multimediali. Nel contesto della presente tesi, tuttavia, essa assume un ruolo principalmente contestuale: mostra come le immagini digitali possano essere utilizzate non solo come contenuti da interpretare, ma anche come vettori di occultamento o alterazione. Il focus della valutazione resta invece sulle trasformazioni che incidono direttamente sulla classificazione automatica del contenuto visivo, come ricompressione, ricampionamento, sfocatura e modifiche tonali.
+Tecniche di information hiding, come la steganografia, rimangono rilevanti nel dominio forense, ma esulano dal focus sperimentale della presente tesi, centrato sulle trasformazioni che incidono direttamente sulla classificazione visuale automatizzata, quali ricompressione, ricampionamento, sfocatura e modifiche tonali.
 
 I lavori recenti sugli strumenti forensi \gls{ai}-based confermano che tali trasformazioni devono essere considerate anche nella validazione operativa dei tool. Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} mostrano che contenuti manipolati o non conformi alle condizioni ordinarie possono ridurre l'affidabilità delle classificazioni automatiche prodotte da strumenti forensi. Il punto critico è che le trasformazioni anti-forensi e realistiche non richiedono necessariamente un attacco sofisticato contro il modello: possono essere applicate con strumenti comuni, introdotte da piattaforme di condivisione o risultare da normali passaggi di elaborazione dell'immagine. Questo le rende particolarmente plausibili negli scenari investigativi reali.
 
@@ -146,7 +146,7 @@ Le rassegne di Adadi e Berrada~\cite{Adadi2018} e di Doshi-Velez e Kim~\cite{Dos
 
 Nel dominio della classificazione di immagini, un filone rilevante della letteratura riguarda le tecniche di attribuzione visuale. Ribeiro et al.~\cite{Ribeiro2016} hanno proposto LIME come metodo model-agnostic per spiegare localmente le predizioni di classificatori complessi, evidenziando quali regioni o caratteristiche dell'input influenzino maggiormente la decisione. Sundararajan et al.~\cite{Sundararajan2017} hanno introdotto Integrated Gradients, fornendo un approccio teoricamente fondato per attribuire l'output del modello alle componenti dell'input. Zhou et al.~\cite{Zhou2016} hanno mostrato come le tecniche di Class Activation Mapping possano evidenziare le aree dell'immagine maggiormente associate alla classe predetta. Questi contributi hanno reso disponibili strumenti utili per osservare se un modello stia concentrando la propria attenzione su regioni semanticamente coerenti o su elementi spurii del contenuto visivo.
 
-Tali metodologie sono particolarmente interessanti per la valutazione della robustezza. In presenza di perturbazioni adversariali o trasformazioni anti-forensi, le mappe di attribuzione possono mostrare se il modello continua a fondare la decisione su regioni rilevanti dell'immagine oppure se la classificazione viene influenzata da artefatti, sfondi, texture o dettagli non pertinenti. In questo senso, la \gls{xai} non misura direttamente la robustezza, ma può fornire evidenze qualitative utili per interpretare il degrado prestazionale osservato con metriche quantitative. La combinazione tra analisi numerica e spiegazioni visuali permette quindi di distinguere, almeno in parte, tra errore casuale, instabilità dovuta alla degradazione dell'immagine e possibile dipendenza del modello da correlazioni spurie.
+Nel caso della classificazione forense di immagini, questo tipo di analisi è utile soprattutto per verificare se, dopo una manipolazione, il modello continui a focalizzarsi sull'oggetto investigativamente rilevante oppure se la decisione venga spostata verso regioni secondarie, texture, sfondi o artefatti introdotti dalla trasformazione. Tale uso diagnostico non attribuisce valore probatorio autonomo alla spiegazione visuale, ma consente di collegare il degrado quantitativo delle prestazioni a cambiamenti osservabili nel comportamento del classificatore.
 
 La letteratura ha tuttavia evidenziato limiti importanti delle spiegazioni visuali. Carvalho et al.~\cite{Carvalho2019} sottolineano che l'interpretabilità dei modelli dipende fortemente dal metodo utilizzato e che spiegazioni diverse possono produrre risultati non perfettamente sovrapponibili. Inoltre, molte tecniche di attribuzione sono sensibili a parametri, baseline, rumore locale o scelte di preprocessing. Ciò implica che una saliency map apparentemente coerente non costituisce una prova autonoma della correttezza del modello. In ambito forense, questa cautela è essenziale: una spiegazione visuale può supportare l'analista nella comprensione del comportamento del sistema, ma non può sostituire la verifica manuale dell'evidenza né la validazione quantitativa del classificatore.
 
@@ -170,6 +170,58 @@ Un secondo insieme di contributi riguarda le minacce che possono alterare il com
 
 Il limite principale che emerge da questo quadro non è l'assenza di ricerca sui singoli temi, ma la mancanza di una valutazione integrata. In particolare, la letteratura disponibile tende a separare la valutazione dei modelli accademici dalla validazione degli strumenti operativi, gli attacchi adversariali dalle trasformazioni anti-forensi, le metriche quantitative dall'analisi spiegabile del comportamento del modello, e i benchmark generici di computer vision dagli scenari investigativi realistici. Questa frammentazione rende difficile comprendere in che misura un sistema \gls{ai}-based possa essere considerato affidabile quando viene impiegato per supportare la classificazione automatizzata di immagini all'interno di un workflow forense.
 
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    node distance=1.5cm and 2.0cm,
+    every node/.style={font=\small, align=center},
+    field/.style={
+        rectangle,
+        rounded corners,
+        draw=black,
+        thick,
+        fill=gray!10,
+        minimum width=3.6cm,
+        minimum height=1.0cm
+    },
+    gap/.style={
+        rectangle,
+        rounded corners,
+        draw=black,
+        thick,
+        fill=orange!20,
+        minimum width=4.3cm,
+        minimum height=1.2cm
+    },
+    arrow/.style={->, thick}
+]
+
+\node[field] (ai_df) {Automazione\\nella \gls{df}};
+\node[field, right=of ai_df] (tools) {Tool forensi\\\gls{ai}-based};
+\node[field, below=of ai_df] (classification) {Classificazione\\automatica di immagini};
+\node[field, right=of classification] (robustness) {Valutazione\\della robustezza};
+\node[field, below=of classification] (aml) {\gls{aml}\\su immagini};
+\node[field, right=of aml] (antiforensics) {Anti-forensics\\su immagini};
+\node[field, below=of robustness] (xai) {\gls{xai}\\e affidabilità};
+
+\node[gap, below right=1.2cm and -0.8cm of classification] (gap) {Gap metodologico:\\valutazione integrata\\della robustezza operativa};
+
+\draw[arrow] (ai_df) -- (tools);
+\draw[arrow] (classification) -- (robustness);
+\draw[arrow] (aml) -- (gap);
+\draw[arrow] (antiforensics) -- (gap);
+\draw[arrow] (xai) -- (gap);
+\draw[arrow] (tools) -- (gap);
+\draw[arrow] (classification) -- (gap);
+\draw[arrow] (robustness) -- (gap);
+
+\end{tikzpicture}
+\caption{Relazione tra i principali filoni della letteratura e gap metodologico affrontato dalla presente tesi.}
+\label{fig:sota-literature-gap}
+\end{figure}
+
+
 La Tabella~\ref{tab:sota-gap-summary} sintetizza i principali filoni emersi dalla revisione e il limite che ciascuno lascia aperto rispetto al problema affrontato nella presente tesi.
 
 \begin{table}[H]
@@ -183,9 +235,9 @@ La Tabella~\ref{tab:sota-gap-summary} sintetizza i principali filoni emersi dall
 \hline
 Tool forensi \gls{ai}-based & Evidenzia l'utilità operativa dei moduli automatici e i primi problemi di robustezza dei tool commerciali. & Rimane limitata la validazione indipendente e comparativa di strumenti proprietari in scenari avversi realistici. \\
 \hline
-Classificazione automatica di immagini & Fornisce modelli efficaci per object recognition, visual triage e classificazione semantica. & I benchmark sono spesso generici o controllati e non sempre riflettono la complessità del materiale investigativo. \\
+Classificazione automatica di immagini & Mostra l'efficacia di modelli di computer vision e vision-language per object recognition, visual triage e classificazione semantica di contenuti rilevanti. & I benchmark sono spesso generici o controllati e non sempre riflettono la complessità del materiale investigativo. \\
 \hline
-Robustness evaluation & Dimostra che accuracy su dati puliti e affidabilità operativa non coincidono. & Mancano benchmark specifici per collegare la robustezza algoritmica all'impatto sul workflow forense. \\
+Valutazione della robustezza & Documenta degradi sistematici delle prestazioni in presenza di corruzioni, input fuori distribuzione e perturbazioni rispetto a modelli valutati solo su dati puliti. & Mancano benchmark specifici per collegare la robustezza algoritmica all'impatto sul workflow forense. \\
 \hline
 \gls{aml} & Mostra la vulnerabilità dei classificatori a perturbazioni intenzionali e trasferibili. & La maggior parte degli studi resta centrata su modelli accademici o benchmark standard, non su tool forensi operativi. \\
 \hline
@@ -202,4 +254,4 @@ Il gap specifico individuato dalla presente tesi riguarda quindi l'assenza di un
 
 La presente tesi si colloca precisamente in questa lacuna. Il suo contributo consiste nel proporre una valutazione della robustezza operativa di sistemi \gls{ai}-based per la classificazione automatizzata di immagini in ambito forense, considerando congiuntamente la dimensione algoritmica e quella operativo-investigativa. L'obiettivo non è soltanto misurare il degrado prestazionale in condizioni avverse, ma comprendere come tale degrado possa incidere sulla capacità del sistema di supportare l'analista nella selezione di contenuti rilevanti. In questa prospettiva, la robustezza viene trattata non come attributo astratto del modello, ma come requisito funzionale per l'uso controllato dell'\gls{ai} nei workflow di \gls{df}.
 
-Il posizionamento della tesi è dunque duplice. Da un lato, essa si collega alla letteratura sull'\gls{aml}, sulla robustness evaluation e sull'\gls{xai}, assumendo che i sistemi di classificazione debbano essere valutati anche in presenza di input ostili, degradati o anomali. Dall'altro, si colloca nel dominio della \gls{df}, dove la qualità dell'automazione deve essere giudicata rispetto alla sua utilità operativa, alla verificabilità dei risultati e alla possibilità di mantenere il controllo umano sul processo di analisi. Questa impostazione consente di superare una valutazione puramente prestazionale e di affrontare il problema della robustezza come questione metodologica, tecnica e forense. Tale spazio di ricerca motiva il framework metodologico \gls{fairlab}, introdotto nel capitolo successivo come pipeline integrata per la valutazione della robustezza operativa di sistemi \gls{ai}-based applicati alla classificazione automatizzata di immagini in ambito forense.
+Il posizionamento della tesi è dunque duplice. Da un lato, essa si collega alla letteratura sull'\gls{aml}, sulla valutazione della robustezza e sull'\gls{xai}, assumendo che i sistemi di classificazione debbano essere valutati anche in presenza di input ostili, degradati o anomali. Dall'altro, si colloca nel dominio della \gls{df}, dove la qualità dell'automazione deve essere giudicata rispetto alla sua utilità operativa, alla verificabilità dei risultati e alla possibilità di mantenere il controllo umano sul processo di analisi. Questa impostazione consente di superare una valutazione puramente prestazionale e di affrontare il problema della robustezza come questione metodologica, tecnica e forense. Tale spazio di ricerca motiva il framework metodologico \gls{fairlab}, presentato nel capitolo successivo.
