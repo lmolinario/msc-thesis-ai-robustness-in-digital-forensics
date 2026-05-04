@@ -24,17 +24,19 @@ Outputs
 
 Methodological notes
 --------------------
-- This script intentionally separates implemented attacks from planned attacks.
-- Model-dependent attacks such as FGSM, Sigma-Zero, One Pixel, and SuperDeepFool
-  require a stable target-model interface before being enabled.
-- The first implemented attack is Color Shift, treated as a controlled
-  model-agnostic color-space perturbation.
+- Color Shift is treated as a controlled model-agnostic color-space perturbation.
+- FGSM is treated as a model-dependent untargeted white-box attack generated
+  separately for each selected proxy model.
+- FGSM epsilon is defined in pixel space after denormalization, with pixel values
+  represented in [0, 1]. This makes epsilon comparable and interpretable across
+  ResNet18, EfficientNet-B0, and CLIP-based adapters even though their internal
+  normalization statistics differ.
 - The output directory keeps an explicit technical naming convention to support
   internal debugging and traceability.
 - A later bundle-generation stage should copy these artifacts into a neutral
   forensic evaluation bundle using opaque names such as sample_0000001.jpg.
 - The mapping between technical files, labels, folds, transformations, model
-  targets, and hashes is preserved exclusively through manifests.
+  targets, predictions, confidences, and hashes is preserved through manifests.
 """
 
 from __future__ import annotations
@@ -59,6 +61,7 @@ from datasets.scripts.attacks.adversarial_model_interface import (
     MODEL_AGNOSTIC_TARGET,
     PLANNED_ATTACK_NAMES,
     SUPPORTED_TARGET_MODELS,
+    TargetModelAdapter,
     TargetModelConfig,
     VALID_BINARY_LABELS,
     expected_generation_count,
@@ -90,6 +93,7 @@ ADVERSARIAL_MANIFEST_PATH = ATTACK_MANIFESTS_DIR / "adversarial_attacks_manifest
 ADVERSARIAL_SUMMARY_PATH = ATTACK_MANIFESTS_DIR / "adversarial_generation_summary.json"
 
 VALID_LABELS = set(VALID_BINARY_LABELS)
+DEFAULT_ATTACKS = ["color_shift"]
 
 
 # =============================================================================
@@ -113,11 +117,11 @@ def parse_args() -> argparse.Namespace:
         "--attack",
         nargs="+",
         choices=PLANNED_ATTACK_NAMES,
-        default=list(IMPLEMENTED_ATTACK_NAMES),
+        default=DEFAULT_ATTACKS,
         help=(
             "One or more adversarial attacks to generate. "
-            "Currently implemented: color_shift. "
-            "Planned: fgsm, sigma_zero, one_pixel, superdeepfool."
+            "Currently implemented: fgsm, color_shift. "
+            "Default: color_shift."
         ),
     )
     parser.add_argument(
@@ -127,9 +131,8 @@ def parse_args() -> argparse.Namespace:
         default=list(SUPPORTED_TARGET_MODELS),
         help=(
             "Target proxy model(s) for model-dependent adversarial attacks. "
-            "Currently accepted values: resnet18, efficientnet_b0, clip. "
-            "This option is recorded for reproducibility and ignored by "
-            "model-agnostic attacks such as color_shift."
+            "Accepted values: resnet18, efficientnet_b0, clip. "
+            "Ignored by model-agnostic attacks such as color_shift."
         ),
     )
     parser.add_argument(
@@ -171,6 +174,15 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=224,
         help="Square input size used by target-model adapters (default: 224).",
+    )
+    parser.add_argument(
+        "--fgsm-epsilon",
+        type=float,
+        default=8.0 / 255.0,
+        help=(
+            "FGSM epsilon in pixel space [0, 1] after denormalization "
+            "(default: 8/255)."
+        ),
     )
     parser.add_argument(
         "--force",
@@ -286,10 +298,17 @@ def validate_selected_attacks(selected_attacks: list[str]) -> None:
     if not_implemented:
         raise NotImplementedError(
             "The following adversarial attacks are planned but not implemented yet: "
-            f"{', '.join(not_implemented)}. "
-            "Enable them only after the target-model interface is finalized "
-            "and concrete target-model adapters are validated."
+            f"{', '.join(not_implemented)}."
         )
+
+
+def validate_attack_parameters(args: argparse.Namespace) -> None:
+    if not (0.0 < args.fgsm_epsilon <= 1.0):
+        raise ValueError("--fgsm-epsilon must be in the interval (0, 1].")
+    if args.input_size <= 0:
+        raise ValueError("--input-size must be greater than 0.")
+    if not (1 <= args.jpeg_quality <= 100):
+        raise ValueError("--jpeg-quality must be between 1 and 100.")
 
 
 def selected_attacks_require_models(selected_attacks: list[str]) -> bool:
@@ -445,9 +464,6 @@ def build_target_model_configs(
     args: argparse.Namespace,
     require_checkpoints: bool,
 ) -> dict[str, TargetModelConfig]:
-    if args.input_size <= 0:
-        raise ValueError("--input-size must be greater than 0.")
-
     configs: dict[str, TargetModelConfig] = {}
 
     for model_name in selected_target_models:
@@ -474,15 +490,8 @@ def build_target_model_configs(
 def load_required_target_model_adapters(
     configs: dict[str, TargetModelConfig],
     should_load: bool,
-) -> dict[str, Any]:
-    """
-    Build and optionally load target-model adapters.
-
-    For now, this function is intentionally inactive for color_shift-only runs.
-    It becomes operational when the first model-dependent attack, FGSM, is added
-    to IMPLEMENTED_ATTACK_NAMES.
-    """
-    adapters: dict[str, Any] = {}
+) -> dict[str, TargetModelAdapter]:
+    adapters: dict[str, TargetModelAdapter] = {}
 
     if not should_load:
         return adapters
@@ -516,23 +525,20 @@ def summarize_target_model_configs(
 
 
 # =============================================================================
-# Perturbation metrics
+# Perturbation metrics and tensor helpers
 # =============================================================================
 
-def compute_perturbation_metrics(
-    original_img: Image.Image,
-    transformed_img: Image.Image,
+def compute_perturbation_metrics_from_arrays(
+    original: np.ndarray,
+    transformed: np.ndarray,
 ) -> dict[str, float | int]:
-    original = np.asarray(original_img.convert("RGB"), dtype=np.float32)
-    transformed = np.asarray(transformed_img.convert("RGB"), dtype=np.float32)
-
     if original.shape != transformed.shape:
         raise ValueError(
-            "Cannot compute perturbation metrics on images with different shapes: "
+            "Cannot compute perturbation metrics on arrays with different shapes: "
             f"original={original.shape}, transformed={transformed.shape}"
         )
 
-    diff = transformed - original
+    diff = transformed.astype(np.float32) - original.astype(np.float32)
     abs_diff = np.abs(diff)
 
     return {
@@ -541,6 +547,66 @@ def compute_perturbation_metrics(
         "perturbation_norm_linf": float(np.max(abs_diff)),
         "perturbation_mean_abs": float(np.mean(abs_diff)),
     }
+
+
+def compute_perturbation_metrics(
+    original_img: Image.Image,
+    transformed_img: Image.Image,
+) -> dict[str, float | int]:
+    original = np.asarray(original_img.convert("RGB"), dtype=np.float32)
+    transformed = np.asarray(transformed_img.convert("RGB"), dtype=np.float32)
+    return compute_perturbation_metrics_from_arrays(original, transformed)
+
+
+def adapter_normalization(adapter: TargetModelAdapter) -> tuple[tuple[float, float, float], tuple[float, float, float]]:
+    if hasattr(adapter, "imagenet_mean") and hasattr(adapter, "imagenet_std"):
+        return tuple(adapter.imagenet_mean), tuple(adapter.imagenet_std)
+    if hasattr(adapter, "clip_mean") and hasattr(adapter, "clip_std"):
+        return tuple(adapter.clip_mean), tuple(adapter.clip_std)
+    raise RuntimeError(f"Adapter {adapter.name!r} does not expose normalization statistics.")
+
+
+def normalization_tensors(model_input: Any, adapter: TargetModelAdapter) -> tuple[Any, Any]:
+    mean, std = adapter_normalization(adapter)
+    torch_module = __import__("torch")
+    mean_tensor = torch_module.tensor(
+        mean,
+        dtype=model_input.dtype,
+        device=model_input.device,
+    ).view(1, 3, 1, 1)
+    std_tensor = torch_module.tensor(
+        std,
+        dtype=model_input.dtype,
+        device=model_input.device,
+    ).view(1, 3, 1, 1)
+    return mean_tensor, std_tensor
+
+
+def denormalize_tensor(model_input: Any, adapter: TargetModelAdapter) -> Any:
+    mean_tensor, std_tensor = normalization_tensors(model_input, adapter)
+    return model_input * std_tensor + mean_tensor
+
+
+def normalize_tensor(pixel_tensor: Any, adapter: TargetModelAdapter) -> Any:
+    mean_tensor, std_tensor = normalization_tensors(pixel_tensor, adapter)
+    return (pixel_tensor - mean_tensor) / std_tensor
+
+
+def tensor_to_rgb_image(pixel_tensor: Any) -> Image.Image:
+    tensor = pixel_tensor.detach().clamp(0.0, 1.0)[0].cpu()
+    array = tensor.permute(1, 2, 0).numpy()
+    array_uint8 = np.clip(np.rint(array * 255.0), 0, 255).astype(np.uint8)
+    return Image.fromarray(array_uint8, mode="RGB")
+
+
+def tensor_to_pixel_array(pixel_tensor: Any) -> np.ndarray:
+    tensor = pixel_tensor.detach().clamp(0.0, 1.0)[0].cpu()
+    array = tensor.permute(1, 2, 0).numpy()
+    return array.astype(np.float32)
+
+
+def confidence_for_prediction(probabilities: dict[str, float], prediction: str) -> float:
+    return float(probabilities.get(prediction, 0.0))
 
 
 # =============================================================================
@@ -589,6 +655,66 @@ def apply_color_shift(
     return shifted, params, MODEL_AGNOSTIC_TARGET
 
 
+def apply_fgsm(
+    img: Image.Image,
+    true_label: str,
+    adapter: TargetModelAdapter,
+    args: argparse.Namespace,
+) -> tuple[Image.Image, dict[str, Any]]:
+    model_input = adapter.preprocess_image(img)
+
+    original_probabilities = adapter.predict_proba(model_input)
+    original_prediction = adapter.predict(model_input)
+    original_confidence = confidence_for_prediction(
+        original_probabilities,
+        original_prediction,
+    )
+
+    gradient_normalized = adapter.compute_gradient(model_input, true_label)
+    original_pixel_tensor = denormalize_tensor(model_input, adapter).clamp(0.0, 1.0)
+    _, std_tensor = normalization_tensors(model_input, adapter)
+
+    # Convert the gradient from normalized input space to pixel space.
+    gradient_pixel_space = gradient_normalized / std_tensor
+    adversarial_pixel_tensor = (
+        original_pixel_tensor + args.fgsm_epsilon * gradient_pixel_space.sign()
+    ).clamp(0.0, 1.0)
+    adversarial_model_input = normalize_tensor(adversarial_pixel_tensor, adapter)
+
+    adversarial_probabilities = adapter.predict_proba(adversarial_model_input)
+    adversarial_prediction = adapter.predict(adversarial_model_input)
+    adversarial_confidence = confidence_for_prediction(
+        adversarial_probabilities,
+        adversarial_prediction,
+    )
+
+    original_pixel_array = tensor_to_pixel_array(original_pixel_tensor)
+    adversarial_pixel_array = tensor_to_pixel_array(adversarial_pixel_tensor)
+    metrics = compute_perturbation_metrics_from_arrays(
+        original_pixel_array,
+        adversarial_pixel_array,
+    )
+
+    params = {
+        "epsilon": args.fgsm_epsilon,
+        "epsilon_space": "pixel_[0,1]",
+        "attack_type": "untargeted",
+        "target_model": adapter.name,
+        "input_size": args.input_size,
+        "output_format": "JPEG",
+        "jpeg_quality": args.jpeg_quality,
+        "original_prediction": original_prediction,
+        "adversarial_prediction": adversarial_prediction,
+        "original_confidence": original_confidence,
+        "adversarial_confidence": adversarial_confidence,
+        "original_true_label_probability": float(original_probabilities.get(true_label, 0.0)),
+        "adversarial_true_label_probability": float(adversarial_probabilities.get(true_label, 0.0)),
+        **metrics,
+    }
+
+    return tensor_to_rgb_image(adversarial_pixel_tensor), params
+
+
 TRANSFORMERS: dict[
     str,
     Callable[[Image.Image, argparse.Namespace], tuple[Image.Image, dict[str, Any], str]],
@@ -609,24 +735,18 @@ def build_output_path(row: pd.Series, attack_name: str, target_model: str) -> Pa
     return ADVERSARIAL_DIR / attack_name / target_model / fold / label / filename
 
 
-def generate_one(
+def build_common_manifest_fields(
     row: pd.Series,
     attack_name: str,
-    args: argparse.Namespace,
+    target_model: str,
+    output_path: Path,
+    attack_params: dict[str, Any],
     created_at: str,
 ) -> dict[str, Any]:
     image_id = safe_str(row["image_id"])
     label = norm(row["final_label"])
     fold = safe_str(row["fold"])
-
     source_path = resolve_clean_image_path(safe_str(row["split_relative_path"]))
-
-    img = open_rgb_image(source_path)
-    transformer = TRANSFORMERS[attack_name]
-    transformed_img, attack_params, target_model = transformer(img, args)
-
-    output_path = build_output_path(row, attack_name, target_model)
-    save_jpeg(img=transformed_img, output_path=output_path, quality=args.jpeg_quality)
 
     sha256_perturbed, md5_perturbed = compute_hashes(output_path)
     sha256_original, md5_original = compute_hashes(source_path)
@@ -639,7 +759,19 @@ def generate_one(
             f"manifest={expected_sha256_original}, computed={sha256_original}"
         )
 
-    metrics = compute_perturbation_metrics(img, transformed_img)
+    original_prediction = attack_params.get("original_prediction", "not_computed")
+    adversarial_prediction = attack_params.get("adversarial_prediction", "not_computed")
+    original_confidence = attack_params.get("original_confidence", "not_computed")
+    adversarial_confidence = attack_params.get("adversarial_confidence", "not_computed")
+    original_correct = original_prediction == label if original_prediction != "not_computed" else "not_computed"
+    adversarial_correct = adversarial_prediction == label if adversarial_prediction != "not_computed" else "not_computed"
+
+    if attack_name == "fgsm":
+        attack_success: bool | str = adversarial_prediction != label
+        model_dependency = "model_dependent"
+    else:
+        attack_success = "not_applicable"
+        model_dependency = "model_agnostic"
 
     return {
         "generated_image_id": f"{image_id}__{attack_name}__{target_model}",
@@ -656,24 +788,79 @@ def generate_one(
         "attack_name": attack_name,
         "attack_parameters": json.dumps(attack_params, sort_keys=True),
         "target_model": target_model,
-        "model_dependency": "model_agnostic",
-        "attack_success": "not_applicable",
-        "original_prediction": "not_computed",
-        "adversarial_prediction": "not_computed",
-        "original_confidence": "not_computed",
-        "adversarial_confidence": "not_computed",
+        "model_dependency": model_dependency,
+        "attack_success": attack_success,
+        "original_prediction": original_prediction,
+        "adversarial_prediction": adversarial_prediction,
+        "original_confidence": original_confidence,
+        "adversarial_confidence": adversarial_confidence,
+        "original_correct": original_correct,
+        "adversarial_correct": adversarial_correct,
         "sha256_original": sha256_original,
         "md5_original": md5_original,
         "sha256_perturbed": sha256_perturbed,
         "md5_perturbed": md5_perturbed,
-        "perturbation_norm_l0": metrics["perturbation_norm_l0"],
-        "perturbation_norm_l2": metrics["perturbation_norm_l2"],
-        "perturbation_norm_linf": metrics["perturbation_norm_linf"],
-        "perturbation_mean_abs": metrics["perturbation_mean_abs"],
+        "perturbation_norm_l0": attack_params.get("perturbation_norm_l0", "not_computed"),
+        "perturbation_norm_l2": attack_params.get("perturbation_norm_l2", "not_computed"),
+        "perturbation_norm_linf": attack_params.get("perturbation_norm_linf", "not_computed"),
+        "perturbation_mean_abs": attack_params.get("perturbation_mean_abs", "not_computed"),
         "size_bytes": size_bytes,
         "extension": ".jpg",
         "created_at": created_at,
     }
+
+
+def generate_color_shift_one(
+    row: pd.Series,
+    args: argparse.Namespace,
+    created_at: str,
+) -> dict[str, Any]:
+    source_path = resolve_clean_image_path(safe_str(row["split_relative_path"]))
+    img = open_rgb_image(source_path)
+    transformed_img, attack_params, target_model = apply_color_shift(img, args)
+    output_path = build_output_path(row, "color_shift", target_model)
+    save_jpeg(img=transformed_img, output_path=output_path, quality=args.jpeg_quality)
+
+    metrics = compute_perturbation_metrics(img, transformed_img)
+    attack_params.update(metrics)
+
+    return build_common_manifest_fields(
+        row=row,
+        attack_name="color_shift",
+        target_model=target_model,
+        output_path=output_path,
+        attack_params=attack_params,
+        created_at=created_at,
+    )
+
+
+def generate_fgsm_one(
+    row: pd.Series,
+    adapter: TargetModelAdapter,
+    args: argparse.Namespace,
+    created_at: str,
+) -> dict[str, Any]:
+    source_path = resolve_clean_image_path(safe_str(row["split_relative_path"]))
+    label = norm(row["final_label"])
+    img = open_rgb_image(source_path)
+
+    transformed_img, attack_params = apply_fgsm(
+        img=img,
+        true_label=label,
+        adapter=adapter,
+        args=args,
+    )
+    output_path = build_output_path(row, "fgsm", adapter.name)
+    save_jpeg(img=transformed_img, output_path=output_path, quality=args.jpeg_quality)
+
+    return build_common_manifest_fields(
+        row=row,
+        attack_name="fgsm",
+        target_model=adapter.name,
+        output_path=output_path,
+        attack_params=attack_params,
+        created_at=created_at,
+    )
 
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
@@ -703,10 +890,12 @@ def build_summary(
     per_target_counts = Counter(row["target_model"] for row in rows)
     per_fold_counts: dict[str, Counter] = defaultdict(Counter)
     per_label_counts: dict[str, Counter] = defaultdict(Counter)
+    per_attack_success: dict[str, Counter] = defaultdict(Counter)
 
     for row in rows:
         per_fold_counts[row["attack_name"]][row["fold"]] += 1
         per_label_counts[row["attack_name"]][row["final_label"]] += 1
+        per_attack_success[row["attack_name"]][str(row["attack_success"])] += 1
 
     unique_generated_ids = {row["generated_image_id"] for row in rows}
     unique_perturbed_hashes = {row["sha256_perturbed"] for row in rows}
@@ -726,6 +915,7 @@ def build_summary(
         "summary_json": repo_relative_string(ADVERSARIAL_SUMMARY_PATH),
         "planned_attacks": list(PLANNED_ATTACK_NAMES),
         "implemented_attacks": list(IMPLEMENTED_ATTACK_NAMES),
+        "default_attacks": DEFAULT_ATTACKS,
         "supported_target_models": list(SUPPORTED_TARGET_MODELS),
         "selected_attacks": selected_attacks,
         "selected_target_models": selected_target_models,
@@ -737,6 +927,8 @@ def build_summary(
             "jpeg_quality": args.jpeg_quality,
             "device": args.device,
             "input_size": args.input_size,
+            "fgsm_epsilon": args.fgsm_epsilon,
+            "fgsm_epsilon_space": "pixel_[0,1]",
             "color_red_shift": args.color_red_shift,
             "color_green_shift": args.color_green_shift,
             "color_blue_shift": args.color_blue_shift,
@@ -751,6 +943,10 @@ def build_summary(
             "actual_generated_images": len(rows),
             "per_attack_counts": dict(sorted(per_attack_counts.items())),
             "per_target_model_counts": dict(sorted(per_target_counts.items())),
+            "per_attack_success_counts": {
+                attack: dict(sorted(counter.items()))
+                for attack, counter in sorted(per_attack_success.items())
+            },
             "per_fold_counts": {
                 attack: dict(sorted(counter.items()))
                 for attack, counter in sorted(per_fold_counts.items())
@@ -768,7 +964,7 @@ def build_summary(
         },
         "methodological_status": {
             "color_shift": "implemented_as_model_agnostic_color_space_perturbation",
-            "fgsm": "planned_requires_attack_generation_logic_after_adapter_integration",
+            "fgsm": "implemented_as_untargeted_white_box_pixel_space_fgsm",
             "sigma_zero": "planned_requires_reference_implementation_or_stable_adapter",
             "one_pixel": "planned_requires_black_box_or_surrogate_model_interface",
             "superdeepfool": "planned_requires_reference_implementation_or_stable_adapter",
@@ -788,6 +984,7 @@ def write_summary(path: Path, summary: dict[str, Any]) -> None:
 def main() -> None:
     args = parse_args()
     setup_logging(args.verbose)
+    validate_attack_parameters(args)
 
     selected_attacks = list(dict.fromkeys(args.attack))
     selected_target_models = validate_target_model_names(args.target_model)
@@ -829,18 +1026,34 @@ def main() -> None:
 
     for attack_name in selected_attacks:
         logging.info("Generating attack: %s", attack_name)
-        for _, row in df.iterrows():
-            generated_row = generate_one(
-                row=row,
-                attack_name=attack_name,
-                args=args,
-                created_at=created_at,
-            )
-            rows.append(generated_row)
-            progress_counter += 1
 
-            if progress_counter % 250 == 0 or progress_counter == total_expected:
-                logging.info("Generated %d/%d images", progress_counter, total_expected)
+        if attack_name == "color_shift":
+            for _, row in df.iterrows():
+                rows.append(generate_color_shift_one(row=row, args=args, created_at=created_at))
+                progress_counter += 1
+                if progress_counter % 250 == 0 or progress_counter == total_expected:
+                    logging.info("Generated %d/%d images", progress_counter, total_expected)
+            continue
+
+        if attack_name == "fgsm":
+            for target_model in selected_target_models:
+                adapter = target_model_adapters[target_model]
+                logging.info("Generating FGSM against target model: %s", target_model)
+                for _, row in df.iterrows():
+                    rows.append(
+                        generate_fgsm_one(
+                            row=row,
+                            adapter=adapter,
+                            args=args,
+                            created_at=created_at,
+                        )
+                    )
+                    progress_counter += 1
+                    if progress_counter % 250 == 0 or progress_counter == total_expected:
+                        logging.info("Generated %d/%d images", progress_counter, total_expected)
+            continue
+
+        raise NotImplementedError(f"Attack not implemented: {attack_name}")
 
     write_csv(ADVERSARIAL_MANIFEST_PATH, rows)
 
