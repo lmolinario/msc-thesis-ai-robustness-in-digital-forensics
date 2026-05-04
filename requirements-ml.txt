@@ -1,0 +1,19 @@
+# Optional machine-learning dependencies for model-dependent adversarial attacks.
+#
+# The base thesis pipeline can run dataset preparation, splitting, anti-forensic
+# transformations, and model-agnostic color_shift without these packages.
+# Install this file only when generating or evaluating white-box/model-dependent
+# adversarial attacks such as FGSM.
+#
+# CPU-only installation example:
+#   pip install -r requirements.txt
+#   pip install -r requirements-ml.txt
+#
+# CUDA users may prefer installing torch/torchvision from the official PyTorch
+# selector before installing the rest of this file.
+
+torch
+torchvision
+numpy
+pillow
+pandas
