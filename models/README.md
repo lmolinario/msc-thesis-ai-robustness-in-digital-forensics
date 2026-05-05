@@ -22,7 +22,8 @@ models/
 ├── README.md
 ├── model_registry.json
 ├── scripts/
-│   └── train_proxy_models.py
+│   ├── 12_train_proxy_models.py
+│   └── train_proxy_models.py        # implementation kept for backward compatibility
 └── checkpoints/
     ├── .gitkeep
     ├── resnet18/
@@ -44,6 +45,22 @@ models/
         ├── fold_4.pt
         └── fold_5.pt
 ```
+
+## Official numbered entry point
+
+The official pipeline entry point for proxy model training is:
+
+```text
+models/scripts/12_train_proxy_models.py
+```
+
+The unnumbered implementation file is kept only for backward compatibility:
+
+```text
+models/scripts/train_proxy_models.py
+```
+
+Use the numbered script in documentation, experiments, and reproducible commands.
 
 ## Per-fold training protocol
 
@@ -69,10 +86,16 @@ This avoids training a proxy model on the same images that are later attacked fo
 
 ## Training commands
 
+Run the interactive launcher directly:
+
+```bash
+python models/scripts/12_train_proxy_models.py
+```
+
 Smoke test on ResNet18 for `fold_1`:
 
 ```bash
-python models/scripts/train_proxy_models.py \
+python models/scripts/12_train_proxy_models.py \
   --model resnet18 \
   --fold fold_1 \
   --epochs 2 \
@@ -83,7 +106,7 @@ python models/scripts/train_proxy_models.py \
 Train all ResNet18 fold checkpoints:
 
 ```bash
-python models/scripts/train_proxy_models.py \
+python models/scripts/12_train_proxy_models.py \
   --model resnet18 \
   --fold all \
   --epochs 10 \
@@ -94,7 +117,7 @@ python models/scripts/train_proxy_models.py \
 Train all EfficientNet-B0 fold checkpoints:
 
 ```bash
-python models/scripts/train_proxy_models.py \
+python models/scripts/12_train_proxy_models.py \
   --model efficientnet_b0 \
   --fold all \
   --epochs 10 \
@@ -105,7 +128,7 @@ python models/scripts/train_proxy_models.py \
 Train all CLIP binary-head fold checkpoints:
 
 ```bash
-python models/scripts/train_proxy_models.py \
+python models/scripts/12_train_proxy_models.py \
   --model clip \
   --fold all \
   --epochs 10 \
@@ -116,7 +139,7 @@ python models/scripts/train_proxy_models.py \
 Train all official proxy models:
 
 ```bash
-python models/scripts/train_proxy_models.py \
+python models/scripts/12_train_proxy_models.py \
   --model resnet18 efficientnet_b0 clip \
   --fold all \
   --epochs 10 \
@@ -136,7 +159,7 @@ python models/scripts/train_proxy_models.py \
 The official fold-aware adversarial entry point is:
 
 ```text
-datasets/scripts/attacks/13_generate_adversarial_attacks.py
+datasets/scripts/attacks/14_generate_adversarial_attacks.py
 ```
 
 The script resolves checkpoints deterministically as:
@@ -154,7 +177,7 @@ models/checkpoints/efficientnet_b0/fold_1.pt
 Official FGSM generation against the primary proxy target:
 
 ```bash
-python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
@@ -165,7 +188,7 @@ python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
 Smoke test before full generation:
 
 ```bash
-python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
