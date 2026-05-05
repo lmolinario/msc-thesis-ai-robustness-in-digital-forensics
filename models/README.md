@@ -154,7 +154,7 @@ models/checkpoints/efficientnet_b0/fold_1.pt
 Official FGSM generation against the primary proxy target:
 
 ```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
+python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
@@ -165,7 +165,7 @@ python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
 Smoke test before full generation:
 
 ```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
+python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \

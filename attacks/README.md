@@ -105,13 +105,13 @@ python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py --force
 ```
 
 ```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
+python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
   --attack color_shift \
   --force
 ```
 
 ```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
+python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
