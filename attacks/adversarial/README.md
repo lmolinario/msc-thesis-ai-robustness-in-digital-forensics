@@ -94,16 +94,24 @@ image in fold_1 + target efficientnet_b0
 
 This ensures that the proxy model used for attack generation was trained on the other four folds and never on the images being attacked.
 
-Official entry point:
+Official numbered entry point:
+
+```text
+datasets/scripts/attacks/14_generate_adversarial_attacks.py
+```
+
+The compatibility implementation file is currently retained as:
 
 ```text
 datasets/scripts/attacks/13_generate_adversarial_attacks.py
 ```
 
+Use the numbered script in documentation, experiments, and reproducible commands.
+
 Official FGSM command:
 
 ```bash
-python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
@@ -114,7 +122,7 @@ python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
 Smoke test:
 
 ```bash
-python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
