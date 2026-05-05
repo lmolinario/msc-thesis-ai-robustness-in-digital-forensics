@@ -17,7 +17,14 @@
       "normalization": "imagenet",
       "checkpoint_pattern": "models/checkpoints/resnet18/{fold}.pt",
       "download_url": "",
-      "sha256": {}
+      "sha256": {
+        "fold_1": "faf898a9fec3e9ef3d691aa93d6d6c5f145f27bbf2f585c4bcd22cbab236d828",
+        "fold_2": "ae985687404b80572830482a31a1ecf563f60df54619aab770abb48401782814",
+        "fold_3": "cf308cfa5677dcbf90b92f4bde54002854e9a1fdc85f910cd1dee0ef2054e238",
+        "fold_4": "4817e523b1ab65c35013e2de2b0f9afc5a13ead5a97e34cbf3fc6f7c8fb16e26",
+        "fold_5": "57d2a34d6d2e773e834919dc0f7cde989d5c26cc812347009cdee113ea786980"
+      },
+      "last_trained_at": "2026-05-05T00:33:56+00:00"
     },
     "efficientnet_b0": {
       "architecture": "torchvision.efficientnet_b0",
@@ -27,7 +34,14 @@
       "normalization": "imagenet",
       "checkpoint_pattern": "models/checkpoints/efficientnet_b0/{fold}.pt",
       "download_url": "",
-      "sha256": {}
+      "sha256": {
+        "fold_1": "46d1fd9ccfebf39a370169d94cd374212a8ca7cb24a6502cc9adf283b1191ff6",
+        "fold_2": "59fef93da20f0f8b6598e3653485e9feb8ed0e9ded97db52ae6e415175f517e5",
+        "fold_3": "f69a156a8ad2b85cd7385c2cce5c7590393837622388928aa398520e7fafb963",
+        "fold_4": "47d3472b328770f2ffd11f0d8883e6493bed36f3f3d0ca680adc583ac9c2787a",
+        "fold_5": "f28a8ed6ee0cd6d77c2a38f9d0315970b360915d3ce76326932011ff850147dc"
+      },
+      "last_trained_at": "2026-05-05T01:14:32+00:00"
     },
     "clip": {
       "architecture": "open_clip.ViT-B-32",
@@ -37,7 +51,14 @@
       "normalization": "clip",
       "checkpoint_pattern": "models/checkpoints/clip/{fold}.pt",
       "download_url": "",
-      "sha256": {}
+      "sha256": {
+        "fold_1": "12b68c964e111044f2e36a7da815d47a7135f6fbaa8a751cf3182cb5293bb98b",
+        "fold_2": "c3acc87c3cea4b018f8641d0a68226fc7d3a37c83a429acc5a1c9afd148f21b6",
+        "fold_3": "805b638717159082e268f1f00d7b6a43d43f16ddb6bab89c12a1072aef7bccee",
+        "fold_4": "0880f83539393270dd2a3dfe29d4ad67d8f80f1ba680067a8ca7e841ff518ac1",
+        "fold_5": "8dd78f694599d704ea23b1636bb455b1bca15ba1063d1677de773bcc86623b49"
+      },
+      "last_trained_at": "2026-05-05T01:45:12+00:00"
     }
   }
 }

@@ -1,0 +1,116 @@
+{
+  "script": "datasets/scripts/attacks/13_generate_adversarial_attacks.py",
+  "created_at": "2026-05-04T22:53:16+00:00",
+  "input_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
+  "output_root": "attacks/adversarial",
+  "manifest_csv": "attacks/manifests/adversarial_attacks_manifest.csv",
+  "summary_json": "attacks/manifests/adversarial_generation_summary.json",
+  "planned_attacks": [
+    "fgsm",
+    "sigma_zero",
+    "one_pixel",
+    "superdeepfool",
+    "color_shift"
+  ],
+  "implemented_attacks": [
+    "fgsm",
+    "color_shift"
+  ],
+  "default_attacks": [
+    "color_shift"
+  ],
+  "supported_target_models": [
+    "resnet18",
+    "efficientnet_b0",
+    "clip"
+  ],
+  "selected_attacks": [
+    "color_shift"
+  ],
+  "selected_target_models": [
+    "resnet18",
+    "efficientnet_b0",
+    "clip"
+  ],
+  "target_model_configuration": {
+    "resnet18": {
+      "checkpoint_provided": false,
+      "checkpoint_path": "",
+      "device": "auto",
+      "input_size": 224,
+      "adapter_loaded": false
+    },
+    "efficientnet_b0": {
+      "checkpoint_provided": false,
+      "checkpoint_path": "",
+      "device": "auto",
+      "input_size": 224,
+      "adapter_loaded": false
+    },
+    "clip": {
+      "checkpoint_provided": false,
+      "checkpoint_path": "",
+      "device": "auto",
+      "input_size": 224,
+      "adapter_loaded": false
+    }
+  },
+  "parameters": {
+    "jpeg_quality": 95,
+    "device": "auto",
+    "input_size": 224,
+    "fgsm_epsilon": 0.03137254901960784,
+    "fgsm_epsilon_space": "pixel_[0,1]",
+    "color_red_shift": 12,
+    "color_green_shift": 0,
+    "color_blue_shift": -12,
+    "color_saturation_factor": 1.1,
+    "color_contrast_factor": 1.0
+  },
+  "counts": {
+    "input_images": 1000,
+    "selected_attack_count": 1,
+    "selected_target_model_count": 3,
+    "expected_generated_images": 1000,
+    "actual_generated_images": 1000,
+    "per_attack_counts": {
+      "color_shift": 1000
+    },
+    "per_target_model_counts": {
+      "model_agnostic": 1000
+    },
+    "per_attack_success_counts": {
+      "color_shift": {
+        "not_applicable": 1000
+      }
+    },
+    "per_fold_counts": {
+      "color_shift": {
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
+      }
+    },
+    "per_label_counts": {
+      "color_shift": {
+        "non_weapon": 500,
+        "weapon": 500
+      }
+    }
+  },
+  "checks": {
+    "expected_total_generated": true,
+    "generated_image_id_unique": true,
+    "perturbed_sha256_unique": true,
+    "manifest_written": true
+  },
+  "methodological_status": {
+    "color_shift": "implemented_as_model_agnostic_color_space_perturbation",
+    "fgsm": "implemented_as_untargeted_white_box_pixel_space_fgsm",
+    "sigma_zero": "planned_requires_reference_implementation_or_stable_adapter",
+    "one_pixel": "planned_requires_black_box_or_surrogate_model_interface",
+    "superdeepfool": "planned_requires_reference_implementation_or_stable_adapter"
+  }
+}
