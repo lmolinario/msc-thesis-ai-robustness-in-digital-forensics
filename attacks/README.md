@@ -58,6 +58,65 @@ Each attack family must preserve traceability through manifest files, original h
 
 ---
 
-## Current Status
+## Current Operational Status
 
-This directory currently defines the planned attack structure. Attack generation scripts and generated outputs will be added in the next experimental phase.
+Operational scripts:
+
+```text
+datasets/scripts/attacks/12_generate_anti_forensic_attacks.py
+datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py
+```
+
+The historical script `datasets/scripts/attacks/13_generate_adversarial_attacks.py` is kept for continuity, but the official safe entry point for fold-aware adversarial generation is `14_generate_adversarial_attacks_foldaware.py`.
+
+Implemented anti-forensic transformations:
+
+```text
+jpeg_recompression
+resample_resize
+gaussian_blur
+histogram_modification
+contrast_stretching
+```
+
+Implemented adversarial/adversarial-style attacks:
+
+```text
+fgsm
+color_shift
+```
+
+Planned but not currently implemented adversarial attacks:
+
+```text
+superdeepfool
+sigma_zero
+one_pixel
+```
+
+---
+
+## Official Generation Order
+
+Recommended order after proxy checkpoints are available:
+
+```bash
+python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py --force
+```
+
+```bash
+python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
+  --attack color_shift \
+  --force
+```
+
+```bash
+python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
+  --attack fgsm \
+  --target-model efficientnet_b0 \
+  --checkpoint-root models/checkpoints \
+  --device auto \
+  --force
+```
+
+FGSM must be smoke-tested first using `--limit 10` before full generation.
