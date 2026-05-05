@@ -70,6 +70,7 @@ PLANNED_ATTACK_NAMES: Final[tuple[str, ...]] = (
 IMPLEMENTED_ATTACK_NAMES: Final[tuple[str, ...]] = (
     "fgsm",
     "color_shift",
+    "one_pixel",
 )
 
 

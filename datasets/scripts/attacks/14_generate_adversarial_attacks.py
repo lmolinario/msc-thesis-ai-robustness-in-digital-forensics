@@ -24,10 +24,10 @@ Operational protocol
 Implemented attacks:
 - fgsm
 - color_shift
+- one_pixel
 
 Planned but intentionally not implemented here:
 - sigma_zero
-- one_pixel
 - superdeepfool
 """
 
@@ -169,10 +169,11 @@ def parse_interactive_args() -> argparse.Namespace:
     print("  1. color_shift only (model-agnostic, no checkpoints required) [default]")
     print("  2. FGSM smoke test on efficientnet_b0 (--limit 10)")
     print("  3. FGSM full generation on efficientnet_b0")
-    print("  4. color_shift + FGSM smoke test")
-    print("  5. custom FGSM target selection")
+    print("  4. One Pixel smoke test on efficientnet_b0 (--limit 10)")
+    print("  5. One Pixel full generation on efficientnet_b0")
+    print("  6. custom FGSM target selection")
 
-    selection = ask_choice("Selection", {"1", "2", "3", "4", "5"}, "1")
+    selection = ask_choice("Selection", {"1", "2", "3", "4", "5", "6"}, "1")
 
     attacks = ["color_shift"]
     target_models = DEFAULT_TARGET_MODELS.copy()
@@ -188,10 +189,13 @@ def parse_interactive_args() -> argparse.Namespace:
         attacks = ["fgsm"]
         target_models = ["efficientnet_b0"]
     elif selection == "4":
-        attacks = ["color_shift", "fgsm"]
+        attacks = ["one_pixel"]
         target_models = ["efficientnet_b0"]
         limit = 10
     elif selection == "5":
+        attacks = ["one_pixel"]
+        target_models = ["efficientnet_b0"]
+    elif selection == "6":
         attacks = ["fgsm"]
         target_models = ask_target_models(DEFAULT_TARGET_MODELS)
         limit = ask_int("Limit rows for smoke test; use 0 for full generation", 10, minimum=0)
@@ -215,6 +219,9 @@ def parse_interactive_args() -> argparse.Namespace:
         color_blue_shift=-12,
         color_saturation_factor=1.10,
         color_contrast_factor=1.00,
+        one_pixel_max_iterations=30,
+        one_pixel_population_size=8,
+        one_pixel_seed=42,
         verbose=verbose,
     )
 
@@ -239,7 +246,7 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="+",
         choices=PLANNED_ATTACK_NAMES,
         default=DEFAULT_ATTACKS,
-        help="Attack(s) to generate. Implemented: fgsm, color_shift. Default: color_shift.",
+        help="Attack(s) to generate. Implemented: fgsm, color_shift, one_pixel. Default: color_shift.",
     )
     parser.add_argument(
         "--target-model",
@@ -254,6 +261,30 @@ def build_parser() -> argparse.ArgumentParser:
         default=str(DEFAULT_CHECKPOINT_ROOT),
         help="Root directory for fold-aware checkpoints: <root>/<target_model>/<fold>.pt.",
     )
+
+    parser.add_argument(
+        "--one-pixel-max-iterations",
+        type=int,
+        default=30,
+        help="Maximum number of Differential Evolution iterations for the One Pixel attack.",
+    )
+    parser.add_argument(
+        "--one-pixel-population-size",
+        type=int,
+        default=8,
+        help=(
+            "Differential Evolution population-size multiplier. "
+            "The effective population is approximately population_size * 5."
+        ),
+    )
+    parser.add_argument(
+        "--one-pixel-seed",
+        type=int,
+        default=42,
+        help="Base random seed for deterministic per-image One Pixel optimization.",
+    )
+
+
     parser.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
     parser.add_argument("--input-size", type=int, default=224)
     parser.add_argument("--fgsm-epsilon", type=float, default=8.0 / 255.0)
@@ -389,6 +420,10 @@ def validate_attack_parameters(args: argparse.Namespace) -> None:
         raise ValueError("--jpeg-quality must be between 1 and 100.")
     if args.limit < 0:
         raise ValueError("--limit must be greater than or equal to 0.")
+    if args.one_pixel_max_iterations <= 0:
+        raise ValueError("--one-pixel-max-iterations must be greater than 0.")
+    if args.one_pixel_population_size <= 0:
+        raise ValueError("--one-pixel-population-size must be greater than 0.")
 
 
 def load_manifest(path: Path, limit: int) -> pd.DataFrame:
@@ -590,6 +625,7 @@ def apply_color_shift(img: Image.Image, args: argparse.Namespace) -> tuple[Image
         "red_shift": args.color_red_shift,
         "green_shift": args.color_green_shift,
         "blue_shift": args.color_blue_shift,
+        "metric_space": "pixel_[0,255]",
         "saturation_factor": args.color_saturation_factor,
         "contrast_factor": args.color_contrast_factor,
         "output_format": "JPEG",
@@ -623,6 +659,7 @@ def apply_fgsm(img: Image.Image, true_label: str, adapter: TargetModelAdapter, a
     params = {
         "epsilon": args.fgsm_epsilon,
         "epsilon_space": "pixel_[0,1]",
+        "metric_space": "pixel_[0,1]",
         "attack_type": "untargeted",
         "target_model": adapter.name,
         "input_size": args.input_size,
@@ -637,9 +674,235 @@ def apply_fgsm(img: Image.Image, true_label: str, adapter: TargetModelAdapter, a
     }
     return tensor_to_rgb_image(adversarial_pixel_tensor), params
 
+def stable_attack_seed(base_seed: int, image_id: str, attack_name: str) -> int:
+    """
+    Build a deterministic per-image seed for stochastic attacks.
+
+    This avoids using the exact same candidate sequence for every image while
+    preserving reproducibility across runs.
+    """
+    material = f"{base_seed}|{attack_name}|{image_id}".encode("utf-8")
+    digest = hashlib.sha256(material).hexdigest()
+    return int(digest[:8], 16)
+
+
+def count_changed_pixels(original_img: Image.Image, transformed_img: Image.Image) -> int:
+    """
+    Count pixels whose RGB value changed in at least one channel.
+    """
+    original = np.asarray(original_img.convert("RGB"), dtype=np.int16)
+    transformed = np.asarray(transformed_img.convert("RGB"), dtype=np.int16)
+    changed = np.any(original != transformed, axis=2)
+    return int(np.count_nonzero(changed))
+
+
+def apply_one_pixel(
+    img: Image.Image,
+    true_label: str,
+    adapter: TargetModelAdapter,
+    args: argparse.Namespace,
+    image_id: str,
+) -> tuple[Image.Image, dict[str, Any]]:
+    """
+    Apply an untargeted One Pixel Attack using Differential Evolution.
+
+    The attack optimizes five variables:
+
+    - x coordinate
+    - y coordinate
+    - red channel
+    - green channel
+    - blue channel
+
+    The objective minimizes the probability assigned by the target model to the
+    true class. The procedure is score-based and uses only model probabilities,
+    not gradients. A deterministic per-image seed is used for reproducibility.
+    """
+    try:
+        from scipy.optimize import differential_evolution
+    except ImportError as exc:
+        raise RuntimeError(
+            "SciPy is required for the Differential Evolution-based One Pixel attack. "
+            "Install it with: python -m pip install scipy"
+        ) from exc
+
+    clean_img = img.convert("RGB")
+    width, height = clean_img.size
+
+    original_input = adapter.preprocess_image(clean_img)
+    original_probabilities = adapter.predict_proba(original_input)
+    original_prediction = adapter.predict(original_input)
+    original_confidence = confidence_for_prediction(original_probabilities, original_prediction)
+    original_true_probability = float(original_probabilities.get(true_label, 0.0))
+
+    image_seed = stable_attack_seed(
+        base_seed=args.one_pixel_seed,
+        image_id=image_id,
+        attack_name="one_pixel",
+    )
+
+    bounds = [
+        (0, width - 1),
+        (0, height - 1),
+        (0, 255),
+        (0, 255),
+        (0, 255),
+    ]
+
+    best_img = clean_img.copy()
+    best_prediction = original_prediction
+    best_probabilities = original_probabilities
+    best_true_probability = original_true_probability
+    best_confidence = original_confidence
+    best_x = -1
+    best_y = -1
+    best_rgb = (-1, -1, -1)
+    best_candidate = [-1.0, -1.0, -1.0, -1.0, -1.0]
+
+    queries_used = 0
+    converged = False
+
+    def decode_candidate(candidate: np.ndarray) -> tuple[int, int, tuple[int, int, int], list[float]]:
+        """Convert a Differential Evolution candidate into integer pixel parameters."""
+        x = int(np.clip(np.rint(candidate[0]), 0, width - 1))
+        y = int(np.clip(np.rint(candidate[1]), 0, height - 1))
+        rgb = tuple(int(np.clip(np.rint(value), 0, 255)) for value in candidate[2:5])
+        candidate_list = [float(value) for value in candidate]
+        return x, y, rgb, candidate_list
+
+    def objective(candidate: np.ndarray) -> float:
+        """
+        Objective minimized by Differential Evolution.
+
+        Lower values correspond to lower probability assigned to the true label.
+        Misclassification is handled through early stopping in the callback.
+        """
+        nonlocal best_img
+        nonlocal best_prediction
+        nonlocal best_probabilities
+        nonlocal best_true_probability
+        nonlocal best_confidence
+        nonlocal best_x
+        nonlocal best_y
+        nonlocal best_rgb
+        nonlocal best_candidate
+        nonlocal queries_used
+        nonlocal converged
+
+        x, y, rgb, candidate_list = decode_candidate(candidate)
+
+        candidate_img = clean_img.copy()
+        candidate_img.putpixel((x, y), rgb)
+
+        candidate_input = adapter.preprocess_image(candidate_img)
+        candidate_probabilities = adapter.predict_proba(candidate_input)
+        candidate_prediction = adapter.predict(candidate_input)
+        candidate_true_probability = float(candidate_probabilities.get(true_label, 0.0))
+        candidate_confidence = confidence_for_prediction(
+            candidate_probabilities,
+            candidate_prediction,
+        )
+
+        queries_used += 1
+
+        if candidate_true_probability < best_true_probability:
+            best_img = candidate_img
+            best_prediction = candidate_prediction
+            best_probabilities = candidate_probabilities
+            best_true_probability = candidate_true_probability
+            best_confidence = candidate_confidence
+            best_x = x
+            best_y = y
+            best_rgb = rgb
+            best_candidate = candidate_list
+
+        if candidate_prediction != true_label:
+            best_img = candidate_img
+            best_prediction = candidate_prediction
+            best_probabilities = candidate_probabilities
+            best_true_probability = candidate_true_probability
+            best_confidence = candidate_confidence
+            best_x = x
+            best_y = y
+            best_rgb = rgb
+            best_candidate = candidate_list
+            converged = True
+
+        return candidate_true_probability
+
+    def stop_callback(_xk: np.ndarray, _convergence: float) -> bool:
+        """Stop Differential Evolution after the first successful misclassification."""
+        return converged
+
+    result = differential_evolution(
+        objective,
+        bounds=bounds,
+        maxiter=args.one_pixel_max_iterations,
+        popsize=args.one_pixel_population_size,
+        seed=image_seed,
+        polish=False,
+        updating="immediate",
+        workers=1,
+        tol=0.0,
+        atol=0.0,
+        callback=stop_callback,
+    )
+
+    # Ensure that the optimizer's final candidate has been reflected in the
+    # tracked best solution.
+    objective(np.asarray(result.x, dtype=np.float64))
+
+    metrics = compute_perturbation_metrics(clean_img, best_img)
+    changed_pixel_count = count_changed_pixels(clean_img, best_img)
+
+    optimizer_fun = result.fun
+    if not np.isfinite(optimizer_fun):
+        optimizer_fun = float("nan")
+
+    params = {
+        "attack_type": "differential_evolution_one_pixel",
+        "target_model": adapter.name,
+        "input_size": args.input_size,
+        "output_format": "PNG",
+        "metric_space": "pixel_[0,255]",
+        "optimization_objective": "minimize_true_label_probability",
+        "search_space": "x_y_rgb",
+        "search_dimension": 5,
+        "max_iterations": args.one_pixel_max_iterations,
+        "population_size": args.one_pixel_population_size,
+        "effective_population_size": args.one_pixel_population_size * 5,
+        "polish": False,
+        "updating": "immediate",
+        "workers": 1,
+        "base_seed": args.one_pixel_seed,
+        "image_seed": image_seed,
+        "queries_used": queries_used,
+        "iterations_used": int(getattr(result, "nit", 0)),
+        "optimizer_success": bool(getattr(result, "success", False)),
+        "optimizer_message": str(getattr(result, "message", "")),
+        "optimizer_fun": float(optimizer_fun),
+        "converged": converged,
+        "changed_pixel_count": changed_pixel_count,
+        "best_x": best_x,
+        "best_y": best_y,
+        "best_rgb": list(best_rgb),
+        "best_candidate": best_candidate,
+        "original_prediction": original_prediction,
+        "adversarial_prediction": best_prediction,
+        "original_confidence": original_confidence,
+        "adversarial_confidence": best_confidence,
+        "original_true_label_probability": original_true_probability,
+        "adversarial_true_label_probability": best_true_probability,
+        "adversarial_probabilities": best_probabilities,
+        **metrics,
+    }
+
+    return best_img, params
 
 def output_extension_for_attack(attack_name: str) -> str:
-    return ".png" if attack_name == "fgsm" else ".jpg"
+    if attack_name in {"fgsm", "one_pixel", "sigma_zero", "superdeepfool"}:
+        return ".png"
+    return ".jpg"
 
 
 def build_output_path(row: pd.Series, attack_name: str, target_model: str) -> Path:
@@ -677,8 +940,12 @@ def build_manifest_row(
     original_correct = original_prediction == label if original_prediction != "not_computed" else "not_computed"
     adversarial_correct = adversarial_prediction == label if adversarial_prediction != "not_computed" else "not_computed"
 
-    model_dependency = "model_dependent" if attack_name == "fgsm" else "model_agnostic"
-    attack_success: bool | str = adversarial_prediction != label if attack_name == "fgsm" else "not_applicable"
+    model_dependency = "model_dependent" if is_model_dependent_attack(attack_name) else "model_agnostic"
+    attack_success: bool | str = (
+        adversarial_prediction != label
+        if is_model_dependent_attack(attack_name)
+        else "not_applicable"
+    )
 
     return {
         "generated_image_id": f"{image_id}__{attack_name}__{target_model}",
@@ -746,6 +1013,44 @@ def generate_fgsm_one(row: pd.Series, adapter: TargetModelAdapter, args: argpars
         checkpoint_path=adapter.config.checkpoint_path,
     )
 
+def generate_model_dependent_attack_one(
+    row: pd.Series,
+    attack_name: str,
+    adapter: TargetModelAdapter,
+    args: argparse.Namespace,
+    created_at: str,
+) -> dict[str, Any]:
+    """
+    Generate one model-dependent adversarial artifact for a manifest row.
+    """
+    source_path = resolve_clean_image_path(safe_str(row["split_relative_path"]))
+    img = open_rgb_image(source_path)
+    label = norm(row["final_label"])
+    image_id = safe_str(row["image_id"])
+
+    if attack_name == "one_pixel":
+        transformed_img, attack_params = apply_one_pixel(
+            img=img,
+            true_label=label,
+            adapter=adapter,
+            args=args,
+            image_id=image_id,
+        )
+    else:
+        raise NotImplementedError(f"Unsupported model-dependent attack: {attack_name}")
+
+    output_path = build_output_path(row, attack_name, adapter.name)
+    save_png(transformed_img, output_path)
+
+    return build_manifest_row(
+        row,
+        attack_name,
+        adapter.name,
+        output_path,
+        attack_params,
+        created_at,
+        checkpoint_path=adapter.config.checkpoint_path,
+    )
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
@@ -802,6 +1107,9 @@ def build_summary(
             "input_size": args.input_size,
             "device": args.device,
             "limit": args.limit,
+            "one_pixel_max_iterations": args.one_pixel_max_iterations,
+            "one_pixel_population_size": args.one_pixel_population_size,
+            "one_pixel_seed": args.one_pixel_seed,
         },
         "counts": {
             "input_images": input_image_count,
@@ -882,6 +1190,24 @@ def main() -> None:
                 for _, row in df.iterrows():
                     fold = safe_str(row["fold"])
                     rows.append(generate_fgsm_one(row, adapters[(target_model, fold)], args, created_at))
+                    progress += 1
+                    if progress % 250 == 0 or progress == expected_total:
+                        logging.info("Generated %d/%d images", progress, expected_total)
+            continue
+
+        if attack_name == "one_pixel":
+            for target_model in selected_target_models:
+                for _, row in df.iterrows():
+                    fold = safe_str(row["fold"])
+                    rows.append(
+                        generate_model_dependent_attack_one(
+                            row=row,
+                            attack_name=attack_name,
+                            adapter=adapters[(target_model, fold)],
+                            args=args,
+                            created_at=created_at,
+                        )
+                    )
                     progress += 1
                     if progress % 250 == 0 or progress == expected_total:
                         logging.info("Generated %d/%d images", progress, expected_total)
