@@ -18,11 +18,19 @@ Each transformation preserves the original fold structure and class labels.
 
 ## Implemented Transformations
 
-Implemented by:
+Official numbered entry point:
+
+```text
+datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
+```
+
+The compatibility implementation file is currently retained as:
 
 ```text
 datasets/scripts/attacks/12_generate_anti_forensic_attacks.py
 ```
+
+Use the numbered script in documentation, experiments, and reproducible commands.
 
 Transformations:
 
@@ -40,17 +48,31 @@ These transformations are controlled image-processing operations, not model-opti
 
 ## Official Command
 
+Run the interactive launcher directly:
+
+```bash
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
+```
+
 Generate all implemented anti-forensic transformations:
 
 ```bash
-python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py --force
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py --force
 ```
 
 Generate one transformation only:
 
 ```bash
-python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py \
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py \
   --attack gaussian_blur \
+  --force
+```
+
+Smoke test all transformations:
+
+```bash
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py \
+  --limit 10 \
   --force
 ```
 
