@@ -1,4 +1,4 @@
-# Adversarial Attacks
+ Adversarial Attacks
 
 This directory contains adversarial perturbations generated against AI-based image classifiers.
 
@@ -100,11 +100,6 @@ Official numbered entry point:
 datasets/scripts/attacks/14_generate_adversarial_attacks.py
 ```
 
-The compatibility implementation file is currently retained as:
-
-```text
-datasets/scripts/attacks/13_generate_adversarial_attacks.py
-```
 
 Use the numbered script in documentation, experiments, and reproducible commands.
 

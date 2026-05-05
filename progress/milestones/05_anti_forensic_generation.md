@@ -6,7 +6,7 @@ Completed.
 
 ## Official script
 
-`datasets/scripts/attacks/12_generate_anti_forensic_attacks.py`
+`datasets/scripts/attacks/13_generate_anti_forensic_attacks.py`
 
 ## Input
 

@@ -24,13 +24,6 @@ Official numbered entry point:
 datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
 ```
 
-The compatibility implementation file is currently retained as:
-
-```text
-datasets/scripts/attacks/12_generate_anti_forensic_attacks.py
-```
-
-Use the numbered script in documentation, experiments, and reproducible commands.
 
 Transformations:
 
