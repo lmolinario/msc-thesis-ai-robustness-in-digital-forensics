@@ -22,8 +22,7 @@ models/
 ├── README.md
 ├── model_registry.json
 ├── scripts/
-│   ├── 12_train_proxy_models.py
-│   └── train_proxy_models.py        # implementation kept for backward compatibility
+│   └── 12_train_proxy_models.py        
 └── checkpoints/
     ├── .gitkeep
     ├── resnet18/

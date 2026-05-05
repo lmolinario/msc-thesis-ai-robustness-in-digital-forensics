@@ -164,7 +164,6 @@ The operational pipeline uses numbered scripts as the official entry points:
 14_generate_adversarial_attacks.py
 ```
 
-Compatibility implementation files may be retained internally, but numbered scripts are the official scripts to cite and run in reproducible experiments.
 
 ---
 
