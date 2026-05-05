@@ -12,11 +12,19 @@ datasets/splits/clean/fold_4/
 datasets/splits/clean/fold_5/
 ```
 
-Each transformation should preserve the original fold structure and class labels.
+Each transformation preserves the original fold structure and class labels.
 
 ---
 
-## Planned Transformations
+## Implemented Transformations
+
+Implemented by:
+
+```text
+datasets/scripts/attacks/12_generate_anti_forensic_attacks.py
+```
+
+Transformations:
 
 ```text
 jpeg_recompression/
@@ -26,14 +34,34 @@ histogram_modification/
 contrast_stretching/
 ```
 
+These transformations are controlled image-processing operations, not model-optimized adversarial examples.
+
+---
+
+## Official Command
+
+Generate all implemented anti-forensic transformations:
+
+```bash
+python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py --force
+```
+
+Generate one transformation only:
+
+```bash
+python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py \
+  --attack gaussian_blur \
+  --force
+```
+
 ---
 
 ## Manifest Requirements
 
-Each generated anti-forensic artifact should be traceable through a manifest containing at least:
+Each generated anti-forensic artifact must be traceable through a manifest containing at least:
 
 ```text
-image_id
+generated_image_id
 original_image_id
 fold
 final_label
@@ -54,4 +82,6 @@ created_at
 
 ## Methodological Note
 
-Anti-forensic transformations are not necessarily optimization-based adversarial examples. They should be implemented as controlled image-processing operations with explicit parameters, reproducible outputs, and forensic traceability through hashes and manifests.
+Anti-forensic transformations are not necessarily optimization-based adversarial examples. They are implemented as controlled image-processing operations with explicit parameters, reproducible outputs, and forensic traceability through hashes and manifests.
+
+They are evaluated separately from adversarial FGSM perturbations because their purpose is to simulate realistic image-processing manipulations that may occur in operational or anti-forensic scenarios.
