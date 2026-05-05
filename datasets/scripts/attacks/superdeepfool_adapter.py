@@ -265,10 +265,23 @@ class SuperDeepFoolReferenceAttack:
     def device(self) -> torch.device:
         """Resolve the active torch device."""
 
-        try:
-            return next(self.model.parameters()).device
-        except StopIteration:
-            return torch.device("cpu")
+        if self.model is not None and hasattr(self.model, "parameters"):
+            try:
+                return next(self.model.parameters()).device
+            except StopIteration:
+                pass
+
+        if hasattr(self.adapter, "device"):
+            return torch.device(getattr(self.adapter, "device"))
+
+        if hasattr(self.adapter, "config") and hasattr(self.adapter.config, "device"):
+            configured_device = getattr(self.adapter.config, "device")
+            if configured_device == "auto":
+                return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            return torch.device(configured_device)
+
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
     def _run_deepfool_until_boundary(
         self,
@@ -448,8 +461,18 @@ class SuperDeepFoolReferenceAttack:
             logits = self.adapter.predict_logits(model_input)
         elif hasattr(self.adapter, "logits"):
             logits = self.adapter.logits(model_input)
-        else:
+        elif self.model is not None:
             logits = self.model(model_input)
+        else:
+            available_attributes = sorted(
+                name for name in dir(self.adapter)
+                if not name.startswith("__")
+            )
+            raise TypeError(
+                "Unable to compute differentiable logits for SuperDeepFool. "
+                "The adapter must expose forward_logits/predict_logits/logits or an underlying torch.nn.Module. "
+                f"Available adapter attributes: {available_attributes}"
+            )
 
         if isinstance(logits, tuple):
             logits = logits[0]
@@ -464,25 +487,78 @@ class SuperDeepFoolReferenceAttack:
             raise ValueError(f"Expected logits with shape (N, C), got {tuple(logits.shape)}.")
 
         return logits
-
-
 def resolve_torch_model(adapter: Any) -> Any:
-    """Resolve the underlying PyTorch model from the target adapter."""
+    """
+    Resolve the underlying PyTorch model from the target adapter.
 
-    for attribute_name in ("model", "torch_model", "network", "net"):
-        if hasattr(adapter, attribute_name):
-            model = getattr(adapter, attribute_name)
-            if model is not None:
-                return model
+    The FAIR-Lab adapters may expose the loaded model through different public
+    or private attribute names. SuperDeepFool is a white-box attack, therefore
+    it needs differentiable logits from the target model.
+    """
 
-    if callable(adapter):
-        return adapter
-
-    raise TypeError(
-        "The target adapter does not expose a PyTorch model. "
-        "Expected one of: model, torch_model, network, net."
+    candidate_attribute_names = (
+        "model",
+        "_model",
+        "torch_model",
+        "_torch_model",
+        "network",
+        "_network",
+        "net",
+        "_net",
+        "classifier",
+        "_classifier",
+        "backbone",
+        "_backbone",
+        "loaded_model",
+        "_loaded_model",
+        "target_model",
+        "_target_model",
     )
 
+    for attribute_name in candidate_attribute_names:
+        if hasattr(adapter, attribute_name):
+            candidate = getattr(adapter, attribute_name)
+            if candidate is not None and is_torch_module_like(candidate):
+                return candidate
+
+    for attribute_name in dir(adapter):
+        if attribute_name.startswith("__"):
+            continue
+
+        try:
+            candidate = getattr(adapter, attribute_name)
+        except Exception:
+            continue
+
+        if candidate is not None and is_torch_module_like(candidate):
+            return candidate
+
+    if is_torch_module_like(adapter):
+        return adapter
+
+    available_attributes = sorted(
+        name for name in dir(adapter)
+        if not name.startswith("__")
+    )
+
+    raise TypeError(
+        "The target adapter does not expose a usable PyTorch model for SuperDeepFool. "
+        "Expected a torch.nn.Module-like object in attributes such as model, _model, "
+        "torch_model, _torch_model, network, net, classifier, or loaded_model. "
+        f"Available adapter attributes: {available_attributes}"
+    )
+
+def is_torch_module_like(candidate: Any) -> bool:
+    """Return True when the object behaves like a torch.nn.Module."""
+
+    if isinstance(candidate, torch.nn.Module):
+        return True
+
+    return (
+        callable(candidate)
+        and hasattr(candidate, "parameters")
+        and hasattr(candidate, "eval")
+    )
 
 def resolve_label_names(adapter: Any, pixel_tensor: torch.Tensor) -> list[str]:
     """
