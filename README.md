@@ -19,21 +19,21 @@ Completed stages:
 5. final frozen dataset construction;
 6. clean fold generation;
 7. OOD evaluation set generation;
-8. dataset documentation and milestone documentation.
+8. proxy model training setup;
+9. adversarial and anti-forensic generation setup.
 
 Current focus:
 
-1. consolidate dataset documentation;
-2. write the dataset construction chapter;
-3. define the evaluation schema;
-4. start attack generation.
+1. run perturbation smoke tests;
+2. generate adversarial and anti-forensic perturbations;
+3. build the forensic evaluation bundle;
+4. define the evaluation schema for local models and forensic tools.
 
 Planned next stages:
 
-1. generate anti-forensic and adversarial perturbations;
-2. build the forensic evaluation bundle;
-3. evaluate local AI models and forensic AI tools under a shared metric protocol;
-4. perform explainability-based case studies.
+1. evaluate local AI models and forensic AI tools under a shared metric protocol;
+2. perform explainability-based case studies;
+3. consolidate results and thesis chapters.
 
 ---
 
@@ -58,9 +58,9 @@ The previous `33_final_frozen_dataset.csv` naming convention is no longer used.
 ## Pipeline Overview
 
 ```text
-datasets/scripts/acquisition/
+datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
     ↓
-datasets/raw/
+datasets/scripts/acquisition/01_download_kaggle.py ... 07_scrape_deepweb.py
     ↓
 datasets/scripts/prepared/08_build_prepared_dataset.py
     ↓
@@ -79,6 +79,11 @@ datasets/scripts/splits/11_generate_clean_and_ood_splits.py
     ↓
 datasets/splits/clean/
 datasets/splits/ood/
+    ↓
+models/scripts/12_train_proxy_models.py
+    ↓
+datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
+datasets/scripts/attacks/14_generate_adversarial_attacks.py
     ↓
 attacks/
     ↓
@@ -115,11 +120,15 @@ msc-thesis-ai-robustness-in-digital-forensics/
 │       ├── prepared/
 │       ├── final/
 │       ├── splits/
+│       ├── attacks/
 │       └── bundle/
 ├── attacks/
 │   ├── adversarial/
 │   └── anti_forensic/
 ├── models/
+│   ├── scripts/
+│   ├── checkpoints/
+│   └── reports/
 ├── evaluation/
 ├── explainability/
 ├── forensic_tools/
@@ -130,6 +139,32 @@ msc-thesis-ai-robustness-in-digital-forensics/
     ├── logs/
     └── notes/
 ```
+
+---
+
+## Official Script Sequence
+
+The operational pipeline uses numbered scripts as the official entry points:
+
+```text
+00_download_raw_datasets_bundle.py
+01_download_kaggle.py
+02_download_github.py
+03_build_subset_deepfirearm.py
+04_scrape_google.py
+05_scrape_telegram.py
+06_scrape_youtube.py
+07_scrape_deepweb.py
+08_build_prepared_dataset.py
+09_generate_review_manifest_full.py
+10_manual_selection_protocol_reviewer.py
+11_generate_clean_and_ood_splits.py
+12_train_proxy_models.py
+13_generate_anti_forensic_attacks.py
+14_generate_adversarial_attacks.py
+```
+
+Compatibility implementation files may be retained internally, but numbered scripts are the official scripts to cite and run in reproducible experiments.
 
 ---
 
@@ -215,12 +250,14 @@ progress/
 │   ├── 01_dataset_acquisition.md
 │   ├── 02_prepared_dataset.md
 │   ├── 03_manual_selection.md
-│   └── 04_split_generation.md
+│   ├── 04_split_generation.md
+│   └── 05_anti_forensic_generation.md
 ├── logs/
 │   └── README.md
 └── notes/
     ├── methodological_decisions.md
-    └── open_questions.md
+    ├── open_questions.md
+    └── operational_pipeline.md
 ```
 
 ---
