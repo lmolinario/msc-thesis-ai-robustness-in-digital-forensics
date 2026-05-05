@@ -64,10 +64,8 @@ Operational scripts:
 
 ```text
 datasets/scripts/attacks/12_generate_anti_forensic_attacks.py
-datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py
+datasets/scripts/attacks/13_generate_adversarial_attacks.py
 ```
-
-The historical script `datasets/scripts/attacks/13_generate_adversarial_attacks.py` is kept for continuity, but the official safe entry point for fold-aware adversarial generation is `14_generate_adversarial_attacks_foldaware.py`.
 
 Implemented anti-forensic transformations:
 
@@ -119,4 +117,14 @@ python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
   --force
 ```
 
-FGSM must be smoke-tested first using `--limit 10` before full generation.
+FGSM must be smoke-tested first using `--limit 10` before full generation:
+
+```bash
+python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
+  --attack fgsm \
+  --target-model efficientnet_b0 \
+  --checkpoint-root models/checkpoints \
+  --device auto \
+  --limit 10 \
+  --force
+```
