@@ -68,13 +68,7 @@ datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
 datasets/scripts/attacks/14_generate_adversarial_attacks.py
 ```
 
-Compatibility implementation files currently retained:
 
-```text
-models/scripts/train_proxy_models.py
-datasets/scripts/attacks/12_generate_anti_forensic_attacks.py
-datasets/scripts/attacks/13_generate_adversarial_attacks.py
-```
 
 Implemented anti-forensic transformations:
 
