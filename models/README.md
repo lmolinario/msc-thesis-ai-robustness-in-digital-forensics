@@ -133,10 +133,10 @@ python models/scripts/train_proxy_models.py \
 
 ## Adversarial generation with per-fold checkpoints
 
-The safe fold-aware adversarial entry point is:
+The official fold-aware adversarial entry point is:
 
 ```text
-datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py
+datasets/scripts/attacks/13_generate_adversarial_attacks.py
 ```
 
 The script resolves checkpoints deterministically as:
