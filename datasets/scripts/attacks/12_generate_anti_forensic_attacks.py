@@ -6,6 +6,12 @@
 
 Official anti-forensic transformation script for the FAIR-Lab thesis pipeline.
 
+This script supports two equivalent execution modes:
+
+1. Interactive mode, automatically enabled when the script is launched without
+   command-line arguments.
+2. Command-line mode, used for fully reproducible scripted execution.
+
 Purpose
 -------
 Generate controlled anti-forensic image transformations from the official clean
@@ -45,6 +51,7 @@ import hashlib
 import json
 import logging
 import shutil
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -86,15 +93,121 @@ ATTACK_NAMES = [
 
 
 # =============================================================================
+# Interactive helpers
+# =============================================================================
+
+def ask_choice(prompt: str, valid_choices: set[str], default: str) -> str:
+    """Ask for a constrained textual choice."""
+    while True:
+        value = input(f"{prompt} [{default}]: ").strip().lower()
+        if not value:
+            return default
+        if value in valid_choices:
+            return value
+        print(f"Invalid choice: {value}. Valid choices: {', '.join(sorted(valid_choices))}.")
+
+
+def ask_yes_no(prompt: str, default: bool = True) -> bool:
+    """Ask a yes/no question and return a boolean."""
+    suffix = "Y/n" if default else "y/N"
+    while True:
+        value = input(f"{prompt} [{suffix}]: ").strip().lower()
+        if not value:
+            return default
+        if value in {"y", "yes", "s", "si", "sì"}:
+            return True
+        if value in {"n", "no"}:
+            return False
+        print("Please answer yes or no.")
+
+
+def ask_int(prompt: str, default: int, minimum: int = 0) -> int:
+    """Ask for an integer value."""
+    while True:
+        value = input(f"{prompt} [{default}]: ").strip()
+        if not value:
+            return default
+        try:
+            parsed = int(value)
+        except ValueError:
+            print("Please enter a valid integer.")
+            continue
+        if parsed < minimum:
+            print(f"Value must be >= {minimum}.")
+            continue
+        return parsed
+
+
+def ask_attack_selection() -> list[str]:
+    """Ask for one or more anti-forensic transformations."""
+    print("\nSelect anti-forensic transformations:")
+    for idx, attack_name in enumerate(ATTACK_NAMES, start=1):
+        print(f"  {idx}. {attack_name}")
+    print("Examples: 1 | 1 3 | 1,2,5 | all")
+    value = input("Selection [all]: ").strip().lower()
+    if not value or value == "all":
+        return ATTACK_NAMES.copy()
+
+    mapping = {str(idx): attack_name for idx, attack_name in enumerate(ATTACK_NAMES, start=1)}
+    tokens = value.replace(",", " ").split()
+    selected: list[str] = []
+    for token in tokens:
+        if token in mapping:
+            selected.append(mapping[token])
+        elif token in ATTACK_NAMES:
+            selected.append(token)
+        else:
+            raise ValueError(f"Invalid anti-forensic attack selection: {token}")
+    return list(dict.fromkeys(selected))
+
+
+def parse_interactive_args() -> argparse.Namespace:
+    """Build an argparse namespace through a safe interactive launcher."""
+    print("\n" + "=" * 78)
+    print("FAIR-Lab anti-forensic transformation generator")
+    print("=" * 78)
+    print(f"Repository root: {REPO_ROOT}")
+    print(f"Input manifest: {INPUT_MANIFEST_PATH}")
+    print("\nWhat do you want to generate?")
+    print("  1. all anti-forensic transformations [default]")
+    print("  2. one or more selected transformations")
+    print("  3. smoke test all transformations (--limit 10)")
+
+    selection = ask_choice("Selection", {"1", "2", "3"}, "1")
+    selected_attacks = ATTACK_NAMES.copy()
+    limit = 0
+
+    if selection == "2":
+        selected_attacks = ask_attack_selection()
+    elif selection == "3":
+        selected_attacks = ATTACK_NAMES.copy()
+        limit = 10
+
+    force = ask_yes_no("Overwrite existing selected output directories if present?", default=True)
+    verbose = ask_yes_no("Enable verbose logging?", default=False)
+
+    return argparse.Namespace(
+        input_manifest=str(INPUT_MANIFEST_PATH),
+        attack=selected_attacks,
+        force=force,
+        jpeg_quality=70,
+        resample_scale=0.50,
+        blur_radius=1.50,
+        contrast_cutoff=1.0,
+        limit=limit,
+        verbose=verbose,
+    )
+
+
+# =============================================================================
 # Argument parsing and logging
 # =============================================================================
 
-def parse_args() -> argparse.Namespace:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description=(
-            "Generate anti-forensic image transformations from the official clean folds."
-        )
+        description="Generate anti-forensic image transformations from the official clean folds."
     )
+    parser.add_argument("--interactive", action="store_true", help="Force interactive mode.")
     parser.add_argument(
         "--input-manifest",
         type=str,
@@ -108,7 +221,7 @@ def parse_args() -> argparse.Namespace:
         default=ATTACK_NAMES,
         help=(
             "One or more anti-forensic transformations to generate. "
-            "By default, all planned anti-forensic transformations are generated."
+            "By default, all anti-forensic transformations are generated."
         ),
     )
     parser.add_argument(
@@ -141,11 +254,27 @@ def parse_args() -> argparse.Namespace:
         help="Autocontrast cutoff percentage for contrast_stretching (default: 1.0).",
     )
     parser.add_argument(
+        "--limit",
+        type=int,
+        default=0,
+        help="Optional maximum number of manifest rows to process for smoke tests.",
+    )
+    parser.add_argument(
         "--verbose",
         action="store_true",
         help="Enable verbose logging.",
     )
-    return parser.parse_args()
+    return parser
+
+
+def parse_args() -> argparse.Namespace:
+    if len(sys.argv) == 1:
+        return parse_interactive_args()
+    parser = build_parser()
+    args = parser.parse_args()
+    if args.interactive:
+        return parse_interactive_args()
+    return args
 
 
 def setup_logging(verbose: bool) -> None:
@@ -199,7 +328,7 @@ def ensure_required_columns(df: pd.DataFrame, required: set[str], manifest_name:
         raise ValueError(f"Missing required columns in {manifest_name}: {sorted(missing)}")
 
 
-def load_manifest(path: Path) -> pd.DataFrame:
+def load_manifest(path: Path, limit: int) -> pd.DataFrame:
     if not path.exists():
         raise FileNotFoundError(f"Input manifest not found: {path}")
 
@@ -217,6 +346,9 @@ def load_manifest(path: Path) -> pd.DataFrame:
 
     if df.empty:
         raise ValueError(f"Input manifest is empty: {path}")
+
+    if limit > 0:
+        df = df.head(limit).copy()
 
     invalid_labels = set(df["final_label"].map(norm).unique()) - VALID_LABELS
     if invalid_labels:
@@ -297,14 +429,8 @@ def prepare_output_dirs(selected_attacks: list[str], force: bool) -> None:
 def open_rgb_image(path: Path) -> Image.Image:
     try:
         with Image.open(path) as img:
-            img = ImageOps.exif_transpose(img)
-            if img.mode not in {"RGB", "L"}:
-                img = img.convert("RGB")
-            elif img.mode == "L":
-                img = img.convert("RGB")
-            else:
-                img = img.copy()
-            return img
+            img = ImageOps.exif_transpose(img).convert("RGB")
+            return img.copy()
     except UnidentifiedImageError as exc:
         raise ValueError(f"Cannot identify image file: {path}") from exc
 
@@ -491,6 +617,7 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 def build_summary(
     rows: list[dict[str, Any]],
     input_manifest: Path,
+    input_image_count: int,
     selected_attacks: list[str],
     args: argparse.Namespace,
     created_at: str,
@@ -505,7 +632,7 @@ def build_summary(
 
     unique_generated_ids = {row["generated_image_id"] for row in rows}
     unique_perturbed_hashes = {row["sha256_perturbed"] for row in rows}
-    expected_total = len(pd.read_csv(input_manifest)) * len(selected_attacks)
+    expected_total = input_image_count * len(selected_attacks)
 
     return {
         "script": SCRIPT_NAME,
@@ -520,9 +647,10 @@ def build_summary(
             "resample_scale": args.resample_scale,
             "blur_radius": args.blur_radius,
             "contrast_cutoff": args.contrast_cutoff,
+            "limit": args.limit,
         },
         "counts": {
-            "input_images": expected_total // len(selected_attacks) if selected_attacks else 0,
+            "input_images": input_image_count,
             "selected_attack_count": len(selected_attacks),
             "expected_generated_images": expected_total,
             "actual_generated_images": len(rows),
@@ -566,7 +694,7 @@ def main() -> None:
     logging.info("Selected attacks: %s", ", ".join(selected_attacks))
     logging.info("Output root: %s", ANTI_FORENSIC_DIR)
 
-    df = load_manifest(input_manifest)
+    df = load_manifest(input_manifest, args.limit)
     validate_source_files(df)
     prepare_output_dirs(selected_attacks=selected_attacks, force=args.force)
 
@@ -589,6 +717,7 @@ def main() -> None:
     summary = build_summary(
         rows=rows,
         input_manifest=input_manifest,
+        input_image_count=len(df),
         selected_attacks=selected_attacks,
         args=args,
         created_at=created_at,
