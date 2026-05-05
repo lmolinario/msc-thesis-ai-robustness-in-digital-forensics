@@ -33,7 +33,7 @@ sigma_zero/
 one_pixel/
 ```
 
-The official fold-aware generation script raises `NotImplementedError` if a planned but unsupported attack is requested.
+The official generation script raises `NotImplementedError` if a planned but unsupported attack is requested.
 
 ---
 
@@ -94,10 +94,10 @@ image in fold_1 + target efficientnet_b0
 
 This ensures that the proxy model used for attack generation was trained on the other four folds and never on the images being attacked.
 
-Official safe entry point:
+Official entry point:
 
 ```text
-datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py
+datasets/scripts/attacks/13_generate_adversarial_attacks.py
 ```
 
 Official FGSM command:
