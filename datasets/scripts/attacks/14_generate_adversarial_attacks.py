@@ -25,9 +25,9 @@ Implemented attacks:
 - fgsm
 - color_shift
 - one_pixel
+- sigma_zero
 
 Planned but intentionally not implemented here:
-- sigma_zero
 - superdeepfool
 """
 
@@ -67,6 +67,7 @@ from datasets.scripts.attacks.adversarial_model_interface import (
     validate_target_model_names,
 )
 from datasets.scripts.attacks.adversarial_torch_model_adapters import build_target_model_adapter
+from datasets.scripts.attacks.sigma_zero_reference_adapter import apply_sigma_zero_reference
 from datasets.scripts.utils.paths import (
     ADVERSARIAL_DIR,
     ATTACKS_DIR,
@@ -171,9 +172,11 @@ def parse_interactive_args() -> argparse.Namespace:
     print("  3. FGSM full generation on efficientnet_b0")
     print("  4. One Pixel smoke test on efficientnet_b0 (--limit 10)")
     print("  5. One Pixel full generation on efficientnet_b0")
-    print("  6. custom FGSM target selection")
+    print("  6. Sigma Zero smoke test on efficientnet_b0 (--limit 10)")
+    print("  7. Sigma Zero full generation on efficientnet_b0")
+    print("  8. custom FGSM target selection")
 
-    selection = ask_choice("Selection", {"1", "2", "3", "4", "5", "6"}, "1")
+    selection = ask_choice("Selection", {"1", "2", "3", "4", "5", "6", "7", "8"}, "1")
 
     attacks = ["color_shift"]
     target_models = DEFAULT_TARGET_MODELS.copy()
@@ -196,6 +199,13 @@ def parse_interactive_args() -> argparse.Namespace:
         attacks = ["one_pixel"]
         target_models = ["efficientnet_b0"]
     elif selection == "6":
+        attacks = ["sigma_zero"]
+        target_models = ["efficientnet_b0"]
+        limit = 10
+    elif selection == "7":
+        attacks = ["sigma_zero"]
+        target_models = ["efficientnet_b0"]
+    elif selection == "8":
         attacks = ["fgsm"]
         target_models = ask_target_models(DEFAULT_TARGET_MODELS)
         limit = ask_int("Limit rows for smoke test; use 0 for full generation", 10, minimum=0)
@@ -222,6 +232,12 @@ def parse_interactive_args() -> argparse.Namespace:
         one_pixel_max_iterations=30,
         one_pixel_population_size=8,
         one_pixel_seed=42,
+        sigma_zero_steps=1000,
+        sigma_zero_eta=1.0,
+        sigma_zero_sigma=0.001,
+        sigma_zero_tau=0.3,
+        sigma_zero_tau_factor=0.01,
+        sigma_zero_grad_norm=float("inf"),
         verbose=verbose,
     )
 
@@ -246,7 +262,10 @@ def build_parser() -> argparse.ArgumentParser:
         nargs="+",
         choices=PLANNED_ATTACK_NAMES,
         default=DEFAULT_ATTACKS,
-        help="Attack(s) to generate. Implemented: fgsm, color_shift, one_pixel. Default: color_shift.",
+        help=(
+            "Attack(s) to generate. Implemented: fgsm, color_shift, "
+            "one_pixel, sigma_zero. Default: color_shift."
+        ),
     )
     parser.add_argument(
         "--target-model",
@@ -282,6 +301,43 @@ def build_parser() -> argparse.ArgumentParser:
         type=int,
         default=42,
         help="Base random seed for deterministic per-image One Pixel optimization.",
+    )
+
+    parser.add_argument(
+        "--sigma-zero-steps",
+        type=int,
+        default=1000,
+        help="Number of optimization steps for the reference Sigma-Zero attack.",
+    )
+    parser.add_argument(
+        "--sigma-zero-eta",
+        type=float,
+        default=1.0,
+        help="Initial step size eta_0 for the reference Sigma-Zero attack.",
+    )
+    parser.add_argument(
+        "--sigma-zero-sigma",
+        type=float,
+        default=0.001,
+        help="Differentiable L0 approximation parameter sigma.",
+    )
+    parser.add_argument(
+        "--sigma-zero-tau",
+        type=float,
+        default=0.3,
+        help="Initial sparsity threshold tau_0 for the reference Sigma-Zero attack.",
+    )
+    parser.add_argument(
+        "--sigma-zero-tau-factor",
+        type=float,
+        default=0.01,
+        help="Adaptive threshold adjustment factor for the reference Sigma-Zero attack.",
+    )
+    parser.add_argument(
+        "--sigma-zero-grad-norm",
+        type=float,
+        default=float("inf"),
+        help="Gradient normalization norm used by the reference Sigma-Zero attack.",
     )
 
 
@@ -424,6 +480,18 @@ def validate_attack_parameters(args: argparse.Namespace) -> None:
         raise ValueError("--one-pixel-max-iterations must be greater than 0.")
     if args.one_pixel_population_size <= 0:
         raise ValueError("--one-pixel-population-size must be greater than 0.")
+    if args.sigma_zero_steps <= 0:
+        raise ValueError("--sigma-zero-steps must be greater than 0.")
+    if args.sigma_zero_eta <= 0:
+        raise ValueError("--sigma-zero-eta must be greater than 0.")
+    if args.sigma_zero_sigma <= 0:
+        raise ValueError("--sigma-zero-sigma must be greater than 0.")
+    if not (0.0 <= args.sigma_zero_tau <= 1.0):
+        raise ValueError("--sigma-zero-tau must be in the interval [0, 1].")
+    if args.sigma_zero_tau_factor < 0:
+        raise ValueError("--sigma-zero-tau-factor must be greater than or equal to 0.")
+    if args.sigma_zero_grad_norm <= 0:
+        raise ValueError("--sigma-zero-grad-norm must be greater than 0.")
 
 
 def load_manifest(path: Path, limit: int) -> pd.DataFrame:
@@ -1036,6 +1104,13 @@ def generate_model_dependent_attack_one(
             args=args,
             image_id=image_id,
         )
+    elif attack_name == "sigma_zero":
+        transformed_img, attack_params = apply_sigma_zero_reference(
+            img=img,
+            true_label=label,
+            adapter=adapter,
+            args=args,
+        )
     else:
         raise NotImplementedError(f"Unsupported model-dependent attack: {attack_name}")
 
@@ -1110,6 +1185,12 @@ def build_summary(
             "one_pixel_max_iterations": args.one_pixel_max_iterations,
             "one_pixel_population_size": args.one_pixel_population_size,
             "one_pixel_seed": args.one_pixel_seed,
+            "sigma_zero_steps": args.sigma_zero_steps,
+            "sigma_zero_eta": args.sigma_zero_eta,
+            "sigma_zero_sigma": args.sigma_zero_sigma,
+            "sigma_zero_tau": args.sigma_zero_tau,
+            "sigma_zero_tau_factor": args.sigma_zero_tau_factor,
+            "sigma_zero_grad_norm": args.sigma_zero_grad_norm,
         },
         "counts": {
             "input_images": input_image_count,
@@ -1195,7 +1276,7 @@ def main() -> None:
                         logging.info("Generated %d/%d images", progress, expected_total)
             continue
 
-        if attack_name == "one_pixel":
+        if attack_name in {"one_pixel", "sigma_zero"}:
             for target_model in selected_target_models:
                 for _, row in df.iterrows():
                     fold = safe_str(row["fold"])
