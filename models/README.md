@@ -113,20 +113,68 @@ python models/scripts/train_proxy_models.py \
   --device auto
 ```
 
-## Adversarial generation with per-fold checkpoints
-
-After training, FGSM should be generated using the checkpoint directory:
+Train all official proxy models:
 
 ```bash
-python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
+python models/scripts/train_proxy_models.py \
+  --model resnet18 efficientnet_b0 clip \
+  --fold all \
+  --epochs 10 \
+  --batch-size 16 \
+  --learning-rate 0.0001 \
+  --weight-decay 0.0001 \
+  --validation-ratio 0.15 \
+  --seed 42 \
+  --device auto \
+  --input-size 224 \
+  --num-workers 2 \
+  --force
+```
+
+## Adversarial generation with per-fold checkpoints
+
+The safe fold-aware adversarial entry point is:
+
+```text
+datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py
+```
+
+The script resolves checkpoints deterministically as:
+
+```text
+models/checkpoints/<target_model>/<fold>.pt
+```
+
+For example, an image from `fold_1` attacked against `efficientnet_b0` uses:
+
+```text
+models/checkpoints/efficientnet_b0/fold_1.pt
+```
+
+Official FGSM generation against the primary proxy target:
+
+```bash
+python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
   --attack fgsm \
-  --target-model resnet18 \
-  --checkpoint-dir models/checkpoints \
+  --target-model efficientnet_b0 \
+  --checkpoint-root models/checkpoints \
   --device auto \
   --force
 ```
 
-The generator automatically maps each input image to the checkpoint corresponding to its fold.
+Smoke test before full generation:
+
+```bash
+python datasets/scripts/attacks/14_generate_adversarial_attacks_foldaware.py \
+  --attack fgsm \
+  --target-model efficientnet_b0 \
+  --checkpoint-root models/checkpoints \
+  --device auto \
+  --limit 10 \
+  --force
+```
+
+FGSM outputs are saved as lossless PNG files to preserve epsilon-bounded perturbations.
 
 ## Git LFS
 
