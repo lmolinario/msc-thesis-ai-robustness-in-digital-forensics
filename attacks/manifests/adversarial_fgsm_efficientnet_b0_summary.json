@@ -1,0 +1,62 @@
+{
+  "script": "datasets/scripts/attacks/14_generate_adversarial_attacks.py",
+  "created_at": "2026-05-05T13:56:55+00:00",
+  "input_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
+  "output_root": "attacks/adversarial",
+  "manifest_csv": "attacks/manifests/adversarial_fgsm_efficientnet_b0_manifest.csv",
+  "summary_json": "attacks/manifests/adversarial_fgsm_efficientnet_b0_summary.json",
+  "selected_attacks": [
+    "fgsm"
+  ],
+  "selected_target_models": [
+    "efficientnet_b0"
+  ],
+  "checkpoint_root": "models/checkpoints",
+  "parameters": {
+    "fgsm_epsilon": 0.03137254901960784,
+    "fgsm_output_format": "PNG",
+    "color_shift_output_format": "JPEG",
+    "jpeg_quality": 95,
+    "input_size": 224,
+    "device": "auto",
+    "limit": 0
+  },
+  "counts": {
+    "input_images": 1000,
+    "expected_generated_images": 1000,
+    "actual_generated_images": 1000,
+    "per_attack_counts": {
+      "fgsm": 1000
+    },
+    "per_target_counts": {
+      "efficientnet_b0": 1000
+    },
+    "per_fold_counts": {
+      "fgsm": {
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
+      }
+    },
+    "per_label_counts": {
+      "fgsm": {
+        "non_weapon": 500,
+        "weapon": 500
+      }
+    },
+    "per_attack_success": {
+      "fgsm": {
+        "False": 575,
+        "True": 425
+      }
+    }
+  },
+  "checks": {
+    "expected_total_generated": true,
+    "generated_image_id_unique": true,
+    "perturbed_sha256_unique": true,
+    "manifest_written": true
+  }
+}
