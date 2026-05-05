@@ -6,9 +6,14 @@
 
 Fold-aware adversarial generation entry point for the FAIR-Lab thesis pipeline.
 
-This script implements the corrected operational protocol for adversarial image
-generation:
+This script supports two equivalent execution modes:
 
+1. Interactive mode, automatically enabled when the script is launched without
+   command-line arguments.
+2. Command-line mode, used for fully reproducible scripted execution.
+
+Operational protocol
+--------------------
 - EfficientNet-B0 is the default primary proxy target.
 - Model-dependent attacks use fold-aware checkpoints from:
   models/checkpoints/<target_model>/<fold>.pt
@@ -34,6 +39,7 @@ import hashlib
 import json
 import logging
 import shutil
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -76,10 +82,148 @@ DEFAULT_TARGET_MODELS = ["efficientnet_b0"]
 DEFAULT_CHECKPOINT_ROOT = REPO_ROOT / "models" / "checkpoints"
 
 
-def parse_args() -> argparse.Namespace:
+# =============================================================================
+# Interactive helpers
+# =============================================================================
+
+def ask_choice(prompt: str, valid_choices: set[str], default: str) -> str:
+    """Ask for a constrained textual choice."""
+    while True:
+        value = input(f"{prompt} [{default}]: ").strip().lower()
+        if not value:
+            return default
+        if value in valid_choices:
+            return value
+        print(f"Invalid choice: {value}. Valid choices: {', '.join(sorted(valid_choices))}.")
+
+
+def ask_yes_no(prompt: str, default: bool = True) -> bool:
+    """Ask a yes/no question and return a boolean."""
+    suffix = "Y/n" if default else "y/N"
+    while True:
+        value = input(f"{prompt} [{suffix}]: ").strip().lower()
+        if not value:
+            return default
+        if value in {"y", "yes", "s", "si", "sì"}:
+            return True
+        if value in {"n", "no"}:
+            return False
+        print("Please answer yes or no.")
+
+
+def ask_int(prompt: str, default: int, minimum: int = 0) -> int:
+    """Ask for an integer value."""
+    while True:
+        value = input(f"{prompt} [{default}]: ").strip()
+        if not value:
+            return default
+        try:
+            parsed = int(value)
+        except ValueError:
+            print("Please enter a valid integer.")
+            continue
+        if parsed < minimum:
+            print(f"Value must be >= {minimum}.")
+            continue
+        return parsed
+
+
+def ask_target_models(default_models: list[str]) -> list[str]:
+    """Ask for one or more FGSM target models."""
+    print("\nSelect target models for FGSM:")
+    print("  1. efficientnet_b0 [recommended primary target]")
+    print("  2. resnet18")
+    print("  3. clip")
+    print("Examples: 1 | 1 2 | 1,2,3 | all")
+    value = input("Selection [1]: ").strip().lower()
+    if not value:
+        return default_models
+    if value == "all":
+        return ["efficientnet_b0", "resnet18", "clip"]
+
+    mapping = {"1": "efficientnet_b0", "2": "resnet18", "3": "clip"}
+    tokens = value.replace(",", " ").split()
+    selected: list[str] = []
+    for token in tokens:
+        if token in mapping:
+            selected.append(mapping[token])
+        elif token in SUPPORTED_TARGET_MODELS:
+            selected.append(token)
+        else:
+            raise ValueError(f"Invalid target model selection: {token}")
+    return list(dict.fromkeys(selected))
+
+
+def parse_interactive_args() -> argparse.Namespace:
+    """Build an argparse namespace through a safe interactive launcher."""
+    print("\n" + "=" * 78)
+    print("FAIR-Lab adversarial attack generator")
+    print("=" * 78)
+    print(f"Repository root: {REPO_ROOT}")
+    print(f"Input manifest: {INPUT_MANIFEST_PATH}")
+    print("\nWhat do you want to generate?")
+    print("  1. color_shift only (model-agnostic, no checkpoints required) [default]")
+    print("  2. FGSM smoke test on efficientnet_b0 (--limit 10)")
+    print("  3. FGSM full generation on efficientnet_b0")
+    print("  4. color_shift + FGSM smoke test")
+    print("  5. custom FGSM target selection")
+
+    selection = ask_choice("Selection", {"1", "2", "3", "4", "5"}, "1")
+
+    attacks = ["color_shift"]
+    target_models = DEFAULT_TARGET_MODELS.copy()
+    limit = 0
+
+    if selection == "1":
+        attacks = ["color_shift"]
+    elif selection == "2":
+        attacks = ["fgsm"]
+        target_models = ["efficientnet_b0"]
+        limit = 10
+    elif selection == "3":
+        attacks = ["fgsm"]
+        target_models = ["efficientnet_b0"]
+    elif selection == "4":
+        attacks = ["color_shift", "fgsm"]
+        target_models = ["efficientnet_b0"]
+        limit = 10
+    elif selection == "5":
+        attacks = ["fgsm"]
+        target_models = ask_target_models(DEFAULT_TARGET_MODELS)
+        limit = ask_int("Limit rows for smoke test; use 0 for full generation", 10, minimum=0)
+
+    force = ask_yes_no("Overwrite existing selected output directories if present?", default=True)
+    verbose = ask_yes_no("Enable verbose logging?", default=False)
+
+    return argparse.Namespace(
+        input_manifest=str(INPUT_MANIFEST_PATH),
+        attack=attacks,
+        target_model=target_models,
+        checkpoint_root=str(DEFAULT_CHECKPOINT_ROOT),
+        device="auto",
+        input_size=224,
+        fgsm_epsilon=8.0 / 255.0,
+        force=force,
+        jpeg_quality=95,
+        limit=limit,
+        color_red_shift=12,
+        color_green_shift=0,
+        color_blue_shift=-12,
+        color_saturation_factor=1.10,
+        color_contrast_factor=1.00,
+        verbose=verbose,
+    )
+
+
+# =============================================================================
+# Argument parsing and logging
+# =============================================================================
+
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Generate fold-aware adversarial/adversarial-style perturbations."
     )
+    parser.add_argument("--interactive", action="store_true", help="Force interactive mode.")
     parser.add_argument(
         "--input-manifest",
         type=str,
@@ -118,7 +262,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--color-saturation-factor", type=float, default=1.10)
     parser.add_argument("--color-contrast-factor", type=float, default=1.00)
     parser.add_argument("--verbose", action="store_true")
-    return parser.parse_args()
+    return parser
+
+
+def parse_args() -> argparse.Namespace:
+    if len(sys.argv) == 1:
+        return parse_interactive_args()
+    parser = build_parser()
+    args = parser.parse_args()
+    if args.interactive:
+        return parse_interactive_args()
+    return args
 
 
 def setup_logging(verbose: bool) -> None:
@@ -127,6 +281,10 @@ def setup_logging(verbose: bool) -> None:
         format="[%(levelname)s] %(message)s",
     )
 
+
+# =============================================================================
+# Generic helpers
+# =============================================================================
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
