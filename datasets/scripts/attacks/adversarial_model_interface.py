@@ -286,8 +286,6 @@ def expected_generation_count(
 
 def load_model(config: TargetModelConfig) -> TargetModelAdapter:
     """
-    Legacy placeholder retained for compatibility.
-
     Concrete target-model adapters are built by
     datasets.scripts.attacks.adversarial_torch_model_adapters.build_target_model_adapter.
     """

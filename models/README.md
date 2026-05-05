@@ -53,13 +53,6 @@ The official pipeline entry point for proxy model training is:
 models/scripts/12_train_proxy_models.py
 ```
 
-The unnumbered implementation file is kept only for backward compatibility:
-
-```text
-models/scripts/train_proxy_models.py
-```
-
-Use the numbered script in documentation, experiments, and reproducible commands.
 
 ## Per-fold training protocol
 
