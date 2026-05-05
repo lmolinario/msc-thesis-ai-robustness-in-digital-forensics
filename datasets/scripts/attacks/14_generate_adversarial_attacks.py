@@ -17,7 +17,7 @@ Operational protocol
 - EfficientNet-B0 is the default primary proxy target.
 - Model-dependent attacks use fold-aware checkpoints from:
   models/checkpoints/<target_model>/<fold>.pt
-- FGSM outputs are saved as lossless PNG files.
+- Model-dependent adversarial outputs are saved as lossless PNG files.
 - Color Shift remains a model-agnostic JPEG perturbation.
 - The manifest records checkpoint path and checkpoint SHA256 for reproducibility.
 
@@ -26,8 +26,6 @@ Implemented attacks:
 - color_shift
 - one_pixel
 - sigma_zero
-
-Planned but intentionally not implemented here:
 - superdeepfool
 """
 
@@ -68,6 +66,7 @@ from datasets.scripts.attacks.adversarial_model_interface import (
 )
 from datasets.scripts.attacks.adversarial_torch_model_adapters import build_target_model_adapter
 from datasets.scripts.attacks.sigma_zero_reference_adapter import apply_sigma_zero_reference
+from datasets.scripts.attacks.superdeepfool_adapter import apply_superdeepfool_reference
 from datasets.scripts.utils.paths import (
     ADVERSARIAL_DIR,
     ATTACKS_DIR,
@@ -85,6 +84,20 @@ VALID_LABELS = set(VALID_BINARY_LABELS)
 DEFAULT_ATTACKS = ["color_shift"]
 DEFAULT_TARGET_MODELS = ["efficientnet_b0"]
 DEFAULT_CHECKPOINT_ROOT = REPO_ROOT / "models" / "checkpoints"
+
+LOCAL_IMPLEMENTED_ATTACK_NAMES = sorted(set(IMPLEMENTED_ATTACK_NAMES) | {"superdeepfool"})
+LOCAL_PLANNED_ATTACK_NAMES = sorted(set(PLANNED_ATTACK_NAMES) | {"superdeepfool"})
+LOCAL_MODEL_DEPENDENT_ATTACK_NAMES = {"fgsm", "one_pixel", "sigma_zero", "superdeepfool"}
+
+
+def is_model_dependent_attack_local(attack_name: str) -> bool:
+    """
+    Local model-dependency resolver.
+
+    This keeps the current pipeline compatible even if the central attack
+    interface has not yet been updated to include newly integrated attacks.
+    """
+    return attack_name in LOCAL_MODEL_DEPENDENT_ATTACK_NAMES or is_model_dependent_attack(attack_name)
 
 
 # =============================================================================
@@ -134,8 +147,8 @@ def ask_int(prompt: str, default: int, minimum: int = 0) -> int:
 
 
 def ask_target_models(default_models: list[str]) -> list[str]:
-    """Ask for one or more FGSM target models."""
-    print("\nSelect target models for FGSM:")
+    """Ask for one or more target models."""
+    print("\nSelect target models for model-dependent attacks:")
     print("  1. efficientnet_b0 [recommended primary target]")
     print("  2. resnet18")
     print("  3. clip")
@@ -174,9 +187,11 @@ def parse_interactive_args() -> argparse.Namespace:
     print("  5. One Pixel full generation on efficientnet_b0")
     print("  6. Sigma Zero smoke test on efficientnet_b0 (--limit 10)")
     print("  7. Sigma Zero full generation on efficientnet_b0")
-    print("  8. custom FGSM target selection")
+    print("  8. SuperDeepFool smoke test on efficientnet_b0 (--limit 10)")
+    print("  9. SuperDeepFool full generation on efficientnet_b0")
+    print(" 10. custom FGSM target selection")
 
-    selection = ask_choice("Selection", {"1", "2", "3", "4", "5", "6", "7", "8"}, "1")
+    selection = ask_choice("Selection", {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, "1")
 
     attacks = ["color_shift"]
     target_models = DEFAULT_TARGET_MODELS.copy()
@@ -206,6 +221,13 @@ def parse_interactive_args() -> argparse.Namespace:
         attacks = ["sigma_zero"]
         target_models = ["efficientnet_b0"]
     elif selection == "8":
+        attacks = ["superdeepfool"]
+        target_models = ["efficientnet_b0"]
+        limit = 10
+    elif selection == "9":
+        attacks = ["superdeepfool"]
+        target_models = ["efficientnet_b0"]
+    elif selection == "10":
         attacks = ["fgsm"]
         target_models = ask_target_models(DEFAULT_TARGET_MODELS)
         limit = ask_int("Limit rows for smoke test; use 0 for full generation", 10, minimum=0)
@@ -238,6 +260,10 @@ def parse_interactive_args() -> argparse.Namespace:
         sigma_zero_tau=0.3,
         sigma_zero_tau_factor=0.01,
         sigma_zero_grad_norm=float("inf"),
+        superdeepfool_max_outer_iterations=20,
+        superdeepfool_max_deepfool_iterations=50,
+        superdeepfool_projection_steps=1,
+        superdeepfool_candidate_classes=None,
         verbose=verbose,
     )
 
@@ -260,11 +286,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--attack",
         nargs="+",
-        choices=PLANNED_ATTACK_NAMES,
+        choices=LOCAL_PLANNED_ATTACK_NAMES,
         default=DEFAULT_ATTACKS,
         help=(
             "Attack(s) to generate. Implemented: fgsm, color_shift, "
-            "one_pixel, sigma_zero. Default: color_shift."
+            "one_pixel, sigma_zero, superdeepfool. Default: color_shift."
         ),
     )
     parser.add_argument(
@@ -340,6 +366,30 @@ def build_parser() -> argparse.ArgumentParser:
         help="Gradient normalization norm used by the reference Sigma-Zero attack.",
     )
 
+    parser.add_argument(
+        "--superdeepfool-max-outer-iterations",
+        type=int,
+        default=20,
+        help="Maximum number of outer SDF iterations.",
+    )
+    parser.add_argument(
+        "--superdeepfool-max-deepfool-iterations",
+        type=int,
+        default=50,
+        help="Maximum number of internal DeepFool iterations before the projection step.",
+    )
+    parser.add_argument(
+        "--superdeepfool-projection-steps",
+        type=int,
+        default=1,
+        help="Number of SuperDeepFool projection steps. SDF(infinity,1) uses 1.",
+    )
+    parser.add_argument(
+        "--superdeepfool-candidate-classes",
+        type=int,
+        default=None,
+        help="Optional number of top candidate classes for the DeepFool step. Default: all classes.",
+    )
 
     parser.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
     parser.add_argument("--input-size", type=int, default=224)
@@ -413,7 +463,7 @@ def build_run_id(selected_attacks: list[str], selected_target_models: list[str])
     if selected_attacks == ["color_shift"]:
         return "adversarial_color_shift"
 
-    if all(not is_model_dependent_attack(attack) for attack in selected_attacks):
+    if all(not is_model_dependent_attack_local(attack) for attack in selected_attacks):
         return f"adversarial_{attack_part}"
 
     target_part = "_".join(selected_target_models)
@@ -448,6 +498,7 @@ def validate_manifest_outputs(manifest_path: Path, summary_path: Path, force: bo
             + ", ".join(str(path) for path in existing)
         )
 
+
 def compute_hashes(file_path: Path) -> tuple[str, str]:
     sha256 = hashlib.sha256()
     md5 = hashlib.md5()
@@ -459,7 +510,7 @@ def compute_hashes(file_path: Path) -> tuple[str, str]:
 
 
 def validate_selected_attacks(selected_attacks: list[str]) -> None:
-    not_implemented = [name for name in selected_attacks if name not in IMPLEMENTED_ATTACK_NAMES]
+    not_implemented = [name for name in selected_attacks if name not in LOCAL_IMPLEMENTED_ATTACK_NAMES]
     if not_implemented:
         raise NotImplementedError(
             "The following adversarial attacks are planned but not implemented yet: "
@@ -492,6 +543,14 @@ def validate_attack_parameters(args: argparse.Namespace) -> None:
         raise ValueError("--sigma-zero-tau-factor must be greater than or equal to 0.")
     if args.sigma_zero_grad_norm <= 0:
         raise ValueError("--sigma-zero-grad-norm must be greater than 0.")
+    if args.superdeepfool_max_outer_iterations <= 0:
+        raise ValueError("--superdeepfool-max-outer-iterations must be greater than 0.")
+    if args.superdeepfool_max_deepfool_iterations <= 0:
+        raise ValueError("--superdeepfool-max-deepfool-iterations must be greater than 0.")
+    if args.superdeepfool_projection_steps <= 0:
+        raise ValueError("--superdeepfool-projection-steps must be greater than 0.")
+    if args.superdeepfool_candidate_classes is not None and args.superdeepfool_candidate_classes <= 0:
+        raise ValueError("--superdeepfool-candidate-classes must be greater than 0 when provided.")
 
 
 def load_manifest(path: Path, limit: int) -> pd.DataFrame:
@@ -549,7 +608,10 @@ def prepare_output_dirs(selected_attacks: list[str], force: bool) -> None:
     ATTACK_MANIFESTS_DIR.mkdir(parents=True, exist_ok=True)
     existing = [ADVERSARIAL_DIR / attack for attack in selected_attacks if (ADVERSARIAL_DIR / attack).exists()]
     if existing and not force:
-        raise FileExistsError("Selected attack output directories already exist. Use --force: " + ", ".join(map(str, existing)))
+        raise FileExistsError(
+            "Selected attack output directories already exist. Use --force: "
+            + ", ".join(map(str, existing))
+        )
     if force:
         for attack in selected_attacks:
             attack_dir = ADVERSARIAL_DIR / attack
@@ -702,7 +764,12 @@ def apply_color_shift(img: Image.Image, args: argparse.Namespace) -> tuple[Image
     return shifted, params, MODEL_AGNOSTIC_TARGET
 
 
-def apply_fgsm(img: Image.Image, true_label: str, adapter: TargetModelAdapter, args: argparse.Namespace) -> tuple[Image.Image, dict[str, Any]]:
+def apply_fgsm(
+    img: Image.Image,
+    true_label: str,
+    adapter: TargetModelAdapter,
+    args: argparse.Namespace,
+) -> tuple[Image.Image, dict[str, Any]]:
     model_input = adapter.preprocess_image(img)
     original_probabilities = adapter.predict_proba(model_input)
     original_prediction = adapter.predict(model_input)
@@ -741,6 +808,7 @@ def apply_fgsm(img: Image.Image, true_label: str, adapter: TargetModelAdapter, a
         **metrics,
     }
     return tensor_to_rgb_image(adversarial_pixel_tensor), params
+
 
 def stable_attack_seed(base_seed: int, image_id: str, attack_name: str) -> int:
     """
@@ -916,8 +984,6 @@ def apply_one_pixel(
         callback=stop_callback,
     )
 
-    # Ensure that the optimizer's final candidate has been reflected in the
-    # tracked best solution.
     objective(np.asarray(result.x, dtype=np.float64))
 
     metrics = compute_perturbation_metrics(clean_img, best_img)
@@ -967,6 +1033,7 @@ def apply_one_pixel(
 
     return best_img, params
 
+
 def output_extension_for_attack(attack_name: str) -> str:
     if attack_name in {"fgsm", "one_pixel", "sigma_zero", "superdeepfool"}:
         return ".png"
@@ -1008,10 +1075,10 @@ def build_manifest_row(
     original_correct = original_prediction == label if original_prediction != "not_computed" else "not_computed"
     adversarial_correct = adversarial_prediction == label if adversarial_prediction != "not_computed" else "not_computed"
 
-    model_dependency = "model_dependent" if is_model_dependent_attack(attack_name) else "model_agnostic"
+    model_dependency = "model_dependent" if is_model_dependent_attack_local(attack_name) else "model_agnostic"
     attack_success: bool | str = (
         adversarial_prediction != label
-        if is_model_dependent_attack(attack_name)
+        if is_model_dependent_attack_local(attack_name)
         else "not_applicable"
     )
 
@@ -1048,6 +1115,8 @@ def build_manifest_row(
         "perturbation_norm_l2": attack_params.get("perturbation_norm_l2", "not_computed"),
         "perturbation_norm_linf": attack_params.get("perturbation_norm_linf", "not_computed"),
         "perturbation_mean_abs": attack_params.get("perturbation_mean_abs", "not_computed"),
+        "attack_iterations": attack_params.get("iterations_used", attack_params.get("deepfool_iterations_used", "not_computed")),
+        "attack_convergence_status": attack_params.get("convergence_status", "not_computed"),
         "size_bytes": output_path.stat().st_size,
         "extension": output_path.suffix.lower(),
         "created_at": created_at,
@@ -1064,7 +1133,12 @@ def generate_color_shift_one(row: pd.Series, args: argparse.Namespace, created_a
     return build_manifest_row(row, "color_shift", target_model, output_path, attack_params, created_at)
 
 
-def generate_fgsm_one(row: pd.Series, adapter: TargetModelAdapter, args: argparse.Namespace, created_at: str) -> dict[str, Any]:
+def generate_fgsm_one(
+    row: pd.Series,
+    adapter: TargetModelAdapter,
+    args: argparse.Namespace,
+    created_at: str,
+) -> dict[str, Any]:
     source_path = resolve_clean_image_path(safe_str(row["split_relative_path"]))
     img = open_rgb_image(source_path)
     label = norm(row["final_label"])
@@ -1080,6 +1154,7 @@ def generate_fgsm_one(row: pd.Series, adapter: TargetModelAdapter, args: argpars
         created_at,
         checkpoint_path=adapter.config.checkpoint_path,
     )
+
 
 def generate_model_dependent_attack_one(
     row: pd.Series,
@@ -1111,6 +1186,13 @@ def generate_model_dependent_attack_one(
             adapter=adapter,
             args=args,
         )
+    elif attack_name == "superdeepfool":
+        transformed_img, attack_params = apply_superdeepfool_reference(
+            img=img,
+            true_label=label,
+            adapter=adapter,
+            args=args,
+        )
     else:
         raise NotImplementedError(f"Unsupported model-dependent attack: {attack_name}")
 
@@ -1126,6 +1208,7 @@ def generate_model_dependent_attack_one(
         created_at,
         checkpoint_path=adapter.config.checkpoint_path,
     )
+
 
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
@@ -1155,6 +1238,7 @@ def build_summary(
     per_fold_counts: dict[str, Counter] = defaultdict(Counter)
     per_label_counts: dict[str, Counter] = defaultdict(Counter)
     per_attack_success: dict[str, Counter] = defaultdict(Counter)
+
     for row in rows:
         per_fold_counts[row["attack_name"]][row["fold"]] += 1
         per_label_counts[row["attack_name"]][row["final_label"]] += 1
@@ -1162,7 +1246,9 @@ def build_summary(
 
     expected_total = 0
     for attack in selected_attacks:
-        expected_total += input_image_count * (len(selected_target_models) if is_model_dependent_attack(attack) else 1)
+        expected_total += input_image_count * (
+            len(selected_target_models) if is_model_dependent_attack_local(attack) else 1
+        )
 
     return {
         "script": SCRIPT_NAME,
@@ -1191,6 +1277,12 @@ def build_summary(
             "sigma_zero_tau": args.sigma_zero_tau,
             "sigma_zero_tau_factor": args.sigma_zero_tau_factor,
             "sigma_zero_grad_norm": args.sigma_zero_grad_norm,
+            "superdeepfool_max_outer_iterations": args.superdeepfool_max_outer_iterations,
+            "superdeepfool_max_deepfool_iterations": args.superdeepfool_max_deepfool_iterations,
+            "superdeepfool_projection_steps": args.superdeepfool_projection_steps,
+            "superdeepfool_candidate_classes": args.superdeepfool_candidate_classes,
+            "superdeepfool_output_format": "PNG",
+            "superdeepfool_variant": "SDF(infinity,1)",
         },
         "counts": {
             "input_images": input_image_count,
@@ -1247,17 +1339,20 @@ def main() -> None:
     validate_manifest_outputs(manifest_path, summary_path, args.force)
 
     adapters: dict[tuple[str, str], TargetModelAdapter] = {}
-    if any(is_model_dependent_attack(attack) for attack in selected_attacks):
+    if any(is_model_dependent_attack_local(attack) for attack in selected_attacks):
         adapters = load_fold_aware_adapters(df, selected_target_models, checkpoint_root, args)
 
     rows: list[dict[str, Any]] = []
     expected_total = 0
     for attack_name in selected_attacks:
-        expected_total += len(df) * (len(selected_target_models) if is_model_dependent_attack(attack_name) else 1)
+        expected_total += len(df) * (
+            len(selected_target_models) if is_model_dependent_attack_local(attack_name) else 1
+        )
 
     progress = 0
     for attack_name in selected_attacks:
         logging.info("Generating attack: %s", attack_name)
+
         if attack_name == "color_shift":
             for _, row in df.iterrows():
                 rows.append(generate_color_shift_one(row, args, created_at))
@@ -1276,7 +1371,7 @@ def main() -> None:
                         logging.info("Generated %d/%d images", progress, expected_total)
             continue
 
-        if attack_name in {"one_pixel", "sigma_zero"}:
+        if attack_name in {"one_pixel", "sigma_zero", "superdeepfool"}:
             for target_model in selected_target_models:
                 for _, row in df.iterrows():
                     fold = safe_str(row["fold"])
@@ -1313,6 +1408,7 @@ def main() -> None:
             created_at,
         ),
     )
+
     logging.info("Manifest written: %s", manifest_path)
     logging.info("Summary written: %s", summary_path)
     logging.info("Fold-aware adversarial generation completed successfully.")
