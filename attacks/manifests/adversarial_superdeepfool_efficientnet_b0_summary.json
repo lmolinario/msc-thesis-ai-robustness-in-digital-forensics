@@ -1,0 +1,77 @@
+{
+  "script": "datasets/scripts/attacks/14_generate_adversarial_attacks.py",
+  "created_at": "2026-05-06T04:04:44+00:00",
+  "input_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
+  "output_root": "attacks/adversarial",
+  "manifest_csv": "attacks/manifests/adversarial_superdeepfool_efficientnet_b0_manifest.csv",
+  "summary_json": "attacks/manifests/adversarial_superdeepfool_efficientnet_b0_summary.json",
+  "selected_attacks": [
+    "superdeepfool"
+  ],
+  "selected_target_models": [
+    "efficientnet_b0"
+  ],
+  "checkpoint_root": "models/checkpoints",
+  "parameters": {
+    "fgsm_epsilon": 0.03137254901960784,
+    "fgsm_output_format": "PNG",
+    "color_shift_output_format": "JPEG",
+    "jpeg_quality": 95,
+    "input_size": 224,
+    "device": "auto",
+    "limit": 0,
+    "one_pixel_max_iterations": 30,
+    "one_pixel_population_size": 8,
+    "one_pixel_seed": 42,
+    "sigma_zero_steps": 1000,
+    "sigma_zero_eta": 1.0,
+    "sigma_zero_sigma": 0.001,
+    "sigma_zero_tau": 0.3,
+    "sigma_zero_tau_factor": 0.01,
+    "sigma_zero_grad_norm": Infinity,
+    "superdeepfool_max_outer_iterations": 20,
+    "superdeepfool_max_deepfool_iterations": 50,
+    "superdeepfool_projection_steps": 1,
+    "superdeepfool_candidate_classes": null,
+    "superdeepfool_output_format": "PNG",
+    "superdeepfool_variant": "SDF(infinity,1)"
+  },
+  "counts": {
+    "input_images": 1000,
+    "expected_generated_images": 1000,
+    "actual_generated_images": 1000,
+    "per_attack_counts": {
+      "superdeepfool": 1000
+    },
+    "per_target_counts": {
+      "efficientnet_b0": 1000
+    },
+    "per_fold_counts": {
+      "superdeepfool": {
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
+      }
+    },
+    "per_label_counts": {
+      "superdeepfool": {
+        "non_weapon": 500,
+        "weapon": 500
+      }
+    },
+    "per_attack_success": {
+      "superdeepfool": {
+        "False": 456,
+        "True": 544
+      }
+    }
+  },
+  "checks": {
+    "expected_total_generated": true,
+    "generated_image_id_unique": true,
+    "perturbed_sha256_unique": true,
+    "manifest_written": true
+  }
+}

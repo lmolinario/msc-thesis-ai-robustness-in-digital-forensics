@@ -71,6 +71,7 @@ IMPLEMENTED_ATTACK_NAMES: Final[tuple[str, ...]] = (
     "fgsm",
     "color_shift",
     "one_pixel",
+    "sigma_zero",
 )
 
 
@@ -82,24 +83,6 @@ IMPLEMENTED_ATTACK_NAMES: Final[tuple[str, ...]] = (
 class TargetModelConfig:
     """
     Immutable configuration for a model targeted by adversarial attacks.
-
-    Parameters
-    ----------
-    name:
-        Canonical target-model name. Must belong to SUPPORTED_TARGET_MODELS.
-
-    checkpoint_path:
-        Optional path to a trained binary classifier checkpoint.
-
-    device:
-        Device selector. The concrete adapter should interpret "auto" as CUDA
-        if available, otherwise CPU.
-
-    input_size:
-        Expected square input size for image preprocessing.
-
-    labels:
-        Ordered binary labels. The order must remain aligned with LABEL_TO_INDEX.
     """
 
     name: str
@@ -126,13 +109,6 @@ class TargetModelConfig:
 class TargetModelAdapter(ABC):
     """
     Abstract contract required by model-dependent adversarial attacks.
-
-    Concrete implementations must expose a consistent binary-classification
-    interface for ResNet18, EfficientNet-B0, and CLIP-based proxy models.
-
-    The methods deliberately use `Any` to avoid importing framework-specific
-    tensor types in this lightweight interface module. Concrete adapters can use
-    PyTorch tensors internally.
     """
 
     def __init__(self, config: TargetModelConfig) -> None:
@@ -153,12 +129,7 @@ class TargetModelAdapter(ABC):
 
     @abstractmethod
     def preprocess_image(self, image: Any) -> Any:
-        """
-        Convert a PIL image or image-like object into the model input tensor.
-
-        The implementation must apply the exact normalization used during
-        training/evaluation of the corresponding target model.
-        """
+        """Convert a PIL image or image-like object into the model input tensor."""
 
     @abstractmethod
     def predict(self, model_input: Any) -> str:
@@ -170,22 +141,11 @@ class TargetModelAdapter(ABC):
 
     @abstractmethod
     def compute_loss(self, model_input: Any, true_label: str) -> Any:
-        """
-        Compute the attack loss for a given input and ground-truth label.
-
-        FGSM and related white-box attacks must use this method rather than
-        duplicating loss logic inside each attack implementation.
-        """
+        """Compute the attack loss for a given input and ground-truth label."""
 
     @abstractmethod
     def compute_gradient(self, model_input: Any, true_label: str) -> Any:
-        """
-        Compute the gradient of the attack loss with respect to the input.
-
-        The returned object is framework-specific, but it must be aligned with
-        the preprocessed input tensor so that the attack implementation can apply
-        the perturbation consistently.
-        """
+        """Compute the gradient of the attack loss with respect to the input."""
 
 
 # =============================================================================
@@ -228,10 +188,7 @@ def validate_target_model_name(model_name: str) -> str:
 
 
 def validate_target_model_names(model_names: list[str] | tuple[str, ...]) -> list[str]:
-    """
-    Validate a sequence of target-model names while preserving order and removing
-    duplicates.
-    """
+    """Validate target-model names while preserving order and removing duplicates."""
     normalized: list[str] = []
     seen: set[str] = set()
 
@@ -262,12 +219,7 @@ def expected_generation_count(
     selected_attacks: list[str] | tuple[str, ...],
     selected_target_models: list[str] | tuple[str, ...],
 ) -> int:
-    """
-    Compute the expected number of generated adversarial images.
-
-    Model-agnostic attacks are generated once per input image. Model-dependent
-    attacks are generated once per input image and target model.
-    """
+    """Compute the expected number of generated adversarial images."""
     if input_image_count < 0:
         raise ValueError("input_image_count must be greater than or equal to 0.")
 
