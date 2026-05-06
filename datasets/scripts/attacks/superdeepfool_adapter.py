@@ -172,7 +172,7 @@ class SuperDeepFoolReferenceAttack:
         self.config = config
         self.model = resolve_torch_model(adapter)
 
-        if hasattr(self.model, "eval"):
+        if self.model is not None and hasattr(self.model, "eval"):
             self.model.eval()
 
     def generate(
@@ -470,7 +470,8 @@ class SuperDeepFoolReferenceAttack:
             )
             raise TypeError(
                 "Unable to compute differentiable logits for SuperDeepFool. "
-                "The adapter must expose forward_logits/predict_logits/logits or an underlying torch.nn.Module. "
+                "The adapter must expose forward_logits, predict_logits, logits, "
+                "or an underlying torch.nn.Module. "
                 f"Available adapter attributes: {available_attributes}"
             )
 
@@ -481,19 +482,31 @@ class SuperDeepFoolReferenceAttack:
             logits = logits[0]
 
         if not isinstance(logits, torch.Tensor):
-            raise TypeError("The target model must return torch.Tensor logits.")
+            raise TypeError(
+                f"The target model must return torch.Tensor logits, got {type(logits)}."
+            )
 
         if logits.ndim != 2:
             raise ValueError(f"Expected logits with shape (N, C), got {tuple(logits.shape)}.")
 
         return logits
-def resolve_torch_model(adapter: Any) -> Any:
+
+
+def resolve_torch_model(adapter: Any) -> Any | None:
     """
     Resolve the underlying PyTorch model from the target adapter.
 
-    The FAIR-Lab adapters may expose the loaded model through different public
-    or private attribute names. SuperDeepFool is a white-box attack, therefore
-    it needs differentiable logits from the target model.
+    The function returns None when the adapter exposes differentiable logits
+    through forward_logits, predict_logits, or logits. In that case, the attack
+    will use the adapter method directly.
+
+    SuperDeepFool is a white-box attack, so at generation time one of the
+    following must be available:
+
+    - a torch.nn.Module-like model attribute
+    - adapter.forward_logits(...)
+    - adapter.predict_logits(...)
+    - adapter.logits(...)
     """
 
     candidate_attribute_names = (
@@ -536,17 +549,14 @@ def resolve_torch_model(adapter: Any) -> Any:
     if is_torch_module_like(adapter):
         return adapter
 
-    available_attributes = sorted(
-        name for name in dir(adapter)
-        if not name.startswith("__")
-    )
+    if (
+        hasattr(adapter, "forward_logits")
+        or hasattr(adapter, "predict_logits")
+        or hasattr(adapter, "logits")
+    ):
+        return None
 
-    raise TypeError(
-        "The target adapter does not expose a usable PyTorch model for SuperDeepFool. "
-        "Expected a torch.nn.Module-like object in attributes such as model, _model, "
-        "torch_model, _torch_model, network, net, classifier, or loaded_model. "
-        f"Available adapter attributes: {available_attributes}"
-    )
+    return None
 
 def is_torch_module_like(candidate: Any) -> bool:
     """Return True when the object behaves like a torch.nn.Module."""
