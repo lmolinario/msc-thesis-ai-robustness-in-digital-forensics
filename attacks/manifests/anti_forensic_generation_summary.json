@@ -1,6 +1,6 @@
 {
   "script": "datasets/scripts/attacks/13_generate_anti_forensic_attacks.py",
-  "created_at": "2026-05-04T19:54:03+00:00",
+  "created_at": "2026-05-07T04:09:38+00:00",
   "input_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
   "output_root": "attacks/anti_forensic",
   "manifest_csv": "attacks/manifests/anti_forensic_attacks_manifest.csv",
@@ -16,7 +16,8 @@
     "jpeg_quality": 70,
     "resample_scale": 0.5,
     "blur_radius": 1.5,
-    "contrast_cutoff": 1.0
+    "contrast_cutoff": 1.0,
+    "limit": 0
   },
   "counts": {
     "input_images": 1000,

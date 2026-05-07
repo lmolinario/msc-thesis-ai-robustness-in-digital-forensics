@@ -251,8 +251,8 @@ def parse_interactive_args() -> argparse.Namespace:
         color_blue_shift=-12,
         color_saturation_factor=1.10,
         color_contrast_factor=1.00,
-        one_pixel_max_iterations=30,
-        one_pixel_population_size=8,
+        one_pixel_max_iterations=50,
+        one_pixel_population_size=20,
         one_pixel_seed=42,
         sigma_zero_steps=1000,
         sigma_zero_eta=1.0,
@@ -1309,6 +1309,8 @@ def write_summary(path: Path, summary: dict[str, Any]) -> None:
 
 
 def main() -> None:
+    import datetime
+    print (datetime.datetime.now(datetime.UTC))
     args = parse_args()
     setup_logging(args.verbose)
 
@@ -1413,6 +1415,6 @@ def main() -> None:
     logging.info("Summary written: %s", summary_path)
     logging.info("Fold-aware adversarial generation completed successfully.")
 
-
+    print (datetime.datetime.now(datetime.UTC))
 if __name__ == "__main__":
     main()

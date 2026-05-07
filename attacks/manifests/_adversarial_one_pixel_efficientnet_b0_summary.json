@@ -1,6 +1,6 @@
 {
   "script": "datasets/scripts/attacks/14_generate_adversarial_attacks.py",
-  "created_at": "2026-05-06T17:25:27+00:00",
+  "created_at": "2026-05-05T14:53:08+00:00",
   "input_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
   "output_root": "attacks/adversarial",
   "manifest_csv": "attacks/manifests/adversarial_one_pixel_efficientnet_b0_manifest.csv",
@@ -19,46 +19,40 @@
     "jpeg_quality": 95,
     "input_size": 224,
     "device": "auto",
-    "limit": 10,
-    "one_pixel_max_iterations": 50,
-    "one_pixel_population_size": 20,
-    "one_pixel_seed": 42,
-    "sigma_zero_steps": 1000,
-    "sigma_zero_eta": 1.0,
-    "sigma_zero_sigma": 0.001,
-    "sigma_zero_tau": 0.3,
-    "sigma_zero_tau_factor": 0.01,
-    "sigma_zero_grad_norm": Infinity,
-    "superdeepfool_max_outer_iterations": 20,
-    "superdeepfool_max_deepfool_iterations": 50,
-    "superdeepfool_projection_steps": 1,
-    "superdeepfool_candidate_classes": null,
-    "superdeepfool_output_format": "PNG",
-    "superdeepfool_variant": "SDF(infinity,1)"
+    "limit": 0,
+    "one_pixel_max_iterations": 30,
+    "one_pixel_population_size": 8,
+    "one_pixel_seed": 42
   },
   "counts": {
-    "input_images": 10,
-    "expected_generated_images": 10,
-    "actual_generated_images": 10,
+    "input_images": 1000,
+    "expected_generated_images": 1000,
+    "actual_generated_images": 1000,
     "per_attack_counts": {
-      "one_pixel": 10
+      "one_pixel": 1000
     },
     "per_target_counts": {
-      "efficientnet_b0": 10
+      "efficientnet_b0": 1000
     },
     "per_fold_counts": {
       "one_pixel": {
-        "fold_1": 10
+        "fold_1": 200,
+        "fold_2": 200,
+        "fold_3": 200,
+        "fold_4": 200,
+        "fold_5": 200
       }
     },
     "per_label_counts": {
       "one_pixel": {
-        "non_weapon": 10
+        "non_weapon": 500,
+        "weapon": 500
       }
     },
     "per_attack_success": {
       "one_pixel": {
-        "False": 10
+        "False": 977,
+        "True": 23
       }
     }
   },
