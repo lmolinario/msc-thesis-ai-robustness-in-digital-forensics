@@ -1,4 +1,4 @@
-\begincomment
+\begin{comment}
 4.1   Overview of the FAIR-Lab methodology
 4.2   Research design and experimental assumptions
 4.3   Dataset construction and source consolidation
@@ -12,7 +12,7 @@
 4.11  Evaluation metrics
 4.12  Explainability approach
 4.13  Traceability and reproducibility controls
-\endcomment
+\end{comment}
 
 
 \chapter{Methodology}
@@ -31,7 +31,7 @@ La metodologia della tesi è organizzata attorno al framework \gls{fairlab}, int
 
 Il framework integra due livelli complementari. Il primo è una pipeline accademica, nella quale dataset, modelli, perturbazioni, metriche e tecniche di interpretabilità vengono definiti in modo controllato e comparabile. Il secondo è una pipeline operativo-forense, nella quale gli artefatti prodotti dalla pipeline accademica vengono predisposti per essere analizzati da strumenti professionali di \gls{df}, secondo una logica più vicina alle condizioni applicative reali. Questa distinzione consente di mantenere separati il controllo sperimentale proprio della ricerca accademica e la valutazione black-box o quasi black-box richiesta dall'analisi di strumenti commerciali, spesso caratterizzati da moduli proprietari e non pienamente ispezionabili \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
-Nel suo stato attuale, la pipeline è stata consolidata fino alla costruzione degli artefatti dataset. In particolare, sono stati definiti e prodotti il dataset finale congelato, il subset binario destinato agli esperimenti adversariali e anti-forensi, gli split puliti per la valutazione baseline e il set \gls{ood} separato. Tali artefatti costituiscono la base stabile sulla quale verranno eseguite le successive fasi di perturbazione, valutazione dei modelli, analisi con strumenti forensi e explainability. Questa separazione tra artefatti già congelati e fasi sperimentali successive è essenziale per evitare che modifiche future ai dati alterino retroattivamente il protocollo di valutazione.
+Nel suo stato attuale, la pipeline è stata consolidata fino alla costruzione degli artefatti dataset, alla generazione degli split puliti e alla produzione delle principali famiglie di perturbazioni adversariali e anti-forensi sul subset binario. In particolare, sono stati definiti e prodotti il dataset finale congelato, il subset binario destinato agli esperimenti, gli split puliti per la valutazione baseline, il set \gls{ood} separato e i manifest relativi agli artefatti manipolati. Tali componenti costituiscono la base stabile sulla quale verranno completate le successive fasi di valutazione multi-modello, costruzione del bundle forense, analisi con strumenti commerciali ed explainability. In particolare, sono stati definiti e prodotti il dataset finale congelato, il subset binario destinato agli esperimenti adversariali e anti-forensi, gli split puliti per la valutazione baseline e il set \gls{ood} separato. Tali artefatti costituiscono la base stabile sulla quale verranno eseguite le successive fasi di perturbazione, valutazione dei modelli, analisi con strumenti forensi e explainability. Questa separazione tra artefatti già congelati e fasi sperimentali successive è essenziale per evitare che modifiche future ai dati alterino retroattivamente il protocollo di valutazione.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Research design and experimental assumptions}
@@ -173,9 +173,54 @@ Gli output principali della fase di split generation sono tre manifest: \texttt{
 
 Questa struttura consente di disporre di unità sperimentali stabili per le successive valutazioni baseline, per la generazione delle perturbazioni adversariali e anti-forensi e per il confronto con i risultati prodotti dagli strumenti forensi. La separazione tra clean folds e set \gls{ood} consente inoltre di evitare che problemi metodologicamente distinti, quali robustezza su classi note e gestione dell'incertezza fuori distribuzione, vengano confusi nella stessa metrica aggregata.
 
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Models and classification paradigm}
+\label{sec:methodology-models-classification}
+% ─────────────────────────────────────────────────────────────────────────────
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Adversarial attack selection and generation}
+\label{sec:methodology-adversarial-attacks}
+% ─────────────────────────────────────────────────────────────────────────────
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Anti-forensic transformation pipeline}
+\label{sec:methodology-anti-forensic-transformations}
+% ─────────────────────────────────────────────────────────────────────────────
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Forensic evaluation bundle}
+\label{sec:methodology-forensic-evaluation-bundle}
+% ─────────────────────────────────────────────────────────────────────────────
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Evaluation metrics}
+\label{sec:methodology-evaluation-metrics}
+% ─────────────────────────────────────────────────────────────────────────────
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Explainability approach}
+\label{sec:methodology-explainability}
+% ─────────────────────────────────────────────────────────────────────────────
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Traceability and reproducibility controls}
 \label{sec:methodology-traceability-controls}
+% ─────────────────────────────────────────────────────────────────────────────
+
+
+
+
+\begin{comment}
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Traceability and reproducibility controls}
+\label{sec:methodology-traceability-controls1}
 % ─────────────────────────────────────────────────────────────────────────────
 
 La pipeline dataset è costruita attorno a un principio di tracciabilità progressiva. Ogni fase produce artefatti documentali che consentono di ricostruire il passaggio dalla sorgente grezza al campione incluso negli split finali. Tale impostazione è coerente con i requisiti generali della \gls{df}, nella quale l'affidabilità dell'analisi dipende anche dalla possibilità di documentare le trasformazioni subite dagli artefatti digitali e di verificarne l'identità attraverso hash e manifest \cite{casey2011digital,nist2006guide,iso27037}.
@@ -207,6 +252,7 @@ La Tabella~\ref{tab:methodology-dataset-artifacts} sintetizza gli artefatti prin
 
 Questi artefatti permettono di distinguere tra dati grezzi, pool tecnico, selezione semantica, dataset congelato e split sperimentali. Tale distinzione è necessaria per preservare la riproducibilità del lavoro e per evitare ambiguità tra la fase di costruzione del dataset e le successive fasi di valutazione dei modelli. Inoltre, la disponibilità di manifest separati consente di effettuare controlli indipendenti su duplicati, percorsi mancanti, classi assegnate e distribuzione dei campioni.
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Transition to subsequent experimental stages}
 \label{sec:methodology-transition-next-stages}
@@ -217,3 +263,10 @@ Gli artefatti descritti nelle sezioni precedenti costituiscono la base congelata
 Le fasi successive prevedono la costruzione di un \textit{forensic evaluation bundle}, destinato a raccogliere in una struttura omogenea le immagini pulite, le immagini perturbate e il set \gls{ood}, insieme ai relativi manifest e hash. Tale bundle avrà la funzione di rendere trasferibili gli artefatti verso strumenti forensi commerciali come X-Ways Forensics, Magnet AXIOM, Cellebrite \gls{ufed} e Oxygen Forensics, preservando il collegamento tra file analizzato, campione originario, trasformazione applicata e output dello strumento.
 
 Poiché la generazione delle perturbazioni e la costruzione del bundle operativo appartengono alle fasi sperimentali successive, il presente capitolo non anticipa risultati né descrive comportamenti osservati dei modelli o dei tool forensi. La metodologia qui definita stabilisce invece la base dataset e i controlli di tracciabilità necessari affinché tali valutazioni possano essere condotte in modo coerente, verificabile e riproducibile.
+
+
+
+
+
+
+\end{comment}
