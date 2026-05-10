@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-14_generate_adversarial_attacks.py
+13_generate_adversarial_attacks.py
 
 Fold-aware adversarial generation entry point for the FAIR-Lab thesis pipeline.
 
@@ -76,7 +76,7 @@ from datasets.scripts.utils.paths import (
 )
 
 
-SCRIPT_NAME = "datasets/scripts/attacks/14_generate_adversarial_attacks.py"
+SCRIPT_NAME = "datasets/scripts/attacks/13_generate_adversarial_attacks.py"
 INPUT_MANIFEST_PATH = SPLIT_MANIFESTS_DIR / "clean_folds_manifest.csv"
 ATTACK_MANIFESTS_DIR = ATTACKS_DIR / "manifests"
 

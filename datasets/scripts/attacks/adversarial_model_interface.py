@@ -18,7 +18,7 @@ module.
 
 Design principles
 -----------------
-- Keep 14_generate_adversarial_attacks.py as the official entry point.
+- Keep 13_generate_adversarial_attacks.py as the official entry point.
 - Keep model-dependent attack logic separated from dataset traversal, manifest
   writing, hashing, and output-path construction.
 - Make every future attack use the same label mapping, prediction interface,

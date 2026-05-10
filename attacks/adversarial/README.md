@@ -106,7 +106,7 @@ Use the numbered script in documentation, experiments, and reproducible commands
 Official FGSM command:
 
 ```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
+python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
@@ -117,7 +117,7 @@ python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
 Smoke test:
 
 ```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
+python datasets/scripts/attacks/13_generate_adversarial_attacks.py \
   --attack fgsm \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
