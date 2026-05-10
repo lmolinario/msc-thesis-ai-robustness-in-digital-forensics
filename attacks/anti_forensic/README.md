@@ -44,19 +44,19 @@ These transformations are controlled image-processing operations, not model-opti
 Run the interactive launcher directly:
 
 ```bash
-python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
 ```
 
 Generate all implemented anti-forensic transformations:
 
 ```bash
-python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py --force
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py --force
 ```
 
 Generate one transformation only:
 
 ```bash
-python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py \
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py \
   --attack gaussian_blur \
   --force
 ```
@@ -64,7 +64,7 @@ python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py \
 Smoke test all transformations:
 
 ```bash
-python datasets/scripts/attacks/12_generate_anti_forensic_attacks.py \
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py \
   --limit 10 \
   --force
 ```

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-12_generate_anti_forensic_attacks.py
+13_generate_anti_forensic_attacks.py
 
 Official anti-forensic transformation script for the FAIR-Lab thesis pipeline.
 
@@ -80,7 +80,7 @@ from datasets.scripts.utils.paths import (
 # Configuration
 # =============================================================================
 
-SCRIPT_NAME = "datasets/scripts/attacks/12_generate_anti_forensic_attacks.py"
+SCRIPT_NAME = "datasets/scripts/attacks/13_generate_anti_forensic_attacks.py"
 
 INPUT_MANIFEST_PATH = SPLIT_MANIFESTS_DIR / "clean_folds_manifest.csv"
 ATTACK_MANIFESTS_DIR = ATTACKS_DIR / "manifests"
