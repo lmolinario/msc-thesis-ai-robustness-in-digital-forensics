@@ -1,61 +1,149 @@
-\begin{comment}
-4.1   Overview of the FAIR-Lab methodology
-4.2   Research design and experimental assumptions
-4.3   Dataset construction and source consolidation
-4.4   Review manifest generation
-4.5   Human-in-the-loop review and final dataset freezing
-4.6   Split generation and OOD evaluation set
-4.7   Models and classification paradigm
-4.8   Adversarial attack selection and generation
-4.9   Anti-forensic transformation pipeline
-4.10  Forensic evaluation bundle
-4.11  Evaluation metrics
-4.12  Explainability approach
-4.13  Traceability and reproducibility controls
-\end{comment}
-
-
 \chapter{Methodology}
 \label{chap:methodology}
 
-Questo capitolo descrive la metodologia adottata per costruire la base sperimentale della tesi e per predisporre la successiva valutazione della robustezza operativa di sistemi \gls{ai}-based per la classificazione automatizzata di immagini in ambito forense. In coerenza con il gap individuato nel Capitolo~\ref{chap:state-of-the-art}, l'obiettivo metodologico non consiste nella sola misurazione dell'accuratezza di classificatori visuali, ma nella definizione di un protocollo riproducibile capace di collegare dataset, modelli, perturbazioni, strumenti forensi, metriche e controlli di tracciabilità all'interno di un unico framework sperimentale.
+Questo capitolo descrive la metodologia adottata per costruire la base
+sperimentale della tesi e per predisporre la valutazione della robustezza
+operativa di sistemi \gls{ai}-based per la classificazione automatizzata
+di immagini in ambito forense. In coerenza con il gap individuato nel
+Capitolo~\ref{chap:state-of-the-art}, relativo alla limitata disponibilità
+di protocolli riproducibili per validare modelli e strumenti \gls{ai}-based
+in workflow forensi realistici, il capitolo non si limita a descrivere
+singoli componenti tecnici, ma formalizza un disegno sperimentale integrato.
+Tale disegno collega dataset, modelli, perturbazioni adversariali e
+anti-forensi, strumenti forensi, metriche, approccio di \gls{xai} e controlli
+di tracciabilità all'interno del framework \gls{fairlab}, mantenendo una
+distinzione netta tra metodologia sperimentale e analisi dei risultati.
+Il capitolo è organizzato in tredici sezioni: le prime sei
+(\S\S\,\ref{sec:methodology-fairlab-overview}--\ref{sec:methodology-split-generation})
+descrivono le componenti della pipeline dataset, già consolidate nello
+stato attuale del lavoro; le successive sette
+(\S\S\,\ref{sec:methodology-models-classification}--\ref{sec:methodology-traceability-controls})
+introducono il paradigma di classificazione, la selezione e la generazione
+delle perturbazioni, il \emph{forensic evaluation bundle}, le metriche
+di valutazione, l'approccio di \gls{xai} e i controlli di tracciabilità
+e riproducibilità.
 
-La trattazione del presente capitolo si concentra sulle componenti metodologiche già consolidate nella pipeline dataset: acquisizione delle sorgenti, preparazione tecnica del pool di immagini, generazione del manifest di revisione, selezione manuale \textit{human-in-the-loop}, congelamento del dataset finale, costruzione del subset binario per gli esperimenti adversariali e generazione degli split puliti con set \gls{ood} separato. Le fasi successive, relative alla generazione delle perturbazioni, alla costruzione del \textit{forensic evaluation bundle} e alla valutazione mediante strumenti forensi commerciali, sono richiamate soltanto come raccordo metodologico e saranno sviluppate nei passaggi sperimentali successivi.
+La trattazione del presente capitolo si concentra sulle componenti
+metodologiche già consolidate nella pipeline dataset: acquisizione delle
+sorgenti, preparazione tecnica del pool di immagini, generazione del manifest
+di revisione, selezione manuale \textit{human-in-the-loop}, congelamento del
+dataset finale, costruzione del subset binario per gli esperimenti adversariali
+e generazione degli split puliti con set \gls{ood} separato. Le fasi
+successive, relative alla generazione delle perturbazioni, alla costruzione
+del \textit{forensic evaluation bundle} e alla valutazione mediante strumenti
+forensi commerciali, sono richiamate soltanto come raccordo metodologico e
+saranno sviluppate nei passaggi sperimentali successivi.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Overview of the FAIR-Lab methodology}
 \label{sec:methodology-fairlab-overview}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La metodologia della tesi è organizzata attorno al framework \gls{fairlab}, inteso come pipeline sperimentale per la valutazione della robustezza operativa di sistemi \gls{ai}-based in scenari di \gls{df}. Il framework nasce dall'esigenza di superare una valutazione puramente algoritmica della classificazione di immagini, collegando le prestazioni dei modelli alla loro possibile funzione operativa nei workflow di triage e prioritizzazione delle evidenze digitali. In tale prospettiva, la robustezza non viene considerata soltanto come proprietà tecnica del classificatore, ma come requisito metodologico per l'impiego prudente dell'automazione in un contesto investigativo.
+La metodologia della tesi è organizzata attorno al framework \gls{fairlab},
+inteso come pipeline sperimentale per la valutazione della robustezza operativa
+di sistemi \gls{ai}-based in scenari di \gls{df}. Il framework nasce
+dall'esigenza di superare una valutazione puramente algoritmica della
+classificazione di immagini, collegando le prestazioni dei modelli alla loro
+possibile funzione operativa nei workflow di triage e prioritizzazione delle
+evidenze digitali. In tale prospettiva, la robustezza non viene considerata
+soltanto come proprietà tecnica del classificatore, ma come requisito
+metodologico per l'impiego prudente dell'automazione in un contesto
+investigativo.
 
-Il framework integra due livelli complementari. Il primo è una pipeline accademica, nella quale dataset, modelli, perturbazioni, metriche e tecniche di interpretabilità vengono definiti in modo controllato e comparabile. Il secondo è una pipeline operativo-forense, nella quale gli artefatti prodotti dalla pipeline accademica vengono predisposti per essere analizzati da strumenti professionali di \gls{df}, secondo una logica più vicina alle condizioni applicative reali. Questa distinzione consente di mantenere separati il controllo sperimentale proprio della ricerca accademica e la valutazione black-box o quasi black-box richiesta dall'analisi di strumenti commerciali, spesso caratterizzati da moduli proprietari e non pienamente ispezionabili \cite{sanna2024preliminary,sanna2025pixelperfect}.
+Il framework integra due livelli complementari. Il primo è una pipeline
+accademica, nella quale dataset, modelli, perturbazioni, metriche e approcci
+di \gls{xai} vengono definiti in modo controllato e comparabile. Il secondo è
+una pipeline operativo-forense, nella quale gli artefatti prodotti dalla
+pipeline accademica vengono predisposti per essere analizzati da strumenti
+professionali di \gls{df}, secondo una logica più vicina alle condizioni
+applicative reali. Questa distinzione consente di mantenere separati il
+controllo sperimentale proprio della ricerca accademica e la valutazione
+black-box o quasi black-box richiesta dall'analisi di strumenti commerciali,
+spesso caratterizzati da moduli proprietari e non pienamente ispezionabili
+\cite{sanna2024preliminary,sanna2025pixelperfect}.
 
-Nel suo stato attuale, la pipeline è stata consolidata fino alla costruzione degli artefatti dataset, alla generazione degli split puliti e alla produzione delle principali famiglie di perturbazioni adversariali e anti-forensi sul subset binario. In particolare, sono stati definiti e prodotti il dataset finale congelato, il subset binario destinato agli esperimenti, gli split puliti per la valutazione baseline, il set \gls{ood} separato e i manifest relativi agli artefatti manipolati. Tali componenti costituiscono la base stabile sulla quale verranno completate le successive fasi di valutazione multi-modello, costruzione del bundle forense, analisi con strumenti commerciali ed explainability. In particolare, sono stati definiti e prodotti il dataset finale congelato, il subset binario destinato agli esperimenti adversariali e anti-forensi, gli split puliti per la valutazione baseline e il set \gls{ood} separato. Tali artefatti costituiscono la base stabile sulla quale verranno eseguite le successive fasi di perturbazione, valutazione dei modelli, analisi con strumenti forensi e explainability. Questa separazione tra artefatti già congelati e fasi sperimentali successive è essenziale per evitare che modifiche future ai dati alterino retroattivamente il protocollo di valutazione.
+Nel suo stato attuale, la pipeline è stata consolidata fino alla costruzione
+degli artefatti dataset, alla generazione degli split puliti e alla produzione
+delle principali famiglie di perturbazioni adversariali e anti-forensi sul
+subset binario. In particolare, sono stati definiti e prodotti il dataset
+finale congelato, il subset binario destinato agli esperimenti adversariali
+e anti-forensi, gli split puliti per la valutazione baseline e il set
+\gls{ood} separato. Tali artefatti costituiscono la base stabile sulla quale
+verranno eseguite le successive fasi di perturbazione, valutazione dei modelli,
+analisi con strumenti forensi e \gls{xai}. Questa separazione tra artefatti
+già congelati e fasi sperimentali successive è essenziale per evitare che
+modifiche future ai dati alterino retroattivamente il protocollo di
+valutazione.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Research design and experimental assumptions}
 \label{sec:methodology-research-design}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Il disegno sperimentale assume come scenario di riferimento un'attività di triage visuale in ambito forense, nella quale un sistema automatico supporta l'analista nell'individuazione preliminare di immagini potenzialmente rilevanti. Il caso di studio riguarda la classificazione di immagini in tre categorie metodologiche: \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. La prima categoria rappresenta la classe investigativamente rilevante nel task considerato; la seconda raccoglie esempi negativi realistici e coerenti con il dominio; la terza comprende casi borderline, anomali o fuori distribuzione che non dovrebbero essere forzati in modo acritico nelle due classi binarie principali.
+Il disegno sperimentale assume come scenario di riferimento un'attività di
+triage visuale in ambito forense, nella quale un sistema automatico supporta
+l'analista nell'individuazione preliminare di immagini potenzialmente
+rilevanti. Il caso di studio riguarda la classificazione di immagini in tre
+categorie metodologiche: \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}.
+La prima categoria rappresenta la classe investigativamente rilevante nel task
+considerato; la seconda raccoglie esempi negativi realistici e coerenti con il
+dominio; la terza comprende casi borderline, anomali o fuori distribuzione che
+non dovrebbero essere forzati in modo acritico nelle due classi binarie
+principali.
 
-La scelta di includere una classe \gls{ood} esplicita risponde a un'esigenza metodologica specifica. In un contesto operativo reale, i sistemi di classificazione non ricevono soltanto immagini pulite e semanticamente allineate alle classi previste, ma anche contenuti ambigui, degradati, sintetici, non pertinenti o appartenenti a distribuzioni differenti. La letteratura sulla \gls{ood} detection ha mostrato che i classificatori possono produrre predizioni ad alta confidenza anche su input estranei al dominio di addestramento, rendendo necessario distinguere gli errori su classi note dalla gestione di campioni che non dovrebbero essere classificati come positivi o negativi ordinari \cite{hendrycks2017baseline,fort2021exploring}.
+La scelta di includere una classe \gls{ood} esplicita risponde a un'esigenza
+metodologica specifica. In un contesto operativo reale, i sistemi di
+classificazione non ricevono soltanto immagini pulite e semanticamente allineate
+alle classi previste, ma anche contenuti ambigui, degradati, sintetici, non
+pertinenti o appartenenti a distribuzioni differenti. La letteratura sulla
+\gls{ood} detection ha mostrato che i classificatori possono produrre predizioni
+ad alta confidenza anche su input estranei al dominio di addestramento,
+rendendo necessario distinguere gli errori su classi note dalla gestione di
+campioni che non dovrebbero essere classificati come positivi o negativi ordinari
+\cite{hendrycks2017baseline,fort2021exploring}.
 
-La metodologia distingue inoltre tra classificazione automatica, robustezza e validazione operativa. La classificazione automatica riguarda la capacità del sistema di assegnare una classe a un'immagine. La robustezza riguarda la stabilità di tale comportamento quando l'input viene degradato, alterato o manipolato. La validazione operativa riguarda invece l'impatto dell'output automatico sul workflow forense, in particolare rispetto al rischio di falsi negativi su contenuti rilevanti, falsi positivi che aumentano il carico analitico e classificazioni improprie di campioni \gls{ood}. Questa distinzione permette di evitare che l'accuratezza nominale su dati puliti venga interpretata come garanzia sufficiente di affidabilità in scenari investigativi.
+La metodologia distingue inoltre tra classificazione automatica, robustezza e
+validazione operativa. La classificazione automatica riguarda la capacità del
+sistema di assegnare una classe a un'immagine. La robustezza riguarda la
+stabilità di tale comportamento quando l'input viene degradato, alterato o
+manipolato. La validazione operativa riguarda invece l'impatto dell'output
+automatico sul workflow forense, in particolare rispetto al rischio di falsi
+negativi su contenuti rilevanti, falsi positivi che aumentano il carico
+analitico e classificazioni improprie di campioni \gls{ood}. Questa distinzione
+permette di evitare che l'accuratezza nominale su dati puliti venga interpretata
+come garanzia sufficiente di affidabilità in scenari investigativi.
 
-Il protocollo adotta infine un'impostazione \textit{human-in-the-loop}. La componente manuale non viene trattata come elemento esterno o residuale, ma come parte documentata della metodologia. In ambito forense, infatti, la costruzione del dataset non può dipendere esclusivamente da etichette automatiche o da directory originarie delle sorgenti: è necessario che i criteri semantici di inclusione, esclusione e assegnazione alle classi siano espliciti, tracciabili e coerenti con il task investigativo.
+Il protocollo adotta infine un'impostazione \textit{human-in-the-loop}.
+La componente manuale non viene trattata come elemento esterno o residuale,
+ma come parte documentata della metodologia. In ambito forense, la costruzione
+del dataset non può dipendere esclusivamente da etichette automatiche o da
+directory originarie delle sorgenti: è necessario che i criteri semantici di
+inclusione, esclusione e assegnazione alle classi siano espliciti, tracciabili
+e coerenti con il task investigativo.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Dataset construction and source consolidation}
 \label{sec:methodology-dataset-construction}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La costruzione del dataset è stata articolata in una sequenza di fasi distinte, progettate per separare la raccolta delle sorgenti, la preparazione tecnica dei file, la revisione semantica e il congelamento degli artefatti finali. Questa separazione è metodologicamente rilevante perché consente di distinguere ciò che appartiene alla qualità tecnica dell'immagine da ciò che riguarda la sua interpretazione semantica rispetto al task forense.
+La costruzione del dataset è stata articolata in una sequenza di fasi distinte,
+progettate per separare la raccolta delle sorgenti, la preparazione tecnica dei
+file, la revisione semantica e il congelamento degli artefatti finali. Questa
+separazione è metodologicamente rilevante perché consente di distinguere ciò
+che appartiene alla qualità tecnica dell'immagine da ciò che riguarda la sua
+interpretazione semantica rispetto al task forense.
 
-La fase iniziale ha previsto l'organizzazione di cinque sorgenti eterogenee all'interno della directory \texttt{datasets/raw/}. Le sorgenti comprendono dataset pubblici, materiale derivato da repository specializzate, raccolte ottenute mediante scraping controllato, contenuti acquisiti secondo una logica \gls{osint} e dati provenienti da fonti deep web-oriented. L'obiettivo non era costruire un benchmark visivamente omogeneo, ma un pool iniziale sufficientemente vario da rappresentare alcune delle condizioni di eterogeneità che caratterizzano le indagini digitali contemporanee.
-
-Le sorgenti grezze sono state organizzate secondo la seguente struttura logica:
+La fase iniziale ha previsto l'organizzazione di cinque sorgenti eterogenee
+all'interno della directory \texttt{datasets/raw/}. Le sorgenti comprendono
+dataset pubblici, materiale derivato da repository specializzate, raccolte
+ottenute mediante scraping controllato, contenuti acquisiti secondo una logica
+\gls{osint} e dati provenienti da fonti deep web-oriented. L'obiettivo non era
+costruire un benchmark visivamente omogeneo, ma un pool iniziale sufficientemente
+vario da rappresentare alcune delle condizioni di eterogeneità che caratterizzano
+le indagini digitali contemporanee.
 
 \begin{table}[H]
 \centering
@@ -65,42 +153,145 @@ Le sorgenti grezze sono state organizzate secondo la seguente struttura logica:
 \toprule
 \textbf{Directory sorgente} & \textbf{Ruolo metodologico} \\
 \midrule
-\texttt{01\_kaggle\_weapon} & Dataset pubblico orientato al riconoscimento di armi e utile come sorgente strutturata iniziale. \\
-\texttt{02\_deepfirearm} & Sorgente specializzata per immagini di armi da fuoco, utile a includere esempi positivi più controllati. \\
-\texttt{03\_google\_scraped} & Raccolta web ottenuta tramite scraping, finalizzata a introdurre variabilità semantica e visiva. \\
-\texttt{04\_telegram\_youtube} & Raccolta \gls{osint}-oriented da fonti social e video, utile a simulare contenuti meno strutturati. \\
-\texttt{05\_deepweb} & Sorgente deep web-oriented, impiegata per rappresentare materiale eterogeneo e non convenzionale. \\
+\texttt{01\_kaggle\_weapon}    & Dataset pubblico orientato al riconoscimento
+                                 di armi, utile come sorgente strutturata
+                                 iniziale. \\
+\texttt{02\_deepfirearm}       & Sorgente specializzata per immagini di armi
+                                 da fuoco, utile a includere esempi positivi
+                                 più controllati. \\
+\texttt{03\_google\_scraped}   & Raccolta web ottenuta tramite scraping,
+                                 finalizzata a introdurre variabilità semantica
+                                 e visiva. \\
+\texttt{04\_telegram\_youtube} & Raccolta \gls{osint}-oriented da fonti social
+                                 e video, utile a simulare contenuti meno
+                                 strutturati. \\
+\texttt{05\_deepweb}           & Sorgente deep web-oriented, impiegata per
+                                 rappresentare materiale eterogeneo e non
+                                 convenzionale. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-A partire dalle sorgenti grezze, lo script \texttt{datasets/scripts/prepared/08\_build\_prepared\_dataset.py} costruisce il pool preparato in \texttt{datasets/prepared/final\_pool/}. Questa fase non assegna etichette semantiche definitive, ma produce una base tecnica validata attraverso controlli di leggibilità, filtraggio dimensionale, calcolo degli hash e rimozione dei duplicati esatti. In particolare, ogni immagine candidata viene verificata come file immagine valido, sottoposta a soglia minima di dimensione, associata a un valore SHA256 e copiata nel pool preparato solo se supera i controlli tecnici.
+A partire dalle sorgenti grezze, lo script
+\texttt{datasets/scripts/prepared/08\_build\_prepared\_dataset.py} costruisce
+il pool preparato in \texttt{datasets/prepared/final\_pool/}. Questa fase non
+assegna etichette semantiche definitive, ma produce una base tecnica validata
+attraverso controlli di leggibilità, filtraggio dimensionale, calcolo degli hash
+e rimozione dei duplicati esatti. In particolare, ogni immagine candidata viene
+verificata come file immagine valido, sottoposta a soglia minima di dimensione,
+associata a un valore SHA256 e copiata nel pool preparato solo se supera i
+controlli tecnici.
 
-Il risultato principale della fase di preparazione è il file \texttt{metadata.csv}, che registra per ciascun campione informazioni quali \texttt{image\_id}, nome del file preparato, sorgente di provenienza, percorso relativo originario, hash SHA256, dimensioni, estensione e dimensione del file. La disponibilità di tali metadati consente di mantenere un collegamento stabile tra la sorgente originaria e la versione normalizzata inclusa nel pool sperimentale. Gli output di reportistica, tra cui \texttt{invalid\_images.csv}, \texttt{duplicates\_discarded.csv} e \texttt{prepared\_build\_summary.json}, documentano invece le esclusioni tecniche e i duplicati rimossi.
+Il risultato principale della fase di preparazione è il file
+\texttt{metadata.csv}, che registra per ciascun campione informazioni quali
+\texttt{image\_id}, nome del file preparato, sorgente di provenienza, percorso
+relativo originario, hash SHA256, dimensioni, estensione e dimensione del file.
+La disponibilità di tali metadati consente di mantenere un collegamento stabile
+tra la sorgente originaria e la versione normalizzata inclusa nel pool
+sperimentale. Gli output di reportistica, tra cui \texttt{invalid\_images.csv},
+\texttt{duplicates\_discarded.csv} e \texttt{prepared\_build\_summary.json},
+documentano invece le esclusioni tecniche e i duplicati rimossi.
 
-Questa fase ha una funzione esclusivamente tecnica. La pipeline evita deliberatamente di inferire la classe finale di un'immagine dalla cartella sorgente, dal nome del file o da eventuali pre-label automatici. Tale scelta riduce il rischio di propagare bias o errori delle sorgenti originarie nella selezione finale, mantenendo la distinzione tra provenienza del campione e assegnazione semantica verificata.
+Questa fase ha una funzione esclusivamente tecnica. La pipeline evita
+deliberatamente di inferire la classe finale di un'immagine dalla cartella
+sorgente, dal nome del file o da eventuali pre-label automatici. Tale scelta
+riduce il rischio di propagare bias o errori delle sorgenti originarie nella
+selezione finale, mantenendo la distinzione tra provenienza del campione e
+assegnazione semantica verificata.
+
+Il manifest operativo di revisione comprendeva complessivamente 15\,321 immagini
+candidate. La distribuzione tra le sorgenti era fortemente asimmetrica: la
+sorgente \texttt{02\_deepfirearm} rappresentava da sola la componente
+numericamente prevalente del pool, mentre le restanti sorgenti contribuivano
+volumi significativamente inferiori. Tale asimmetria è stata trattata come una
+caratteristica del pool candidato e non come un criterio di campionamento
+finale: la fase \textit{human-in-the-loop} ha applicato criteri semantici e di
+bilanciamento indipendenti dal volume originario delle singole sorgenti.
+Di conseguenza, la sorgente \texttt{02\_deepfirearm}, pur essendo dominante nel
+pool iniziale, contribuisce al dataset congelato con 100 immagini
+\texttt{weapon}, pari alla stessa quota positiva assegnata alle altre sorgenti.
+La distribuzione finale per sorgente e classe è riportata nella
+Tabella~\ref{tab:final-dataset-source-distribution} della
+Sezione~\ref{sec:methodology-human-review}.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Review manifest generation}
 \label{sec:methodology-review-manifest}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Dopo la costruzione del pool preparato, la pipeline genera un manifest di revisione completo mediante lo script \texttt{datasets/scripts/prepared/09\_generate\_review\_manifest\_full.py}. Questo passaggio costituisce il raccordo tra la preparazione tecnica del dataset e la successiva selezione manuale. Il file prodotto, \texttt{datasets/prepared/manifests/review\_manifest\_full.csv}, conserva le informazioni tecniche provenienti da \texttt{metadata.csv} e introduce colonne dedicate alla revisione semantica.
+Dopo la costruzione del pool preparato, la pipeline genera un manifest di
+revisione completo mediante lo script
+\texttt{datasets/scripts/prepared/09\_generate\_review\_manifest\_full.py}.
+Questo passaggio costituisce il raccordo tra la preparazione tecnica del dataset
+e la successiva selezione manuale. Il file prodotto,
+\texttt{datasets/prepared/manifests/review\_manifest\_full.csv}, conserva le
+informazioni tecniche provenienti da \texttt{metadata.csv} e introduce colonne
+dedicate alla revisione semantica.
 
-Il manifest di revisione è progettato per supportare una pipeline controllata e ispezionabile. Da un lato, mantiene campi di identità e provenienza, quali \texttt{image\_id}, \texttt{sha256}, \texttt{relative\_path}, \texttt{source\_dataset} e \texttt{source\_relative\_path}. Dall'altro, introduce campi destinati a eventuali pre-label automatici, allo stato della revisione, all'etichetta finale, alle note del revisore, all'identificativo del revisore e alla gestione dei casi \gls{ood} o esclusi. In questo modo, il manifest diventa l'artefatto centrale per documentare il passaggio da pool tecnico a dataset semanticamente validato.
+Il manifest di revisione è progettato per supportare una pipeline controllata e
+ispezionabile. Da un lato, mantiene campi di identità e provenienza, quali
+\texttt{image\_id}, \texttt{sha256}, \texttt{relative\_path},
+\texttt{source\_dataset} e \texttt{source\_relative\_path}. Dall'altro,
+introduce campi destinati allo stato della revisione, all'etichetta finale, alle
+note del revisore, all'identificativo del revisore e alla gestione dei casi
+\gls{ood} o esclusi. Il manifest predispone inoltre colonne per eventuali
+pre-label ausiliari, che tuttavia non sostituiscono la decisione manuale del
+revisore: l'unico criterio di assegnazione della classe finale è il giudizio
+semantico esplicito formulato durante la revisione \textit{human-in-the-loop}.
+In questo modo, il manifest diventa l'artefatto centrale per documentare il
+passaggio da pool tecnico a dataset semanticamente validato.
 
-La scelta di introdurre i campi di revisione in un file separato rispetto al metadata tecnico consente di preservare la distinzione tra due livelli della pipeline. Il primo livello riguarda l'esistenza, la leggibilità e l'unicità tecnica dei file. Il secondo riguarda invece la loro pertinenza rispetto al task forense. Questa separazione è particolarmente importante perché un'immagine tecnicamente valida può essere semanticamente inadatta alla classe \texttt{weapon} o \texttt{non\_weapon}, mentre un'immagine borderline può essere utile come campione \texttt{ood} per valutare l'affidabilità del sistema in condizioni aperte.
+La scelta di introdurre i campi di revisione in un file separato rispetto al
+metadata tecnico consente di preservare la distinzione tra due livelli della
+pipeline. Il primo livello riguarda l'esistenza, la leggibilità e l'unicità
+tecnica dei file. Il secondo riguarda invece la loro pertinenza rispetto al task
+forense. Questa separazione è particolarmente importante perché un'immagine
+tecnicamente valida può essere semanticamente inadatta alla classe \texttt{weapon}
+o \texttt{non\_weapon}, mentre un'immagine borderline può essere utile come
+campione \texttt{ood} per valutare l'affidabilità del sistema in condizioni
+aperte.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Human-in-the-loop review and final dataset freezing}
 \label{sec:methodology-human-review}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La selezione finale del dataset è stata eseguita mediante un protocollo \textit{human-in-the-loop}, implementato nello script \texttt{datasets/scripts/final/10\_manual\_selection\_protocol\_reviewer.py}. Tale protocollo consente al revisore di ispezionare manualmente le immagini del pool preparato, assegnando una delle etichette finali previste: \texttt{weapon}, \texttt{non\_weapon}, \texttt{ood} o \texttt{exclude}. Le decisioni del revisore vengono salvate in un database operativo e registrate in log dedicati, in modo da rendere documentabile il processo di selezione.
+La selezione finale del dataset è stata eseguita mediante un protocollo
+\textit{human-in-the-loop}, implementato nello script
+\texttt{datasets/scripts/final/10\_manual\_selection\_protocol\_reviewer.py}.
+Tale protocollo consente al revisore di ispezionare manualmente le immagini del
+pool preparato, assegnando una delle etichette finali previste: \texttt{weapon},
+\texttt{non\_weapon}, \texttt{ood} o \texttt{exclude}. Le decisioni del
+revisore vengono salvate in un database operativo e registrate in log dedicati,
+in modo da rendere documentabile il processo di selezione.
 
-I criteri semantici adottati sono stati definiti in modo restrittivo. La classe \texttt{weapon} include soltanto armi individuali realistiche, chiaramente visibili e coerenti con il task di classificazione. La classe \texttt{non\_weapon} comprende immagini realistiche prive di armi, ma plausibili come esempi negativi nel dominio investigativo considerato. La classe \texttt{ood} raccoglie invece contenuti borderline o fuori distribuzione, come coltelli, spade, repliche, airsoft, immagini sintetiche, videogiochi, mezzi militari pesanti, esplosioni, scene di guerra, immagini fortemente degradate o contenuti anomali rispetto al dominio di interesse. La classe \texttt{exclude} è riservata a file non utilizzabili o non coerenti con il dataset finale.
+I criteri semantici adottati sono stati definiti in modo restrittivo.
+La classe \texttt{weapon} include soltanto armi individuali realistiche,
+chiaramente visibili e coerenti con il task di classificazione; la valutazione
+si basa sull'apparenza visiva dell'oggetto nell'immagine e non sulla possibilità
+di accertarne la natura materiale, salvo i casi in cui elementi visivi evidenti
+ne suggeriscano la natura di replica, giocattolo, modello airsoft o contenuto
+sintetico, che vengono ricondotti alla classe \texttt{ood}. La classe
+\texttt{non\_weapon} comprende immagini realistiche prive di armi, ma plausibili
+come esempi negativi nel dominio investigativo considerato. La classe \texttt{ood}
+raccoglie invece contenuti borderline o fuori distribuzione, come coltelli,
+spade, repliche, airsoft, immagini sintetiche, videogiochi, mezzi militari
+pesanti, esplosioni, scene di guerra, immagini fortemente degradate o contenuti
+anomali rispetto al dominio di interesse. La classe \texttt{exclude} è riservata
+a file non utilizzabili o non coerenti con il dataset finale.
 
-Il risultato della revisione è il dataset frozen ufficiale, registrato nel manifest \texttt{datasets/final/manifests/manual\_selection\_final\_1500.csv}. Il dataset finale contiene 1500 immagini bilanciate nelle tre classi principali, come indicato nella Tabella~\ref{tab:methodology-final-dataset}.
+Il risultato della revisione è il dataset frozen ufficiale, registrato nel
+manifest \texttt{datasets/final/manifests/manual\_selection\_final\_1500.csv}.
+Il dataset finale contiene 1500 immagini bilanciate nelle tre classi principali,
+come indicato nella Tabella~\ref{tab:methodology-final-dataset}. La
+distribuzione per sorgente e classe, riportata nella
+Tabella~\ref{tab:final-dataset-source-distribution}, mostra come la selezione
+manuale abbia compensato la sproporzione del pool candidato: ogni sorgente
+contribuisce alla classe \texttt{weapon} con 100 immagini, mentre la
+distribuzione delle classi \texttt{non\_weapon} e \texttt{ood} riflette le
+caratteristiche semantiche delle singole sorgenti.
 
 \begin{table}[H]
 \centering
@@ -110,51 +301,114 @@ Il risultato della revisione è il dataset frozen ufficiale, registrato nel mani
 \toprule
 \textbf{Classe} & \textbf{Numero di immagini} \\
 \midrule
-\texttt{weapon} & 500 \\
+\texttt{weapon}      & 500 \\
 \texttt{non\_weapon} & 500 \\
-\texttt{ood} & 500 \\
+\texttt{ood}         & 500 \\
 \midrule
-\textbf{Totale} & \textbf{1500} \\
+\textbf{Totale}      & \textbf{1500} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-A partire dal dataset frozen viene inoltre generato il subset binario ufficiale per gli esperimenti adversariali e anti-forensi, memorizzato in \texttt{datasets/final/manifests/manual\_selection\_adversarial\_subset.csv}. Questo subset contiene esclusivamente le classi \texttt{weapon} e \texttt{non\_weapon}, per un totale di 1000 immagini bilanciate. I campioni \gls{ood} non vengono utilizzati come target primari per la generazione delle perturbazioni, poiché rispondono a una domanda sperimentale distinta: valutare se modelli e strumenti automatici tendano ad assegnare impropriamente una classe nota a contenuti fuori distribuzione.
+\begin{table}[H]
+\centering
+\caption{Distribuzione del dataset finale congelato per sorgente e classe.}
+\label{tab:final-dataset-source-distribution}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Sorgente} & \textbf{\texttt{weapon}} & \textbf{\texttt{non\_weapon}}
+                  & \textbf{\texttt{ood}} & \textbf{Totale} \\
+\midrule
+\texttt{01\_kaggle\_weapon}    & 100 &   0 & 100 &  200 \\
+\texttt{02\_deepfirearm}       & 100 &   0 &   0 &  100 \\
+\texttt{03\_google\_scraped}   & 100 &  30 &  71 &  201 \\
+\texttt{04\_telegram\_youtube} & 100 &  57 & 225 &  382 \\
+\texttt{05\_deepweb}           & 100 & 413 & 104 &  617 \\
+\midrule
+\textbf{Totale} & \textbf{500} & \textbf{500} & \textbf{500} & \textbf{1500} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Il protocollo di selezione è stato condotto da un singolo revisore, secondo
+criteri espliciti e documentati. Questa scelta rappresenta un limite rispetto a
+protocolli multi-revisore con misura formale di accordo inter-annotatore, ma
+consente di mantenere piena tracciabilità delle decisioni, coerenza applicativa
+dei criteri e riproducibilità documentale del processo di freezing del dataset.
+
+A partire dal dataset frozen viene inoltre generato il subset binario ufficiale
+per gli esperimenti adversariali e anti-forensi, memorizzato in
+\texttt{datasets/final/manifests/manual\_selection\_adversarial\_subset.csv}.
+Questo subset contiene esclusivamente le classi \texttt{weapon} e
+\texttt{non\_weapon}, per un totale di 1000 immagini bilanciate. I campioni
+\gls{ood} non vengono utilizzati come target primari per la generazione delle
+perturbazioni, poiché rispondono a una domanda sperimentale distinta: valutare
+se modelli e strumenti automatici tendano ad assegnare impropriamente una classe
+binaria nota a contenuti borderline, anomali o semanticamente esterni al dominio
+operativo del task.
 
 \begin{table}[H]
 \centering
-\caption{Distribuzione del subset binario per esperimenti adversariali e anti-forensi.}
+\caption{Distribuzione del subset binario per esperimenti adversariali
+         e anti-forensi.}
 \label{tab:methodology-adversarial-subset}
 \begin{tabularx}{0.75\textwidth}{@{}l>{\raggedleft\arraybackslash}X@{}}
 \toprule
 \textbf{Classe} & \textbf{Numero di immagini} \\
 \midrule
-\texttt{weapon} & 500 \\
+\texttt{weapon}      & 500 \\
 \texttt{non\_weapon} & 500 \\
 \midrule
-\textbf{Totale} & \textbf{1000} \\
+\textbf{Totale}      & \textbf{1000} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-La presenza di un dataset congelato rappresenta un requisito metodologico centrale. Una volta prodotti i manifest finali, le fasi successive della pipeline devono riferirsi a questi file come fonte ufficiale, evitando modifiche implicite al corpus sperimentale. In questo modo, eventuali variazioni nei risultati potranno essere attribuite ai modelli, alle perturbazioni, agli strumenti o alle metriche, e non a cambiamenti non documentati nella composizione del dataset.
+La presenza di un dataset congelato rappresenta un requisito metodologico
+centrale. Una volta prodotti i manifest finali, le fasi successive della
+pipeline devono riferirsi a questi file come fonte ufficiale, evitando
+modifiche implicite al corpus sperimentale. In questo modo, eventuali variazioni
+nei risultati potranno essere attribuite ai modelli, alle perturbazioni, agli
+strumenti o alle metriche, e non a cambiamenti non documentati nella
+composizione del dataset.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Split generation and OOD evaluation set}
 \label{sec:methodology-split-generation}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La fase successiva della pipeline dataset consiste nella generazione degli split puliti e del set \gls{ood}. Questa operazione è eseguita mediante lo script \texttt{datasets/scripts/splits/11\_generate\_clean\_and\_ood\_splits.py}, che utilizza come input i due manifest ufficiali: \texttt{manual\_selection\_final\_1500.csv} e \texttt{manual\_selection\_adversarial\_subset.csv}. Lo script non modifica i manifest finali, ma produce copie organizzate delle immagini e manifest specifici per la valutazione.
+La fase successiva della pipeline dataset consiste nella generazione degli split
+puliti e del set \gls{ood}. Questa operazione è eseguita mediante lo script
+\texttt{datasets/scripts/splits/11\_generate\_clean\_and\_ood\_splits.py},
+che utilizza come input i due manifest ufficiali prodotti nella fase di
+freezing: \texttt{manual\_selection\_final\_1500.csv} e
+\texttt{manual\_selection\_adversarial\_subset.csv}. Lo script non modifica
+i manifest finali, ma produce copie organizzate delle immagini e manifest
+specifici per le successive fasi sperimentali.
 
-Il subset binario viene suddiviso in cinque fold deterministici, denominati \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4} e \texttt{fold\_5}. Ciascun fold contiene 200 immagini, equamente distribuite tra le due classi \texttt{weapon} e \texttt{non\_weapon}. La scelta di usare la nomenclatura \texttt{fold} al posto della precedente convenzione \texttt{test\_set} riflette una terminologia più coerente con la valutazione sperimentale in ambito \gls{ml}.
+Il subset binario composto dalle classi \texttt{weapon} e \texttt{non\_weapon}
+viene suddiviso in cinque fold deterministici, denominati \texttt{fold\_1},
+\texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4} e \texttt{fold\_5}.
+Ciascun fold contiene 200 immagini, equamente distribuite tra le due classi
+operative del task binario. La procedura di split utilizza un seed pseudo-casuale
+fissato a 42, in modo che la partizione possa essere rigenerata in modo
+riproducibile a partire dai manifest ufficiali e dallo script indicato.
+In questa fase, il termine \texttt{fold} indica unità sperimentali bilanciate e
+tracciabili, non partizioni di addestramento nel senso della cross-validation
+tradizionale. L'impiego dei fold nelle fasi di addestramento e valutazione dei
+modelli viene descritto nella Sezione~\ref{sec:methodology-models-classification}.
 
 \begin{table}[H]
 \centering
 \caption{Distribuzione degli split puliti generati dal subset binario.}
 \label{tab:methodology-clean-folds}
-\begin{tabularx}{\textwidth}{@{}l>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X>{\raggedleft\arraybackslash}X@{}}
+\begin{tabularx}{\textwidth}{@{}l>{\raggedleft\arraybackslash}X
+                               >{\raggedleft\arraybackslash}X
+                               >{\raggedleft\arraybackslash}X@{}}
 \toprule
-\textbf{Fold} & \textbf{weapon} & \textbf{non\_weapon} & \textbf{Totale} \\
+\textbf{Fold} & \textbf{\texttt{weapon}} & \textbf{\texttt{non\_weapon}}
+              & \textbf{Totale} \\
 \midrule
 \texttt{fold\_1} & 100 & 100 & 200 \\
 \texttt{fold\_2} & 100 & 100 & 200 \\
@@ -167,11 +421,37 @@ Il subset binario viene suddiviso in cinque fold deterministici, denominati \tex
 \end{tabularx}
 \end{table}
 
-La classe \texttt{ood} viene invece mantenuta separata e organizzata in un unico set di valutazione, collocato in \texttt{datasets/splits/ood/ood\_eval\_set/ood/}. Questa scelta riflette la diversa funzione metodologica dei campioni fuori distribuzione. Essi non servono a valutare la robustezza rispetto a perturbazioni costruite su classi note, ma a misurare il comportamento del sistema quando riceve input che non dovrebbero essere trattati come esempi ordinari di \texttt{weapon} o \texttt{non\_weapon}.
+La classe \texttt{ood} viene invece mantenuta separata dal subset binario e
+organizzata in un unico set di valutazione, collocato in
+\texttt{datasets/splits/ood/ood\_eval\_set/ood/}. Questa scelta riflette la
+diversa funzione metodologica dei campioni fuori distribuzione. Essi non sono
+utilizzati per generare perturbazioni adversariali o anti-forensi su classi
+note, ma per valutare il comportamento dei sistemi quando ricevono contenuti
+che non dovrebbero essere trattati come esempi ordinari di \texttt{weapon} o
+\texttt{non\_weapon}. La separazione del set \gls{ood} consente quindi di
+distinguere la robustezza sul task binario dalla gestione di input borderline,
+anomali o semanticamente esterni al dominio operativo.
 
-Gli output principali della fase di split generation sono tre manifest: \texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv} e \texttt{split\_generation\_summary.json}. I manifest registrano per ciascun campione l'identificativo, la classe finale, il fold, la sorgente, il percorso dell'immagine preparata, il percorso nello split, l'hash SHA256, l'MD5 e le informazioni sul tipo di campione. Il file di summary documenta inoltre controlli di integrità quali unicità degli \texttt{image\_id}, unicità degli hash e consistenza numerica dei fold.
+Gli output principali della fase di split generation sono tre artefatti:
+\texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv} e
+\texttt{split\_generation\_summary.json}. I manifest non sono semplici elenchi
+di file, ma artefatti di controllo che registrano, per ciascun campione,
+l'identificativo dell'immagine, la classe finale, il fold o il set di
+appartenenza, la sorgente, il percorso dell'immagine preparata, il percorso
+nello split, l'hash SHA256, l'MD5 e le informazioni relative al tipo di
+campione. Il file di summary documenta i controlli di consistenza eseguiti
+sulla generazione degli split, inclusa l'unicità degli \texttt{image\_id},
+l'unicità degli hash e la corrispondenza tra i conteggi attesi e quelli
+effettivamente prodotti.
 
-Questa struttura consente di disporre di unità sperimentali stabili per le successive valutazioni baseline, per la generazione delle perturbazioni adversariali e anti-forensi e per il confronto con i risultati prodotti dagli strumenti forensi. La separazione tra clean folds e set \gls{ood} consente inoltre di evitare che problemi metodologicamente distinti, quali robustezza su classi note e gestione dell'incertezza fuori distribuzione, vengano confusi nella stessa metrica aggregata.
+Questa organizzazione consente di disporre di unità sperimentali stabili per
+le successive valutazioni baseline, per la generazione degli input adversariali
+e delle trasformazioni anti-forensi e per il confronto con gli output prodotti
+dagli strumenti forensi. La separazione tra clean folds e set \gls{ood} evita
+inoltre di aggregare in una sola metrica problemi metodologicamente distinti:
+da un lato, la stabilità della classificazione su classi note; dall'altro, la
+capacità del sistema di gestire input che non appartengono alla distribuzione
+operativa del task binario.
 
 
 
