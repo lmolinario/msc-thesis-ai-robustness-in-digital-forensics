@@ -8,16 +8,50 @@ Build the FAIR-Lab forensic evaluation bundle.
 
 The bundle is the operational bridge between the academic pipeline and
 commercial forensic-tool testing. It collects clean, OOD, adversarial and
-anti-forensic artifacts into a stable, hash-traceable directory structure.
+anti-forensic artifacts into a stable, hash-traceable corpus.
+
+Bias-control principle
+----------------------
+Commercial forensic tools and human analysts must not receive paths or filenames
+that reveal the ground-truth class, attack family, attack name, fold, source
+model, or OOD status. For this reason, the default bundle contains:
+
+1. metadata/
+   Internal manifests, hashes and summaries. These files preserve all labels,
+   source information, perturbation metadata and hash mappings. They must not be
+   imported into the forensic tools during blind evaluation.
+
+2. blind_tool_input/files/
+   A flat anonymized directory intended as the only input folder for Magnet
+   AXIOM, X-Ways / Excire, Cellebrite UFED, Oxygen, or any other black-box
+   forensic tool. Files are named only as bundle_000001.jpg, bundle_000002.png,
+   etc.
+
+3. structured_audit_view/
+   Optional structured copy for internal audit/debug only. This view keeps the
+   semantic folder hierarchy and must not be used as forensic-tool input.
 
 This script does not run Magnet AXIOM, X-Ways, Cellebrite UFED or Oxygen.
-It only prepares the input corpus and traceability manifests required for
-later black-box forensic-tool evaluation.
+It only prepares the input corpus and traceability manifests required for later
+black-box forensic-tool evaluation.
 
-Outputs:
-- datasets/forensic_evaluation_bundle/bundle_manifest.csv
-- datasets/forensic_evaluation_bundle/bundle_hashes_sha256.csv
-- datasets/forensic_evaluation_bundle/bundle_summary.json
+Default outputs
+---------------
+datasets/forensic_evaluation_bundle/
+├── metadata/
+│   ├── bundle_manifest.csv
+│   ├── bundle_hashes_sha256.csv
+│   └── bundle_summary.json
+├── blind_tool_input/
+│   └── files/
+│       ├── bundle_000001.jpg
+│       ├── bundle_000002.png
+│       └── ...
+└── structured_audit_view/
+    ├── clean/
+    ├── ood/
+    ├── adversarial/
+    └── anti_forensic/
 """
 
 from __future__ import annotations
@@ -55,6 +89,33 @@ DEFAULT_CLEAN_MANIFEST = SPLIT_MANIFESTS_DIR / "clean_folds_manifest.csv"
 DEFAULT_OOD_MANIFEST = SPLIT_MANIFESTS_DIR / "ood_eval_manifest.csv"
 DEFAULT_ATTACK_MANIFESTS_DIR = ATTACKS_DIR / "manifests"
 DEFAULT_BUNDLE_DIR = DATASETS_DIR / "forensic_evaluation_bundle"
+
+SEMANTIC_TOKENS_FORBIDDEN_IN_BLIND_PATHS = {
+    "weapon",
+    "non_weapon",
+    "ood",
+    "clean",
+    "adversarial",
+    "anti_forensic",
+    "fgsm",
+    "one_pixel",
+    "sigma_zero",
+    "superdeepfool",
+    "color_shift",
+    "jpeg_recompression",
+    "resample_resize",
+    "gaussian_blur",
+    "histogram_modification",
+    "contrast_stretching",
+    "efficientnet_b0",
+    "resnet18",
+    "clip",
+    "fold_1",
+    "fold_2",
+    "fold_3",
+    "fold_4",
+    "fold_5",
+}
 
 
 def utc_now_iso() -> str:
@@ -141,7 +202,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ood-manifest", default=str(DEFAULT_OOD_MANIFEST))
     parser.add_argument("--attack-manifests-dir", default=str(DEFAULT_ATTACK_MANIFESTS_DIR))
     parser.add_argument("--bundle-dir", default=str(DEFAULT_BUNDLE_DIR))
-    parser.add_argument("--copy-files", action="store_true", default=True)
+    parser.add_argument(
+        "--layout",
+        choices=("blind", "structured", "both"),
+        default="both",
+        help=(
+            "Bundle layout to materialize. 'blind' creates only the anonymized flat "
+            "tool input; 'structured' creates only the internal audit view; 'both' "
+            "creates both. Default: both."
+        ),
+    )
+    parser.add_argument("--copy-files", dest="copy_files", action="store_true", default=True)
+    parser.add_argument("--no-copy-files", dest="copy_files", action="store_false")
     parser.add_argument("--limit", type=int, default=0)
     parser.add_argument("--force", action="store_true")
     parser.add_argument("--verbose", action="store_true")
@@ -264,39 +336,88 @@ def collect_rows(args: argparse.Namespace) -> list[dict[str, Any]]:
     return rows
 
 
-def bundle_subpath(row: dict[str, Any], bundle_id: str, src_path: Path) -> Path:
+def blind_subpath(bundle_id: str, src_path: Path) -> Path:
+    ext = src_path.suffix.lower() or ".img"
+    return Path("blind_tool_input") / "files" / f"{bundle_id}{ext}"
+
+
+def structured_subpath(row: dict[str, Any], bundle_id: str, src_path: Path) -> Path:
     ext = src_path.suffix.lower() or ".img"
     if row["sample_type"] == "clean":
-        subdir = Path("clean") / row["fold"] / row["final_label"]
+        subdir = Path("structured_audit_view") / "clean" / row["fold"] / row["final_label"]
     elif row["sample_type"] == "ood":
-        subdir = Path("ood") / "ood_eval_set"
+        subdir = Path("structured_audit_view") / "ood" / "ood_eval_set"
     elif row["attack_family"] == "adversarial":
-        subdir = Path("adversarial") / row["attack_name"] / row["attack_target_model"] / row["fold"] / row["final_label"]
+        subdir = (
+            Path("structured_audit_view")
+            / "adversarial"
+            / row["attack_name"]
+            / row["attack_target_model"]
+            / row["fold"]
+            / row["final_label"]
+        )
     elif row["attack_family"] == "anti_forensic":
-        subdir = Path("anti_forensic") / row["attack_name"] / row["fold"] / row["final_label"]
+        subdir = (
+            Path("structured_audit_view")
+            / "anti_forensic"
+            / row["attack_name"]
+            / row["fold"]
+            / row["final_label"]
+        )
     else:
-        subdir = Path("other")
+        subdir = Path("structured_audit_view") / "other"
     filename = safe_filename(f"{bundle_id}__{row['generated_image_id']}{ext}")
     return subdir / filename
 
 
-def materialize(row: dict[str, Any], bundle_dir: Path, index: int, created_at: str, copy_files: bool) -> dict[str, Any]:
+def should_create_blind(layout: str) -> bool:
+    return layout in {"blind", "both"}
+
+
+def should_create_structured(layout: str) -> bool:
+    return layout in {"structured", "both"}
+
+
+def materialize(
+    row: dict[str, Any],
+    bundle_dir: Path,
+    index: int,
+    created_at: str,
+    copy_files: bool,
+    layout: str,
+) -> dict[str, Any]:
     bundle_id = f"bundle_{index:06d}"
     src_path = resolve_repo_path(row["input_relative_path"])
     if not src_path.exists():
         raise FileNotFoundError(f"Input file not found for {bundle_id}: {src_path}")
-    rel_bundle_path = bundle_subpath(row, bundle_id, src_path)
-    dst_path = bundle_dir / rel_bundle_path
-    if copy_files:
-        dst_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src_path, dst_path)
-        hash_path = dst_path
-    else:
-        hash_path = src_path
+
+    blind_relative_path = ""
+    structured_relative_path = ""
+    tool_input_filename = ""
+    hash_path = src_path
+
+    if copy_files and should_create_blind(layout):
+        blind_path = bundle_dir / blind_subpath(bundle_id, src_path)
+        blind_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src_path, blind_path)
+        blind_relative_path = repo_relative_string(blind_path)
+        tool_input_filename = blind_path.name
+        hash_path = blind_path
+
+    if copy_files and should_create_structured(layout):
+        structured_path = bundle_dir / structured_subpath(row, bundle_id, src_path)
+        structured_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src_path, structured_path)
+        structured_relative_path = repo_relative_string(structured_path)
+        if not should_create_blind(layout):
+            hash_path = structured_path
+
     sha256, md5 = compute_hashes(hash_path)
     expected = row.get("input_sha256_manifest", "")
+
     return {
         "bundle_id": bundle_id,
+        "tool_input_filename": tool_input_filename,
         "sample_type": row["sample_type"],
         "attack_family": row["attack_family"],
         "attack_name": row["attack_name"],
@@ -308,7 +429,9 @@ def materialize(row: dict[str, Any], bundle_dir: Path, index: int, created_at: s
         "generated_image_id": row["generated_image_id"],
         "source_manifest": row["source_manifest"],
         "source_relative_path": row["input_relative_path"],
-        "bundle_relative_path": repo_relative_string(dst_path) if copy_files else "",
+        "blind_relative_path": blind_relative_path,
+        "structured_relative_path": structured_relative_path,
+        "tool_input_relative_path": blind_relative_path,
         "original_sha256": row.get("original_sha256", ""),
         "original_md5": row.get("original_md5", ""),
         "sha256_manifest": expected,
@@ -318,6 +441,7 @@ def materialize(row: dict[str, Any], bundle_dir: Path, index: int, created_at: s
         "sha256_matches_manifest": bool(expected) and expected == sha256,
         "size_bytes": hash_path.stat().st_size,
         "extension": hash_path.suffix.lower(),
+        "layout": layout,
         "created_at": created_at,
     }
 
@@ -336,7 +460,10 @@ def hash_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         "bundle_id": row["bundle_id"],
         "sha256": row["sha256_actual"],
         "md5": row["md5_actual"],
-        "bundle_relative_path": row["bundle_relative_path"],
+        "tool_input_filename": row["tool_input_filename"],
+        "tool_input_relative_path": row["tool_input_relative_path"],
+        "blind_relative_path": row["blind_relative_path"],
+        "structured_relative_path": row["structured_relative_path"],
         "sample_type": row["sample_type"],
         "attack_family": row["attack_family"],
         "attack_name": row["attack_name"],
@@ -346,15 +473,38 @@ def hash_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     } for row in rows]
 
 
-def build_summary(rows: list[dict[str, Any]], bundle_dir: Path, created_at: str) -> dict[str, Any]:
+def blind_paths_are_semantically_clean(rows: list[dict[str, Any]]) -> bool:
+    for row in rows:
+        path_value = str(row.get("tool_input_relative_path", "")).lower()
+        if not path_value:
+            continue
+        filename = Path(path_value).name.lower()
+        stem = Path(filename).stem.lower()
+        if stem != row["bundle_id"].lower():
+            return False
+        for token in SEMANTIC_TOKENS_FORBIDDEN_IN_BLIND_PATHS:
+            if token in filename:
+                return False
+    return True
+
+
+def build_summary(rows: list[dict[str, Any]], bundle_dir: Path, created_at: str, layout: str) -> dict[str, Any]:
+    metadata_dir = bundle_dir / "metadata"
+    blind_dir = bundle_dir / "blind_tool_input" / "files"
+    structured_dir = bundle_dir / "structured_audit_view"
+
     return {
         "script": SCRIPT_NAME,
         "created_at": created_at,
         "bundle_dir": repo_relative_string(bundle_dir),
+        "layout": layout,
         "outputs": {
-            "bundle_manifest_csv": repo_relative_string(bundle_dir / "bundle_manifest.csv"),
-            "bundle_hashes_sha256_csv": repo_relative_string(bundle_dir / "bundle_hashes_sha256.csv"),
-            "bundle_summary_json": repo_relative_string(bundle_dir / "bundle_summary.json"),
+            "metadata_dir": repo_relative_string(metadata_dir),
+            "bundle_manifest_csv": repo_relative_string(metadata_dir / "bundle_manifest.csv"),
+            "bundle_hashes_sha256_csv": repo_relative_string(metadata_dir / "bundle_hashes_sha256.csv"),
+            "bundle_summary_json": repo_relative_string(metadata_dir / "bundle_summary.json"),
+            "blind_tool_input_dir": repo_relative_string(blind_dir),
+            "structured_audit_view_dir": repo_relative_string(structured_dir),
         },
         "counts": {
             "total_bundle_rows": len(rows),
@@ -362,13 +512,26 @@ def build_summary(rows: list[dict[str, Any]], bundle_dir: Path, created_at: str)
             "by_attack_family": dict(Counter(row["attack_family"] for row in rows)),
             "by_attack_name": dict(Counter(row["attack_name"] for row in rows)),
             "by_label": dict(Counter(row["final_label"] for row in rows)),
+            "blind_files": sum(1 for row in rows if row["blind_relative_path"]),
+            "structured_files": sum(1 for row in rows if row["structured_relative_path"]),
         },
         "checks": {
             "bundle_id_unique": len({row["bundle_id"] for row in rows}) == len(rows),
             "sha256_actual_unique": len({row["sha256_actual"] for row in rows}) == len(rows),
             "all_sha256_match_when_manifest_present": all(row["sha256_matches_manifest"] or not row["sha256_manifest"] for row in rows),
+            "blind_paths_semantically_clean": blind_paths_are_semantically_clean(rows),
+            "metadata_separated_from_tool_input": True,
         },
-        "methodological_note": "The bundle is an operational input corpus for forensic-tool evaluation and does not contain forensic-tool results.",
+        "tool_input_instruction": (
+            "For black-box forensic-tool evaluation, import only the directory "
+            "datasets/forensic_evaluation_bundle/blind_tool_input/files. Do not import "
+            "metadata/ or structured_audit_view/ into forensic tools."
+        ),
+        "methodological_note": (
+            "The blind flat layout is designed to reduce path-induced and analyst-induced bias. "
+            "Ground truth labels, perturbation metadata, source information and hash mappings are "
+            "preserved only in metadata manifests for post-export normalization."
+        ),
     }
 
 
@@ -381,13 +544,17 @@ def main() -> None:
     created_at = utc_now_iso()
     bundle_rows = []
     for index, row in enumerate(source_rows, start=1):
-        bundle_rows.append(materialize(row, bundle_dir, index, created_at, args.copy_files))
+        bundle_rows.append(materialize(row, bundle_dir, index, created_at, args.copy_files, args.layout))
         if index % 500 == 0:
             logging.info("Materialized %d/%d", index, len(source_rows))
-    write_csv(bundle_dir / "bundle_manifest.csv", bundle_rows)
-    write_csv(bundle_dir / "bundle_hashes_sha256.csv", hash_rows(bundle_rows))
-    write_json(bundle_dir / "bundle_summary.json", build_summary(bundle_rows, bundle_dir, created_at))
+
+    metadata_dir = bundle_dir / "metadata"
+    write_csv(metadata_dir / "bundle_manifest.csv", bundle_rows)
+    write_csv(metadata_dir / "bundle_hashes_sha256.csv", hash_rows(bundle_rows))
+    write_json(metadata_dir / "bundle_summary.json", build_summary(bundle_rows, bundle_dir, created_at, args.layout))
     logging.info("Bundle written: %s", bundle_dir)
+    logging.info("Tool input directory: %s", bundle_dir / "blind_tool_input" / "files")
+    logging.info("Metadata directory: %s", metadata_dir)
 
 
 if __name__ == "__main__":
