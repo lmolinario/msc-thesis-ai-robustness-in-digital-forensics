@@ -1,0 +1,57 @@
+{
+  "script": "datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py",
+  "created_at": "2026-05-11T17:38:20+00:00",
+  "bundle_dir": "datasets/forensic_evaluation_bundle",
+  "layout": "both",
+  "outputs": {
+    "metadata_dir": "datasets/forensic_evaluation_bundle/metadata",
+    "bundle_manifest_csv": "datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv",
+    "bundle_hashes_sha256_csv": "datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv",
+    "bundle_summary_json": "datasets/forensic_evaluation_bundle/metadata/bundle_summary.json",
+    "blind_tool_input_dir": "datasets/forensic_evaluation_bundle/blind_tool_input/files",
+    "structured_audit_view_dir": "datasets/forensic_evaluation_bundle/structured_audit_view"
+  },
+  "counts": {
+    "total_bundle_rows": 11500,
+    "by_sample_type": {
+      "clean": 1000,
+      "ood": 500,
+      "perturbed": 10000
+    },
+    "by_attack_family": {
+      "none": 1500,
+      "adversarial": 5000,
+      "anti_forensic": 5000
+    },
+    "by_attack_name": {
+      "clean": 1000,
+      "ood": 500,
+      "color_shift": 1000,
+      "fgsm": 1000,
+      "one_pixel": 1000,
+      "sigma_zero": 1000,
+      "superdeepfool": 1000,
+      "jpeg_recompression": 1000,
+      "resample_resize": 1000,
+      "gaussian_blur": 1000,
+      "histogram_modification": 1000,
+      "contrast_stretching": 1000
+    },
+    "by_label": {
+      "non_weapon": 5500,
+      "weapon": 5500,
+      "ood": 500
+    },
+    "blind_files": 11500,
+    "structured_files": 11500
+  },
+  "checks": {
+    "bundle_id_unique": true,
+    "sha256_actual_unique": true,
+    "all_sha256_match_when_manifest_present": true,
+    "blind_paths_semantically_clean": true,
+    "metadata_separated_from_tool_input": true
+  },
+  "tool_input_instruction": "For black-box forensic-tool evaluation, import only the directory datasets/forensic_evaluation_bundle/blind_tool_input/files. Do not import metadata/ or structured_audit_view/ into forensic tools.",
+  "methodological_note": "The blind flat layout is designed to reduce path-induced and analyst-induced bias. Ground truth labels, perturbation metadata, source information and hash mappings are preserved only in metadata manifests for post-export normalization."
+}
