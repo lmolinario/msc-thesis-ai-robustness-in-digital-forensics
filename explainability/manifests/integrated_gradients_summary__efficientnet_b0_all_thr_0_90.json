@@ -1,0 +1,23 @@
+{
+  "script": "explainability/scripts/17_generate_integrated_gradients_case_studies.py",
+  "created_at": "2026-05-11T19:24:27+00:00",
+  "run_tag": "efficientnet_b0_all_thr_0_90",
+  "input_predictions_csv": "evaluation/proxy_models/proxy_model_predictions.csv",
+  "checkpoint_root": "models/checkpoints",
+  "models": [
+    "efficientnet_b0"
+  ],
+  "strategy": "all",
+  "max_cases": 30,
+  "generated_cases": 30,
+  "n_steps": 32,
+  "high_confidence_threshold": 0.9,
+  "device": "auto",
+  "input_size": 224,
+  "outputs": {
+    "integrated_gradients_manifest": "explainability/manifests/integrated_gradients_manifest__efficientnet_b0_all_thr_0_90.csv",
+    "case_studies_manifest": "explainability/manifests/xai_case_studies_manifest__efficientnet_b0_all_thr_0_90.csv",
+    "integrated_gradients_output_dir": "explainability/outputs/integrated_gradients/efficientnet_b0_all_thr_0_90"
+  },
+  "methodological_note": "Integrated Gradients are diagnostic support for transparent proxy models, not black-box forensic tools."
+}

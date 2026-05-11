@@ -365,16 +365,42 @@ def load_predictions(path: Path, models: list[str]) -> pd.DataFrame:
 
     return df
 
+def build_unique_case_key(row: pd.Series) -> str:
+    """
+    Build a stable key to avoid selecting the same visual case multiple times.
+
+    For OOD samples, the input image path is the best unique key.
+    For perturbed samples, original_image_id is preferred so that the same
+    original image is not selected multiple times under different folds/attacks.
+    """
+    sample_type = norm(row.get("sample_type", ""))
+
+    if sample_type in {"ood", "out_of_distribution", "out-of-distribution"}:
+        key = safe_str(row.get("image_relative_path", ""))
+        if key:
+            return key
+
+    original_image_id = safe_str(row.get("original_image_id", ""))
+    if original_image_id:
+        return original_image_id
+
+    generated_image_id = safe_str(row.get("generated_image_id", ""))
+    if generated_image_id:
+        return generated_image_id
+
+    image_relative_path = safe_str(row.get("image_relative_path", ""))
+    if image_relative_path:
+        return image_relative_path
+
+    return safe_str(row.name)
+
 
 def select_cases(df: pd.DataFrame, strategy: str, max_cases: int, threshold: float) -> pd.DataFrame:
     """
     Select diagnostic XAI cases.
 
-    The script primarily expects:
-    - sample_type == perturbed for adversarial/anti-forensic transformed images;
-    - sample_type == ood for out-of-distribution samples.
-
-    A few alternative sample_type names are also tolerated to make the script more robust.
+    The selection enforces visual uniqueness: the same OOD image or the same
+    original image behind perturbed samples is selected only once.
     """
     df = df.copy()
 
@@ -404,7 +430,13 @@ def select_cases(df: pd.DataFrame, strategy: str, max_cases: int, threshold: flo
         }
     )
 
-    ood_mask = df["sample_type_norm"].isin({"ood", "out_of_distribution", "out-of-distribution"})
+    ood_mask = df["sample_type_norm"].isin(
+        {
+            "ood",
+            "out_of_distribution",
+            "out-of-distribution",
+        }
+    )
 
     parts: list[pd.DataFrame] = []
 
@@ -440,13 +472,14 @@ def select_cases(df: pd.DataFrame, strategy: str, max_cases: int, threshold: flo
 
     selected = pd.concat(parts, ignore_index=True)
 
+    selected["unique_case_key"] = selected.apply(build_unique_case_key, axis=1)
+
     selected = selected.drop_duplicates(
-        subset=["evaluated_model", "evaluation_fold", "image_relative_path"],
+        subset=["evaluated_model", "unique_case_key"],
         keep="first",
     )
 
     return selected.head(max_cases).copy()
-
 
 def open_rgb_image(path: Path) -> Image.Image:
     with Image.open(path) as img:
