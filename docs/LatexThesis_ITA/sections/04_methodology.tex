@@ -461,17 +461,423 @@ operativa del task binario.
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
+La pipeline accademica di \gls{fairlab} utilizza un insieme di proxy model
+trasparenti e riproducibili per rappresentare il comportamento di classificatori
+\gls{ai}-based sottoposti a dati puliti, input adversariali e trasformazioni
+anti-forensi. Tali modelli non devono essere interpretati come strumenti forensi
+commerciali, né come sostituti dei software analizzati nella pipeline
+operativo-forense. Essi costituiscono invece componenti sperimentali controllate,
+necessarie per definire un riferimento algoritmico ispezionabile, generare
+perturbazioni model-dependent e studiare la possibile trasferibilità degli
+effetti osservati verso altri sistemi di classificazione.
+
+Il paradigma di classificazione adottato dai proxy model è binario. Le etichette
+operative sono \texttt{non\_weapon} e \texttt{weapon}, rispettivamente codificate
+come classe 0 e classe 1 nel registro dei modelli. La classe \texttt{ood}, pur
+essendo parte del dataset finale congelato, non viene utilizzata per addestrare
+i proxy model e non costituisce un target primario per la generazione delle
+perturbazioni adversariali o anti-forensi. Essa rimane separata per la valutazione
+del comportamento fuori distribuzione, in coerenza con la distinzione metodologica
+introdotta nelle Sezioni~\ref{sec:methodology-research-design} e
+\ref{sec:methodology-split-generation}. Questa scelta evita di trasformare il
+problema \gls{ood} in una terza classe supervisionata ordinaria e consente di
+mantenere separata la valutazione della robustezza binaria dalla gestione di
+input borderline, anomali o semanticamente esterni al dominio operativo.
+
+I proxy model ufficiali considerati in questa fase sono ResNet18,
+EfficientNet-B0 e \gls{clip}. ResNet18 rappresenta una baseline convoluzionale
+consolidata e relativamente compatta, utile per disporre di un riferimento
+\gls{cnn} standard nel task binario \cite{he2016deep}. EfficientNet-B0 viene
+utilizzato come modello convoluzionale più efficiente e costituisce il primary
+proxy target per la generazione degli attacchi adversariali model-dependent
+nella pipeline corrente \cite{tan2019efficientnet}. \gls{clip}, invece, viene
+impiegato nella forma di visual encoder congelato con una testa binaria addestrata
+sul task \texttt{non\_weapon}/\texttt{weapon}, così da includere nel protocollo
+un modello vision-language pre-addestrato e successivamente adattato alla
+classificazione binaria \cite{radford2021learning}. La Tabella~\ref{tab:methodology-proxy-models}
+riassume il ruolo metodologico dei tre modelli.
+
+\begin{table}[H]
+\centering
+\caption{Proxy model utilizzati nella pipeline accademica.}
+\label{tab:methodology-proxy-models}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+\textbf{Modello} & \textbf{Paradigma} & \textbf{Ruolo metodologico} \\
+\midrule
+\texttt{resnet18}
+&
+\gls{cnn} supervisionata
+&
+Baseline convoluzionale compatta per la classificazione binaria
+\texttt{non\_weapon}/\texttt{weapon}. \\
+\texttt{efficientnet\_b0}
+&
+\gls{cnn} supervisionata
+&
+Proxy target principale per la generazione degli attacchi adversariali
+model-dependent. \\
+\texttt{clip}
+&
+Visual encoder congelato con testa binaria
+&
+Modello vision-language pre-addestrato adattato al task binario mediante
+classificatore supervisionato. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+L'addestramento dei proxy model segue un protocollo fold-aware. Per ciascun
+fold target, il modello viene addestrato sui quattro fold rimanenti e salvato
+come checkpoint specifico del fold escluso. Ad esempio, il checkpoint associato
+a \texttt{fold\_1} viene addestrato utilizzando \texttt{fold\_2},
+\texttt{fold\_3}, \texttt{fold\_4} e \texttt{fold\_5}. Lo stesso schema viene
+ripetuto per tutti i cinque fold. Questo protocollo riduce il rischio di leakage
+tra immagini usate per l'addestramento del proxy model e immagini successivamente
+attaccate o valutate nello stesso fold, preservando una separazione metodologica
+tra training e holdout sperimentale.
+
+\begin{table}[H]
+\centering
+\caption{Protocollo fold-aware per l'addestramento dei proxy model.}
+\label{tab:methodology-fold-aware-training}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Checkpoint target} & \textbf{Fold utilizzati per l'addestramento} \\
+\midrule
+\texttt{fold\_1.pt} & \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4}, \texttt{fold\_5} \\
+\texttt{fold\_2.pt} & \texttt{fold\_1}, \texttt{fold\_3}, \texttt{fold\_4}, \texttt{fold\_5} \\
+\texttt{fold\_3.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_4}, \texttt{fold\_5} \\
+\texttt{fold\_4.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_5} \\
+\texttt{fold\_5.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Lo script ufficiale per l'addestramento dei proxy model è
+\texttt{models/scripts/12\_train\_proxy\_models.py}. Esso utilizza come input
+il manifest \texttt{datasets/splits/manifests/clean\_folds\_manifest.csv},
+applica il mapping binario \texttt{non\_weapon}~$\rightarrow 0$ e
+\texttt{weapon}~$\rightarrow 1$, genera i checkpoint in
+\texttt{models/checkpoints/<model\_name>/<fold>.pt} e aggiorna il registro
+\texttt{models/model\_registry.json}. Il registro dei modelli documenta, per
+ciascuna architettura e per ciascun fold, il pattern del checkpoint, la
+dimensione di input, la normalizzazione utilizzata e l'hash SHA256 del file
+prodotto. La registrazione dell'hash del checkpoint è metodologicamente rilevante
+perché consente di verificare che le fasi successive della pipeline, incluse la
+generazione degli attacchi model-dependent e le valutazioni di robustezza, siano
+riconducibili a una versione specifica e immutata del modello.
+
+Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di primary proxy
+target per la generazione degli attacchi adversariali model-dependent. Questa
+scelta non implica che EfficientNet-B0 rappresenti il modello più robusto o più
+accurato in senso assoluto, né che esaurisca l'analisi comparativa della tesi.
+Indica invece il modello controllato rispetto al quale vengono costruite, in
+questa fase della pipeline, le perturbazioni che richiedono accesso al gradiente,
+al classificatore o al comportamento decisionale del target. La valutazione
+successiva potrà quindi distinguere tra prestazioni del proxy target, effetti
+delle perturbazioni generate rispetto a tale modello e trasferibilità verso altri
+modelli o strumenti.
+
+È infine necessario distinguere i proxy model dagli strumenti forensi
+\gls{cots} analizzati nella pipeline operativo-forense. I proxy model sono
+componenti accademiche aperte, configurabili e documentate, per le quali sono
+noti architettura, checkpoint, mapping delle classi, protocollo di addestramento
+e hash dei file. Gli strumenti forensi commerciali, al contrario, vengono trattati
+come sistemi black-box o quasi black-box: l'analisi non presuppone accesso alla
+loro architettura interna, ma si concentra sugli output osservabili, sulla loro
+coerenza rispetto ai manifest sperimentali e sul loro comportamento in presenza
+di immagini pulite, manipolate o fuori distribuzione. Questa distinzione consente
+di mantenere separati il controllo sperimentale della pipeline accademica e la
+valutazione operativa dei tool forensi.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial attack selection and generation}
 \label{sec:methodology-adversarial-attacks}
 % ─────────────────────────────────────────────────────────────────────────────
 
+La pipeline adversariale di \gls{fairlab} è progettata per generare versioni
+manipolate delle immagini appartenenti al subset binario
+\texttt{weapon}/\texttt{non\_weapon}, preservando il collegamento tra ciascun
+campione perturbato e la corrispondente immagine pulita. La generazione degli
+attacchi utilizza come input il manifest
+\texttt{datasets/splits/manifests/clean\_folds\_manifest.csv}, composto da
+1000 immagini distribuite in cinque fold bilanciati. I campioni \texttt{ood}
+non vengono utilizzati in questa fase, poiché la loro funzione metodologica è
+distinta: essi servono a valutare il comportamento fuori distribuzione e non a
+produrre perturbazioni adversariali rispetto a classi binarie note.
+
+Lo script ufficiale per questa fase è
+\texttt{datasets/scripts/attacks/14\_generate\_adversarial\_attacks.py}. Esso
+costituisce l'entry point fold-aware per la generazione degli attacchi
+adversariali e supporta sia una modalità interattiva, utile per l'esecuzione
+guidata, sia una modalità a riga di comando, più adatta alla riproducibilità
+sperimentale. In coerenza con il paradigma definito nella
+Sezione~\ref{sec:methodology-models-classification}, lo script distingue tra
+attacchi model-dependent, costruiti rispetto a un proxy model specifico, e
+trasformazioni model-agnostic, applicate senza accesso al gradiente o al
+comportamento decisionale del classificatore.
+
+Gli attacchi model-dependent utilizzati nella pipeline corrente sono
+\gls{fgsm}, One Pixel Attack, Sigma Zero Attack e SuperDeepFool. Essi vengono
+generati rispetto a EfficientNet-B0, assunto come primary proxy target. Per ogni
+immagine appartenente a un determinato fold, lo script carica il checkpoint
+corrispondente da \texttt{models/checkpoints/<target\_model>/<fold>.pt}.
+Questa scelta mantiene la coerenza con il protocollo fold-aware: l'immagine di
+un fold viene perturbata usando il modello addestrato secondo la separazione
+definita nella fase di training dei proxy model. La procedura evita quindi di
+trattare il dataset come un insieme indistinto e preserva il legame tra split,
+checkpoint e artefatto generato.
+
+La trasformazione \texttt{color\_shift} viene invece trattata come perturbazione
+model-agnostic. Essa modifica globalmente le componenti cromatiche
+dell'immagine, senza interrogare il modello e senza utilizzare informazioni di
+gradiente. Questa distinzione è metodologicamente rilevante perché consente di
+separare perturbazioni costruite rispetto a un classificatore specifico da
+alterazioni visive più generali, che possono simulare variazioni cromatiche o
+post-processing non necessariamente ottimizzati contro un modello.
+
+\begin{table}[H]
+\centering
+\caption{Attacchi adversariali generati sul subset binario.}
+\label{tab:methodology-adversarial-attacks}
+\begin{tabularx}{\textwidth}{@{}l l l l r@{}}
+\toprule
+\textbf{Attacco} & \textbf{Dipendenza} & \textbf{Target} & \textbf{Formato} & \textbf{Immagini} \\
+\midrule
+\texttt{fgsm}
+&
+model-dependent
+&
+\texttt{efficientnet\_b0}
+&
+PNG
+&
+1000 \\
+\texttt{one\_pixel}
+&
+model-dependent
+&
+\texttt{efficientnet\_b0}
+&
+PNG
+&
+1000 \\
+\texttt{sigma\_zero}
+&
+model-dependent
+&
+\texttt{efficientnet\_b0}
+&
+PNG
+&
+1000 \\
+\texttt{superdeepfool}
+&
+model-dependent
+&
+\texttt{efficientnet\_b0}
+&
+PNG
+&
+1000 \\
+\texttt{color\_shift}
+&
+model-agnostic
+&
+\texttt{model\_agnostic}
+&
+JPEG
+&
+1000 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La selezione degli attacchi copre famiglie diverse di manipolazione. \gls{fgsm}
+rappresenta un attacco gradient-based a singolo passo, utile come baseline
+adversariale efficiente e riproducibile \cite{goodfellow2015explaining}. One
+Pixel Attack introduce una perturbazione sparsa, limitata a un numero minimo di
+pixel modificati, e permette di valutare la sensibilità del classificatore a
+variazioni localizzate \cite{su2019onepixel}. Sigma Zero Attack è incluso come
+attacco orientato alla sparsità, con parametri dedicati alla regolazione della
+soglia e dell'approssimazione differenziabile della norma \(L_0\)
+\cite{zhao2024sigmazero}. SuperDeepFool è adottato come variante iterativa
+basata su una logica di attraversamento del confine decisionale, richiamando la
+famiglia di metodi ispirati a DeepFool \cite{moosavi2016deepfool}. Color Shift,
+infine, non è trattato come attacco ottimizzato rispetto al modello, ma come
+trasformazione adversarial-style model-agnostic, utile per introdurre una
+manipolazione cromatica globale e controllata.
+
+Per ciascuna generazione, la pipeline produce un manifest CSV e un summary JSON
+dedicati. I manifest sono collocati in \texttt{attacks/manifests/} e seguono una
+nomenclatura che combina famiglia adversariale, nome dell'attacco e, quando
+presente, modello target. Ogni riga mantiene il collegamento con il campione
+pulito originario attraverso campi quali \texttt{generated\_image\_id},
+\texttt{original\_image\_id}, \texttt{fold}, \texttt{final\_label},
+\texttt{clean\_relative\_path}, \texttt{perturbed\_relative\_path},
+\texttt{sha256\_original}, \texttt{sha256\_perturbed}, \texttt{md5\_original}
+e \texttt{md5\_perturbed}. Per gli attacchi model-dependent, il manifest
+registra inoltre il modello target, il checkpoint utilizzato e l'hash SHA256 del
+checkpoint, così da rendere verificabile la relazione tra immagine perturbata e
+versione specifica del proxy model.
+
+I summary JSON documentano i parametri di generazione, il manifest di input,
+l'output root, il manifest prodotto, il numero di immagini attese e generate, la
+distribuzione per fold, la distribuzione per classe e i controlli di integrità.
+Nel caso di \gls{fgsm}, il parametro \(\epsilon\) è pari a \(8/255\), con input
+size pari a 224 e output PNG. Per One Pixel Attack, il summary registra il numero
+massimo di iterazioni, la dimensione della popolazione e il seed utilizzato. Per
+Sigma Zero Attack sono documentati il numero di step, i parametri \(\eta\),
+\(\sigma\), \(\tau\), il fattore di adattamento della soglia e la norma di
+normalizzazione del gradiente. Per SuperDeepFool sono registrati il numero
+massimo di iterazioni esterne, le iterazioni interne DeepFool, il numero di
+projection step e la variante utilizzata. Per \texttt{color\_shift}, invece,
+sono registrati formato \gls{jpeg}, qualità di compressione e parametri di
+alterazione cromatica.
+
+È importante precisare che la presente sezione descrive la selezione e la
+generazione degli artefatti adversariali, non i risultati di robustezza. I campi
+relativi al successo dell'attacco, quando presenti nei summary, sono trattati in
+questa fase come metadati tecnici della generazione e non come evidenza
+conclusiva sul comportamento dei modelli. L'analisi quantitativa degli effetti
+degli attacchi, inclusa la variazione delle metriche rispetto agli input puliti,
+viene demandata alla sezione dedicata al protocollo di valutazione e,
+successivamente, al capitolo dei risultati sperimentali.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-forensic transformation pipeline}
 \label{sec:methodology-anti-forensic-transformations}
 % ─────────────────────────────────────────────────────────────────────────────
+
+La pipeline anti-forense di \gls{fairlab} introduce un insieme di trasformazioni
+realistiche dell'artefatto immagine, applicate al subset binario
+\texttt{weapon}/\texttt{non\_weapon}. A differenza degli attacchi adversariali
+model-dependent descritti nella Sezione~\ref{sec:methodology-adversarial-attacks},
+queste trasformazioni non sono ottimizzate rispetto al gradiente, alla funzione
+di perdita o al confine decisionale di uno specifico classificatore. Esse
+rappresentano invece manipolazioni plausibili del file immagine, riconducibili
+a operazioni di ricompressione, ridimensionamento, sfocatura, modifica
+dell'istogramma e alterazione del contrasto. In questo senso, la loro funzione
+metodologica è valutare la stabilità della classificazione in presenza di
+modifiche realistiche che possono alterare caratteristiche visive o statistiche
+dell'immagine senza necessariamente renderla semanticamente irriconoscibile.
+
+Lo script ufficiale per questa fase è
+\texttt{datasets/scripts/attacks/13\_generate\_anti\_forensic\_attacks.py}.
+Esso utilizza come input il manifest
+\texttt{datasets/splits/manifests/clean\_folds\_manifest.csv} e genera gli
+artefatti trasformati nella directory \texttt{attacks/anti\_forensic/}. La
+struttura di output mantiene la separazione per trasformazione, fold e classe,
+secondo il pattern
+\texttt{attacks/anti\_forensic/<attack>/<fold>/<label>/<image\_id>\_\_<attack>.jpg}.
+Tale organizzazione consente di preservare il collegamento tra ciascuna immagine
+trasformata, il fold di appartenenza, la classe originaria e il corrispondente
+campione pulito.
+
+Le trasformazioni incluse nella pipeline sono \gls{jpeg} recompression,
+resample~+~resize, Gaussian blur, histogram modification e contrast stretching.
+La ricompressione \gls{jpeg} applica una nuova codifica lossy dell'immagine,
+introducendo artefatti compatibili con scenari ordinari di salvataggio,
+inoltro o conversione del file. La trasformazione resample~+~resize riduce
+temporaneamente la risoluzione dell'immagine e la riporta alla dimensione
+originaria mediante interpolazione, simulando degradazioni dovute a ridimensionamenti
+ripetuti o a passaggi tra piattaforme. Il Gaussian blur introduce una sfocatura
+controllata, utile a valutare la dipendenza del classificatore da dettagli
+locali e bordi ad alta frequenza. La histogram modification modifica la
+distribuzione tonale mediante equalizzazione dell'istogramma, mentre il contrast
+stretching applica una normalizzazione del contrasto attraverso autocontrast
+con cutoff controllato. Tali trasformazioni sono coerenti con una prospettiva
+anti-forense perché intervengono sull'artefatto immagine senza introdurre,
+almeno intenzionalmente, una perturbazione costruita sul modello.
+
+\begin{table}[H]
+\centering
+\caption{Trasformazioni anti-forensi generate sul subset binario.}
+\label{tab:methodology-anti-forensic-transformations}
+\begin{tabularx}{\textwidth}{@{}lXr@{}}
+\toprule
+\textbf{Trasformazione} & \textbf{Operazione metodologica} & \textbf{Immagini} \\
+\midrule
+\texttt{jpeg\_recompression}
+&
+Ricompressione \gls{jpeg} con qualità controllata.
+&
+1000 \\
+\texttt{resample\_resize}
+&
+Downsampling seguito da ripristino della dimensione originaria.
+&
+1000 \\
+\texttt{gaussian\_blur}
+&
+Applicazione di sfocatura gaussiana con raggio controllato.
+&
+1000 \\
+\texttt{histogram\_modification}
+&
+Equalizzazione dell'istogramma dell'immagine.
+&
+1000 \\
+\texttt{contrast\_stretching}
+&
+Autocontrast con cutoff percentuale controllato.
+&
+1000 \\
+\midrule
+\textbf{Totale}
+&
+Cinque trasformazioni applicate alle 1000 immagini del subset binario.
+&
+\textbf{5000} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Nel run consolidato della pipeline, ciascuna trasformazione è stata applicata
+alle 1000 immagini del subset binario, mantenendo la distribuzione dei cinque
+fold e il bilanciamento tra le classi \texttt{weapon} e \texttt{non\_weapon}.
+Per ogni trasformazione sono quindi state prodotte 200 immagini per fold, pari
+a 500 immagini \texttt{weapon} e 500 immagini \texttt{non\_weapon}. Il totale
+degli artefatti anti-forensi generati è pari a 5000 immagini. Questa scelta
+consente di confrontare in modo simmetrico le risposte dei modelli e, nelle fasi
+successive, degli strumenti forensi, rispetto a un insieme bilanciato di
+manipolazioni non ottimizzate sul classificatore.
+
+I parametri principali della generazione sono registrati nel summary
+\texttt{attacks/manifests/anti\_forensic\_generation\_summary.json}. Nel run
+corrente, la ricompressione \gls{jpeg} utilizza qualità 70, la trasformazione
+resample~+~resize applica un fattore di scala pari a 0.5, il Gaussian blur usa
+raggio 1.5 e il contrast stretching usa cutoff pari a 1.0. Tutte le immagini
+generate sono salvate in formato \texttt{.jpg}; per le trasformazioni diverse
+dalla ricompressione \gls{jpeg} primaria, il salvataggio avviene con qualità
+\gls{jpeg} pari a 95. Questi parametri non sono presentati come ottimali, ma
+come configurazione controllata e riproducibile per introdurre degradazioni
+moderate e comparabili sull'intero subset sperimentale.
+
+La pipeline produce il manifest
+\texttt{attacks/manifests/anti\_forensic\_attacks\_manifest.csv}, nel quale ogni
+riga descrive un'immagine trasformata e mantiene il collegamento con il campione
+pulito originario. Il manifest registra campi quali
+\texttt{generated\_image\_id}, \texttt{original\_image\_id}, \texttt{fold},
+\texttt{final\_label}, \texttt{source\_dataset}, \texttt{clean\_relative\_path},
+\texttt{perturbed\_relative\_path}, \texttt{attack\_family},
+\texttt{attack\_name}, \texttt{attack\_parameters}, \texttt{sha256\_original},
+\texttt{md5\_original}, \texttt{sha256\_perturbed} e
+\texttt{md5\_perturbed}. La registrazione degli hash consente di verificare sia
+l'identità del file pulito sia quella dell'artefatto trasformato, preservando la
+tracciabilità tra input, trasformazione applicata e output generato.
+
+Il file di sintesi documenta inoltre i controlli di consistenza della fase di
+generazione: corrispondenza tra immagini attese e immagini effettivamente
+prodotte, unicità degli identificativi generati, unicità degli hash SHA256 delle
+immagini trasformate e corretta scrittura del manifest. Tali controlli non
+costituiscono una valutazione dei risultati di robustezza, ma attestano la
+coerenza tecnica della generazione degli artefatti anti-forensi. L'analisi
+dell'impatto di tali trasformazioni sulle prestazioni dei modelli e, in seguito,
+sugli strumenti forensi commerciali viene demandata alle sezioni dedicate al
+protocollo metrico e al capitolo dei risultati.
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
