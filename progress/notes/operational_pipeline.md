@@ -2,7 +2,7 @@
 
 This document summarizes the operational workflow used by the repository for the MSc thesis on AI robustness in digital forensics.
 
-It is intended as a working methodological note. The canonical repository entry point remains `README.md`; this file only expands the execution logic behind the pipeline.
+It is intended as a working methodological note. The canonical repository entry point remains `README.md`; this file expands the execution logic behind the pipeline and reflects the current repository state.
 
 ---
 
@@ -152,21 +152,43 @@ The repository uses the naming `fold_1` ... `fold_5`, not `test_set_1` ... `test
 
 The second layer builds confidence in the measurement process.
 
-### 3.1 Clean baseline evaluation
+### 3.1 Proxy model training
 
-Planned model families:
-
-- ResNet18;
-- EfficientNet-B0;
-- CLIP;
-- BLIP;
-- SVM baseline.
-
-Expected outputs:
+Main script:
 
 ```text
-evaluation/clean/
-results/metrics/clean_baseline_metrics.csv
+models/scripts/12_train_proxy_models.py
+```
+
+Proxy models currently used in the local evaluation layer:
+
+- EfficientNet-B0;
+- ResNet18;
+- CLIP.
+
+BLIP may be used as a semantic/caption-based evaluator, but it is not a primary adversarial generation target.
+
+Expected checkpoint area:
+
+```text
+models/checkpoints/
+```
+
+Fold-aware checkpoints are used for binary evaluation and model-dependent attack generation.
+
+### 3.2 Clean and OOD evaluation
+
+Main evaluation script:
+
+```text
+evaluation/scripts/15_evaluate_proxy_models.py
+```
+
+Current output areas:
+
+```text
+evaluation/proxy_models/
+results/metrics/
 ```
 
 Core metrics:
@@ -178,11 +200,14 @@ Core metrics:
 - F1-score;
 - confusion matrix;
 - false positive rate;
-- false negative rate.
+- false negative rate;
+- confidence statistics where available.
 
-### 3.2 Perturbation generation
+OOD samples are evaluated separately and are not included in binary accuracy.
 
-Adversarial attacks:
+### 3.3 Perturbation generation
+
+Adversarial attacks generated:
 
 - FGSM;
 - SuperDeepFool;
@@ -190,7 +215,7 @@ Adversarial attacks:
 - One Pixel Attack;
 - Color Shift.
 
-Anti-forensic transformations:
+Anti-forensic transformations generated:
 
 - JPEG recompression;
 - Resample and resize;
@@ -198,24 +223,39 @@ Anti-forensic transformations:
 - Histogram modification;
 - Contrast stretching.
 
-Expected structure:
+Official scripts:
+
+```text
+datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
+datasets/scripts/attacks/14_generate_adversarial_attacks.py
+```
+
+Output structure:
 
 ```text
 attacks/adversarial/
 attacks/anti_forensic/
+attacks/manifests/
 ```
 
-Each attack output should be traceable to the clean source image through `image_id`, fold, label, relative path, and hash.
+Each attack output is traceable to the clean source image through `image_id`, fold, label, relative path, and hash.
 
-### 3.3 Evaluation under perturbation
+### 3.4 Evaluation under perturbation
 
-Expected outputs:
+Main evaluation script:
 
 ```text
-evaluation/adversarial/
-evaluation/anti_forensic/
-results/metrics/adversarial_robustness_metrics.csv
-results/metrics/anti_forensic_robustness_metrics.csv
+evaluation/scripts/15_evaluate_proxy_models.py
+```
+
+Current output files include:
+
+```text
+evaluation/proxy_models/proxy_model_predictions.csv
+results/metrics/proxy_model_clean_metrics.csv
+results/metrics/proxy_model_ood_metrics.csv
+results/metrics/proxy_model_comparative_metrics.csv
+results/metrics/proxy_model_evaluation_summary.json
 ```
 
 Robustness metrics:
@@ -225,9 +265,12 @@ Robustness metrics:
 - robust accuracy;
 - attack success rate;
 - misclassification rate;
-- confidence shift.
+- confidence shift;
+- comparative clean-vs-perturbed behavior by attack.
 
-### 3.4 Explainability
+Comparative metrics match perturbed predictions to clean predictions through model, fold, and original image identifier.
+
+### 3.5 Explainability
 
 Expected method:
 
@@ -262,16 +305,21 @@ Target tools:
 Main script:
 
 ```text
-datasets/scripts/bundle/12_build_forensic_evaluation_bundle.py
+datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
 ```
 
-Expected outputs:
+Expected output area:
 
 ```text
 datasets/forensic_evaluation_bundle/
-datasets/forensic_evaluation_bundle/bundle_manifest.csv
-datasets/forensic_evaluation_bundle/bundle_hashes_sha256.csv
-datasets/forensic_evaluation_bundle/bundle_summary.json
+```
+
+Current logical bundle areas:
+
+```text
+datasets/forensic_evaluation_bundle/blind_tool_input/
+datasets/forensic_evaluation_bundle/metadata/
+datasets/forensic_evaluation_bundle/structured_audit_view/
 ```
 
 The bundle should include:
@@ -280,10 +328,24 @@ The bundle should include:
 - adversarial outputs;
 - anti-forensic outputs;
 - OOD evaluation samples;
-- global manifest;
-- SHA256 hashes.
+- global metadata;
+- SHA256/MD5 hashes where available;
+- blind filenames for tool-facing input;
+- internal mapping from blind files to original image identifiers, labels, attacks, and sample types.
 
-### 4.2 Tool execution
+### 4.2 Bundle validation
+
+Before running forensic tools, the bundle must be checked for:
+
+- expected number of files by sample type;
+- expected number of files by attack;
+- expected number of files by fold;
+- presence of clean/adversarial/anti-forensic/OOD samples;
+- absence of label leakage in blind filenames;
+- valid SHA256/MD5 mappings;
+- stable relation between blind filename, original image identifier, and generated artifact.
+
+### 4.3 Tool execution
 
 Each tool should be tested on comparable inputs:
 
@@ -301,7 +363,7 @@ forensic_tools/cellebrite_ufed/
 forensic_tools/oxygen/
 ```
 
-### 4.3 Forensic output normalization
+### 4.4 Forensic output normalization
 
 Expected output area:
 
@@ -316,6 +378,8 @@ Tool exports should be linked back to the dataset primarily through:
 2. MD5, if available;
 3. filename or `image_id` as fallback.
 
+The normalized schema should make commercial-tool outputs comparable with local proxy-model predictions.
+
 ---
 
 ## 5. Final comparative analysis
@@ -324,9 +388,10 @@ The final analysis compares:
 
 - clean vs perturbed behavior;
 - model vs model;
-- local AI models vs forensic AI tools;
+- local proxy models vs forensic AI tools;
 - adversarial attacks vs anti-forensic transformations;
-- nominal binary classification vs OOD behavior.
+- nominal binary classification vs OOD behavior;
+- quantitative robustness metrics vs qualitative explainability findings.
 
 Expected final outputs:
 
@@ -336,6 +401,32 @@ results/tables/
 results/plots/
 results/figures/
 results/reports/
+```
+
+---
+
+## 6. Current operational state
+
+Completed:
+
+```text
+raw/prepared/final dataset pipeline
+clean and OOD split generation
+proxy model training
+anti-forensic transformation generation
+adversarial attack generation
+proxy model evaluation
+initial forensic evaluation bundle construction
+```
+
+Current focus:
+
+```text
+validate forensic evaluation bundle
+run forensic AI tools
+normalize forensic tool outputs
+compare forensic tool outputs with proxy model metrics
+select representative failure cases for explainability and thesis discussion
 ```
 
 ---
@@ -357,6 +448,7 @@ The workflow is organized around three levels of trust:
    - consistent fold structure;
    - clean/perturbed comparability;
    - attack manifests;
+   - proxy model predictions;
    - confidence and robustness analysis.
 
 3. **Trust in the forensic interpretation**
