@@ -241,8 +241,8 @@ The bundle is not the final evaluation result. It is the controlled input packag
 
 ## Next step
 
-The next milestone should document forensic tool execution and output normalization:
+The next milestone documents commercial forensic tool execution and output normalization planning:
 
 ```text
-progress/milestones/09_forensic_tool_evaluation.md
+progress/milestones/09_commercial_forensic_tools_evaluation.md
 ```
