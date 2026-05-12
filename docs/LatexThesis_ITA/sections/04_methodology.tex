@@ -981,17 +981,17 @@ prodotti comprendono il file
 \codepath{evaluation/proxy_models/proxy_model_predictions.csv} e i file metrici
 in \codepath{results/metrics/}:
 
-\codepath{proxy/model/clean/metrics.csv},
+\codepath{proxy_model_clean_metrics.csv},
 
-\codepath{proxy/model/adversarial/metrics.csv},
+\codepath{proxy_model_adversarial_metrics.csv},
 
-\codepath{proxy/model/anti/forensic/metrics.csv},
+\codepath{proxy_model_anti_forensic_metrics.csv},
 
-\codepath{proxy/model/ood/metrics.csv},
+\codepath{proxy_model_ood_metrics.csv},
 
-\codepath{proxy/model/comparative/metrics.csv} e
+\codepath{proxy_model_comparative_metrics.csv} e
 
-\codepath{proxy/model/evaluation/summary.json}.
+\codepath{proxy_model_evaluation_summary.json}.
 
 Il run di valutazione dei proxy model comprende 11\,500 campioni in input e
 40\,500 righe di predizione, senza errori registrati. La distribuzione delle
@@ -1204,11 +1204,11 @@ registrazione non attribuisce all'MD5 il ruolo di identificatore primario, ma ne
 preserva l'utilità operativa nel raccordo con tool e formati eterogenei.
 
 La pipeline utilizza manifest progressivi. Il passaggio da
-\texttt{metadata.csv} a \codepath{review/manifest/full.csv}, poi a
-\codepath{manual/selection/final/1500.csv},
-\codepath{manual/selection/adversarial/subset.csv},
-\codepath{clean/folds/manifest.csv}, \codepath{ood/eval/manifest.csv},
-manifest degli attacchi, manifest anti-forense, \codepath{bundle/manifest.csv},
+\texttt{metadata.csv} a \codepath{review_manifest_full.csv}, poi a
+\codepath{manual_selection_final_1500.csv},
+\codepath{manual_selection_adversarial_subset.csv},
+\codepath{clean_folds_manifest.csv}, \codepath{ood_eval_manifest.csv},
+manifest degli attacchi, manifest anti-forense, \codepath{bundle_manifest.csv},
 predizioni dei proxy model e manifest \gls{xai}, consente di ricostruire il
 ciclo di vita del campione sperimentale. La relazione tra
 \codepath{original/image/id}, \codepath{generated/image/id},
