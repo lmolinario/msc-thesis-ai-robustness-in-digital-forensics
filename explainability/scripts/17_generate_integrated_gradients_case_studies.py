@@ -277,6 +277,8 @@ def setup_logging(verbose: bool) -> None:
         level=logging.DEBUG if verbose else logging.INFO,
         format="[%(levelname)s] %(message)s",
     )
+    logging.getLogger("matplotlib").setLevel(logging.WARNING)
+    logging.getLogger("PIL").setLevel(logging.WARNING)
 
 
 def build_run_tag(args: argparse.Namespace) -> str:
@@ -399,24 +401,84 @@ def ood_mask(df: pd.DataFrame) -> pd.Series:
 
 
 def rank_candidates(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rank manual-review candidates according to forensic relevance.
+
+    Priority order:
+    1. weapon -> non_weapon failures, when the clean sample was correct;
+    2. non_weapon -> weapon failures, when the clean sample was correct;
+    3. any clean-correct -> perturbed-wrong failure;
+    4. remaining high-confidence errors;
+    5. remaining high-confidence cases.
+
+    This makes the manual reviewer show first the cases that are most relevant
+    for the thesis: operational failures induced by adversarial or anti-forensic
+    transformations.
+    """
     ranked = add_selection_helper_columns(df)
-    ranked["rank_clean_correct_fail"] = (ranked["clean_correct_bool"] & (~ranked["correct_bool"])).astype(int)
-    ranked["rank_weapon_to_non_weapon"] = (
-        (ranked["final_label_norm"] == "weapon") & (ranked["prediction_norm"] == "non_weapon")
-    ).astype(int)
+
+    ranked["is_clean_correct_failure"] = (
+        ranked["clean_correct_bool"] & (~ranked["correct_bool"])
+    )
+
+    ranked["is_weapon_to_non_weapon"] = (
+        ranked["is_clean_correct_failure"]
+        & (ranked["final_label_norm"] == "weapon")
+        & (ranked["prediction_norm"] == "non_weapon")
+    )
+
+    ranked["is_non_weapon_to_weapon"] = (
+        ranked["is_clean_correct_failure"]
+        & (ranked["final_label_norm"] == "non_weapon")
+        & (ranked["prediction_norm"] == "weapon")
+    )
+
+    ranked["is_other_failure"] = (
+        ranked["is_clean_correct_failure"]
+        & (~ranked["is_weapon_to_non_weapon"])
+        & (~ranked["is_non_weapon_to_weapon"])
+    )
+
+    ranked["is_high_confidence_error"] = (
+        (~ranked["correct_bool"])
+        & (ranked["confidence_numeric"] >= 0.90)
+    )
+
+    def priority_label(row: pd.Series) -> str:
+        if row["is_weapon_to_non_weapon"]:
+            return "P1_weapon_to_non_weapon"
+        if row["is_non_weapon_to_weapon"]:
+            return "P2_non_weapon_to_weapon"
+        if row["is_other_failure"]:
+            return "P3_other_clean_correct_failure"
+        if row["is_high_confidence_error"]:
+            return "P4_high_confidence_error"
+        return "P5_other"
+
+    ranked["xai_priority_label"] = ranked.apply(priority_label, axis=1)
+
+    priority_order = {
+        "P1_weapon_to_non_weapon": 1,
+        "P2_non_weapon_to_weapon": 2,
+        "P3_other_clean_correct_failure": 3,
+        "P4_high_confidence_error": 4,
+        "P5_other": 5,
+    }
+
+    ranked["xai_priority_rank"] = ranked["xai_priority_label"].map(priority_order).fillna(99)
+
     return ranked.sort_values(
         [
-            "rank_weapon_to_non_weapon",
-            "rank_clean_correct_fail",
+            "xai_priority_rank",
             "confidence_numeric",
             "evaluation_fold",
             "final_label",
+            "prediction",
             "image_relative_path",
         ],
-        ascending=[False, False, False, True, True, True],
+        ascending=[True, False, True, True, True, True],
         kind="stable",
     )
-
 
 def select_cases(
     df: pd.DataFrame,
@@ -552,6 +614,12 @@ class XAIManualCaseReviewer:
 
         self.db_df = self.load_or_create_db()
         self.ensure_current_candidates_in_db()
+
+    def total_pages(self) -> int:
+        return max(1, math.ceil(len(self.candidates_df) / BATCH_SIZE))
+
+    def current_page(self) -> int:
+        return (self.current_start // BATCH_SIZE) + 1
 
     def candidate_id_from_row(self, row: pd.Series) -> str:
         model = sanitize_tag(safe_str(row.get("evaluated_model", "")))
@@ -811,6 +879,7 @@ class XAIManualCaseReviewer:
                 f"attack_name    : {self.attack_name}",
                 f"selected       : {self.selected_count_for_attack()}/{self.requested_cases}",
                 f"candidates     : {len(self.candidates_df)}",
+                f"page           : {self.current_page()}/{self.total_pages()}",
                 "",
                 "Mouse: left=select | right=unselect | middle=zoom",
                 "Keys : s=save | q=save+close current attack | u=undo | g=page | t=summary | h=help",
@@ -875,8 +944,13 @@ class XAIManualCaseReviewer:
                     ax.text(0.5, 0.5, "ERR IMG", ha="center", va="center", fontsize=10)
             else:
                 ax.text(0.5, 0.5, "IMG NOT FOUND", ha="center", va="center", fontsize=10)
+            priority_label = safe_str(row.get("xai_priority_label", ""))
+            priority_short = priority_label.replace("P1_", "P1 ").replace("P2_", "P2 ").replace("P3_", "P3 ").replace(
+                "P4_", "P4 ").replace("P5_", "P5 ")
+
             title = (
                 f"{i + 1}. {candidate_id[:42]}\n"
+                f"{priority_short}\n"
                 f"fold={safe_str(row.get('evaluation_fold', ''))} | "
                 f"label={safe_str(row.get('final_label', ''))} -> pred={safe_str(row.get('prediction', ''))}\n"
                 f"conf={safe_str(row.get('confidence', ''))} | selected={selected}"
@@ -904,13 +978,40 @@ class XAIManualCaseReviewer:
 
     def next_batch(self) -> None:
         indices = self.get_local_indices()
+
         if not indices:
+            print("[INFO] No candidates available.")
             return
-        self.current_start = min(self.current_start + BATCH_SIZE, max(0, ((len(indices) - 1) // BATCH_SIZE) * BATCH_SIZE))
+
+        max_start = max(0, ((len(indices) - 1) // BATCH_SIZE) * BATCH_SIZE)
+
+        if self.current_start >= max_start:
+            print(
+                f"[INFO] Already at last page "
+                f"({self.current_page()}/{self.total_pages()}) "
+                f"for attack {self.attack_name}."
+            )
+            return
+
+        self.current_start = min(self.current_start + BATCH_SIZE, max_start)
         self.selected_pos = 0
         self.draw_batch()
 
     def prev_batch(self) -> None:
+        indices = self.get_local_indices()
+
+        if not indices:
+            print("[INFO] No candidates available.")
+            return
+
+        if self.current_start <= 0:
+            print(
+                f"[INFO] Already at first page "
+                f"({self.current_page()}/{self.total_pages()}) "
+                f"for attack {self.attack_name}."
+            )
+            return
+
         self.current_start = max(0, self.current_start - BATCH_SIZE)
         self.selected_pos = 0
         self.draw_batch()
@@ -1012,9 +1113,9 @@ class XAIManualCaseReviewer:
 
     def on_key(self, event) -> None:
         key = str(event.key).lower() if event.key is not None else ""
-        if key in ["right", " "]:
+        if key in ["right", " ", "space", "pagedown", "n"]:
             self.next_batch()
-        elif key in ["left", "backspace"]:
+        elif key in ["left", "backspace", "pageup", "p"]:
             self.prev_batch()
         elif key == "enter":
             self.open_zoom()
