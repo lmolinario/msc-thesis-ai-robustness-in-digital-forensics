@@ -1,6 +1,6 @@
 {
   "script": "evaluation/scripts/15_evaluate_proxy_models.py",
-  "created_at": "2026-05-11T17:03:55+00:00",
+  "created_at": "2026-05-12T10:30:01+00:00",
   "models": [
     "efficientnet_b0",
     "resnet18",
@@ -9,6 +9,15 @@
   "outputs": {
     "predictions_csv": "evaluation/proxy_models/proxy_model_predictions.csv",
     "metrics_dir": "results/metrics",
+    "proxy_clean_metrics_csv": "results/metrics/proxy_model_clean_metrics.csv",
+    "proxy_adversarial_metrics_csv": "results/metrics/proxy_model_adversarial_metrics.csv",
+    "proxy_anti_forensic_metrics_csv": "results/metrics/proxy_model_anti_forensic_metrics.csv",
+    "proxy_ood_metrics_csv": "results/metrics/proxy_model_ood_metrics.csv",
+    "proxy_comparative_metrics_csv": "results/metrics/proxy_model_comparative_metrics.csv",
+    "final_core_metrics_csv": "results/metrics/final_core_metrics.csv",
+    "final_robustness_metrics_csv": "results/metrics/final_robustness_metrics.csv",
+    "final_confusion_matrices_csv": "results/metrics/final_confusion_matrices.csv",
+    "final_ood_metrics_csv": "results/metrics/final_ood_metrics.csv",
     "summary_json": "results/metrics/proxy_model_evaluation_summary.json"
   },
   "counts": {
@@ -24,11 +33,27 @@
       "none": 10500,
       "adversarial": 15000,
       "anti_forensic": 15000
-    }
+    },
+    "final_core_metric_rows": 33,
+    "final_robustness_metric_rows": 30,
+    "final_confusion_matrix_rows": 33,
+    "final_ood_metric_rows": 3
+  },
+  "metric_schema_notes": {
+    "positive_class": "weapon",
+    "negative_class": "non_weapon",
+    "confusion_matrix_layout": "[[tn, fp], [fn, tp]]",
+    "false_positive_rate": "fp / (fp + tn)",
+    "false_negative_rate": "fn / (fn + tp)",
+    "robust_accuracy": "perturbed_accuracy",
+    "attack_success_rate": "induced_error_count / clean_correct_count",
+    "confidence_shift": "mean(perturbed_confidence - clean_confidence)",
+    "misclassification_rate": "1 - accuracy for core metrics; 1 - perturbed_accuracy for robustness metrics"
   },
   "methodological_notes": [
     "Binary samples are evaluated with the checkpoint corresponding to their fold.",
     "OOD samples are evaluated separately and are not included in binary accuracy.",
-    "Comparative metrics match perturbed predictions to clean predictions through model, fold and original_image_id."
+    "Comparative metrics match perturbed predictions to clean predictions through model, fold and original_image_id.",
+    "Final metric tables expose canonical metric names for thesis reporting and forensic-tool comparison."
   ]
 }

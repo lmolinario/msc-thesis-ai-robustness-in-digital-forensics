@@ -1,4 +1,4 @@
-evaluated_model,total,predicted_weapon,predicted_non_weapon,predicted_weapon_rate,confidence_mean,high_confidence_threshold,high_confidence_count,high_confidence_rate
-clip,2500,2089,411,0.8356,0.5357783779382705,0.9,0,0.0
-efficientnet_b0,2500,924,1576,0.3696,0.8504651925325394,0.9,1252,0.5008
-resnet18,2500,1094,1406,0.4376,0.8895860863685607,0.9,1617,0.6468
+evaluated_model,sample_type,total,predicted_weapon,predicted_non_weapon,predicted_weapon_rate,confidence_mean,high_confidence_threshold,high_confidence_count,high_confidence_rate
+clip,ood,2500,2089,411,0.8356,0.5357783776760101,0.9,0,0.0
+efficientnet_b0,ood,2500,924,1576,0.3696,0.8504651769161224,0.9,1252,0.5008
+resnet18,ood,2500,1094,1406,0.4376,0.8895860877275467,0.9,1617,0.6468
