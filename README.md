@@ -2,9 +2,9 @@
 
 This repository contains the working research pipeline for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
 
-The thesis evaluates the operational robustness of AI-based image classification systems in digital forensic scenarios. The workflow compares local AI models and forensic AI tools under clean inputs, perturbed inputs, and out-of-distribution samples.
+The thesis evaluates the operational robustness of AI-based image classification systems in digital forensic scenarios. The workflow compares local proxy AI models and forensic AI tools under clean inputs, adversarial perturbations, anti-forensic transformations, and out-of-distribution samples.
 
-At this stage, this is a **complete working repository**. Datasets, generated outputs, manifests, reports, and intermediate artifacts may be versioned to support continuity across multiple workstations. A cleaned public release can be derived later.
+At this stage, this is a **complete working research repository**. Datasets, generated outputs, manifests, reports, and intermediate artifacts may be versioned to support continuity across multiple workstations. A cleaned public release can be derived later.
 
 ---
 
@@ -15,25 +15,30 @@ Completed stages:
 1. dataset acquisition structure;
 2. prepared dataset construction;
 3. full review manifest generation;
-4. manual human-in-the-loop selection;
+4. manual human-in-the-loop final selection;
 5. final frozen dataset construction;
 6. clean fold generation;
 7. OOD evaluation set generation;
-8. proxy model training setup;
-9. adversarial and anti-forensic generation setup.
+8. proxy model training;
+9. anti-forensic transformation generation;
+10. adversarial attack generation;
+11. local proxy model evaluation under clean, OOD, adversarial, and anti-forensic conditions;
+12. initial forensic evaluation bundle construction.
 
 Current focus:
 
-1. run perturbation smoke tests;
-2. generate adversarial and anti-forensic perturbations;
-3. build the forensic evaluation bundle;
-4. define the evaluation schema for local models and forensic tools.
+1. validate forensic evaluation bundle completeness and traceability;
+2. run forensic AI tools on the blind bundle;
+3. normalize forensic tool outputs;
+4. compare local proxy models and forensic tools under a shared metric protocol;
+5. select representative failure cases for explainability and thesis discussion.
 
-Planned next stages:
+Next thesis stage:
 
-1. evaluate local AI models and forensic AI tools under a shared metric protocol;
-2. perform explainability-based case studies;
-3. consolidate results and thesis chapters.
+1. consolidate Chapter 5 results for proxy models;
+2. complete forensic tool evaluation;
+3. integrate comparative results and operational implications;
+4. finalize explainability case studies.
 
 ---
 
@@ -87,16 +92,22 @@ datasets/scripts/attacks/14_generate_adversarial_attacks.py
     ↓
 attacks/
     ↓
+evaluation/scripts/15_evaluate_proxy_models.py
+    ↓
+evaluation/proxy_models/
+results/metrics/
+    ↓
+datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
+    ↓
 datasets/forensic_evaluation_bundle/
     ↓
-models/
 forensic_tools/
-evaluation/
-explainability/
+evaluation/forensic_tools/
 results/
+explainability/
 ```
 
-`datasets/forensic_evaluation_bundle/` is a planned operational bundle. It will be generated after clean, adversarial, anti-forensic, and OOD artifacts are ready to be tested with forensic AI tools.
+`datasets/forensic_evaluation_bundle/` is the operational bridge between the local experimental pipeline and the forensic AI tool evaluation phase. It is intended to provide blind tool inputs while preserving internal traceability through metadata and hashes.
 
 ---
 
@@ -124,15 +135,19 @@ msc-thesis-ai-robustness-in-digital-forensics/
 │       └── bundle/
 ├── attacks/
 │   ├── adversarial/
-│   └── anti_forensic/
+│   ├── anti_forensic/
+│   └── manifests/
 ├── models/
 │   ├── scripts/
 │   ├── checkpoints/
 │   └── reports/
 ├── evaluation/
+│   ├── scripts/
+│   └── proxy_models/
 ├── explainability/
 ├── forensic_tools/
 ├── results/
+│   └── metrics/
 ├── docs/
 └── progress/
     ├── milestones/
@@ -162,8 +177,9 @@ The operational pipeline uses numbered scripts as the official entry points:
 12_train_proxy_models.py
 13_generate_anti_forensic_attacks.py
 14_generate_adversarial_attacks.py
+15_evaluate_proxy_models.py
+16_build_forensic_evaluation_bundle.py
 ```
-
 
 ---
 
@@ -171,51 +187,80 @@ The operational pipeline uses numbered scripts as the official entry points:
 
 The final dataset is organized into three semantic groups:
 
-- target-class images;
-- negative-class images;
-- out-of-distribution samples.
+- `weapon`;
+- `non_weapon`;
+- `ood`.
 
 Final frozen distribution:
 
 | Group | Count |
 |---|---:|
-| target class | 500 |
-| negative class | 500 |
+| weapon | 500 |
+| non_weapon | 500 |
 | OOD | 500 |
 
-The binary subset is divided into five clean folds. Each fold contains 200 samples, equally balanced between the two binary classes.
+The binary subset is divided into five clean folds. Each fold contains 200 samples, equally balanced between `weapon` and `non_weapon`.
 
 OOD samples are evaluated separately as a single OOD evaluation set and are not used as direct targets for perturbation generation.
 
 ---
 
-## Split Strategy
+## Attack and Transformation Set
 
-Clean folds:
-
-```text
-datasets/splits/clean/fold_1/
-datasets/splits/clean/fold_2/
-datasets/splits/clean/fold_3/
-datasets/splits/clean/fold_4/
-datasets/splits/clean/fold_5/
-```
-
-OOD evaluation set:
+Adversarial attacks generated for the thesis pipeline:
 
 ```text
-datasets/splits/ood/ood_eval_set/ood/
+fgsm
+superdeepfool
+sigma_zero
+one_pixel
+color_shift
 ```
 
-Split manifests:
+Anti-forensic transformations generated for the thesis pipeline:
 
 ```text
-datasets/splits/manifests/clean_folds_manifest.csv
-datasets/splits/manifests/ood_eval_manifest.csv
-datasets/splits/manifests/split_generation_summary.json
+jpeg_recompression
+resample_resize
+gaussian_blur
+histogram_modification
+contrast_stretching
 ```
 
-The repository uses `fold_1`, `fold_2`, etc., rather than `test_set_1`, because this is more consistent with experimental machine learning terminology.
+Adversarial attacks are generated primarily against the EfficientNet-B0 proxy target where model dependency is required. Color Shift is treated as model-agnostic. Anti-forensic transformations are model-agnostic image-processing transformations.
+
+---
+
+## Evaluation Status
+
+Proxy models evaluated:
+
+```text
+efficientnet_b0
+resnet18
+clip
+```
+
+Main evaluation entry point:
+
+```text
+evaluation/scripts/15_evaluate_proxy_models.py
+```
+
+Main output areas:
+
+```text
+evaluation/proxy_models/
+results/metrics/
+```
+
+The proxy evaluation covers:
+
+- clean binary folds;
+- OOD samples;
+- adversarial perturbations;
+- anti-forensic transformations;
+- comparative clean-vs-perturbed metrics.
 
 ---
 
@@ -230,8 +275,9 @@ The repository is designed around traceable artifacts:
 - manual review logs;
 - split manifests;
 - attack manifests;
-- future forensic bundle manifest;
-- normalized evaluation outputs.
+- proxy model evaluation outputs;
+- forensic bundle metadata;
+- normalized forensic tool outputs.
 
 The hash-based mapping is especially important because forensic tools may rename files, alter export structures, or provide different reporting formats.
 
@@ -258,6 +304,8 @@ progress/
     ├── open_questions.md
     └── operational_pipeline.md
 ```
+
+The next documentation alignment step is to add milestones for adversarial generation, proxy model evaluation, forensic bundle construction, forensic tool evaluation, and explainability case studies.
 
 ---
 
