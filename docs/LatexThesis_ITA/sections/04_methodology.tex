@@ -13,23 +13,24 @@ Tale disegno collega dataset, modelli, perturbazioni adversariali e
 anti-forensi, strumenti forensi, metriche, approccio di \gls{xai} e controlli
 di tracciabilità all'interno del framework \gls{fairlab}, mantenendo una
 distinzione netta tra metodologia sperimentale e analisi dei risultati.
-Il capitolo è organizzato in tredici sezioni: le prime sei
-(\S\S\,\ref{sec:methodology-fairlab-overview}--\ref{sec:methodology-split-generation})
-descrivono le componenti della pipeline dataset; le successive sette
-(\S\S\,\ref{sec:methodology-models-classification}--\ref{sec:methodology-traceability-controls})
-introducono il paradigma di classificazione, la selezione e la generazione
-delle perturbazioni, il \emph{forensic evaluation bundle}, le metriche
-di valutazione, l'approccio di \gls{xai} e i controlli di tracciabilità
-e riproducibilità.
 
-La distinzione tra metodologia e analisi dei risultati è mantenuta lungo
-tutto il capitolo: gli artefatti prodotti vengono descritti come componenti
+Il capitolo è organizzato in quattordici sezioni. Le prime sei
+(\S\S\,\ref{sec:methodology-fairlab-overview}--\ref{sec:methodology-split-generation})
+descrivono la costruzione della base sperimentale, includendo il disegno
+metodologico, la preparazione del dataset, la generazione del manifest di
+revisione, il protocollo \textit{human-in-the-loop}, il freezing del dataset e
+la produzione degli split. Le successive otto
+(\S\S\,\ref{sec:methodology-models-classification}--\ref{sec:methodology-traceability-controls})
+descrivono il paradigma di classificazione, la selezione e la generazione
+delle perturbazioni adversariali e anti-forensi, il \textit{forensic evaluation
+bundle}, il protocollo di valutazione degli strumenti commerciali, le metriche,
+l'approccio di \gls{xai} e i controlli di tracciabilità e riproducibilità.
+
+La distinzione tra metodologia e analisi dei risultati è mantenuta lungo tutto
+il capitolo: gli artefatti prodotti vengono descritti come componenti
 metodologiche consolidate, mentre le evidenze quantitative, il confronto tra
-modelli e strumenti, e le interpretazioni sperimentali vengono demandati al
-capitolo dedicato ai risultati. Questa scelta consente di presentare la
-pipeline come un protocollo verificabile e riproducibile, evitando di
-anticipare conclusioni sulle prestazioni o sulla robustezza dei sistemi
-analizzati.
+modelli e strumenti e le interpretazioni sperimentali vengono demandati al
+capitolo dedicato ai risultati.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -452,6 +453,9 @@ capacità del sistema di gestire input che non appartengono alla distribuzione
 operativa del task binario.
 
 
+
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Models and classification paradigm}
 \label{sec:methodology-models-classification}
@@ -490,9 +494,8 @@ nella pipeline corrente \cite{tan2019efficientnet}. \gls{clip}, invece, viene
 impiegato nella forma di visual encoder congelato con una testa binaria addestrata
 sul task \texttt{non\_weapon}/\texttt{weapon}, così da includere nel protocollo
 un modello vision-language pre-addestrato e successivamente adattato alla
-classificazione binaria \cite{radford2021learning}. La
-Tabella~\ref{tab:methodology-proxy-models} riassume il ruolo metodologico dei
-tre modelli.
+classificazione binaria \cite{radford2021learning}. La Tabella~\ref{tab:methodology-proxy-models}
+riassume il ruolo metodologico dei tre modelli.
 
 \begin{table}[H]
 \centering
@@ -593,7 +596,6 @@ di immagini pulite, manipolate o fuori distribuzione. Questa distinzione consent
 di mantenere separati il controllo sperimentale della pipeline accademica e la
 valutazione operativa dei tool forensi.
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial attack selection and generation}
 \label{sec:methodology-adversarial-attacks}
@@ -648,11 +650,51 @@ post-processing non necessariamente ottimizzati contro un modello.
 \toprule
 \textbf{Attacco} & \textbf{Dipendenza} & \textbf{Target} & \textbf{Formato} & \textbf{Immagini} \\
 \midrule
-\texttt{fgsm}          & model-dependent & \texttt{efficientnet\_b0} & PNG  & 1000 \\
-\texttt{one\_pixel}    & model-dependent & \texttt{efficientnet\_b0} & PNG  & 1000 \\
-\texttt{sigma\_zero}   & model-dependent & \texttt{efficientnet\_b0} & PNG  & 1000 \\
-\texttt{superdeepfool} & model-dependent & \texttt{efficientnet\_b0} & PNG  & 1000 \\
-\texttt{color\_shift}  & model-agnostic  & \texttt{model\_agnostic}  & JPEG & 1000 \\
+\texttt{fgsm}
+&
+model-dependent
+&
+\texttt{efficientnet\_b0}
+&
+PNG
+&
+1000 \\
+\texttt{one\_pixel}
+&
+model-dependent
+&
+\texttt{efficientnet\_b0}
+&
+PNG
+&
+1000 \\
+\texttt{sigma\_zero}
+&
+model-dependent
+&
+\texttt{efficientnet\_b0}
+&
+PNG
+&
+1000 \\
+\texttt{superdeepfool}
+&
+model-dependent
+&
+\texttt{efficientnet\_b0}
+&
+PNG
+&
+1000 \\
+\texttt{color\_shift}
+&
+model-agnostic
+&
+\texttt{model\_agnostic}
+&
+JPEG
+&
+1000 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -667,11 +709,10 @@ attacco orientato alla sparsità, con parametri dedicati alla regolazione della
 soglia e dell'approssimazione differenziabile della norma \(L_0\)
 \cite{zhao2024sigmazero}. SuperDeepFool è adottato come variante iterativa
 basata su una logica di attraversamento del confine decisionale, richiamando la
-famiglia di metodi ispirati a DeepFool
-\cite{moosavi2016deepfool,zhang2024superdeepfool}. Color Shift, infine, non è
-trattato come attacco ottimizzato rispetto al modello, ma come trasformazione
-adversarial-style model-agnostic, utile per introdurre una manipolazione
-cromatica globale e controllata.
+famiglia di metodi ispirati a DeepFool \cite{moosavi2016deepfool}. Color Shift,
+infine, non è trattato come attacco ottimizzato rispetto al modello, ma come
+trasformazione adversarial-style model-agnostic, utile per introdurre una
+manipolazione cromatica globale e controllata.
 
 Per ciascuna generazione, la pipeline produce un manifest CSV e un summary JSON
 dedicati. I manifest sono collocati in \codepath{attacks/manifests/} e seguono una
@@ -709,7 +750,6 @@ degli attacchi, inclusa la variazione delle metriche rispetto agli input puliti,
 viene demandata alla sezione dedicata al protocollo di valutazione e,
 successivamente, al capitolo dei risultati sperimentali.
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-forensic transformation pipeline}
 \label{sec:methodology-anti-forensic-transformations}
@@ -746,16 +786,15 @@ La ricompressione \gls{jpeg} applica una nuova codifica lossy dell'immagine,
 introducendo artefatti compatibili con scenari ordinari di salvataggio,
 inoltro o conversione del file. La trasformazione resample~+~resize riduce
 temporaneamente la risoluzione dell'immagine e la riporta alla dimensione
-originaria mediante interpolazione, simulando degradazioni dovute a
-ridimensionamenti ripetuti o a passaggi tra piattaforme. Il Gaussian blur
-introduce una sfocatura controllata, utile a valutare la dipendenza del
-classificatore da dettagli locali e bordi ad alta frequenza. La histogram
-modification modifica la distribuzione tonale mediante equalizzazione
-dell'istogramma, mentre il contrast stretching applica una normalizzazione del
-contrasto attraverso autocontrast con cutoff controllato. Tali trasformazioni
-sono coerenti con una prospettiva anti-forense perché intervengono
-sull'artefatto immagine senza introdurre, almeno intenzionalmente, una
-perturbazione costruita sul modello.
+originaria mediante interpolazione, simulando degradazioni dovute a ridimensionamenti
+ripetuti o a passaggi tra piattaforme. Il Gaussian blur introduce una sfocatura
+controllata, utile a valutare la dipendenza del classificatore da dettagli
+locali e bordi ad alta frequenza. La histogram modification modifica la
+distribuzione tonale mediante equalizzazione dell'istogramma, mentre il contrast
+stretching applica una normalizzazione del contrasto attraverso autocontrast
+con cutoff controllato. Tali trasformazioni sono coerenti con una prospettiva
+anti-forense perché intervengono sull'artefatto immagine senza introdurre,
+almeno intenzionalmente, una perturbazione costruita sul modello.
 
 \begin{table}[H]
 \centering
@@ -765,13 +804,37 @@ perturbazione costruita sul modello.
 \toprule
 \textbf{Trasformazione} & \textbf{Operazione metodologica} & \textbf{Immagini} \\
 \midrule
-\texttt{jpeg\_recompression} & Ricompressione \gls{jpeg} con qualità controllata. & 1000 \\
-\texttt{resample\_resize}    & Downsampling seguito da ripristino della dimensione originaria. & 1000 \\
-\texttt{gaussian\_blur}      & Applicazione di sfocatura gaussiana con raggio controllato. & 1000 \\
-\texttt{histogram\_modification} & Equalizzazione dell'istogramma dell'immagine. & 1000 \\
-\texttt{contrast\_stretching} & Autocontrast con cutoff percentuale controllato. & 1000 \\
+\texttt{jpeg\_recompression}
+&
+Ricompressione \gls{jpeg} con qualità controllata.
+&
+1000 \\
+\texttt{resample\_resize}
+&
+Downsampling seguito da ripristino della dimensione originaria.
+&
+1000 \\
+\texttt{gaussian\_blur}
+&
+Applicazione di sfocatura gaussiana con raggio controllato.
+&
+1000 \\
+\texttt{histogram\_modification}
+&
+Equalizzazione dell'istogramma dell'immagine.
+&
+1000 \\
+\texttt{contrast\_stretching}
+&
+Autocontrast con cutoff percentuale controllato.
+&
+1000 \\
 \midrule
-\textbf{Totale} & Cinque trasformazioni applicate alle 1000 immagini del subset binario. & \textbf{5000} \\
+\textbf{Totale}
+&
+Cinque trasformazioni applicate alle 1000 immagini del subset binario.
+&
+\textbf{5000} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -805,10 +868,10 @@ pulito originario. Il manifest registra campi quali
 \texttt{final\_label}, \texttt{source\_dataset}, \texttt{clean\_relative\_path},
 \texttt{perturbed\_relative\_path}, \texttt{attack\_family},
 \texttt{attack\_name}, \texttt{attack\_parameters}, \texttt{sha256\_original},
-\texttt{md5\_original}, \texttt{sha256\_perturbed} e \texttt{md5\_perturbed}.
-La registrazione degli hash consente di verificare sia l'identità del file
-pulito sia quella dell'artefatto trasformato, preservando la tracciabilità tra
-input, trasformazione applicata e output generato.
+\texttt{md5\_original}, \texttt{sha256\_perturbed} e
+\texttt{md5\_perturbed}. La registrazione degli hash consente di verificare sia
+l'identità del file pulito sia quella dell'artefatto trasformato, preservando la
+tracciabilità tra input, trasformazione applicata e output generato.
 
 Il file di sintesi documenta inoltre i controlli di consistenza della fase di
 generazione: corrispondenza tra immagini attese e immagini effettivamente
@@ -819,6 +882,7 @@ coerenza tecnica della generazione degli artefatti anti-forensi. L'analisi
 dell'impatto di tali trasformazioni sulle prestazioni dei modelli e, in seguito,
 sugli strumenti forensi commerciali viene demandata alle sezioni dedicate al
 protocollo metrico e al capitolo dei risultati.
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -848,10 +912,10 @@ e una vista strutturata per l'audit interno e la verifica sperimentale.
 
 Nel run consolidato, il bundle è stato generato con layout \texttt{both}. La
 directory principale \codepath{datasets/forensic_evaluation_bundle/} contiene
-tre componenti: la directory \texttt{metadata/}, che conserva manifest e summary;
-la directory \texttt{blind\_tool\_input/files/}, che contiene esclusivamente i
+tre componenti: la directory \codepath{metadata/}, che conserva manifest e summary;
+la directory \codepath{blind_tool_input/files/}, che contiene esclusivamente i
 file da importare nei tool forensi; e la directory
-\texttt{structured\_audit\_view/}, che mantiene una vista organizzata per
+\codepath{structured_audit_view/}, che mantiene una vista organizzata per
 famiglia sperimentale. La struttura è sintetizzata nella
 Tabella~\ref{tab:methodology-forensic-bundle-layout}.
 
@@ -863,38 +927,45 @@ Tabella~\ref{tab:methodology-forensic-bundle-layout}.
 \toprule
 \textbf{Componente} & \textbf{Funzione metodologica} \\
 \midrule
-\texttt{metadata/}
+\codepath{metadata/}
 &
 Contiene \texttt{bundle\_manifest.csv}, \texttt{bundle\_hashes\_sha256.csv}
 e \texttt{bundle\_summary.json}. Conserva ground truth, provenienza, classi,
 famiglia di attacco, fold, hash e percorsi di controllo. \\
-\texttt{blind\_tool\_input/files/}
+\codepath{blind_tool_input/files/}
 &
-Contiene la vista cieca da importare nei tool commerciali. I file sono
-rinominati con identificativi neutri, ad esempio \texttt{bundle\_000001.jpg}
-o \texttt{bundle\_000002.png}. \\
-\texttt{structured\_audit\_view/clean/}      & Vista interna degli artefatti puliti del subset binario. \\
-\texttt{structured\_audit\_view/ood/}        & Vista interna del set \gls{ood}. \\
-\texttt{structured\_audit\_view/adversarial/} & Vista interna delle immagini generate mediante attacchi adversariali. \\
-\texttt{structured\_audit\_view/anti\_forensic/} & Vista interna delle immagini generate mediante trasformazioni anti-forensi. \\
+Contiene la vista cieca da importare nei tool commerciali. I file sono rinominati
+con identificativi neutri, ad esempio \texttt{bundle\_000001.jpg} o
+\texttt{bundle\_000002.png}. \\
+\codepath{structured_audit_view/clean/}
+&
+Vista interna degli artefatti puliti del subset binario. \\
+\codepath{structured_audit_view/ood/}
+&
+Vista interna del set \gls{ood}. \\
+\codepath{structured_audit_view/adversarial/}
+&
+Vista interna delle immagini generate mediante attacchi adversariali. \\
+\codepath{structured_audit_view/anti_forensic/}
+&
+Vista interna delle immagini generate mediante trasformazioni anti-forensi. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 Ai fini della valutazione con strumenti commerciali, deve essere importata
-esclusivamente la directory \texttt{blind\_tool\_input/files/}, contenuta
-all'interno di \codepath{datasets/forensic_evaluation_bundle/}. Non devono
-invece essere importate le directory \texttt{metadata/} e
-\texttt{structured\_audit\_view/}. Questa regola è essenziale per ridurre il
+esclusivamente la directory
+\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}.
+Non devono invece essere importate le directory \codepath{metadata/} e
+\codepath{structured_audit_view/}. Questa regola è essenziale per ridurre il
 rischio di \textit{path-induced bias} e \textit{analyst-induced bias}: nomi di
-cartelle o file contenenti informazioni come \texttt{weapon},
-\texttt{non\_weapon}, \texttt{ood}, \texttt{fgsm}, \texttt{sigma\_zero},
-\texttt{gaussian\_blur}, \texttt{efficientnet\_b0} o \texttt{fold\_1}
-potrebbero infatti rivelare la natura del campione prima dell'analisi automatica
-o manuale. La vista cieca impedisce che tali informazioni siano esposte allo
-strumento o all'analista durante la fase di importazione, mentre i metadati
-conservano la ground truth necessaria per la successiva normalizzazione dei
-risultati.
+cartelle o file contenenti informazioni come \texttt{weapon}, \texttt{non\_weapon},
+\texttt{ood}, \texttt{fgsm}, \texttt{sigma\_zero}, \texttt{gaussian\_blur},
+\texttt{efficientnet\_b0} o \texttt{fold\_1} potrebbero infatti rivelare la
+natura del campione prima dell'analisi automatica o manuale. La vista cieca
+impedisce che tali informazioni siano esposte allo strumento o all'analista
+durante la fase di importazione, mentre i metadati conservano la ground truth
+necessaria per la successiva normalizzazione dei risultati.
 
 Il bundle contiene complessivamente 11\,500 file nella vista cieca e 11\,500
 file nella vista strutturata. La composizione è riportata nella
@@ -911,17 +982,17 @@ incluse in modo tracciabile e bilanciato rispetto al disegno sperimentale.
 \toprule
 \textbf{Categoria} & \textbf{Numero di file} \\
 \midrule
-\texttt{clean}      & 1000 \\
-\texttt{ood}        & 500 \\
-\texttt{perturbed}  & 10\,000 \\
+\texttt{clean} & 1000 \\
+\texttt{ood} & 500 \\
+\texttt{perturbed} & 10\,000 \\
 \midrule
-\texttt{attack\_family = none}           & 1500 \\
-\texttt{attack\_family = adversarial}    & 5000 \\
+\texttt{attack\_family = none} & 1500 \\
+\texttt{attack\_family = adversarial} & 5000 \\
 \texttt{attack\_family = anti\_forensic} & 5000 \\
 \midrule
 \texttt{non\_weapon} & 5500 \\
-\texttt{weapon}      & 5500 \\
-\texttt{ood}         & 500 \\
+\texttt{weapon} & 5500 \\
+\texttt{ood} & 500 \\
 \midrule
 \textbf{Totale} & \textbf{11\,500} \\
 \bottomrule
@@ -941,11 +1012,9 @@ corrispondenza degli hash quando presenti nei manifest sorgente, assenza di
 blind path mancanti, pulizia semantica dei percorsi ciechi e separazione dei
 metadata dagli input dei tool.
 
-La valutazione operativa con strumenti commerciali considera come nucleo minimo
-Magnet AXIOM con Magnet.AI e X-Ways Forensics con Excire Photo AI. La metodologia
-prevede inoltre la possibilità di estendere l'analisi a Cellebrite \gls{ufed},
-Physical Analyzer o Inseyets, e a Oxygen Forensic Detective, qualora disponibili
-nel contesto sperimentale. Tali strumenti vengono trattati come sistemi
+La successiva valutazione operativa con strumenti commerciali utilizza il
+bundle come input controllato e separa la fase di importazione dei file dalla
+fase di normalizzazione degli output. I tool vengono trattati come sistemi
 black-box o quasi black-box: la pipeline non assume accesso ai modelli interni,
 alle soglie decisionali o alle logiche proprietarie di classificazione, ma
 analizza gli output esportabili e li normalizza rispetto a
@@ -954,7 +1023,6 @@ Questa impostazione è coerente con l'esigenza di valutare l'affidabilità
 operativa di strumenti professionali in condizioni controllate, senza confondere
 la validazione sperimentale con una certificazione generale del prodotto
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
-
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -1044,7 +1112,7 @@ luogo, vengono esportati i risultati prodotti dallo strumento, includendo ove
 disponibili il nome del file, l'hash, la categoria assegnata, eventuali tag,
 punteggi di confidenza, stati di mancato rilevamento e metadati rilevanti. In
 terzo luogo, gli output vengono ricondotti al file
-\codepath{bundle_manifest.csv} mediante \texttt{bundle_id}, nome del file cieco
+\texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, nome del file cieco
 o hash, così da confrontare le categorie prodotte dal tool con la ground truth
 sperimentale.
 
@@ -1063,6 +1131,7 @@ commerciali senza attribuire loro proprietà interne non verificabili. La
 valutazione rimane quindi ancorata agli output osservabili e alla loro coerenza
 rispetto al manifest sperimentale, mantenendo separati il piano metodologico,
 la misurazione quantitativa e la successiva interpretazione dei risultati.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Evaluation metrics}
@@ -1087,19 +1156,12 @@ anti-forensi, applicando il protocollo ai tre proxy model ufficiali:
 \texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}. Gli artefatti
 prodotti comprendono il file
 \codepath{evaluation/proxy_models/proxy_model_predictions.csv} e i file metrici
-in \codepath{results/metrics/}:
-
-\codepath{proxy_model_clean_metrics.csv},
-
-\codepath{proxy_model_adversarial_metrics.csv},
-
-\codepath{proxy_model_anti_forensic_metrics.csv},
-
-\codepath{proxy_model_ood_metrics.csv},
-
-\codepath{proxy_model_comparative_metrics.csv} e
-
-\codepath{proxy_model_evaluation_summary.json}.
+in \codepath{results/metrics/}: \texttt{proxy\_model\_clean\_metrics.csv},
+\texttt{proxy\_model\_adversarial\_metrics.csv},
+\texttt{proxy\_model\_anti\_forensic\_metrics.csv},
+\texttt{proxy\_model\_ood\_metrics.csv},
+\texttt{proxy\_model\_comparative\_metrics.csv} e
+\texttt{proxy\_model\_evaluation\_summary.json}.
 
 Il run di valutazione dei proxy model comprende 11\,500 campioni in input e
 40\,500 righe di predizione, senza errori registrati. La distribuzione delle
@@ -1124,19 +1186,27 @@ performance.
 \textbf{Artefatto} & \textbf{Funzione metodologica} \\
 \midrule
 \texttt{proxy\_model\_predictions.csv}
-& Raccoglie le predizioni dei proxy model sui campioni clean, \gls{ood}, adversariali e anti-forensi. \\
+&
+Raccoglie le predizioni dei proxy model sui campioni clean, \gls{ood},
+adversariali e anti-forensi. \\
 \texttt{proxy\_model\_clean\_metrics.csv}
-& Contiene le metriche sui clean folds. \\
+&
+Contiene le metriche sui clean folds. \\
 \texttt{proxy\_model\_adversarial\_metrics.csv}
-& Contiene le metriche relative agli input adversariali. \\
+&
+Contiene le metriche relative agli input adversariali. \\
 \texttt{proxy\_model\_anti\_forensic\_metrics.csv}
-& Contiene le metriche relative alle trasformazioni anti-forensi. \\
+&
+Contiene le metriche relative alle trasformazioni anti-forensi. \\
 \texttt{proxy\_model\_ood\_metrics.csv}
-& Contiene le metriche specifiche per il comportamento fuori distribuzione. \\
+&
+Contiene le metriche specifiche per il comportamento fuori distribuzione. \\
 \texttt{proxy\_model\_comparative\_metrics.csv}
-& Integra il confronto tra condizioni clean, perturbate e \gls{ood}. \\
+&
+Integra il confronto tra condizioni clean, perturbate e \gls{ood}. \\
 \texttt{proxy\_model\_evaluation\_summary.json}
-& Riassume copertura del run, modelli valutati, conteggi e assenza di errori. \\
+&
+Riassume copertura del run, modelli valutati, conteggi e assenza di errori. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1172,15 +1242,27 @@ classi operative del task.
 \textbf{Categoria} & \textbf{Metriche e significato operativo} \\
 \midrule
 Classificazione binaria
-& Accuracy, balanced accuracy, precision, recall, F1-score e confusion matrix per \texttt{weapon} e \texttt{non\_weapon}. \\
+&
+Accuracy, balanced accuracy, precision, recall, F1-score e confusion matrix
+per \texttt{weapon} e \texttt{non\_weapon}. \\
 Robustezza clean/manipulated
-& Clean accuracy, perturbed accuracy, accuracy drop, induced error count, induced error rate, confidence delta e true-label confidence delta. \\
+&
+Clean accuracy, perturbed accuracy, accuracy drop, induced error count,
+induced error rate, confidence delta e true-label confidence delta. \\
 Errori critici
-& Transizioni \texttt{weapon}~$\rightarrow$~\texttt{non\_weapon} e \texttt{non\_weapon}~$\rightarrow$~\texttt{weapon}, con priorità interpretativa ai falsi negativi su contenuti rilevanti. \\
+&
+Transizioni \texttt{weapon}~$\rightarrow$~\texttt{non\_weapon} e
+\texttt{non\_weapon}~$\rightarrow$~\texttt{weapon}, con priorità interpretativa
+ai falsi negativi su contenuti rilevanti. \\
 Comportamento \gls{ood}
-& \gls{ood} predicted as \texttt{weapon}, \gls{ood} predicted as \texttt{non\_weapon} e \gls{ood} high-confidence rate. \\
+&
+\gls{ood} predicted as \texttt{weapon}, \gls{ood} predicted as
+\texttt{non\_weapon} e \gls{ood} high-confidence rate. \\
 Tool commerciali
-& True positive, false negative, false positive, true negative, unknown, not detected, uncategorized, weapon recall, weapon false negative rate, false positive rate e balanced accuracy dove applicabile. \\
+&
+True positive, false negative, false positive, true negative, unknown,
+not detected, uncategorized, weapon recall, weapon false negative rate,
+false positive rate e balanced accuracy dove applicabile. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1254,15 +1336,25 @@ alla discussione qualitativa della robustezza.
 \textbf{Categoria di caso} & \textbf{Funzione diagnostica} \\
 \midrule
 Clean corretta e perturbata errata
-& Analizzare come la perturbazione modifichi le regioni rilevanti per la decisione del proxy model. \\
+&
+Analizzare come la perturbazione modifichi le regioni rilevanti per la decisione
+del proxy model. \\
 \texttt{weapon}~$\rightarrow$~\texttt{non\_weapon}
-& Esaminare errori operativamente critici in cui un contenuto rilevante viene ricondotto alla classe negativa. \\
+&
+Esaminare errori operativamente critici in cui un contenuto rilevante viene
+ricondotto alla classe negativa. \\
 \gls{ood} ad alta confidenza
-& Valutare casi in cui un input fuori distribuzione viene forzato in una classe binaria con confidenza elevata. \\
+&
+Valutare casi in cui un input fuori distribuzione viene forzato in una classe
+binaria con confidenza elevata. \\
 Divergenze tra proxy model
-& Confrontare il comportamento di architetture diverse rispetto allo stesso artefatto. \\
+&
+Confrontare il comportamento di architetture diverse rispetto allo stesso
+artefatto. \\
 Divergenze proxy/tool
-& Predisporre casi per il confronto qualitativo con gli output osservabili dei tool commerciali, ove disponibili. \\
+&
+Predisporre casi per il confronto qualitativo con gli output osservabili dei
+tool commerciali, ove disponibili. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1296,11 +1388,10 @@ La tracciabilità costituisce un requisito trasversale dell'intero framework
 attraversa tutte le fasi della pipeline: preparazione tecnica, revisione
 \textit{human-in-the-loop}, freezing, split generation, addestramento dei proxy
 model, generazione adversariale, trasformazioni anti-forensi, costruzione del
-bundle, valutazione metrica e approccio di \gls{xai}. In coerenza con i principi
-della \gls{df}, ogni trasformazione dell'artefatto digitale deve essere
-documentata in modo da consentire la ricostruzione del percorso tra file
-originario, artefatto derivato, output sperimentale e metadati di verifica
-\cite{casey2011digital,nist2006guide,iso27037}.
+bundle, valutazione metrica e approccio di \gls{xai}. In coerenza con i principi della
+\gls{df}, ogni trasformazione dell'artefatto digitale deve essere documentata in
+modo da consentire la ricostruzione del percorso tra file originario, artefatto
+derivato, output sperimentale e metadati di verifica \cite{casey2011digital,nist2006guide,iso27037}.
 
 Il valore SHA256 è l'identificatore crittografico principale della pipeline.
 Esso viene calcolato sui file preparati, propagato nei manifest successivi e
@@ -1312,15 +1403,15 @@ registrazione non attribuisce all'MD5 il ruolo di identificatore primario, ma ne
 preserva l'utilità operativa nel raccordo con tool e formati eterogenei.
 
 La pipeline utilizza manifest progressivi. Il passaggio da
-\texttt{metadata.csv} a \codepath{review_manifest_full.csv}, poi a
-\codepath{manual_selection_final_1500.csv},
-\codepath{manual_selection_adversarial_subset.csv},
-\codepath{clean_folds_manifest.csv}, \codepath{ood_eval_manifest.csv},
-manifest degli attacchi, manifest anti-forense, \codepath{bundle_manifest.csv},
+\texttt{metadata.csv} a \texttt{review\_manifest\_full.csv}, poi a
+\texttt{manual\_selection\_final\_1500.csv},
+\texttt{manual\_selection\_adversarial\_subset.csv},
+\texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv},
+manifest degli attacchi, manifest anti-forense, \texttt{bundle\_manifest.csv},
 predizioni dei proxy model e manifest \gls{xai}, consente di ricostruire il
 ciclo di vita del campione sperimentale. La relazione tra
-\codepath{original_image_id}, \codepath{generated_image_id},
-\codepath{bundle_id}, hash e path rappresenta il collegamento minimo necessario
+\texttt{original\_image\_id}, \texttt{generated\_image\_id},
+\texttt{bundle\_id}, hash e path rappresenta il collegamento minimo necessario
 per verificare che un risultato sia riferito al file corretto.
 
 \begin{table}[H]
@@ -1332,27 +1423,42 @@ per verificare che un risultato sia riferito al file corretto.
 \textbf{Artefatto} & \textbf{Ruolo nella tracciabilità} \\
 \midrule
 \texttt{metadata.csv}
-& Registra identità tecnica, sorgente, path, dimensioni e SHA256 del pool preparato. \\
+&
+Registra identità tecnica, sorgente, path, dimensioni e SHA256 del pool
+preparato. \\
 \texttt{review\_manifest\_full.csv}
-& Collega il pool tecnico alla revisione semantica \textit{human-in-the-loop}. \\
+&
+Collega il pool tecnico alla revisione semantica \textit{human-in-the-loop}. \\
 \texttt{manual\_selection\_final\_1500.csv}
-& Definisce il dataset congelato e la ground truth principale. \\
+&
+Definisce il dataset congelato e la ground truth principale. \\
 \texttt{manual\_selection\_adversarial\_subset.csv}
-& Definisce il subset binario usato per addestramento, attacchi e trasformazioni. \\
+&
+Definisce il subset binario usato per addestramento, attacchi e trasformazioni. \\
 \texttt{clean\_folds\_manifest.csv}
-& Registra fold, classi, path e hash degli input puliti del task binario. \\
+&
+Registra fold, classi, path e hash degli input puliti del task binario. \\
 \texttt{ood\_eval\_manifest.csv}
-& Registra i campioni fuori distribuzione mantenuti separati dal task binario. \\
+&
+Registra i campioni fuori distribuzione mantenuti separati dal task binario. \\
 \texttt{adversarial\_*\_manifest.csv}
-& Collega ogni immagine adversariale al campione pulito, al fold, al target model e al checkpoint. \\
+&
+Collega ogni immagine adversariale al campione pulito, al fold, al target model
+e al checkpoint. \\
 \texttt{anti\_forensic\_attacks\_manifest.csv}
-& Registra trasformazione applicata, parametri, path e hash delle immagini anti-forensi. \\
+&
+Registra trasformazione applicata, parametri, path e hash delle immagini
+anti-forensi. \\
 \texttt{bundle\_manifest.csv}
-& Mappa ogni \texttt{bundle\_id} alla ground truth e agli artefatti sorgente, mantenendo separata la vista cieca. \\
+&
+Mappa ogni \texttt{bundle\_id} alla ground truth e agli artefatti sorgente,
+mantenendo separata la vista cieca. \\
 \texttt{proxy\_model\_predictions.csv}
-& Collega predizioni, modello, campione e condizione sperimentale. \\
+&
+Collega predizioni, modello, campione e condizione sperimentale. \\
 \texttt{xai\_case\_studies\_manifest.csv}
-& Documenta i casi selezionati per l'analisi qualitativa mediante \gls{xai}. \\
+&
+Documenta i casi selezionati per l'analisi qualitativa mediante \gls{xai}. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1361,12 +1467,12 @@ La riproducibilità è rafforzata da controlli deterministici e da registri di
 configurazione. La generazione degli split utilizza seed 42, mentre i proxy
 model sono addestrati secondo un protocollo fold-aware. Per ogni modello e fold,
 il file \codepath{models/model_registry.json} registra il checkpoint, la
-normalizzazione, la dimensione di input e l'hash SHA256 del file \texttt{.pt}.
-Gli attacchi model-dependent utilizzano checkpoint specifici del fold, riducendo
-il rischio di leakage tra immagini usate per l'addestramento e immagini
-perturbate o valutate. Tale controllo anti-leakage è centrale perché la
-robustezza non deve essere misurata su campioni che il proxy model ha già visto
-durante il training.
+normalizzazione, la dimensione di input e l'hash SHA256 del file
+\texttt{.pt}. Gli attacchi model-dependent utilizzano checkpoint specifici del
+fold, riducendo il rischio di leakage tra immagini usate per l'addestramento e
+immagini perturbate o valutate. Tale controllo anti-leakage è centrale perché
+la robustezza non deve essere misurata su campioni che il proxy model ha già
+visto durante il training.
 
 Un ulteriore controllo riguarda il rischio di bias nella valutazione con tool
 commerciali. Il forensic evaluation bundle separa in modo esplicito la directory
