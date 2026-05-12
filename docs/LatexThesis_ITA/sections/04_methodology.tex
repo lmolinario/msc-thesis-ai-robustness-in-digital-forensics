@@ -135,7 +135,7 @@ che appartiene alla qualità tecnica dell'immagine da ciò che riguarda la sua
 interpretazione semantica rispetto al task forense.
 
 La fase iniziale ha previsto l'organizzazione di cinque sorgenti eterogenee
-all'interno della directory \texttt{datasets/raw/}. Le sorgenti comprendono
+all'interno della directory \codepath{datasets/raw/}. Le sorgenti comprendono
 dataset pubblici, materiale derivato da repository specializzate, raccolte
 ottenute mediante scraping controllato, contenuti acquisiti secondo una logica
 \gls{osint} e dati provenienti da fonti deep web-oriented. L'obiettivo non era
@@ -171,8 +171,8 @@ le indagini digitali contemporanee.
 \end{table}
 
 A partire dalle sorgenti grezze, lo script
-\texttt{datasets/scripts/prepared/08\_build\_prepared\_dataset.py} costruisce
-il pool preparato in \texttt{datasets/prepared/final\_pool/}. Questa fase non
+\codepath{datasets/scripts/prepared/08_build_prepared_dataset.py} costruisce
+il pool preparato in \codepath{datasets/prepared/final_pool/}. Questa fase non
 assegna etichette semantiche definitive, ma produce una base tecnica validata
 attraverso controlli di leggibilità, filtraggio dimensionale, calcolo degli hash
 e rimozione dei duplicati esatti. In particolare, ogni immagine candidata viene
@@ -220,10 +220,10 @@ Sezione~\ref{sec:methodology-human-review}.
 
 Dopo la costruzione del pool preparato, la pipeline genera un manifest di
 revisione completo mediante lo script
-\texttt{datasets/scripts/prepared/09\_generate\_review\_manifest\_full.py}.
+\codepath{datasets/scripts/prepared/09_generate_review_manifest_full.py}.
 Questo passaggio costituisce il raccordo tra la preparazione tecnica del dataset
 e la successiva selezione manuale. Il file prodotto,
-\texttt{datasets/prepared/manifests/review\_manifest\_full.csv}, conserva le
+\codepath{datasets/prepared/manifests/review_manifest_full.csv}, conserva le
 informazioni tecniche provenienti da \texttt{metadata.csv} e introduce colonne
 dedicate alla revisione semantica.
 
@@ -258,7 +258,7 @@ aperte.
 
 La selezione finale del dataset è stata eseguita mediante un protocollo
 \textit{human-in-the-loop}, implementato nello script
-\texttt{datasets/scripts/final/10\_manual\_selection\_protocol\_reviewer.py}.
+\codepath{datasets/scripts/final/10_manual_selection_protocol_reviewer.py}.
 Tale protocollo consente al revisore di ispezionare manualmente le immagini del
 pool preparato, assegnando una delle etichette finali previste: \texttt{weapon},
 \texttt{non\_weapon}, \texttt{ood} o \texttt{exclude}. Le decisioni del
@@ -281,7 +281,7 @@ anomali rispetto al dominio di interesse. La classe \texttt{exclude} è riservat
 a file non utilizzabili o non coerenti con il dataset finale.
 
 Il risultato della revisione è il dataset frozen ufficiale, registrato nel
-manifest \texttt{datasets/final/manifests/manual\_selection\_final\_1500.csv}.
+manifest \codepath{datasets/final/manifests/manual_selection_final_1500.csv}.
 Il dataset finale contiene 1500 immagini bilanciate nelle tre classi principali,
 come indicato nella Tabella~\ref{tab:methodology-final-dataset}. La
 distribuzione per sorgente e classe, riportata nella
@@ -336,7 +336,7 @@ dei criteri e riproducibilità documentale del processo di freezing del dataset.
 
 A partire dal dataset frozen viene inoltre generato il subset binario ufficiale
 per gli esperimenti adversariali e anti-forensi, memorizzato in
-\texttt{datasets/final/manifests/manual\_selection\_adversarial\_subset.csv}.
+\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}.
 Questo subset contiene esclusivamente le classi \texttt{weapon} e
 \texttt{non\_weapon}, per un totale di 1000 immagini bilanciate. I campioni
 \gls{ood} non vengono utilizzati come target primari per la generazione delle
@@ -378,7 +378,7 @@ composizione del dataset.
 
 La fase successiva della pipeline dataset consiste nella generazione degli split
 puliti e del set \gls{ood}. Questa operazione è eseguita mediante lo script
-\texttt{datasets/scripts/splits/11\_generate\_clean\_and\_ood\_splits.py},
+\codepath{datasets/scripts/splits/11_generate_clean_and_ood_splits.py},
 che utilizza come input i due manifest ufficiali prodotti nella fase di
 freezing: \texttt{manual\_selection\_final\_1500.csv} e
 \texttt{manual\_selection\_adversarial\_subset.csv}. Lo script non modifica
@@ -421,7 +421,7 @@ modelli viene descritto nella Sezione~\ref{sec:methodology-models-classification
 
 La classe \texttt{ood} viene invece mantenuta separata dal subset binario e
 organizzata in un unico set di valutazione, collocato in
-\texttt{datasets/splits/ood/ood\_eval\_set/ood/}. Questa scelta riflette la
+\codepath{datasets/splits/ood/ood_eval_set/ood/}. Questa scelta riflette la
 diversa funzione metodologica dei campioni fuori distribuzione. Essi non sono
 utilizzati per generare perturbazioni adversariali o anti-forensi su classi
 note, ma per valutare il comportamento dei sistemi quando ricevono contenuti
@@ -552,12 +552,12 @@ tra training e holdout sperimentale.
 \end{table}
 
 Lo script ufficiale per l'addestramento dei proxy model è
-\texttt{models/scripts/12\_train\_proxy\_models.py}. Esso utilizza come input
-il manifest \texttt{datasets/splits/manifests/clean\_folds\_manifest.csv},
+\codepath{models/scripts/12_train_proxy_models.py}. Esso utilizza come input
+il manifest \codepath{datasets/splits/manifests/clean_folds_manifest.csv},
 applica il mapping binario \texttt{non\_weapon}~$\rightarrow 0$ e
 \texttt{weapon}~$\rightarrow 1$, genera i checkpoint in
-\texttt{models/checkpoints/<model\_name>/<fold>.pt} e aggiorna il registro
-\texttt{models/model\_registry.json}. Il registro dei modelli documenta, per
+\codepath{models/checkpoints/<model_name>/<fold>.pt} e aggiorna il registro
+\codepath{models/model_registry.json}. Il registro dei modelli documenta, per
 ciascuna architettura e per ciascun fold, il pattern del checkpoint, la
 dimensione di input, la normalizzazione utilizzata e l'hash SHA256 del file
 prodotto. La registrazione dell'hash del checkpoint è metodologicamente rilevante
@@ -566,7 +566,7 @@ generazione degli attacchi model-dependent e le valutazioni di robustezza, siano
 riconducibili a una versione specifica e immutata del modello. I parametri di
 addestramento, tra cui ottimizzatore, learning rate, batch size, numero di epoche
 e configurazioni specifiche dei singoli modelli, sono documentati nello script di
-training e nel registro \texttt{models/model\_registry.json}, così da mantenere
+training e nel registro \codepath{models/model_registry.json}, così da mantenere
 separata la descrizione metodologica del protocollo dalla riproduzione dettagliata
 della configurazione implementativa.
 
@@ -604,14 +604,14 @@ manipolate delle immagini appartenenti al subset binario
 \texttt{weapon}/\texttt{non\_weapon}, preservando il collegamento tra ciascun
 campione perturbato e la corrispondente immagine pulita. La generazione degli
 attacchi utilizza come input il manifest
-\texttt{datasets/splits/manifests/clean\_folds\_manifest.csv}, composto da
+\codepath{datasets/splits/manifests/clean_folds_manifest.csv}, composto da
 1000 immagini distribuite in cinque fold bilanciati. I campioni \texttt{ood}
 non vengono utilizzati in questa fase, poiché la loro funzione metodologica è
 distinta: essi servono a valutare il comportamento fuori distribuzione e non a
 produrre perturbazioni adversariali rispetto a classi binarie note.
 
 Lo script ufficiale per questa fase è
-\texttt{datasets/scripts/attacks/14\_generate\_adversarial\_attacks.py}. Esso
+\codepath{datasets/scripts/attacks/14_generate_adversarial_attacks.py}. Esso
 costituisce l'entry point fold-aware per la generazione degli attacchi
 adversariali e supporta sia una modalità interattiva, utile per l'esecuzione
 guidata, sia una modalità a riga di comando, più adatta alla riproducibilità
@@ -625,7 +625,7 @@ Gli attacchi model-dependent utilizzati nella pipeline corrente sono
 \gls{fgsm}, One Pixel Attack, Sigma Zero Attack e SuperDeepFool. Essi vengono
 generati rispetto a EfficientNet-B0, assunto come primary proxy target. Per ogni
 immagine appartenente a un determinato fold, lo script carica il checkpoint
-corrispondente da \texttt{models/checkpoints/<target\_model>/<fold>.pt}.
+corrispondente da \codepath{models/checkpoints/<target_model>/<fold>.pt}.
 Questa scelta mantiene la coerenza con il protocollo fold-aware: l'immagine di
 un fold viene perturbata usando il modello addestrato secondo la separazione
 definita nella fase di training dei proxy model. La procedura evita quindi di
@@ -668,13 +668,13 @@ soglia e dell'approssimazione differenziabile della norma \(L_0\)
 \cite{zhao2024sigmazero}. SuperDeepFool è adottato come variante iterativa
 basata su una logica di attraversamento del confine decisionale, richiamando la
 famiglia di metodi ispirati a DeepFool
-\cite{moosavi2016deepfool,zajac2020superdeepfool}. Color Shift, infine, non è
+\cite{moosavi2016deepfool,zhang2024superdeepfool}. Color Shift, infine, non è
 trattato come attacco ottimizzato rispetto al modello, ma come trasformazione
 adversarial-style model-agnostic, utile per introdurre una manipolazione
 cromatica globale e controllata.
 
 Per ciascuna generazione, la pipeline produce un manifest CSV e un summary JSON
-dedicati. I manifest sono collocati in \texttt{attacks/manifests/} e seguono una
+dedicati. I manifest sono collocati in \codepath{attacks/manifests/} e seguono una
 nomenclatura che combina famiglia adversariale, nome dell'attacco e, quando
 presente, modello target. Ogni riga mantiene il collegamento con il campione
 pulito originario attraverso campi quali \texttt{generated\_image\_id},
@@ -729,13 +729,13 @@ modifiche realistiche che possono alterare caratteristiche visive o statistiche
 dell'immagine senza necessariamente renderla semanticamente irriconoscibile.
 
 Lo script ufficiale per questa fase è
-\texttt{datasets/scripts/attacks/13\_generate\_anti\_forensic\_attacks.py}.
+\codepath{datasets/scripts/attacks/13_generate_anti_forensic_attacks.py}.
 Esso utilizza come input il manifest
-\texttt{datasets/splits/manifests/clean\_folds\_manifest.csv} e genera gli
-artefatti trasformati nella directory \texttt{attacks/anti\_forensic/}. La
+\codepath{datasets/splits/manifests/clean_folds_manifest.csv} e genera gli
+artefatti trasformati nella directory \codepath{attacks/anti_forensic/}. La
 struttura di output mantiene la separazione per trasformazione, fold e classe,
 secondo il pattern
-\texttt{attacks/anti\_forensic/<attack>/<fold>/<label>/<image\_id>\_\_<attack>.jpg}.
+\codepath{attacks/anti_forensic/<attack>/<fold>/<label>/<image_id>__<attack>.jpg}.
 Tale organizzazione consente di preservare il collegamento tra ciascuna immagine
 trasformata, il fold di appartenenza, la classe originaria e il corrispondente
 campione pulito.
@@ -787,7 +787,7 @@ successive, degli strumenti forensi, rispetto a un insieme bilanciato di
 manipolazioni non ottimizzate sul classificatore.
 
 I parametri principali della generazione sono registrati nel summary
-\texttt{attacks/manifests/anti\_forensic\_generation\_summary.json}. Nel run
+\codepath{attacks/manifests/anti_forensic_generation_summary.json}. Nel run
 corrente, la ricompressione \gls{jpeg} utilizza qualità 70, la trasformazione
 resample~+~resize applica un fattore di scala pari a 0.5, il Gaussian blur usa
 raggio 1.5 e il contrast stretching usa cutoff pari a 1.0. Tutte le immagini
@@ -798,7 +798,7 @@ come configurazione controllata e riproducibile per introdurre degradazioni
 moderate e comparabili sull'intero subset sperimentale.
 
 La pipeline produce il manifest
-\texttt{attacks/manifests/anti\_forensic\_attacks\_manifest.csv}, nel quale ogni
+\codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}, nel quale ogni
 riga descrive un'immagine trasformata e mantiene il collegamento con il campione
 pulito originario. Il manifest registra campi quali
 \texttt{generated\_image\_id}, \texttt{original\_image\_id}, \texttt{fold},
@@ -838,7 +838,7 @@ dagli input effettivamente sottoposti agli strumenti, preservandola nei metadati
 di controllo.
 
 Lo script ufficiale per questa fase è
-\texttt{datasets/scripts/bundle/16\_build\_forensic\_evaluation\_bundle.py}.
+\codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py}.
 Il bundle viene generato a partire dagli artefatti già consolidati della pipeline:
 immagini pulite del subset binario, set \gls{ood}, immagini adversariali e
 immagini anti-forensi. L'obiettivo non è soltanto raccogliere i file in una
@@ -847,7 +847,7 @@ complementari: una vista cieca e piatta per l'importazione nei tool commerciali,
 e una vista strutturata per l'audit interno e la verifica sperimentale.
 
 Nel run consolidato, il bundle è stato generato con layout \texttt{both}. La
-directory principale \texttt{datasets/forensic\_evaluation\_bundle/} contiene
+directory principale \codepath{datasets/forensic_evaluation_bundle/} contiene
 tre componenti: la directory \texttt{metadata/}, che conserva manifest e summary;
 la directory \texttt{blind\_tool\_input/files/}, che contiene esclusivamente i
 file da importare nei tool forensi; e la directory
@@ -883,7 +883,7 @@ o \texttt{bundle\_000002.png}. \\
 
 Ai fini della valutazione con strumenti commerciali, deve essere importata
 esclusivamente la directory \texttt{blind\_tool\_input/files/}, contenuta
-all'interno di \texttt{datasets/forensic\_evaluation\_bundle/}. Non devono
+all'interno di \codepath{datasets/forensic_evaluation_bundle/}. Non devono
 invece essere importate le directory \texttt{metadata/} e
 \texttt{structured\_audit\_view/}. Questa regola è essenziale per ridurre il
 rischio di \textit{path-induced bias} e \textit{analyst-induced bias}: nomi di
@@ -949,7 +949,7 @@ nel contesto sperimentale. Tali strumenti vengono trattati come sistemi
 black-box o quasi black-box: la pipeline non assume accesso ai modelli interni,
 alle soglie decisionali o alle logiche proprietarie di classificazione, ma
 analizza gli output esportabili e li normalizza rispetto a
-\texttt{datasets/forensic\_evaluation\_bundle/metadata/bundle\_manifest.csv}.
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}.
 Questa impostazione è coerente con l'esigenza di valutare l'affidabilità
 operativa di strumenti professionali in condizioni controllate, senza confondere
 la validazione sperimentale con una certificazione generale del prodotto
@@ -973,18 +973,25 @@ critiche di un falso positivo, poiché può ridurre la priorità assegnata a un
 artefatto che meriterebbe ulteriore analisi.
 
 La valutazione consolidata dei proxy model viene eseguita mediante lo script
-\texttt{evaluation/scripts/15\_evaluate\_proxy\_models.py}. Lo script considera
+\codepath{evaluation/scripts/15_evaluate_proxy_models.py}. Lo script considera
 i clean folds, il set \gls{ood}, le immagini adversariali e le immagini
 anti-forensi, applicando il protocollo ai tre proxy model ufficiali:
 \texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}. Gli artefatti
 prodotti comprendono il file
-\texttt{evaluation/proxy\_models/proxy\_model\_predictions.csv} e i file metrici
-in \texttt{results/metrics/}: \texttt{proxy\_model\_clean\_metrics.csv},
-\texttt{proxy\_model\_adversarial\_metrics.csv},
-\texttt{proxy\_model\_anti\_forensic\_metrics.csv},
-\texttt{proxy\_model\_ood\_metrics.csv},
-\texttt{proxy\_model\_comparative\_metrics.csv} e
-\texttt{proxy\_model\_evaluation\_summary.json}.
+\codepath{evaluation/proxy_models/proxy_model_predictions.csv} e i file metrici
+in \codepath{results/metrics/}:
+
+\codepath{proxy/model/clean/metrics.csv},
+
+\codepath{proxy/model/adversarial/metrics.csv},
+
+\codepath{proxy/model/anti/forensic/metrics.csv},
+
+\codepath{proxy/model/ood/metrics.csv},
+
+\codepath{proxy/model/comparative/metrics.csv} e
+
+\codepath{proxy/model/evaluation/summary.json}.
 
 Il run di valutazione dei proxy model comprende 11\,500 campioni in input e
 40\,500 righe di predizione, senza errori registrati. La distribuzione delle
@@ -1108,7 +1115,7 @@ predizione del modello e per confrontare, a livello qualitativo, campioni puliti
 campioni perturbati e casi fuori distribuzione.
 
 Lo script ufficiale previsto per questa fase è
-\texttt{explainability/scripts/17\_generate\_integrated\_gradients\_case\_studies.py}.
+\codepath{explainability/scripts/17_generate_integrated_gradients_case_studies.py}.
 La tecnica considerata è Integrated Gradients, applicabile ai proxy model
 trasparenti per i quali sono disponibili architettura, pesi e pipeline di
 pre-processing \cite{Sundararajan2017}. La tecnica non è invece applicabile
@@ -1119,7 +1126,7 @@ potranno quindi avvenire solo a livello di output osservabile, non di
 attribuzione interna.
 
 L'input principale della fase \gls{xai} è
-\texttt{evaluation/proxy\_models/proxy\_model\_predictions.csv}. A partire da
+\codepath{evaluation/proxy_models/proxy_model_predictions.csv}. A partire da
 tale file, la pipeline seleziona casi diagnostici rappresentativi. Le categorie
 di interesse includono immagini classificate correttamente nella versione pulita
 e classificate erroneamente nella versione perturbata, transizioni critiche
@@ -1153,10 +1160,10 @@ Divergenze proxy/tool
 \end{table}
 
 Gli output previsti sono salvati in
-\texttt{explainability/outputs/integrated\_gradients/} e documentati mediante
-tre manifest: \texttt{explainability/manifests/integrated\_gradients\_manifest.csv},
-\texttt{explainability/manifests/xai\_case\_studies\_manifest.csv} e
-\texttt{explainability/manifests/integrated\_gradients\_summary.json}. Il primo
+\codepath{explainability/outputs/integrated_gradients/} e documentati mediante
+tre manifest: \codepath{explainability/manifests/integrated_gradients_manifest.csv},
+\codepath{explainability/manifests/xai_case_studies_manifest.csv} e
+\codepath{explainability/manifests/integrated_gradients_summary.json}. Il primo
 manifest registra gli artefatti di attribuzione generati; il secondo documenta
 i criteri di selezione dei casi; il terzo riassume il run e i controlli eseguiti.
 Questa organizzazione consente di mantenere la stessa logica di tracciabilità
@@ -1245,7 +1252,7 @@ per verificare che un risultato sia riferito al file corretto.
 La riproducibilità è rafforzata da controlli deterministici e da registri di
 configurazione. La generazione degli split utilizza seed 42, mentre i proxy
 model sono addestrati secondo un protocollo fold-aware. Per ogni modello e fold,
-il file \texttt{models/model\_registry.json} registra il checkpoint, la
+il file \codepath{models/model_registry.json} registra il checkpoint, la
 normalizzazione, la dimensione di input e l'hash SHA256 del file \texttt{.pt}.
 Gli attacchi model-dependent utilizzano checkpoint specifici del fold, riducendo
 il rischio di leakage tra immagini usate per l'addestramento e immagini

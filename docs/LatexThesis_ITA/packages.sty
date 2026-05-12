@@ -62,11 +62,10 @@ sortcites=true
 \usepackage{fontawesome5}
 
 % --- Image ---
+
 \usepackage{graphicx}
 \usepackage{wrapfig}
 \usepackage{float}
-\usepackage{url}
-\urlstyle{sf}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
 % --- Flow Charts and Diagrams ---
@@ -152,6 +151,7 @@ sortcites=true
 }
 
 % --- Hyperlinks ---
+\usepackage{xurl}
 \usepackage{hyperref}
 \hypersetup{
     colorlinks,
@@ -159,6 +159,14 @@ sortcites=true
     filecolor=black,
     linkcolor=black,
     urlcolor=black
+}
+
+% Breakable monospaced paths for scripts, manifests and repository artifacts.
+\newcommand{\codepath}[1]{%
+    \begingroup
+    \urlstyle{tt}%
+    \nolinkurl{#1}%
+    \endgroup
 }
 
 % --- Header and footer ---
