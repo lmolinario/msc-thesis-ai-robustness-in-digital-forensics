@@ -20,13 +20,14 @@ and executes the corresponding command for the official XAI script.
 
 Main workflows
 --------------
-1. Critical weapon -> non_weapon cases, true-label attribution.
-2. Critical weapon -> non_weapon cases, both true-label and predicted-label attribution.
-3. High-confidence OOD cases, predicted-label attribution.
-4. Attack-stratified manual case selection and IG generation.
-5. Attack-stratified manual selection only.
-6. Generate IG from an existing manual selection manifest.
-7. Custom guided run.
+1. Auto XAI: critical weapon -> non_weapon cases, true-label attribution.
+2. Auto XAI: critical weapon -> non_weapon cases, true-label and predicted-label attribution.
+3. Auto XAI: high-confidence OOD cases, predicted-label attribution.
+4. Manual XAI: select N cases for one attack and generate IG.
+5. Manual XAI: select N cases for all attacks and generate IG.
+6. Manual XAI: select N cases for all attacks and save the manifest only.
+7. Generate IG from an existing manual selection manifest.
+8. Custom guided run.
 
 Methodological notes
 --------------------
@@ -34,6 +35,19 @@ Methodological notes
 - The launcher prints and saves the exact command used for reproducibility.
 - Manual review, when enabled in the underlying script, remains human-in-the-loop.
 - This script does not change labels, predictions, metrics, or ground truth.
+
+Important dependency
+--------------------
+The official XAI script must support the following arguments:
+
+    --strategy attack_stratified
+    --cases-per-attack
+    --candidate-limit
+    --attack-name
+    --manual-review
+    --manual-only
+    --generate-after-manual
+    --selection-manifest
 
 Recommended usage
 -----------------
@@ -92,9 +106,14 @@ DEFAULT_ATTACKS = [
     "contrast_stretching",
 ]
 
+DEFAULT_SELECTION_MANIFEST = (
+    "explainability/manifests/"
+    "xai_manual_selection_db__efficientnet_b0_attack_stratified_per_attack_3_manual_target_both.csv"
+)
+
 PRESETS: dict[str, dict[str, Any]] = {
     "1": {
-        "name": "Critical weapon -> non_weapon | true-label attribution",
+        "name": "Auto XAI: weapon -> non_weapon | true-label attribution",
         "description": (
             "Selects critical perturbed failures where the original class is weapon "
             "and the prediction becomes non_weapon. Integrated Gradients are computed "
@@ -115,10 +134,10 @@ PRESETS: dict[str, dict[str, Any]] = {
         },
     },
     "2": {
-        "name": "Critical weapon -> non_weapon | both true/predicted attribution",
+        "name": "Auto XAI: weapon -> non_weapon | true + predicted attribution",
         "description": (
-            "Same critical transition as preset 1, but computes both true-label and "
-            "predicted-label attribution when they differ."
+            "Selects the same critical transition as preset 1, but computes both "
+            "true-label and predicted-label attribution when they differ."
         ),
         "args": {
             "model": ["efficientnet_b0"],
@@ -135,7 +154,7 @@ PRESETS: dict[str, dict[str, Any]] = {
         },
     },
     "3": {
-        "name": "High-confidence OOD | predicted-label attribution",
+        "name": "Auto XAI: high-confidence OOD | predicted-label attribution",
         "description": (
             "Selects OOD samples classified with high confidence and computes attribution "
             "with respect to the predicted binary label."
@@ -155,14 +174,16 @@ PRESETS: dict[str, dict[str, Any]] = {
         },
     },
     "4": {
-        "name": "Attack-stratified manual selection + IG generation",
+        "name": "Manual XAI: one attack -> select N cases -> generate IG",
         "description": (
-            "Builds candidates stratified by attack_name, opens the manual reviewer, "
-            "and generates Integrated Gradients only for selected cases."
+            "Asks which attack_name must be reviewed, asks how many cases to select, "
+            "opens the manual XAI reviewer only for that attack, and generates "
+            "Integrated Gradients for the selected cases."
         ),
         "args": {
             "model": ["efficientnet_b0"],
             "strategy": "attack_stratified",
+            "review_scope": "one_attack",
             "max_cases": 30,
             "cases_per_attack": 3,
             "candidate_limit": 250,
@@ -179,17 +200,47 @@ PRESETS: dict[str, dict[str, Any]] = {
         },
     },
     "5": {
-        "name": "Attack-stratified manual selection only",
+        "name": "Manual XAI: all attacks -> select N cases per attack -> generate IG",
         "description": (
-            "Builds candidates stratified by attack_name and opens the manual reviewer, "
-            "but does not generate Integrated Gradients. Useful for selecting cases first."
+            "Reviews all attack_name values sequentially. For each attack, the reviewer "
+            "shows only candidates from that attack. At the end, Integrated Gradients "
+            "are generated for all selected cases."
         ),
         "args": {
             "model": ["efficientnet_b0"],
             "strategy": "attack_stratified",
+            "review_scope": "all_attacks",
             "max_cases": 30,
             "cases_per_attack": 3,
             "candidate_limit": 250,
+            "attack_name": DEFAULT_ATTACKS.copy(),
+            "n_steps": 32,
+            "attribution_target": "both",
+            "top_percentile": 90,
+            "high_confidence_threshold": 0.90,
+            "device": "auto",
+            "input_size": 224,
+            "manual_review": True,
+            "generate_after_manual": True,
+            "force": True,
+            "verbose": True,
+        },
+    },
+    "6": {
+        "name": "Manual XAI: all attacks -> select N cases per attack -> save manifest only",
+        "description": (
+            "Reviews all attack_name values sequentially and saves the manual selection "
+            "manifest, but does not generate Integrated Gradients. Useful when the case "
+            "selection should be checked before attribution generation."
+        ),
+        "args": {
+            "model": ["efficientnet_b0"],
+            "strategy": "attack_stratified",
+            "review_scope": "all_attacks",
+            "max_cases": 30,
+            "cases_per_attack": 3,
+            "candidate_limit": 250,
+            "attack_name": DEFAULT_ATTACKS.copy(),
             "n_steps": 32,
             "attribution_target": "both",
             "top_percentile": 90,
@@ -202,7 +253,7 @@ PRESETS: dict[str, dict[str, Any]] = {
             "verbose": True,
         },
     },
-    "6": {
+    "7": {
         "name": "Generate IG from existing manual selection manifest",
         "description": (
             "Uses a previously saved xai_manual_selection_db__*.csv file and generates "
@@ -249,7 +300,10 @@ def ask_int(prompt: str, default: int) -> int:
     if not raw:
         return default
     try:
-        return int(raw)
+        value = int(raw)
+        if value < 0:
+            raise ValueError
+        return value
     except ValueError:
         print(f"[WARN] Invalid integer value: {raw}. Using default: {default}.")
         return default
@@ -336,7 +390,6 @@ def ask_multi_choice(prompt: str, choices: list[str], default: list[str]) -> lis
         else:
             print(f"[WARN] Ignoring invalid value: {token}")
 
-    # Preserve order and remove duplicates.
     unique_selected = []
     for item in selected:
         if item not in unique_selected:
@@ -393,6 +446,46 @@ def ensure_xai_script_exists() -> None:
             "Official XAI script not found. Expected path:\n"
             f"{XAI_SCRIPT}"
         )
+
+
+# =============================================================================
+# Preset-specific mandatory questions
+# =============================================================================
+
+def apply_mandatory_preset_questions(args: dict[str, Any], preset_key: str) -> dict[str, Any]:
+    """
+    Ask mandatory questions for workflows where the default preset alone would
+    be methodologically ambiguous.
+    """
+    updated = dict(args)
+
+    if preset_key == "4":
+        attack_name = ask_choice(
+            "Select the attack_name to review",
+            DEFAULT_ATTACKS,
+            updated.get("attack_name", ["sigma_zero"])[0] if updated.get("attack_name") else "sigma_zero",
+        )
+        requested_cases = ask_int(
+            f"How many cases do you want to select for {attack_name}?",
+            int(updated.get("cases_per_attack", 3)),
+        )
+        updated["attack_name"] = [attack_name]
+        updated["cases_per_attack"] = requested_cases
+        updated["max_cases"] = requested_cases
+        updated["output_tag"] = updated.get("output_tag", "") or f"manual_{attack_name}_{requested_cases}_cases"
+
+    elif preset_key in {"5", "6"}:
+        requested_cases = ask_int(
+            "How many cases do you want to select per attack?",
+            int(updated.get("cases_per_attack", 3)),
+        )
+        updated["cases_per_attack"] = requested_cases
+        updated["max_cases"] = requested_cases * len(DEFAULT_ATTACKS)
+        updated["attack_name"] = DEFAULT_ATTACKS.copy()
+        mode_tag = "generate_ig" if preset_key == "5" else "manifest_only"
+        updated["output_tag"] = updated.get("output_tag", "") or f"manual_all_attacks_{requested_cases}_cases_{mode_tag}"
+
+    return updated
 
 
 # =============================================================================
@@ -455,7 +548,7 @@ def maybe_customize_preset(args: dict[str, Any]) -> dict[str, Any]:
     print("\nCurrent preset configuration:")
     print(json.dumps(args, indent=2, ensure_ascii=False))
 
-    customize = ask_bool("Customize this preset before execution?", default=False)
+    customize = ask_bool("Customize advanced options before execution?", default=False)
     if not customize:
         return args
 
@@ -472,42 +565,29 @@ def maybe_customize_preset(args: dict[str, Any]) -> dict[str, Any]:
             SUPPORTED_STRATEGIES,
             updated.get("strategy", "attack_stratified"),
         )
-        updated["max_cases"] = ask_int("Max cases", int(updated.get("max_cases", 30)))
 
         if updated["strategy"] == "attack_stratified":
-            updated["cases_per_attack"] = ask_int(
-                "Cases per attack", int(updated.get("cases_per_attack", 3))
-            )
             updated["candidate_limit"] = ask_int(
-                "Candidate limit", int(updated.get("candidate_limit", 250))
-            )
-            updated["attack_name"] = ask_multi_choice(
-                "Optional attack_name filter",
-                DEFAULT_ATTACKS,
-                updated.get("attack_name", DEFAULT_ATTACKS),
+                "Candidate limit",
+                int(updated.get("candidate_limit", 250)),
             )
         else:
-            if "cases_per_attack" in updated:
-                updated["cases_per_attack"] = ask_int(
-                    "Cases per attack", int(updated.get("cases_per_attack", 3))
-                )
-            if "candidate_limit" in updated:
-                updated["candidate_limit"] = ask_int(
-                    "Candidate limit", int(updated.get("candidate_limit", 250))
-                )
+            updated["max_cases"] = ask_int("Max cases", int(updated.get("max_cases", 30)))
 
         updated["manual_review"] = ask_bool(
             "Enable manual review", bool(updated.get("manual_review", False))
         )
         if updated["manual_review"]:
             updated["manual_only"] = ask_bool(
-                "Manual selection only, without IG generation", bool(updated.get("manual_only", False))
+                "Manual selection only, without IG generation",
+                bool(updated.get("manual_only", False)),
             )
             if updated["manual_only"]:
                 updated["generate_after_manual"] = False
             else:
                 updated["generate_after_manual"] = ask_bool(
-                    "Generate IG after manual review", bool(updated.get("generate_after_manual", True))
+                    "Generate IG after manual review",
+                    bool(updated.get("generate_after_manual", True)),
                 )
 
     updated["n_steps"] = ask_int("Integrated Gradients steps", int(updated.get("n_steps", 32)))
@@ -539,28 +619,50 @@ def build_custom_run() -> dict[str, Any]:
     if use_existing:
         args["selection_manifest"] = ask_string(
             "Selection manifest path",
-            "explainability/manifests/xai_manual_selection_db__efficientnet_b0_attack_stratified_per_attack_3_manual_target_both.csv",
+            DEFAULT_SELECTION_MANIFEST,
         )
         args["model"] = ["efficientnet_b0"]
         args["strategy"] = "attack_stratified"
     else:
         args["model"] = ask_multi_choice("Select model(s)", SUPPORTED_MODELS, ["efficientnet_b0"])
         args["strategy"] = ask_choice("Select strategy", SUPPORTED_STRATEGIES, "attack_stratified")
-        args["max_cases"] = ask_int("Max cases", 30)
 
         if args["strategy"] == "attack_stratified":
-            args["cases_per_attack"] = ask_int("Cases per attack", 3)
-            args["candidate_limit"] = ask_int("Candidate limit", 250)
-            args["attack_name"] = ask_multi_choice(
-                "Optional attack_name filter", DEFAULT_ATTACKS, DEFAULT_ATTACKS
+            scope = ask_choice(
+                "Manual review scope",
+                ["one_attack", "all_attacks", "custom_attack_filter"],
+                "one_attack",
             )
+            args["review_scope"] = scope
 
-        args["manual_review"] = ask_bool("Enable manual review", default=args["strategy"] == "attack_stratified")
-        if args["manual_review"]:
-            args["manual_only"] = ask_bool("Manual selection only, without IG generation", default=False)
-            args["generate_after_manual"] = False if args["manual_only"] else ask_bool(
-                "Generate IG after manual review", default=True
-            )
+            if scope == "one_attack":
+                attack_name = ask_choice("Select attack_name", DEFAULT_ATTACKS, "sigma_zero")
+                args["attack_name"] = [attack_name]
+                args["cases_per_attack"] = ask_int(
+                    f"How many cases do you want to select for {attack_name}?", 3
+                )
+                args["max_cases"] = args["cases_per_attack"]
+            elif scope == "all_attacks":
+                args["attack_name"] = DEFAULT_ATTACKS.copy()
+                args["cases_per_attack"] = ask_int("How many cases per attack?", 3)
+                args["max_cases"] = args["cases_per_attack"] * len(DEFAULT_ATTACKS)
+            else:
+                args["attack_name"] = ask_multi_choice(
+                    "Select attack_name filter", DEFAULT_ATTACKS, DEFAULT_ATTACKS
+                )
+                args["cases_per_attack"] = ask_int("How many cases per selected attack?", 3)
+                args["max_cases"] = args["cases_per_attack"] * max(1, len(args["attack_name"]))
+
+            args["candidate_limit"] = ask_int("Candidate limit", 250)
+            args["manual_review"] = ask_bool("Enable manual review", default=True)
+            if args["manual_review"]:
+                args["manual_only"] = ask_bool("Manual selection only, without IG generation", default=False)
+                args["generate_after_manual"] = False if args["manual_only"] else ask_bool(
+                    "Generate IG after manual review", default=True
+                )
+        else:
+            args["max_cases"] = ask_int("Max cases", 30)
+            args["manual_review"] = ask_bool("Enable manual review", default=False)
 
     args["n_steps"] = ask_int("Integrated Gradients steps", 32)
     args["high_confidence_threshold"] = ask_float("High-confidence threshold", 0.90)
@@ -612,7 +714,7 @@ def print_menu() -> None:
     print("\nAvailable workflows:")
     for key in sorted(PRESETS.keys(), key=int):
         print(f"{key}. {PRESETS[key]['name']}")
-    print("7. Custom guided run")
+    print("8. Custom guided run")
     print("0. Exit")
 
 
@@ -646,14 +748,16 @@ def main() -> None:
             if args.get("selection_manifest") == "ASK":
                 args["selection_manifest"] = ask_string(
                     "Selection manifest path",
-                    "explainability/manifests/xai_manual_selection_db__efficientnet_b0_attack_stratified_per_attack_3_manual_target_both.csv",
+                    DEFAULT_SELECTION_MANIFEST,
                 )
+            else:
+                args = apply_mandatory_preset_questions(args, choice)
 
             args = maybe_customize_preset(args)
             command = build_command(args)
             return_code = execute_command(command, PRESETS[choice]["name"], args)
 
-        elif choice == "7":
+        elif choice == "8":
             args = build_custom_run()
             command = build_command(args)
             return_code = execute_command(command, "Custom guided run", args)
