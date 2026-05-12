@@ -17,7 +17,26 @@ The goal is not to optimize Adversarial Machine Learning performance as an isola
 
 ---
 
+## Position in the pipeline
+
+This milestone is documented after split generation and before proxy-model evaluation.
+
+However, model-dependent adversarial attacks require trained proxy checkpoints. For this reason, the operational execution order is:
+
+```text
+04_split_generation
+06_proxy_model_training
+05_attack_generation
+07_proxy_model_evaluation
+```
+
+The milestone numbering preserves the conceptual pipeline order: dataset construction, perturbation families, model training/evaluation, bundle construction, forensic-tool evaluation, and XAI.
+
+---
+
 ## Input
+
+Clean binary split manifest:
 
 ```text
 datasets/splits/manifests/clean_folds_manifest.csv
@@ -30,6 +49,18 @@ The input manifest contains the official clean binary subset:
 | `weapon` | 500 |
 | `non_weapon` | 500 |
 | **Total** | **1000** |
+
+Model-dependent adversarial attacks also require fold-aware model checkpoints from:
+
+```text
+models/checkpoints/<target_model>/<fold>.pt
+```
+
+The primary target model for model-dependent attacks is:
+
+```text
+efficientnet_b0
+```
 
 OOD samples are not attacked in this stage. They remain reserved for out-of-distribution reliability evaluation.
 
@@ -151,3 +182,19 @@ This milestone is complete when:
 - the resulting artifacts are available for proxy-model evaluation and forensic-bundle construction.
 
 Status: **completed**.
+
+---
+
+## Next milestone
+
+The next milestone in the documented sequence is proxy model training:
+
+```text
+progress/milestones/06_proxy_model_training.md
+```
+
+The next milestone that consumes the generated perturbations is proxy model evaluation:
+
+```text
+progress/milestones/07_proxy_model_evaluation.md
+```
