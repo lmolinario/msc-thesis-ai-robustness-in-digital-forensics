@@ -1204,15 +1204,15 @@ registrazione non attribuisce all'MD5 il ruolo di identificatore primario, ma ne
 preserva l'utilità operativa nel raccordo con tool e formati eterogenei.
 
 La pipeline utilizza manifest progressivi. Il passaggio da
-\texttt{metadata.csv} a \texttt{review\_manifest\_full.csv}, poi a
-\texttt{manual\_selection\_final\_1500.csv},
-\texttt{manual\_selection\_adversarial\_subset.csv},
-\texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv},
-manifest degli attacchi, manifest anti-forense, \texttt{bundle\_manifest.csv},
+\texttt{metadata.csv} a \codepath{review/manifest/full.csv}, poi a
+\codepath{manual/selection/final/1500.csv},
+\codepath{manual/selection/adversarial/subset.csv},
+\codepath{clean/folds/manifest.csv}, \codepath{ood/eval/manifest.csv},
+manifest degli attacchi, manifest anti-forense, \codepath{bundle/manifest.csv},
 predizioni dei proxy model e manifest \gls{xai}, consente di ricostruire il
 ciclo di vita del campione sperimentale. La relazione tra
-\texttt{original\_image\_id}, \texttt{generated\_image\_id},
-\texttt{bundle\_id}, hash e path rappresenta il collegamento minimo necessario
+\codepath{original/image/id}, \codepath{generated/image/id},
+\codepath{bundle/id}, hash e path rappresenta il collegamento minimo necessario
 per verificare che un risultato sia riferito al file corretto.
 
 \begin{table}[H]
