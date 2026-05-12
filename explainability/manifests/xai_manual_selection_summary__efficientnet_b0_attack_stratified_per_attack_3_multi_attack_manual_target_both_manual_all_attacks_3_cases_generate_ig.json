@@ -1,0 +1,73 @@
+{
+  "script": "explainability/scripts/17_generate_integrated_gradients_case_studies.py",
+  "run_tag": "efficientnet_b0_attack_stratified_per_attack_3_multi_attack_manual_target_both_manual_all_attacks_3_cases_generate_ig",
+  "updated_at": "2026-05-12T01:58:54+00:00",
+  "reviewer_id": "Lello",
+  "last_action": "reviewer_closed",
+  "manual_selection_db": "explainability/manifests/xai_manual_selection_db__efficientnet_b0_attack_stratified_per_attack_3_multi_attack_manual_target_both_manual_all_attacks_3_cases_generate_ig.csv",
+  "manual_selection_log": "explainability/logs/xai_manual_selection_log__efficientnet_b0_attack_stratified_per_attack_3_multi_attack_manual_target_both_manual_all_attacks_3_cases_generate_ig.csv",
+  "total_candidate_rows": 10000,
+  "total_selected_cases": 11,
+  "attack_summary": [
+    {
+      "attack_name": "color_shift",
+      "candidate_rows": 1000,
+      "selected_cases": 0,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "contrast_stretching",
+      "candidate_rows": 1000,
+      "selected_cases": 0,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "fgsm",
+      "candidate_rows": 1000,
+      "selected_cases": 3,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "gaussian_blur",
+      "candidate_rows": 1000,
+      "selected_cases": 0,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "histogram_modification",
+      "candidate_rows": 1000,
+      "selected_cases": 0,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "jpeg_recompression",
+      "candidate_rows": 1000,
+      "selected_cases": 0,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "one_pixel",
+      "candidate_rows": 1000,
+      "selected_cases": 3,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "resample_resize",
+      "candidate_rows": 1000,
+      "selected_cases": 1,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "sigma_zero",
+      "candidate_rows": 1000,
+      "selected_cases": 3,
+      "requested_cases": 3
+    },
+    {
+      "attack_name": "superdeepfool",
+      "candidate_rows": 1000,
+      "selected_cases": 1,
+      "requested_cases": 3
+    }
+  ]
+}
