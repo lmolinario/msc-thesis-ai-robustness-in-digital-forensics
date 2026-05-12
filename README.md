@@ -1,12 +1,16 @@
+<p align="center">
+  <img src="docs/assets/repository_header.png" alt="Experimental Evaluation of the Robustness of AI-Based Forensic Tools" width="100%">
+</p>
+
 # MSc Thesis – AI Robustness in Digital Forensics
+
+## Experimental Evaluation of the Robustness of AI-Based Forensic Tools for Automated Image Classification Under Adversarial and Anti-Forensic Attacks
 
 This repository contains the working research pipeline for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
 
 The thesis evaluates the **operational robustness of AI-based image classification systems in digital forensic scenarios**. The workflow compares local proxy AI models and commercial forensic AI tools under clean inputs, adversarial perturbations, anti-forensic transformations, and out-of-distribution samples.
 
 The focus of the project is **Digital/Computer Forensics**, not Adversarial Machine Learning as an isolated optimization problem. Adversarial and anti-forensic manipulations are used as experimental stressors to assess reliability, traceability, robustness, and the operational risk of AI-assisted triage in forensic workflows.
-
-At this stage, this is a **complete working research repository**. Datasets, generated outputs, manifests, reports, and intermediate artifacts may be versioned to support continuity across multiple workstations. A cleaned public release can be derived later.
 
 ---
 

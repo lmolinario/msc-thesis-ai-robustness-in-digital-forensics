@@ -956,6 +956,114 @@ la validazione sperimentale con una certificazione generale del prodotto
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Commercial forensic tools evaluation protocol}
+\label{sec:methodology-commercial-tools}
+% ─────────────────────────────────────────────────────────────────────────────
+
+La pipeline operativo-forense di \gls{fairlab} prevede la valutazione di
+strumenti commerciali impiegati in contesti professionali di \gls{df}, con
+particolare attenzione ai moduli di analisi automatizzata delle immagini. A
+differenza dei proxy model descritti nella
+Sezione~\ref{sec:methodology-models-classification}, tali strumenti vengono
+trattati come sistemi black-box o quasi black-box: la metodologia non assume
+accesso alle architetture interne, ai dataset di addestramento, alle soglie
+decisionali o alle logiche proprietarie di categorizzazione. L'analisi si
+concentra invece sugli output osservabili, esportabili e riconducibili agli
+artefatti del \textit{forensic evaluation bundle}.
+
+L'obiettivo di questa fase non è certificare in senso generale l'affidabilità
+dei prodotti considerati, ma valutare in condizioni controllate il loro
+comportamento operativo rispetto a immagini pulite, immagini fuori distribuzione
+e immagini manipolate mediante perturbazioni adversariali e trasformazioni
+anti-forensi. In questo modo, il protocollo consente di confrontare la risposta
+dei tool commerciali con quella dei proxy model accademici, mantenendo tuttavia
+distinti i due livelli di analisi: da un lato, modelli pienamente ispezionabili
+e riproducibili; dall'altro, strumenti professionali caratterizzati da logiche
+interne non completamente accessibili.
+
+La valutazione utilizza come input esclusivo la directory cieca del bundle,
+ossia \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}.
+Tale directory contiene file rinominati con identificativi neutri, privi di
+informazioni semantiche sulla classe, sulla sorgente, sul fold, sulla famiglia
+di attacco o sul modello target. La ground truth sperimentale viene conservata
+separatamente nel file
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv} e
+non viene esposta al tool durante l'importazione. Questa separazione riduce il
+rischio di bias indotto dai nomi dei file o dai percorsi e consente di
+normalizzare gli output solo in una fase successiva.
+
+Gli strumenti considerati nel protocollo comprendono Magnet AXIOM, X-Ways
+Forensics, Cellebrite \gls{ufed} e Oxygen Forensic Detective, compatibilmente
+con la disponibilità delle rispettive licenze, versioni software e funzionalità
+di esportazione. Magnet AXIOM viene considerato per la presenza di funzionalità
+di categorizzazione e analisi automatizzata dei contenuti multimediali. X-Ways
+Forensics viene incluso come ambiente forense professionale ad approccio
+low-level, valutabile anche in combinazione con esportazioni, estensioni o
+workflow esterni di analisi visuale. Cellebrite \gls{ufed} e gli ambienti di
+analisi collegati vengono considerati per il loro ruolo nell'estrazione e
+nell'analisi forense di dispositivi mobili. Oxygen Forensic Detective viene
+considerato per le funzionalità di analisi e categorizzazione automatizzata di
+contenuti multimediali e artefatti provenienti da dispositivi mobili o sorgenti
+cloud.
+
+\begin{table}[H]
+\centering
+\caption{Strumenti forensi commerciali considerati nella pipeline operativo-forense.}
+\label{tab:methodology-commercial-tools}
+\begin{tabularx}{\textwidth}{@{}lX@{}}
+\toprule
+\textbf{Strumento} & \textbf{Ruolo metodologico nel protocollo} \\
+\midrule
+\texttt{Magnet AXIOM}
+&
+Valutazione degli output prodotti dai moduli di analisi e categorizzazione
+automatizzata dei contenuti multimediali rispetto agli artefatti del bundle. \\
+\texttt{X-Ways Forensics}
+&
+Ambiente forense professionale utilizzato per l'ispezione, la gestione e
+l'eventuale integrazione di workflow esterni di classificazione o triage
+visuale. \\
+\texttt{Cellebrite UFED}
+&
+Strumento considerato per scenari di acquisizione e analisi forense di
+dispositivi mobili, con successiva valutazione degli output disponibili sui
+contenuti immagine. \\
+\texttt{Oxygen Forensic Detective}
+&
+Suite considerata per l'analisi di artefatti mobili, cloud e multimediali, con
+attenzione alle funzionalità di categorizzazione automatizzata delle immagini. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Per ciascun tool, il protocollo prevede tre passaggi. In primo luogo, viene
+importata o indicizzata esclusivamente la vista cieca del bundle. In secondo
+luogo, vengono esportati i risultati prodotti dallo strumento, includendo ove
+disponibili il nome del file, l'hash, la categoria assegnata, eventuali tag,
+punteggi di confidenza, stati di mancato rilevamento e metadati rilevanti. In
+terzo luogo, gli output vengono ricondotti al file
+\codepath{bundle_manifest.csv} mediante \texttt{bundle_id}, nome del file cieco
+o hash, così da confrontare le categorie prodotte dal tool con la ground truth
+sperimentale.
+
+La normalizzazione degli output commerciali richiede particolare cautela,
+poiché le categorie interne dei tool potrebbero non coincidere direttamente con
+le classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo
+motivo, la pipeline prevede una fase di mapping esplicito, nella quale le label
+proprietarie vengono ricondotte, quando possibile, a categorie operative
+comparabili. Gli stati ambigui, non rilevati o non categorizzati non vengono
+convertiti automaticamente in \texttt{non\_weapon}, ma mantenuti come stati
+distinti, poiché in un workflow forense l'assenza di rilevamento non equivale
+necessariamente a una classificazione negativa.
+
+Questa impostazione consente di valutare la robustezza operativa degli strumenti
+commerciali senza attribuire loro proprietà interne non verificabili. La
+valutazione rimane quindi ancorata agli output osservabili e alla loro coerenza
+rispetto al manifest sperimentale, mantenendo separati il piano metodologico,
+la misurazione quantitativa e la successiva interpretazione dei risultati.
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Evaluation metrics}
 \label{sec:methodology-evaluation-metrics}
