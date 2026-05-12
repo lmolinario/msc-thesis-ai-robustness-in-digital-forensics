@@ -6,54 +6,23 @@
 
 Interactive terminal launcher for FAIR-Lab Integrated Gradients case studies.
 
-Purpose
--------
-This script provides a guided terminal menu for running:
-
-    explainability/scripts/17_generate_integrated_gradients_case_studies.py
-
-without manually typing long command-line arguments.
-
-It is designed to support the thesis XAI workflow with documented, reproducible
-presets. The launcher does not implement Integrated Gradients directly; it builds
-and executes the corresponding command for the official XAI script.
-
-Main workflows
---------------
-1. Auto XAI: critical weapon -> non_weapon cases, true-label attribution.
-2. Auto XAI: critical weapon -> non_weapon cases, true-label and predicted-label attribution.
-3. Auto XAI: high-confidence OOD cases, predicted-label attribution.
-4. Manual XAI: select N cases for one attack and generate IG.
-5. Manual XAI: select N cases for all attacks and generate IG.
-6. Manual XAI: select N cases for all attacks and save the manifest only.
-7. Generate IG from an existing manual selection manifest.
+Workflow summary
+----------------
+1. Auto XAI: weapon -> non_weapon | true-label attribution.
+2. Auto XAI: weapon -> non_weapon | true + predicted attribution.
+3. Auto XAI: high-confidence OOD | predicted-label attribution.
+4. Manual XAI: one attack -> select N cases -> generate IG.
+5. Manual XAI: all attacks -> select N cases per attack -> generate IG.
+6. Manual XAI: all attacks -> select N cases per attack -> save manifest only.
+7. Generate IG from existing manual selection manifest.
 8. Custom guided run.
 
-Methodological notes
---------------------
-- Presets are intended to keep the XAI protocol consistent across runs.
-- The launcher prints and saves the exact command used for reproducibility.
-- Manual review, when enabled in the underlying script, remains human-in-the-loop.
-- This script does not change labels, predictions, metrics, or ground truth.
-
-Important dependency
---------------------
-The official XAI script must support the following arguments:
-
-    --strategy attack_stratified
-    --cases-per-attack
-    --candidate-limit
-    --attack-name
-    --manual-review
-    --manual-only
-    --generate-after-manual
-    --selection-manifest
-
-Recommended usage
------------------
-From the repository root:
-
-    python explainability/scripts/18_xai_interactive_launcher.py
+Notes
+-----
+- candidate_limit = 0 means show all candidates for each reviewed attack.
+- cases_per_attack defines how many cases should be selected, not how many
+  candidates should be displayed.
+- The launcher only builds and executes commands for the official XAI script.
 """
 
 from __future__ import annotations
@@ -66,21 +35,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
-# =============================================================================
-# Paths
-# =============================================================================
-
 SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parents[2]
 XAI_SCRIPT = REPO_ROOT / "explainability" / "scripts" / "17_generate_integrated_gradients_case_studies.py"
 LOG_DIR = REPO_ROOT / "explainability" / "logs"
 COMMAND_LOG_PATH = LOG_DIR / "xai_interactive_launcher_commands.jsonl"
-
-
-# =============================================================================
-# Constants
-# =============================================================================
 
 SUPPORTED_MODELS = ["efficientnet_b0", "resnet18", "clip"]
 SUPPORTED_STRATEGIES = [
@@ -114,11 +73,7 @@ DEFAULT_SELECTION_MANIFEST = (
 PRESETS: dict[str, dict[str, Any]] = {
     "1": {
         "name": "Auto XAI: weapon -> non_weapon | true-label attribution",
-        "description": (
-            "Selects critical perturbed failures where the original class is weapon "
-            "and the prediction becomes non_weapon. Integrated Gradients are computed "
-            "with respect to the true label."
-        ),
+        "description": "Automatic selection of critical weapon -> non_weapon failures.",
         "args": {
             "model": ["efficientnet_b0"],
             "strategy": "weapon_to_non_weapon",
@@ -135,10 +90,7 @@ PRESETS: dict[str, dict[str, Any]] = {
     },
     "2": {
         "name": "Auto XAI: weapon -> non_weapon | true + predicted attribution",
-        "description": (
-            "Selects the same critical transition as preset 1, but computes both "
-            "true-label and predicted-label attribution when they differ."
-        ),
+        "description": "Automatic selection of critical failures with both attribution targets.",
         "args": {
             "model": ["efficientnet_b0"],
             "strategy": "weapon_to_non_weapon",
@@ -155,10 +107,7 @@ PRESETS: dict[str, dict[str, Any]] = {
     },
     "3": {
         "name": "Auto XAI: high-confidence OOD | predicted-label attribution",
-        "description": (
-            "Selects OOD samples classified with high confidence and computes attribution "
-            "with respect to the predicted binary label."
-        ),
+        "description": "Automatic selection of high-confidence OOD cases.",
         "args": {
             "model": ["efficientnet_b0"],
             "strategy": "ood_high_confidence",
@@ -175,18 +124,13 @@ PRESETS: dict[str, dict[str, Any]] = {
     },
     "4": {
         "name": "Manual XAI: one attack -> select N cases -> generate IG",
-        "description": (
-            "Asks which attack_name must be reviewed, asks how many cases to select, "
-            "opens the manual XAI reviewer only for that attack, and generates "
-            "Integrated Gradients for the selected cases."
-        ),
+        "description": "Review one selected attack_name and generate IG for manually selected cases.",
         "args": {
             "model": ["efficientnet_b0"],
             "strategy": "attack_stratified",
-            "review_scope": "one_attack",
-            "max_cases": 30,
+            "max_cases": 3,
             "cases_per_attack": 3,
-            "candidate_limit": 250,
+            "candidate_limit": 0,
             "n_steps": 32,
             "attribution_target": "both",
             "top_percentile": 90,
@@ -201,18 +145,13 @@ PRESETS: dict[str, dict[str, Any]] = {
     },
     "5": {
         "name": "Manual XAI: all attacks -> select N cases per attack -> generate IG",
-        "description": (
-            "Reviews all attack_name values sequentially. For each attack, the reviewer "
-            "shows only candidates from that attack. At the end, Integrated Gradients "
-            "are generated for all selected cases."
-        ),
+        "description": "Review all attacks sequentially and generate IG at the end.",
         "args": {
             "model": ["efficientnet_b0"],
             "strategy": "attack_stratified",
-            "review_scope": "all_attacks",
             "max_cases": 30,
             "cases_per_attack": 3,
-            "candidate_limit": 250,
+            "candidate_limit": 0,
             "attack_name": DEFAULT_ATTACKS.copy(),
             "n_steps": 32,
             "attribution_target": "both",
@@ -228,18 +167,13 @@ PRESETS: dict[str, dict[str, Any]] = {
     },
     "6": {
         "name": "Manual XAI: all attacks -> select N cases per attack -> save manifest only",
-        "description": (
-            "Reviews all attack_name values sequentially and saves the manual selection "
-            "manifest, but does not generate Integrated Gradients. Useful when the case "
-            "selection should be checked before attribution generation."
-        ),
+        "description": "Review all attacks sequentially and save only the manual selection manifest.",
         "args": {
             "model": ["efficientnet_b0"],
             "strategy": "attack_stratified",
-            "review_scope": "all_attacks",
             "max_cases": 30,
             "cases_per_attack": 3,
-            "candidate_limit": 250,
+            "candidate_limit": 0,
             "attack_name": DEFAULT_ATTACKS.copy(),
             "n_steps": 32,
             "attribution_target": "both",
@@ -255,10 +189,7 @@ PRESETS: dict[str, dict[str, Any]] = {
     },
     "7": {
         "name": "Generate IG from existing manual selection manifest",
-        "description": (
-            "Uses a previously saved xai_manual_selection_db__*.csv file and generates "
-            "Integrated Gradients only for rows marked as selected."
-        ),
+        "description": "Generate IG only for rows already marked as selected in a saved manifest.",
         "args": {
             "selection_manifest": "ASK",
             "model": ["efficientnet_b0"],
@@ -276,16 +207,8 @@ PRESETS: dict[str, dict[str, Any]] = {
 }
 
 
-# =============================================================================
-# Utility functions
-# =============================================================================
-
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
-
-
-def clear_screen() -> None:
-    print("\n" * 3)
 
 
 def ask_string(prompt: str, default: str = "") -> str:
@@ -338,19 +261,15 @@ def ask_choice(prompt: str, choices: list[str], default: str) -> str:
     for i, choice in enumerate(choices, start=1):
         marker = "*" if choice == default else " "
         print(f"{i}. {choice} {marker}")
-
     raw = input(f"Select [default: {default}]: ").strip()
     if not raw:
         return default
-
     if raw.isdigit():
         index = int(raw) - 1
         if 0 <= index < len(choices):
             return choices[index]
-
     if raw in choices:
         return raw
-
     print(f"[WARN] Invalid choice: {raw}. Using default: {default}.")
     return default
 
@@ -359,26 +278,19 @@ def ask_multi_choice(prompt: str, choices: list[str], default: list[str]) -> lis
     print(f"\n{prompt}")
     print("Insert comma-separated indexes or names. Leave empty for default.")
     print("Use 'all' for all values, 'none' for no filter.")
-
     default_set = set(default)
     for i, choice in enumerate(choices, start=1):
         marker = "*" if choice in default_set else " "
         print(f"{i}. {choice} {marker}")
-
     raw = input("Selection: ").strip()
     if not raw:
         return default
-
     if raw.lower() == "all":
         return choices.copy()
-
     if raw.lower() == "none":
         return []
-
     selected: list[str] = []
-    tokens = [x.strip() for x in raw.split(",") if x.strip()]
-
-    for token in tokens:
+    for token in [x.strip() for x in raw.split(",") if x.strip()]:
         if token.isdigit():
             index = int(token) - 1
             if 0 <= index < len(choices):
@@ -389,12 +301,10 @@ def ask_multi_choice(prompt: str, choices: list[str], default: list[str]) -> lis
             selected.append(token)
         else:
             print(f"[WARN] Ignoring invalid value: {token}")
-
     unique_selected = []
     for item in selected:
         if item not in unique_selected:
             unique_selected.append(item)
-
     return unique_selected
 
 
@@ -405,11 +315,9 @@ def command_to_string(command: list[str]) -> str:
 def repo_relative_or_raw(path_value: str) -> str:
     if not path_value:
         return ""
-
     path = Path(path_value)
     if not path.is_absolute():
         return path_value.replace("\\", "/")
-
     try:
         return str(path.resolve().relative_to(REPO_ROOT)).replace("\\", "/")
     except ValueError:
@@ -431,6 +339,7 @@ def log_command(command: list[str], preset_name: str, args_payload: dict[str, An
 
 
 def print_header() -> None:
+    print("\n" * 3)
     print("=" * 80)
     print("FAIR-LAB XAI INTERACTIVE LAUNCHER")
     print("=" * 80)
@@ -442,228 +351,131 @@ def print_header() -> None:
 
 def ensure_xai_script_exists() -> None:
     if not XAI_SCRIPT.exists():
-        raise FileNotFoundError(
-            "Official XAI script not found. Expected path:\n"
-            f"{XAI_SCRIPT}"
-        )
+        raise FileNotFoundError(f"Official XAI script not found: {XAI_SCRIPT}")
 
-
-# =============================================================================
-# Preset-specific mandatory questions
-# =============================================================================
 
 def apply_mandatory_preset_questions(args: dict[str, Any], preset_key: str) -> dict[str, Any]:
-    """
-    Ask mandatory questions for workflows where the default preset alone would
-    be methodologically ambiguous.
-    """
     updated = dict(args)
-
     if preset_key == "4":
-        attack_name = ask_choice(
-            "Select the attack_name to review",
-            DEFAULT_ATTACKS,
-            updated.get("attack_name", ["sigma_zero"])[0] if updated.get("attack_name") else "sigma_zero",
-        )
-        requested_cases = ask_int(
-            f"How many cases do you want to select for {attack_name}?",
-            int(updated.get("cases_per_attack", 3)),
-        )
+        attack_name = ask_choice("Select the attack_name to review", DEFAULT_ATTACKS, "sigma_zero")
+        requested_cases = ask_int(f"How many cases do you want to select for {attack_name}?", int(updated.get("cases_per_attack", 3)))
         updated["attack_name"] = [attack_name]
         updated["cases_per_attack"] = requested_cases
         updated["max_cases"] = requested_cases
+        updated["candidate_limit"] = ask_int("Candidate limit for this attack (0 = show all candidates)", int(updated.get("candidate_limit", 0)))
         updated["output_tag"] = updated.get("output_tag", "") or f"manual_{attack_name}_{requested_cases}_cases"
-
     elif preset_key in {"5", "6"}:
-        requested_cases = ask_int(
-            "How many cases do you want to select per attack?",
-            int(updated.get("cases_per_attack", 3)),
-        )
+        requested_cases = ask_int("How many cases do you want to select per attack?", int(updated.get("cases_per_attack", 3)))
         updated["cases_per_attack"] = requested_cases
         updated["max_cases"] = requested_cases * len(DEFAULT_ATTACKS)
+        updated["candidate_limit"] = ask_int("Candidate limit per attack (0 = show all candidates)", int(updated.get("candidate_limit", 0)))
         updated["attack_name"] = DEFAULT_ATTACKS.copy()
         mode_tag = "generate_ig" if preset_key == "5" else "manifest_only"
         updated["output_tag"] = updated.get("output_tag", "") or f"manual_all_attacks_{requested_cases}_cases_{mode_tag}"
-
     return updated
 
 
-# =============================================================================
-# Command building
-# =============================================================================
-
 def build_command(args: dict[str, Any]) -> list[str]:
     command = [sys.executable, str(XAI_SCRIPT)]
-
     selection_manifest = args.get("selection_manifest", "")
     if selection_manifest:
         command.extend(["--selection-manifest", repo_relative_or_raw(selection_manifest)])
     else:
-        models = args.get("model", ["efficientnet_b0"])
-        command.extend(["--model", *models])
+        command.extend(["--model", *args.get("model", ["efficientnet_b0"])])
         command.extend(["--strategy", args.get("strategy", "all")])
-
         if "max_cases" in args:
             command.extend(["--max-cases", str(args["max_cases"])])
         if "cases_per_attack" in args:
             command.extend(["--cases-per-attack", str(args["cases_per_attack"])])
         if "candidate_limit" in args:
             command.extend(["--candidate-limit", str(args["candidate_limit"])])
-
-        attack_filter = args.get("attack_name", [])
-        if attack_filter:
-            command.extend(["--attack-name", *attack_filter])
-
+        if args.get("attack_name", []):
+            command.extend(["--attack-name", *args["attack_name"]])
         if args.get("manual_review", False):
             command.append("--manual-review")
         if args.get("manual_only", False):
             command.append("--manual-only")
         if args.get("generate_after_manual", False):
             command.append("--generate-after-manual")
-
     command.extend(["--n-steps", str(args.get("n_steps", 32))])
     command.extend(["--high-confidence-threshold", str(args.get("high_confidence_threshold", 0.90))])
     command.extend(["--attribution-target", args.get("attribution_target", "true_label")])
     command.extend(["--top-percentile", str(args.get("top_percentile", 90))])
     command.extend(["--device", args.get("device", "auto")])
     command.extend(["--input-size", str(args.get("input_size", 224))])
-
-    output_tag = args.get("output_tag", "")
-    if output_tag:
-        command.extend(["--output-tag", output_tag])
-
+    if args.get("output_tag", ""):
+        command.extend(["--output-tag", args["output_tag"]])
     if args.get("force", True):
         command.append("--force")
     if args.get("verbose", True):
         command.append("--verbose")
-
     return command
 
-
-# =============================================================================
-# Preset customization
-# =============================================================================
 
 def maybe_customize_preset(args: dict[str, Any]) -> dict[str, Any]:
     print("\nCurrent preset configuration:")
     print(json.dumps(args, indent=2, ensure_ascii=False))
-
-    customize = ask_bool("Customize advanced options before execution?", default=False)
-    if not customize:
+    if not ask_bool("Customize advanced options before execution?", default=False):
         return args
-
     updated = dict(args)
-
     if not updated.get("selection_manifest"):
-        updated["model"] = ask_multi_choice(
-            "Select model(s)",
-            SUPPORTED_MODELS,
-            updated.get("model", ["efficientnet_b0"]),
-        )
-        updated["strategy"] = ask_choice(
-            "Select strategy",
-            SUPPORTED_STRATEGIES,
-            updated.get("strategy", "attack_stratified"),
-        )
-
+        updated["model"] = ask_multi_choice("Select model(s)", SUPPORTED_MODELS, updated.get("model", ["efficientnet_b0"]))
+        updated["strategy"] = ask_choice("Select strategy", SUPPORTED_STRATEGIES, updated.get("strategy", "attack_stratified"))
         if updated["strategy"] == "attack_stratified":
-            updated["candidate_limit"] = ask_int(
-                "Candidate limit",
-                int(updated.get("candidate_limit", 250)),
-            )
+            updated["candidate_limit"] = ask_int("Candidate limit per attack (0 = show all candidates)", int(updated.get("candidate_limit", 0)))
         else:
             updated["max_cases"] = ask_int("Max cases", int(updated.get("max_cases", 30)))
-
-        updated["manual_review"] = ask_bool(
-            "Enable manual review", bool(updated.get("manual_review", False))
-        )
+        updated["manual_review"] = ask_bool("Enable manual review", bool(updated.get("manual_review", False)))
         if updated["manual_review"]:
-            updated["manual_only"] = ask_bool(
-                "Manual selection only, without IG generation",
-                bool(updated.get("manual_only", False)),
-            )
-            if updated["manual_only"]:
-                updated["generate_after_manual"] = False
-            else:
-                updated["generate_after_manual"] = ask_bool(
-                    "Generate IG after manual review",
-                    bool(updated.get("generate_after_manual", True)),
-                )
-
+            updated["manual_only"] = ask_bool("Manual selection only, without IG generation", bool(updated.get("manual_only", False)))
+            updated["generate_after_manual"] = False if updated["manual_only"] else ask_bool("Generate IG after manual review", bool(updated.get("generate_after_manual", True)))
     updated["n_steps"] = ask_int("Integrated Gradients steps", int(updated.get("n_steps", 32)))
-    updated["high_confidence_threshold"] = ask_float(
-        "High-confidence threshold", float(updated.get("high_confidence_threshold", 0.90))
-    )
-    updated["attribution_target"] = ask_choice(
-        "Attribution target",
-        SUPPORTED_ATTRIBUTION_TARGETS,
-        updated.get("attribution_target", "true_label"),
-    )
+    updated["high_confidence_threshold"] = ask_float("High-confidence threshold", float(updated.get("high_confidence_threshold", 0.90)))
+    updated["attribution_target"] = ask_choice("Attribution target", SUPPORTED_ATTRIBUTION_TARGETS, updated.get("attribution_target", "true_label"))
     updated["top_percentile"] = ask_float("Top percentile", float(updated.get("top_percentile", 90)))
     updated["device"] = ask_choice("Device", SUPPORTED_DEVICES, updated.get("device", "auto"))
     updated["input_size"] = ask_int("Input size", int(updated.get("input_size", 224)))
     updated["output_tag"] = ask_string("Optional output tag", updated.get("output_tag", ""))
     updated["force"] = ask_bool("Force overwrite current run outputs", bool(updated.get("force", True)))
     updated["verbose"] = ask_bool("Verbose logging", bool(updated.get("verbose", True)))
-
     return updated
 
 
 def build_custom_run() -> dict[str, Any]:
     print("\nCUSTOM GUIDED RUN")
     print("-" * 80)
-
     args: dict[str, Any] = {}
-
     use_existing = ask_bool("Use existing manual selection manifest?", default=False)
     if use_existing:
-        args["selection_manifest"] = ask_string(
-            "Selection manifest path",
-            DEFAULT_SELECTION_MANIFEST,
-        )
+        args["selection_manifest"] = ask_string("Selection manifest path", DEFAULT_SELECTION_MANIFEST)
         args["model"] = ["efficientnet_b0"]
         args["strategy"] = "attack_stratified"
     else:
         args["model"] = ask_multi_choice("Select model(s)", SUPPORTED_MODELS, ["efficientnet_b0"])
         args["strategy"] = ask_choice("Select strategy", SUPPORTED_STRATEGIES, "attack_stratified")
-
         if args["strategy"] == "attack_stratified":
-            scope = ask_choice(
-                "Manual review scope",
-                ["one_attack", "all_attacks", "custom_attack_filter"],
-                "one_attack",
-            )
-            args["review_scope"] = scope
-
+            scope = ask_choice("Manual review scope", ["one_attack", "all_attacks", "custom_attack_filter"], "one_attack")
             if scope == "one_attack":
                 attack_name = ask_choice("Select attack_name", DEFAULT_ATTACKS, "sigma_zero")
                 args["attack_name"] = [attack_name]
-                args["cases_per_attack"] = ask_int(
-                    f"How many cases do you want to select for {attack_name}?", 3
-                )
+                args["cases_per_attack"] = ask_int(f"How many cases do you want to select for {attack_name}?", 3)
                 args["max_cases"] = args["cases_per_attack"]
             elif scope == "all_attacks":
                 args["attack_name"] = DEFAULT_ATTACKS.copy()
                 args["cases_per_attack"] = ask_int("How many cases per attack?", 3)
                 args["max_cases"] = args["cases_per_attack"] * len(DEFAULT_ATTACKS)
             else:
-                args["attack_name"] = ask_multi_choice(
-                    "Select attack_name filter", DEFAULT_ATTACKS, DEFAULT_ATTACKS
-                )
+                args["attack_name"] = ask_multi_choice("Select attack_name filter", DEFAULT_ATTACKS, DEFAULT_ATTACKS)
                 args["cases_per_attack"] = ask_int("How many cases per selected attack?", 3)
                 args["max_cases"] = args["cases_per_attack"] * max(1, len(args["attack_name"]))
-
-            args["candidate_limit"] = ask_int("Candidate limit", 250)
+            args["candidate_limit"] = ask_int("Candidate limit per attack (0 = show all candidates)", 0)
             args["manual_review"] = ask_bool("Enable manual review", default=True)
             if args["manual_review"]:
                 args["manual_only"] = ask_bool("Manual selection only, without IG generation", default=False)
-                args["generate_after_manual"] = False if args["manual_only"] else ask_bool(
-                    "Generate IG after manual review", default=True
-                )
+                args["generate_after_manual"] = False if args["manual_only"] else ask_bool("Generate IG after manual review", default=True)
         else:
             args["max_cases"] = ask_int("Max cases", 30)
             args["manual_review"] = ask_bool("Enable manual review", default=False)
-
     args["n_steps"] = ask_int("Integrated Gradients steps", 32)
     args["high_confidence_threshold"] = ask_float("High-confidence threshold", 0.90)
     args["attribution_target"] = ask_choice("Attribution target", SUPPORTED_ATTRIBUTION_TARGETS, "both")
@@ -673,42 +485,26 @@ def build_custom_run() -> dict[str, Any]:
     args["output_tag"] = ask_string("Optional output tag", "")
     args["force"] = ask_bool("Force overwrite current run outputs", True)
     args["verbose"] = ask_bool("Verbose logging", True)
-
     return args
 
-
-# =============================================================================
-# Execution
-# =============================================================================
 
 def execute_command(command: list[str], preset_name: str, args_payload: dict[str, Any]) -> int:
     print("\nCommand to execute:")
     print(command_to_string(command))
-
     log_command(command, preset_name, args_payload)
-
-    proceed = ask_bool("Execute now?", default=True)
-    if not proceed:
+    if not ask_bool("Execute now?", default=True):
         print("[INFO] Execution cancelled. Command was saved to launcher log.")
         return 0
-
     print("\n" + "=" * 80)
     print("RUNNING XAI SCRIPT")
     print("=" * 80)
-
     process = subprocess.Popen(command, cwd=str(REPO_ROOT))
     return_code = process.wait()
-
     print("\n" + "=" * 80)
     print(f"Process finished with exit code {return_code}")
     print("=" * 80)
-
     return int(return_code)
 
-
-# =============================================================================
-# Menu
-# =============================================================================
 
 def print_menu() -> None:
     print("\nAvailable workflows:")
@@ -729,49 +525,34 @@ def show_preset_details(key: str) -> None:
 
 def main() -> None:
     ensure_xai_script_exists()
-
     while True:
-        clear_screen()
         print_header()
         print_menu()
-
         choice = input("\nSelect workflow: ").strip()
-
         if choice == "0":
             print("[OK] Exit.")
             return
-
         if choice in PRESETS:
             show_preset_details(choice)
             args = dict(PRESETS[choice]["args"])
-
             if args.get("selection_manifest") == "ASK":
-                args["selection_manifest"] = ask_string(
-                    "Selection manifest path",
-                    DEFAULT_SELECTION_MANIFEST,
-                )
+                args["selection_manifest"] = ask_string("Selection manifest path", DEFAULT_SELECTION_MANIFEST)
             else:
                 args = apply_mandatory_preset_questions(args, choice)
-
             args = maybe_customize_preset(args)
             command = build_command(args)
             return_code = execute_command(command, PRESETS[choice]["name"], args)
-
         elif choice == "8":
             args = build_custom_run()
             command = build_command(args)
             return_code = execute_command(command, "Custom guided run", args)
-
         else:
             print(f"[WARN] Invalid workflow: {choice}")
             input("Press Enter to continue...")
             continue
-
         if return_code != 0:
             print("[WARN] The XAI script ended with a non-zero exit code.")
-
-        again = ask_bool("Run another workflow?", default=False)
-        if not again:
+        if not ask_bool("Run another workflow?", default=False):
             return
 
 
