@@ -18,6 +18,21 @@ Proxy models are not commercial forensic tools. They are local, inspectable mode
 
 ---
 
+## Position in the pipeline
+
+Proxy model training depends on the clean binary folds generated in Milestone 04.
+
+Model-dependent adversarial attacks documented in Milestone 05 require trained fold-aware checkpoints. Therefore, although Milestone 05 documents the perturbation family, the operational execution order is:
+
+```text
+04_split_generation
+06_proxy_model_training
+05_attack_generation
+07_proxy_model_evaluation
+```
+
+---
+
 ## Input
 
 Clean binary folds:
@@ -76,6 +91,16 @@ models/reports/
 models/model_registry.json
 ```
 
+Expected fold-aware checkpoint layout:
+
+```text
+models/checkpoints/<model_name>/fold_1.pt
+models/checkpoints/<model_name>/fold_2.pt
+models/checkpoints/<model_name>/fold_3.pt
+models/checkpoints/<model_name>/fold_4.pt
+models/checkpoints/<model_name>/fold_5.pt
+```
+
 The registry records the proxy model configuration and label mapping used by later evaluation scripts.
 
 ---
@@ -97,6 +122,23 @@ This milestone is complete when:
 - `efficientnet_b0`, `resnet18`, and `clip` are available as proxy models;
 - the downstream evaluation script can load the trained/registered models;
 - the model registry and checkpoint/report areas are available for reproducibility;
-- the models can be evaluated on clean, adversarial, anti-forensic, and OOD inputs.
+- the models can be evaluated on clean, adversarial, anti-forensic, and OOD inputs;
+- the EfficientNet-B0 fold-aware checkpoints are available for model-dependent adversarial attack generation.
 
 Status: **completed**.
+
+---
+
+## Next milestone
+
+The next conceptual milestone is proxy model evaluation:
+
+```text
+progress/milestones/07_proxy_model_evaluation.md
+```
+
+The trained EfficientNet-B0 checkpoints are also consumed by the model-dependent attack generation documented in:
+
+```text
+progress/milestones/05_attack_generation.md
+```
