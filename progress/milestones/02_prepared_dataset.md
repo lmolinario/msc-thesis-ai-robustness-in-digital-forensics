@@ -26,15 +26,25 @@ Expected source directories:
 05_deepweb/
 ```
 
-## Script used
+## Scripts used
+
+Prepared dataset construction:
 
 ```text
 datasets/scripts/prepared/08_build_prepared_dataset.py
 ```
 
+Review-manifest generation:
+
+```text
+datasets/scripts/prepared/09_generate_review_manifest_full.py
+```
+
+The second script is the bridge between the technical prepared pool and the human-in-the-loop review stage documented in Milestone 03.
+
 ## Main operations
 
-The preparation script performs:
+The preparation stage performs:
 
 - recursive image discovery from the raw source directories;
 - technical image validation;
@@ -43,7 +53,8 @@ The preparation script performs:
 - global exact-duplicate removal;
 - copy of valid unique images into the prepared final pool;
 - generation of technical metadata;
-- generation of invalid-image and duplicate-discard reports.
+- generation of invalid-image and duplicate-discard reports;
+- generation of the full review manifest consumed by the manual-selection tool.
 
 ## Output directory
 
@@ -63,7 +74,7 @@ datasets/prepared/final_pool/reports/duplicates_discarded.csv
 
 ## Output files
 
-Main output:
+Main technical output:
 
 ```text
 datasets/prepared/final_pool/metadata.csv
@@ -75,6 +86,12 @@ Reports:
 datasets/prepared/final_pool/reports/prepared_build_summary.json
 datasets/prepared/final_pool/reports/invalid_images.csv
 datasets/prepared/final_pool/reports/duplicates_discarded.csv
+```
+
+Review manifest for the next stage:
+
+```text
+datasets/prepared/manifests/review_manifest_full.csv
 ```
 
 ## Methodological role
@@ -93,6 +110,8 @@ The resulting metadata file records technical provenance information such as:
 - file size;
 - extension;
 - image validity status.
+
+The review manifest preserves these technical fields and exposes the prepared image pool to the manual-selection protocol.
 
 ## Important decision
 
