@@ -1,6 +1,6 @@
 # Adversarial Attacks
 
-This directory contains adversarial perturbations generated against AI-based image classifiers.
+This directory contains adversarial and adversarial-style perturbations generated for the thesis pipeline.
 
 The official adversarial attack targets are the clean binary folds:
 
@@ -16,24 +16,24 @@ Each attack preserves the original fold structure and class labels.
 
 ---
 
-## Implemented and Planned Attacks
+## Generated Attacks
 
-Implemented:
+Generated adversarial/adversarial-style attacks:
 
 ```text
 fgsm/
-color_shift/
-```
-
-Planned but not currently implemented:
-
-```text
 superdeepfool/
 sigma_zero/
 one_pixel/
+color_shift/
 ```
 
-The official generation script raises `NotImplementedError` if a planned but unsupported attack is requested.
+Operational status:
+
+```text
+adversarial generation completed
+proxy model evaluation completed
+```
 
 ---
 
@@ -41,22 +41,22 @@ The official generation script raises `NotImplementedError` if a planned but uns
 
 The adversarial protocol follows a proxy-based, limited-knowledge threat model.
 
-White-box proxy generation target:
+Primary white-box proxy generation target:
 
 ```text
 efficientnet_b0
 ```
 
-EfficientNet-B0 is the primary target for adversarial generation because it is a realistic CNN-based surrogate for image classification systems and provides a sustainable computational compromise for the thesis.
+EfficientNet-B0 is the primary target for model-dependent adversarial generation because it is a realistic CNN-based surrogate for image classification systems and provides a sustainable computational compromise for the thesis.
 
-Transfer targets for cross-model evaluation:
+Transfer/evaluation targets:
 
 ```text
 resnet18
 clip
 ```
 
-Semantic evaluation model:
+Semantic evaluator, if used in the thesis discussion:
 
 ```text
 BLIP
@@ -74,6 +74,18 @@ Oxygen
 ```
 
 Commercial forensic tools are treated as operational black boxes. The goal is not to know or reproduce their internal models, but to evaluate whether perturbations generated on transparent local proxy models transfer to AI-assisted forensic triage systems.
+
+---
+
+## Attack Set
+
+| Attack | Type | Model dependency | Main role |
+|---|---|---|---|
+| `fgsm` | gradient-based adversarial attack | model-dependent | baseline white-box evasion attack |
+| `superdeepfool` | decision-boundary adversarial attack | model-dependent | stronger/iterative adversarial perturbation |
+| `sigma_zero` | adversarial attack | model-dependent | high-impact adversarial perturbation |
+| `one_pixel` | sparse adversarial attack | model-dependent | localized perturbation stress test |
+| `color_shift` | adversarial-style image transformation | model-agnostic | color/channel robustness stress test |
 
 ---
 
@@ -100,10 +112,21 @@ Official numbered entry point:
 datasets/scripts/attacks/14_generate_adversarial_attacks.py
 ```
 
-
 Use the numbered script in documentation, experiments, and reproducible commands.
 
-Official FGSM command:
+---
+
+## Official Commands
+
+Model-agnostic Color Shift:
+
+```bash
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
+  --attack color_shift \
+  --force
+```
+
+FGSM:
 
 ```bash
 python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
@@ -114,29 +137,56 @@ python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
   --force
 ```
 
-Smoke test:
+SuperDeepFool:
 
 ```bash
 python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack fgsm \
+  --attack superdeepfool \
   --target-model efficientnet_b0 \
   --checkpoint-root models/checkpoints \
   --device auto \
-  --limit 10 \
   --force
+```
+
+Sigma Zero:
+
+```bash
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
+  --attack sigma_zero \
+  --target-model efficientnet_b0 \
+  --checkpoint-root models/checkpoints \
+  --device auto \
+  --force
+```
+
+One Pixel:
+
+```bash
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
+  --attack one_pixel \
+  --target-model efficientnet_b0 \
+  --checkpoint-root models/checkpoints \
+  --device auto \
+  --force
+```
+
+Smoke tests can be performed before full regeneration by adding:
+
+```text
+--limit 10
 ```
 
 ---
 
 ## Output Format
 
-FGSM outputs are saved in lossless PNG format:
+Model-dependent adversarial outputs are saved in lossless PNG format:
 
 ```text
-attacks/adversarial/fgsm/<target_model>/<fold>/<label>/<image_id>__fgsm__<target_model>.png
+attacks/adversarial/<attack_name>/<target_model>/<fold>/<label>/<image_id>__<attack_name>__<target_model>.png
 ```
 
-PNG is required for gradient-based attacks because JPEG compression may introduce artifacts comparable to the epsilon-bounded perturbation.
+PNG is required for gradient-based and model-dependent attacks because JPEG compression may introduce artifacts comparable to or stronger than the intended perturbation.
 
 Color Shift outputs remain JPEG because Color Shift is a model-agnostic image-processing perturbation:
 
@@ -175,6 +225,30 @@ created_at
 
 ---
 
+## Evaluation Outputs
+
+The proxy model evaluation stage is performed by:
+
+```text
+evaluation/scripts/15_evaluate_proxy_models.py
+```
+
+Main outputs:
+
+```text
+evaluation/proxy_models/proxy_model_predictions.csv
+results/metrics/proxy_model_clean_metrics.csv
+results/metrics/proxy_model_ood_metrics.csv
+results/metrics/proxy_model_comparative_metrics.csv
+results/metrics/proxy_model_evaluation_summary.json
+```
+
+The comparative metrics match perturbed predictions to clean predictions through model, fold, and original image identifier.
+
+---
+
 ## Methodological Note
 
 The preferred methodological reference is a Cagliari-aligned adversarial machine learning workflow, using SecML/SecML-Torch where practical and academically justified. Where specific attacks are not directly available or are easier to reproduce through widely used frameworks, Foolbox or ART may be used as implementation backends, provided that parameters and outputs are normalized into the thesis manifest format.
+
+For this thesis, adversarial machine learning is not the final object of study. It is used as an experimental stressor to evaluate the operational robustness of AI-based image classification systems in a digital forensic workflow.
