@@ -2,7 +2,7 @@
 
 ## Status
 
-Started.
+Completed and verified.
 
 ## Official script
 
@@ -29,13 +29,16 @@ attacks/manifests/
 datasets/forensic_evaluation_bundle/
 ```
 
-## Expected logical structure
+## Verified logical structure
 
 ```text
 datasets/forensic_evaluation_bundle/
 ├── blind_tool_input/
 │   └── files/
 ├── metadata/
+│   ├── bundle_manifest.csv
+│   ├── bundle_hashes_sha256.csv
+│   └── bundle_summary.json
 └── structured_audit_view/
 ```
 
@@ -51,58 +54,163 @@ Its purpose is to:
 - support later normalization of forensic tool outputs;
 - make local proxy model results and forensic tool outputs comparable.
 
-## Bundle content
+## Verified bundle content
 
-The bundle is expected to include selected or complete samples from:
+The generated bundle contains the complete clean, OOD, adversarial, and anti-forensic corpus prepared for forensic-tool evaluation.
 
-| Sample type | Source |
-|---|---|
-| clean binary samples | `datasets/splits/clean/` |
-| OOD samples | `datasets/splits/ood/` |
-| adversarial samples | `attacks/adversarial/` |
-| anti-forensic samples | `attacks/anti_forensic/` |
+| Sample type / family | Count |
+|---|---:|
+| clean | 1000 |
+| OOD | 500 |
+| adversarial | 5000 |
+| anti-forensic | 5000 |
+| total bundle rows | 11500 |
+| blind files | 11500 |
+| structured files | 11500 |
 
-## Required traceability fields
+Detailed attack distribution:
 
-The bundle metadata should preserve, at minimum:
+| Attack / group | Count |
+|---|---:|
+| clean | 1000 |
+| ood | 500 |
+| color_shift | 1000 |
+| fgsm | 1000 |
+| one_pixel | 1000 |
+| sigma_zero | 1000 |
+| superdeepfool | 1000 |
+| jpeg_recompression | 1000 |
+| resample_resize | 1000 |
+| gaussian_blur | 1000 |
+| histogram_modification | 1000 |
+| contrast_stretching | 1000 |
+
+Label distribution:
+
+| Label | Count |
+|---|---:|
+| weapon | 5500 |
+| non_weapon | 5500 |
+| ood | 500 |
+
+## Metadata and hashes
+
+Verified metadata outputs:
 
 ```text
-blind_filename
+datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
+datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
+datasets/forensic_evaluation_bundle/metadata/bundle_summary.json
+```
+
+The metadata layer preserves both SHA256 and MD5 values for forensic-tool matching and post-export normalization.
+
+The bundle generation script writes:
+
+```text
+sha256_actual
+md5_actual
+sha256_manifest
+md5_manifest
+sha256_matches_manifest
+```
+
+and the compact hash file contains:
+
+```text
+bundle_id
+sha256
+md5
+tool_input_filename
+tool_input_relative_path
+blind_relative_path
+structured_relative_path
 sample_type
+attack_family
+attack_name
+final_label
 original_image_id
 generated_image_id
-fold
-final_label
-source_dataset
+```
+
+## Verified traceability fields
+
+The generated `bundle_manifest.csv` preserves the following key mapping fields:
+
+```text
+bundle_id
+tool_input_filename
+sample_type
 attack_family
 attack_name
 attack_target_model
-original_relative_path
-bundle_relative_path
-sha256
-md5
-extension
+fold
+final_label
+source_dataset
+original_image_id
+generated_image_id
+source_manifest
+source_relative_path
+blind_relative_path
+structured_relative_path
+tool_input_relative_path
+original_sha256
+original_md5
+sha256_manifest
+md5_manifest
+sha256_actual
+md5_actual
+sha256_matches_manifest
 size_bytes
+extension
+layout
+created_at
 ```
 
-Additional fields may be included when useful for auditing or tool-output normalization.
+This satisfies the required mapping toward:
 
-## Validation checklist
+```text
+original_image_id
+attack_name
+sample_type
+```
 
-Before running forensic tools, the bundle must be checked for:
+and also preserves the additional fields needed for forensic output normalization.
 
-| Check | Expected result |
-|---|---|
-| blind filenames do not expose labels | true |
-| blind filenames do not expose attack names | true |
+## Verified checks
+
+| Check | Result |
+|---|---:|
+| bundle ID unique | true |
+| actual SHA256 unique | true |
+| SHA256 values match source manifests when manifest hashes are present | true |
+| blind paths semantically clean | true |
+| metadata separated from tool input | true |
 | clean samples included | true |
 | OOD samples included | true |
 | adversarial samples included | true |
 | anti-forensic samples included | true |
-| SHA256 available for all bundle files | true |
-| MD5 available where required for tool matching | true |
+| SHA256 available | true |
+| MD5 available | true |
 | internal mapping to original image identifiers | true |
 | internal mapping to attack metadata | true |
+
+## Blind-input rule
+
+For black-box forensic-tool evaluation, import only:
+
+```text
+datasets/forensic_evaluation_bundle/blind_tool_input/files
+```
+
+Do not import:
+
+```text
+datasets/forensic_evaluation_bundle/metadata
+datasets/forensic_evaluation_bundle/structured_audit_view
+```
+
+The blind flat layout is designed to reduce path-induced and analyst-induced bias. Ground-truth labels, perturbation metadata, source information, and hash mappings are preserved only in metadata manifests for post-export normalization.
 
 ## Forensic tool targets
 
@@ -125,7 +233,7 @@ results/metrics/
 
 ## Methodological notes
 
-The bundle must separate tool-facing filenames from internal experimental metadata. Forensic tools should receive opaque filenames, while the thesis pipeline preserves the mapping through manifests and hash-based traceability.
+The bundle separates tool-facing filenames from internal experimental metadata. Forensic tools receive opaque filenames, while the thesis pipeline preserves the mapping through manifests and hash-based traceability.
 
 This design supports an operationally realistic scenario: the forensic tool is not given direct information about whether a file is clean, adversarial, anti-forensic, OOD, weapon, or non-weapon.
 
