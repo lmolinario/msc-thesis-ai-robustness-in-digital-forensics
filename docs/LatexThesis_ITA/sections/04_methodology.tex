@@ -57,10 +57,8 @@ pipeline accademica vengono predisposti per essere analizzati da strumenti
 professionali di \gls{df}, secondo una logica più vicina alle condizioni
 applicative reali. Questa distinzione consente di mantenere separati il
 controllo sperimentale proprio della ricerca accademica e la valutazione
-black-box o quasi black-box richiesta dall'analisi di strumenti
-proprietari o professionali,
-spesso caratterizzati da moduli proprietari e non pienamente ispezionabili
-\cite{sanna2024preliminary,sanna2025pixelperfect}.
+black-box o quasi black-box richiesta dall'analisi di strumenti professionali o proprietari,
+spesso caratterizzati da moduli non pienamente ispezionabili \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 Nel protocollo sperimentale consolidato, la pipeline comprende la costruzione
 degli artefatti dataset, la generazione degli split puliti, la produzione delle
@@ -486,9 +484,9 @@ operativa del task binario.
 La pipeline accademica di \gls{fairlab} utilizza un insieme di proxy model
 trasparenti e riproducibili per rappresentare il comportamento di classificatori
 \gls{ai}-based sottoposti a dati puliti, input adversariali e trasformazioni
-anti-forensi. Tali modelli non devono essere interpretati come strumenti forensi
-commerciali, né come sostituti dei software analizzati nella pipeline
-operativo-forense. Essi costituiscono invece componenti sperimentali controllate,
+anti-forensi. Tali modelli non devono essere interpretati come strumenti forensi valutati
+nella pipeline operativo-forense, né come sostituti dei software analizzati
+in tale livello del protocollo. Essi costituiscono invece componenti sperimentali controllate,
 necessarie per definire un riferimento algoritmico ispezionabile, generare
 perturbazioni model-dependent e studiare la possibile trasferibilità degli
 effetti osservati verso altri sistemi di classificazione.
@@ -934,8 +932,8 @@ protocollo metrico e al capitolo dei risultati.
 % ─────────────────────────────────────────────────────────────────────────────
 
 La pipeline operativo-forense di \gls{fairlab} richiede che gli artefatti
-prodotti nella pipeline accademica siano trasferiti verso strumenti forensi
-valutati senza esporre, durante l'importazione, informazioni semantiche che
+prodotti nella pipeline accademica siano trasferiti verso gli strumenti forensi oggetto di valutazione
+senza esporre, durante l'importazione, informazioni semantiche che
 possano influenzare l'analisi. Per questa ragione, dopo la generazione degli
 split puliti, delle immagini adversariali e delle trasformazioni anti-forensi,
 viene costruito un \textit{forensic evaluation bundle}, cioè un corpus
@@ -1057,8 +1055,8 @@ metadata dagli input dei tool.
 
 La successiva valutazione operativa con strumenti forensi utilizza il bundle
 come input controllato e separa la fase di importazione dei file dalla
-fase di normalizzazione degli output. I tool vengono trattati come sistemi
-black-box o quasi black-box: la pipeline non assume accesso ai modelli interni,
+fase di normalizzazione degli output. Gli strumenti che integrano moduli proprietari o non pienamente ispezionabili
+vengono trattati come sistemi black-box o quasi black-box: la pipeline non assume accesso ai modelli interni,
 alle soglie decisionali o alle logiche proprietarie di classificazione, ma
 analizza gli output esportabili e li normalizza rispetto a
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}.
