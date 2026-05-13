@@ -329,6 +329,15 @@ caratteristiche semantiche delle singole sorgenti.
 \end{tabular}
 \end{table}
 
+
+Un limite del dataset congelato riguarda la distribuzione per sorgente della classe \texttt{non\_weapon},
+nella quale la sorgente \texttt{05\_deepweb} contribuisce con una quota prevalente di campioni.
+Tale sbilanciamento deriva dal protocollo \textit{human-in-the-loop},
+che ha privilegiato chiarezza semantica, pertinenza forense e separazione rispetto alla classe
+\texttt{weapon}, piuttosto che un bilanciamento rigido per sorgente. Sebbene il dataset finale sia
+bilanciato a livello di classe, lo sbilanciamento per sorgente può influenzare la varietà visiva della
+classe negativa e viene quindi considerato come limite metodologico nell'interpretazione dei risultati.
+
 Il protocollo di selezione è stato condotto da un singolo revisore, secondo
 criteri espliciti e documentati. Questa scelta rappresenta un limite rispetto a
 protocolli multi-revisore con misura formale di accordo inter-annotatore, ma
@@ -566,14 +575,26 @@ dimensione di input, la normalizzazione utilizzata e l'hash SHA256 del file
 prodotto. La registrazione dell'hash del checkpoint è metodologicamente rilevante
 perché consente di verificare che le fasi successive della pipeline, incluse la
 generazione degli attacchi model-dependent e le valutazioni di robustezza, siano
-riconducibili a una versione specifica e immutata del modello. I parametri di
-addestramento, tra cui ottimizzatore, learning rate, batch size, numero di epoche
-e configurazioni specifiche dei singoli modelli, sono documentati nello script di
-training e nel registro \codepath{models/model_registry.json}, così da mantenere
-separata la descrizione metodologica del protocollo dalla riproduzione dettagliata
-della configurazione implementativa.
+riconducibili a una versione specifica e immutata del modello. I parametri di addestramento,
+tra cui ottimizzatore, learning rate, batch size, numero di epoche e configurazioni specifiche
+dei singoli modelli, sono documentati nello script di training e, ove applicabile, nei
+metadati registrati in \codepath{models/model_registry.json}, così da mantenere separata la
+descrizione metodologica del protocollo dalla riproduzione dettagliata della configurazione implementativa.
 
-Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target} per la generazione degli attacchi adversariali model-dependent. Questa scelta non implica che EfficientNet-B0 rappresenti il modello più robusto o più accurato in senso assoluto, né che esaurisca l'analisi comparativa della tesi. Indica invece il modello controllato rispetto al quale vengono costruite, in questa fase della pipeline, le perturbazioni che richiedono accesso al gradiente, al classificatore o al comportamento decisionale del target. Tale impostazione consente di mantenere il protocollo adversarial controllato e confrontabile tra famiglie di perturbazione, evitando di moltiplicare il numero di varianti sperimentali in funzione dell'architettura attaccata. L'obiettivo non è ottimizzare separatamente gli attacchi contro ogni modello, ma generare un banco di prova adversarial coerente e successivamente valutare la trasferibilità delle perturbazioni verso modelli differenti, quali ResNet18 e \gls{clip}.
+NNel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target}
+per la generazione degli attacchi adversariali model-dependent. Questa scelta non implica che
+EfficientNet-B0 rappresenti il modello più robusto o più accurato in senso assoluto, né che esaurisca
+l'analisi comparativa della tesi. Indica invece il modello controllato rispetto al quale vengono costruite,
+in questa fase della pipeline, le perturbazioni che richiedono accesso al gradiente, al classificatore
+o al comportamento decisionale del target.
+
+Tale impostazione consente di mantenere il protocollo adversarial
+controllato e confrontabile tra famiglie di perturbazione, evitando di moltiplicare il
+numero di varianti sperimentali in funzione dell'architettura attaccata.
+L'obiettivo non è ottimizzare separatamente gli attacchi contro ogni modello, ma generare un banco di
+prova adversarial coerente e successivamente valutare la trasferibilità delle perturbazioni verso modelli
+differenti, quali ResNet18 e \gls{clip}.
+
 
 È infine necessario distinguere i proxy model dagli strumenti forensi
 \gls{cots} analizzati nella pipeline operativo-forense. I proxy model sono
@@ -1148,13 +1169,27 @@ in \codepath{results/metrics/}: \codepath{proxy\_model\_clean\_metrics.csv},
 \codepath{proxy\_model\_comparative\_metrics.csv} e
 \codepath{proxy\_model\_evaluation\_summary.json}.
 
+Lo stesso script produce inoltre file metrici finali orientati alla sintesi sperimentale,
+tra cui \codepath{final_core_metrics.csv}, \codepath{final_robustness_metrics.csv},
+\codepath{final_confusion_matrices.csv} e \codepath{final_ood_metrics.csv}.
+
 Il run di valutazione dei proxy model comprende 11\,500 campioni in input e
 40\,500 righe di predizione, senza errori registrati. La distribuzione delle
 predizioni include 3000 righe relative a campioni puliti, 7500 righe relative
-al set \gls{ood} e 30\,000 righe relative a campioni perturbati. Il set
-\gls{ood} viene valutato rispetto a ciascuno dei cinque checkpoint fold-aware
-per ogni modello, producendo 500~$\times$~5~$\times$~3~$=$~7\,500 righe;
-questa scelta non mira ad aumentare artificialmente il numero di campioni, ma a osservare la stabilità del comportamento fuori distribuzione al variare del checkpoint di addestramento. In questo modo, la valutazione \gls{ood} consente di verificare se l'incertezza o l'errore del modello rispetto a input non appartenenti alla distribuzione target sia stabile oppure dipenda sensibilmente dal fold utilizzato per l'addestramento, mantenendo al contempo la coerenza con il protocollo dei proxy model. In termini di famiglia di attacco, il summary distingue
+al set \gls{ood} e 30\,000 righe relative a campioni perturbati. Il set \gls{ood} viene
+valutato rispetto a ciascuno dei cinque checkpoint fold-aware
+per ogni modello, producendo 500~$\times$~5~$\times$~3~$=$~7\,500 righe.
+Questa scelta non mira ad aumentare artificialmente il numero di campioni, ma a
+osservare la stabilità del comportamento fuori distribuzione al variare del
+checkpoint di addestramento.
+
+In questo modo, la valutazione \gls{ood} consente di verificare se l'incertezza
+o l'errore del modello rispetto a input non appartenenti alla distribuzione
+target sia stabile oppure dipenda sensibilmente dal fold utilizzato per
+l'addestramento, mantenendo al contempo la coerenza con il protocollo dei proxy
+model.
+
+In termini di famiglia di attacco, il summary distingue
 10\,500 righe con \texttt{attack\_family = none}, 15\,000 righe adversariali
 e 15\,000 righe anti-forensi. Questi valori descrivono la copertura della
 valutazione metodologica e non devono essere interpretati come risultati di
@@ -1250,6 +1285,11 @@ false positive rate e balanced accuracy dove applicabile. \\
 \end{tabularx}
 \end{table}
 
+Metriche threshold-independent come AUROC non vengono considerate come output principale
+del protocollo corrente, poiché la valutazione deve rimanere confrontabile anche con
+strumenti commerciali che possono esportare solo etichette categoriali, stati non standardizzati
+o risultati privi di score probabilistici omogenei.
+
 Per gli strumenti forensi commerciali, il protocollo metrico deve essere
 adattato alla natura degli output disponibili. I tool possono produrre categorie
 non perfettamente sovrapponibili al task binario, punteggi di confidenza non
@@ -1344,13 +1384,13 @@ tool commerciali, ove disponibili. \\
 
 Gli output previsti sono salvati in
 \codepath{explainability/outputs/integrated_gradients/} e documentati mediante
-tre manifest: \codepath{explainability/manifests/integrated_gradients_manifest.csv},
-\codepath{explainability/manifests/xai_case_studies_manifest.csv} e
-\codepath{explainability/manifests/integrated_gradients_summary.json}. Il primo
-manifest registra gli artefatti di attribuzione generati; il secondo documenta
-i criteri di selezione dei casi; il terzo riassume il run e i controlli eseguiti.
-Questa organizzazione consente di mantenere la stessa logica di tracciabilità
-già adottata per dataset, perturbazioni, bundle e valutazioni metriche.
+manifest run-specific nella directory \codepath{explainability/manifests/}.
+In particolare, lo script produce artefatti secondo pattern quali
+\codepath{integrated_gradients_manifest__<run_tag>.csv},
+\codepath{xai_case_studies_manifest__<run_tag>.csv} e
+\codepath{integrated_gradients_summary__<run_tag>.json}. Il primo manifest
+registra gli artefatti di attribuzione generati; il secondo documenta i criteri
+di selezione dei casi; il terzo riassume il run e i controlli eseguiti.
 
 Le mappe di attribuzione devono essere interpretate con cautela. Esse possono
 supportare l'analisi di casi specifici e contribuire a formulare ipotesi sul
