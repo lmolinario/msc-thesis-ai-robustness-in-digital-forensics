@@ -23,7 +23,7 @@ la produzione degli split. Le successive otto
 (\S\S\,\ref{sec:methodology-models-classification}--\ref{sec:methodology-traceability-controls})
 descrivono il paradigma di classificazione, la selezione e la generazione
 delle perturbazioni adversariali e anti-forensi, il \textit{forensic evaluation
-bundle}, il protocollo di valutazione degli strumenti commerciali, le metriche,
+bundle}, il protocollo di valutazione degli strumenti forensi, le metriche,
 l'approccio di \gls{xai} e i controlli di tracciabilità e riproducibilità.
 
 La distinzione tra metodologia e analisi dei risultati è mantenuta lungo tutto
@@ -57,13 +57,14 @@ pipeline accademica vengono predisposti per essere analizzati da strumenti
 professionali di \gls{df}, secondo una logica più vicina alle condizioni
 applicative reali. Questa distinzione consente di mantenere separati il
 controllo sperimentale proprio della ricerca accademica e la valutazione
-black-box o quasi black-box richiesta dall'analisi di strumenti commerciali,
+black-box o quasi black-box richiesta dall'analisi di strumenti
+proprietari o professionali,
 spesso caratterizzati da moduli proprietari e non pienamente ispezionabili
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
-Nel suo stato attuale, la pipeline è stata consolidata fino alla costruzione
-degli artefatti dataset, alla generazione degli split puliti, alla produzione
-delle principali famiglie di perturbazioni adversariali e anti-forensi e alla
+Nel protocollo sperimentale consolidato, la pipeline comprende la costruzione
+degli artefatti dataset, la generazione degli split puliti, la produzione delle
+principali famiglie di perturbazioni adversariali e anti-forensi e la
 predisposizione del bundle per la valutazione forense. In particolare, sono
 stati definiti e prodotti il dataset finale congelato, il subset binario
 destinato agli esperimenti adversariali e anti-forensi, gli split puliti per la
@@ -92,6 +93,7 @@ dominio; la terza comprende casi borderline, anomali o fuori distribuzione che
 non dovrebbero essere forzati in modo acritico nelle due classi binarie
 principali.
 
+
 La scelta di includere una classe \gls{ood} esplicita risponde a un'esigenza
 metodologica specifica. In un contesto operativo reale, i sistemi di
 classificazione non ricevono soltanto immagini pulite e semanticamente allineate
@@ -102,6 +104,11 @@ ad alta confidenza anche su input estranei al dominio di addestramento,
 rendendo necessario distinguere gli errori su classi note dalla gestione di
 campioni che non dovrebbero essere classificati come positivi o negativi ordinari
 \cite{hendrycks2017baseline,fort2021exploring}.
+
+La classe \texttt{ood} non deve quindi essere interpretata come una categoria
+semantica omogenea, ma come un insieme metodologico di stress test volto a
+verificare la tendenza dei sistemi automatici a forzare contenuti anomali,
+borderline o esterni al dominio entro classi operative note.
 
 La metodologia distingue inoltre tra classificazione automatica, robustezza e
 validazione operativa. La classificazione automatica riguarda la capacità del
@@ -337,6 +344,12 @@ che ha privilegiato chiarezza semantica, pertinenza forense e separazione rispet
 \texttt{weapon}, piuttosto che un bilanciamento rigido per sorgente. Sebbene il dataset finale sia
 bilanciato a livello di classe, lo sbilanciamento per sorgente può influenzare la varietà visiva della
 classe negativa e viene quindi considerato come limite metodologico nell'interpretazione dei risultati.
+
+Di conseguenza, le conclusioni relative alla classe \texttt{non\_weapon}
+devono essere interpretate rispetto alla composizione effettiva del dataset
+congelato e non come stima generale della distribuzione dei negativi realistici
+in scenari forensi eterogenei.
+
 
 Il protocollo di selezione è stato condotto da un singolo revisore, secondo
 criteri espliciti e documentati. Questa scelta rappresenta un limite rispetto a
@@ -581,7 +594,7 @@ dei singoli modelli, sono documentati nello script di training e, ove applicabil
 metadati registrati in \codepath{models/model_registry.json}, così da mantenere separata la
 descrizione metodologica del protocollo dalla riproduzione dettagliata della configurazione implementativa.
 
-NNel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target}
+Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target}
 per la generazione degli attacchi adversariali model-dependent. Questa scelta non implica che
 EfficientNet-B0 rappresenti il modello più robusto o più accurato in senso assoluto, né che esaurisca
 l'analisi comparativa della tesi. Indica invece il modello controllato rispetto al quale vengono costruite,
@@ -596,11 +609,11 @@ prova adversarial coerente e successivamente valutare la trasferibilità delle p
 differenti, quali ResNet18 e \gls{clip}.
 
 
-È infine necessario distinguere i proxy model dagli strumenti forensi
-\gls{cots} analizzati nella pipeline operativo-forense. I proxy model sono
+È infine necessario distinguere i proxy model dagli strumenti forensi valutati
+nella pipeline operativo-forense. I proxy model sono
 componenti accademiche aperte, configurabili e documentate, per le quali sono
 noti architettura, checkpoint, mapping delle classi, protocollo di addestramento
-e hash dei file. Gli strumenti forensi commerciali, al contrario, vengono trattati
+e hash dei file. Gli strumenti forensi, al contrario, vengono trattati
 come sistemi black-box o quasi black-box: l'analisi non presuppone accesso alla
 loro architettura interna, ma si concentra sugli output osservabili, sulla loro
 coerenza rispetto ai manifest sperimentali e sul loro comportamento in presenza
@@ -646,7 +659,24 @@ definita nella fase di training dei proxy model. La procedura evita quindi di
 trattare il dataset come un insieme indistinto e preserva il legame tra split,
 checkpoint e artefatto generato.
 
-La trasformazione \texttt{color\_shift} viene invece trattata come perturbazione \textit{adversarial-style} model-agnostic. Essa modifica globalmente le componenti cromatiche dell'immagine, senza interrogare il modello e senza utilizzare informazioni di gradiente. Questa distinzione è metodologicamente rilevante perché consente di separare le perturbazioni costruite rispetto a un classificatore specifico da alterazioni visive più generali. All'interno della pipeline, \texttt{color\_shift} viene comunque incluso nel gruppo adversarial perché la sua finalità sperimentale non è simulare un ordinario intervento di post-processing forense, ma verificare se una variazione cromatica semanticamente conservativa possa alterare il comportamento dei classificatori automatici.
+La trasformazione \texttt{color\_shift} viene invece trattata come perturbazione \textit{adversarial-style}
+model-agnostic. Essa modifica globalmente le componenti cromatiche dell'immagine,
+senza interrogare il modello e senza utilizzare informazioni di gradiente.
+Questa distinzione è metodologicamente rilevante perché consente di separare le perturbazioni
+costruite rispetto a un classificatore specifico da alterazioni visive più generali.
+
+All'interno della pipeline, \texttt{color\_shift} viene comunque incluso nel gruppo adversarial
+perché la sua finalità sperimentale non è simulare un ordinario intervento di post-processing forense,
+ma verificare se una variazione cromatica semanticamente conservativa possa alterare il comportamento
+dei classificatori automatici.
+
+Il protocollo non mira a costruire un benchmark esaustivo di robustezza
+adversariale nel senso stretto dell'Adversarial Machine Learning, come avverrebbe
+con sweep estesi o attacchi iterativi standard quali PGD o AutoAttack. La
+selezione privilegia invece un insieme eterogeneo e computazionalmente
+sostenibile di perturbazioni, coerente con l'obiettivo forense di valutare la
+robustezza operativa della pipeline.
+
 
 \begin{table}[H]
 \centering
@@ -845,6 +875,13 @@ Cinque trasformazioni applicate alle 1000 immagini del subset binario.
 \end{tabularx}
 \end{table}
 
+Tali trasformazioni non vengono intese come catalogo esaustivo delle tecniche
+anti-forensi applicabili alle immagini digitali, né come semplici operazioni di
+data augmentation, ma come manipolazioni controllate dell'artefatto immagine
+utili a valutare la stabilità operativa della classificazione in presenza di
+degradazioni realistiche.
+
+
 Nel run consolidato della pipeline, ciascuna trasformazione è stata applicata
 alle 1000 immagini del subset binario, mantenendo la distribuzione dei cinque
 fold e il bilanciamento tra le classi \texttt{weapon} e \texttt{non\_weapon}.
@@ -886,7 +923,7 @@ immagini trasformate e corretta scrittura del manifest. Tali controlli non
 costituiscono una valutazione dei risultati di robustezza, ma attestano la
 coerenza tecnica della generazione degli artefatti anti-forensi. L'analisi
 dell'impatto di tali trasformazioni sulle prestazioni dei modelli e, in seguito,
-sugli strumenti forensi commerciali viene demandata alle sezioni dedicate al
+sugli strumenti forensi viene demandata alle sezioni dedicate al
 protocollo metrico e al capitolo dei risultati.
 
 
@@ -898,12 +935,12 @@ protocollo metrico e al capitolo dei risultati.
 
 La pipeline operativo-forense di \gls{fairlab} richiede che gli artefatti
 prodotti nella pipeline accademica siano trasferiti verso strumenti forensi
-commerciali senza esporre, durante l'importazione, informazioni semantiche che
+valutati senza esporre, durante l'importazione, informazioni semantiche che
 possano influenzare l'analisi. Per questa ragione, dopo la generazione degli
 split puliti, delle immagini adversariali e delle trasformazioni anti-forensi,
 viene costruito un \textit{forensic evaluation bundle}, cioè un corpus
-organizzato e tracciabile destinato alla valutazione operativa mediante tool
-\gls{cots}. Tale bundle non modifica la ground truth sperimentale, ma la separa
+organizzato e tracciabile destinato alla valutazione operativa mediante strumenti
+forensi professionali o open-source. Tale bundle non modifica la ground truth sperimentale, ma la separa
 dagli input effettivamente sottoposti agli strumenti, preservandola nei metadati
 di controllo.
 
@@ -913,7 +950,7 @@ Il bundle viene generato a partire dagli artefatti già consolidati della pipeli
 immagini pulite del subset binario, set \gls{ood}, immagini adversariali e
 immagini anti-forensi. L'obiettivo non è soltanto raccogliere i file in una
 directory comune, ma produrre una struttura che consenta due modalità di accesso
-complementari: una vista cieca e piatta per l'importazione nei tool commerciali,
+complementari: una vista cieca e piatta per l'importazione nei tool forensi,
 e una vista strutturata per l'audit interno e la verifica sperimentale.
 
 Nel run consolidato, il bundle è stato generato con layout \texttt{both}. La
@@ -940,7 +977,7 @@ e \texttt{bundle\_summary.json}. Conserva ground truth, provenienza, classi,
 famiglia di attacco, fold, hash e percorsi di controllo. \\
 \codepath{blind_tool_input/files/}
 &
-Contiene la vista cieca da importare nei tool commerciali. I file sono rinominati
+Contiene la vista cieca da importare nei tool forensi valutati. I file sono rinominati
 con identificativi neutri, ad esempio \texttt{bundle\_000001.jpg} o
 \texttt{bundle\_000002.png}. \\
 \codepath{structured_audit_view/clean/}
@@ -959,7 +996,7 @@ Vista interna delle immagini generate mediante trasformazioni anti-forensi. \\
 \end{tabularx}
 \end{table}
 
-Ai fini della valutazione con strumenti commerciali, deve essere importata
+Ai fini della valutazione con strumenti forensi, deve essere importata
 esclusivamente la directory
 \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}.
 Non devono invece essere importate le directory \codepath{metadata/} e
@@ -1018,8 +1055,8 @@ corrispondenza degli hash quando presenti nei manifest sorgente, assenza di
 blind path mancanti, pulizia semantica dei percorsi ciechi e separazione dei
 metadata dagli input dei tool.
 
-La successiva valutazione operativa con strumenti commerciali utilizza il
-bundle come input controllato e separa la fase di importazione dei file dalla
+La successiva valutazione operativa con strumenti forensi utilizza il bundle
+come input controllato e separa la fase di importazione dei file dalla
 fase di normalizzazione degli output. I tool vengono trattati come sistemi
 black-box o quasi black-box: la pipeline non assume accesso ai modelli interni,
 alle soglie decisionali o alle logiche proprietarie di classificazione, ma
@@ -1031,28 +1068,36 @@ la validazione sperimentale con una certificazione generale del prodotto
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 
+La cecità del bundle riguarda principalmente nomi dei file, percorsi e struttura
+delle directory. Eventuali metadati embedded nei file immagine, quali campi EXIF
+o informazioni residue prodotte dalle trasformazioni, devono essere documentati
+e controllati separatamente, poiché potrebbero essere indicizzati da alcuni
+strumenti forensi e influenzare l'analisi oltre il solo contenuto visuale.
+
+
+
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Commercial forensic tools evaluation protocol}
-\label{sec:methodology-commercial-tools}
+\section{Forensic tools evaluation protocol}
+\label{sec:methodology-forensic-tools}
 % ─────────────────────────────────────────────────────────────────────────────
 
 La pipeline operativo-forense di \gls{fairlab} prevede la valutazione di
-strumenti commerciali impiegati in contesti professionali di \gls{df}, con
-particolare attenzione ai moduli di analisi automatizzata delle immagini. A
-differenza dei proxy model descritti nella
+strumenti forensi professionali e, ove opportuno, di ambienti open-source di
+supporto al workflow sperimentale, con particolare attenzione alla gestione,
+all'indicizzazione, alla categorizzazione e all'esportazione di contenuti
+immagine. A differenza dei proxy model descritti nella
 Sezione~\ref{sec:methodology-models-classification}, tali strumenti vengono
-trattati come sistemi black-box o quasi black-box: la metodologia non assume
-accesso alle architetture interne, ai dataset di addestramento, alle soglie
-decisionali o alle logiche proprietarie di categorizzazione. L'analisi si
-concentra invece sugli output osservabili, esportabili e riconducibili agli
-artefatti del \textit{forensic evaluation bundle}.
+trattati come sistemi black-box o quasi black-box quando integrano moduli
+proprietari di analisi automatizzata; nei casi in cui lo strumento non includa
+funzionalità \gls{ai} direttamente comparabili, esso viene utilizzato come
+ambiente di ingest, hashing, visualizzazione, tagging, reporting o integrazione
+con workflow esterni.
 
 L'obiettivo di questa fase non è certificare in senso generale l'affidabilità
 dei prodotti considerati, ma valutare in condizioni controllate il loro
 comportamento operativo rispetto a immagini pulite, immagini fuori distribuzione
 e immagini manipolate mediante perturbazioni adversariali e trasformazioni
-anti-forensi. In questo modo, il protocollo consente di confrontare la risposta
-dei tool commerciali con quella dei proxy model accademici, mantenendo tuttavia
+anti-forensi. In questo modo, il protocollo consente di confrontare la risposta degli strumenti forensi valutati con quella dei proxy model accademici, mantenendo tuttavia
 distinti i due livelli di analisi: da un lato, modelli pienamente ispezionabili
 e riproducibili; dall'altro, strumenti professionali caratterizzati da logiche
 interne non completamente accessibili.
@@ -1068,46 +1113,49 @@ non viene esposta al tool durante l'importazione. Questa separazione riduce il
 rischio di bias indotto dai nomi dei file o dai percorsi e consente di
 normalizzare gli output solo in una fase successiva.
 
-Gli strumenti considerati nel protocollo comprendono Magnet AXIOM, X-Ways
-Forensics, Cellebrite \gls{ufed} e Oxygen Forensic Detective, compatibilmente
-con la disponibilità delle rispettive licenze, versioni software e funzionalità
-di esportazione. Magnet AXIOM viene considerato per la presenza di funzionalità
-di categorizzazione e analisi automatizzata dei contenuti multimediali. X-Ways
-Forensics viene incluso come ambiente forense professionale ad approccio
-low-level, valutabile anche in combinazione con esportazioni, estensioni o
-workflow esterni di analisi visuale. Cellebrite \gls{ufed} e gli ambienti di
-analisi collegati vengono considerati per il loro ruolo nell'estrazione e
-nell'analisi forense di dispositivi mobili. Oxygen Forensic Detective viene
-considerato per le funzionalità di analisi e categorizzazione automatizzata di
-contenuti multimediali e artefatti provenienti da dispositivi mobili o sorgenti
-cloud.
+Gli strumenti considerati nel protocollo comprendono Magnet AXIOM,
+X-Ways Forensics, eventualmente in combinazione con Excire Forensics,
+Autopsy e ulteriori strumenti forensi solo se compatibili con la disponibilità
+di licenza, versione software, moduli abilitati e possibilità di esportare
+output riconducibili agli artefatti del bundle. Magnet AXIOM viene considerato
+per la presenza di funzionalità di analisi, categorizzazione o triage
+automatizzato dei contenuti multimediali. X-Ways Forensics, eventualmente
+integrato con Excire Forensics, viene incluso come ambiente professionale per
+l'ispezione, la gestione e l'analisi visuale di contenuti immagine. Autopsy viene
+invece trattato come baseline open-source per ingest, hashing, visualizzazione,
+tagging e reporting, non come equivalente diretto ai tool proprietari con moduli
+di categorizzazione automatizzata.
 
 \begin{table}[H]
 \centering
-\caption{Strumenti forensi commerciali considerati nella pipeline operativo-forense.}
-\label{tab:methodology-commercial-tools}
+\caption{Strumenti forensi considerati nella pipeline operativo-forense.}
+\label{tab:methodology-forensic-tools}
 \begin{tabularx}{\textwidth}{@{}lX@{}}
 \toprule
 \textbf{Strumento} & \textbf{Ruolo metodologico nel protocollo} \\
 \midrule
 \texttt{Magnet AXIOM}
 &
-Valutazione degli output prodotti dai moduli di analisi e categorizzazione
-automatizzata dei contenuti multimediali rispetto agli artefatti del bundle. \\
-\texttt{X-Ways Forensics}
+Valutazione degli output prodotti dai moduli disponibili di analisi,
+categorizzazione o triage automatizzato dei contenuti multimediali rispetto agli
+artefatti del bundle. \\
+\texttt{X-Ways Forensics / Excire Forensics}
 &
 Ambiente forense professionale utilizzato per l'ispezione, la gestione e
-l'eventuale integrazione di workflow esterni di classificazione o triage
-visuale. \\
-\texttt{Cellebrite UFED}
+l'eventuale integrazione con moduli o workflow esterni di analisi visuale,
+incluse funzionalità di categorizzazione o ricerca immagini ove disponibili. \\
+\texttt{Autopsy}
 &
-Strumento considerato per scenari di acquisizione e analisi forense di
-dispositivi mobili, con successiva valutazione degli output disponibili sui
-contenuti immagine. \\
-\texttt{Oxygen Forensic Detective}
+Ambiente forense open-source utilizzato come baseline per ingest, hashing,
+visualizzazione, tagging e reporting; non viene trattato come equivalente diretto
+ai tool proprietari con moduli di categorizzazione automatizzata, ma come
+possibile punto di integrazione con workflow esterni FAIR-Lab e \gls{xai}. \\
+\texttt{Additional forensic tools}
 &
-Suite considerata per l'analisi di artefatti mobili, cloud e multimediali, con
-attenzione alle funzionalità di categorizzazione automatizzata delle immagini. \\
+Eventuali ulteriori strumenti professionali, mobili o cloud-oriented, inclusi
+solo compatibilmente con disponibilità di licenza, versione software, moduli
+abilitati e possibilità di esportare output riconducibili agli artefatti del
+bundle. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1122,7 +1170,7 @@ terzo luogo, gli output vengono ricondotti al file
 o hash, così da confrontare le categorie prodotte dal tool con la ground truth
 sperimentale.
 
-La normalizzazione degli output commerciali richiede particolare cautela,
+La normalizzazione degli output prodotti dagli strumenti forensi richiede particolare cautela,
 poiché le categorie interne dei tool potrebbero non coincidere direttamente con
 le classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo
 motivo, la pipeline prevede una fase di mapping esplicito, nella quale le label
@@ -1132,8 +1180,7 @@ convertiti automaticamente in \texttt{non\_weapon}, ma mantenuti come stati
 distinti, poiché in un workflow forense l'assenza di rilevamento non equivale
 necessariamente a una classificazione negativa.
 
-Questa impostazione consente di valutare la robustezza operativa degli strumenti
-commerciali senza attribuire loro proprietà interne non verificabili. La
+Questa impostazione consente di valutare la robustezza operativa degli strumenti valutati senza attribuire loro proprietà interne non verificabili. La
 valutazione rimane quindi ancorata agli output osservabili e alla loro coerenza
 rispetto al manifest sperimentale, mantenendo separati il piano metodologico,
 la misurazione quantitativa e la successiva interpretazione dei risultati.
@@ -1147,7 +1194,7 @@ la misurazione quantitativa e la successiva interpretazione dei risultati.
 Il protocollo metrico di \gls{fairlab} è progettato per valutare due livelli
 distinti della pipeline: i proxy model accademici, per i quali sono disponibili
 predizioni, confidenze, checkpoint e mapping delle classi, e gli strumenti
-forensi commerciali, per i quali l'analisi si basa sugli output esportati dal
+forensi valutati, per i quali l'analisi si basa sugli output esportati dal
 tool. In entrambi i casi, l'obiettivo non è misurare soltanto l'accuratezza
 aggregata, ma qualificare il comportamento operativo dei sistemi rispetto a
 input puliti, manipolati e fuori distribuzione. In ambito forense, infatti, un
@@ -1174,7 +1221,8 @@ tra cui \codepath{final_core_metrics.csv}, \codepath{final_robustness_metrics.cs
 \codepath{final_confusion_matrices.csv} e \codepath{final_ood_metrics.csv}.
 
 Il run di valutazione dei proxy model comprende 11\,500 campioni in input e
-40\,500 righe di predizione, senza errori registrati. La distribuzione delle
+40\,500 righe di predizione. Tali conteggi descrivono la copertura del run e la
+completezza degli artefatti prodotti, non una misura di performance del sistema. La distribuzione delle
 predizioni include 3000 righe relative a campioni puliti, 7500 righe relative
 al set \gls{ood} e 30\,000 righe relative a campioni perturbati. Il set \gls{ood} viene
 valutato rispetto a ciascuno dei cinque checkpoint fold-aware
@@ -1224,7 +1272,21 @@ Contiene le metriche specifiche per il comportamento fuori distribuzione. \\
 Integra il confronto tra condizioni clean, perturbate e \gls{ood}. \\
 \texttt{proxy\_model\_evaluation\_summary.json}
 &
-Riassume copertura del run, modelli valutati, conteggi e assenza di errori. \\
+Riassume copertura del run, modelli valutati, conteggi e controlli di completezza. \\
+\texttt{final\_core\_metrics.csv}
+&
+Sintetizza le metriche principali dei proxy model nelle condizioni sperimentali
+centrali. \\
+\texttt{final\_robustness\_metrics.csv}
+&
+Raccoglie le metriche comparative orientate alla robustezza rispetto a input
+puliti e manipolati. \\
+\texttt{final\_confusion\_matrices.csv}
+&
+Documenta le matrici di confusione aggregate e per condizione sperimentale. \\
+\texttt{final\_ood\_metrics.csv}
+&
+Riporta le metriche finali relative al comportamento fuori distribuzione. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1276,7 +1338,7 @@ Comportamento \gls{ood}
 &
 \gls{ood} predicted as \texttt{weapon}, \gls{ood} predicted as
 \texttt{non\_weapon} e \gls{ood} high-confidence rate. \\
-Tool commerciali
+Strumenti forensi
 &
 True positive, false negative, false positive, true negative, unknown,
 not detected, uncategorized, weapon recall, weapon false negative rate,
@@ -1287,10 +1349,10 @@ false positive rate e balanced accuracy dove applicabile. \\
 
 Metriche threshold-independent come AUROC non vengono considerate come output principale
 del protocollo corrente, poiché la valutazione deve rimanere confrontabile anche con
-strumenti commerciali che possono esportare solo etichette categoriali, stati non standardizzati
+strumenti forensi che possono esportare solo etichette categoriali, stati non standardizzati
 o risultati privi di score probabilistici omogenei.
 
-Per gli strumenti forensi commerciali, il protocollo metrico deve essere
+Per gli strumenti forensi, il protocollo metrico deve essere
 adattato alla natura degli output disponibili. I tool possono produrre categorie
 non perfettamente sovrapponibili al task binario, punteggi di confidenza non
 standardizzati, label proprietarie o stati intermedi quali \texttt{unknown},
@@ -1302,7 +1364,7 @@ automaticamente in \texttt{non\_weapon}: esso viene mantenuto come categoria
 separata, perché in un workflow forense l'assenza di rilevamento e la
 classificazione negativa non sono equivalenti.
 
-Nel caso dei tool commerciali, il falso negativo su \texttt{weapon}, incluso il
+Nel caso degli strumenti forensi valutati, il falso negativo su \texttt{weapon}, incluso il
 caso in cui un artefatto rilevante venga restituito come \texttt{unknown},
 \texttt{not\_detected} o non categorizzato, viene considerato un errore
 operativo critico. Il falso positivo su \texttt{non\_weapon} è comunque
@@ -1332,9 +1394,9 @@ Lo script ufficiale previsto per questa fase è
 La tecnica considerata è Integrated Gradients, applicabile ai proxy model
 trasparenti per i quali sono disponibili architettura, pesi e pipeline di
 pre-processing \cite{Sundararajan2017}. La tecnica non è invece applicabile
-internamente ai tool commerciali black-box, poiché per tali strumenti non sono
+internamente ai tool proprietari black-box o quasi black-box, poiché per tali strumenti non sono
 disponibili il modello sottostante, i gradienti, le soglie decisionali o le
-funzioni di scoring proprietarie. Eventuali confronti con i tool commerciali
+funzioni di scoring proprietarie. Eventuali confronti con strumenti proprietari o professionali
 potranno quindi avvenire solo a livello di output osservabile, non di
 attribuzione interna.
 
@@ -1346,7 +1408,7 @@ e classificate erroneamente nella versione perturbata, transizioni critiche
 \texttt{weapon}~$\rightarrow$~\texttt{non\_weapon}, campioni \gls{ood}
 classificati con alta confidenza in una delle due classi binarie, divergenze tra
 proxy model e, nelle fasi successive, eventuali divergenze tra proxy model e
-strumenti forensi commerciali. La selezione dei casi non ha lo scopo di stimare
+strumenti forensi. La selezione dei casi non ha lo scopo di stimare
 una metrica aggregata, ma di costruire un insieme controllato di esempi utili
 alla discussione qualitativa della robustezza.
 
@@ -1376,8 +1438,8 @@ Confrontare il comportamento di architetture diverse rispetto allo stesso
 artefatto. \\
 Divergenze proxy/tool
 &
-Predisporre casi per il confronto qualitativo con gli output osservabili dei
-tool commerciali, ove disponibili. \\
+Predisporre casi per il confronto qualitativo con gli output osservabili degli
+strumenti forensi valutati, ove disponibili. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1400,6 +1462,12 @@ serve quindi a integrare le metriche quantitative con evidenze qualitative
 selezionate, mantenendo ferma la distinzione tra spiegabilità tecnica,
 valutazione sperimentale e uso forense dell'informazione prodotta.
 
+La scelta di Integrated Gradients privilegia una tecnica di attribuzione
+applicabile in modo coerente ai proxy model differenziabili della pipeline,
+senza introdurre ulteriori livelli di approssimazione legati a metodi
+surrogati. Tecniche alternative, quali Grad-CAM, SHAP o LIME, rimangono
+compatibili con estensioni future del protocollo, ma non costituiscono il focus
+della valutazione corrente.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Traceability and reproducibility controls}
@@ -1497,8 +1565,8 @@ immagini perturbate o valutate. Tale controllo anti-leakage è centrale perché
 la robustezza non deve essere misurata su campioni che il proxy model ha già
 visto durante il training.
 
-Un ulteriore controllo riguarda il rischio di bias nella valutazione con tool
-commerciali. Il forensic evaluation bundle separa in modo esplicito la directory
+Un ulteriore controllo riguarda il rischio di bias nella valutazione con
+strumenti forensi. Il forensic evaluation bundle separa in modo esplicito la directory
 cieca da importare nei tool dalla directory dei metadati e dalla vista
 strutturata di audit. I nomi dei file nella vista cieca non espongono classe,
 famiglia di attacco, fold, sorgente o modello target. In questo modo, la
@@ -1515,8 +1583,8 @@ esperimenti siano eseguiti su artefatti coerenti con il protocollo.
 
 La metodologia presenta infine alcuni limiti espliciti. La revisione semantica
 del dataset è stata condotta da un singolo revisore, quindi non include una
-misura formale di accordo inter-annotatore. Gli strumenti commerciali sono
-trattati come sistemi black-box o quasi black-box, e le loro categorie interne
+misura formale di accordo inter-annotatore. Gli strumenti proprietari o professionali valutati sono trattati come sistemi
+black-box o quasi black-box, e le loro categorie interne
 potrebbero non essere perfettamente equivalenti al task binario
 \texttt{weapon}/\texttt{non\_weapon}. Le versioni software, i moduli \gls{ai}
 disponibili e le modalità di esportazione dei risultati devono pertanto essere
@@ -1524,3 +1592,8 @@ documentati nella fase sperimentale. Rendere espliciti questi limiti non
 indebolisce il protocollo; al contrario, chiarisce il perimetro entro cui la
 valutazione può essere considerata verificabile, riproducibile e metodologicamente
 difendibile.
+
+Le versioni software, i moduli abilitati, le impostazioni di importazione e le
+modalità di esportazione dei tool forensi saranno documentati nel capitolo dei
+risultati e, ove necessario, in appendice, così da mantenere separati il
+protocollo metodologico e la configurazione effettiva dei run sperimentali.
