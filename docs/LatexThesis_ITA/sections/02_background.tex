@@ -161,6 +161,8 @@ Accanto alle architetture convoluzionali, negli ultimi anni si sono affermati mo
 
 Accanto a \gls{clip}, anche modelli vision-language generativi come \gls{blip} consentono di associare immagini a descrizioni testuali, introducendo una prospettiva complementare rispetto alla classificazione chiusa basata su etichette predefinite \cite{li2022blip}. Nel contesto forense, tali modelli possono supportare forme di descrizione automatica del contenuto visivo e contribuire alla prioritizzazione preliminare degli artefatti multimediali. Tuttavia, il loro impiego richiede particolare cautela, poiché la descrizione generata può essere sensibile alla qualità dell'immagine, alla distribuzione dei dati, alla formulazione del prompt e alla presenza di contenuti ambigui o fuori distribuzione.
 
+Nel protocollo sperimentale della presente tesi, \gls{blip} non viene impiegato come proxy model principale. La sua introduzione nel background ha funzione contestuale, poiché consente di inquadrare l'evoluzione dei modelli vision-language e il loro possibile impiego in scenari di analisi automatizzata di immagini. La valutazione sperimentale si concentra invece su modelli proxy più direttamente confrontabili nel task binario \textit{weapon}/\textit{non-weapon} e sugli strumenti forensi commerciali considerati nella pipeline.
+
 Dal punto di vista forense, la scelta del modello non può essere valutata esclusivamente in funzione dell'accuratezza media. Un sistema di classificazione automatica deve essere considerato rispetto alla sua capacità di mantenere prestazioni stabili su dati eterogenei, degradati o non perfettamente allineati alla distribuzione di addestramento. La presenza di immagini fuori distribuzione, casi borderline o contenuti visivamente ambigui può infatti compromettere la confidenza del modello o produrre classificazioni non affidabili. In questo senso, il concetto di \gls{ood} detection è strettamente collegato alla robustezza operativa, poiché consente di distinguere tra errori su classi note e input che non dovrebbero essere ricondotti con eccessiva sicurezza alle categorie previste dal classificatore \cite{hendrycks2017baseline,fort2021exploring}.
 
 Questa impostazione giustifica, sul piano metodologico, l'introduzione di una classe \gls{ood} distinta dalle classi operative principali. Nel contesto della presente tesi, tale classe consente di rappresentare contenuti borderline, anomali o non pienamente riconducibili alla distribuzione semantica attesa dal classificatore, evitando che immagini estranee al task vengano forzatamente ricondotte alle categorie \texttt{weapon} o \texttt{non\_weapon}.
@@ -322,15 +324,20 @@ iterative più articolate rispetto a un attacco single-step come \gls{fgsm},
 senza attribuire alla tecnica una capacità generale di superare ogni possibile
 difesa o forma di pre-processing \cite{moosavi2016deepfool}.
 
-Accanto agli attacchi costruiti rispetto al comportamento del modello, la tesi
-considera anche una perturbazione model-agnostic basata sullo spostamento dei
-canali colore. Il color shift modifica globalmente la rappresentazione cromatica
-dell'immagine, ad esempio mediante offset o fattori moltiplicativi applicati ai
-canali \(R\), \(G\) e \(B\). Pur non essendo un attacco adversariale ottimizzato
-in senso stretto, esso è utile per simulare alterazioni cromatiche realistiche,
-compatibili con variazioni di illuminazione, conversioni o post-processing, e
-per osservare la stabilità dei classificatori rispetto a cambiamenti globali
-dello spazio colore.
+Un ulteriore attacco frequentemente impiegato nella valutazione della robustezza adversarial è \gls{pgd}, che estende l'idea degli attacchi gradient-based mediante aggiornamenti iterativi vincolati entro un intorno perturbativo. Nella presente tesi, tuttavia, \gls{pgd} non viene incluso nel protocollo sperimentale principale. La scelta deriva dalla volontà di mantenere il workflow computazionalmente sostenibile e focalizzato sulla robustezza operativa in ambito forense, utilizzando \textit{SuperDeepFool} e \textit{Sigma Zero} come rappresentanti di attacchi più intensivi rispetto a \gls{fgsm}.
+
+
+Accanto agli attacchi costruiti rispetto al comportamento del modello,
+la tesi considera anche una perturbazione model-agnostic basata sullo spostamento dei canali colore.
+Il color shift modifica globalmente la rappresentazione cromatica dell'immagine, ad esempio mediante offset o
+fattori moltiplicativi applicati ai canali \(R\), \(G\) e \(B\).
+Esso rappresenta un caso intermedio rispetto alla distinzione classica tra attacchi adversariali
+model-dependent e trasformazioni anti-forensi. In questa tesi viene trattato come perturbazione
+\textit{adversarial-style} di tipo model-agnostic: non utilizza informazioni di gradiente né
+ottimizza direttamente una funzione di perdita del modello, ma viene applicato con la finalità
+sperimentale di valutare l'effetto di alterazioni semanticamente conservative sulla classificazione automatizzata.
+Per tale motivo, pur condividendo alcune caratteristiche visive con trasformazioni realistiche dell'immagine,
+viene mantenuto nel gruppo adversarial.
 
 La Tabella~\ref{tab:background_attack_families} sintetizza le famiglie di attacco
 considerate nella pipeline sperimentale.

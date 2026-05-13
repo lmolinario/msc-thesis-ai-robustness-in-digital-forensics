@@ -573,16 +573,7 @@ training e nel registro \codepath{models/model_registry.json}, così da mantener
 separata la descrizione metodologica del protocollo dalla riproduzione dettagliata
 della configurazione implementativa.
 
-Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di primary proxy
-target per la generazione degli attacchi adversariali model-dependent. Questa
-scelta non implica che EfficientNet-B0 rappresenti il modello più robusto o più
-accurato in senso assoluto, né che esaurisca l'analisi comparativa della tesi.
-Indica invece il modello controllato rispetto al quale vengono costruite, in
-questa fase della pipeline, le perturbazioni che richiedono accesso al gradiente,
-al classificatore o al comportamento decisionale del target. La valutazione
-successiva potrà quindi distinguere tra prestazioni del proxy target, effetti
-delle perturbazioni generate rispetto a tale modello e trasferibilità verso altri
-modelli o strumenti.
+Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target} per la generazione degli attacchi adversariali model-dependent. Questa scelta non implica che EfficientNet-B0 rappresenti il modello più robusto o più accurato in senso assoluto, né che esaurisca l'analisi comparativa della tesi. Indica invece il modello controllato rispetto al quale vengono costruite, in questa fase della pipeline, le perturbazioni che richiedono accesso al gradiente, al classificatore o al comportamento decisionale del target. Tale impostazione consente di mantenere il protocollo adversarial controllato e confrontabile tra famiglie di perturbazione, evitando di moltiplicare il numero di varianti sperimentali in funzione dell'architettura attaccata. L'obiettivo non è ottimizzare separatamente gli attacchi contro ogni modello, ma generare un banco di prova adversarial coerente e successivamente valutare la trasferibilità delle perturbazioni verso modelli differenti, quali ResNet18 e \gls{clip}.
 
 È infine necessario distinguere i proxy model dagli strumenti forensi
 \gls{cots} analizzati nella pipeline operativo-forense. I proxy model sono
@@ -634,13 +625,7 @@ definita nella fase di training dei proxy model. La procedura evita quindi di
 trattare il dataset come un insieme indistinto e preserva il legame tra split,
 checkpoint e artefatto generato.
 
-La trasformazione \texttt{color\_shift} viene invece trattata come perturbazione
-model-agnostic. Essa modifica globalmente le componenti cromatiche
-dell'immagine, senza interrogare il modello e senza utilizzare informazioni di
-gradiente. Questa distinzione è metodologicamente rilevante perché consente di
-separare perturbazioni costruite rispetto a un classificatore specifico da
-alterazioni visive più generali, che possono simulare variazioni cromatiche o
-post-processing non necessariamente ottimizzati contro un modello.
+La trasformazione \texttt{color\_shift} viene invece trattata come perturbazione \textit{adversarial-style} model-agnostic. Essa modifica globalmente le componenti cromatiche dell'immagine, senza interrogare il modello e senza utilizzare informazioni di gradiente. Questa distinzione è metodologicamente rilevante perché consente di separare le perturbazioni costruite rispetto a un classificatore specifico da alterazioni visive più generali. All'interno della pipeline, \texttt{color\_shift} viene comunque incluso nel gruppo adversarial perché la sua finalità sperimentale non è simulare un ordinario intervento di post-processing forense, ma verificare se una variazione cromatica semanticamente conservativa possa alterare il comportamento dei classificatori automatici.
 
 \begin{table}[H]
 \centering
@@ -1169,9 +1154,7 @@ predizioni include 3000 righe relative a campioni puliti, 7500 righe relative
 al set \gls{ood} e 30\,000 righe relative a campioni perturbati. Il set
 \gls{ood} viene valutato rispetto a ciascuno dei cinque checkpoint fold-aware
 per ogni modello, producendo 500~$\times$~5~$\times$~3~$=$~7\,500 righe;
-questa scelta consente di osservarne il comportamento in funzione del checkpoint
-specifico del fold, mantenendo la coerenza con il protocollo di addestramento
-dei proxy model. In termini di famiglia di attacco, il summary distingue
+questa scelta non mira ad aumentare artificialmente il numero di campioni, ma a osservare la stabilità del comportamento fuori distribuzione al variare del checkpoint di addestramento. In questo modo, la valutazione \gls{ood} consente di verificare se l'incertezza o l'errore del modello rispetto a input non appartenenti alla distribuzione target sia stabile oppure dipenda sensibilmente dal fold utilizzato per l'addestramento, mantenendo al contempo la coerenza con il protocollo dei proxy model. In termini di famiglia di attacco, il summary distingue
 10\,500 righe con \texttt{attack\_family = none}, 15\,000 righe adversariali
 e 15\,000 righe anti-forensi. Questi valori descrivono la copertura della
 valutazione metodologica e non devono essere interpretati come risultati di
