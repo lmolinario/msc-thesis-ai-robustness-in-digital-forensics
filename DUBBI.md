@@ -18,4 +18,4 @@ sorgente. Secondo lei basta dichiararlo così?
 black-box o quasi black-box, mentre strumenti come Autopsy li descrivo più come baseline/ambiente di supporto per
 ingest, hashing, tagging e reporting. Anche qui vorrei capire se il perimetro è corretto.
 
-In sostanza, vorrei evitare di presentare il protocollo come più “forte” di quanto sia, ma allo stesso tempo renderlo difendibile dal punto di vista metodologico. Secondo lei questi limiti, così formulati, sono accettabili o conviene rafforzare qualche punto?
+In sostanza, vorrei evitare di presentare il protocollo come più “forte” di quanto sia, ma allo stesso tempo renderlo difendibile dal punto di vista metodologico. Secondo te questi limiti, così formulati, sono accettabili o conviene rafforzare qualche punto?
