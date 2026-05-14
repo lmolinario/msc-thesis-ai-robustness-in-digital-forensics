@@ -126,16 +126,6 @@ The official binary subset used for clean folds and perturbation generation is:
 datasets/final/manifests/manual_selection_adversarial_subset.csv
 ```
 
-Distribution:
-
-| Group | Count |
-|---|---:|
-| `weapon` | 500 |
-| `non_weapon` | 500 |
-| **Total** | **1000** |
-
-The previous `33_final_frozen_dataset.csv` naming convention is no longer used.
-
 ---
 
 ## Pipeline Overview
