@@ -1,5 +1,3 @@
-Versione più pulita, informale ma ordinata per WhatsApp:
-
 Ciao Silvia, mentre leggi i primi tre capitoli ho fatto qualche piccola aggiunta: nel capitolo di background ho inserito la parte matematica e descrittiva degli attacchi adversarial e anti-forensic che sto usando.
 
 Nel frattempo sto buttando giù il Capitolo 4 sulla metodologia e mi sono venuti alcuni dubbi. I principali sono questi:
