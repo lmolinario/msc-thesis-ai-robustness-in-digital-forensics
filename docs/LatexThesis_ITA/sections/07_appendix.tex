@@ -71,30 +71,77 @@ La directory \codepath{datasets/} contiene la pipeline dati, dalla raccolta iniz
 
 La Tabella~\ref{tab:official-experimental-artifacts} riassume gli artefatti principali della pipeline. Tali file non sono semplici output intermedi, ma costituiscono i punti di ancoraggio tra la metodologia descritta nel corpo della tesi e la sua implementazione sperimentale. In particolare, i manifest mantengono il collegamento tra identificativo dell'immagine, sorgente, classe finale, hash, split, eventuale perturbazione e percorso del file generato.
 
-\begin{table}[H]
-\centering
+\begin{longtable}{@{}%
+>{\raggedright\arraybackslash}p{0.43\textwidth}
+>{\raggedright\arraybackslash}p{0.53\textwidth}@{}}
 \caption{Principali artefatti ufficiali della pipeline sperimentale.}
-\label{tab:official-experimental-artifacts}
-\begin{tabularx}{\textwidth}{@{}lX@{}}
+\label{tab:official-experimental-artifacts} \\
 \toprule
 \textbf{Artefatto} & \textbf{Ruolo nella pipeline} \\
 \midrule
-\codepath{datasets/prepared/final_pool/metadata.csv} & Metadati tecnici del pool preparato, generato dopo validazione delle immagini, calcolo degli hash e rimozione dei duplicati esatti. \\
-\codepath{datasets/prepared/manifests/review_manifest_full.csv} & Manifest completo utilizzato come base per il protocollo di revisione manuale \textit{human-in-the-loop}. \\
-\codepath{datasets/final/manifests/manual_selection_protocol_db.csv} & Database operativo del processo di selezione manuale, comprensivo dello stato di revisione e delle assegnazioni semantiche. \\
-\codepath{datasets/final/manifests/manual_selection_final_1500.csv} & Manifest ufficiale del dataset congelato, composto da 1500 immagini bilanciate nelle classi \texttt{weapon}, \texttt{non\_weapon} e \gls{ood}. \\
-\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv} & Manifest ufficiale del subset binario, composto dalle classi \texttt{weapon} e \texttt{non\_weapon}, utilizzato per split puliti, attacchi adversariali e trasformazioni anti-forensi. \\
-\codepath{datasets/final/manifests/manual_selection_removed.csv} & Manifest dei campioni esclusi durante la selezione finale, utile per audit e controllo delle decisioni di revisione. \\
-\codepath{datasets/splits/manifests/clean_folds_manifest.csv} & Manifest degli split puliti a cinque fold, con tracciabilità per classe, sorgente, percorso, hash e tipo di campione. \\
-\codepath{datasets/splits/manifests/ood_eval_manifest.csv} & Manifest del set \gls{ood}, mantenuto separato dal subset binario e utilizzato per la valutazione fuori distribuzione. \\
-\codepath{attacks/manifests/} & Directory dei manifest prodotti per collegare ogni immagine perturbata al campione pulito, al fold, alla classe reale e al tipo di attacco o trasformazione. \\
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv} & Manifest globale del bundle destinato alla valutazione con strumenti forensi commerciali. \\
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv} & File di controllo contenente gli hash \texttt{SHA256} degli artefatti inclusi nel bundle forense. \\
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_summary.json} & Riepilogo strutturato del bundle, comprensivo di conteggi, controlli di coerenza e istruzioni operative per l'importazione nei tool forensi. \\
-\bottomrule
-\end{tabularx}
-\end{table}
+\endfirsthead
 
+\toprule
+\textbf{Artefatto} & \textbf{Ruolo nella pipeline} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{2}{r}{\footnotesize Continua nella pagina successiva} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+\footnotesize\codepath{datasets/prepared/final_pool/metadata.csv}
+&
+Metadati tecnici del pool preparato, generato dopo la validazione delle immagini, il calcolo degli hash e la rimozione dei duplicati esatti. \\
+
+\footnotesize\codepath{datasets/prepared/manifests/review_manifest_full.csv}
+&
+Manifest completo utilizzato come base per il protocollo di revisione manuale \textit{human-in-the-loop}. \\
+
+\footnotesize\codepath{datasets/final/manifests/manual_selection_protocol_db.csv}
+&
+Database operativo del processo di selezione manuale, comprensivo dello stato di revisione e delle assegnazioni semantiche. \\
+
+\footnotesize\codepath{datasets/final/manifests/manual_selection_final_1500.csv}
+&
+Manifest ufficiale del dataset congelato, composto da 1500 immagini bilanciate nelle classi \texttt{weapon}, \texttt{non\_weapon} e \gls{ood}. \\
+
+\footnotesize\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
+&
+Manifest ufficiale del subset binario, composto dalle classi \texttt{weapon} e \texttt{non\_weapon}, utilizzato per split puliti, attacchi adversariali e trasformazioni anti-forensi. \\
+
+\footnotesize\codepath{datasets/final/manifests/manual_selection_removed.csv}
+&
+Manifest dei campioni esclusi durante la selezione finale, utile per audit e controllo delle decisioni di revisione. \\
+
+\footnotesize\codepath{datasets/splits/manifests/clean_folds_manifest.csv}
+&
+Manifest degli split puliti a cinque fold, con tracciabilità per classe, sorgente, percorso, hash e tipo di campione. \\
+
+\footnotesize\codepath{datasets/splits/manifests/ood_eval_manifest.csv}
+&
+Manifest del set \gls{ood}, mantenuto separato dal subset binario e utilizzato per la valutazione fuori distribuzione. \\
+
+\footnotesize\codepath{attacks/manifests/}
+&
+Directory dei manifest prodotti per collegare ogni immagine perturbata al campione pulito, al fold, alla classe reale e al tipo di attacco o trasformazione. \\
+
+\footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
+&
+Manifest globale del bundle destinato alla valutazione con strumenti forensi commerciali. \\
+
+\footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}
+&
+File di controllo contenente gli hash \texttt{SHA256} degli artefatti inclusi nel bundle forense. \\
+
+\footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_summary.json}
+&
+Riepilogo strutturato del bundle, comprensivo di conteggi, controlli di coerenza e istruzioni operative per l'importazione nei tool forensi. \\
+
+\end{longtable}
 \section{Dataset traceability and human-in-the-loop selection}
 \label{app:dataset-traceability-human-in-the-loop}
 
