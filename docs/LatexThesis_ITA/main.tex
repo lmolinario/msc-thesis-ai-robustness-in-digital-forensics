@@ -115,13 +115,13 @@ To view a copy of this license, visit:
 
 \cleardoublepage
 \input{sections/000_acronyms}
-\glsaddall
-\printglossary[type=\acronymtype,title={Acronimi}]
-\glsresetall
-\newpage
 
-\cleardoublepage
-\listoftables
+% Print all defined acronyms, even if not used before this point.
+\glsaddall[types=\acronymtype]
+\printglossary[type=\acronymtype,title={Acronimi}]
+
+% Reset acronym usage so first occurrences in the thesis body are expanded.
+\glsresetall
 \newpage
 
 % ----------------- Corpo Tesi ----------------------
