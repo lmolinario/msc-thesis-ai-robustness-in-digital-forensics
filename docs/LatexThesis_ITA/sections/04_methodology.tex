@@ -675,64 +675,80 @@ selezione privilegia invece un insieme eterogeneo e computazionalmente
 sostenibile di perturbazioni, coerente con l'obiettivo forense di valutare la
 robustezza operativa della pipeline.
 
-
 \begin{table}[H]
 \centering
 \caption{Attacchi adversariali generati sul subset binario.}
 \label{tab:methodology-adversarial-attacks}
-\begin{tabularx}{\textwidth}{@{}l X X X r@{}}
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{0.23\textwidth}
+    >{\raggedright\arraybackslash}p{0.22\textwidth}
+    >{\raggedright\arraybackslash}p{0.22\textwidth}
+    >{\raggedright\arraybackslash}p{0.11\textwidth}
+    >{\raggedleft\arraybackslash}X
+@{}}
 \toprule
-\textbf{Attacco} & \textbf{Dipendenza} & \textbf{Target} & \textbf{Formato} & \textbf{Immagini} \\
+\textbf{Attacco} &
+\textbf{Dipendenza} &
+\textbf{Target} &
+\textbf{Formato} &
+\textbf{Immagini} \\
 \midrule
-\texttt{fgsm}
+
+\glsentryshort{fgsm}
 &
 model-dependent
 &
 \texttt{efficientnet\_b0}
 &
-PNG
+\glsentryshort{png}
 &
 1000 \\
-\texttt{one\_pixel}
+
+\glsentryname{onepixel}
 &
 model-dependent
 &
 \texttt{efficientnet\_b0}
 &
-PNG
+\glsentryshort{png}
 &
 1000 \\
-\texttt{sigma\_zero}
+
+\glsentryname{sigmazero}
 &
 model-dependent
 &
 \texttt{efficientnet\_b0}
 &
-PNG
+\glsentryshort{png}
 &
 1000 \\
-\texttt{superdeepfool}
+
+\glsentryname{superdeepfool}
 &
 model-dependent
 &
 \texttt{efficientnet\_b0}
 &
-PNG
+\glsentryshort{png}
 &
 1000 \\
-\texttt{color\_shift}
+
+\glsentryname{colorshift}
 &
 model-agnostic
 &
 \texttt{model\_agnostic}
 &
-JPEG
+\glsentryshort{jpeg}
 &
 1000 \\
+
 \midrule
 \textbf{Totale}
 &
-\multicolumn{3}{p{0.6\textwidth}}{Cinque attacchi applicati alle 1000 immagini del subset binario.}
+\multicolumn{3}{>{\raggedright\arraybackslash}p{0.55\textwidth}}%
+{Cinque attacchi applicati alle 1000 immagini del subset binario.}
 &
 \textbf{5000} \\
 \bottomrule
@@ -835,40 +851,51 @@ stretching applica una normalizzazione del contrasto attraverso autocontrast
 con cutoff controllato. Tali trasformazioni sono coerenti con una prospettiva
 anti-forense perché intervengono sull'artefatto immagine senza introdurre,
 almeno intenzionalmente, una perturbazione costruita sul modello.
-
 \begin{table}[H]
 \centering
 \caption{Trasformazioni anti-forensi generate sul subset binario.}
 \label{tab:methodology-anti-forensic-transformations}
-\begin{tabularx}{\textwidth}{@{}lXr@{}}
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{0.28\textwidth}
+    X
+    >{\raggedleft\arraybackslash}p{0.13\textwidth}
+@{}}
 \toprule
-\textbf{Trasformazione} & \textbf{Operazione metodologica} & \textbf{Immagini} \\
+\textbf{Trasformazione} &
+\textbf{Operazione metodologica} &
+\textbf{Immagini} \\
 \midrule
-\texttt{jpeg\_recompression}
+
+\glsentryname{jpegrecompression}
 &
-Ricompressione \gls{jpeg} con qualità controllata.
+Ricompressione \glsentryshort{jpeg} con qualità controllata.
 &
 1000 \\
-\texttt{resample\_resize}
+
+\glsentryname{resampleresize}
 &
 Downsampling seguito da ripristino della dimensione originaria.
 &
 1000 \\
-\texttt{gaussian\_blur}
+
+\glsentryname{gaussianblur}
 &
 Applicazione di sfocatura gaussiana con raggio controllato.
 &
 1000 \\
-\texttt{histogram\_modification}
+
+\glsentryname{histogrammodification}
 &
 Equalizzazione dell'istogramma dell'immagine.
 &
 1000 \\
-\texttt{contrast\_stretching}
+
+\glsentryname{contraststretching}
 &
 Autocontrast con cutoff percentuale controllato.
 &
 1000 \\
+
 \midrule
 \textbf{Totale}
 &
@@ -911,12 +938,12 @@ La pipeline produce il manifest
 \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}, nel quale ogni
 riga descrive un'immagine trasformata e mantiene il collegamento con il campione
 pulito originario. Il manifest registra campi quali
-\texttt{generated\_image\_id}, \texttt{original\_image\_id}, \texttt{fold},
-\texttt{final\_label}, \texttt{source\_dataset}, \texttt{clean\_relative\_path},
-\texttt{perturbed\_relative\_path}, \texttt{attack\_family},
-\texttt{attack\_name}, \texttt{attack\_parameters}, \texttt{sha256\_original},
-\texttt{md5\_original}, \texttt{sha256\_perturbed} e
-\texttt{md5\_perturbed}. La registrazione degli hash consente di verificare sia
+\codepath{generated\_image\_id}, \codepath{original\_image\_id}, \codepath{fold},
+\codepath{final\_label}, \codepath{source\_dataset}, \codepath{clean\_relative\_path},
+\codepath{perturbed\_relative\_path}, \codepath{attack\_family},
+\codepath{attack\_name}, \codepath{attack\_parameters}, \codepath{sha256\_original},
+\codepath{md5\_original}, \codepath{sha256\_perturbed} e
+\codepath{md5\_perturbed}. La registrazione degli hash consente di verificare sia
 l'identità del file pulito sia quella dell'artefatto trasformato, preservando la
 tracciabilità tra input, trasformazione applicata e output generato.
 
@@ -930,7 +957,145 @@ dell'impatto di tali trasformazioni sulle prestazioni dei modelli e, in seguito,
 sugli strumenti forensi viene demandata alle sezioni dedicate al
 protocollo metrico e al capitolo dei risultati.
 
+\subsection*{Computational cost and operational relevance}
 
+La selezione delle perturbazioni non è stata guidata esclusivamente dalla
+forza teorica degli attacchi, ma anche dalla loro sostenibilità computazionale
+e dalla loro coerenza con uno scenario operativo realistico di \gls{df}. In un
+workflow forense, infatti, un sistema di triage visuale deve poter trattare
+volumi elevati di dati entro tempi compatibili con le esigenze investigative.
+Di conseguenza, il costo computazionale delle perturbazioni rappresenta un criterio
+metodologico rilevante, sia per la riproducibilità dell'esperimento sia per
+l'interpretazione della plausibilità operativa delle manipolazioni considerate.
+
+Le trasformazioni anti-forensi, come ricompressione \gls{jpeg},
+resample~+~resize, Gaussian blur, histogram modification e contrast stretching,
+presentano un costo computazionale contenuto e possono essere applicate in modo
+batch anche su grandi collezioni di immagini. Esse sono quindi particolarmente
+rilevanti dal punto di vista operativo, poiché simulano manipolazioni semplici,
+economiche e plausibili che un soggetto potrebbe applicare per degradare,
+alterare o normalizzare un'immagine prima dell'acquisizione o dell'analisi
+forense.
+
+Gli attacchi adversariali model-dependent, al contrario, richiedono
+l'interazione con un modello target e, in alcuni casi, procedure iterative o di
+ottimizzazione. \gls{fgsm} rappresenta una baseline efficiente, poiché richiede
+una singola stima del gradiente per immagine. Attacchi come
+\texttt{one\_pixel}, \texttt{sigma\_zero} e \texttt{superdeepfool} sono invece
+più onerosi e vengono inclusi non perché rappresentino necessariamente lo
+scenario operativo più probabile, ma perché consentono di stressare il
+comportamento dei classificatori in condizioni controllate. La perturbazione
+\texttt{color\_shift}, pur essendo inclusa nel gruppo adversarial per finalità
+sperimentale, rimane model-agnostic e presenta un costo computazionale ridotto.
+
+Questa impostazione è coerente con l'obiettivo della tesi: valutare la
+robustezza operativa di sistemi \gls{ai}-based in un contesto forense, non
+produrre una classifica esaustiva degli attacchi adversariali più forti in senso
+strettamente algoritmico. Per tale ragione, il protocollo privilegia un insieme
+eterogeneo di perturbazioni, bilanciando severità sperimentale, sostenibilità
+computazionale, riproducibilità e rilevanza rispetto a possibili scenari
+anti-forensi reali.
+
+\begin{table}[H]
+\centering
+\caption{Costo computazionale qualitativo e rilevanza operativa delle perturbazioni.}
+\label{tab:methodology-attack-cost-operational-relevance}
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{0.22\textwidth}
+    >{\raggedright\arraybackslash}p{0.24\textwidth}
+    >{\raggedright\arraybackslash}p{0.13\textwidth}
+    X
+@{}}
+\toprule
+\textbf{Perturbazione} &
+\textbf{Tipo} &
+\textbf{Costo} &
+\textbf{Rilevanza operativa} \\
+\midrule
+
+\glsentryshort{fgsm}
+&
+Adversarial model-dependent
+&
+Basso/medio
+&
+Baseline efficiente per valutare la sensibilità del modello a perturbazioni gradient-based. \\
+
+\glsentryname{onepixel}
+&
+Adversarial model-dependent
+&
+Alto
+&
+Stress test localizzato; utile per valutare la vulnerabilità a modifiche minime ma ottimizzate. \\
+
+\glsentryname{sigmazero}
+&
+Adversarial model-dependent
+&
+Medio/alto
+&
+Stress test adversarial controllato, più rilevante sul piano sperimentale che operativo. \\
+
+\glsentryname{superdeepfool}
+&
+Adversarial model-dependent
+&
+Medio/alto
+&
+Attacco utile per analizzare la sensibilità del classificatore rispetto al confine decisionale. \\
+
+\glsentryname{colorshift}
+&
+Adversarial-style model-agnostic
+&
+Basso
+&
+Manipolazione cromatica semplice, plausibile e semanticamente conservativa. \\
+
+\glsentryname{jpegrecompression}
+&
+Anti-forensic
+&
+Basso
+&
+Molto plausibile in scenari reali; altera qualità e rappresentazione del file. \\
+
+\glsentryname{resampleresize}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile come effetto di ridimensionamento, inoltro o normalizzazione dell'immagine. \\
+
+\glsentryname{gaussianblur}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile per degradare dettagli visivi rilevanti. \\
+
+\glsentryname{histogrammodification}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile per alterare distribuzione tonale e caratteristiche statistiche dell'immagine. \\
+
+\glsentryname{contraststretching}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile come post-processing semplice con possibile impatto sui classificatori. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic evaluation bundle}

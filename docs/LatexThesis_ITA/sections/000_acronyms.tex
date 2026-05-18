@@ -1,3 +1,7 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% General AI, ML and Digital Forensics terminology
+% ─────────────────────────────────────────────────────────────────────────────
+
 \newacronym{ai}{AI}{Artificial Intelligence}
 \newacronym{ml}{ML}{Machine Learning}
 \newacronym{dl}{DL}{Deep Learning}
@@ -5,17 +9,37 @@
 \newacronym{df}{DF}{Digital Forensics}
 \newacronym{dfir}{DFIR}{Digital Forensics and Incident Response}
 \newacronym{cots}{COTS}{Commercial Off-The-Shelf}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% Machine learning models and techniques
+% ─────────────────────────────────────────────────────────────────────────────
+
 \newacronym{cnn}{CNN}{Convolutional Neural Network}
 \newacronym{svm}{SVM}{Support Vector Machine}
 \newacronym{vit}{ViT}{Vision Transformer}
-\newacronym{fgsm}{FGSM}{Fast Gradient Sign Method}
-\newacronym{pgd}{PGD}{Projected Gradient Descent}
 \newacronym{clip}{CLIP}{Contrastive Language-Image Pre-training}
 \newacronym{blip}{BLIP}{Bootstrapping Language-Image Pre-training}
 \newacronym{xai}{XAI}{Explainable Artificial Intelligence}
 \newacronym{ood}{OOD}{Out-of-Distribution}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% Adversarial Machine Learning terminology
+% ─────────────────────────────────────────────────────────────────────────────
+
+\newacronym{fgsm}{FGSM}{Fast Gradient Sign Method}
+\newacronym{pgd}{PGD}{Projected Gradient Descent}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% Image forensics and file formats
+% ─────────────────────────────────────────────────────────────────────────────
+
 \newacronym{prnu}{PRNU}{Photo-Response Non-Uniformity}
 \newacronym{jpeg}{JPEG}{Joint Photographic Experts Group}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% Tools, standards and institutional references
+% ─────────────────────────────────────────────────────────────────────────────
+
 \newacronym{api}{API}{Application Programming Interface}
 \newacronym{osint}{OSINT}{Open Source Intelligence}
 \newacronym{ufed}{UFED}{Universal Forensic Extraction Device}
@@ -27,3 +51,61 @@
 \newacronym{nist}{NIST}{National Institute of Standards and Technology}
 \newacronym{fairlab}{FAIR-Lab}{Forensic AI Robustness Lab}
 \newacronym{gpu}{GPU}{Graphics Processing Unit}
+
+% ─────────────────────────────────────────────────────────────────────────────
+% Adversarial attacks and anti-forensic transformations
+% ─────────────────────────────────────────────────────────────────────────────
+
+\newglossaryentry{onepixel}{
+    name={One Pixel Attack},
+    text={One Pixel Attack},
+    description={Adversarial attack based on sparse pixel-level perturbations}
+}
+
+\newglossaryentry{sigmazero}{
+    name={Sigma Zero Attack},
+    text={Sigma Zero Attack},
+    description={Sparse adversarial attack based on differentiable approximation of the \(L_0\) norm}
+}
+
+\newglossaryentry{superdeepfool}{
+    name={SuperDeepFool},
+    text={SuperDeepFool},
+    description={Iterative adversarial attack inspired by decision-boundary crossing methods}
+}
+
+\newglossaryentry{colorshift}{
+    name={Color Shift},
+    text={Color Shift},
+    description={Model-agnostic color perturbation applied to the image channels}
+}
+
+\newglossaryentry{jpegrecompression}{
+    name={JPEG recompression},
+    text={JPEG recompression},
+    description={Anti-forensic transformation based on lossy recompression of the image}
+}
+
+\newglossaryentry{resampleresize}{
+    name={Resample + Resize},
+    text={Resample + Resize},
+    description={Anti-forensic transformation based on downsampling and restoration of the original image size}
+}
+
+\newglossaryentry{gaussianblur}{
+    name={Gaussian Blur},
+    text={Gaussian Blur},
+    description={Anti-forensic transformation based on controlled image blurring}
+}
+
+\newglossaryentry{histogrammodification}{
+    name={Histogram Modification},
+    text={Histogram Modification},
+    description={Anti-forensic transformation based on modification of the tonal distribution of the image}
+}
+
+\newglossaryentry{contraststretching}{
+    name={Contrast Stretching},
+    text={Contrast Stretching},
+    description={Anti-forensic transformation based on contrast normalization}
+}
