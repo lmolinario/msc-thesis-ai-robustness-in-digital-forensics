@@ -11,10 +11,18 @@
 
 \begin{document}
 
+
+% ----------------- Front matter numbering ----------------------
+\pagenumbering{roman}
+
+% ----------------- Acronyms and glossary definitions ----------------------
+\input{sections/000_acronyms}
+
 % ----------------- Frontespizio ----------------------
 \import{./}{title}
 
-% ----------------- Epigrafe ----------------------
+
+
 % ----------------- Epigraph and dedication ----------------------
 \cleardoublepage
 \thispagestyle{empty}
@@ -22,7 +30,7 @@
 \vspace*{\fill}
 
 \begin{flushright}
-\begin{minipage}{0.72\textwidth}
+\begin{minipage}{0.52\textwidth}
 \itshape
 
 If you can keep your head when all about you\\
@@ -52,34 +60,7 @@ Yours is the Earth and everything that's in it. \ldots
 
 \cleardoublepage
 
-% ----------------- Dedica ----------------------
-\thispagestyle{empty}
 
-\vspace*{\fill}
-
-\begin{flushright}
-\begin{minipage}{0.72\textwidth}
-\itshape
-
-A tutte le persone che ho incontrato sino a qui.\\
-A tutte le persone che mi hanno permesso di essere ciò che sono.\\
-
-\vspace{0.8em}
-
-Alla mia famiglia nativa.\\
-Alla mia famiglia acquisita.\\
-
-\vspace{0.8em}
-
-Al mio grande Amore, Francesca.\\
-Alla mia Roccia, Bussola e Ancora, Pietro.
-
-\end{minipage}
-\end{flushright}
-
-\vspace*{\fill}
-
-\cleardoublepage
 
 % ----------------- Copyright / License ----------------------
 \thispagestyle{empty}
@@ -107,28 +88,33 @@ To view a copy of this license, visit:
 
 % ----------------- Indice e liste ----------------------
 \tableofcontents
-\newpage
+\clearpage
 
-\cleardoublepage
 \listoffigures
-\newpage
+\clearpage
 
-\cleardoublepage
-\input{sections/000_acronyms}
+\listoftables
+\clearpage
 
 % Print all defined acronyms, even if not used before this point.
 \glsaddall[types=\acronymtype]
-\printglossary[type=\acronymtype,title={Acronimi}]
+\printglossary[type=\acronymtype,title={Acronyms}]
 
 % Reset acronym usage so first occurrences in the thesis body are expanded.
 \glsresetall
-\newpage
+\clearpage
 
-% ----------------- Corpo Tesi ----------------------
-\pagenumbering{arabic}
+% ----------------- Front matter text ----------------------
+
 
 \input{sections/0_acknowledgment}
 \input{sections/00_abstract}
+
+
+% ----------------- Main matter ----------------------
+
+\cleardoublepage
+\pagenumbering{arabic}
 \input{sections/01_introduction}
 \input{sections/02_background}
 \input{sections/03_StateoftheArt}

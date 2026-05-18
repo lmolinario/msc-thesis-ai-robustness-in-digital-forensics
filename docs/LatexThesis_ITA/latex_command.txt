@@ -3,3 +3,11 @@ makeglossaries main
 biber main
 pdflatex main.tex
 pdflatex main.tex
+
+
+
+pdflatex main.tex
+makeindex -s main.ist -t main.alg -o main.acr main.acn
+biber main
+pdflatex main.tex
+pdflatex main.tex
