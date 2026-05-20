@@ -1,0 +1,32 @@
+{
+  "script": "evaluation/scripts/19_normalize_forensic_tool_outputs.py",
+  "created_at": "2026-05-20T19:30:00+00:00",
+  "bundle_rows": 11500,
+  "tools_requested": [
+    "magnet_axiom"
+  ],
+  "per_tool_prediction_export_counts": {
+    "magnet_axiom": 1
+  },
+  "per_tool_raw_row_counts": {
+    "magnet_axiom": 23000
+  },
+  "raw_rows_parsed": 23000,
+  "normalized_rows_before_deduplication": 23000,
+  "matched_rows_before_deduplication": 23000,
+  "deduplication_enabled": true,
+  "normalized_rows_after_deduplication": 11500,
+  "matched_rows_after_deduplication": 11500,
+  "unmatched_rows_after_deduplication": 0,
+  "interpretable_rows_after_deduplication": 11500,
+  "weapon_detected_true_after_deduplication": 5329,
+  "weapon_detected_false_after_deduplication": 6171,
+  "weapon_detected_unknown_after_deduplication": 0,
+  "outputs": {
+    "normalized_predictions": "evaluation/forensic_tools/normalized_predictions.csv",
+    "tool_export_audit": "evaluation/forensic_tools/tool_export_audit.csv",
+    "tool_version_log": "evaluation/forensic_tools/tool_version_log.csv",
+    "normalization_summary": "evaluation/forensic_tools/normalization_summary.json",
+    "forensic_tool_metrics": "results/metrics/forensic_tools_metrics.csv"
+  }
+}
