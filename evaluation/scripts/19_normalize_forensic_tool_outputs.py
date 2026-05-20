@@ -1290,24 +1290,44 @@ def compute_group_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def add_metric_group(
-    groups: dict[tuple[str, str, str, str], list[dict[str, Any]]],
+    groups: dict[tuple[str, str, str, str, str], list[dict[str, Any]]],
     row: dict[str, Any],
     scope: str,
     sample_type: str,
     attack_family: str,
     attack_name: str,
 ) -> None:
+    """
+    Add a row to a metric group.
+
+    The group key keeps sample_type, attack_family and attack_name separated.
+    This is important because grouping only by attack_family would collapse
+    all adversarial attacks into a single row and would hide per-attack metrics.
+    """
     key = (
         safe_str(row.get("tool_name", "")),
         scope,
         sample_type or "all",
-        attack_family or attack_name or "all",
+        attack_family or "all",
+        attack_name or "all",
     )
     groups[key].append(row)
 
 
 def compute_metrics(normalized_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    groups: dict[tuple[str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
+    """
+    Compute forensic-tool metrics at multiple aggregation levels.
+
+    Produced scopes:
+    - all: complete tool-level aggregate;
+    - sample_type: clean / perturbed / ood, depending on bundle schema;
+    - attack_family: none / adversarial / anti_forensic;
+    - attack_name: clean, ood, fgsm, sigma_zero, etc.;
+    - sample_type_attack: combined view preserving sample type and attack name.
+
+    OOD rows are preserved but do not contribute to binary accuracy.
+    """
+    groups: dict[tuple[str, str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
 
     for row in normalized_rows:
         if safe_str(row.get("matched", "")) != "true":
@@ -1317,28 +1337,93 @@ def compute_metrics(normalized_rows: list[dict[str, Any]]) -> list[dict[str, Any
         attack_family = safe_str(row.get("attack_family", "")) or "none"
         attack_name = safe_str(row.get("attack_name", "")) or "none"
 
-        add_metric_group(groups, row, "all", "all", "all", "all")
-        add_metric_group(groups, row, "sample_type", sample_type, "all", "all")
-        add_metric_group(groups, row, "attack_family", "all", attack_family, "all")
-        add_metric_group(groups, row, "attack_name", "all", attack_family, attack_name)
-        add_metric_group(groups, row, "sample_type_attack", sample_type, attack_family, attack_name)
+        # Global aggregate.
+        add_metric_group(
+            groups=groups,
+            row=row,
+            scope="all",
+            sample_type="all",
+            attack_family="all",
+            attack_name="all",
+        )
+
+        # Aggregate by sample type, e.g. clean / perturbed / ood.
+        add_metric_group(
+            groups=groups,
+            row=row,
+            scope="sample_type",
+            sample_type=sample_type,
+            attack_family="all",
+            attack_name="all",
+        )
+
+        # Aggregate by attack family, e.g. adversarial / anti_forensic / none.
+        add_metric_group(
+            groups=groups,
+            row=row,
+            scope="attack_family",
+            sample_type="all",
+            attack_family=attack_family,
+            attack_name="all",
+        )
+
+        # Aggregate by specific attack/transformation name.
+        # This fixes the previous bug where all attacks were collapsed by family.
+        add_metric_group(
+            groups=groups,
+            row=row,
+            scope="attack_name",
+            sample_type="all",
+            attack_family=attack_family,
+            attack_name=attack_name,
+        )
+
+        # Combined detailed view.
+        add_metric_group(
+            groups=groups,
+            row=row,
+            scope="sample_type_attack",
+            sample_type=sample_type,
+            attack_family=attack_family,
+            attack_name=attack_name,
+        )
 
     metric_rows: list[dict[str, Any]] = []
 
-    for (tool_name, scope, group_1, group_2), rows in sorted(groups.items()):
+    scope_order = {
+        "all": 0,
+        "sample_type": 1,
+        "attack_family": 2,
+        "attack_name": 3,
+        "sample_type_attack": 4,
+    }
+
+    sorted_group_items = sorted(
+        groups.items(),
+        key=lambda item: (
+            item[0][0],
+            scope_order.get(item[0][1], 99),
+            item[0][2],
+            item[0][3],
+            item[0][4],
+        ),
+    )
+
+    for (tool_name, scope, sample_type, attack_family, attack_name), rows in sorted_group_items:
         values = compute_group_metrics(rows)
+
         metric_rows.append(
             {
                 "tool_name": tool_name,
                 "scope": scope,
-                "group_1": group_1,
-                "group_2": group_2,
+                "sample_type": sample_type,
+                "attack_family": attack_family,
+                "attack_name": attack_name,
                 **values,
             }
         )
 
     return metric_rows
-
 
 # =============================================================================
 # Output writing
