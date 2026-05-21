@@ -1,42 +1,58 @@
-\chapter{Implementation and Experiments}	\label{chap:experiments}
+\chapter{Results and Operational Robustness Analysis}
+\label{chap:results}
 
-\begin{comment}
-Qui dare i dettagli sulla metodologia descritta in precedenza.
+% Paragrafo introduttivo:
+% distinzione proxy/black-box, focus forense, ordine per frequenza operativa
 
-Presentare i risultati.
+\section{Experimental Evaluation Status and Dataset Overview}
+\label{sec:results-status}
+% Tabella stato sperimentale, composizione dataset/bundle,
+% dichiarazione trasparente dei tool commerciali pending
 
-Spiegare e discutere i risultati, quindi dare un significato ai numeri ottenuti.
+\section{Clean Baseline Performance}
+\label{sec:results-clean-baseline}
+% T1: Accuracy, balanced accuracy, precision, recall, F1,
+% false positive rate, false negative rate per modello
+% F1: Confusion matrix per modello
 
-DATASET:
-- kaggle
-- scraping google
-- deep web scraping
-- social network
-Dataset diversi in modo essere più forte lato tecnico dimostrativo. Circa 1000 immagini.
+\section{Out-of-Distribution Behavior and False Positive Risk}
+\label{sec:results-ood}
+% T2: weapon rate, confidence media, high-confidence rate per modello
+% F2: distribuzione confidence su OOD, se disponibile
 
-TOOL: XWays (si trova), Magnet Axiom (ce lo danno), UFED (dovremmo averlo), Oxygen (?)
+\section{Robustness Against Anti-Forensic Transformations}
+\label{sec:results-antiforensic}
+% T3: accuracy drop per modello e trasformazione
+% F3: bar chart o heatmap drop anti-forensic
 
-PERTURBAZIONI IMMAGINI: 
-1. perturbazioni standard:
-- le più note e utilizzate
-- le più recenti
-2. perturbazioni applicate alla forense:
-- anti-forense
-- \textit{per renderle più "sicure"} (da verificare)
+\section{Robustness Against Adversarial Perturbations}
+\label{sec:results-adversarial}
+% T4: accuracy drop per modello e attacco
+% F4: heatmap drop adversarial
+% Optional: curva accuracy vs epsilon solo se viene eseguito uno sweep FGSM
 
-Preso il dataset, presi gli algoritmi. Si cercano gli script per modificare le immagini e quindi creare il dataset delle immagini adversarial.
+\section{Forensic Evaluation Bundle Composition and Black-Box Readiness}
+\label{sec:results-bundle}
+% T5: composizione bundle da 11500 file
+% Protocollo di matching e normalizzazione degli output dei tool commerciali
 
-Una volta creato il dataset si carica su pennina USB (filesystem pulito senza immagini OS e FS quindi nessuna influenza).
+\section{Commercial Forensic Tools Evaluation}
+\label{sec:results-commercial}
+% T6: matrice risultati/tool availability con celle pending dichiarate
+% Formula trasparente per risultati non ancora disponibili
 
-Si acquisisce la pennina. Si carica l'immagine della pennina nei tool. Si estraggono i report/risultati. Si ripete la procedura con le immagini originali senza perturbazione per confrontare i risultati.
+\section{Comparative Robustness Discussion}
+\label{sec:results-comparative}
+% T7: sintesi comparativa dei proxy model e, quando disponibili,
+% dei tool commerciali normalizzati
 
-Si descrivono i risultati sia numericamente che qualitativamente spiegando il significato. Si fa correlazione tra risultati e tecnica adversariale usata. 
+\section{Explainability Analysis and Representative Failure Cases}
+\label{sec:results-xai}
+% F5: Integrated Gradients su casi rappresentativi clean vs perturbed
+% Gallery completa → Appendice
 
-
-Uno step da fare dopo tutto. Se io aggiungo xAI. Noi non abbiamo algoritmo dei tool quindi test adversarial black box. 
-C'è un modo per creare un modulo aggiuntivo al tool che utilizzi xAI e verificare i risultati. 
-
-Oppure si può prendere un algoritmo molto ben performante allo stato dell'arte sul riconoscimento di immagini, testare con quel dataset nostro perturbato e a questo algoritmo whitebox applicare xAI e se performa meglio, suggerire poi di integrare tecniche simili nei tool forensi.
-
-
-\end{comment}
+\section{Operational Forensic Implications and Limitations}
+\label{sec:results-implications}
+% Falsi negativi, tracciabilità, affidabilità operativa,
+% calibrazione confidence, trasferibilità degli attacchi,
+% limiti dei tool black-box
