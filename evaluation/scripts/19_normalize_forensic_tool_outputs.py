@@ -4,40 +4,42 @@
 """
 19_normalize_forensic_tool_outputs.py
 
-Normalize commercial forensic-tool outputs against the FAIR-Lab forensic
-evaluation bundle.
+Interactive and CLI-capable normalization entry point for commercial forensic
+-tool outputs in the FAIR-Lab thesis pipeline.
+
+Purpose
+-------
+Normalize forensic-tool exports against the validated forensic evaluation
+bundle and produce comparable CSV metrics for Chapter 5.
 
 Current implemented parser
 --------------------------
-- Magnet AXIOM / Magnet.AI export:
-  - reads only Pictures.csv from forensic_tools/magnet_axiom/raw_exports/**
-  - maps Tags = "Possible weapons" to predicted weapon
-  - maps empty Tags to not flagged / predicted non_weapon
-  - deduplicates AXIOM duplicated rows to one prediction per bundle_id
+- Magnet AXIOM / Magnet.AI:
+  - reads only Pictures.csv from selected raw export run folders;
+  - maps Tags = "Possible weapons" to predicted weapon;
+  - maps empty Tags to not flagged / predicted non_weapon;
+  - deduplicates duplicated export rows to one prediction per tool + bundle_id.
 
-Inputs
-------
+Main inputs
+-----------
 - datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
 - datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
-- forensic_tools/magnet_axiom/raw_exports/**/Pictures.csv
+- forensic_tools/<tool_name>/raw_exports/<run_id>/...
 
-Outputs
--------
+Main outputs
+------------
 - evaluation/forensic_tools/normalized_predictions.csv
-- evaluation/forensic_tools/magnet_axiom_normalized_predictions.csv
+- evaluation/forensic_tools/<tool_name>_normalized_predictions.csv
 - evaluation/forensic_tools/tool_export_audit.csv
 - evaluation/forensic_tools/tool_version_log.csv
 - evaluation/forensic_tools/normalization_summary.json
 - results/metrics/forensic_tools_metrics.csv
-- results/metrics/magnet_axiom_metrics.csv
+- results/metrics/<tool_name>_metrics.csv
 
-Notes
------
-The script is deliberately conservative:
-- OOD samples are not mixed into binary accuracy.
-- Unknown/non-interpretable predictions are preserved.
-- For AXIOM, absence of the "Possible weapons" tag is interpreted as "not flagged",
-  not as an unknown state, because AXIOM uses tags as positive detections.
+Operational note
+----------------
+By default the script opens an interactive menu, so the analyst can select what
+runs/tools must be normalized. Use --no-interactive for fully scripted execution.
 """
 
 from __future__ import annotations
@@ -62,20 +64,19 @@ import pandas as pd
 # =============================================================================
 
 REPO_ROOT_BOOTSTRAP = Path(__file__).resolve().parents[2]
-
 if str(REPO_ROOT_BOOTSTRAP) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT_BOOTSTRAP))
 
 try:
     from datasets.scripts.utils.paths import REPO_ROOT, repo_relative_path
-except Exception:  # pragma: no cover
+except Exception:  # pragma: no cover - fallback for unusual execution contexts
     REPO_ROOT = REPO_ROOT_BOOTSTRAP
 
     def repo_relative_path(path_value: str | Path) -> Path:
-        path = Path(path_value)
+        path = Path(path_value).expanduser()
         if path.is_absolute():
-            return path
-        return REPO_ROOT / path
+            return path.resolve()
+        return (REPO_ROOT / path).resolve()
 
 
 SCRIPT_NAME = "evaluation/scripts/19_normalize_forensic_tool_outputs.py"
@@ -87,7 +88,6 @@ DEFAULT_BUNDLE_MANIFEST = (
     / "metadata"
     / "bundle_manifest.csv"
 )
-
 DEFAULT_BUNDLE_HASHES = (
     REPO_ROOT
     / "datasets"
@@ -95,12 +95,9 @@ DEFAULT_BUNDLE_HASHES = (
     / "metadata"
     / "bundle_hashes_sha256.csv"
 )
-
 DEFAULT_FORENSIC_TOOLS_ROOT = REPO_ROOT / "forensic_tools"
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "evaluation" / "forensic_tools"
 DEFAULT_METRICS_DIR = REPO_ROOT / "results" / "metrics"
-
-SUPPORTED_GENERIC_EXPORT_EXTENSIONS = {".csv", ".tsv", ".json", ".jsonl", ".txt"}
 
 KNOWN_TOOL_NAMES = [
     "magnet_axiom",
@@ -108,6 +105,8 @@ KNOWN_TOOL_NAMES = [
     "cellebrite_ufed",
     "oxygen_forensic_detective",
 ]
+
+SUPPORTED_GENERIC_EXPORT_EXTENSIONS = {".csv", ".tsv", ".json", ".jsonl", ".txt"}
 
 SHA256_COLUMNS = {
     "sha256",
@@ -237,75 +236,40 @@ class RawToolRow:
     raw_confidence: str
 
 
+@dataclass
+class InteractiveSelection:
+    """Configuration selected from the initial interactive menu."""
+
+    tools: list[str]
+    selected_run_dirs_by_tool: dict[str, list[Path]]
+    strict: bool
+    deduplicate: bool
+    output_dir: Path
+    metrics_dir: Path
+
+
 # =============================================================================
 # CLI and logging
 # =============================================================================
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Normalize forensic-tool exports against the FAIR-Lab forensic evaluation bundle."
+        description=(
+            "Normalize forensic-tool exports against the FAIR-Lab forensic "
+            "evaluation bundle. By default, an interactive menu is shown."
+        )
     )
-
-    parser.add_argument(
-        "--bundle-manifest",
-        type=str,
-        default=str(DEFAULT_BUNDLE_MANIFEST),
-        help="Path to bundle_manifest.csv.",
-    )
-
-    parser.add_argument(
-        "--bundle-hashes",
-        type=str,
-        default=str(DEFAULT_BUNDLE_HASHES),
-        help="Path to bundle_hashes_sha256.csv.",
-    )
-
-    parser.add_argument(
-        "--forensic-tools-root",
-        type=str,
-        default=str(DEFAULT_FORENSIC_TOOLS_ROOT),
-        help="Root directory containing forensic_tools/<tool_name>/raw_exports/.",
-    )
-
-    parser.add_argument(
-        "--tools",
-        nargs="+",
-        default=KNOWN_TOOL_NAMES,
-        help="Tool directory names to scan under forensic_tools/.",
-    )
-
-    parser.add_argument(
-        "--output-dir",
-        type=str,
-        default=str(DEFAULT_OUTPUT_DIR),
-        help="Directory for normalized forensic-tool outputs.",
-    )
-
-    parser.add_argument(
-        "--metrics-dir",
-        type=str,
-        default=str(DEFAULT_METRICS_DIR),
-        help="Directory for forensic-tool metrics.",
-    )
-
-    parser.add_argument(
-        "--strict",
-        action="store_true",
-        help="Fail if no raw export files are found for a requested tool.",
-    )
-
-    parser.add_argument(
-        "--no-deduplicate",
-        action="store_true",
-        help="Disable one-prediction-per-bundle_id consolidation.",
-    )
-
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Enable verbose logging.",
-    )
-
+    parser.add_argument("--bundle-manifest", default=str(DEFAULT_BUNDLE_MANIFEST))
+    parser.add_argument("--bundle-hashes", default=str(DEFAULT_BUNDLE_HASHES))
+    parser.add_argument("--forensic-tools-root", default=str(DEFAULT_FORENSIC_TOOLS_ROOT))
+    parser.add_argument("--tools", nargs="+", default=KNOWN_TOOL_NAMES)
+    parser.add_argument("--selected-run-dir", nargs="*", default=[])
+    parser.add_argument("--output-dir", default=str(DEFAULT_OUTPUT_DIR))
+    parser.add_argument("--metrics-dir", default=str(DEFAULT_METRICS_DIR))
+    parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--no-deduplicate", action="store_true")
+    parser.add_argument("--no-interactive", action="store_true")
+    parser.add_argument("--verbose", action="store_true")
     return parser
 
 
@@ -342,8 +306,7 @@ def normalize_column_name(name: str) -> str:
 
 def normalize_hash(value: Any) -> str:
     text = safe_str(value).lower()
-    text = re.sub(r"[^a-f0-9]", "", text)
-    return text
+    return re.sub(r"[^a-f0-9]", "", text)
 
 
 def basename_from_path(value: Any) -> str:
@@ -353,35 +316,32 @@ def basename_from_path(value: Any) -> str:
     return text.rstrip("/").split("/")[-1]
 
 
-def repo_relative_string(path: Path) -> str:
+def repo_relative_string(path: Path | str) -> str:
+    candidate = Path(path)
     try:
-        return str(path.resolve().relative_to(REPO_ROOT)).replace("\\", "/")
+        return str(candidate.resolve().relative_to(REPO_ROOT)).replace("\\", "/")
     except ValueError:
-        return str(path).replace("\\", "/")
+        return str(candidate).replace("\\", "/")
 
 
 def first_non_empty(record: dict[str, Any], candidate_columns: set[str]) -> str:
     normalized_candidates = {normalize_column_name(col) for col in candidate_columns}
-
     for key, value in record.items():
         if normalize_column_name(key) in normalized_candidates:
             text = safe_str(value)
             if text:
                 return text
-
     return ""
 
 
 def collect_text_fields(record: dict[str, Any], candidate_columns: set[str]) -> str:
     normalized_candidates = {normalize_column_name(col) for col in candidate_columns}
     values: list[str] = []
-
     for key, value in record.items():
         if normalize_column_name(key) in normalized_candidates:
             text = safe_str(value)
             if text:
                 values.append(text)
-
     return " | ".join(values)
 
 
@@ -389,11 +349,9 @@ def parse_float(value: Any) -> float | None:
     text = safe_str(value).replace(",", ".")
     if not text:
         return None
-
     match = re.search(r"[-+]?\d*\.?\d+", text)
     if not match:
         return None
-
     try:
         return float(match.group(0))
     except ValueError:
@@ -403,16 +361,224 @@ def parse_float(value: Any) -> float | None:
 def unique_join(values: list[Any], separator: str = " | ") -> str:
     seen: set[str] = set()
     output: list[str] = []
-
     for value in values:
         text = safe_str(value)
-        if not text:
-            continue
-        if text not in seen:
+        if text and text not in seen:
             seen.add(text)
             output.append(text)
-
     return separator.join(output)
+
+
+def ask_text(prompt: str, default: str = "") -> str:
+    """Ask for a text value. Return default on empty input or non-interactive EOF."""
+    suffix = f" [{default}]" if default else ""
+    try:
+        value = input(f"{prompt}{suffix}: ").strip()
+    except EOFError:
+        return default
+    return value or default
+
+
+def ask_yes_no(prompt: str, default: bool) -> bool:
+    """Ask a yes/no question."""
+    default_text = "Y/n" if default else "y/N"
+    try:
+        value = input(f"{prompt} [{default_text}]: ").strip().lower()
+    except EOFError:
+        return default
+    if not value:
+        return default
+    return value in {"y", "yes", "s", "si", "sì", "true", "1"}
+
+
+def ask_index(prompt: str, min_value: int, max_value: int, default: int) -> int:
+    """Ask for an integer menu choice within a range."""
+    while True:
+        value = ask_text(prompt, str(default))
+        try:
+            choice = int(value)
+        except ValueError:
+            print(f"Invalid value: {value}")
+            continue
+        if min_value <= choice <= max_value:
+            return choice
+        print(f"Choose a value between {min_value} and {max_value}.")
+
+
+# =============================================================================
+# Raw export discovery and interactive menu
+# =============================================================================
+
+def prediction_export_name_for_tool(tool_name: str) -> str:
+    if tool_name == "magnet_axiom":
+        return "Pictures.csv"
+    return "prediction export"
+
+
+def discover_raw_run_dirs(tool_name: str, forensic_tools_root: Path) -> list[Path]:
+    """Discover immediate run directories under forensic_tools/<tool>/raw_exports/."""
+    raw_dir = forensic_tools_root / tool_name / "raw_exports"
+    if not raw_dir.exists():
+        return []
+
+    run_dirs = sorted(path for path in raw_dir.iterdir() if path.is_dir())
+    if run_dirs:
+        return run_dirs
+
+    # Fallback for flat exports directly under raw_exports/.
+    if any(path.is_file() for path in raw_dir.iterdir()):
+        return [raw_dir]
+
+    return []
+
+
+def run_dir_has_prediction_files(tool_name: str, run_dir: Path) -> bool:
+    return bool(discover_prediction_export_files_in_roots(tool_name, [run_dir]))
+
+
+def format_run_dir_label(run_dir: Path, tool_name: str) -> str:
+    prediction_files = discover_prediction_export_files_in_roots(tool_name, [run_dir])
+    all_files = discover_export_files_in_roots([run_dir])
+    return (
+        f"{run_dir.name} "
+        f"({len(prediction_files)} prediction file(s), {len(all_files)} export file(s))"
+    )
+
+
+def print_interactive_header() -> None:
+    print("\n" + "=" * 78)
+    print("FAIR-Lab forensic-tool output normalization")
+    print("=" * 78)
+    print("This menu selects which forensic-tool exports must be normalized.")
+    print("The script does not modify datasets, bundle files, or raw exports.")
+    print("It only creates normalized CSV outputs and metrics.\n")
+
+
+def select_tool_from_menu(forensic_tools_root: Path) -> tuple[list[str], dict[str, list[Path]]]:
+    """Interactive selection of tools and run directories."""
+    available_tools = []
+    for tool_name in KNOWN_TOOL_NAMES:
+        run_dirs = discover_raw_run_dirs(tool_name, forensic_tools_root)
+        available_tools.append((tool_name, run_dirs))
+
+    print("Available forensic-tool export folders:")
+    for index, (tool_name, run_dirs) in enumerate(available_tools, start=1):
+        status = f"{len(run_dirs)} run folder(s)" if run_dirs else "no run folders found"
+        print(f"  {index}. {tool_name} - {status}")
+    print(f"  {len(available_tools) + 1}. All tools with available run folders")
+    print(f"  {len(available_tools) + 2}. Manual CLI-style selection")
+
+    choice = ask_index(
+        "Select what to analyze",
+        min_value=1,
+        max_value=len(available_tools) + 2,
+        default=1,
+    )
+
+    selected_run_dirs_by_tool: dict[str, list[Path]] = {}
+
+    if choice == len(available_tools) + 1:
+        tools = [tool_name for tool_name, run_dirs in available_tools if run_dirs]
+        for tool_name, run_dirs in available_tools:
+            if run_dirs:
+                selected_run_dirs_by_tool[tool_name] = choose_run_dirs_for_tool(tool_name, run_dirs)
+        return tools, selected_run_dirs_by_tool
+
+    if choice == len(available_tools) + 2:
+        tools_text = ask_text("Tool names separated by spaces", "magnet_axiom")
+        tools = [item.strip() for item in tools_text.split() if item.strip()]
+        return tools, selected_run_dirs_by_tool
+
+    tool_name, run_dirs = available_tools[choice - 1]
+    if not run_dirs:
+        print(f"No run folders found for {tool_name}. The tool will still be selected.")
+        return [tool_name], selected_run_dirs_by_tool
+
+    selected_run_dirs_by_tool[tool_name] = choose_run_dirs_for_tool(tool_name, run_dirs)
+    return [tool_name], selected_run_dirs_by_tool
+
+
+def choose_run_dirs_for_tool(tool_name: str, run_dirs: list[Path]) -> list[Path]:
+    """Interactive selection of one/latest/all run directories for a tool."""
+    print(f"\nRun folders for {tool_name}:")
+    for index, run_dir in enumerate(run_dirs, start=1):
+        print(f"  {index}. {format_run_dir_label(run_dir, tool_name)}")
+
+    print("\nRun selection mode:")
+    print("  1. Use latest run folder only (recommended for thesis reporting)")
+    print("  2. Choose one run folder")
+    print("  3. Use all run folders and deduplicate by bundle_id")
+    print("  4. Choose multiple run folders")
+
+    mode = ask_index("Select run mode", 1, 4, default=1)
+
+    if mode == 1:
+        return [run_dirs[-1]]
+
+    if mode == 2:
+        selected = ask_index("Select run folder", 1, len(run_dirs), default=len(run_dirs))
+        return [run_dirs[selected - 1]]
+
+    if mode == 3:
+        return run_dirs
+
+    indexes_text = ask_text(
+        "Enter run indexes separated by commas",
+        ",".join(str(i) for i in range(1, len(run_dirs) + 1)),
+    )
+    selected_dirs: list[Path] = []
+    for chunk in indexes_text.split(","):
+        chunk = chunk.strip()
+        if not chunk:
+            continue
+        try:
+            index = int(chunk)
+        except ValueError:
+            print(f"Skipping invalid index: {chunk}")
+            continue
+        if 1 <= index <= len(run_dirs):
+            selected_dirs.append(run_dirs[index - 1])
+        else:
+            print(f"Skipping out-of-range index: {chunk}")
+
+    return selected_dirs or [run_dirs[-1]]
+
+
+def interactive_menu(args: argparse.Namespace) -> InteractiveSelection:
+    """Initial interactive interface used by default."""
+    forensic_tools_root = repo_relative_path(args.forensic_tools_root)
+    print_interactive_header()
+
+    tools, selected_run_dirs_by_tool = select_tool_from_menu(forensic_tools_root)
+
+    print("\nProcessing options:")
+    deduplicate = ask_yes_no("Deduplicate to one prediction per tool + bundle_id", default=not args.no_deduplicate)
+    strict = ask_yes_no("Strict mode: fail if selected tool has no prediction exports", default=args.strict)
+
+    output_dir_text = ask_text("Output directory", args.output_dir)
+    metrics_dir_text = ask_text("Metrics directory", args.metrics_dir)
+
+    print("\nSelection summary:")
+    print(f"  Tools: {', '.join(tools) if tools else 'none'}")
+    for tool_name, run_dirs in selected_run_dirs_by_tool.items():
+        if run_dirs:
+            print(f"  {tool_name} run folder(s):")
+            for run_dir in run_dirs:
+                print(f"    - {repo_relative_string(run_dir)}")
+    print(f"  Deduplicate: {str(deduplicate).lower()}")
+    print(f"  Strict: {str(strict).lower()}")
+    proceed = ask_yes_no("Proceed with normalization", default=True)
+    if not proceed:
+        raise SystemExit("Normalization cancelled by user.")
+
+    return InteractiveSelection(
+        tools=tools,
+        selected_run_dirs_by_tool=selected_run_dirs_by_tool,
+        strict=strict,
+        deduplicate=deduplicate,
+        output_dir=repo_relative_path(output_dir_text),
+        metrics_dir=repo_relative_path(metrics_dir_text),
+    )
 
 
 # =============================================================================
@@ -424,7 +590,6 @@ def load_bundle(bundle_manifest_path: Path, bundle_hashes_path: Path) -> pd.Data
         raise FileNotFoundError(f"Bundle manifest not found: {bundle_manifest_path}")
 
     bundle_df = pd.read_csv(bundle_manifest_path, dtype=str, keep_default_na=False)
-
     required_columns = {
         "bundle_id",
         "tool_input_filename",
@@ -433,16 +598,12 @@ def load_bundle(bundle_manifest_path: Path, bundle_hashes_path: Path) -> pd.Data
         "attack_name",
         "final_label",
     }
-
     missing = required_columns - set(bundle_df.columns)
     if missing:
-        raise ValueError(
-            f"Bundle manifest is missing required columns: {sorted(missing)}"
-        )
+        raise ValueError(f"Bundle manifest is missing required columns: {sorted(missing)}")
 
     if bundle_hashes_path.exists():
         hashes_df = pd.read_csv(bundle_hashes_path, dtype=str, keep_default_na=False)
-
         if "bundle_id" in hashes_df.columns:
             hash_columns = [col for col in hashes_df.columns if col != "bundle_id"]
             bundle_df = bundle_df.merge(
@@ -455,28 +616,14 @@ def load_bundle(bundle_manifest_path: Path, bundle_hashes_path: Path) -> pd.Data
     bundle_df["_sha256_key"] = ""
     bundle_df["_md5_key"] = ""
 
-    sha_candidate_columns = [
-        "sha256_actual",
-        "sha256",
-        "sha256_manifest",
-        "sha256_hashfile",
-    ]
-
-    md5_candidate_columns = [
-        "md5_actual",
-        "md5",
-        "md5_manifest",
-        "md5_hashfile",
-    ]
-
-    for col in sha_candidate_columns:
+    for col in ["sha256_actual", "sha256", "sha256_manifest", "sha256_hashfile"]:
         if col in bundle_df.columns:
             bundle_df["_sha256_key"] = bundle_df["_sha256_key"].mask(
                 bundle_df["_sha256_key"].eq(""),
                 bundle_df[col].map(normalize_hash),
             )
 
-    for col in md5_candidate_columns:
+    for col in ["md5_actual", "md5", "md5_manifest", "md5_hashfile"]:
         if col in bundle_df.columns:
             bundle_df["_md5_key"] = bundle_df["_md5_key"].mask(
                 bundle_df["_md5_key"].eq(""),
@@ -486,18 +633,13 @@ def load_bundle(bundle_manifest_path: Path, bundle_hashes_path: Path) -> pd.Data
     bundle_df["_filename_key"] = bundle_df["tool_input_filename"].map(
         lambda x: basename_from_path(x).lower()
     )
-
     logging.info("Loaded bundle rows: %d", len(bundle_df))
     return bundle_df
 
 
 def build_bundle_indexes(
     bundle_df: pd.DataFrame,
-) -> tuple[
-    dict[str, dict[str, Any]],
-    dict[str, dict[str, Any]],
-    dict[str, dict[str, Any]],
-]:
+) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
     sha_index: dict[str, dict[str, Any]] = {}
     md5_index: dict[str, dict[str, Any]] = {}
     filename_index: dict[str, dict[str, Any]] = {}
@@ -506,7 +648,6 @@ def build_bundle_indexes(
         sha = safe_str(row.get("_sha256_key", ""))
         md5 = safe_str(row.get("_md5_key", ""))
         filename = safe_str(row.get("_filename_key", ""))
-
         if sha:
             sha_index[sha] = row
         if md5:
@@ -517,7 +658,6 @@ def build_bundle_indexes(
     logging.info("Bundle SHA256 index entries: %d", len(sha_index))
     logging.info("Bundle MD5 index entries: %d", len(md5_index))
     logging.info("Bundle filename index entries: %d", len(filename_index))
-
     return sha_index, md5_index, filename_index
 
 
@@ -525,185 +665,136 @@ def build_bundle_indexes(
 # Raw export discovery and parsing
 # =============================================================================
 
-def discover_prediction_export_files(tool_name: str, tool_dir: Path) -> list[Path]:
-    """
-    Return only files that should be interpreted as prediction exports.
+def discover_prediction_export_files_in_roots(tool_name: str, roots: list[Path]) -> list[Path]:
+    files: list[Path] = []
+    for root in roots:
+        if not root.exists():
+            continue
+        if tool_name == "magnet_axiom":
+            files.extend(
+                path
+                for path in root.rglob("*")
+                if path.is_file() and path.name.lower() == "pictures.csv"
+            )
+        else:
+            files.extend(
+                path
+                for path in root.rglob("*")
+                if path.is_file() and path.suffix.lower() in SUPPORTED_GENERIC_EXPORT_EXTENSIONS
+            )
+    return sorted(set(files))
 
-    For Magnet AXIOM, only Pictures.csv is a prediction-bearing export for this
-    thesis protocol. ExportSummary.json and other CSVs are audit/configuration
-    artifacts, not classification rows.
-    """
-    raw_dir = tool_dir / "raw_exports"
-    if not raw_dir.exists():
-        return []
 
-    if tool_name == "magnet_axiom":
-        return sorted(
+def discover_export_files_in_roots(roots: list[Path]) -> list[Path]:
+    files: list[Path] = []
+    for root in roots:
+        if not root.exists():
+            continue
+        files.extend(
             path
-            for path in raw_dir.rglob("*")
-            if path.is_file() and path.name.lower() == "pictures.csv"
+            for path in root.rglob("*")
+            if path.is_file() and path.suffix.lower() in SUPPORTED_GENERIC_EXPORT_EXTENSIONS
         )
-
-    return sorted(
-        path
-        for path in raw_dir.rglob("*")
-        if path.is_file()
-        and path.suffix.lower() in SUPPORTED_GENERIC_EXPORT_EXTENSIONS
-    )
+    return sorted(set(files))
 
 
-def discover_all_export_files(tool_dir: Path) -> list[Path]:
-    raw_dir = tool_dir / "raw_exports"
-    if not raw_dir.exists():
-        return []
+def get_scan_roots(tool_name: str, tool_dir: Path, selected_run_dirs: list[Path] | None) -> list[Path]:
+    if selected_run_dirs:
+        return selected_run_dirs
+    return [tool_dir / "raw_exports"]
 
-    return sorted(
-        path
-        for path in raw_dir.rglob("*")
-        if path.is_file()
-        and path.suffix.lower() in SUPPORTED_GENERIC_EXPORT_EXTENSIONS
-    )
+
+def discover_prediction_export_files(tool_name: str, tool_dir: Path, selected_run_dirs: list[Path] | None = None) -> list[Path]:
+    return discover_prediction_export_files_in_roots(tool_name, get_scan_roots(tool_name, tool_dir, selected_run_dirs))
+
+
+def discover_all_export_files(tool_dir: Path, selected_run_dirs: list[Path] | None = None) -> list[Path]:
+    roots = selected_run_dirs if selected_run_dirs else [tool_dir / "raw_exports"]
+    return discover_export_files_in_roots(roots)
 
 
 def read_csv_like(path: Path) -> list[dict[str, Any]]:
-    suffix = path.suffix.lower()
-    sep = "\t" if suffix == ".tsv" else ","
-
-    encodings = ["utf-8-sig", "utf-8", "cp1252", "latin1"]
-
+    sep = "\t" if path.suffix.lower() == ".tsv" else ","
     last_error: Exception | None = None
-
-    for encoding in encodings:
+    for encoding in ["utf-8-sig", "utf-8", "cp1252", "latin1"]:
         try:
-            df = pd.read_csv(
-                path,
-                sep=sep,
-                dtype=str,
-                keep_default_na=False,
-                encoding=encoding,
-            )
+            df = pd.read_csv(path, sep=sep, dtype=str, keep_default_na=False, encoding=encoding)
             return df.to_dict(orient="records")
         except UnicodeDecodeError as exc:
             last_error = exc
-
     if last_error:
         raise last_error
-
     return []
 
 
 def flatten_json_object(obj: Any, prefix: str = "") -> dict[str, Any]:
     flat: dict[str, Any] = {}
-
     if isinstance(obj, dict):
         for key, value in obj.items():
             new_key = f"{prefix}.{key}" if prefix else safe_str(key)
-
             if isinstance(value, dict):
                 flat.update(flatten_json_object(value, new_key))
             elif isinstance(value, list):
-                if all(not isinstance(item, (dict, list)) for item in value):
-                    flat[new_key] = " | ".join(safe_str(item) for item in value)
-                else:
-                    flat[new_key] = json.dumps(value, ensure_ascii=False)
+                flat[new_key] = json.dumps(value, ensure_ascii=False)
             else:
                 flat[new_key] = value
-
     elif isinstance(obj, list):
         flat[prefix or "value"] = json.dumps(obj, ensure_ascii=False)
-
     else:
         flat[prefix or "value"] = obj
-
     return flat
 
 
 def read_json_records(path: Path) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8", errors="replace").strip()
-
     if not text:
         return []
-
     if path.suffix.lower() == ".jsonl":
-        records: list[dict[str, Any]] = []
-        for line in text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            records.append(flatten_json_object(json.loads(line)))
-        return records
-
+        return [flatten_json_object(json.loads(line)) for line in text.splitlines() if line.strip()]
     obj = json.loads(text)
-
     if isinstance(obj, list):
         return [flatten_json_object(item) for item in obj]
-
     if isinstance(obj, dict):
         for key in ("items", "artifacts", "files", "results", "records", "data"):
             value = obj.get(key)
             if isinstance(value, list):
                 return [flatten_json_object(item) for item in value]
-
         return [flatten_json_object(obj)]
-
     return [{"value": safe_str(obj)}]
 
 
 def read_txt_records(path: Path) -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
-
-    for idx, line in enumerate(
-        path.read_text(encoding="utf-8", errors="replace").splitlines(),
-        start=1,
-    ):
+    for idx, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1):
         line = line.strip()
-        if not line:
-            continue
-        records.append({"line_number": idx, "description": line})
-
+        if line:
+            records.append({"line_number": idx, "description": line})
     return records
 
 
 def read_export_records(path: Path) -> list[dict[str, Any]]:
     suffix = path.suffix.lower()
-
     if suffix in {".csv", ".tsv"}:
         return read_csv_like(path)
-
     if suffix in {".json", ".jsonl"}:
         return read_json_records(path)
-
     if suffix == ".txt":
         return read_txt_records(path)
-
     return []
 
 
-def extract_raw_row(
-    tool_name: str,
-    export_file: Path,
-    row_number: int,
-    record: dict[str, Any],
-) -> RawToolRow:
+def extract_raw_row(tool_name: str, export_file: Path, row_number: int, record: dict[str, Any]) -> RawToolRow:
     sha256 = normalize_hash(first_non_empty(record, SHA256_COLUMNS))
     md5 = normalize_hash(first_non_empty(record, MD5_COLUMNS))
     filename_or_path = first_non_empty(record, FILENAME_COLUMNS)
     raw_confidence = first_non_empty(record, CONFIDENCE_COLUMNS)
 
     if tool_name == "magnet_axiom":
-        # AXIOM Pictures.csv uses the Tags column as the positive AI category
-        # signal. Empty Tags means "not flagged" for this protocol.
         raw_label = first_non_empty(record, {"tags"})
     else:
         raw_label = collect_text_fields(record, LABEL_COLUMNS)
-
         if not raw_label:
-            free_text = " | ".join(
-                safe_str(value)
-                for value in record.values()
-                if safe_str(value)
-            )
-            raw_label = free_text[:1000]
+            raw_label = " | ".join(safe_str(value) for value in record.values() if safe_str(value))[:1000]
 
     return RawToolRow(
         tool_name=tool_name,
@@ -721,18 +812,17 @@ def extract_raw_row(
 def parse_tool_exports(
     tool_name: str,
     tool_dir: Path,
+    selected_run_dirs: list[Path] | None = None,
 ) -> tuple[list[RawToolRow], list[dict[str, Any]]]:
-    prediction_files = discover_prediction_export_files(tool_name, tool_dir)
-    all_export_files = discover_all_export_files(tool_dir)
+    prediction_files = discover_prediction_export_files(tool_name, tool_dir, selected_run_dirs)
+    all_export_files = discover_all_export_files(tool_dir, selected_run_dirs)
+    prediction_file_set = {path.resolve() for path in prediction_files}
 
     raw_rows: list[RawToolRow] = []
     audit_rows: list[dict[str, Any]] = []
 
-    prediction_file_set = {path.resolve() for path in prediction_files}
-
     for export_file in all_export_files:
         is_prediction_file = export_file.resolve() in prediction_file_set
-
         try:
             records = read_export_records(export_file)
             status = "parsed_prediction_file" if is_prediction_file else "parsed_audit_only"
@@ -745,19 +835,13 @@ def parse_tool_exports(
 
         if is_prediction_file:
             for idx, record in enumerate(records, start=1):
-                raw_rows.append(
-                    extract_raw_row(
-                        tool_name=tool_name,
-                        export_file=export_file,
-                        row_number=idx,
-                        record=record,
-                    )
-                )
+                raw_rows.append(extract_raw_row(tool_name, export_file, idx, record))
 
         audit_rows.append(
             {
                 "tool_name": tool_name,
                 "raw_export_file": repo_relative_string(export_file),
+                "run_dir": infer_run_dir_name(tool_dir, export_file),
                 "extension": export_file.suffix.lower(),
                 "is_prediction_file": str(is_prediction_file).lower(),
                 "status": status,
@@ -769,6 +853,15 @@ def parse_tool_exports(
     return raw_rows, audit_rows
 
 
+def infer_run_dir_name(tool_dir: Path, export_file: Path) -> str:
+    raw_dir = tool_dir / "raw_exports"
+    try:
+        relative = export_file.resolve().relative_to(raw_dir.resolve())
+    except ValueError:
+        return ""
+    return relative.parts[0] if len(relative.parts) > 1 else "raw_exports"
+
+
 # =============================================================================
 # Tool version log
 # =============================================================================
@@ -778,23 +871,15 @@ def extract_version_fields_from_summary(summary_path: Path) -> dict[str, str]:
         records = read_json_records(summary_path)
     except Exception:
         return {}
-
     if not records:
         return {}
 
-    flat = records[0]
-    normalized_items = {
-        normalize_column_name(key): safe_str(value)
-        for key, value in flat.items()
-    }
+    normalized_items = {normalize_column_name(k): safe_str(v) for k, v in records[0].items()}
 
     def find_value(patterns: list[str]) -> str:
         for key, value in normalized_items.items():
-            if not value:
-                continue
-            for pattern in patterns:
-                if pattern in key:
-                    return value
+            if value and any(pattern in key for pattern in patterns):
+                return value
         return ""
 
     return {
@@ -806,29 +891,36 @@ def extract_version_fields_from_summary(summary_path: Path) -> dict[str, str]:
     }
 
 
-def build_tool_version_row(tool_name: str, tool_dir: Path, export_files_found: int) -> dict[str, Any]:
-    summary_files = sorted(
-        path
-        for path in (tool_dir / "raw_exports").rglob("*")
-        if path.is_file()
-        and path.name.lower() in {"exportsummary.json", "export_summary.json"}
-    ) if (tool_dir / "raw_exports").exists() else []
+def build_tool_version_row(
+    tool_name: str,
+    tool_dir: Path,
+    export_files_found: int,
+    selected_run_dirs: list[Path] | None = None,
+) -> dict[str, Any]:
+    roots = selected_run_dirs if selected_run_dirs else [tool_dir / "raw_exports"]
+    summary_files: list[Path] = []
+    for root in roots:
+        if root.exists():
+            summary_files.extend(
+                path
+                for path in root.rglob("*")
+                if path.is_file() and path.name.lower() in {"exportsummary.json", "export_summary.json"}
+            )
+    summary_files = sorted(summary_files)
 
     extracted: dict[str, str] = {}
     summary_file = ""
-
     if summary_files:
         summary_file = repo_relative_string(summary_files[0])
         extracted = extract_version_fields_from_summary(summary_files[0])
 
-    if tool_name == "magnet_axiom":
-        default_notes = (
-            "Magnet AXIOM export. Predictions are derived from Pictures.csv Tags; "
-            "Tags='Possible weapons' is mapped to weapon_detected=true; empty Tags "
-            "is mapped to weapon_detected=false."
-        )
-    else:
-        default_notes = "Fill manually after tool execution/export."
+    notes = (
+        "Magnet AXIOM export. Predictions are derived from Pictures.csv Tags; "
+        "Tags='Possible weapons' is mapped to weapon_detected=true; empty Tags "
+        "is mapped to weapon_detected=false."
+        if tool_name == "magnet_axiom"
+        else "Fill manually after tool execution/export."
+    )
 
     return {
         "tool_name": tool_name,
@@ -838,11 +930,12 @@ def build_tool_version_row(tool_name: str, tool_dir: Path, export_files_found: i
         "export_status": extracted.get("export_status", ""),
         "export_timestamp": extracted.get("export_timestamp", ""),
         "summary_file": summary_file,
+        "selected_run_dirs": unique_join([repo_relative_string(path) for path in (selected_run_dirs or [])]),
         "ai_modules_enabled": "",
         "os_environment": "",
         "import_path": "datasets/forensic_evaluation_bundle/blind_tool_input/files/",
         "export_files_found": export_files_found,
-        "notes": default_notes,
+        "notes": notes,
         "created_at": utc_now_iso(),
     }
 
@@ -852,29 +945,16 @@ def build_tool_version_row(tool_name: str, tool_dir: Path, export_files_found: i
 # =============================================================================
 
 def interpret_weapon_detection(tool_name: str, raw_label: str) -> tuple[str, str]:
-    """
-    Convert a raw label into:
-    - "true"
-    - "false"
-    - "unknown"
-
-    Magnet AXIOM receives a tool-specific rule because empty Tags have a
-    meaningful interpretation in this export format.
-    """
     label = safe_str(raw_label)
-    text = label.lower()
-    text_clean = re.sub(r"[^a-z0-9_ +/.-]+", " ", text)
+    text_clean = re.sub(r"[^a-z0-9_ +/.-]+", " ", label.lower())
 
     if tool_name == "magnet_axiom":
         if "possible weapons" in text_clean:
             return "true", "magnet_axiom_tag:possible_weapons"
         if not text_clean:
             return "false", "magnet_axiom_empty_tags:not_flagged"
-
-        # Defensive fallback for future AXIOM category variants.
         if "weapon" in text_clean or "weapons" in text_clean:
             return "true", "magnet_axiom_tag:weapon_keyword"
-
         return "unknown", "magnet_axiom_unmapped_tag"
 
     if not text_clean:
@@ -903,7 +983,6 @@ def match_bundle_row(
 ) -> tuple[dict[str, Any] | None, str]:
     if raw_row.sha256 and raw_row.sha256 in sha_index:
         return sha_index[raw_row.sha256], "sha256"
-
     if raw_row.md5 and raw_row.md5 in md5_index:
         return md5_index[raw_row.md5], "md5"
 
@@ -911,7 +990,6 @@ def match_bundle_row(
     if filename and filename in filename_index:
         return filename_index[filename], "filename"
 
-    # Fallback: sometimes reports embed the filename inside a text field.
     text = f"{raw_row.filename_or_path} {raw_row.raw_label}".lower()
     for filename_key, row in filename_index.items():
         if filename_key and filename_key in text:
@@ -922,38 +1000,18 @@ def match_bundle_row(
 
 def compute_correctness(final_label: str, weapon_detected: str) -> tuple[str, str, str]:
     label = safe_str(final_label).lower()
-
     if weapon_detected not in {"true", "false"}:
         return "", "", ""
 
     detected = weapon_detected == "true"
-
     if label == "weapon":
-        correct = detected
-        false_negative = not detected
-        false_positive = False
-
-    elif label == "non_weapon":
-        correct = not detected
-        false_negative = False
-        false_positive = detected
-
-    else:
-        # OOD has no binary correctness.
-        return "", "", ""
-
-    return (
-        str(correct).lower(),
-        str(false_negative).lower(),
-        str(false_positive).lower(),
-    )
+        return str(detected).lower(), str(not detected).lower(), "false"
+    if label == "non_weapon":
+        return str(not detected).lower(), "false", str(detected).lower()
+    return "", "", ""
 
 
-def build_base_match_fields(
-    raw_row: RawToolRow,
-    bundle_row: dict[str, Any] | None,
-    match_method: str,
-) -> dict[str, Any]:
+def build_base_match_fields(raw_row: RawToolRow, bundle_row: dict[str, Any] | None, match_method: str) -> dict[str, Any]:
     if bundle_row is None:
         return {
             "tool_name": raw_row.tool_name,
@@ -1001,32 +1059,12 @@ def normalize_rows(
     filename_index: dict[str, dict[str, Any]],
 ) -> list[dict[str, Any]]:
     normalized_rows: list[dict[str, Any]] = []
-
     for raw_row in raw_rows:
-        bundle_row, match_method = match_bundle_row(
-            raw_row=raw_row,
-            sha_index=sha_index,
-            md5_index=md5_index,
-            filename_index=filename_index,
-        )
-
-        weapon_detected, mapping_reason = interpret_weapon_detection(
-            tool_name=raw_row.tool_name,
-            raw_label=raw_row.raw_label,
-        )
-
+        bundle_row, match_method = match_bundle_row(raw_row, sha_index, md5_index, filename_index)
+        weapon_detected, mapping_reason = interpret_weapon_detection(raw_row.tool_name, raw_row.raw_label)
         confidence = parse_float(raw_row.raw_confidence)
-
-        base = build_base_match_fields(
-            raw_row=raw_row,
-            bundle_row=bundle_row,
-            match_method=match_method,
-        )
-
-        correct, false_negative, false_positive = compute_correctness(
-            final_label=base["final_label"],
-            weapon_detected=weapon_detected,
-        )
+        base = build_base_match_fields(raw_row, bundle_row, match_method)
+        correct, false_negative, false_positive = compute_correctness(base["final_label"], weapon_detected)
 
         normalized_rows.append(
             {
@@ -1039,11 +1077,7 @@ def normalize_rows(
                 "tool_confidence_numeric": "" if confidence is None else confidence,
                 "weapon_detected": weapon_detected,
                 "normalized_prediction": (
-                    "weapon"
-                    if weapon_detected == "true"
-                    else "non_weapon"
-                    if weapon_detected == "false"
-                    else "unknown"
+                    "weapon" if weapon_detected == "true" else "non_weapon" if weapon_detected == "false" else "unknown"
                 ),
                 "mapping_reason": mapping_reason,
                 "correct": correct,
@@ -1052,166 +1086,78 @@ def normalize_rows(
                 "raw_row_count_after_deduplication": 1,
             }
         )
-
     return normalized_rows
 
 
 # =============================================================================
-# Deduplication / consolidation
+# Deduplication and metrics
 # =============================================================================
 
 def choose_consolidated_detection(rows: list[dict[str, Any]]) -> tuple[str, str]:
     detections = [safe_str(row.get("weapon_detected", "")) for row in rows]
-
     if "true" in detections:
         return "true", "deduplicated:any_positive"
-
     if "false" in detections:
         return "false", "deduplicated:all_not_flagged_or_no_positive"
-
     return "unknown", "deduplicated:all_unknown"
 
 
 def consolidate_matched_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
     representative = rows[0].copy()
-
     weapon_detected, consolidation_reason = choose_consolidated_detection(rows)
-
     representative["weapon_detected"] = weapon_detected
-    representative["normalized_prediction"] = (
-        "weapon"
-        if weapon_detected == "true"
-        else "non_weapon"
-        if weapon_detected == "false"
-        else "unknown"
-    )
-
-    original_reasons = [
-        safe_str(row.get("mapping_reason", ""))
-        for row in rows
-        if safe_str(row.get("mapping_reason", ""))
-    ]
-
-    representative["mapping_reason"] = unique_join(
-        [consolidation_reason, *original_reasons],
-        separator=" | ",
-    )
-
-    representative["raw_export_file"] = unique_join(
-        [row.get("raw_export_file", "") for row in rows],
-        separator=" | ",
-    )
-
-    representative["raw_row_number"] = unique_join(
-        [row.get("raw_row_number", "") for row in rows],
-        separator=" | ",
-    )
-
-    representative["tool_raw_label"] = unique_join(
-        [row.get("tool_raw_label", "") for row in rows],
-        separator=" | ",
-    )
-
-    representative["tool_raw_confidence"] = unique_join(
-        [row.get("tool_raw_confidence", "") for row in rows],
-        separator=" | ",
-    )
+    representative["normalized_prediction"] = "weapon" if weapon_detected == "true" else "non_weapon" if weapon_detected == "false" else "unknown"
+    representative["mapping_reason"] = unique_join([consolidation_reason, *[row.get("mapping_reason", "") for row in rows]])
+    representative["raw_export_file"] = unique_join([row.get("raw_export_file", "") for row in rows])
+    representative["raw_row_number"] = unique_join([row.get("raw_row_number", "") for row in rows])
+    representative["tool_raw_label"] = unique_join([row.get("tool_raw_label", "") for row in rows])
+    representative["tool_raw_confidence"] = unique_join([row.get("tool_raw_confidence", "") for row in rows])
 
     numeric_confidences = [
         parse_float(row.get("tool_confidence_numeric", ""))
         for row in rows
         if parse_float(row.get("tool_confidence_numeric", "")) is not None
     ]
-
-    representative["tool_confidence_numeric"] = (
-        max(numeric_confidences) if numeric_confidences else ""
-    )
-
+    representative["tool_confidence_numeric"] = max(numeric_confidences) if numeric_confidences else ""
     representative["raw_row_count_after_deduplication"] = len(rows)
 
-    correct, false_negative, false_positive = compute_correctness(
-        final_label=representative.get("final_label", ""),
-        weapon_detected=weapon_detected,
-    )
-
+    correct, false_negative, false_positive = compute_correctness(representative.get("final_label", ""), weapon_detected)
     representative["correct"] = correct
     representative["false_negative"] = false_negative
     representative["false_positive"] = false_positive
-
     return representative
 
 
 def deduplicate_predictions(normalized_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """
-    Consolidate duplicated matched rows to one prediction per tool_name + bundle_id.
-
-    This is essential for Magnet AXIOM because the current export contains the
-    same 11,500 bundle images twice due to two exported evidence sources.
-    """
     matched_groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
     unmatched_rows: list[dict[str, Any]] = []
-
     for row in normalized_rows:
         if safe_str(row.get("matched", "")) == "true" and safe_str(row.get("bundle_id", "")):
-            key = (
-                safe_str(row.get("tool_name", "")),
-                safe_str(row.get("bundle_id", "")),
-            )
-            matched_groups[key].append(row)
+            matched_groups[(safe_str(row.get("tool_name", "")), safe_str(row.get("bundle_id", "")))].append(row)
         else:
             unmatched_rows.append(row)
-
-    deduplicated_rows = [
-        consolidate_matched_rows(group_rows)
-        for _, group_rows in sorted(matched_groups.items())
-    ]
-
+    deduplicated_rows = [consolidate_matched_rows(group) for _, group in sorted(matched_groups.items())]
     deduplicated_rows.extend(unmatched_rows)
-
     return deduplicated_rows
 
 
-# =============================================================================
-# Metrics
-# =============================================================================
-
 def safe_div(numerator: float, denominator: float) -> float | None:
-    if denominator == 0:
-        return None
-    return numerator / denominator
+    return None if denominator == 0 else numerator / denominator
 
 
 def metric_value(value: float | None) -> str:
-    if value is None:
-        return ""
-    return f"{value:.6f}"
+    return "" if value is None else f"{value:.6f}"
 
 
 def compute_group_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    matched_rows = [
-        row
-        for row in rows
-        if safe_str(row.get("matched", "")) == "true"
-    ]
-
-    binary_rows = [
-        row
-        for row in matched_rows
-        if safe_str(row.get("final_label", "")).lower() in {"weapon", "non_weapon"}
-    ]
-
-    binary_interpretable_rows = [
-        row
-        for row in binary_rows
-        if safe_str(row.get("weapon_detected", "")) in {"true", "false"}
-    ]
+    matched_rows = [row for row in rows if safe_str(row.get("matched", "")) == "true"]
+    binary_rows = [row for row in matched_rows if safe_str(row.get("final_label", "")).lower() in {"weapon", "non_weapon"}]
+    binary_interpretable_rows = [row for row in binary_rows if safe_str(row.get("weapon_detected", "")) in {"true", "false"}]
 
     tp = fp = tn = fn = 0
-
     for row in binary_interpretable_rows:
         label = safe_str(row.get("final_label", "")).lower()
         detected = safe_str(row.get("weapon_detected", "")).lower() == "true"
-
         if label == "weapon" and detected:
             tp += 1
         elif label == "weapon" and not detected:
@@ -1222,46 +1168,18 @@ def compute_group_metrics(rows: list[dict[str, Any]]) -> dict[str, Any]:
             tn += 1
 
     total = tp + fp + tn + fn
-
     accuracy = safe_div(tp + tn, total)
     precision = safe_div(tp, tp + fp)
     recall = safe_div(tp, tp + fn)
     specificity = safe_div(tn, tn + fp)
     f1 = safe_div(2 * tp, 2 * tp + fp + fn)
+    balanced_accuracy = (recall + specificity) / 2 if recall is not None and specificity is not None else None
 
-    balanced_accuracy = None
-    if recall is not None and specificity is not None:
-        balanced_accuracy = (recall + specificity) / 2
-
-    ood_rows = [
-        row
-        for row in matched_rows
-        if safe_str(row.get("final_label", "")).lower() == "ood"
-    ]
-
-    ood_weapon_flags = sum(
-        1
-        for row in ood_rows
-        if safe_str(row.get("weapon_detected", "")) == "true"
-    )
-
-    ood_non_weapon_flags = sum(
-        1
-        for row in ood_rows
-        if safe_str(row.get("weapon_detected", "")) == "false"
-    )
-
-    ood_unknown = sum(
-        1
-        for row in ood_rows
-        if safe_str(row.get("weapon_detected", "")) == "unknown"
-    )
-
-    unknown_rows = sum(
-        1
-        for row in matched_rows
-        if safe_str(row.get("weapon_detected", "")) == "unknown"
-    )
+    ood_rows = [row for row in matched_rows if safe_str(row.get("final_label", "")).lower() == "ood"]
+    ood_weapon_flags = sum(1 for row in ood_rows if safe_str(row.get("weapon_detected", "")) == "true")
+    ood_non_weapon_flags = sum(1 for row in ood_rows if safe_str(row.get("weapon_detected", "")) == "false")
+    ood_unknown = sum(1 for row in ood_rows if safe_str(row.get("weapon_detected", "")) == "unknown")
+    unknown_rows = sum(1 for row in matched_rows if safe_str(row.get("weapon_detected", "")) == "unknown")
 
     return {
         "rows_total": len(rows),
@@ -1297,13 +1215,6 @@ def add_metric_group(
     attack_family: str,
     attack_name: str,
 ) -> None:
-    """
-    Add a row to a metric group.
-
-    The group key keeps sample_type, attack_family and attack_name separated.
-    This is important because grouping only by attack_family would collapse
-    all adversarial attacks into a single row and would hide per-attack metrics.
-    """
     key = (
         safe_str(row.get("tool_name", "")),
         scope,
@@ -1315,103 +1226,24 @@ def add_metric_group(
 
 
 def compute_metrics(normalized_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """
-    Compute forensic-tool metrics at multiple aggregation levels.
-
-    Produced scopes:
-    - all: complete tool-level aggregate;
-    - sample_type: clean / perturbed / ood, depending on bundle schema;
-    - attack_family: none / adversarial / anti_forensic;
-    - attack_name: clean, ood, fgsm, sigma_zero, etc.;
-    - sample_type_attack: combined view preserving sample type and attack name.
-
-    OOD rows are preserved but do not contribute to binary accuracy.
-    """
     groups: dict[tuple[str, str, str, str, str], list[dict[str, Any]]] = defaultdict(list)
-
     for row in normalized_rows:
         if safe_str(row.get("matched", "")) != "true":
             continue
-
         sample_type = safe_str(row.get("sample_type", "")) or "none"
         attack_family = safe_str(row.get("attack_family", "")) or "none"
         attack_name = safe_str(row.get("attack_name", "")) or "none"
+        add_metric_group(groups, row, "all", "all", "all", "all")
+        add_metric_group(groups, row, "sample_type", sample_type, "all", "all")
+        add_metric_group(groups, row, "attack_family", "all", attack_family, "all")
+        add_metric_group(groups, row, "attack_name", "all", attack_family, attack_name)
+        add_metric_group(groups, row, "sample_type_attack", sample_type, attack_family, attack_name)
 
-        # Global aggregate.
-        add_metric_group(
-            groups=groups,
-            row=row,
-            scope="all",
-            sample_type="all",
-            attack_family="all",
-            attack_name="all",
-        )
-
-        # Aggregate by sample type, e.g. clean / perturbed / ood.
-        add_metric_group(
-            groups=groups,
-            row=row,
-            scope="sample_type",
-            sample_type=sample_type,
-            attack_family="all",
-            attack_name="all",
-        )
-
-        # Aggregate by attack family, e.g. adversarial / anti_forensic / none.
-        add_metric_group(
-            groups=groups,
-            row=row,
-            scope="attack_family",
-            sample_type="all",
-            attack_family=attack_family,
-            attack_name="all",
-        )
-
-        # Aggregate by specific attack/transformation name.
-        # This fixes the previous bug where all attacks were collapsed by family.
-        add_metric_group(
-            groups=groups,
-            row=row,
-            scope="attack_name",
-            sample_type="all",
-            attack_family=attack_family,
-            attack_name=attack_name,
-        )
-
-        # Combined detailed view.
-        add_metric_group(
-            groups=groups,
-            row=row,
-            scope="sample_type_attack",
-            sample_type=sample_type,
-            attack_family=attack_family,
-            attack_name=attack_name,
-        )
-
+    scope_order = {"all": 0, "sample_type": 1, "attack_family": 2, "attack_name": 3, "sample_type_attack": 4}
     metric_rows: list[dict[str, Any]] = []
-
-    scope_order = {
-        "all": 0,
-        "sample_type": 1,
-        "attack_family": 2,
-        "attack_name": 3,
-        "sample_type_attack": 4,
-    }
-
-    sorted_group_items = sorted(
-        groups.items(),
-        key=lambda item: (
-            item[0][0],
-            scope_order.get(item[0][1], 99),
-            item[0][2],
-            item[0][3],
-            item[0][4],
-        ),
-    )
-
-    for (tool_name, scope, sample_type, attack_family, attack_name), rows in sorted_group_items:
-        values = compute_group_metrics(rows)
-
+    for (tool_name, scope, sample_type, attack_family, attack_name), rows in sorted(
+        groups.items(), key=lambda item: (item[0][0], scope_order.get(item[0][1], 99), item[0][2], item[0][3], item[0][4])
+    ):
         metric_rows.append(
             {
                 "tool_name": tool_name,
@@ -1419,11 +1251,11 @@ def compute_metrics(normalized_rows: list[dict[str, Any]]) -> list[dict[str, Any
                 "sample_type": sample_type,
                 "attack_family": attack_family,
                 "attack_name": attack_name,
-                **values,
+                **compute_group_metrics(rows),
             }
         )
-
     return metric_rows
+
 
 # =============================================================================
 # Output writing
@@ -1432,45 +1264,48 @@ def compute_metrics(normalized_rows: list[dict[str, Any]]) -> list[dict[str, Any
 def collect_fieldnames(rows: list[dict[str, Any]]) -> list[str]:
     fieldnames: list[str] = []
     seen: set[str] = set()
-
     for row in rows:
         for key in row.keys():
             if key not in seen:
                 seen.add(key)
                 fieldnames.append(key)
-
     return fieldnames
 
 
-def write_csv(
-    path: Path,
-    rows: list[dict[str, Any]],
-    fieldnames: list[str] | None = None,
-) -> None:
+def write_csv(path: Path, rows: list[dict[str, Any]], fieldnames: list[str] | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-
     if fieldnames is None:
         fieldnames = collect_fieldnames(rows)
-
     with path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-
         for row in rows:
             writer.writerow({key: row.get(key, "") for key in fieldnames})
 
 
 def write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(payload, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 # =============================================================================
 # Main
 # =============================================================================
+
+def build_selected_run_dirs_from_cli(selected_run_dirs: list[str]) -> dict[str, list[Path]]:
+    selected_by_tool: dict[str, list[Path]] = defaultdict(list)
+    for path_text in selected_run_dirs:
+        run_dir = repo_relative_path(path_text)
+        parts = run_dir.parts
+        matched_tool = ""
+        for tool_name in KNOWN_TOOL_NAMES:
+            if tool_name in parts:
+                matched_tool = tool_name
+                break
+        if matched_tool:
+            selected_by_tool[matched_tool].append(run_dir)
+    return dict(selected_by_tool)
+
 
 def main() -> None:
     args = parse_args()
@@ -1479,8 +1314,22 @@ def main() -> None:
     bundle_manifest_path = repo_relative_path(args.bundle_manifest)
     bundle_hashes_path = repo_relative_path(args.bundle_hashes)
     forensic_tools_root = repo_relative_path(args.forensic_tools_root)
-    output_dir = repo_relative_path(args.output_dir)
-    metrics_dir = repo_relative_path(args.metrics_dir)
+
+    if args.no_interactive:
+        tools = args.tools
+        selected_run_dirs_by_tool = build_selected_run_dirs_from_cli(args.selected_run_dir)
+        output_dir = repo_relative_path(args.output_dir)
+        metrics_dir = repo_relative_path(args.metrics_dir)
+        strict = args.strict
+        deduplicate = not args.no_deduplicate
+    else:
+        selection = interactive_menu(args)
+        tools = selection.tools
+        selected_run_dirs_by_tool = selection.selected_run_dirs_by_tool
+        output_dir = selection.output_dir
+        metrics_dir = selection.metrics_dir
+        strict = selection.strict
+        deduplicate = selection.deduplicate
 
     normalized_predictions_path = output_dir / "normalized_predictions.csv"
     export_audit_path = output_dir / "tool_export_audit.csv"
@@ -1490,11 +1339,8 @@ def main() -> None:
 
     logging.info("Script: %s", SCRIPT_NAME)
     logging.info("Repository root: %s", REPO_ROOT)
-    logging.info("Bundle manifest: %s", bundle_manifest_path)
-    logging.info("Bundle hashes: %s", bundle_hashes_path)
     logging.info("Forensic tools root: %s", forensic_tools_root)
-    logging.info("Output directory: %s", output_dir)
-    logging.info("Metrics directory: %s", metrics_dir)
+    logging.info("Selected tools: %s", tools)
 
     bundle_df = load_bundle(bundle_manifest_path, bundle_hashes_path)
     sha_index, md5_index, filename_index = build_bundle_indexes(bundle_df)
@@ -1502,14 +1348,15 @@ def main() -> None:
     all_raw_rows: list[RawToolRow] = []
     audit_rows: list[dict[str, Any]] = []
     version_rows: list[dict[str, Any]] = []
-
-    per_tool_export_counts: dict[str, int] = {}
+    per_tool_prediction_export_counts: dict[str, int] = {}
+    per_tool_total_export_counts: dict[str, int] = {}
     per_tool_raw_row_counts: dict[str, int] = {}
 
-    for tool_name in args.tools:
+    for tool_name in tools:
         tool_dir = forensic_tools_root / tool_name
-        prediction_files = discover_prediction_export_files(tool_name, tool_dir)
-        all_export_files = discover_all_export_files(tool_dir)
+        selected_run_dirs = selected_run_dirs_by_tool.get(tool_name, [])
+        prediction_files = discover_prediction_export_files(tool_name, tool_dir, selected_run_dirs or None)
+        all_export_files = discover_all_export_files(tool_dir, selected_run_dirs or None)
 
         logging.info(
             "Tool %s: found %d prediction export file(s), %d total export file(s)",
@@ -1518,17 +1365,18 @@ def main() -> None:
             len(all_export_files),
         )
 
-        if args.strict and not prediction_files:
+        if strict and not prediction_files:
             raise FileNotFoundError(
-                f"No prediction export files found for {tool_name} under {tool_dir / 'raw_exports'}"
+                f"No prediction export files found for {tool_name}. "
+                f"Selected run dirs: {[repo_relative_string(path) for path in selected_run_dirs]}"
             )
 
-        raw_rows, tool_audit_rows = parse_tool_exports(tool_name, tool_dir)
-
+        raw_rows, tool_audit_rows = parse_tool_exports(tool_name, tool_dir, selected_run_dirs or None)
         all_raw_rows.extend(raw_rows)
         audit_rows.extend(tool_audit_rows)
 
-        per_tool_export_counts[tool_name] = len(prediction_files)
+        per_tool_prediction_export_counts[tool_name] = len(prediction_files)
+        per_tool_total_export_counts[tool_name] = len(all_export_files)
         per_tool_raw_row_counts[tool_name] = len(raw_rows)
 
         version_rows.append(
@@ -1536,21 +1384,12 @@ def main() -> None:
                 tool_name=tool_name,
                 tool_dir=tool_dir,
                 export_files_found=len(all_export_files),
+                selected_run_dirs=selected_run_dirs or None,
             )
         )
 
-    normalized_before_deduplication = normalize_rows(
-        raw_rows=all_raw_rows,
-        sha_index=sha_index,
-        md5_index=md5_index,
-        filename_index=filename_index,
-    )
-
-    if args.no_deduplicate:
-        normalized_rows = normalized_before_deduplication
-    else:
-        normalized_rows = deduplicate_predictions(normalized_before_deduplication)
-
+    normalized_before_deduplication = normalize_rows(all_raw_rows, sha_index, md5_index, filename_index)
+    normalized_rows = deduplicate_predictions(normalized_before_deduplication) if deduplicate else normalized_before_deduplication
     metrics_rows = compute_metrics(normalized_rows)
 
     write_csv(normalized_predictions_path, normalized_rows)
@@ -1558,80 +1397,38 @@ def main() -> None:
     write_csv(tool_version_log_path, version_rows)
     write_csv(forensic_tool_metrics_path, metrics_rows)
 
-    # Tool-specific outputs for easier thesis inspection.
-    for tool_name in args.tools:
-        tool_rows = [
-            row
-            for row in normalized_rows
-            if safe_str(row.get("tool_name", "")) == tool_name
-        ]
-        tool_metrics = [
-            row
-            for row in metrics_rows
-            if safe_str(row.get("tool_name", "")) == tool_name
-        ]
-
+    for tool_name in tools:
+        tool_rows = [row for row in normalized_rows if safe_str(row.get("tool_name", "")) == tool_name]
+        tool_metrics = [row for row in metrics_rows if safe_str(row.get("tool_name", "")) == tool_name]
         if tool_rows:
-            write_csv(
-                output_dir / f"{tool_name}_normalized_predictions.csv",
-                tool_rows,
-            )
-
+            write_csv(output_dir / f"{tool_name}_normalized_predictions.csv", tool_rows)
         if tool_metrics:
-            write_csv(
-                metrics_dir / f"{tool_name}_metrics.csv",
-                tool_metrics,
-            )
+            write_csv(metrics_dir / f"{tool_name}_metrics.csv", tool_metrics)
 
-    matched_before = sum(
-        1
-        for row in normalized_before_deduplication
-        if row.get("matched") == "true"
-    )
-
-    matched_after = sum(
-        1
-        for row in normalized_rows
-        if row.get("matched") == "true"
-    )
-
+    matched_before = sum(1 for row in normalized_before_deduplication if row.get("matched") == "true")
+    matched_after = sum(1 for row in normalized_rows if row.get("matched") == "true")
     unmatched_after = len(normalized_rows) - matched_after
-
-    interpretable_after = sum(
-        1
-        for row in normalized_rows
-        if row.get("weapon_detected") in {"true", "false"}
-    )
-
-    possible_weapon_after = sum(
-        1
-        for row in normalized_rows
-        if row.get("weapon_detected") == "true"
-    )
-
-    not_flagged_after = sum(
-        1
-        for row in normalized_rows
-        if row.get("weapon_detected") == "false"
-    )
-
-    unknown_after = sum(
-        1
-        for row in normalized_rows
-        if row.get("weapon_detected") == "unknown"
-    )
+    interpretable_after = sum(1 for row in normalized_rows if row.get("weapon_detected") in {"true", "false"})
+    possible_weapon_after = sum(1 for row in normalized_rows if row.get("weapon_detected") == "true")
+    not_flagged_after = sum(1 for row in normalized_rows if row.get("weapon_detected") == "false")
+    unknown_after = sum(1 for row in normalized_rows if row.get("weapon_detected") == "unknown")
 
     summary = {
         "script": SCRIPT_NAME,
         "created_at": utc_now_iso(),
         "bundle_rows": len(bundle_df),
-        "tools_requested": args.tools,
-        "per_tool_prediction_export_counts": per_tool_export_counts,
+        "tools_requested": tools,
+        "selected_run_dirs_by_tool": {
+            tool_name: [repo_relative_string(path) for path in paths]
+            for tool_name, paths in selected_run_dirs_by_tool.items()
+        },
+        "per_tool_prediction_export_counts": per_tool_prediction_export_counts,
+        "per_tool_total_export_counts": per_tool_total_export_counts,
         "per_tool_raw_row_counts": per_tool_raw_row_counts,
         "raw_rows_parsed": len(all_raw_rows),
         "normalized_rows_before_deduplication": len(normalized_before_deduplication),
         "matched_rows_before_deduplication": matched_before,
-        "deduplication_enabled": not args.no_deduplicate,
+        "deduplication_enabled": deduplicate,
         "normalized_rows_after_deduplication": len(normalized_rows),
         "matched_rows_after_deduplication": matched_after,
         "unmatched_rows_after_deduplication": unmatched_after,
@@ -1647,16 +1444,12 @@ def main() -> None:
             "forensic_tool_metrics": repo_relative_string(forensic_tool_metrics_path),
         },
     }
-
     write_json(normalization_summary_path, summary)
 
     logging.info("Raw rows parsed: %d", len(all_raw_rows))
-    logging.info(
-        "Normalized rows before deduplication: %d",
-        len(normalized_before_deduplication),
-    )
+    logging.info("Normalized rows before deduplication: %d", len(normalized_before_deduplication))
     logging.info("Matched rows before deduplication: %d", matched_before)
-    logging.info("Deduplication enabled: %s", str(not args.no_deduplicate).lower())
+    logging.info("Deduplication enabled: %s", str(deduplicate).lower())
     logging.info("Normalized rows after deduplication: %d", len(normalized_rows))
     logging.info("Matched rows after deduplication: %d", matched_after)
     logging.info("Unmatched rows after deduplication: %d", unmatched_after)
