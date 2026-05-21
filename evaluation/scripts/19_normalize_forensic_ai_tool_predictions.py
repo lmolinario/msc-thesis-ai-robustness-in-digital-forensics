@@ -10,7 +10,7 @@ Interactive and CLI-capable normalization entry point for commercial forensic
 Purpose
 -------
 Normalize forensic-tool exports against the validated forensic evaluation
-bundle and produce comparable CSV metrics for the experimental results and reporting layer..
+bundle and produce comparable CSV metrics for the experimental results and reporting layer.
 
 Implemented normalization logic
 ------------------------------

@@ -1,5 +1,6 @@
 tool_name,raw_export_file,run_dir,extension,is_prediction_file,status,parsed_rows,error
-magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1/ExportSummary.json,run_2026_05_21_axiom_10_1,.json,false,parsed_audit_only,1,
-magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1/File System Information.csv,run_2026_05_21_axiom_10_1,.csv,false,parsed_audit_only,1,
-magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1/Identifiers - Device.csv,run_2026_05_21_axiom_10_1,.csv,false,parsed_audit_only,20,
-magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1/Pictures.csv,run_2026_05_21_axiom_10_1,.csv,true,parsed_prediction_file,11500,
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02/ExportSummary.json,FAIRLAB_AXIOM_RUN_02,.json,false,parsed_audit_only,1,
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02/File System Information.csv,FAIRLAB_AXIOM_RUN_02,.csv,false,parsed_audit_only,1,
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02/Identifiers - Device.csv,FAIRLAB_AXIOM_RUN_02,.csv,false,parsed_audit_only,20,
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02/Pictures.csv,FAIRLAB_AXIOM_RUN_02,.csv,true,parsed_prediction_file,11500,
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02/run_metadata.json,FAIRLAB_AXIOM_RUN_02,.json,false,parsed_audit_only,1,

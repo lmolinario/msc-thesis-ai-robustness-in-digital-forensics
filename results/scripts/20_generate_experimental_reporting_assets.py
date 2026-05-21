@@ -4,8 +4,7 @@
 """
 20_generate_experimental_reporting_assets.py
 
-Generate thesis-ready figures for Chapter 5 from consolidated FAIR-Lab metric
-files.
+Generate experimental reporting figures, tables and summaries from consolidated FAIR-Lab metric files.
 
 This script belongs to the reporting layer of the thesis repository. It does
 not regenerate datasets, attacks, proxy-model predictions, or metrics. It only
