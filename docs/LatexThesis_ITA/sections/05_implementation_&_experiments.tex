@@ -259,32 +259,503 @@ di export del singolo tool.
 Le sezioni successive presentano i risultati quantitativi, a partire dalla
 baseline clean descritta nella Sezione~\ref{sec:results-clean-baseline}.
 
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Clean Baseline Performance}
 \label{sec:results-clean-baseline}
-% T1: Accuracy, balanced accuracy, precision, recall, F1,
-% false positive rate, false negative rate per modello
-% F1: Confusion matrix per modello
+% ─────────────────────────────────────────────────────────────────────────────
 
+La valutazione su input clean costituisce la baseline sperimentale rispetto alla
+quale interpretare il comportamento dei modelli nelle condizioni successive,
+ossia campioni \gls{ood}, trasformazioni anti-forensi e perturbazioni
+adversariali. In questa fase, i modelli sono valutati sul subset binario
+ufficiale composto da 1000 immagini, bilanciate tra 500 campioni
+\texttt{weapon} e 500 campioni \texttt{non\_weapon}. La classe positiva è
+definita come \texttt{weapon}, mentre la classe negativa è definita come
+\texttt{non\_weapon}; di conseguenza, i falsi negativi indicano immagini
+contenenti armi classificate come non rilevanti, mentre i falsi positivi indicano
+immagini non contenenti armi classificate come \texttt{weapon}.
+
+La Tabella~\ref{tab:results-clean-baseline-metrics} riporta le principali
+metriche prestazionali dei tre modelli proxy sul subset binario clean.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Prestazioni clean dei modelli proxy sul subset binario.}
+\label{tab:results-clean-baseline-metrics}
+\begin{tabular}{@{}l r r r r r r r r r r@{}}
+\toprule
+\textbf{Modello} &
+\textbf{Acc.} &
+\textbf{Bal. acc.} &
+\textbf{Macro P} &
+\textbf{Macro R} &
+\textbf{Macro F1} &
+\textbf{P weapon} &
+\textbf{R weapon} &
+\textbf{F1 weapon} &
+\textbf{\gls{fpr}} &
+\textbf{\gls{fnr}} \\
+\midrule
+EfficientNet-B0 & 0.978 & 0.978 & 0.978 & 0.978 & 0.978 & 0.972 & 0.984 & 0.978 & 0.028 & 0.016 \\
+ResNet18        & 0.964 & 0.964 & 0.964 & 0.964 & 0.964 & 0.958 & 0.970 & 0.964 & 0.042 & 0.030 \\
+\gls{clip}      & 0.927 & 0.927 & 0.933 & 0.927 & 0.927 & 0.881 & 0.988 & 0.931 & 0.134 & 0.012 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+EfficientNet-B0 ottiene la prestazione nominale più elevata, con accuracy pari a
+0.978 e macro-F1 pari a 0.978. ResNet18 mostra una prestazione leggermente
+inferiore ma ancora elevata, con accuracy pari a 0.964. \gls{clip} ottiene
+un'accuracy pari a 0.927, mostrando una dinamica diversa rispetto ai due modelli
+supervisionati: il recall sulla classe \texttt{weapon} è molto alto, pari a
+0.988, ma il valore di \gls{fpr} risulta sensibilmente superiore, pari a 0.134.
+Questo comportamento suggerisce che \gls{clip} tende a privilegiare una maggiore
+sensibilità verso la classe \texttt{weapon}, al costo di un numero più elevato di
+falsi positivi sulla classe \texttt{non\_weapon}.
+
+La Tabella~\ref{tab:results-clean-confusion-matrices} riporta le confusion
+matrix aggregate per modello, utilizzando il layout
+\(\left[\left[\gls{tn}, \gls{fp}\right], \left[\gls{fn}, \gls{tp}\right]\right]\).
+
+\begin{table}[H]
+\centering
+\caption{Confusion matrix clean dei modelli proxy.}
+\label{tab:results-clean-confusion-matrices}
+\begin{tabular}{@{}l r r r r@{}}
+\toprule
+\textbf{Modello} & \textbf{\gls{tn}} & \textbf{\gls{fp}} & \textbf{\gls{fn}} & \textbf{\gls{tp}} \\
+\midrule
+EfficientNet-B0 & 486 & 14 & 8  & 492 \\
+ResNet18        & 479 & 21 & 15 & 485 \\
+\gls{clip}      & 433 & 67 & 6  & 494 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La stessa distribuzione degli errori è visualizzata nella
+Figura~\ref{fig:results-clean-confusion-matrices}, che rende evidente il diverso
+profilo operativo dei tre modelli: EfficientNet-B0 minimizza il numero totale di
+errori, ResNet18 mantiene un comportamento intermedio, mentre \gls{clip} riduce
+i falsi negativi sulla classe \texttt{weapon} al costo di un numero più elevato
+di falsi positivi.
+
+\begin{figure}[H]
+\centering
+
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_efficientnet_b0.pdf}
+\end{minipage}
+\hfill
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_resnet18.pdf}
+\end{minipage}
+\hfill
+\begin{minipage}{0.32\textwidth}
+\centering
+\includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_clip.pdf}
+\end{minipage}
+
+\caption{Confusion matrix clean dei tre modelli proxy sul subset binario. Le righe rappresentano la label reale, mentre le colonne rappresentano la label predetta.}
+\label{fig:results-clean-confusion-matrices}
+\end{figure}
+
+Dal punto di vista forense, il dato più critico è rappresentato dai falsi
+negativi sulla classe \texttt{weapon}. EfficientNet-B0 produce 8 falsi negativi,
+ResNet18 ne produce 15, mentre \gls{clip} ne produce 6. Tuttavia, \gls{clip}
+produce anche 67 falsi positivi, valore sensibilmente più alto rispetto ai 14 di
+EfficientNet-B0 e ai 21 di ResNet18. Ne deriva che il confronto clean non può
+essere letto soltanto in termini di accuracy complessiva, ma deve considerare il
+diverso bilanciamento tra sensibilità verso le armi e rischio di segnalazioni
+improprie.
+
+Nel complesso, la baseline clean conferma che i modelli proxy sono in grado di
+raggiungere prestazioni elevate in condizioni nominali. Tuttavia, la differenza
+tra accuracy, \gls{fpr} e \gls{fnr} evidenzia già in assenza di perturbazioni un
+aspetto rilevante per il triage forense: modelli con accuracy simile possono
+produrre profili di rischio operativo diversi, soprattutto quando l'errore
+riguarda la mancata segnalazione di contenuti \texttt{weapon} oppure la
+classificazione impropria di contenuti \texttt{non\_weapon} come potenzialmente
+rilevanti.
+
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Out-of-Distribution Behavior and False Positive Risk}
 \label{sec:results-ood}
-% T2: weapon rate, confidence media, high-confidence rate per modello
-% F2: distribuzione confidence su OOD, se disponibile
+% ─────────────────────────────────────────────────────────────────────────────
 
+La valutazione \gls{ood} analizza il comportamento dei modelli proxy su immagini
+che non appartengono al task binario nominale \texttt{weapon}/\texttt{non\_weapon}.
+Questi campioni includono contenuti borderline o fuori distribuzione, quali
+coltelli, spade, repliche, airsoft, render sintetici, immagini videoludiche,
+scene di guerra, mezzi militari, esplosioni e immagini degradate o anomale. A
+differenza delle perturbazioni adversariali e delle trasformazioni anti-forensi,
+la condizione \gls{ood} non rappresenta un attacco, ma un rischio operativo
+realistico: in un workflow investigativo, immagini ambigue o non perfettamente
+aderenti alle classi del modello possono essere comunque sottoposte ad analisi
+automatica.
+
+Le metriche sono aggregate su 2500 predizioni, ottenute valutando le 500 immagini
+\gls{ood} attraverso i cinque checkpoint fold-aware di ciascun modello. Questa
+scelta mantiene la coerenza con la strategia di valutazione adottata per il
+subset binario, pur preservando la separazione concettuale tra campioni
+\gls{ood} e task \texttt{weapon}/\texttt{non\_weapon}. Il valore \emph{weapon
+rate} indica la quota di campioni \gls{ood} classificati come \texttt{weapon};
+il valore \emph{high-confidence rate} indica invece la quota di predizioni con
+confidenza almeno pari a 0.9.
+
+\begin{table}[H]
+\centering
+\caption{Comportamento dei modelli proxy sui campioni \gls{ood}.}
+\label{tab:results-ood-behavior}
+\begin{tabular}{@{}l r r r r r r@{}}
+\toprule
+\textbf{Modello} &
+\textbf{Totale} &
+\textbf{Pred. weapon} &
+\textbf{Pred. non\_weapon} &
+\textbf{Weapon rate} &
+\textbf{Conf. media} &
+\textbf{High-conf. rate} \\
+\midrule
+EfficientNet-B0 & 2500 & 924  & 1576 & 0.370 & 0.850 & 0.501 \\
+ResNet18        & 2500 & 1094 & 1406 & 0.438 & 0.890 & 0.647 \\
+\gls{clip}      & 2500 & 2089 & 411  & 0.836 & 0.536 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La Figura~\ref{fig:results-ood-weapon-rate-confidence} visualizza il confronto
+tra weapon rate, confidenza media e high-confidence rate, mentre la
+Figura~\ref{fig:results-ood-confidence-distribution} mostra la distribuzione
+delle confidenze predittive sui campioni \gls{ood}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{images/fig_ood_weapon_rate_and_confidence.pdf}
+\caption{Comportamento dei modelli proxy sui campioni \gls{ood}: quota di predizioni \texttt{weapon}, confidenza media e quota di predizioni ad alta confidenza.}
+\label{fig:results-ood-weapon-rate-confidence}
+\end{figure}
+
+I risultati mostrano tre profili distinti. \gls{clip} classifica come
+\texttt{weapon} una quota molto elevata di campioni \gls{ood}, pari a 0.836,
+ma lo fa con una confidenza media contenuta e senza predizioni sopra la soglia
+di alta confidenza. Il valore nullo di high-confidence rate per \gls{clip}
+indica infatti che nessuna predizione \gls{ood} supera la soglia di confidenza
+0.9, in coerenza con la minore confidenza complessiva del modello su input fuori
+distribuzione. EfficientNet-B0 e ResNet18, al contrario, classificano come
+\texttt{weapon} una quota inferiore di campioni \gls{ood}, rispettivamente pari
+a 0.370 e 0.438, ma con confidenze medie molto più alte. In particolare,
+ResNet18 presenta un high-confidence rate pari a 0.647, mentre EfficientNet-B0
+raggiunge 0.501.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{images/fig_ood_confidence_distribution.pdf}
+\caption{Distribuzione della confidenza predittiva sui campioni \gls{ood} per ciascun modello proxy. Il grafico evidenzia il comportamento più concentrato e meno confident di \gls{clip} rispetto ai due modelli supervisionati.}
+\label{fig:results-ood-confidence-distribution}
+\end{figure}
+
+Dal punto di vista forense, questo risultato è rilevante perché evidenzia un
+rischio diverso rispetto alla normale misclassificazione binaria. Una predizione
+errata o impropria su un campione fuori distribuzione può infatti generare una
+segnalazione investigativa non pienamente fondata oppure, al contrario,
+rafforzare indebitamente la percezione di rilevanza di un contenuto ambiguo. Il
+caso di ResNet18 ed EfficientNet-B0 mostra che un modello può produrre meno
+classificazioni \texttt{weapon} su campioni \gls{ood}, ma attribuire a tali
+predizioni una confidenza elevata. Il caso di \gls{clip}, invece, mostra un
+comportamento opposto: maggiore propensione a classificare come \texttt{weapon},
+ma con confidenza più bassa. Questa distinzione è essenziale in un contesto
+forense, nel quale la confidenza del sistema non deve essere interpretata come
+prova autonoma, ma come informazione ausiliaria soggetta a verifica umana.
+
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Robustness Against Anti-Forensic Transformations}
 \label{sec:results-antiforensic}
-% T3: accuracy drop per modello e trasformazione
-% F3: bar chart o heatmap drop anti-forensic
+% ─────────────────────────────────────────────────────────────────────────────
 
+La valutazione contro trasformazioni anti-forensi misura la stabilità dei modelli
+proxy rispetto a manipolazioni model-agnostic che possono emergere in scenari
+operativi realistici. A differenza degli attacchi adversariali, tali
+trasformazioni non richiedono accesso al modello target e non sono
+necessariamente progettate per massimizzare l'errore di classificazione. Esse
+simulano invece alterazioni comuni del contenuto visivo o del file immagine,
+quali ricompressione, ridimensionamento, sfocatura, modifica della distribuzione
+tonale e normalizzazione del contrasto.
+
+La Tabella~\ref{tab:results-antiforensic-robustness} riporta, per ciascuna
+trasformazione, l'accuracy perturbata e la variazione rispetto alla baseline
+clean. La variazione è calcolata come
+\(\Delta=\text{accuracy}_{perturbed}-\text{accuracy}_{clean}\); pertanto, valori
+negativi indicano una riduzione della prestazione, mentre valori positivi
+indicano un incremento rispetto alla baseline. Eventuali incrementi lievi non
+devono essere interpretati come una garanzia di robustezza generale, ma come
+oscillazioni compatibili con la specifica distribuzione dei campioni trasformati
+e con la sensibilità del modello alla trasformazione applicata. Le variazioni di
+entità inferiore a 0.005 devono essere interpretate con cautela, poiché possono
+rientrare nella variabilità inter-fold osservabile in condizioni clean e non
+necessariamente indicano una differenza operativamente significativa tra la
+condizione originale e quella trasformata.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Accuracy perturbata e variazione rispetto alla baseline clean sotto trasformazioni anti-forensi.}
+\label{tab:results-antiforensic-robustness}
+\begin{tabular}{@{}l r r r r r r@{}}
+\toprule
+\textbf{Trasformazione} &
+\textbf{\gls{clip} acc.} & \textbf{\(\Delta\)} &
+\textbf{EffNet acc.} & \textbf{\(\Delta\)} &
+\textbf{ResNet acc.} & \textbf{\(\Delta\)} \\
+\midrule
+\gls{jpegrecompression}     & 0.925 & -0.002 & 0.976 & -0.002 & 0.964 &  0.000 \\
+\gls{resampleresize}        & 0.929 & +0.002 & 0.976 & -0.002 & 0.963 & -0.001 \\
+\gls{gaussianblur}          & 0.934 & +0.007 & 0.965 & -0.013 & 0.959 & -0.005 \\
+\gls{histogrammodification} & 0.925 & -0.002 & 0.973 & -0.005 & 0.934 & -0.030 \\
+\gls{contraststretching}    & 0.927 &  0.000 & 0.974 & -0.004 & 0.963 & -0.001 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La Figura~\ref{fig:results-antiforensic-accuracy-drop-heatmap} riporta la stessa
+valutazione in termini di accuracy drop, definito come
+\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). Di conseguenza, il
+segno del drop visualizzato nella heatmap è opposto rispetto alla colonna
+\(\Delta\) della Tabella~\ref{tab:results-antiforensic-robustness}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{images/fig_anti_forensic_accuracy_drop_heatmap.pdf}
+\caption{Accuracy drop sotto trasformazioni anti-forensi. Il drop è definito come \(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\), quindi valori positivi indicano una degradazione della prestazione, mentre valori negativi indicano un lieve incremento rispetto alla baseline clean.}
+\label{fig:results-antiforensic-accuracy-drop-heatmap}
+\end{figure}
+
+I risultati mostrano che le trasformazioni anti-forensi producono effetti
+complessivamente più contenuti rispetto agli attacchi adversariali analizzati
+nella Sezione~\ref{sec:results-adversarial}. EfficientNet-B0 mantiene
+prestazioni elevate in tutte le condizioni, ma risulta maggiormente sensibile a
+\gls{gaussianblur}, con una variazione pari a -0.013. ResNet18 mostra invece la
+maggiore degradazione in corrispondenza di \gls{histogrammodification}, con una
+variazione pari a -0.030. \gls{clip} rimane sostanzialmente stabile, con
+variazioni molto contenute e, in alcuni casi, lievi incrementi dell'accuracy. La
+Figura~\ref{fig:results-antiforensic-accuracy-drop-heatmap} conferma che la
+degradazione anti-forense rimane complessivamente contenuta, con il massimo drop
+osservato per ResNet18 sotto \gls{histogrammodification}.
+
+Dal punto di vista operativo, questi risultati non devono essere considerati
+trascurabili soltanto perché i drop sono inferiori a quelli adversariali. Le
+trasformazioni anti-forensi sono infatti più facilmente riconducibili a condizioni
+realistiche di circolazione, compressione, modifica e ricondivisione delle
+immagini. In un workflow di \gls{df}, anche una riduzione limitata della
+prestazione può diventare rilevante quando riguarda contenuti investigativamente
+sensibili o quando si combina con altri fattori di incertezza, quali bassa
+qualità dell'immagine, contesto ambiguo o assenza di verifica manuale
+sistematica.
+
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Robustness Against Adversarial Perturbations}
 \label{sec:results-adversarial}
-% T4: accuracy drop per modello e attacco
-% F4: heatmap drop adversarial
-% Optional: curva accuracy vs epsilon solo se viene eseguito uno sweep FGSM
+% ─────────────────────────────────────────────────────────────────────────────
 
+La valutazione adversarial misura la risposta dei modelli proxy a perturbazioni
+progettate per alterare il comportamento del classificatore. Nel contesto della
+presente tesi, tali perturbazioni non sono analizzate come fine autonomo di
+\gls{aml}, ma come stressor sperimentali utili a valutare l'affidabilità
+operativa di sistemi \gls{ai}-based in scenari forensi. L'interesse principale
+non riguarda quindi soltanto la capacità dell'attacco di ridurre l'accuracy, ma
+il rischio che immagini della classe \texttt{weapon} vengano riclassificate come
+\texttt{non\_weapon}, generando falsi negativi potenzialmente critici in un
+processo di triage investigativo.
+
+Gli attacchi model-dependent sono generati contro EfficientNet-B0. Questa scelta
+riflette uno scenario white-box nel quale l'avversario dispone di accesso pieno a
+un singolo modello target; la trasferibilità verso architetture differenti viene
+quindi valutata empiricamente, anziché assunta a priori. \gls{colorshift} è
+invece trattato come perturbazione model-agnostic di stile adversarial.
+
+La Tabella~\ref{tab:results-adversarial-robustness} riporta l'accuracy
+perturbata e la variazione rispetto alla baseline clean per ciascuna famiglia di
+perturbazioni. Anche in questo caso la variazione è calcolata come
+\(\Delta=\text{accuracy}_{perturbed}-\text{accuracy}_{clean}\).
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Accuracy perturbata e variazione rispetto alla baseline clean sotto perturbazioni adversariali.}
+\label{tab:results-adversarial-robustness}
+\begin{tabular}{@{}l r r r r r r@{}}
+\toprule
+\textbf{Perturbazione} &
+\textbf{\gls{clip} acc.} & \textbf{\(\Delta\)} &
+\textbf{EffNet acc.} & \textbf{\(\Delta\)} &
+\textbf{ResNet acc.} & \textbf{\(\Delta\)} \\
+\midrule
+\gls{fgsm}          & 0.914 & -0.013 & 0.575 & -0.403 & 0.918 & -0.046 \\
+\gls{superdeepfool} & 0.926 & -0.001 & 0.931 & -0.047 & 0.964 &  0.000 \\
+\gls{sigmazero}     & 0.944 & +0.017 & 0.015 & -0.963 & 0.968 & +0.004 \\
+\gls{onepixel}      & 0.928 & +0.001 & 0.976 & -0.002 & 0.963 & -0.001 \\
+\gls{colorshift}    & 0.925 & -0.002 & 0.977 & -0.001 & 0.963 & -0.001 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La Figura~\ref{fig:results-adversarial-accuracy-drop-heatmap} riporta i medesimi
+risultati in termini di accuracy drop, definito come
+\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). Anche in questo caso,
+il segno del drop visualizzato nella heatmap è opposto rispetto alla colonna
+\(\Delta\) della Tabella~\ref{tab:results-adversarial-robustness}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{images/fig_adversarial_accuracy_drop_heatmap.pdf}
+\caption{Accuracy drop sotto perturbazioni adversariali. Il drop è definito come \(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). La degradazione più marcata riguarda EfficientNet-B0 sotto \gls{sigmazero}, confermando la vulnerabilità del modello nello scenario white-box considerato.}
+\label{fig:results-adversarial-accuracy-drop-heatmap}
+\end{figure}
+
+Il risultato più critico riguarda EfficientNet-B0 sotto \gls{sigmazero}, dove
+l'accuracy passa da 0.978 a 0.015, con una variazione pari a -0.963. Tale valore
+indica una compromissione quasi completa della capacità classificativa del
+modello, limitata tuttavia alla configurazione white-box in cui l'attacco è
+ottimizzato direttamente contro EfficientNet-B0 con accesso pieno ai suoi
+parametri. Anche \gls{fgsm}, generato contro EfficientNet-B0, produce un degrado
+rilevante, riducendo l'accuracy a 0.575 e determinando una variazione pari a
+-0.403. \gls{superdeepfool} produce invece un effetto più contenuto sullo stesso
+modello, con accuracy pari a 0.931 e variazione pari a -0.047.
+
+Il confronto con ResNet18 e \gls{clip} mostra che il trasferimento degli attacchi
+generati contro EfficientNet-B0 non produce una degradazione equivalente sugli
+altri modelli. ResNet18 subisce una variazione pari a -0.046 sotto \gls{fgsm},
+mentre rimane sostanzialmente stabile rispetto a \gls{superdeepfool},
+\gls{onepixel}, \gls{sigmazero} e \gls{colorshift}. \gls{clip} mostra variazioni
+ancora più contenute, con il peggioramento massimo pari a -0.013 sotto
+\gls{fgsm}. In alcuni casi, come \gls{sigmazero}, l'accuracy perturbata di
+\gls{clip} e ResNet18 risulta lievemente superiore alla rispettiva baseline
+clean. Questo risultato suggerisce che le perturbazioni ottimizzate contro
+EfficientNet-B0 alterano caratteristiche pixel-level non necessariamente
+diagnostiche per ResNet18 e \gls{clip}, comportandosi per tali architetture come
+una trasformazione neutra o lievemente favorevole, piuttosto che come una
+perturbazione effettivamente trasferibile.
+
+La Figura~\ref{fig:results-adversarial-accuracy-drop-heatmap} mostra una
+distribuzione fortemente asimmetrica dei drop adversariali: la degradazione è
+massima quando l'attacco è ottimizzato contro EfficientNet-B0, mentre la
+trasferibilità verso ResNet18 e \gls{clip} rimane limitata.
+
+Dal punto di vista forense, la vulnerabilità di EfficientNet-B0 a perturbazioni
+come \gls{sigmazero} e \gls{fgsm} evidenzia un rischio operativo significativo:
+un sistema apparentemente molto accurato in condizioni clean può degradare in
+modo drastico quando esposto a input manipolati in modo deliberato. Questo
+rafforza la necessità di non interpretare l'output di un classificatore
+\gls{ai}-based come evidenza autonoma, ma come supporto al triage da sottoporre
+a verifica, tracciamento e validazione nel contesto complessivo dell'indagine.
+
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic Evaluation Bundle Composition and Black-Box Readiness}
 \label{sec:results-bundle}
-% T5: composizione bundle da 11500 file
-% Protocollo di matching e normalizzazione degli output dei tool commerciali
+% ─────────────────────────────────────────────────────────────────────────────
+
+Il forensic evaluation bundle costituisce il livello di collegamento tra la
+valutazione sperimentale controllata dei modelli proxy e la successiva
+valutazione black-box degli strumenti forensi commerciali. Il bundle è progettato
+per fornire ai tool un input cieco e semanticamente neutro, preservando
+separatamente le informazioni necessarie per il matching, la normalizzazione
+degli export e l'audit dei risultati.
+
+A differenza della composizione generale del corpus sperimentale riportata nella
+Sezione~\ref{sec:results-status}, la Tabella~\ref{tab:results-bundle-operational-layout}
+descrive il bundle dal punto di vista operativo, distinguendo tra contenuto
+sottoposto ai tool, naming cieco e ruolo dei metadati nella fase di audit. Il
+totale è pari a 11500 file, comprendenti 1000 campioni clean, 500 campioni
+\gls{ood}, 5000 campioni adversariali e 5000 campioni anti-forensi.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\caption{Vista operativa del forensic evaluation bundle per la valutazione black-box.}
+\label{tab:results-bundle-operational-layout}
+\begin{tabularx}{\textwidth}{@{}l r l X@{}}
+\toprule
+\textbf{Componente} &
+\textbf{File} &
+\textbf{Input cieco} &
+\textbf{Ruolo dei metadati} \\
+\midrule
+Clean &
+1000 &
+\texttt{bundle\_*.jpg} &
+Conserva la corrispondenza con il subset binario originale e con la label
+\texttt{weapon}/\texttt{non\_weapon}. \\
+
+\gls{ood} &
+500 &
+\texttt{bundle\_*.jpg} &
+Preserva la distinzione tra campioni fuori distribuzione e task binario
+nominale. \\
+
+Adversarial &
+5000 &
+\texttt{bundle\_*.jpg} &
+Registra famiglia di attacco, nome della perturbazione, modello target e
+immagine sorgente. \\
+
+Anti-forensic &
+5000 &
+\texttt{bundle\_*.jpg} &
+Registra trasformazione applicata, immagine sorgente e mapping verso il
+campione clean corrispondente. \\
+\midrule
+\textbf{Totale} &
+\textbf{11500} &
+\texttt{bundle\_*.jpg} &
+Abilita matching, normalizzazione post-export e audit hash-based. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La costruzione del bundle segue due viste complementari. La prima è una
+directory cieca destinata ai tool forensi, nella quale i file sono rinominati con
+identificativi neutri del tipo \texttt{bundle\_000001.jpg}. La seconda è una
+vista strutturata di audit, riservata al ricercatore, nella quale sono preservate
+le informazioni semantiche e sperimentali necessarie alla verifica. Per la
+valutazione black-box, i tool devono importare esclusivamente la directory:
+
+\begin{verbatim}
+datasets/forensic_evaluation_bundle/blind_tool_input/files
+\end{verbatim}
+
+e non devono importare né la directory \texttt{metadata/} né la directory
+\texttt{structured\_audit\_view/}. Questa separazione riduce il rischio di bias
+indotto dai nomi dei file, dai path, dalle classi, dai nomi degli attacchi o
+dalla struttura degli split.
+
+Il bundle preserva la tracciabilità attraverso manifest separati contenenti, per
+ciascun file, identificativo del bundle, nome cieco, tipo di campione, famiglia e
+nome della perturbazione, fold, label finale, dataset sorgente, identificativo
+dell'immagine originale, path sorgente, path cieco, path strutturato, hash
+\gls{sha256}, hash \gls{md5}, dimensione del file ed estensione. Tale struttura
+consente di collegare ogni output esportato da un tool commerciale al
+corrispondente artefatto sperimentale senza esporre al tool la ground truth
+durante la fase di importazione.
+
+I controlli di consistenza confermano che gli identificativi del bundle sono
+univoci, gli hash \gls{sha256} effettivi sono univoci, gli hash calcolati
+corrispondono a quelli riportati nel manifest quando disponibili, i path ciechi
+sono semanticamente neutri e i metadati sono separati dall'input operativo dei
+tool. Questi controlli sono essenziali per rendere il bundle idoneo alla
+valutazione black-box, poiché permettono di distinguere tra errori di
+classificazione, file non processati, output non categorizzati, limiti del
+formato di export e problemi di matching.
+
+In sintesi, il forensic evaluation bundle consente di passare da una valutazione
+proxy completamente controllata a una valutazione più vicina al contesto
+operativo degli strumenti forensi commerciali. La sua funzione non è soltanto
+organizzativa, ma metodologica: preserva la riproducibilità dell'esperimento e
+riduce l'esposizione dei tool a informazioni semantiche non necessarie. Al tempo
+stesso, abilita una normalizzazione post-export basata su identificativi e hash
+verificabili, condizione necessaria per distinguere errori di classificazione
+genuini da artefatti del processo di export.
 
 \section{Commercial Forensic Tools Evaluation}
 \label{sec:results-commercial}
