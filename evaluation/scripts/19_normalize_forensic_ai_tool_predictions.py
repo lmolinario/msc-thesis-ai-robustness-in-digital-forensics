@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-19_normalize_forensic_tool_outputs.py
+19_normalize_forensic_ai_tool_predictions.py
 
 Interactive and CLI-capable normalization entry point for commercial forensic
 -tool outputs in the FAIR-Lab thesis pipeline.
@@ -10,15 +10,20 @@ Interactive and CLI-capable normalization entry point for commercial forensic
 Purpose
 -------
 Normalize forensic-tool exports against the validated forensic evaluation
-bundle and produce comparable CSV metrics for Chapter 5.
+bundle and produce comparable CSV metrics for the experimental results and reporting layer..
 
-Current implemented parser
---------------------------
+Implemented normalization logic
+------------------------------
 - Magnet AXIOM / Magnet.AI:
-  - reads only Pictures.csv from selected raw export run folders;
+  - reads Pictures.csv from selected raw export run folders;
   - maps Tags = "Possible weapons" to predicted weapon;
   - maps empty Tags to not flagged / predicted non_weapon;
   - deduplicates duplicated export rows to one prediction per tool + bundle_id.
+
+- Generic forensic AI tool exports:
+  - supports CSV, TSV, JSON, JSONL and TXT exports;
+  - attempts to infer filename/hash, label/category and confidence columns;
+  - maps weapon-related labels to the binary FAIR-Lab task when possible.
 
 Main inputs
 -----------
@@ -79,7 +84,7 @@ except Exception:  # pragma: no cover - fallback for unusual execution contexts
         return (REPO_ROOT / path).resolve()
 
 
-SCRIPT_NAME = "evaluation/scripts/19_normalize_forensic_tool_outputs.py"
+SCRIPT_NAME = "evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py"
 
 DEFAULT_BUNDLE_MANIFEST = (
     REPO_ROOT

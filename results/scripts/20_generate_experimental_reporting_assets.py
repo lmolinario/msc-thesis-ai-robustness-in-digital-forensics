@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-20_generate_chapter5_figures.py
+20_generate_experimental_reporting_assets.py
 
 Generate thesis-ready figures for Chapter 5 from consolidated FAIR-Lab metric
 files.
@@ -48,7 +48,7 @@ if str(REPO_ROOT_BOOTSTRAP) not in sys.path:
 
 from datasets.scripts.utils.paths import EVALUATION_DIR, REPO_ROOT, RESULTS_DIR, repo_relative_path
 
-SCRIPT_NAME = "results/scripts/20_generate_chapter5_figures.py"
+SCRIPT_NAME = "results/scripts/20_generate_experimental_reporting_assets.py"
 
 METRICS_DIR = RESULTS_DIR / "metrics"
 DEFAULT_CORE_METRICS_CSV = METRICS_DIR / "final_core_metrics.csv"
