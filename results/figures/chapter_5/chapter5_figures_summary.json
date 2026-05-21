@@ -1,0 +1,35 @@
+{
+  "script": "results/scripts/20_generate_chapter5_figures.py",
+  "created_at": "2026-05-21T17:07:00+00:00",
+  "inputs": {
+    "core_metrics_csv": "results/metrics/final_core_metrics.csv",
+    "robustness_metrics_csv": "results/metrics/final_robustness_metrics.csv",
+    "confusion_matrices_csv": "results/metrics/final_confusion_matrices.csv",
+    "ood_metrics_csv": "results/metrics/final_ood_metrics.csv",
+    "predictions_csv": "evaluation/proxy_models/proxy_model_predictions.csv"
+  },
+  "outputs": {
+    "output_dir": "results/figures/chapter_5",
+    "manifest_csv": "results/figures/chapter_5/chapter5_figures_manifest.csv",
+    "summary_json": "results/figures/chapter_5/chapter5_figures_summary.json"
+  },
+  "formats": [
+    "pdf",
+    "png"
+  ],
+  "dpi": 300,
+  "figure_count_unique": 8,
+  "file_count": 16,
+  "figure_ids": [
+    "fig_adversarial_accuracy_drop_heatmap",
+    "fig_anti_forensic_accuracy_drop_heatmap",
+    "fig_clean_confusion_matrix_clip",
+    "fig_clean_confusion_matrix_efficientnet_b0",
+    "fig_clean_confusion_matrix_resnet18",
+    "fig_max_accuracy_drop_by_model",
+    "fig_ood_confidence_distribution",
+    "fig_ood_weapon_rate_and_confidence"
+  ],
+  "warnings": [],
+  "methodological_note": "This script only generates thesis figures from consolidated metric outputs. It does not regenerate datasets, perturbations, model predictions, or metrics."
+}
