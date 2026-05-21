@@ -11,3 +11,8 @@
 *.ckpt filter=lfs diff=lfs merge=lfs -text
 *.safetensors filter=lfs diff=lfs merge=lfs -text
 /docs/assets/*.png -filter -diff -merge -text
+
+
+# Keep thesis generated figures and documentation screenshots in normal Git, not Git LFS
+results/figures/** -filter -diff -merge -text
+docs/assets/** -filter -diff -merge -text
