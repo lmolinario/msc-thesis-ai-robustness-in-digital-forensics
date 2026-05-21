@@ -1,13 +1,263 @@
 \chapter{Results and Operational Robustness Analysis}
 \label{chap:results}
 
-% Paragrafo introduttivo:
-% distinzione proxy/black-box, focus forense, ordine per frequenza operativa
+Il presente capitolo espone i risultati sperimentali della pipeline di valutazione
+\textsc{FAIR-Lab}, con particolare attenzione alla robustezza operativa di sistemi
+di classificazione automatizzata di immagini basati su \gls{ai} in uno scenario di
+triage forense digitale. L'obiettivo dell'analisi non è ordinare i modelli
+esclusivamente in base alla loro accuratezza nominale, bensì valutare se gli
+output prodotti rimangano affidabili in presenza di input puliti, campioni
+out-of-distribution, trasformazioni anti-forensi e perturbazioni adversariali. In
+questa prospettiva, assumono particolare rilievo i falsi negativi relativi alla
+classe \texttt{weapon}, le predizioni ad alta confidenza su campioni fuori
+distribuzione e i requisiti di tracciabilità necessari per confrontare modelli
+proxy trasparenti con strumenti forensi commerciali operanti come sistemi
+black-box.
 
+Nel corso del capitolo viene mantenuta una distinzione metodologica esplicita
+tra i modelli proxy trasparenti, per i quali risultano disponibili architetture,
+checkpoint, rappresentazioni intermedie e output predittivi, e gli strumenti
+forensi commerciali, che operano come sistemi black-box o quasi black-box, poiché
+la loro logica interna di classificazione è proprietaria e non direttamente
+ispezionabile. Tale distinzione non è soltanto tecnica, ma incide direttamente
+sulla tracciabilità, sull'auditabilità e sull'interpretazione probatoria degli
+output assistiti da \gls{ai} all'interno di workflow forensi.
+
+L'organizzazione del capitolo segue la frequenza operativa attesa delle diverse
+condizioni sperimentali in un contesto investigativo. Le prestazioni su input
+puliti definiscono la baseline di riferimento; il comportamento su campioni
+out-of-distribution e su trasformazioni anti-forensi rappresenta condizioni
+realistiche che possono emergere nel corso di indagini digitali; le perturbazioni
+adversariali descrivono invece tentativi deliberati di evasione e costituiscono
+la condizione di stress più severa considerata in questa valutazione. La
+valutazione degli strumenti forensi commerciali è trattata come livello
+black-box distinto, introdotto dopo la presentazione dei risultati controllati dei
+modelli proxy e dopo la definizione del forensic evaluation bundle.
+
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Experimental Evaluation Status and Dataset Overview}
 \label{sec:results-status}
-% Tabella stato sperimentale, composizione dataset/bundle,
-% dichiarazione trasparente dei tool commerciali pending
+% ─────────────────────────────────────────────────────────────────────────────
+
+La valutazione sperimentale si basa sugli artefatti generati attraverso la
+metodologia descritta nel Capitolo~\ref{chap:methodology}. Allo stato attuale,
+risultano completate la costruzione del dataset, il congelamento semantico delle
+classi, la generazione degli split, l'addestramento dei modelli proxy, la
+generazione delle perturbazioni, la valutazione dei modelli proxy e la
+costruzione del forensic evaluation bundle. La valutazione black-box degli
+strumenti forensi commerciali è invece considerata una fase operativa separata,
+poiché dipende dalla disponibilità dei tool, dai moduli effettivamente abilitati,
+dai formati di esportazione e dalla successiva normalizzazione degli output
+proprietari.
+
+Questa separazione è metodologicamente rilevante. Il livello dei modelli proxy
+fornisce una baseline trasparente e riproducibile, poiché architetture,
+checkpoint, fold di addestramento, predizioni e metriche sono disponibili per
+ispezione e verifica. Il livello degli strumenti forensi commerciali riflette
+invece una condizione operativa differente: l'analista interagisce con strumenti
+professionali la cui logica interna di classificazione non è pienamente
+accessibile, e la valutazione deve quindi basarsi sugli output osservabili, sulle
+categorie esportate, sui tag assegnati, sugli eventuali valori di confidenza e
+sul matching hash-based rispetto alla ground truth sperimentale.
+
+La Tabella~\ref{tab:results-evaluation-status} riporta lo stato corrente delle
+principali componenti sperimentali, fornendo una sintesi audit-ready del workflow
+di valutazione al momento della redazione.
+
+\begin{table}[H]
+\centering
+\caption{Stato corrente del workflow di valutazione sperimentale.}
+\label{tab:results-evaluation-status}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+\textbf{Componente} & \textbf{Stato} & \textbf{Note} \\
+\midrule
+
+Dataset finale
+&
+\textbf{Congelato}
+&
+1500 immagini suddivise in tre classi: 500 \texttt{weapon}, 500
+\texttt{non\_weapon} e 500 \texttt{ood}. \\
+
+Subset binario
+&
+\textbf{Congelato}
+&
+1000 immagini, composte da 500 campioni \texttt{weapon} e 500 campioni
+\texttt{non\_weapon}. Il subset è utilizzato per gli split clean, per gli
+attacchi adversariali e per le trasformazioni anti-forensi. \\
+
+Split clean e OOD
+&
+\textbf{Completati}
+&
+Sono stati generati cinque fold binari clean e un insieme di valutazione
+out-of-distribution separato, entrambi derivati dai manifest congelati. \\
+
+Addestramento dei modelli proxy
+&
+\textbf{Completato}
+&
+Sono stati prodotti checkpoint fold-aware per \texttt{efficientnet\_b0},
+\texttt{resnet18} e \texttt{clip}. \\
+
+Valutazione dei modelli proxy
+&
+\textbf{Completata}
+&
+Il livello proxy è stato valutato su input clean, OOD, adversariali e
+anti-forensi, producendo output a livello di predizione e tabelle metriche
+finali. \\
+
+Attacchi adversariali
+&
+\textbf{Generati}
+&
+Sono state generate cinque famiglie di perturbazioni: \texttt{fgsm},
+\texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e
+\texttt{color\_shift}. \\
+
+Trasformazioni anti-forensi
+&
+\textbf{Generate}
+&
+Sono state generate cinque trasformazioni model-agnostic:
+\texttt{jpeg\_recompression}, \texttt{resample\_resize},
+\texttt{gaussian\_blur}, \texttt{histogram\_modification} e
+\texttt{contrast\_stretching}. \\
+
+Forensic evaluation bundle
+&
+\textbf{Generato}
+&
+11500 file predisposti per la valutazione black-box degli strumenti forensi,
+includendo campioni clean, OOD, adversariali e anti-forensi. \\
+
+Magnet AXIOM / Magnet.AI
+&
+\textbf{In attesa}
+&
+Bundle sottoposto o in fase di importazione; la valutazione black-box e la
+normalizzazione degli export non sono ancora consolidate nelle tabelle metriche
+finali. \\
+
+X-Ways Forensics / Excire
+&
+\textbf{In attesa}
+&
+La valutazione dipende dalla disponibilità del tool, dai moduli di
+classificazione visuale abilitati e dal formato di esportazione disponibile. \\
+
+Cellebrite UFED
+&
+\textbf{In attesa}
+&
+La valutazione dipende dalla disponibilità del tool e dal supporto
+all'importazione e all'esportazione di risultati di classificazione delle
+immagini. \\
+
+Oxygen Forensic Detective
+&
+\textbf{In attesa}
+&
+La valutazione dipende dalla disponibilità del tool, dai moduli \gls{ai}
+abilitati e dagli output di classificazione effettivamente esportabili. \\
+
+Casi di studio di explainability
+&
+\textbf{Pianificati}
+&
+Le attribution map basate su Integrated Gradients saranno calcolate su casi di
+fallimento rappresentativi dei modelli proxy; tali risultati avranno valore
+qualitativo e diagnostico, senza costituire metriche primarie di valutazione. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Il corpus sperimentale risultante è organizzato in condizioni clean,
+out-of-distribution, adversariali e anti-forensi. I campioni binari clean e
+perturbati derivano dal subset ufficiale \texttt{weapon}/\texttt{non\_weapon},
+mentre i campioni OOD sono valutati separatamente e non sono utilizzati come
+target degli attacchi. Tale distinzione preserva la differenza tra classificazione
+binaria nominale, comportamento fuori distribuzione e robustezza rispetto a input
+manipolati.
+
+La Tabella~\ref{tab:results-corpus-composition} riporta la composizione
+consolidata del corpus di valutazione utilizzato nei livelli proxy-model e
+forensic-tool.
+
+\begin{table}[H]
+\centering
+\caption{Composizione del corpus sperimentale e del forensic evaluation bundle.}
+\label{tab:results-corpus-composition}
+\begin{tabularx}{0.88\textwidth}{@{}l r X@{}}
+\toprule
+\textbf{Condizione} & \textbf{File} & \textbf{Ruolo nella valutazione} \\
+\midrule
+
+Clean
+&
+1000
+&
+Valutazione binaria nominale sui campioni \texttt{weapon} e
+\texttt{non\_weapon}. \\
+
+OOD
+&
+500
+&
+Insieme di valutazione out-of-distribution e borderline, mantenuto separato dal
+task di classificazione binaria. \\
+
+Adversarial
+&
+5000
+&
+Cinque famiglie di perturbazioni applicate al subset binario di 1000 immagini,
+con 1000 file generati per ciascuna famiglia di perturbazione. \\
+
+Anti-forensic
+&
+5000
+&
+Cinque trasformazioni model-agnostic applicate al subset binario di 1000
+immagini, con 1000 file generati per ciascuna trasformazione. \\
+
+\midrule
+\textbf{Totale}
+&
+\textbf{11500}
+&
+Forensic evaluation bundle completo, predisposto per la valutazione dei modelli
+proxy e per il processamento mediante strumenti forensi black-box. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Il forensic evaluation bundle costituisce il collegamento operativo tra il
+livello sperimentale controllato e il livello di valutazione basato su strumenti
+forensi professionali. Esso fornisce una directory di input cieca e
+semanticamente neutra per i tool forensi, preservando al contempo ground truth,
+informazioni di provenienza, metadati sulle perturbazioni e mapping hash-based in
+file separati. In termini operativi, gli strumenti forensi devono processare
+soltanto la directory cieca di input, mentre il livello dei metadati è riservato
+alle fasi successive di matching, normalizzazione e audit degli export.
+
+Questo disegno riduce il rischio di bias indotto dai path o dall'analista, poiché
+i tool non sono esposti a label di classe, nomi degli attacchi, identificativi di
+sorgente o informazioni sui fold durante l'importazione. Al tempo stesso, la
+presenza di mapping SHA256 e MD5 consente di ricondurre ciascun risultato
+esportato al corrispondente artefatto sperimentale. Tale requisito di
+tracciabilità è centrale per l'interpretazione forense dei risultati, poiché
+permette di distinguere tra errori di classificazione, file non supportati,
+mancate rilevazioni, output non categorizzati e limitazioni specifiche del formato
+di export del singolo tool.
+
+Le sezioni successive presentano i risultati quantitativi, a partire dalla
+baseline clean descritta nella Sezione~\ref{sec:results-clean-baseline}.
 
 \section{Clean Baseline Performance}
 \label{sec:results-clean-baseline}

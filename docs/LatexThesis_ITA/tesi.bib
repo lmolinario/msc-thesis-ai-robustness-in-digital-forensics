@@ -1031,3 +1031,181 @@
   doi          = {10.48550/arXiv.2510.14638},
   note         = {Conference paper / preprint}
 }
+
+
+% ============================================================
+% Additional references for robustness, validation and OOD analysis
+% ============================================================
+
+% ============================================================
+% Additional methodological references for forensic validation
+% ============================================================
+
+@misc{iso27041,
+  author       = {{International Organization for Standardization}},
+  title        = {{ISO/IEC 27041:2015 -- Information technology -- Security techniques -- Guidance on assuring suitability and adequacy of incident investigative methods}},
+  year         = {2015},
+  howpublished = {\url{https://www.iso.org/standard/44405.html}},
+  note         = {International Standard}
+}
+
+@misc{iso27042,
+  author       = {{International Organization for Standardization}},
+  title        = {{ISO/IEC 27042:2015 -- Information technology -- Security techniques -- Guidelines for the analysis and interpretation of digital evidence}},
+  year         = {2015},
+  howpublished = {\url{https://www.iso.org/standard/44406.html}},
+  note         = {International Standard}
+}
+
+@misc{iso27043,
+  author       = {{International Organization for Standardization}},
+  title        = {{ISO/IEC 27043:2015 -- Information technology -- Security techniques -- Incident investigation principles and processes}},
+  year         = {2015},
+  howpublished = {\url{https://www.iso.org/standard/44407.html}},
+  note         = {International Standard}
+}
+
+@misc{swgde2014validation,
+  author       = {{Scientific Working Group on Digital Evidence}},
+  title        = {{SWGDE Recommended Guidelines for Validation Testing}},
+  year         = {2014},
+  howpublished = {\url{https://www.swgde.org/documents}},
+  note         = {Digital evidence validation guideline}
+}
+
+@techreport{nist2023airmf,
+  author      = {Tabassi, Elham},
+  title       = {{Artificial Intelligence Risk Management Framework (AI RMF 1.0)}},
+  institution = {National Institute of Standards and Technology},
+  number      = {NIST AI 100-1},
+  year        = {2023},
+  doi         = {10.6028/NIST.AI.100-1},
+  url         = {https://doi.org/10.6028/NIST.AI.100-1}
+}
+
+% ============================================================
+% Calibration, confidence and reliability of AI predictions
+% ============================================================
+
+@inproceedings{guo2017calibration,
+  author    = {Guo, Chuan and Pleiss, Geoff and Sun, Yu and Weinberger, Kilian Q.},
+  title     = {{On Calibration of Modern Neural Networks}},
+  booktitle = {Proceedings of the 34th International Conference on Machine Learning},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {70},
+  pages     = {1321--1330},
+  year      = {2017},
+  publisher = {PMLR},
+  url       = {https://proceedings.mlr.press/v70/guo17a.html}
+}
+
+% ============================================================
+% Out-of-distribution detection
+% ============================================================
+
+@inproceedings{liang2018odin,
+  author    = {Liang, Shiyu and Li, Yixuan and Srikant, Rayadurgam},
+  title     = {{Enhancing the Reliability of Out-of-distribution Image Detection in Neural Networks}},
+  booktitle = {International Conference on Learning Representations},
+  year      = {2018},
+  url       = {https://arxiv.org/abs/1706.02690},
+  doi       = {10.48550/arXiv.1706.02690}
+}
+
+@inproceedings{liu2020energy,
+  author    = {Liu, Weitang and Wang, Xiaoyun and Owens, John D. and Li, Yixuan},
+  title     = {{Energy-based Out-of-distribution Detection}},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume    = {33},
+  pages     = {21464--21475},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/2010.03759},
+  doi       = {10.48550/arXiv.2010.03759}
+}
+
+% ============================================================
+% Robust adversarial evaluation
+% ============================================================
+
+@inproceedings{athalye2018obfuscated,
+  author    = {Athalye, Anish and Carlini, Nicholas and Wagner, David},
+  title     = {{Obfuscated Gradients Give a False Sense of Security: Circumventing Defenses to Adversarial Examples}},
+  booktitle = {Proceedings of the 35th International Conference on Machine Learning},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {80},
+  pages     = {274--283},
+  year      = {2018},
+  publisher = {PMLR},
+  url       = {https://proceedings.mlr.press/v80/athalye18a.html}
+}
+
+@inproceedings{croce2020autoattack,
+  author    = {Croce, Francesco and Hein, Matthias},
+  title     = {{Reliable Evaluation of Adversarial Robustness with an Ensemble of Diverse Parameter-free Attacks}},
+  booktitle = {Proceedings of the 37th International Conference on Machine Learning},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {119},
+  pages     = {2206--2216},
+  year      = {2020},
+  publisher = {PMLR},
+  url       = {https://arxiv.org/abs/2003.01690},
+  doi       = {10.48550/arXiv.2003.01690}
+}
+
+@inproceedings{kurakin2017physical,
+  author    = {Kurakin, Alexey and Goodfellow, Ian and Bengio, Samy},
+  title     = {{Adversarial Examples in the Physical World}},
+  booktitle = {International Conference on Learning Representations Workshop},
+  year      = {2017},
+  url       = {https://arxiv.org/abs/1607.02533},
+  doi       = {10.48550/arXiv.1607.02533}
+}
+
+@article{brown2017patch,
+  author  = {Brown, Tom B. and Mané, Dandelion and Roy, Aurko and Abadi, Martín and Gilmer, Justin},
+  title   = {{Adversarial Patch}},
+  journal = {arXiv preprint arXiv:1712.09665},
+  year    = {2017},
+  url     = {https://arxiv.org/abs/1712.09665},
+  doi     = {10.48550/arXiv.1712.09665}
+}
+
+% ============================================================
+% Dataset quality, leakage and reproducibility
+% ============================================================
+
+@article{kapoor2023leakage,
+  author  = {Kapoor, Sayash and Narayanan, Arvind},
+  title   = {{Leakage and the Reproducibility Crisis in Machine-learning-based Science}},
+  journal = {Patterns},
+  volume  = {4},
+  number  = {9},
+  pages   = {100804},
+  year    = {2023},
+  doi     = {10.1016/j.patter.2023.100804}
+}
+
+@inproceedings{sambasivan2021data,
+  author    = {Sambasivan, Nithya and Kapania, Shivani and Highfill, Hannah and Akrong, Diana and Paritosh, Praveen and Aroyo, Lora M.},
+  title     = {{Everyone Wants to Do the Model Work, Not the Data Work: Data Cascades in High-Stakes AI}},
+  booktitle = {Proceedings of the 2021 CHI Conference on Human Factors in Computing Systems},
+  pages     = {1--15},
+  year      = {2021},
+  publisher = {ACM},
+  doi       = {10.1145/3411764.3445518}
+}
+
+% ============================================================
+% Classical image forensics and PRNU
+% ============================================================
+
+@article{lukas2006prnu,
+  author  = {Lukáš, Jan and Fridrich, Jessica and Goljan, Miroslav},
+  title   = {{Digital Camera Identification from Sensor Pattern Noise}},
+  journal = {IEEE Transactions on Information Forensics and Security},
+  volume  = {1},
+  number  = {2},
+  pages   = {205--214},
+  year    = {2006},
+  doi     = {10.1109/TIFS.2006.873602}
+}
