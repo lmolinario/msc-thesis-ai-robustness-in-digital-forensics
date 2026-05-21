@@ -1,5 +1,5 @@
-tool_name,raw_export_file,extension,is_prediction_file,status,parsed_rows,error
-magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_20_axiom_10_1/ExportSummary.json,.json,false,parsed_audit_only,1,
-magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_20_axiom_10_1/File System Information.csv,.csv,false,parsed_audit_only,2,
-magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_20_axiom_10_1/Identifiers - Device.csv,.csv,false,parsed_audit_only,40,
-magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_20_axiom_10_1/Pictures.csv,.csv,true,parsed_prediction_file,23000,
+tool_name,raw_export_file,run_dir,extension,is_prediction_file,status,parsed_rows,error
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1/ExportSummary.json,run_2026_05_21_axiom_10_1,.json,false,parsed_audit_only,1,
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1/File System Information.csv,run_2026_05_21_axiom_10_1,.csv,false,parsed_audit_only,1,
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1/Identifiers - Device.csv,run_2026_05_21_axiom_10_1,.csv,false,parsed_audit_only,20,
+magnet_axiom,forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1/Pictures.csv,run_2026_05_21_axiom_10_1,.csv,true,parsed_prediction_file,11500,

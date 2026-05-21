@@ -1,19 +1,27 @@
 {
   "script": "evaluation/scripts/19_normalize_forensic_tool_outputs.py",
-  "created_at": "2026-05-20T19:35:11+00:00",
+  "created_at": "2026-05-21T16:38:32+00:00",
   "bundle_rows": 11500,
   "tools_requested": [
     "magnet_axiom"
   ],
+  "selected_run_dirs_by_tool": {
+    "magnet_axiom": [
+      "forensic_tools/magnet_axiom/raw_exports/run_2026_05_21_axiom_10_1"
+    ]
+  },
   "per_tool_prediction_export_counts": {
     "magnet_axiom": 1
   },
-  "per_tool_raw_row_counts": {
-    "magnet_axiom": 23000
+  "per_tool_total_export_counts": {
+    "magnet_axiom": 4
   },
-  "raw_rows_parsed": 23000,
-  "normalized_rows_before_deduplication": 23000,
-  "matched_rows_before_deduplication": 23000,
+  "per_tool_raw_row_counts": {
+    "magnet_axiom": 11500
+  },
+  "raw_rows_parsed": 11500,
+  "normalized_rows_before_deduplication": 11500,
+  "matched_rows_before_deduplication": 11500,
   "deduplication_enabled": true,
   "normalized_rows_after_deduplication": 11500,
   "matched_rows_after_deduplication": 11500,
