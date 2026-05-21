@@ -353,24 +353,37 @@ di falsi positivi.
 \begin{figure}[htbp]
 \centering
 
-\begin{minipage}{0.32\textwidth}
+\begin{minipage}{0.48\textwidth}
 \centering
+\small EfficientNet-B0
+
+\vspace{0.2em}
 \includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_efficientnet_b0.pdf}
 \end{minipage}
 \hfill
-\begin{minipage}{0.32\textwidth}
+\begin{minipage}{0.48\textwidth}
 \centering
+\small ResNet18
+
+\vspace{0.2em}
 \includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_resnet18.pdf}
 \end{minipage}
-\hfill
-\begin{minipage}{0.32\textwidth}
+
+\vspace{0.8em}
+
+\begin{minipage}{0.48\textwidth}
 \centering
+\small \acrshort{clip}
+
+\vspace{0.2em}
 \includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_clip.pdf}
 \end{minipage}
 
 \caption{Confusion matrix clean dei tre modelli proxy sul subset binario. Le righe rappresentano la label reale, mentre le colonne rappresentano la label predetta.}
 \label{fig:results-clean-confusion-matrices}
 \end{figure}
+
+
 
 Dal punto di vista forense, il dato più critico è rappresentato dai falsi
 negativi sulla classe \texttt{weapon}. EfficientNet-B0 produce 8 falsi negativi,
@@ -415,26 +428,39 @@ rate} indica la quota di campioni \gls{ood} classificati come \texttt{weapon};
 il valore \emph{high-confidence rate} indica invece la quota di predizioni con
 confidenza almeno pari a 0.9.
 
+
 \begin{table}[H]
 \centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
 \caption{Comportamento dei modelli proxy sui campioni \gls{ood}.}
 \label{tab:results-ood-behavior}
 \begin{tabular}{@{}l r r r r r r@{}}
 \toprule
 \textbf{Modello} &
-\textbf{Totale} &
-\textbf{Pred. weapon} &
-\textbf{Pred. non\_weapon} &
-\textbf{Weapon rate} &
-\textbf{Conf. media} &
-\textbf{High-conf. rate} \\
+\textbf{Tot.} &
+\textbf{Pred. w} &
+\textbf{Pred. nw} &
+\textbf{W-rate} &
+\textbf{Conf.} &
+\textbf{HC-rate} \\
 \midrule
 EfficientNet-B0 & 2500 & 924  & 1576 & 0.370 & 0.850 & 0.501 \\
 ResNet18        & 2500 & 1094 & 1406 & 0.438 & 0.890 & 0.647 \\
-\gls{clip}      & 2500 & 2089 & 411  & 0.836 & 0.536 & 0.000 \\
+\acrshort{clip} & 2500 & 2089 & 411  & 0.836 & 0.536 & 0.000 \\
 \bottomrule
 \end{tabular}
+
+\vspace{0.4em}
+\footnotesize
+\textit{Nota.} \textit{Pred. w} indica le predizioni \texttt{weapon};
+\textit{Pred. nw} indica le predizioni \texttt{non\_weapon};
+\textit{W-rate} indica la quota di campioni \gls{ood} classificati come
+\texttt{weapon}; \textit{Conf.} indica la confidenza media; \textit{HC-rate}
+indica la quota di predizioni con confidenza almeno pari a 0.9.
 \end{table}
+
 
 La Figura~\ref{fig:results-ood-weapon-rate-confidence} visualizza il confronto
 tra weapon rate, confidenza media e high-confidence rate, mentre la
