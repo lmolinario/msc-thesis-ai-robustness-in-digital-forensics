@@ -5,9 +5,18 @@ pdflatex main.tex
 pdflatex main.tex
 
 
+pdflatex main.tex
+biber main
+makeglossaries main
+pdflatex main.tex
+pdflatex main.tex
+
+
+
 
 pdflatex main.tex
 makeindex -s main.ist -t main.alg -o main.acr main.acn
+makeglossaries main
 biber main
 pdflatex main.tex
 pdflatex main.tex

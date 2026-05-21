@@ -136,11 +136,12 @@ includendo campioni clean, OOD, adversariali e anti-forensi. \\
 
 Magnet AXIOM / Magnet.AI
 &
-\textbf{In attesa}
+\textbf{Disponibile}
 &
-Bundle sottoposto o in fase di importazione; la valutazione black-box e la
-normalizzazione degli export non sono ancora consolidate nelle tabelle metriche
-finali. \\
+Bundle processato ed export normalizzato in formato metrico CSV; i risultati
+sono consolidati per la valutazione black-box di Magnet AXIOM / Magnet.AI,
+mentre il confronto con gli altri strumenti commerciali resta subordinato alla
+disponibilità dei rispettivi export. \\
 
 X-Ways Forensics / Excire
 &
@@ -281,27 +282,36 @@ metriche prestazionali dei tre modelli proxy sul subset binario clean.
 \begin{table}[H]
 \centering
 \scriptsize
+\setlength{\tabcolsep}{2.8pt}
+\renewcommand{\arraystretch}{1.15}
 \caption{Prestazioni clean dei modelli proxy sul subset binario.}
 \label{tab:results-clean-baseline-metrics}
-\begin{tabular}{@{}l r r r r r r r r r r@{}}
+\begin{tabularx}{\textwidth}{@{}l *{10}{>{\centering\arraybackslash}X}@{}}
 \toprule
 \textbf{Modello} &
 \textbf{Acc.} &
-\textbf{Bal. acc.} &
-\textbf{Macro P} &
-\textbf{Macro R} &
-\textbf{Macro F1} &
-\textbf{P weapon} &
-\textbf{R weapon} &
-\textbf{F1 weapon} &
-\textbf{\gls{fpr}} &
-\textbf{\gls{fnr}} \\
+\textbf{Bal.} &
+\textbf{M-P} &
+\textbf{M-R} &
+\textbf{M-F1} &
+\textbf{P\textsubscript{w}} &
+\textbf{R\textsubscript{w}} &
+\textbf{F1\textsubscript{w}} &
+\textbf{\acrshort{fpr}} &
+\textbf{\acrshort{fnr}} \\
 \midrule
 EfficientNet-B0 & 0.978 & 0.978 & 0.978 & 0.978 & 0.978 & 0.972 & 0.984 & 0.978 & 0.028 & 0.016 \\
 ResNet18        & 0.964 & 0.964 & 0.964 & 0.964 & 0.964 & 0.958 & 0.970 & 0.964 & 0.042 & 0.030 \\
-\gls{clip}      & 0.927 & 0.927 & 0.933 & 0.927 & 0.927 & 0.881 & 0.988 & 0.931 & 0.134 & 0.012 \\
+\acrshort{clip} & 0.927 & 0.927 & 0.933 & 0.927 & 0.927 & 0.881 & 0.988 & 0.931 & 0.134 & 0.012 \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
+
+\vspace{0.4em}
+\footnotesize
+\textit{Nota.} \textit{Bal.} indica la balanced accuracy; \textit{M-P},
+\textit{M-R} e \textit{M-F1} indicano rispettivamente macro-precision,
+macro-recall e macro-F1; \(P_w\), \(R_w\) e \(F1_w\) indicano precision,
+recall e F1-score per la classe \texttt{weapon}.
 \end{table}
 
 EfficientNet-B0 ottiene la prestazione nominale più elevata, con accuracy pari a
@@ -315,7 +325,7 @@ sensibilità verso la classe \texttt{weapon}, al costo di un numero più elevato
 falsi positivi sulla classe \texttt{non\_weapon}.
 
 La Tabella~\ref{tab:results-clean-confusion-matrices} riporta le confusion
-matrix aggregate per modello, utilizzando il layout
+matrix aggregate per modello, utilizzando il layout\\
 \(\left[\left[\gls{tn}, \gls{fp}\right], \left[\gls{fn}, \gls{tp}\right]\right]\).
 
 \begin{table}[H]
@@ -340,7 +350,7 @@ errori, ResNet18 mantiene un comportamento intermedio, mentre \gls{clip} riduce
 i falsi negativi sulla classe \texttt{weapon} al costo di un numero più elevato
 di falsi positivi.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 
 \begin{minipage}{0.32\textwidth}
@@ -457,6 +467,12 @@ raggiunge 0.501.
 \label{fig:results-ood-confidence-distribution}
 \end{figure}
 
+La Figura~\ref{fig:results-ood-confidence-distribution} mostra che la
+distribuzione delle confidenze di \gls{clip} è più concentrata verso valori
+intermedi, mentre EfficientNet-B0 e ResNet18 presentano distribuzioni più
+polarizzate verso confidenze alte, confermando il diverso profilo di rischio
+operativo dei tre modelli.
+
 Dal punto di vista forense, questo risultato è rilevante perché evidenzia un
 rischio diverso rispetto alla normale misclassificazione binaria. Una predizione
 errata o impropria su un campione fuori distribuzione può infatti generare una
@@ -539,10 +555,13 @@ prestazioni elevate in tutte le condizioni, ma risulta maggiormente sensibile a
 \gls{gaussianblur}, con una variazione pari a -0.013. ResNet18 mostra invece la
 maggiore degradazione in corrispondenza di \gls{histogrammodification}, con una
 variazione pari a -0.030. \gls{clip} rimane sostanzialmente stabile, con
-variazioni molto contenute e, in alcuni casi, lievi incrementi dell'accuracy. La
-Figura~\ref{fig:results-antiforensic-accuracy-drop-heatmap} conferma che la
-degradazione anti-forense rimane complessivamente contenuta, con il massimo drop
-osservato per ResNet18 sotto \gls{histogrammodification}.
+variazioni molto contenute e, in alcuni casi, lievi incrementi dell'accuracy.
+
+La Figura~\ref{fig:results-antiforensic-accuracy-drop-heatmap} rende
+visivamente evidente la distribuzione disomogenea degli effetti tra modelli e
+trasformazioni, evidenziando in particolare l'isolamento del drop di ResNet18
+sotto \gls{histogrammodification} rispetto alla generale stabilità degli altri
+casi.
 
 Dal punto di vista operativo, questi risultati non devono essere considerati
 trascurabili soltanto perché i drop sono inferiori a quelli adversariali. Le
@@ -553,7 +572,6 @@ prestazione può diventare rilevante quando riguarda contenuti investigativament
 sensibili o quando si combina con altri fattori di incertezza, quali bassa
 qualità dell'immagine, contesto ambiguo o assenza di verifica manuale
 sistematica.
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Robustness Against Adversarial Perturbations}
 \label{sec:results-adversarial}
@@ -638,10 +656,10 @@ diagnostiche per ResNet18 e \gls{clip}, comportandosi per tali architetture come
 una trasformazione neutra o lievemente favorevole, piuttosto che come una
 perturbazione effettivamente trasferibile.
 
-La Figura~\ref{fig:results-adversarial-accuracy-drop-heatmap} mostra una
-distribuzione fortemente asimmetrica dei drop adversariali: la degradazione è
-massima quando l'attacco è ottimizzato contro EfficientNet-B0, mentre la
-trasferibilità verso ResNet18 e \gls{clip} rimane limitata.
+La Figura~\ref{fig:results-adversarial-accuracy-drop-heatmap} rende
+visivamente evidente il contrasto tra la colonna EfficientNet-B0, dominata da
+drop elevati, e le colonne ResNet18 e \gls{clip}, caratterizzate da variazioni
+prossime allo zero o lievemente positive.
 
 Dal punto di vista forense, la vulnerabilità di EfficientNet-B0 a perturbazioni
 come \gls{sigmazero} e \gls{fgsm} evidenzia un rischio operativo significativo:
