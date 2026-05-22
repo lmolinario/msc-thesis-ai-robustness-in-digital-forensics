@@ -16,3 +16,8 @@
 # Keep thesis generated figures and documentation screenshots in normal Git, not Git LFS
 results/figures/** -filter -diff -merge -text
 docs/assets/** -filter -diff -merge -text
+
+# Keep thesis images and generated figures in normal Git, not Git LFS
+docs/LatexThesis_ITA/images/** -filter -diff -merge -text
+docs/assets/** -filter -diff -merge -text
+results/figures/** -filter -diff -merge -text
