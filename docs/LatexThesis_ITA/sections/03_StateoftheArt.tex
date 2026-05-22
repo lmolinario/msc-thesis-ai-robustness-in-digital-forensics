@@ -168,6 +168,71 @@ La revisione condotta nelle sezioni precedenti mostra che la letteratura ha prod
 
 Un secondo insieme di contributi riguarda le minacce che possono alterare il comportamento dei sistemi automatici. La letteratura sull'\gls{aml} ha mostrato che perturbazioni costruite intenzionalmente possono indurre errori anche in modelli ad alte prestazioni~\cite{szegedy2014intriguing,goodfellow2015explaining,papernot2016limitations,carlini2017towards,biggio2018wild}. I lavori più vicini all'image forensics hanno poi evidenziato che anche modelli progettati per compiti forensi possono essere vulnerabili in scenari adversariali~\cite{barni2018cf,nowroozi2020phd}. In parallelo, la letteratura anti-forense ha studiato trasformazioni applicate direttamente all'artefatto digitale, come ricompressione, ricampionamento, alterazioni statistiche e modifiche della qualità visiva, mostrando che tali operazioni possono incidere sia sulle tracce forensi sia sulla rappresentazione digitale dell'immagine~\cite{stamm2010anti,stamm2013information,farid2016photo,popescu2005exposing}. Infine, la letteratura sull'\gls{xai} ha fornito strumenti utili per analizzare qualitativamente il comportamento dei modelli, ma tali tecniche sono state raramente integrate in protocolli forensi completi di valutazione della robustezza~\cite{Adadi2018,Doshi-Velez2017,Ribeiro2016,Sundararajan2017,Zhou2016}.
 
+
+\begin{table}[H]
+\centering
+\small
+\caption{Lavori rappresentativi e posizionamento della presente tesi rispetto alla letteratura.}
+\label{tab:sota-representative-works}
+\begin{tabularx}{\textwidth}{@{}p{2.6cm} p{3.4cm} X X@{}}
+\toprule
+\textbf{Categoria} &
+\textbf{Lavori rappresentativi} &
+\textbf{Contributo principale} &
+\textbf{Limite rispetto alla presente tesi} \\
+\midrule
+
+Lavori centrali &
+Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} &
+Valutano la robustezza di strumenti forensi commerciali \gls{ai}-based, con attenzione a tool black-box e contenuti multimediali manipolati. &
+Rappresentano il riferimento più vicino alla presente tesi, ma restano orientati a scenari preliminari o a domini visivi differenti. Non integrano nello stesso protocollo dataset weapon/non\_weapon/\gls{ood}, perturbazioni adversariali, trasformazioni anti-forensi e forensic evaluation bundle. \\
+
+\midrule
+
+Lavori centrali &
+Nowroozi e Barni et al.~\cite{nowroozi2020phd,barni2018cf} &
+Analizzano l'image forensics in scenari adversariali e mostrano che modelli forensi basati su \gls{ml} e \gls{dl} possono essere vulnerabili a perturbazioni mirate. &
+Forniscono la base teorica per adversarial image forensics, ma sono prevalentemente focalizzati su modelli accademici o task controllati, non sulla valutazione operativa di strumenti forensi commerciali. \\
+
+\midrule
+
+Lavori centrali &
+Biggio e Roli~\cite{biggio2018wild} &
+Formalizzano il paradigma dell'adversarial machine learning e la necessità di valutare i classificatori in presenza di un avversario strategico. &
+Il contributo è fondamentale per il threat model, ma resta generale rispetto alla \gls{df} e non affronta direttamente workflow forensi, tool commerciali o classificazione di evidenze digitali. \\
+
+\midrule
+
+Lavori di supporto &
+Costantini et al. e Faqir~\cite{costantini2019digital,faqir2023digital} &
+Mostrano il ruolo dell'\gls{ai} come supporto all'analisi, all'organizzazione delle evidenze e alla formulazione di ipotesi investigative. &
+Contestualizzano l'automazione nella \gls{df}, ma non valutano sistematicamente la robustezza degli strumenti \gls{ai}-based rispetto a input degradati, manipolati o fuori distribuzione. \\
+
+\midrule
+
+Lavori di supporto &
+Yaacoub et al., Stamm e Farid~\cite{yaacoub2021digital,stamm2010anti,farid2016photo} &
+Descrivono tecniche anti-forensi e trasformazioni dell'immagine capaci di alterare tracce, metadati, qualità visiva e struttura statistica del file. &
+Sono essenziali per giustificare il piano anti-forense della tesi, ma non collegano in modo sistematico tali trasformazioni alla classificazione automatizzata di immagini in tool forensi \gls{ai}-based. \\
+
+\midrule
+
+Lavori di supporto &
+Hendrycks et al., Fort et al. e RobustBench~\cite{hendrycks2019benchmarking,hendrycks2017baseline,fort2021exploring,croce2020robustbench} &
+Dimostrano che accuratezza su dati clean, robustezza a corruzioni, comportamento \gls{ood} e robustezza adversariale devono essere valutati separatamente. &
+Forniscono benchmark e principi metodologici generali, ma non sono progettati per dati, vincoli e workflow propri della \gls{df}. \\
+
+\midrule
+
+Lavori diagnostici e contestuali &
+Ribeiro et al., Sundararajan et al. e Zhou et al.~\cite{Ribeiro2016,Sundararajan2017,Zhou2016} &
+Propongono tecniche di \gls{xai} e attribuzione visuale utili per interpretare il comportamento dei classificatori di immagini. &
+Supportano l'analisi qualitativa delle failure cases, ma non sostituiscono la validazione quantitativa né risolvono il problema dell'opacità dei tool commerciali black-box. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
 Il limite principale che emerge da questo quadro non è l'assenza di ricerca
 sui singoli temi, ma la mancanza di una valutazione integrata.
 La Figura~\ref{fig:sota-literature-gap} visualizza sinteticamente questa
