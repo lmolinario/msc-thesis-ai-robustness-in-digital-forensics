@@ -12,7 +12,7 @@ questa prospettiva, assumono particolare rilievo i falsi negativi relativi alla
 classe \texttt{weapon}, le predizioni ad alta confidenza su campioni fuori
 distribuzione e i requisiti di tracciabilità necessari per confrontare modelli
 proxy trasparenti con strumenti forensi commerciali operanti come sistemi
-black-box.
+black-box \cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
 
 Nel corso del capitolo viene mantenuta una distinzione metodologica esplicita
 tra i modelli proxy trasparenti, per i quali risultano disponibili architetture,
@@ -21,7 +21,8 @@ forensi commerciali, che operano come sistemi black-box o quasi black-box, poich
 la loro logica interna di classificazione è proprietaria e non direttamente
 ispezionabile. Tale distinzione non è soltanto tecnica, ma incide direttamente
 sulla tracciabilità, sull'auditabilità e sull'interpretazione probatoria degli
-output assistiti da \gls{ai} all'interno di workflow forensi.
+output assistiti da \gls{ai} all'interno di workflow forensi
+\cite{iso27041,iso27042,swgde2014validation}.
 
 L'organizzazione del capitolo segue la frequenza operativa attesa delle diverse
 condizioni sperimentali in un contesto investigativo. Le prestazioni su input
@@ -29,7 +30,8 @@ puliti definiscono la baseline di riferimento; il comportamento su campioni
 out-of-distribution e su trasformazioni anti-forensi rappresenta condizioni
 realistiche che possono emergere nel corso di indagini digitali; le perturbazioni
 adversariali descrivono invece tentativi deliberati di evasione e costituiscono
-la condizione di stress più severa considerata in questa valutazione. La
+la condizione di stress più severa considerata in questa valutazione
+\cite{hendrycks2017baseline,hendrycks2019benchmarking,biggio2018wild}. La
 valutazione degli strumenti forensi commerciali è trattata come livello
 black-box distinto, introdotto dopo la presentazione dei risultati controllati dei
 modelli proxy e dopo la definizione del forensic evaluation bundle.
@@ -48,7 +50,7 @@ costruzione del forensic evaluation bundle. La valutazione black-box degli
 strumenti forensi commerciali è invece considerata una fase operativa separata,
 poiché dipende dalla disponibilità dei tool, dai moduli effettivamente abilitati,
 dai formati di esportazione e dalla successiva normalizzazione degli output
-proprietari.
+proprietari \cite{sanna2024preliminary,sanna2025pixelperfect,magnet,xways,cellebrite,oxygen}.
 
 Questa separazione è metodologicamente rilevante. Il livello dei modelli proxy
 fornisce una baseline trasparente e riproducibile, poiché architetture,
@@ -58,7 +60,8 @@ invece una condizione operativa differente: l'analista interagisce con strumenti
 professionali la cui logica interna di classificazione non è pienamente
 accessibile, e la valutazione deve quindi basarsi sugli output osservabili, sulle
 categorie esportate, sui tag assegnati, sugli eventuali valori di confidenza e
-sul matching hash-based rispetto alla ground truth sperimentale.
+sul matching hash-based rispetto alla ground truth sperimentale
+\cite{casey2011digital,nist2006guide,iso27041,iso27042}.
 
 La Tabella~\ref{tab:results-evaluation-status} riporta lo stato corrente delle
 principali componenti sperimentali, fornendo una sintesi audit-ready del workflow
@@ -255,7 +258,7 @@ esportato al corrispondente artefatto sperimentale. Tale requisito di
 tracciabilità è centrale per l'interpretazione forense dei risultati, poiché
 permette di distinguere tra errori di classificazione, file non supportati,
 mancate rilevazioni, output non categorizzati e limitazioni specifiche del formato
-di export del singolo tool.
+di export del singolo tool \cite{casey2011digital,nist2006guide,iso27041,iso27042,swgde2014validation}.
 
 Le sezioni successive presentano i risultati quantitativi, a partire dalla
 baseline clean descritta nella Sezione~\ref{sec:results-clean-baseline}.
@@ -417,7 +420,7 @@ differenza delle perturbazioni adversariali e delle trasformazioni anti-forensi,
 la condizione \gls{ood} non rappresenta un attacco, ma un rischio operativo
 realistico: in un workflow investigativo, immagini ambigue o non perfettamente
 aderenti alle classi del modello possono essere comunque sottoposte ad analisi
-automatica.
+automatica \cite{hendrycks2017baseline,liang2018odin,fort2021exploring}.
 
 Le metriche sono aggregate su 2500 predizioni, ottenute valutando le 500 immagini
 \gls{ood} attraverso i cinque checkpoint fold-aware di ciascun modello. Questa
@@ -510,7 +513,8 @@ predizioni una confidenza elevata. Il caso di \gls{clip}, invece, mostra un
 comportamento opposto: maggiore propensione a classificare come \texttt{weapon},
 ma con confidenza più bassa. Questa distinzione è essenziale in un contesto
 forense, nel quale la confidenza del sistema non deve essere interpretata come
-prova autonoma, ma come informazione ausiliaria soggetta a verifica umana.
+prova autonoma, ma come informazione ausiliaria soggetta a verifica umana
+\cite{guo2017calibration,nist2023airmf}.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Robustness Against Anti-Forensic Transformations}
@@ -524,7 +528,8 @@ trasformazioni non richiedono accesso al modello target e non sono
 necessariamente progettate per massimizzare l'errore di classificazione. Esse
 simulano invece alterazioni comuni del contenuto visivo o del file immagine,
 quali ricompressione, ridimensionamento, sfocatura, modifica della distribuzione
-tonale e normalizzazione del contrasto.
+tonale e normalizzazione del contrasto
+\cite{stamm2010anti,yaacoub2021digital,hendrycks2019benchmarking}.
 
 La Tabella~\ref{tab:results-antiforensic-robustness} riporta, per ciascuna
 trasformazione, l'accuracy perturbata e la variazione rispetto alla baseline
@@ -604,7 +609,8 @@ sistematica.
 % ─────────────────────────────────────────────────────────────────────────────
 
 La valutazione adversarial misura la risposta dei modelli proxy a perturbazioni
-progettate per alterare il comportamento del classificatore. Nel contesto della
+progettate per alterare il comportamento del classificatore
+\cite{szegedy2014intriguing,goodfellow2015explaining,biggio2018wild}. Nel contesto della
 presente tesi, tali perturbazioni non sono analizzate come fine autonomo di
 \gls{aml}, ma come stressor sperimentali utili a valutare l'affidabilità
 operativa di sistemi \gls{ai}-based in scenari forensi. L'interesse principale
@@ -616,12 +622,15 @@ processo di triage investigativo.
 Gli attacchi model-dependent sono generati contro EfficientNet-B0. Questa scelta
 riflette uno scenario white-box nel quale l'avversario dispone di accesso pieno a
 un singolo modello target; la trasferibilità verso architetture differenti viene
-quindi valutata empiricamente, anziché assunta a priori. \gls{colorshift} è
+quindi valutata empiricamente, anziché assunta a priori
+\cite{biggio2018wild,nowroozi2020adversarial,barni2018cf}. \gls{colorshift} è
 invece trattato come perturbazione model-agnostic di stile adversarial.
 
 La Tabella~\ref{tab:results-adversarial-robustness} riporta l'accuracy
 perturbata e la variazione rispetto alla baseline clean per ciascuna famiglia di
-perturbazioni. Anche in questo caso la variazione è calcolata come
+perturbazioni, includendo famiglie di attacco riconducibili a \gls{fgsm}, metodi
+sparse pixel-level e varianti decision-boundary-oriented
+\cite{goodfellow2015explaining,su2019onepixel,zhao2024sigmazero,zhang2024superdeepfool}. Anche in questo caso la variazione è calcolata come
 \(\Delta=\text{accuracy}_{perturbed}-\text{accuracy}_{clean}\).
 
 \begin{table}[H]
@@ -705,7 +714,8 @@ valutazione sperimentale controllata dei modelli proxy e la successiva
 valutazione black-box degli strumenti forensi commerciali. Il bundle è progettato
 per fornire ai tool un input cieco e semanticamente neutro, preservando
 separatamente le informazioni necessarie per il matching, la normalizzazione
-degli export e l'audit dei risultati.
+degli export e l'audit dei risultati
+\cite{casey2011digital,nist2006guide,iso27041,iso27042,swgde2014validation}.
 
 A differenza della composizione generale del corpus sperimentale riportata nella
 Sezione~\ref{sec:results-status}, la Tabella~\ref{tab:results-bundle-operational-layout}
@@ -790,7 +800,7 @@ sono semanticamente neutri e i metadati sono separati dall'input operativo dei
 tool. Questi controlli sono essenziali per rendere il bundle idoneo alla
 valutazione black-box, poiché permettono di distinguere tra errori di
 classificazione, file non processati, output non categorizzati, limiti del
-formato di export e problemi di matching.
+formato di export e problemi di matching \cite{iso27041,iso27042,iso27043,swgde2014validation}.
 
 In sintesi, il forensic evaluation bundle consente di passare da una valutazione
 proxy completamente controllata a una valutazione più vicina al contesto
