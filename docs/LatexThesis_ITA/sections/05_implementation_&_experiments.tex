@@ -813,21 +813,507 @@ genuini da artefatti del processo di export.
 
 \section{Commercial Forensic Tools Evaluation}
 \label{sec:results-commercial}
-% T6: matrice risultati/tool availability con celle pending dichiarate
-% Formula trasparente per risultati non ancora disponibili
+
+La valutazione degli strumenti forensi commerciali rappresenta il livello
+black-box della pipeline sperimentale. A differenza dei modelli proxy analizzati
+nelle sezioni precedenti, per i tool commerciali non sono disponibili
+architettura del modello, dataset di addestramento, soglie decisionali,
+preprocessing interno o logica completa di classificazione. La valutazione si
+basa quindi esclusivamente sugli output osservabili prodotti dal tool, sui tag
+assegnati, sulle categorie esportate e sul matching tra i file del forensic
+evaluation bundle e la ground truth sperimentale.
+
+
+\subsection{Black-box evaluation protocol}
+\label{subsec:results-commercial-protocol}
+
+Per evitare che il tool potesse utilizzare informazioni semantiche derivate dai
+nomi dei file, dai path o dalla struttura delle cartelle, la valutazione è stata
+condotta utilizzando la vista cieca del forensic evaluation bundle. I file sono
+stati importati con nomi neutri del tipo \texttt{bundle\_*.jpg}, mentre le
+informazioni relative a classe, sorgente, fold, attacco, trasformazione, hash e
+ground truth sono state mantenute separate nei manifest di audit.
+
+Dopo l'elaborazione da parte del tool, gli output esportati sono stati
+normalizzati e ricondotti ai campioni originali tramite identificativi del
+bundle e hash crittografici. Questa impostazione consente di distinguere tra
+immagini correttamente segnalate, immagini non segnalate, falsi negativi sulla
+classe \texttt{weapon}, falsi positivi sulle classi \texttt{non\_weapon} e
+\gls{ood}, e differenze di comportamento tra input clean, adversariali e
+anti-forensi.
+
+
+\subsection{Tool availability and export normalization}
+\label{subsec:results-commercial-availability}
+
+La Tabella~\ref{tab:results-commercial-tool-status} riassume lo stato della
+valutazione dei tool commerciali considerati. In questa fase, la valutazione
+quantitativa consolidata riguarda Magnet AXIOM/Magnet.AI, mentre gli altri tool
+rimangono subordinati alla disponibilità effettiva dei moduli di classificazione,
+alla possibilità di importare il forensic evaluation bundle e alla presenza di
+export normalizzabili.
+
+\begin{table}[H]
+\centering
+\caption{Stato della valutazione black-box degli strumenti forensi commerciali.}
+\label{tab:results-commercial-tool-status}
+\small
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+\textbf{Tool} & \textbf{Stato} & \textbf{Implicazione metodologica} \\
+\midrule
+
+Magnet AXIOM / Magnet.AI
+&
+Consolidato
+&
+Il forensic evaluation bundle è stato processato e l'export \texttt{Pictures.csv}
+è stato normalizzato rispetto alla ground truth sperimentale. I risultati sono
+inclusi nella valutazione black-box commerciale. \\
+
+X-Ways Forensics / Excire Photo AI
+&
+In attesa
+&
+La valutazione dipende dalla disponibilità del modulo, dal tipo di categorie
+visuali esportabili e dalla possibilità di ricondurre i risultati ai file del
+bundle tramite identificativi o hash. \\
+
+Cellebrite UFED
+&
+In attesa
+&
+Lo strumento è rilevante nel workflow forense, ma la valutazione della
+classificazione automatica di immagini dipende dalla presenza di funzionalità
+\gls{ai}-based esportabili e comparabili. \\
+
+Oxygen Forensic Detective
+&
+In attesa
+&
+La valutazione è subordinata alla disponibilità dei moduli automatici, alla
+struttura degli export e alla possibilità di normalizzare gli output rispetto
+alla ground truth sperimentale. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Per Magnet AXIOM/Magnet.AI, la normalizzazione è stata condotta sul run
+\texttt{FAIRLAB\_AXIOM\_RUN\_02}, selezionato come esportazione di riferimento
+per la completezza e la consistenza degli output prodotti. Nel run selezionato
+sono stati individuati cinque file di export complessivi, di cui un file
+predittivo principale, \texttt{Pictures.csv}, utilizzato per ricostruire le
+segnalazioni \texttt{Possible weapons}.
+
+
+\subsection{Magnet AXIOM / Magnet.AI results}
+\label{subsec:results-magnet}
+
+La valutazione di Magnet AXIOM/Magnet.AI costituisce il primo risultato
+black-box commerciale consolidato della pipeline. Gli output prodotti dal tool
+sono stati normalizzati mappando il tag \texttt{Possible weapons} come
+predizione positiva per la classe \texttt{weapon} e l'assenza di tag come
+predizione negativa. La normalizzazione ha prodotto un match completo tra export
+del tool e forensic evaluation bundle: tutte le 11\,500 immagini sono state
+ricondotte a un identificativo del bundle e nessuna riga è rimasta unmatched.
+
+\begin{table}[H]
+\centering
+\caption{Sintesi della normalizzazione dell'export Magnet AXIOM/Magnet.AI.}
+\label{tab:results-magnet-normalization-summary}
+\small
+\begin{tabularx}{0.82\textwidth}{@{}l r@{}}
+\toprule
+\textbf{Elemento} & \textbf{Valore} \\
+\midrule
+Immagini nel forensic evaluation bundle & 11\,500 \\
+Righe normalizzate dopo deduplicazione & 11\,500 \\
+Righe matched & 11\,500 \\
+Righe unmatched & 0 \\
+Predizioni interpretabili & 11\,500 \\
+Predizioni \texttt{weapon\_detected=true} & 5\,329 \\
+Predizioni \texttt{weapon\_detected=false} & 6\,171 \\
+Predizioni \texttt{weapon\_detected=unknown} & 0 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Sulle sole classi binarie \texttt{weapon} e \texttt{non\_weapon}, escludendo le
+500 immagini \gls{ood}, Magnet.AI raggiunge un'accuracy complessiva pari a
+0.933 e una precisione sulla classe \texttt{weapon} pari a 0.963. Tuttavia, il
+recall sulla classe \texttt{weapon} è pari a 0.901, con un \gls{fnr} di 0.099:
+542 immagini appartenenti alla classe \texttt{weapon} non sono state segnalate
+come \texttt{Possible weapons}.
+
+\begin{table}[H]
+\centering
+\caption{Prestazioni complessive di Magnet.AI sul task binario weapon/non\_weapon.}
+\label{tab:results-magnet-global-metrics}
+\small
+\begin{tabularx}{0.82\textwidth}{@{}l r@{}}
+\toprule
+\textbf{Metrica} & \textbf{Valore} \\
+\midrule
+Accuracy & 0.933 \\
+Precision \texttt{weapon} & 0.963 \\
+Recall \texttt{weapon} & 0.901 \\
+F1 \texttt{weapon} & 0.931 \\
+False negative rate & 0.099 \\
+False positive rate & 0.035 \\
+True positives & 4\,958 \\
+True negatives & 5\,309 \\
+False positives & 191 \\
+False negatives & 542 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Le metriche complessive riportate nella Tabella~\ref{tab:results-magnet-global-metrics}
+sono calcolate sulle 11\,000 immagini appartenenti al task binario
+\texttt{weapon}/\texttt{non\_weapon}. Il valore globale non corrisponde alla
+media aritmetica semplice tra clean e perturbed, poiché il bundle contiene
+1\,000 immagini clean e 10\,000 immagini perturbate. Di conseguenza, le
+condizioni perturbate hanno peso maggiore nella metrica aggregata.
+
+\begin{table}[H]
+\centering
+\caption{Comportamento di Magnet.AI per condizione sperimentale.}
+\label{tab:results-magnet-condition-metrics}
+\small
+\begin{tabularx}{\textwidth}{@{}l r r r r X@{}}
+\toprule
+\textbf{Condizione} &
+\textbf{Accuracy} &
+\textbf{Recall weapon} &
+\textbf{\gls{fnr}} &
+\textbf{\gls{fpr}} &
+\textbf{Nota operativa} \\
+\midrule
+
+Clean &
+0.950 &
+0.930 &
+0.070 &
+0.030 &
+Baseline commerciale su 1\,000 immagini non perturbate. \\
+
+Perturbed &
+0.932 &
+0.899 &
+0.101 &
+0.035 &
+Valori calcolati su 10\,000 immagini adversariali e anti-forensi; il degrado
+principale riguarda l'aumento dei falsi negativi sulla classe \texttt{weapon}. \\
+
+OOD &
+-- &
+-- &
+-- &
+-- &
+Weapon flag rate pari a 0.360: 180 immagini \gls{ood} su 500 sono state
+segnalate come \texttt{Possible weapons}. Le metriche binarie standard non sono
+applicabili. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Tra le condizioni perturbate, gli attacchi adversariali producono una
+degradazione più marcata rispetto alle trasformazioni anti-forensi: il
+\gls{fnr} medio adversariale è pari a 0.116, contro 0.087 per le trasformazioni
+anti-forensi. Questo risultato conferma che, nel caso di Magnet.AI, le
+perturbazioni progettate per interferire con il comportamento del classificatore
+hanno un impatto operativo superiore rispetto alle trasformazioni realistiche di
+degradazione o manipolazione dell'immagine.
+
+Il risultato sulle immagini \gls{ood} è particolarmente rilevante per il
+workflow di triage. Le immagini fuori distribuzione non appartengono al task
+binario weapon/non\_weapon e non devono quindi essere interpretate come errori
+classici di classificazione. Tuttavia, il fatto che 180 immagini \gls{ood} su
+500 siano state segnalate come \texttt{Possible weapons} indica che il modulo
+automatico può assegnare rilevanza investigativa a contenuti semanticamente
+ambigui o non appartenenti alla distribuzione attesa.
+
+A differenza dei modelli proxy, Magnet.AI non esporta valori di confidenza
+numerici associati alle singole predizioni. La classificazione osservabile si
+basa esclusivamente sulla presenza o assenza del tag \texttt{Possible weapons},
+senza indicazione quantitativa del grado di certezza. Questa caratteristica
+preclude il confronto diretto con le distribuzioni di confidenza dei modelli
+proxy e costituisce un ulteriore limite alla tracciabilità dell'output.
+
+La Tabella~\ref{tab:results-magnet-attack-metrics} riporta le condizioni più
+rilevanti tra attacchi adversariali e trasformazioni anti-forensi. FGSM risulta
+la condizione più critica per Magnet.AI, con accuracy pari a 0.867, recall
+\texttt{weapon} pari a 0.808 e \gls{fnr} pari a 0.192.
+
+\begin{table}[H]
+\centering
+\caption{Prestazioni di Magnet.AI nelle principali condizioni perturbate.}
+\label{tab:results-magnet-attack-metrics}
+\small
+\begin{tabularx}{\textwidth}{@{}l r r r r r r@{}}
+\toprule
+\textbf{Condizione} &
+\textbf{Accuracy} &
+\textbf{Recall} &
+\textbf{\gls{fnr}} &
+\textbf{\gls{fpr}} &
+\textbf{FN} &
+\textbf{FP} \\
+\midrule
+
+FGSM &
+0.867 &
+0.808 &
+0.192 &
+0.074 &
+96 &
+37 \\
+
+Sigma Zero &
+0.916 &
+0.856 &
+0.144 &
+0.024 &
+72 &
+12 \\
+
+SuperDeepFool &
+0.932 &
+0.894 &
+0.106 &
+0.030 &
+53 &
+15 \\
+
+Gaussian Blur &
+0.927 &
+0.880 &
+0.120 &
+0.026 &
+60 &
+13 \\
+
+Histogram Modification &
+0.936 &
+0.920 &
+0.080 &
+0.048 &
+40 &
+24 \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Nel complesso, Magnet.AI mostra prestazioni elevate in condizioni clean, ma
+evidenzia una riduzione della capacità di segnalazione della classe
+\texttt{weapon} in presenza di perturbazioni adversariali. Il dato più rilevante
+non è la sola riduzione di accuracy, ma l'aumento dei falsi negativi: in uno
+scenario di triage, un'immagine \texttt{weapon} non segnalata dal modulo
+automatico può ricevere minore priorità di revisione umana.
+
+Questi risultati devono essere interpretati come indicatori di affidabilità
+operativa, non come misura della robustezza algoritmica interna di Magnet.AI,
+che rimane non ispezionabile. Il tool mantiene buone prestazioni complessive e
+una precisione elevata sulla classe \texttt{weapon}, ma produce falsi negativi
+in condizioni clean e perturbate e segnala una quota non trascurabile di immagini
+\gls{ood} come \texttt{Possible weapons}. Questi risultati confermano che
+l'output automatico deve essere trattato come supporto al triage e non come
+decisione conclusiva o autosufficiente.
+
+
+\subsection{Pending commercial tools}
+\label{subsec:results-commercial-pending}
+
+Per X-Ways Forensics/Excire Photo AI, Cellebrite UFED e Oxygen Forensic
+Detective, la valutazione rimane pianificata ma non consolidata nella presente
+versione dei risultati. Questa scelta non rappresenta una lacuna metodologica,
+ma una conseguenza della natura operativa della sperimentazione: i tool
+commerciali differiscono per licenze, moduli disponibili, categorie esportabili,
+formati di output e grado di tracciabilità dei risultati.
+
+Per X-Ways Forensics con Excire Photo AI, la criticità principale riguarda la
+necessità di ottenere un export strutturato che consenta di associare in modo
+univoco ogni risultato classificatorio ai file del forensic evaluation bundle,
+preferibilmente tramite nome normalizzato, path o hash. Per Cellebrite UFED e
+Oxygen Forensic Detective, la comparabilità dipende invece dalla disponibilità
+effettiva di moduli \gls{ai}-based per la classificazione automatica di immagini,
+dalla licenza disponibile, dalla versione del software e dalla granularità degli
+output esportabili.
+
+In assenza di export normalizzati, non è metodologicamente corretto aggregare
+tali strumenti in una comparazione quantitativa diretta con Magnet.AI. Il
+livello commerciale della presente versione deve quindi essere interpretato come
+una valutazione black-box consolidata per Magnet AXIOM/Magnet.AI e come una base
+procedurale estendibile agli altri tool quando saranno disponibili output
+comparabili.
+
 
 \section{Comparative Robustness Discussion}
 \label{sec:results-comparative}
-% T7: sintesi comparativa dei proxy model e, quando disponibili,
-% dei tool commerciali normalizzati
+
+I risultati ottenuti consentono di confrontare tre livelli della pipeline:
+modelli proxy trasparenti, perturbazioni sperimentali controllate e valutazione
+black-box commerciale. I modelli proxy permettono di osservare in modo
+controllato il degrado prestazionale rispetto a clean, \gls{ood}, adversarial e
+anti-forensic input. Magnet.AI, invece, permette di verificare come uno strumento
+professionale black-box reagisca allo stesso bundle sperimentale, pur senza
+accesso alla logica interna del classificatore.
+
+La Tabella~\ref{tab:results-comparative-summary} sintetizza i principali
+risultati comparativi. Il confronto non deve essere interpretato come ranking
+diretto tra modelli proxy e tool commerciale, perché i primi espongono
+predizioni controllate su classi binarie note, mentre il secondo opera tramite
+categorie proprietarie e tag esportati. Il valore del confronto è operativo:
+mostrare se le tendenze di fragilità osservate nei proxy si riflettono anche in
+uno strumento black-box.
+
+\begin{table}[H]
+\centering
+\caption{Sintesi comparativa tra modelli proxy e Magnet.AI.}
+\label{tab:results-comparative-summary}
+\small
+\begin{tabularx}{\textwidth}{@{}p{3.5cm} r r r X@{}}
+\toprule
+\textbf{Sistema} &
+\textbf{Clean accuracy} &
+\textbf{Clean \gls{fnr}} &
+\textbf{OOD weapon rate} &
+\textbf{Osservazione principale} \\
+\midrule
+
+EfficientNet-B0 &
+0.978 &
+0.016 &
+0.370 &
+Migliore baseline clean, ma fortemente vulnerabile ad alcune perturbazioni
+adversariali, in particolare Sigma Zero e FGSM. \\
+
+ResNet18 &
+0.964 &
+0.030 &
+0.438 &
+Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 in alcuni
+scenari adversariali, pur con vulnerabilità osservabili. \\
+
+CLIP &
+0.927 &
+0.012 &
+0.836 &
+Accuracy clean inferiore ai modelli supervisionati, ma forte tendenza a
+segnalare come \texttt{weapon} immagini fuori distribuzione. \\
+
+Magnet AXIOM / Magnet.AI &
+0.950 &
+0.070 &
+0.360 &
+Buona baseline commerciale, ma aumento dei falsi negativi su input perturbati e
+weapon flag rate non trascurabile sulle immagini \gls{ood}. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Una divergenza rilevante emerge nel confronto tra CLIP e i modelli
+supervisionati. CLIP mostra un weapon rate su immagini \gls{ood} molto più alto
+rispetto a EfficientNet-B0 e ResNet18, pur con una confidenza media inferiore.
+Magnet.AI, invece, mostra un weapon flag rate su \gls{ood} pari a 0.360, più
+vicino al comportamento di EfficientNet-B0 che a quello di CLIP. CLIP tende ad
+assegnare più facilmente la classe \texttt{weapon} su input fuori distribuzione
+\mbox{(weapon rate 0.836)}, mentre i modelli supervisionati e Magnet.AI mostrano
+un comportamento più selettivo, con weapon rate compreso tra 0.360 e 0.438.
+
+Questa differenza suggerisce che i sistemi non reagiscono agli input fuori
+distribuzione nello stesso modo. Dal punto di vista operativo, tale variabilità
+conferma che la robustezza non può essere dedotta dalla sola accuracy clean, ma
+deve essere valutata rispetto a condizioni specifiche di impiego, inclusi input
+anomali, borderline o semanticamente distanti dalla distribuzione attesa.
+
 
 \section{Explainability Analysis and Representative Failure Cases}
 \label{sec:results-xai}
-% F5: Integrated Gradients su casi rappresentativi clean vs perturbed
-% Gallery completa → Appendice
+
+L'analisi di explainability ha una funzione qualitativa e diagnostica. Non
+sostituisce le metriche quantitative riportate nelle sezioni precedenti, ma
+serve a osservare come le perturbazioni modifichino le regioni dell'immagine che
+contribuiscono alla decisione del modello. In questa tesi, l'analisi è condotta
+tramite Integrated Gradients sui modelli proxy, con particolare attenzione ai
+casi in cui l'immagine clean viene classificata correttamente mentre la versione
+perturbata produce un errore.
+
+\subsection{Selection of representative cases}
+\label{subsec:results-xai-selection}
+
+I casi rappresentativi sono selezionati a partire dalle failure rows più
+rilevanti, privilegiando immagini per cui:
+\begin{itemize}
+    \item la predizione clean è corretta;
+    \item la predizione perturbata è errata;
+    \item la perturbazione appartiene a una condizione sperimentalmente critica;
+    \item il confronto visuale tra immagine clean, immagine perturbata e mappa
+    di attribuzione è interpretabile.
+\end{itemize}
+
+\subsection{Clean versus perturbed attribution maps}
+\label{subsec:results-xai-maps}
+
+Al momento della redazione, la selezione dei casi rappresentativi è stata
+definita sulla base delle failure rows più rilevanti. Le attribution map tramite
+Integrated Gradients saranno inserite nella versione finale del capitolo; la
+gallery completa sarà riportata in appendice. La valutazione quantitativa rimane
+fondata sulle metriche delle sezioni precedenti.
+
+Le mappe saranno interpretate verificando se, dopo la perturbazione, il modello
+continui a concentrarsi sull'oggetto investigativamente rilevante o se
+l'attenzione si sposti verso sfondo, texture, bordi o artefatti introdotti dalla
+trasformazione.
+
 
 \section{Operational Forensic Implications and Limitations}
 \label{sec:results-implications}
-% Falsi negativi, tracciabilità, affidabilità operativa,
-% calibrazione confidence, trasferibilità degli attacchi,
-% limiti dei tool black-box
+
+I risultati sperimentali hanno implicazioni operative rilevanti per l'uso di
+sistemi \gls{ai}-based nella \gls{df}. La prima riguarda i falsi negativi. In
+un workflow di triage, un falso negativo sulla classe \texttt{weapon} è più
+critico di un falso positivo, poiché può ridurre la probabilità che un contenuto
+investigativamente rilevante venga sottoposto a revisione umana. Questo vale sia
+per i modelli proxy sia per i tool commerciali black-box.
+
+La seconda implicazione riguarda gli input \gls{ood}. Le immagini fuori
+distribuzione non devono essere valutate come una normale terza classe del task
+binario, ma come stress test della capacità del sistema di gestire input
+ambigui, sintetici, borderline o semanticamente distanti dalla distribuzione
+attesa. Il comportamento osservato su Magnet.AI, che segnala 180 immagini
+\gls{ood} su 500 come \texttt{Possible weapons}, mostra come tali input possano
+generare rumore operativo e aumentare il carico di revisione dell'analista.
+
+La terza implicazione riguarda la tracciabilità. La pipeline proposta mantiene
+separati dataset, manifest, hash, bundle cieco, predizioni, metriche e output
+dei tool. Questa separazione consente di ricostruire il percorso sperimentale e
+di verificare in modo auditabile il rapporto tra input, manipolazione, output e
+ground truth. Tale requisito è essenziale in ambito forense, dove la
+riproducibilità e la documentazione del processo assumono valore metodologico e
+operativo.
+
+La valutazione presenta limiti che devono essere dichiarati esplicitamente. I
+tool commerciali sono valutati come black-box e non consentono di ispezionare
+modello, training set, soglie o preprocessing interno. Inoltre, la valutazione
+quantitativa commerciale è al momento consolidata per Magnet AXIOM/Magnet.AI,
+mentre X-Ways/Excire, Cellebrite UFED e Oxygen Forensic Detective richiedono
+ulteriori export normalizzabili. Infine, la selezione delle perturbazioni non
+mira a coprire in modo esaustivo l'intero spazio dell'\gls{aml}, ma a costruire
+uno stress test operativo coerente con la finalità forense della tesi.
+
+I risultati di \gls{fairlab} mostrano che sistemi con accuracy clean elevata,
+come EfficientNet-B0 e ResNet18, possono produrre un incremento significativo
+dei falsi negativi in presenza di perturbazioni adversariali, e che un tool
+commerciale con buona baseline può segnalare come rilevanti immagini fuori
+distribuzione con weapon flag rate pari a 0.360. Questi valori indicano che
+l'affidabilità operativa non può essere dedotta dalla sola performance nominale
+su dati clean, ma richiede validazione sperimentale esplicita nelle condizioni
+attese di utilizzo. In conclusione, l'\gls{ai} può supportare il triage e la
+prioritizzazione delle evidenze, ma deve rimanere inserita in un workflow
+human-in-the-loop, tracciabile e soggetto a verifica critica da parte
+dell'analista forense.
