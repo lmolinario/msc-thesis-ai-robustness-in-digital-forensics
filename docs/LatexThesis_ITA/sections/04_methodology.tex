@@ -755,6 +755,83 @@ model-agnostic
 \end{tabularx}
 \end{table}
 
+\begin{table}[H]
+\centering
+\small
+\caption{Parametri principali utilizzati per la generazione degli attacchi adversariali.}
+\label{tab:methodology-adversarial-parameters}
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{0.20\textwidth}
+    >{\raggedright\arraybackslash}p{0.22\textwidth}
+    X
+@{}}
+\toprule
+\textbf{Attacco} &
+\textbf{Configurazione} &
+\textbf{Parametri principali} \\
+\midrule
+
+\glsentryshort{fgsm}
+&
+White-box, gradient-based, untargeted
+&
+\(\epsilon = 0.031372549 \simeq 8/255\); spazio dei pixel normalizzato in \([0,1]\);
+input size \(224 \times 224\); target model \texttt{efficientnet\_b0};
+output in formato \glsentryshort{png}. \\
+
+\glsentryname{onepixel}
+&
+Model-dependent, differential evolution
+&
+Un pixel modificato; \texttt{max\_iterations = 50};
+\texttt{population\_size = 20}; \texttt{seed = 42};
+obiettivo di ottimizzazione: minimizzazione della probabilità della classe vera;
+input size \(224 \times 224\); output in formato \glsentryshort{png}. \\
+
+\glsentryname{sigmazero}
+&
+Model-dependent, sparse optimization
+&
+\texttt{steps = 1000}; \(\eta = 1.0\); \(\sigma = 0.001\);
+\(\tau = 0.3\); \texttt{tau\_factor = 0.01};
+\(\ell_{\infty}\) gradient norm; attacco untargeted;
+input size \(224 \times 224\); output in formato \glsentryshort{png}. \\
+
+\glsentryname{superdeepfool}
+&
+Model-dependent, decision-boundary based
+&
+Variante \texttt{SDF(infinity,1)}; \texttt{max\_outer\_iterations = 20};
+\texttt{max\_deepfool\_iterations = 50}; \texttt{projection\_steps = 1};
+candidate classes non fissate; input size \(224 \times 224\);
+output in formato \glsentryshort{png}. \\
+
+\glsentryname{colorshift}
+&
+Model-agnostic, color-space perturbation
+&
+\texttt{red\_shift = 12}; \texttt{green\_shift = 0};
+\texttt{blue\_shift = -12}; \texttt{saturation\_factor = 1.1};
+\texttt{contrast\_factor = 1.0}; output in formato \glsentryshort{jpeg}
+con qualità 95. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+I parametri riportati nella Tabella~\ref{tab:methodology-adversarial-parameters}
+rappresentano la configurazione principale utilizzata per generare gli artefatti
+adversariali. La configurazione completa di ciascun run è conservata nei summary
+JSON e nei manifest CSV in \codepath{attacks/manifests/}. I summary documentano
+lo script di generazione, il manifest di input, la cartella di output, i conteggi
+attesi e generati, la distribuzione per fold e classe e i controlli di integrità.
+I manifest CSV mantengono invece il collegamento tra immagine pulita, artefatto
+perturbato, modello target, checkpoint fold-aware, parametri specifici
+dell'attacco, path di output e hash degli artefatti prodotti. In questo modo, i
+parametri essenziali rimangono leggibili nel testo della tesi, mentre il dettaglio
+completo resta disponibile nella repository sperimentale.
+
+
 La selezione degli attacchi copre famiglie diverse di manipolazione. \gls{fgsm}
 rappresenta un attacco gradient-based a singolo passo, utile come baseline
 adversariale efficiente e riproducibile \cite{goodfellow2015explaining}. One
@@ -783,19 +860,9 @@ registra inoltre il modello target, il checkpoint utilizzato e l'hash SHA256 del
 checkpoint, così da rendere verificabile la relazione tra immagine perturbata e
 versione specifica del proxy model.
 
-I summary JSON documentano i parametri di generazione, il manifest di input,
-l'output root, il manifest prodotto, il numero di immagini attese e generate, la
-distribuzione per fold, la distribuzione per classe e i controlli di integrità.
-Nel caso di \gls{fgsm}, il parametro \(\epsilon\) è pari a \(8/255\), con input
-size pari a 224 e output PNG. Per One Pixel Attack, il summary registra il numero
-massimo di iterazioni, la dimensione della popolazione e il seed utilizzato. Per
-Sigma Zero Attack sono documentati il numero di step, i parametri \(\eta\),
-\(\sigma\), \(\tau\), il fattore di adattamento della soglia e la norma di
-normalizzazione del gradiente. Per SuperDeepFool sono registrati il numero
-massimo di iterazioni esterne, le iterazioni interne DeepFool, il numero di
-projection step e la variante utilizzata. Per \texttt{color\_shift}, invece,
-sono registrati formato \gls{jpeg}, qualità di compressione e parametri di
-alterazione cromatica.
+
+
+
 
 È importante precisare che la presente sezione descrive la selezione e la
 generazione degli artefatti adversariali, non i risultati di robustezza. I campi
@@ -906,6 +973,64 @@ Cinque trasformazioni applicate alle 1000 immagini del subset binario.
 \end{tabularx}
 \end{table}
 
+
+
+\begin{table}[H]
+\centering
+\small
+\caption{Setting principali utilizzati per le trasformazioni anti-forensi.}
+\label{tab:methodology-anti-forensic-parameters}
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{0.25\textwidth}
+    >{\raggedright\arraybackslash}p{0.23\textwidth}
+    X
+@{}}
+\toprule
+\textbf{Trasformazione} &
+\textbf{Operazione} &
+\textbf{Setting utilizzati} \\
+\midrule
+
+\glsentryname{jpegrecompression}
+&
+Ricompressione lossy
+&
+Output in formato \glsentryshort{jpeg}; qualità pari a 70. \\
+
+\glsentryname{resampleresize}
+&
+Downsampling e ripristino
+&
+Fattore di scala pari a 0.5; interpolazione bicubica;
+ripristino alla dimensione originaria; output in formato \glsentryshort{jpeg}
+con qualità pari a 95. \\
+
+\glsentryname{gaussianblur}
+&
+Sfocatura controllata
+&
+Filtro gaussiano con raggio pari a 1.5; output in formato
+\glsentryshort{jpeg} con qualità pari a 95. \\
+
+\glsentryname{histogrammodification}
+&
+Modifica della distribuzione tonale
+&
+Equalizzazione dell'istogramma; output in formato \glsentryshort{jpeg}
+con qualità pari a 95. \\
+
+\glsentryname{contraststretching}
+&
+Normalizzazione del contrasto
+&
+Autocontrast con cutoff percentuale pari a 1.0; output in formato
+\glsentryshort{jpeg} con qualità pari a 95. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
 Tali trasformazioni non vengono intese come catalogo esaustivo delle tecniche
 anti-forensi applicabili alle immagini digitali, né come semplici operazioni di
 data augmentation, ma come manipolazioni controllate dell'artefatto immagine
@@ -923,16 +1048,18 @@ consente di confrontare in modo simmetrico le risposte dei modelli e, nelle fasi
 successive, degli strumenti forensi, rispetto a un insieme bilanciato di
 manipolazioni non ottimizzate sul classificatore.
 
-I parametri principali della generazione sono registrati nel summary
-\codepath{attacks/manifests/anti_forensic_generation_summary.json}. Nel run
-corrente, la ricompressione \gls{jpeg} utilizza qualità 70, la trasformazione
-resample~+~resize applica un fattore di scala pari a 0.5, il Gaussian blur usa
-raggio 1.5 e il contrast stretching usa cutoff pari a 1.0. Tutte le immagini
-generate sono salvate in formato \texttt{.jpg}; per le trasformazioni diverse
-dalla ricompressione \gls{jpeg} primaria, il salvataggio avviene con qualità
-\gls{jpeg} pari a 95. Questi parametri non sono presentati come ottimali, ma
-come configurazione controllata e riproducibile per introdurre degradazioni
-moderate e comparabili sull'intero subset sperimentale.
+
+
+I setting principali delle trasformazioni sono sintetizzati nella
+Tabella~\ref{tab:methodology-anti-forensic-parameters}. La configurazione
+completa del run è registrata nel summary
+\codepath{attacks/manifests/anti_forensic_generation_summary.json}, mentre il
+manifest \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}
+mantiene il collegamento tra immagine pulita, trasformazione applicata,
+parametri, path di output e hash dell'artefatto generato. I parametri adottati
+non sono presentati come configurazione ottimale, ma come setting controllato e
+riproducibile per introdurre degradazioni moderate e comparabili sull'intero
+subset sperimentale.
 
 La pipeline produce il manifest
 \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}, nel quale ogni
