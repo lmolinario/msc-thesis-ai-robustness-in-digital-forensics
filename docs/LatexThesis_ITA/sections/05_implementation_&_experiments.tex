@@ -923,7 +923,7 @@ ricondotte a un identificativo del bundle e nessuna riga è rimasta unmatched.
 \caption{Sintesi della normalizzazione dell'export Magnet AXIOM/Magnet.AI.}
 \label{tab:results-magnet-normalization-summary}
 \small
-\begin{tabularx}{0.82\textwidth}{@{}l r@{}}
+\begin{tabular}{lr}
 \toprule
 \textbf{Elemento} & \textbf{Valore} \\
 \midrule
@@ -936,7 +936,7 @@ Predizioni \texttt{weapon\_detected=true} & 5\,329 \\
 Predizioni \texttt{weapon\_detected=false} & 6\,171 \\
 Predizioni \texttt{weapon\_detected=unknown} & 0 \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 Sulle sole classi binarie \texttt{weapon} e \texttt{non\_weapon}, escludendo le
@@ -951,7 +951,7 @@ come \texttt{Possible weapons}.
 \caption{Prestazioni complessive di Magnet.AI sul task binario weapon/non\_weapon.}
 \label{tab:results-magnet-global-metrics}
 \small
-\begin{tabularx}{0.82\textwidth}{@{}l r@{}}
+\begin{tabular}{lr}
 \toprule
 \textbf{Metrica} & \textbf{Valore} \\
 \midrule
@@ -966,7 +966,7 @@ True negatives & 5\,309 \\
 False positives & 191 \\
 False negatives & 542 \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 Le metriche complessive riportate nella Tabella~\ref{tab:results-magnet-global-metrics}
@@ -1052,7 +1052,7 @@ la condizione più critica per Magnet.AI, con accuracy pari a 0.867, recall
 \caption{Prestazioni di Magnet.AI nelle principali condizioni perturbate.}
 \label{tab:results-magnet-attack-metrics}
 \small
-\begin{tabularx}{\textwidth}{@{}l r r r r r r@{}}
+\begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Condizione} &
 \textbf{Accuracy} &
@@ -1104,7 +1104,7 @@ Histogram Modification &
 24 \\
 
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 Nel complesso, Magnet.AI mostra prestazioni elevate in condizioni clean, ma
@@ -1175,7 +1175,7 @@ uno strumento black-box.
 \caption{Sintesi comparativa tra modelli proxy e Magnet.AI.}
 \label{tab:results-comparative-summary}
 \small
-\begin{tabularx}{\textwidth}{@{}p{3.5cm} r r r X@{}}
+\begin{tabularx}{\textwidth}{@{}p{1.7cm} r r r X@{}}
 \toprule
 \textbf{Sistema} &
 \textbf{Clean accuracy} &
@@ -1296,7 +1296,7 @@ Falso negativo su input pulito, rappresentativo di una mancata rilevazione in as
 \texttt{weapon} &
 Campione \gls{ood} classificato come \texttt{weapon}, rappresentativo del rischio di inclusione semantica impropria. \\
 \texttt{xai\_case\_0010} &
-\texttt{histogram\_modification} &
+\texttt{histogram modification} &
 \texttt{weapon} &
 \texttt{non\_weapon} &
 Falso negativo anti-forense, rappresentativo degli effetti di manipolazioni visuali a basso livello. \\

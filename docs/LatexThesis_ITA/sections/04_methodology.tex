@@ -561,7 +561,7 @@ tra training e holdout sperimentale.
 \centering
 \caption{Protocollo fold-aware per l'addestramento dei proxy model.}
 \label{tab:methodology-fold-aware-training}
-\begin{tabularx}{\textwidth}{@{}lX@{}}
+\begin{tabular}{lrrrr}
 \toprule
 \textbf{Checkpoint target} & \textbf{Fold utilizzati per l'addestramento} \\
 \midrule
@@ -571,8 +571,10 @@ tra training e holdout sperimentale.
 \texttt{fold\_4.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_5} \\
 \texttt{fold\_5.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4} \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
+
+
 
 Lo script ufficiale per l'addestramento dei proxy model è
 \codepath{models/scripts/12_train_proxy_models.py}. Esso utilizza come input
