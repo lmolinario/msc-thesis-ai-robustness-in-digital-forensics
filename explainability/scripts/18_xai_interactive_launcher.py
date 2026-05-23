@@ -16,13 +16,20 @@ Workflow summary
 6. Manual XAI: all attacks -> select N cases per attack -> save manifest only.
 7. Generate IG from existing manual selection manifest.
 8. Custom guided run.
+9. Chapter 5 XAI: generate core candidate cases.
+10. Chapter 5 XAI: manual review by category -> generate final cases.
 
 Notes
 -----
 - candidate_limit = 0 means show all candidates for each reviewed attack.
-- cases_per_attack defines how many cases should be selected, not how many
-  candidates should be displayed.
+- cases_per_attack defines how many cases should be selected for each attack,
+  not how many candidates should be displayed.
+- cases_per_bucket defines how many cases should be selected for each Chapter 5
+  category during thesis-oriented manual review.
 - The launcher only builds and executes commands for the official XAI script.
+- The official XAI script saves thesis-ready assets as separate files:
+  input image, IG overlay, IG heatmap, diagnostic comparison, masks, and
+  attribution distribution.
 """
 
 from __future__ import annotations
@@ -47,6 +54,7 @@ SUPPORTED_STRATEGIES = [
     "ood_high_confidence",
     "perturbed_failures",
     "attack_stratified",
+    "chapter5_core",
     "all",
 ]
 SUPPORTED_ATTRIBUTION_TARGETS = ["true_label", "predicted_label", "both"]
@@ -69,6 +77,57 @@ DEFAULT_SELECTION_MANIFEST = (
     "explainability/manifests/"
     "xai_manual_selection_db__efficientnet_b0_attack_stratified_per_attack_3_manual_target_both.csv"
 )
+
+OUTPUT_ASSET_POLICY = [
+    "__input.png                       = original/resized input image",
+    "__predicted_label_*__overlay.png   = IG overlay only, thesis-ready",
+    "__predicted_label_*__heatmap.png   = IG heatmap only",
+    "__predicted_label_*__comparison.png = diagnostic side-by-side figure",
+    "__predicted_label_*__mask.png      = normalized grayscale attribution mask",
+    "__predicted_label_*__top*_mask.png = top-percentile attribution mask",
+    "__predicted_label_*__distribution.png = attribution value distribution",
+]
+
+CHAPTER5_SELECTION_GUIDE = [
+    (
+        "clean_correct_weapon",
+        "Caso 1 - Clean corretto: seleziona 1 immagine weapon pulita, leggibile, classificata correttamente come weapon.",
+    ),
+    (
+        "clean_false_negative_weapon",
+        "Caso 2 - Falso negativo clean: seleziona 1 immagine weapon pulita classificata erroneamente come non_weapon.",
+    ),
+    (
+        "ood_as_weapon",
+        "Caso 3 - OOD as weapon: seleziona 1 immagine fuori distribuzione classificata come weapon.",
+    ),
+    (
+        "anti_forensic_failure",
+        "Caso 4 - Anti-forensic failure: seleziona 1 immagine manipolata ma ancora leggibile che produce errore.",
+    ),
+    (
+        "adversarial_high_conf_failure",
+        "Caso 5 - Adversarial high-confidence failure: seleziona 1 immagine adversarial con errore chiaro e confidenza alta.",
+    ),
+]
+
+
+def print_chapter5_selection_guide(candidates_per_category: int, selections_per_category: int) -> None:
+    print("\n" + "=" * 80)
+    print("CHAPTER 5 XAI - COSA DEVI SELEZIONARE")
+    print("=" * 80)
+    print(f"Per ogni categoria verranno mostrati fino a {candidates_per_category} candidati.")
+    print(f"Per ogni categoria devi selezionare esattamente {selections_per_category} caso/i finale/i.")
+    print("\nCategorie:")
+    for bucket, instruction in CHAPTER5_SELECTION_GUIDE:
+        print(f"- {bucket}: {instruction}")
+    print("\nComandi nella finestra immagini:")
+    print("- click sinistro = seleziona")
+    print("- click destro   = deseleziona")
+    print("- q              = salva e passa alla categoria successiva")
+    print("- h              = help")
+    print("- t              = riepilogo")
+    print("=" * 80)
 
 PRESETS: dict[str, dict[str, Any]] = {
     "1": {
@@ -204,6 +263,51 @@ PRESETS: dict[str, dict[str, Any]] = {
             "verbose": True,
         },
     },
+
+    "9": {
+        "name": "Chapter 5 XAI: generate core candidate cases with separate assets",
+        "description": "Generate thesis-oriented candidate cases and save input, overlay, heatmap and diagnostic assets separately.",
+        "args": {
+            "model": ["efficientnet_b0"],
+            "strategy": "chapter5_core",
+            "max_cases": 3,
+            "n_steps": 32,
+            "attribution_target": "predicted_label",
+            "top_percentile": 90,
+            "high_confidence_threshold": 0.90,
+            "device": "auto",
+            "input_size": 224,
+            "output_tag": "chapter5_separate_assets_candidates",
+            "force": True,
+            "verbose": True,
+        },
+    },
+    "10": {
+        "name": "Chapter 5 XAI: manual review by category -> generate final separate assets",
+        "description": (
+            "For each Chapter 5 XAI category, show candidate images, "
+            "manually select the final cases, and generate separate thesis-ready XAI assets only for the selected cases."
+        ),
+        "args": {
+            "model": ["efficientnet_b0"],
+            "strategy": "chapter5_core",
+            "max_cases": 500,
+            "cases_per_bucket": 3,
+            "n_steps": 32,
+            "attribution_target": "predicted_label",
+            "top_percentile": 90,
+            "high_confidence_threshold": 0.90,
+            "device": "auto",
+            "input_size": 224,
+            "manual_review": True,
+            "manual_only": False,
+            "generate_after_manual": True,
+            "output_tag": "chapter5_separate_assets_final",
+            "force": True,
+            "verbose": True,
+        },
+    },
+
 }
 
 
@@ -346,6 +450,7 @@ def print_header() -> None:
     print(f"Repository root : {REPO_ROOT}")
     print(f"XAI script      : {XAI_SCRIPT}")
     print(f"Command log     : {COMMAND_LOG_PATH}")
+    print("Output policy   : separate input / overlay / heatmap / comparison assets")
     print("=" * 80)
 
 
@@ -372,6 +477,29 @@ def apply_mandatory_preset_questions(args: dict[str, Any], preset_key: str) -> d
         updated["attack_name"] = DEFAULT_ATTACKS.copy()
         mode_tag = "generate_ig" if preset_key == "5" else "manifest_only"
         updated["output_tag"] = updated.get("output_tag", "") or f"manual_all_attacks_{requested_cases}_cases_{mode_tag}"
+    elif preset_key == "10":
+        print_chapter5_selection_guide(
+            candidates_per_category=int(updated.get("max_cases", 3)),
+            selections_per_category=int(updated.get("cases_per_bucket", 1)),
+        )
+        candidate_cases = ask_int(
+            "How many candidate images do you want to display per Chapter 5 category?",
+            int(updated.get("max_cases", 3)),
+        )
+        selected_cases = ask_int(
+            "How many final cases do you want to select per Chapter 5 category?",
+            int(updated.get("cases_per_bucket", 1)),
+        )
+        print_chapter5_selection_guide(
+            candidates_per_category=candidate_cases,
+            selections_per_category=selected_cases,
+        )
+        updated["max_cases"] = candidate_cases
+        updated["cases_per_bucket"] = selected_cases
+        updated["manual_review"] = True
+        updated["manual_only"] = False
+        updated["generate_after_manual"] = True
+        updated["output_tag"] = updated.get("output_tag", "") or "chapter5_separate_assets_final"
     return updated
 
 
@@ -387,6 +515,8 @@ def build_command(args: dict[str, Any]) -> list[str]:
             command.extend(["--max-cases", str(args["max_cases"])])
         if "cases_per_attack" in args:
             command.extend(["--cases-per-attack", str(args["cases_per_attack"])])
+        if "cases_per_bucket" in args:
+            command.extend(["--cases-per-bucket", str(args["cases_per_bucket"])])
         if "candidate_limit" in args:
             command.extend(["--candidate-limit", str(args["candidate_limit"])])
         if args.get("attack_name", []):
@@ -422,13 +552,33 @@ def maybe_customize_preset(args: dict[str, Any]) -> dict[str, Any]:
         updated["model"] = ask_multi_choice("Select model(s)", SUPPORTED_MODELS, updated.get("model", ["efficientnet_b0"]))
         updated["strategy"] = ask_choice("Select strategy", SUPPORTED_STRATEGIES, updated.get("strategy", "attack_stratified"))
         if updated["strategy"] == "attack_stratified":
-            updated["candidate_limit"] = ask_int("Candidate limit per attack (0 = show all candidates)", int(updated.get("candidate_limit", 0)))
+            updated["candidate_limit"] = ask_int(
+                "Candidate limit per attack (0 = show all candidates)",
+                int(updated.get("candidate_limit", 0)),
+            )
+        elif updated["strategy"] == "chapter5_core":
+            updated["max_cases"] = ask_int(
+                "Candidate images per Chapter 5 category",
+                int(updated.get("max_cases", 3)),
+            )
         else:
             updated["max_cases"] = ask_int("Max cases", int(updated.get("max_cases", 30)))
         updated["manual_review"] = ask_bool("Enable manual review", bool(updated.get("manual_review", False)))
         if updated["manual_review"]:
-            updated["manual_only"] = ask_bool("Manual selection only, without IG generation", bool(updated.get("manual_only", False)))
-            updated["generate_after_manual"] = False if updated["manual_only"] else ask_bool("Generate IG after manual review", bool(updated.get("generate_after_manual", True)))
+            if updated["strategy"] == "chapter5_core":
+                updated["cases_per_bucket"] = ask_int(
+                    "Final cases to select per Chapter 5 category",
+                    int(updated.get("cases_per_bucket", 1)),
+                )
+            updated["manual_only"] = ask_bool(
+                "Manual selection only, without IG generation",
+                bool(updated.get("manual_only", False)),
+            )
+            updated["generate_after_manual"] = (
+                False
+                if updated["manual_only"]
+                else ask_bool("Generate IG after manual review", bool(updated.get("generate_after_manual", True)))
+            )
     updated["n_steps"] = ask_int("Integrated Gradients steps", int(updated.get("n_steps", 32)))
     updated["high_confidence_threshold"] = ask_float("High-confidence threshold", float(updated.get("high_confidence_threshold", 0.90)))
     updated["attribution_target"] = ask_choice("Attribution target", SUPPORTED_ATTRIBUTION_TARGETS, updated.get("attribution_target", "true_label"))
@@ -473,6 +623,13 @@ def build_custom_run() -> dict[str, Any]:
             if args["manual_review"]:
                 args["manual_only"] = ask_bool("Manual selection only, without IG generation", default=False)
                 args["generate_after_manual"] = False if args["manual_only"] else ask_bool("Generate IG after manual review", default=True)
+        elif args["strategy"] == "chapter5_core":
+            args["max_cases"] = ask_int("Candidate images per Chapter 5 category", 500)
+            args["cases_per_bucket"] = ask_int("Final cases to select per Chapter 5 category", 3)
+            args["manual_review"] = ask_bool("Enable manual review by Chapter 5 category", default=True)
+            if args["manual_review"]:
+                args["manual_only"] = ask_bool("Manual selection only, without IG generation", default=False)
+                args["generate_after_manual"] = False if args["manual_only"] else ask_bool("Generate IG after manual review", default=True)
         else:
             args["max_cases"] = ask_int("Max cases", 30)
             args["manual_review"] = ask_bool("Enable manual review", default=False)
@@ -482,7 +639,7 @@ def build_custom_run() -> dict[str, Any]:
     args["top_percentile"] = ask_float("Top percentile", 90)
     args["device"] = ask_choice("Device", SUPPORTED_DEVICES, "auto")
     args["input_size"] = ask_int("Input size", 224)
-    args["output_tag"] = ask_string("Optional output tag", "")
+    args["output_tag"] = ask_string("Optional output tag", "chapter5_separate_assets_final")
     args["force"] = ask_bool("Force overwrite current run outputs", True)
     args["verbose"] = ask_bool("Verbose logging", True)
     return args
@@ -502,6 +659,9 @@ def execute_command(command: list[str], preset_name: str, args_payload: dict[str
     return_code = process.wait()
     print("\n" + "=" * 80)
     print(f"Process finished with exit code {return_code}")
+    if return_code == 0:
+        print("[OK] Output XAI generated with separate thesis-ready assets.")
+        print("[OK] For LaTeX, use the pairs: __input.png + __overlay.png.")
     print("=" * 80)
     return int(return_code)
 
@@ -509,8 +669,12 @@ def execute_command(command: list[str], preset_name: str, args_payload: dict[str
 def print_menu() -> None:
     print("\nAvailable workflows:")
     for key in sorted(PRESETS.keys(), key=int):
-        print(f"{key}. {PRESETS[key]['name']}")
+        if int(key) < 8:
+            print(f"{key}. {PRESETS[key]['name']}")
     print("8. Custom guided run")
+    for key in sorted(PRESETS.keys(), key=int):
+        if int(key) > 8:
+            print(f"{key}. {PRESETS[key]['name']}")
     print("0. Exit")
 
 
