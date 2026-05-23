@@ -1409,18 +1409,31 @@ non viene esposta al tool durante l'importazione. Questa separazione riduce il
 rischio di bias indotto dai nomi dei file o dai percorsi e consente di
 normalizzare gli output solo in una fase successiva.
 
-Gli strumenti considerati nel protocollo comprendono Magnet AXIOM,
-X-Ways Forensics, eventualmente in combinazione con Excire Forensics,
-Autopsy e ulteriori strumenti forensi solo se compatibili con la disponibilità
-di licenza, versione software, moduli abilitati e possibilità di esportare
-output riconducibili agli artefatti del bundle. Magnet AXIOM viene considerato
-per la presenza di funzionalità di analisi, categorizzazione o triage
-automatizzato dei contenuti multimediali. X-Ways Forensics, eventualmente
-integrato con Excire Forensics, viene incluso come ambiente professionale per
-l'ispezione, la gestione e l'analisi visuale di contenuti immagine. Autopsy viene
-invece trattato come baseline open-source per ingest, hashing, visualizzazione,
-tagging e reporting, non come equivalente diretto ai tool proprietari con moduli
-di categorizzazione automatizzata.
+Ai fini della valutazione operativo-forense, gli strumenti considerati nel
+protocollo sono distinti in tre categorie metodologiche. La prima comprende
+gli strumenti effettivamente sottoposti a valutazione sperimentale, per i quali
+gli output prodotti sono esportati, normalizzati e confrontati con il ground
+truth del dataset congelato. La seconda comprende gli strumenti predisposti nel
+protocollo, ma non necessariamente inclusi nella valutazione quantitativa finale
+qualora gli output non risultino disponibili in forma sufficientemente
+strutturata o comparabile. La terza comprende strumenti di supporto utilizzati
+per attività accessorie, quali ingest, indicizzazione, visualizzazione, tagging
+o reporting, senza attribuire loro il ruolo di classificatori \gls{ai}-based
+comparabili ai sistemi commerciali dotati di moduli di categorizzazione
+automatizzata.
+
+In questa prospettiva, \texttt{Magnet AXIOM} e il relativo modulo
+\texttt{Magnet.AI}, \texttt{X-Ways Forensics} in combinazione con
+\texttt{Excire Photo AI}, \texttt{Cellebrite UFED} e \texttt{Oxygen Forensics}
+sono trattati come componenti della pipeline operativo-forense. Tuttavia, la
+loro inclusione nell'analisi quantitativa dipende dalla disponibilità di
+esportazioni strutturate e riconducibili alle categorie sperimentali definite
+nel presente protocollo. \texttt{Autopsy} viene invece considerato come
+ambiente open-source di supporto per ingest, hashing, visualizzazione, tagging
+e reporting, non come equivalente diretto ai tool proprietari con moduli di
+categorizzazione automatizzata. Tale distinzione consente di evitare una
+sovrapposizione impropria tra predisposizione metodologica del test,
+disponibilità effettiva degli output e comparabilità quantitativa dei risultati.
 
 \begin{table}[H]
 \centering
@@ -1430,28 +1443,32 @@ di categorizzazione automatizzata.
 \toprule
 \textbf{Strumento} & \textbf{Ruolo metodologico nel protocollo} \\
 \midrule
-\texttt{Magnet AXIOM}
+\texttt{Magnet AXIOM / Magnet.AI}
 &
-Valutazione degli output prodotti dai moduli disponibili di analisi,
-categorizzazione o triage automatizzato dei contenuti multimediali rispetto agli
-artefatti del bundle. \\
-\texttt{X-Ways Forensics / Excire Forensics}
+Strumento commerciale considerato per la valutazione degli output prodotti dai
+moduli disponibili di analisi, categorizzazione o triage automatizzato dei
+contenuti multimediali rispetto agli artefatti del forensic evaluation bundle. \\
+\texttt{X-Ways Forensics / Excire Photo AI}
 &
-Ambiente forense professionale utilizzato per l'ispezione, la gestione e
-l'eventuale integrazione con moduli o workflow esterni di analisi visuale,
-incluse funzionalità di categorizzazione o ricerca immagini ove disponibili. \\
+Ambiente forense professionale considerato in combinazione con
+\texttt{Excire Photo AI} per l'ispezione, la gestione e l'analisi visuale di
+contenuti immagine, incluse funzionalità di categorizzazione, ricerca visuale o
+riconoscimento ove disponibili ed esportabili. \\
+\texttt{Cellebrite UFED}
+&
+Strumento professionale mobile-oriented predisposto nel protocollo operativo
+qualora gli artefatti e gli output disponibili siano compatibili con una
+valutazione strutturata rispetto al manifest del bundle. \\
+\texttt{Oxygen Forensics}
+&
+Strumento professionale mobile/cloud-oriented predisposto nel protocollo
+operativo qualora gli output esportati consentano una normalizzazione
+riconducibile alle categorie sperimentali del bundle. \\
 \texttt{Autopsy}
 &
-Ambiente forense open-source utilizzato come baseline per ingest, hashing,
-visualizzazione, tagging e reporting; non viene trattato come equivalente diretto
-ai tool proprietari con moduli di categorizzazione automatizzata, ma come
-possibile punto di integrazione con workflow esterni FAIR-Lab e \gls{xai}. \\
-\texttt{Additional forensic tools}
-&
-Eventuali ulteriori strumenti professionali, mobili o cloud-oriented, inclusi
-solo compatibilmente con disponibilità di licenza, versione software, moduli
-abilitati e possibilità di esportare output riconducibili agli artefatti del
-bundle. \\
+Ambiente forense open-source utilizzato come supporto per ingest, hashing,
+visualizzazione, tagging e reporting; non viene trattato come equivalente
+diretto ai tool proprietari con moduli di categorizzazione automatizzata. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1498,6 +1515,20 @@ falso negativo su un contenuto rilevante può avere implicazioni operative più
 critiche di un falso positivo, poiché può ridurre la priorità assegnata a un
 artefatto che meriterebbe ulteriore analisi.
 
+La valutazione non assume \gls{auroc} come metrica centrale, pur essendo essa
+ampiamente utilizzata in contesti di \gls{ml} supervisionato, poiché l'obiettivo
+del lavoro non è ottimizzare o confrontare classificatori sulla base di score
+continui pienamente disponibili e omogenei. Il protocollo mira invece a
+mantenere la comparabilità tra proxy model ispezionabili e strumenti forensi
+commerciali black-box o quasi black-box, i quali possono esportare soltanto
+etichette categoriali, tag, classi assegnate o risultati non sempre accompagnati
+da punteggi calibrati. Per questo motivo, le metriche principali sono fondate
+su conteggi, accuratezza, tassi di errore, distribuzione delle predizioni,
+variazioni rispetto alla baseline pulita e analisi del comportamento su input
+\gls{ood}, adversariali e anti-forensi. Questa scelta non riflette una
+limitazione teorica delle metriche score-based, ma una decisione metodologica
+orientata alla comparabilità operativa tra sistemi eterogenei.
+
 La valutazione consolidata dei proxy model viene eseguita mediante lo script
 \codepath{evaluation/scripts/15_evaluate_proxy_models.py}. Lo script considera
 i clean folds, il set \gls{ood}, le immagini adversariali e le immagini
@@ -1518,14 +1549,21 @@ tra cui \codepath{final_core_metrics.csv}, \codepath{final_robustness_metrics.cs
 
 Il run di valutazione dei proxy model comprende 11\,500 campioni in input e
 40\,500 righe di predizione. Tali conteggi descrivono la copertura del run e la
-completezza degli artefatti prodotti, non una misura di performance del sistema. La distribuzione delle
-predizioni include 3000 righe relative a campioni puliti, 7500 righe relative
-al set \gls{ood} e 30\,000 righe relative a campioni perturbati. Il set \gls{ood} viene
-valutato rispetto a ciascuno dei cinque checkpoint fold-aware
-per ogni modello, producendo 500~$\times$~5~$\times$~3~$=$~7\,500 righe.
-Questa scelta non mira ad aumentare artificialmente il numero di campioni, ma a
-osservare la stabilità del comportamento fuori distribuzione al variare del
-checkpoint di addestramento.
+completezza degli artefatti prodotti, non una misura di performance del sistema.
+La distribuzione delle predizioni include 3000 righe relative a campioni puliti,
+7500 righe relative al set \gls{ood} e 30\,000 righe relative a campioni
+perturbati.
+
+Nel caso della valutazione \gls{ood}, le 7500 righe di predizione derivano
+dalla valutazione delle 500 immagini fuori distribuzione rispetto ai cinque
+checkpoint fold-aware dei tre proxy model, secondo lo schema
+500~$\times$~5~$\times$~3~$=$~7\,500. Tale conteggio non deve essere
+interpretato come una moltiplicazione artificiale dei campioni disponibili:
+le 500 immagini \gls{ood} rimangono il riferimento semantico effettivo, mentre
+le predizioni ottenute sui cinque checkpoint consentono di osservare se la
+tendenza a classificare campioni fuori distribuzione come \texttt{weapon} o
+\texttt{non\_weapon} sia stabile, variabile o dipendente da uno specifico
+addestramento.
 
 In questo modo, la valutazione \gls{ood} consente di verificare se l'incertezza
 o l'errore del modello rispetto a input non appartenenti alla distribuzione
