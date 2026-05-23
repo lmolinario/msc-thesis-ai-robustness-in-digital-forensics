@@ -1,0 +1,31 @@
+{
+  "script": "explainability/scripts/17_generate_integrated_gradients_case_studies.py",
+  "created_at": "2026-05-23T08:10:49+00:00",
+  "run_tag": "efficientnet_b0_chapter5_core_candidates_per_bucket_500_manual_per_bucket_3_target_predicted_label_chapter5_separate_assets_final",
+  "strategy": "chapter5_core",
+  "manual_review": true,
+  "manual_only": false,
+  "generate_after_manual": true,
+  "max_cases": 500,
+  "cases_per_attack": 3,
+  "cases_per_bucket": 3,
+  "candidate_limit": 0,
+  "attack_name_filter": [],
+  "candidate_rows": 1175,
+  "selected_cases": 15,
+  "generated_attribution_rows": 15,
+  "n_steps": 32,
+  "high_confidence_threshold": 0.9,
+  "attribution_target": "predicted_label",
+  "top_percentile": 90.0,
+  "device": "auto",
+  "input_size": 224,
+  "outputs": {
+    "integrated_gradients_manifest": "explainability/manifests/integrated_gradients_manifest__efficientnet_b0_chapter5_core_candidates_per_bucket_500_manual_per_bucket_3_target_predicted_label_chapter5_separate_assets_final.csv",
+    "case_studies_manifest": "explainability/manifests/xai_case_studies_manifest__efficientnet_b0_chapter5_core_candidates_per_bucket_500_manual_per_bucket_3_target_predicted_label_chapter5_separate_assets_final.csv",
+    "integrated_gradients_output_dir": "explainability/outputs/integrated_gradients/efficientnet_b0_chapter5_core_candidates_per_bucket_500_manual_per_bucket_3_target_predicted_label_chapter5_separate_assets_final",
+    "manual_selection_db": "explainability/manifests/xai_manual_selection_db__efficientnet_b0_chapter5_core_candidates_per_bucket_500_manual_per_bucket_3_target_predicted_label_chapter5_separate_assets_final.csv",
+    "manual_selection_summary": "explainability/manifests/xai_manual_selection_summary__efficientnet_b0_chapter5_core_candidates_per_bucket_500_manual_per_bucket_3_target_predicted_label_chapter5_separate_assets_final.json"
+  },
+  "methodological_note": "Integrated Gradients are diagnostic support for transparent proxy models, not black-box forensic tools."
+}

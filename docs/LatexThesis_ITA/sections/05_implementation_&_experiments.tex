@@ -1232,43 +1232,275 @@ deve essere valutata rispetto a condizioni specifiche di impiego, inclusi input
 anomali, borderline o semanticamente distanti dalla distribuzione attesa.
 
 
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability Analysis and Representative Failure Cases}
 \label{sec:results-xai}
+% ─────────────────────────────────────────────────────────────────────────────
 
-L'analisi di explainability ha una funzione qualitativa e diagnostica. Non
-sostituisce le metriche quantitative riportate nelle sezioni precedenti, ma
-serve a osservare come le perturbazioni modifichino le regioni dell'immagine che
-contribuiscono alla decisione del modello. In questa tesi, l'analisi è condotta
-tramite Integrated Gradients sui modelli proxy, con particolare attenzione ai
-casi in cui l'immagine clean viene classificata correttamente mentre la versione
-perturbata produce un errore.
+L'analisi di \gls{xai} è impiegata in questa sezione con funzione qualitativa e
+diagnostica. Essa non sostituisce le metriche quantitative discusse nelle sezioni
+precedenti, né introduce una misura autonoma di robustezza, ma consente di
+osservare, su casi rappresentativi, quali regioni dell'immagine abbiano
+contribuito maggiormente alla decisione del modello proxy. In particolare, le
+mappe di attribuzione sono state generate mediante \gls{ig} sul modello
+\texttt{efficientnet\_b0}, utilizzando come target dell'attribuzione la
+\texttt{predicted\_label}. Questa scelta rende l'analisi coerente con la
+decisione effettivamente prodotta dal modello, poiché le regioni evidenziate si
+riferiscono alla classe predetta e non necessariamente alla ground truth.
 
-\subsection{Selection of representative cases}
+La lettura delle mappe di attribuzione deve essere mantenuta distinta dalla
+valutazione black-box degli strumenti forensi commerciali. Le visualizzazioni
+discusse in questa sezione riguardano esclusivamente il modello proxy white-box
+\texttt{efficientnet\_b0}, per il quale architettura, checkpoint e gradienti sono
+accessibili. Esse non devono quindi essere interpretate come spiegazioni dirette
+del comportamento di Magnet AXIOM/Magnet.AI, X-Ways/Excire, UFED o Oxygen, la
+cui logica interna di classificazione rimane proprietaria e non ispezionabile. Il
+loro ruolo è piuttosto quello di fornire un supporto interpretativo alla
+discussione sulla robustezza operativa di sistemi \gls{ai}-based impiegati in
+workflow di \gls{df}.
+
+\subsection{Selection and layout of representative cases}
 \label{subsec:results-xai-selection}
 
-I casi rappresentativi sono selezionati a partire dalle failure rows più
-rilevanti, privilegiando immagini per cui:
-\begin{itemize}
-    \item la predizione clean è corretta;
-    \item la predizione perturbata è errata;
-    \item la perturbazione appartiene a una condizione sperimentalmente critica;
-    \item il confronto visuale tra immagine clean, immagine perturbata e mappa
-    di attribuzione è interpretabile.
-\end{itemize}
+La selezione dei casi di studio è stata effettuata a partire da 22 casi XAI
+complessivi, generati per documentare scenari differenti di comportamento
+corretto, errore in condizioni clean, comportamento fuori distribuzione,
+fallimento anti-forense e fallimento adversarial. Per evitare che la sezione
+assuma la forma di una rassegna visuale estesa, nel corpo principale del
+Capitolo~\ref{chap:results} sono discussi cinque casi rappresentativi, ciascuno
+associato a uno scenario operativo distinto. Gli altri casi sono mantenuti come
+materiale supplementare o appendice, con funzione documentale e di audit.
 
-\subsection{Clean versus perturbed attribution maps}
-\label{subsec:results-xai-maps}
+Per ciascun caso selezionato, la visualizzazione è organizzata in tre componenti
+complementari. Nella parte superiore sinistra è riportata l'immagine effettivamente
+fornita in input al modello, insieme alla classe reale, alla predizione e alla
+relativa confidenza. Nella parte superiore destra è mostrata la heatmap di
+attribuzione ottenuta mediante \gls{ig}, calcolata rispetto alla
+\texttt{predicted\_label}. Nella parte inferiore centrale è infine riportato
+l'overlay tra immagine e attribuzioni, utile a fornire una lettura qualitativa
+integrata delle regioni che hanno contribuito maggiormente alla decisione del
+modello. Tra i pannelli è esplicitato lo scenario operativo considerato, ad
+esempio condizione clean, trasformazione anti-forense o perturbazione adversarial,
+e la corrispondente predizione prodotta dal classificatore.
 
-Al momento della redazione, la selezione dei casi rappresentativi è stata
-definita sulla base delle failure rows più rilevanti. Le attribution map tramite
-Integrated Gradients saranno inserite nella versione finale del capitolo; la
-gallery completa sarà riportata in appendice. La valutazione quantitativa rimane
-fondata sulle metriche delle sezioni precedenti.
+La Tabella~\ref{tab:results-xai-main-cases} sintetizza i cinque casi principali.
+La colonna relativa allo scenario operativo non indica soltanto il tipo di errore
+classificativo, ma il rischio che tale comportamento potrebbe generare in un
+workflow di triage: mancata segnalazione di contenuti \texttt{weapon}, aumento
+del carico di revisione dovuto a falsi positivi, promozione di input \gls{ood} a
+contenuto investigativamente rilevante, oppure fragilità del modello in presenza
+di manipolazioni anti-forensi e adversariali.
 
-Le mappe saranno interpretate verificando se, dopo la perturbazione, il modello
-continui a concentrarsi sull'oggetto investigativamente rilevante o se
-l'attenzione si sposti verso sfondo, texture, bordi o artefatti introdotti dalla
-trasformazione.
+\begin{table}[H]
+\centering
+\small
+\setlength{\tabcolsep}{3.5pt}
+\renewcommand{\arraystretch}{1.15}
+\caption{Casi XAI principali selezionati per il Capitolo~\ref{chap:results}.}
+\label{tab:results-xai-main-cases}
+\begin{tabularx}{\textwidth}{@{}l l l l r X@{}}
+\toprule
+\textbf{Case ID} &
+\textbf{Condizione} &
+\textbf{Ground truth} &
+\textbf{Predizione} &
+\textbf{Conf.} &
+\textbf{Scenario operativo} \\
+\midrule
+
+\texttt{xai\_case\_0001} &
+\texttt{clean} &
+\texttt{weapon} &
+\texttt{weapon} &
+1.000000 &
+Comportamento atteso del modello su contenuto rilevante correttamente
+riconosciuto. \\
+
+\texttt{xai\_case\_0004} &
+\texttt{clean} &
+\texttt{weapon} &
+\texttt{non\_weapon} &
+0.797763 &
+Falso negativo clean, con rischio di mancata emersione di un'immagine
+investigativamente rilevante. \\
+
+\texttt{xai\_case\_0009} &
+\texttt{ood} &
+\texttt{ood} &
+\texttt{weapon} &
+0.999030 &
+Input fuori distribuzione promosso a contenuto potenzialmente rilevante, con
+rischio di falso positivo e aumento del carico di triage. \\
+
+\texttt{xai\_case\_0010} &
+\texttt{histogram\_modification} &
+\texttt{weapon} &
+\texttt{non\_weapon} &
+0.870108 &
+Trasformazione anti-forense realistica che induce un falso negativo su contenuto
+\texttt{weapon}. \\
+
+\texttt{xai\_case\_0016} &
+\texttt{sigma\_zero} &
+\texttt{non\_weapon} &
+\texttt{weapon} &
+1.000000 &
+Falso positivo adversarial ad alta confidenza, con promozione artificiale di
+contenuto non rilevante. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La selezione evidenzia anche una distinzione metodologica rilevante. Tra i casi
+\texttt{adversarial\_high\_conf\_failure} selezionati non è presente un caso
+\texttt{weapon}~\(\rightarrow\)~\texttt{non\_weapon}; essi corrispondono invece
+a scenari \texttt{non\_weapon}~\(\rightarrow\)~\texttt{weapon}. Di conseguenza,
+il caso adversarial discusso nel testo principale non viene interpretato come
+occultamento adversarial di un'arma, ma come falso positivo adversarial ad alta
+confidenza. Il caso più rilevante di mancata segnalazione di un contenuto
+\texttt{weapon} è invece rappresentato dalla trasformazione anti-forense
+\texttt{xai\_case\_0010}, nella quale un'immagine ancora interpretabile per un
+revisore umano viene classificata dal modello come \texttt{non\_weapon}.
+
+\subsection{Representative attribution patterns}
+\label{subsec:results-xai-representative-patterns}
+
+\paragraph{Clean correct case.}
+Il caso \texttt{xai\_case\_0001} rappresenta il comportamento atteso del modello
+in condizioni nominali. L'immagine appartiene alla classe \texttt{weapon} ed è
+classificata correttamente come \texttt{weapon} con confidenza prossima a 1. In
+questo scenario, la heatmap e l'overlay \gls{ig} consentono di verificare se le
+regioni a maggiore attribuzione risultino semanticamente coerenti con l'oggetto
+investigativamente rilevante. La
+Figura~\ref{fig:results-xai-case1-clean-correct} è utile come riferimento
+qualitativo, poiché rappresenta il comportamento che ci si attende da un sistema
+di triage quando l'oggetto rilevante è chiaramente riconoscibile.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/fig_xai_case1_clean_correct_panel.png}
+\caption{Caso XAI \texttt{xai\_case\_0001}: esempio clean correttamente classificato come \texttt{weapon}. La figura mostra l'immagine di input con ground truth, predizione e confidenza, la heatmap \gls{ig} e l'overlay finale delle attribuzioni.}
+\label{fig:results-xai-case1-clean-correct}
+\end{figure}
+
+\paragraph{Clean false negative.}
+Il caso \texttt{xai\_case\_0004} documenta un falso negativo già in condizione
+clean. L'immagine appartiene alla classe \texttt{weapon}, ma viene classificata
+come \texttt{non\_weapon} con confidenza pari a 0.797763. Dal punto di vista
+forense, questo scenario è particolarmente critico perché un sistema di triage
+potrebbe non segnalare all'analista un contenuto potenzialmente rilevante. La
+Figura~\ref{fig:results-xai-case2-clean-false-negative} non deve essere letta
+come spiegazione causale esaustiva dell'errore, ma come indicatore delle regioni
+che hanno contribuito alla decisione errata del modello. La presenza di un falso
+negativo in assenza di perturbazioni conferma che l'accuratezza clean aggregata
+non elimina la necessità di revisione umana sui casi non segnalati, soprattutto
+quando il dominio applicativo assegna un costo operativo elevato alla mancata
+identificazione della classe \texttt{weapon}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/fig_xai_case2_clean_false_negative_panel.png}
+\caption{Caso XAI \texttt{xai\_case\_0004}: falso negativo in condizione clean, con immagine \texttt{weapon} classificata come \texttt{non\_weapon}. La figura mostra l'input, la heatmap \gls{ig} e l'overlay finale associato alla decisione errata del modello.}
+\label{fig:results-xai-case2-clean-false-negative}
+\end{figure}
+
+\paragraph{OOD sample classified as weapon.}
+Il caso \texttt{xai\_case\_0009} rappresenta un input \gls{ood} classificato come
+\texttt{weapon} con confidenza pari a 0.999030. Questo scenario non corrisponde
+a un attacco adversarial, ma a una condizione operativa realistica: immagini
+borderline, sintetiche, anomale o semanticamente distanti dalla distribuzione
+attesa possono essere comunque sottoposte a classificazione automatica durante
+un'indagine. La Figura~\ref{fig:results-xai-case3-ood-as-weapon} mostra la
+promozione dell'input \gls{ood} verso la classe \texttt{weapon}. Dal punto di
+vista operativo, il rischio principale non è la mancata rilevazione di un'arma,
+ma l'aumento del carico di revisione e la possibile attribuzione di rilevanza
+investigativa a un contenuto che non appartiene al task binario nominale.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/fig_xai_case3_ood_as_weapon_panel.png}
+\caption{Caso XAI \texttt{xai\_case\_0009}: campione \gls{ood} classificato come \texttt{weapon} con alta confidenza. La figura mostra l'input, la heatmap \gls{ig} e l'overlay finale relativo alla promozione dell'input fuori distribuzione verso la classe \texttt{weapon}.}
+\label{fig:results-xai-case3-ood-as-weapon}
+\end{figure}
+
+\paragraph{Anti-forensic false negative.}
+Il caso \texttt{xai\_case\_0010} riguarda una trasformazione
+\texttt{histogram\_modification} applicata a un'immagine \texttt{weapon}, che
+viene classificata come \texttt{non\_weapon} con confidenza pari a 0.870108.
+Questo caso assume particolare rilevanza perché la manipolazione anti-forense è
+realistica e non necessariamente rende l'immagine incomprensibile per un revisore
+umano. La Figura~\ref{fig:results-xai-case4-antiforensic-failure} mostra il
+campione trasformato, la heatmap di attribuzione e l'overlay finale. Il risultato
+suggerisce che modifiche globali dell'aspetto visivo, pur non eliminando
+necessariamente il contenuto semantico dell'immagine, possono alterare le evidenze
+utilizzate dal modello per sostenere la decisione corretta. In un workflow di
+\gls{df}, tale comportamento è più critico di un falso positivo, poiché può
+ridurre la probabilità che un contenuto \texttt{weapon} venga sottoposto a
+verifica umana.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/fig_xai_case4_antiforensic_failure_panel.png}
+\caption{Caso XAI \texttt{xai\_case\_0010}: trasformazione \texttt{histogram\_modification} su immagine \texttt{weapon}, classificata erroneamente come \texttt{non\_weapon}. La figura documenta un falso negativo anti-forense in cui l'immagine rimane interpretabile per un revisore umano ma non viene segnalata dal modello.}
+\label{fig:results-xai-case4-antiforensic-failure}
+\end{figure}
+
+\paragraph{Adversarial high-confidence false positive.}
+Il caso \texttt{xai\_case\_0016} documenta un fallimento adversarial ad alta
+confidenza generato mediante \texttt{sigma\_zero}. L'immagine appartiene alla
+classe \texttt{non\_weapon}, ma viene classificata come \texttt{weapon} con
+confidenza pari a 1.000000. Questo caso non deve essere descritto come
+occultamento di un'arma, poiché lo scenario osservato è
+\texttt{non\_weapon}~\(\rightarrow\)~\texttt{weapon}. La sua rilevanza forense
+consiste piuttosto nella promozione artificiale di un contenuto non rilevante a
+contenuto potenzialmente investigativo. La
+Figura~\ref{fig:results-xai-case5-adversarial-high-conf-failure} consente di
+osservare le regioni associate alla decisione errata del modello. Dal punto di
+vista operativo, un falso positivo adversarial ad altissima confidenza può
+aumentare il carico di revisione, alterare le priorità di triage e generare una
+percezione eccessiva di affidabilità dell'output automatico se la confidenza viene
+interpretata in modo non critico.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{images/fig_xai_case5_adversarial_high_conf_failure_panel.png}
+\caption{Caso XAI \texttt{xai\_case\_0016}: campione \texttt{non\_weapon} perturbato con \texttt{sigma\_zero} e classificato come \texttt{weapon} ad alta confidenza. La figura mostra l'input perturbato, la heatmap \gls{ig} e l'overlay finale associato al falso positivo adversarial.}
+\label{fig:results-xai-case5-adversarial-high-conf-failure}
+\end{figure}
+
+\subsection{Methodological note on attribution and operational interpretation}
+\label{subsec:results-xai-methodological-note}
+
+Le mappe \gls{ig} non dimostrano causalmente la decisione del modello e non
+forniscono una spiegazione completa del processo inferenziale interno. Esse
+rappresentano una tecnica di attribuzione locale, utile per osservare quali aree
+dell'input abbiano contribuito maggiormente alla predizione secondo il modello
+considerato, rispetto al target selezionato. Di conseguenza, le attribution map
+devono essere interpretate come supporto diagnostico e non come prova autonoma
+della correttezza o dell'erroneità della classificazione.
+
+Nel contesto della presente tesi, il contributo principale della \gls{xai} è
+quello di collegare le metriche aggregate a casi concreti di rischio operativo.
+Il caso clean corretto mostra il comportamento atteso in presenza di contenuto
+\texttt{weapon} riconoscibile; il falso negativo clean evidenzia che errori
+critici possono emergere anche in assenza di manipolazioni; il caso \gls{ood}
+mostra il rischio di promuovere input fuori distribuzione a contenuti
+investigativamente rilevanti; il caso anti-forense documenta una mancata
+segnalazione di contenuto \texttt{weapon} dopo una trasformazione realistica; il
+caso adversarial mostra invece un falso positivo ad alta confidenza prodotto da
+una perturbazione deliberata.
+
+Questi risultati rafforzano la necessità di un paradigma human-in-the-loop per
+l'impiego di sistemi \gls{ai}-based nella \gls{df}. Le predizioni automatiche, le
+confidenze e le mappe di attribuzione possono supportare la prioritizzazione e la
+revisione dei contenuti, ma non devono sostituire la valutazione critica
+dell'analista. In particolare, la combinazione di falsi negativi su contenuti
+\texttt{weapon}, falsi positivi ad alta confidenza e comportamento instabile su
+input \gls{ood} indica che l'affidabilità operativa di tali sistemi deve essere
+valutata non soltanto in termini di performance media, ma anche rispetto ai casi
+limite che possono incidere sulla completezza, sulla tracciabilità e sulla
+prudenza interpretativa del workflow forense.
 
 
 \section{Operational Forensic Implications and Limitations}

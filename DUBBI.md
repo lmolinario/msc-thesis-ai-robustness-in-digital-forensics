@@ -1,0 +1,1 @@
+parametri attacchi adv e settining antiforensic
