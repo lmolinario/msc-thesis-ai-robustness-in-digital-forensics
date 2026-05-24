@@ -18,14 +18,18 @@ evaluation/
 ├── README.md
 ├── scripts/
 │   ├── 15_evaluate_proxy_models.py
-│   └── 19_normalize_forensic_tool_outputs.py        # planned / next implementation step
+│   └── 19_normalize_forensic_ai_tool_predictions.py
 ├── proxy_models/
 │   └── proxy_model_predictions.csv
 └── forensic_tools/
-    ├── magnet_axiom/
-    ├── xways_excire/
-    ├── cellebrite_ufed/
-    └── oxygen/
+    ├── normalized_predictions.csv
+    ├── tool_export_audit.csv
+    ├── tool_version_log.csv
+    ├── normalization_summary.json
+    ├── magnet_axiom_normalized_predictions.csv
+    ├── xways_excire_normalized_predictions.csv
+    ├── cellebrite_ufed_normalized_predictions.csv
+    └── oxygen_forensic_detective_normalized_predictions.csv
 ```
 
 ---
@@ -99,12 +103,12 @@ Oxygen Forensic Detective
 
 ---
 
-## Planned Normalization Step
+## Normalization Step
 
-Planned official entry point:
+Official entry point:
 
 ```text
-evaluation/scripts/19_normalize_forensic_tool_outputs.py
+evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
 Purpose:
@@ -114,6 +118,15 @@ Purpose:
 - normalize tool labels into a common schema;
 - compute tool-level metrics;
 - generate thesis-ready metrics and audit tables.
+
+Implemented behavior:
+
+- Magnet AXIOM / Magnet.AI normalization from `Pictures.csv`;
+- mapping of `Possible weapons` to `weapon_detected=true`;
+- mapping of empty Magnet tags to `weapon_detected=false`;
+- generic parsing for CSV, TSV, JSON, JSONL and TXT exports;
+- deduplication to one prediction per `tool_name` + `bundle_id`;
+- export audit and tool version log generation.
 
 Expected normalized output area:
 
