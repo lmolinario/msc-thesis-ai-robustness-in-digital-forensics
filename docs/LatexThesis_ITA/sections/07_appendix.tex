@@ -243,7 +243,7 @@ La pipeline è implementata prevalentemente in Python e utilizza librerie per la
 
 \begin{table}[H]
 \centering
-\caption{Principali componenti software utilizzate nella pipeline.}
+\caption{Principali componenti software utilizzate nella pipeline consolidata.}
 \label{tab:software-environment}
 \begin{tabularx}{\textwidth}{@{}lX@{}}
 \toprule
@@ -252,13 +252,13 @@ La pipeline è implementata prevalentemente in Python e utilizza librerie per la
 \texttt{Python} & Linguaggio principale per orchestrare la pipeline sperimentale. \\
 \texttt{pandas} & Gestione di manifest, metadati, report tabellari e risultati sperimentali. \\
 \texttt{NumPy} & Supporto numerico per array, trasformazioni e operazioni matriciali. \\
+\texttt{SciPy} & Supporto a operazioni numeriche e trasformazioni utilizzate nella pipeline sperimentale. \\
 \texttt{Pillow} & Apertura, validazione, conversione e salvataggio delle immagini. \\
-\texttt{OpenCV} & Elaborazione delle immagini e supporto ad alcune trasformazioni anti-forensi. \\
 \texttt{PyTorch} & Addestramento, inferenza e generazione di perturbazioni su modelli neurali. \\
-\texttt{scikit-learn} & Implementazione della baseline \gls{svm} e calcolo di metriche classiche. \\
-\gls{clip} & Classificazione zero-shot e confronto semantico immagine-testo. \\
-\gls{blip} & Captioning e analisi multimodale delle immagini. \\
-\texttt{matplotlib} & Produzione di grafici, curve e figure sperimentali. \\
+\texttt{torchvision} & Architetture CNN, preprocessing e supporto alla valutazione dei modelli proxy. \\
+\texttt{open\_clip\_torch} & Implementazione del modello \gls{clip} utilizzato come proxy model. \\
+\texttt{Captum} & Generazione delle attribution map mediante Integrated Gradients. \\
+\texttt{matplotlib} & Produzione di grafici, curve, figure sperimentali e visualizzazioni diagnostiche. \\
 \bottomrule
 \end{tabularx}
 \end{table}
