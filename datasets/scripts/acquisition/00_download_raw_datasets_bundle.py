@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-00_download_and_unpack_raw_datasets_bundle.py
+00_download_raw_datasets_bundle.py
 
 Official raw dataset bootstrap script for the public FAIR-Lab thesis repository.
 
