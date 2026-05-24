@@ -322,15 +322,35 @@ e flag di segnalazione per la revisione umana, in modo da rendere il sistema
 meno suscettibile a classificazioni improprie in presenza di campioni anomali
 o sintetici.
 
+\subsection{Evaluation of Additional Attack Families}
+\label{subsec:conclusions-future-additional-attacks}
+
+Un'ulteriore direzione di sviluppo riguarda l'inclusione di famiglie di attacco
+adversariali non considerate nel presente protocollo, in particolare attacchi
+generativi e \gls{gan}-based. Tecniche come AdvGAN e successive varianti
+potrebbero consentire di valutare se perturbazioni apprese o generate in modo
+più adattivo producano effetti differenti rispetto agli attacchi gradient-based,
+agli attacchi sparse e alle trasformazioni anti-forensi considerate in questa
+tesi \cite{xia2018advgan,xie2024nodeadvgan,jin2024geadvgan_plus,zhu2024geadvgan,zhang2025paradvgan}.
+In tale estensione, tali attacchi dovrebbero essere trattati come stressor
+sperimentali aggiuntivi per la valutazione della robustezza operativa, evitando
+di trasformare il benchmark in una valutazione esaustiva di \gls{aml} puro.
+
+
 \subsection{Evaluation of Defensive Strategies}
 \label{subsec:conclusions-future-defense}
 
 Il lavoro non ha incluso una valutazione sistematica delle difese adversariali.
 Sviluppi successivi potranno analizzare l'efficacia di contromisure quali
-l'adversarial training, il denoising dell'input, i metodi ensemble e il
-preprocessing certificato, valutandone la compatibilità con i requisiti di
-integrità, tracciabilità e riproducibilità che caratterizzano l'analisi
-forense.
+l'adversarial training, il denoising dell'input, i metodi ensemble, il
+preprocessing robusto e tecniche di detection o mitigazione delle perturbazioni,
+valutandone la compatibilità con i requisiti di integrità, tracciabilità e
+riproducibilità che caratterizzano l'analisi forense
+\cite{guo2017countering,le2020survey,li2020learning,liu2020energy}.
+In particolare, tali difese dovrebbero essere valutate distinguendo tra
+miglioramenti effettivi della robustezza operativa e forme di robustezza
+apparente dovute a trasformazioni non adattive, gradient masking o preprocessing
+non sufficientemente validato rispetto al threat model.
 
 \subsection{XAI Integration in Forensic Tools}
 \label{subsec:conclusions-future-xai}
