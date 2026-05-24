@@ -1508,7 +1508,6 @@ la misurazione quantitativa e la successiva interpretazione dei risultati.
 
 La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow metodologico adottato per la valutazione degli strumenti forensi: i tool ricevono esclusivamente la vista cieca del bundle, mentre la ground truth sperimentale rimane separata fino alla fase di normalizzazione degli output.
 
-
 \begin{figure}[H]
 \centering
 \resizebox{\textwidth}{!}{%
@@ -1521,29 +1520,30 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
         draw=black!75,
         thick,
         align=center,
-        minimum height=1.55cm,
-        minimum width=3.25cm,
+        minimum height=1.35cm,
+        minimum width=3.6cm,
         fill=gray!10
     },
-    metadata/.style={
+    note/.style={
         rectangle,
         rounded corners,
         draw=black!75,
         dashed,
         thick,
         align=center,
-        minimum height=1.25cm,
-        minimum width=3.7cm,
+        minimum height=1.15cm,
+        minimum width=4.2cm,
         fill=gray!5
     },
-    warning/.style={
+    wide_note/.style={
         rectangle,
         rounded corners,
         draw=black!75,
         dashed,
+        thick,
         align=center,
-        minimum height=1.05cm,
-        minimum width=5.2cm,
+        minimum height=1.10cm,
+        minimum width=5.4cm,
         fill=gray!5
     },
     arrow/.style={
@@ -1559,7 +1559,9 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
     }
 ]
 
-% Main operational workflow
+% -------------------------------------------------------------------------
+% Row 1 - Main tool-side workflow
+% -------------------------------------------------------------------------
 \node[block] (blind) at (0,0)
 {\shortstack{
     \textbf{Blind bundle input}\\[1mm]
@@ -1567,7 +1569,7 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
     \scriptsize neutral filenames only
 }};
 
-\node[block] (import) at (4.0,0)
+\node[block] (import) at (4.6,0)
 {\shortstack{
     \textbf{Tool import}\\
     \textbf{and indexing}\\[1mm]
@@ -1575,28 +1577,31 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
     \scriptsize and media indexing
 }};
 
-\node[block] (analysis) at (8.0,0)
+\node[block] (analysis) at (9.2,0)
 {\shortstack{
     \textbf{Tool analysis}\\[1mm]
     \scriptsize AI-based tags, categories,\\
     \scriptsize detections or visual triage
 }};
 
-\node[block] (export) at (12.0,0)
+\node[block] (export) at (13.8,0)
 {\shortstack{
     \textbf{Output export}\\[1mm]
     \scriptsize CSV, report, tags,\\
     \scriptsize labels or detected items
 }};
 
-\node[block] (normalization) at (8.0,-3.0)
+% -------------------------------------------------------------------------
+% Row 2 - Blind principle and metrics
+% -------------------------------------------------------------------------
+\node[wide_note] (blindnote) at (0,-2.9)
 {\shortstack{
-    \textbf{Output normalization}\\[1mm]
-    \scriptsize mapping exported results\\
-    \scriptsize to \texttt{bundle\_id}
+    \textbf{Blind evaluation principle}\\[1mm]
+    \scriptsize filenames and paths do not expose\\
+    \scriptsize class, source, fold or attack family
 }};
 
-\node[block] (metrics) at (12.0,-3.0)
+\node[block] (metrics) at (13.8,-2.9)
 {\shortstack{
     \textbf{Metric computation}\\
     \textbf{and comparison}\\[1mm]
@@ -1604,54 +1609,53 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
     \scriptsize recall, FNR and FPR
 }};
 
-% Metadata / ground truth branch
-\node[metadata] (manifest) at (4.0,-3.0)
+% -------------------------------------------------------------------------
+% Row 3 - Metadata and normalization on the same line
+% -------------------------------------------------------------------------
+\node[note] (manifest) at (6.8,-5.5)
 {\shortstack{
     \textbf{Experimental metadata}\\[1mm]
     \scriptsize \texttt{bundle\_manifest.csv}\\
     \scriptsize ground truth, class, attack, fold
 }};
 
-\node[warning] (separation) at (4.0,-5.0)
+\node[block] (normalization) at (13.8,-5.5)
 {\shortstack{
-    \textbf{Separation rule}\\[1mm]
-    \scriptsize metadata and structured audit view are not imported into the tool
+    \textbf{Output normalization}\\[1mm]
+    \scriptsize exported results are mapped\\
+    \scriptsize to \texttt{bundle\_id}
 }};
 
-% Main arrows
+% -------------------------------------------------------------------------
+% Row 4 - Separation rule
+% -------------------------------------------------------------------------
+\node[wide_note] (separation) at (6.8,-8.0)
+{\shortstack{
+    \textbf{Separation rule}\\[1mm]
+    \scriptsize metadata and structured audit view\\
+    \scriptsize are not imported into the tool
+}};
+
+% -------------------------------------------------------------------------
+% Arrows
+% -------------------------------------------------------------------------
 \draw[arrow] (blind) -- (import);
 \draw[arrow] (import) -- (analysis);
 \draw[arrow] (analysis) -- (export);
 
-% Export to normalization
-\draw[arrow] (export.south) |- (normalization.east);
-
-% Metadata to normalization
-\draw[dashedarrow] (manifest) -- (normalization);
-
-% Normalization to metrics
-\draw[arrow] (normalization) -- (metrics);
-
-% Separation note
-\draw[dashedarrow] (manifest) -- (separation);
-
-% Blind input note
-\node[warning] (blindnote) at (0,-3.0)
-{\shortstack{
-    \textbf{Blind evaluation principle}\\[1mm]
-    \scriptsize filenames and paths do not expose\\
-    \scriptsize class, source, fold or attack family
-}};
-
 \draw[dashedarrow] (blind) -- (blindnote);
+
+\draw[arrow] (export.south) -- (metrics.north);
+\draw[arrow] (normalization.north) -- (metrics.south);
+
+\draw[dashedarrow] (manifest.east) -- (normalization.west);
+\draw[dashedarrow] (manifest) -- (separation);
 
 \end{tikzpicture}%
 }
 \caption[Forensic tool evaluation workflow]{Forensic tool evaluation workflow based on blind bundle import, tool-side indexing and categorization, export of observable outputs, and normalization against the experimental manifest.}
 \label{fig:methodology-forensic-tool-workflow}
 \end{figure}
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Evaluation metrics}
 \label{sec:methodology-evaluation-metrics}
