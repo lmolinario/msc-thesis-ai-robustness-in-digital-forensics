@@ -672,7 +672,8 @@ dei classificatori automatici.
 
 Il protocollo non mira a costruire un benchmark esaustivo di robustezza
 adversariale nel senso stretto dell'Adversarial Machine Learning, come avverrebbe
-con sweep estesi o attacchi iterativi standard quali PGD o AutoAttack. La
+con sweep estesi o attacchi iterativi standard quali PGD o AutoAttack
+\cite{madry2018towards,croce2020autoattack}. La
 selezione privilegia invece un insieme eterogeneo e computazionalmente
 sostenibile di perturbazioni, coerente con l'obiettivo forense di valutare la
 robustezza operativa della pipeline.
@@ -1427,7 +1428,8 @@ automatizzata.
 In questa prospettiva, \texttt{Magnet AXIOM} e il relativo modulo
 \texttt{Magnet.AI}, \texttt{X-Ways Forensics} in combinazione con
 \texttt{Excire Photo AI}, \texttt{Cellebrite UFED} e \texttt{Oxygen Forensics}
-sono trattati come componenti della pipeline operativo-forense. Tuttavia, la
+sono trattati come componenti della pipeline operativo-forense
+\cite{magnet,xways,ufed,oxygen,cellebrite}. Tuttavia, la
 loro inclusione nell'analisi quantitativa dipende dalla disponibilità di
 esportazioni strutturate e riconducibili alle categorie sperimentali definite
 nel presente protocollo. \texttt{Autopsy} viene invece considerato come
@@ -1475,6 +1477,9 @@ diretto ai tool proprietari con moduli di categorizzazione automatizzata. \\
 \end{tabularx}
 \end{table}
 
+
+
+
 Per ciascun tool, il protocollo prevede tre passaggi. In primo luogo, viene
 importata o indicizzata esclusivamente la vista cieca del bundle. In secondo
 luogo, vengono esportati i risultati prodotti dallo strumento, includendo ove
@@ -1499,6 +1504,152 @@ Questa impostazione consente di valutare la robustezza operativa degli strumenti
 valutazione rimane quindi ancorata agli output osservabili e alla loro coerenza
 rispetto al manifest sperimentale, mantenendo separati il piano metodologico,
 la misurazione quantitativa e la successiva interpretazione dei risultati.
+
+
+La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow metodologico adottato per la valutazione degli strumenti forensi: i tool ricevono esclusivamente la vista cieca del bundle, mentre la ground truth sperimentale rimane separata fino alla fase di normalizzazione degli output.
+
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.55cm,
+        minimum width=3.25cm,
+        fill=gray!10
+    },
+    metadata/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.25cm,
+        minimum width=3.7cm,
+        fill=gray!5
+    },
+    warning/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        dashed,
+        align=center,
+        minimum height=1.05cm,
+        minimum width=5.2cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% Main operational workflow
+\node[block] (blind) at (0,0)
+{\shortstack{
+    \textbf{Blind bundle input}\\[1mm]
+    \scriptsize \texttt{blind\_tool\_input/files/}\\
+    \scriptsize neutral filenames only
+}};
+
+\node[block] (import) at (4.0,0)
+{\shortstack{
+    \textbf{Tool import}\\
+    \textbf{and indexing}\\[1mm]
+    \scriptsize ingest, parsing, hashing\\
+    \scriptsize and media indexing
+}};
+
+\node[block] (analysis) at (8.0,0)
+{\shortstack{
+    \textbf{Tool analysis}\\[1mm]
+    \scriptsize AI-based tags, categories,\\
+    \scriptsize detections or visual triage
+}};
+
+\node[block] (export) at (12.0,0)
+{\shortstack{
+    \textbf{Output export}\\[1mm]
+    \scriptsize CSV, report, tags,\\
+    \scriptsize labels or detected items
+}};
+
+\node[block] (normalization) at (8.0,-3.0)
+{\shortstack{
+    \textbf{Output normalization}\\[1mm]
+    \scriptsize mapping exported results\\
+    \scriptsize to \texttt{bundle\_id}
+}};
+
+\node[block] (metrics) at (12.0,-3.0)
+{\shortstack{
+    \textbf{Metric computation}\\
+    \textbf{and comparison}\\[1mm]
+    \scriptsize TP, FP, FN, TN, unknown,\\
+    \scriptsize recall, FNR and FPR
+}};
+
+% Metadata / ground truth branch
+\node[metadata] (manifest) at (4.0,-3.0)
+{\shortstack{
+    \textbf{Experimental metadata}\\[1mm]
+    \scriptsize \texttt{bundle\_manifest.csv}\\
+    \scriptsize ground truth, class, attack, fold
+}};
+
+\node[warning] (separation) at (4.0,-5.0)
+{\shortstack{
+    \textbf{Separation rule}\\[1mm]
+    \scriptsize metadata and structured audit view are not imported into the tool
+}};
+
+% Main arrows
+\draw[arrow] (blind) -- (import);
+\draw[arrow] (import) -- (analysis);
+\draw[arrow] (analysis) -- (export);
+
+% Export to normalization
+\draw[arrow] (export.south) |- (normalization.east);
+
+% Metadata to normalization
+\draw[dashedarrow] (manifest) -- (normalization);
+
+% Normalization to metrics
+\draw[arrow] (normalization) -- (metrics);
+
+% Separation note
+\draw[dashedarrow] (manifest) -- (separation);
+
+% Blind input note
+\node[warning] (blindnote) at (0,-3.0)
+{\shortstack{
+    \textbf{Blind evaluation principle}\\[1mm]
+    \scriptsize filenames and paths do not expose\\
+    \scriptsize class, source, fold or attack family
+}};
+
+\draw[dashedarrow] (blind) -- (blindnote);
+
+\end{tikzpicture}%
+}
+\caption[Forensic tool evaluation workflow]{Forensic tool evaluation workflow based on blind bundle import, tool-side indexing and categorization, export of observable outputs, and normalization against the experimental manifest.}
+\label{fig:methodology-forensic-tool-workflow}
+\end{figure}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -1628,8 +1779,15 @@ Riporta le metriche finali relative al comportamento fuori distribuzione. \\
 \end{table}
 
 Per i proxy model, le metriche principali comprendono accuracy, balanced
-accuracy, precision, recall, F1-score, confusion matrix e confidenza media. La
-valutazione della robustezza richiede inoltre metriche comparative tra input
+accuracy, precision, recall, F1-score, confusion matrix e confidenza media.
+
+L'implementazione computazionale delle metriche standard di classificazione e
+delle matrici di confusione si basa su funzioni consolidate dell'ecosistema
+Python per il machine learning, in particolare Scikit-learn, utilizzato come
+supporto per il calcolo riproducibile delle metriche aggregate e per classe
+\cite{pedregosa2011scikit}.
+
+La valutazione della robustezza richiede inoltre metriche comparative tra input
 puliti e manipolati, quali clean accuracy, perturbed accuracy, accuracy drop,
 induced error count e induced error rate. Particolare attenzione viene riservata
 alle transizioni critiche \texttt{weapon}~$\rightarrow$~\texttt{non\_weapon} e
@@ -1922,9 +2080,9 @@ del dataset è stata condotta da un singolo revisore, quindi non include una
 misura formale di accordo inter-annotatore. Gli strumenti proprietari o professionali valutati sono trattati come sistemi
 black-box o quasi black-box, e le loro categorie interne
 potrebbero non essere perfettamente equivalenti al task binario
-\texttt{weapon}/\texttt{non\_weapon}. Le versioni software, i moduli \gls{ai}
-disponibili e le modalità di esportazione dei risultati devono pertanto essere
-documentati nella fase sperimentale. Rendere espliciti questi limiti non
+\texttt{weapon}/\texttt{non\_weapon}.
+
+Rendere espliciti questi limiti non
 indebolisce il protocollo; al contrario, chiarisce il perimetro entro cui la
 valutazione può essere considerata verificabile, riproducibile e metodologicamente
 difendibile.
