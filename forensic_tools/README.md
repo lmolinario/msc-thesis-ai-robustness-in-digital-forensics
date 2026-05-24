@@ -47,16 +47,16 @@ forensic_tools/
 ├── README.md
 ├── magnet_axiom/
 │   ├── notes.md
-│   └── exports/
+│   └── raw_exports/
 ├── xways_excire/
 │   ├── notes.md
-│   └── exports/
+│   └── raw_exports/
 ├── cellebrite_ufed/
 │   ├── notes.md
-│   └── exports/
-└── oxygen/
+│   └── raw_exports/
+└── oxygen_forensic_detective/
     ├── notes.md
-    └── exports/
+    └── raw_exports/
 ```
 
 Large proprietary case files and heavy exports should not be committed unless strictly necessary and legally/ethically appropriate. Prefer normalized CSV/JSON outputs and methodological notes.
@@ -65,10 +65,10 @@ Large proprietary case files and heavy exports should not be committed unless st
 
 ## Normalization Target
 
-Raw commercial-tool exports should be normalized by the planned script:
+Raw commercial-tool exports are normalized by the official script:
 
 ```text
-evaluation/scripts/19_normalize_forensic_tool_outputs.py
+evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
 Expected normalized output area:
@@ -77,6 +77,14 @@ Expected normalized output area:
 evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
 ```
+
+The current script supports:
+
+- Magnet AXIOM / Magnet.AI exports through `Pictures.csv`;
+- generic CSV, TSV, JSON, JSONL and TXT forensic AI exports;
+- matching through filename, SHA256 and MD5;
+- deduplication to one prediction per tool and bundle item;
+- export audit and tool-version logging.
 
 ---
 
