@@ -201,13 +201,16 @@ diventino disponibili export normalizzabili.
 \section{Models, attacks and evaluation outputs}
 \label{app:models-attacks-evaluation-outputs}
 
-La pipeline accademica utilizza modelli proxy per rendere controllabile e ispezionabile la valutazione della robustezza. La pipeline accademica consolidata utilizza tre modelli proxy:
+La pipeline accademica consolidata utilizza tre modelli proxy:
 \texttt{efficientnet\_b0}, \texttt{resnet18} e \gls{clip}. Tali modelli
-sono impiegati come baseline trasparenti e ispezionabili per osservare il
-comportamento dei classificatori rispetto a input puliti, perturbati e fuori
-distribuzione. Eventuali componenti preliminari o baseline esplorative non
-incluse nella valutazione finale non sono considerate parte del protocollo
-sperimentale consolidato. L'impiego di modelli proxy consente di osservare in modo controllato il comportamento dei classificatori rispetto a input puliti, perturbati e fuori distribuzione, collocando l'analisi nel più ampio contesto della robustezza dei sistemi di \gls{ml} e \gls{ai} \cite{bishop2006pattern,biggio2018wild,radford2021learning,li2022blip}.
+sono impiegati come baseline trasparenti e ispezionabili per osservare in modo
+controllato il comportamento dei classificatori rispetto a input puliti,
+perturbati e fuori distribuzione. Eventuali componenti preliminari o baseline
+esplorative non incluse nella valutazione finale non sono considerate parte del
+protocollo sperimentale consolidato. L'impiego di modelli proxy colloca
+l'analisi nel più ampio contesto della robustezza dei sistemi di \gls{ml} e
+\gls{ai} \cite{bishop2006pattern,biggio2018wild,radford2021learning}.
+
 
 Gli attacchi adversariali generati nella pipeline sono \texttt{fgsm}, \texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e \texttt{color\_shift}. Le trasformazioni anti-forensi sono \texttt{jpeg\_recompression}, \texttt{resample\_resize}, \texttt{gaussian\_blur}, \texttt{histogram\_modification} e \texttt{contrast\_stretching}. Questa distinzione è metodologicamente importante: gli attacchi adversariali sono utilizzati per valutare la vulnerabilità decisionale dei modelli, mentre le trasformazioni anti-forensi simulano manipolazioni realistiche del contenuto o del file immagine che possono alterare la visibilità, la qualità o le tracce tecniche dell'artefatto \cite{stamm2010anti,nowroozi2020adversarial,croce2020robustbench}.
 
