@@ -24,7 +24,7 @@ sulla tracciabilità, sull'auditabilità e sull'interpretazione probatoria degli
 output assistiti da \gls{ai} all'interno di workflow forensi
 \cite{iso27041,iso27042,swgde2014validation}.
 
-L'organizzazione del capitolo segue la frequenza operativa attesa delle diverse
+L'organizzazione del capitolo segue la sequenza operativa attesa delle diverse
 condizioni sperimentali in un contesto investigativo. Le prestazioni su input
 puliti definiscono la baseline di riferimento; il comportamento su campioni
 out-of-distribution e su trasformazioni anti-forensi rappresenta condizioni
@@ -919,6 +919,13 @@ predizione negativa. La normalizzazione ha prodotto un match completo tra export
 del tool e forensic evaluation bundle: tutte le 11\,500 immagini sono state
 ricondotte a un identificativo del bundle e nessuna riga è rimasta unmatched.
 
+Questa normalizzazione deve essere interpretata come una ricodifica operativa
+dell'output esportato dal tool, non come accesso alla decisione interna del
+modulo proprietario. Di conseguenza, le metriche riportate descrivono il
+comportamento osservabile del sistema rispetto al bundle sperimentale, non le
+prestazioni intrinseche del modello interno eventualmente utilizzato dal tool.
+
+
 \begin{table}[H]
 \centering
 \caption{Sintesi della normalizzazione dell'export Magnet AXIOM/Magnet.AI.}
@@ -1312,7 +1319,7 @@ Falso positivo adversarial ad alta confidenza, rappresentativo dell'inaffidabili
 \label{tab:results-xai-cases}
 \end{table}
 
-\newcommand{\XAIcaseFigure}[9]{%
+\providecommand{\XAIcaseFigure}[9]{%
 \begin{figure}[htbp]
 \centering
 \begin{minipage}{0.44\textwidth}

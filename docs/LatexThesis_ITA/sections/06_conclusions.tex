@@ -81,18 +81,18 @@ forense.
 Il quarto contributo consiste nella costruzione del forensic evaluation bundle,
 composto da 11\,500 file organizzati in condizioni clean, \gls{ood}, adversariali
 e anti-forensi, predisposto per la valutazione black-box di strumenti forensi
-commerciali tramite un protocollo di importazione cieco, con mapping hash-based
-per la tracciabilità degli output.
+commerciali tramite un protocollo di importazione cieco, con mapping basato su \texttt{bundle\_id},
+filename neutro e hash per la tracciabilità degli output.
 
 Il quinto contributo riguarda la valutazione comparativa di tre modelli proxy
 eterogenei — \texttt{EfficientNet-B0}, \texttt{ResNet18} e \texttt{CLIP} — in
 tutte le condizioni sperimentali, mantenendo disponibili architetture,
 checkpoint e predizioni per ispezione e audit.
 
-Il sesto contributo è la valutazione black-box di Magnet \gls{axiom} /
-Magnet.AI mediante il forensic evaluation bundle, che produce un export
-normalizzato in formato metrico CSV analizzabile in modo comparabile rispetto
-ai risultati dei modelli proxy.
+Il sesto contributo è la valutazione black-box di \texttt{Magnet AXIOM} /
+\texttt{Magnet.AI} mediante il forensic evaluation bundle, con normalizzazione
+degli output esportati in un formato CSV compatibile con il protocollo metrico
+adottato per i modelli proxy.
 
 Il settimo contributo è l'analisi qualitativa basata su \gls{ig} su cinque
 casi rappresentativi di EfficientNet-B0, volta a rendere ispezionabili
