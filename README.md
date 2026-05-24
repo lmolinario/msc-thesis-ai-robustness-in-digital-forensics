@@ -31,7 +31,8 @@ The repository is currently aligned with the following state.
 | Anti-forensic transformation generation | Completed | `jpeg_recompression`, `resample_resize`, `gaussian_blur`, `histogram_modification`, `contrast_stretching` |
 | Proxy model evaluation | Completed | `evaluation/proxy_models/proxy_model_predictions.csv`, `results/metrics/` |
 | Forensic evaluation bundle | Generated and validated | `datasets/forensic_evaluation_bundle/` |
-| Commercial forensic tool evaluation | In progress | `forensic_tools/`, `evaluation/forensic_tools/` |
+| Magnet AXIOM / Magnet.AI evaluation | Completed and normalized | `evaluation/forensic_tools/`, `results/metrics/forensic_tools_metrics.csv` |
+| Additional commercial forensic tools | Pending / planned extension | X-Ways/Excire, Cellebrite UFED, Oxygen Forensic Detective |
 | Explainability case studies | In progress for Chapter 5 | `explainability/scripts/17_generate_integrated_gradients_case_studies.py`, `explainability/scripts/18_xai_interactive_launcher.py` |
 | Thesis reporting | In progress | `docs/LatexThesis_ITA/` |
 
@@ -54,6 +55,19 @@ anti_forensic  = 5000
 total          = 11500
 ```
 
+Magnet AXIOM / Magnet.AI normalization summary:
+
+```text
+bundle_rows                 = 11500
+raw_rows_parsed             = 11500
+matched_rows_after_dedup    = 11500
+unmatched_rows_after_dedup  = 0
+interpretable_rows          = 11500
+weapon_detected=true        = 5329
+weapon_detected=false       = 6171
+weapon_detected=unknown     = 0
+```
+
 Bundle validation checks are positive:
 
 ```text
@@ -68,7 +82,7 @@ metadata_separated_from_tool_input       = true
 
 ## Immediate Operational Focus
 
-The current work block is the transition from the fully reproducible proxy pipeline to the **commercial forensic-tool evaluation phase**.
+The reproducible proxy-model layer and the Magnet AXIOM / Magnet.AI black-box commercial-tool layer are already consolidated in the repository.
 
 For black-box forensic-tool evaluation, import only:
 
@@ -85,16 +99,21 @@ datasets/forensic_evaluation_bundle/structured_audit_view/
 
 Those directories contain ground-truth labels, perturbation metadata, source information, and hash mappings. They are reserved for post-export normalization and audit.
 
-Commercial forensic tools are treated as black boxes:
+The consolidated commercial tool is:
 
 ```text
 Magnet AXIOM / Magnet.AI
+```
+
+Additional tools remain planned extensions, subject to licensing, module availability, and export normalization feasibility:
+
+```text
 X-Ways Forensics / Excire
 Cellebrite UFED
 Oxygen Forensic Detective
 ```
 
-Current implementation priority:
+Official forensic-tool prediction normalization entry point:
 
 ```text
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
@@ -181,7 +200,7 @@ datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
     ↓
 datasets/forensic_evaluation_bundle/
     ↓
-commercial forensic tools
+Magnet AXIOM / Magnet.AI
     ↓
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
     ↓
@@ -333,7 +352,14 @@ The proxy evaluation covers:
 - comparative clean-vs-perturbed metrics;
 - thesis-ready metric tables for proxy models.
 
-Commercial forensic-tool results must remain separate until exported outputs are normalized and mapped back to the bundle manifest.
+The Magnet AXIOM / Magnet.AI black-box evaluation is consolidated through normalized outputs in:
+
+```text
+evaluation/forensic_tools/
+results/metrics/forensic_tools_metrics.csv
+```
+
+Additional commercial tools should be reported as planned extensions unless comparable, normalized exports become available.
 
 ---
 
