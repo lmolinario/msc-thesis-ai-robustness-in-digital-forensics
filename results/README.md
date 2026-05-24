@@ -16,7 +16,11 @@ results/
     ├── proxy_model_ood_metrics.csv
     ├── proxy_model_comparative_metrics.csv
     ├── proxy_model_evaluation_summary.json
-    └── forensic_tools_metrics.csv          # expected after normalization
+    ├── forensic_tools_metrics.csv
+    ├── magnet_axiom_metrics.csv
+    ├── xways_excire_metrics.csv
+    ├── cellebrite_ufed_metrics.csv
+    └── oxygen_forensic_detective_metrics.csv
 ```
 
 ---
@@ -50,19 +54,23 @@ These outputs support the quantitative analysis of:
 
 ## Forensic Tool Metrics
 
-Commercial forensic-tool metrics should be generated only after export normalization.
+Commercial forensic-tool metrics are generated after export normalization.
 
-Planned normalization entry point:
+Official normalization entry point:
 
 ```text
-evaluation/scripts/19_normalize_forensic_tool_outputs.py
+evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
 Expected outputs:
 
 ```text
-evaluation/forensic_tools/
+evaluation/forensic_tools/normalized_predictions.csv
+evaluation/forensic_tools/tool_export_audit.csv
+evaluation/forensic_tools/tool_version_log.csv
+evaluation/forensic_tools/normalization_summary.json
 results/metrics/forensic_tools_metrics.csv
+results/metrics/<tool_name>_metrics.csv
 ```
 
 Commercial tool metrics should not be manually merged with proxy metrics before the bundle mapping has been verified.
