@@ -507,9 +507,20 @@ def generate_accuracy_drop_heatmap(
             value = values[i, j]
             if np.isnan(value):
                 label = "n/a"
+                text_color = "black"
             else:
                 label = f"{value:+.3f}"
-            ax.text(j, i, label, ha="center", va="center", fontsize=9)
+                text_color = "white" if value >= 0.71 else "black"
+
+            ax.text(
+                j,
+                i,
+                label,
+                ha="center",
+                va="center",
+                fontsize=9,
+                color=text_color,
+            )
 
     ax.set_xlabel("Evaluated model")
     ax.set_ylabel("Perturbation" if attack_family == "adversarial" else "Transformation")
