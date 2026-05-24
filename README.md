@@ -97,7 +97,7 @@ Oxygen Forensic Detective
 Current implementation priority:
 
 ```text
-evaluation/scripts/19_normalize_forensic_tool_outputs.py
+evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
 The number `19` is intentionally reserved for forensic-tool output normalization because `17` and `18` are already used by the Integrated Gradients/XAI workflow.
@@ -183,7 +183,7 @@ datasets/forensic_evaluation_bundle/
     ↓
 commercial forensic tools
     ↓
-evaluation/scripts/19_normalize_forensic_tool_outputs.py
+evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
     ↓
 evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
@@ -270,12 +270,7 @@ The operational pipeline uses numbered scripts as official entry points:
 16_build_forensic_evaluation_bundle.py
 17_generate_integrated_gradients_case_studies.py
 18_xai_interactive_launcher.py
-```
-
-Planned next numbered script:
-
-```text
-19_normalize_forensic_tool_outputs.py
+19_normalize_forensic_ai_tool_predictions.py
 ```
 
 ---
@@ -407,7 +402,7 @@ The repository is designed around traceable artifacts:
 - attack manifests;
 - proxy model evaluation outputs;
 - forensic bundle metadata;
-- future normalized forensic-tool outputs.
+- normalized forensic-tool outputs.
 
 The hash-based mapping is especially important because forensic tools may rename files, alter export structures, or provide different reporting formats.
 
@@ -439,10 +434,8 @@ Citation details will be added upon thesis completion.
 
 ## License
 
-To be defined.
+Code in this repository is released under the MIT License. See [`LICENSE`](LICENSE).
 
-Recommended separation:
+Thesis text, figures, documentation, datasets, images, forensic-tool exports, model checkpoints and generated artifacts are not automatically covered by the code license unless explicitly stated.
 
-- code: MIT License or Apache-2.0;
-- documentation: CC BY 4.0;
-- datasets/images: restricted according to legal, ethical, and source-specific constraints.
+Datasets, images and forensic artifacts may be subject to third-party terms, ethical restrictions, legal constraints, source-specific limitations, or institutional handling requirements. They should not be redistributed unless their redistribution status has been verified.
