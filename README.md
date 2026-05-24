@@ -8,15 +8,15 @@
 
 This repository contains the working research pipeline for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
 
-The thesis evaluates the **operational robustness of AI-based image classification systems in digital forensic scenarios**. The workflow compares local proxy AI models and commercial forensic AI tools under clean inputs, adversarial perturbations, anti-forensic transformations, and out-of-distribution samples.
+The thesis evaluates the **operational robustness of AI-based image classification systems in digital forensic scenarios**. The workflow compares transparent local proxy models and commercial forensic AI tools under clean inputs, out-of-distribution samples, adversarial perturbations, and anti-forensic image transformations.
 
-The focus of the project is **Digital/Computer Forensics**, not Adversarial Machine Learning as an isolated optimization problem. Adversarial and anti-forensic manipulations are used as experimental stressors to assess reliability, traceability, robustness, and the operational risk of AI-assisted triage in forensic workflows.
+The focus of the project is **Digital/Computer Forensics**, not Adversarial Machine Learning as an isolated optimization problem. Adversarial and anti-forensic manipulations are used as experimental stressors to assess reliability, traceability, robustness, and operational risk in AI-assisted forensic triage.
 
 ---
 
-## Current Status
+## Current Operational Status
 
-The repository is aligned with the following operational state.
+The repository is currently aligned with the following state.
 
 | Stage | Status | Main artifacts |
 |---|---|---|
@@ -31,8 +31,9 @@ The repository is aligned with the following operational state.
 | Anti-forensic transformation generation | Completed | `jpeg_recompression`, `resample_resize`, `gaussian_blur`, `histogram_modification`, `contrast_stretching` |
 | Proxy model evaluation | Completed | `evaluation/proxy_models/proxy_model_predictions.csv`, `results/metrics/` |
 | Forensic evaluation bundle | Generated and validated | `datasets/forensic_evaluation_bundle/` |
-| Commercial forensic tool evaluation | Pending | `forensic_tools/`, `evaluation/forensic_tools/` |
-| Explainability case studies | Prepared, not yet produced | `explainability/scripts/17_generate_integrated_gradients_case_studies.py` |
+| Commercial forensic tool evaluation | In progress | `forensic_tools/`, `evaluation/forensic_tools/` |
+| Explainability case studies | In progress for Chapter 5 | `explainability/scripts/17_generate_integrated_gradients_case_studies.py`, `explainability/scripts/18_xai_interactive_launcher.py` |
+| Thesis reporting | In progress | `docs/LatexThesis_ITA/` |
 
 Proxy evaluation summary:
 
@@ -67,7 +68,7 @@ metadata_separated_from_tool_input       = true
 
 ## Immediate Operational Focus
 
-The next work block is the **commercial forensic-tool evaluation phase**.
+The current work block is the transition from the fully reproducible proxy pipeline to the **commercial forensic-tool evaluation phase**.
 
 For black-box forensic-tool evaluation, import only:
 
@@ -84,7 +85,7 @@ datasets/forensic_evaluation_bundle/structured_audit_view/
 
 Those directories contain ground-truth labels, perturbation metadata, source information, and hash mappings. They are reserved for post-export normalization and audit.
 
-Planned forensic tools:
+Commercial forensic tools are treated as black boxes:
 
 ```text
 Magnet AXIOM / Magnet.AI
@@ -93,13 +94,13 @@ Cellebrite UFED
 Oxygen Forensic Detective
 ```
 
-Expected next implementation step:
+Current implementation priority:
 
 ```text
 evaluation/scripts/19_normalize_forensic_tool_outputs.py
 ```
 
-The number `19` is intentionally reserved for forensic-tool normalization because `18_xai_interactive_launcher.py` already exists under `explainability/scripts/`.
+The number `19` is intentionally reserved for forensic-tool output normalization because `17` and `18` are already used by the Integrated Gradients/XAI workflow.
 
 ---
 
@@ -125,6 +126,16 @@ The official binary subset used for clean folds and perturbation generation is:
 ```text
 datasets/final/manifests/manual_selection_adversarial_subset.csv
 ```
+
+Distribution:
+
+| Group | Count |
+|---|---:|
+| `weapon` | 500 |
+| `non_weapon` | 500 |
+| **Total** | **1000** |
+
+OOD samples are not used to train proxy models or generate adversarial attacks. They are evaluated separately as an operational robustness risk.
 
 ---
 
@@ -178,6 +189,7 @@ evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
     ↓
 explainability/scripts/17_generate_integrated_gradients_case_studies.py
+explainability/scripts/18_xai_interactive_launcher.py
 ```
 
 `datasets/forensic_evaluation_bundle/` is the operational bridge between the local experimental pipeline and the forensic AI tool evaluation phase. It provides blind tool inputs while preserving internal traceability through metadata and hashes.
@@ -194,36 +206,39 @@ msc-thesis-ai-robustness-in-digital-forensics/
 │   ├── prepared/
 │   ├── final/
 │   ├── splits/
-│   │   ├── clean/
-│   │   ├── ood/
-│   │   └── manifests/
 │   ├── forensic_evaluation_bundle/
 │   └── scripts/
-│       ├── utils/
-│       ├── acquisition/
-│       ├── prepared/
-│       ├── final/
-│       ├── splits/
-│       ├── attacks/
-│       └── bundle/
 ├── attacks/
+│   ├── README.md
 │   ├── adversarial/
 │   ├── anti_forensic/
 │   └── manifests/
 ├── models/
+│   ├── README.md
 │   ├── scripts/
 │   ├── checkpoints/
 │   └── reports/
 ├── evaluation/
+│   ├── README.md
 │   ├── scripts/
-│   └── proxy_models/
+│   ├── proxy_models/
+│   └── forensic_tools/
 ├── explainability/
-│   └── scripts/
+│   ├── README.md
+│   ├── scripts/
+│   ├── manifests/
+│   ├── logs/
+│   └── outputs/
 ├── forensic_tools/
+│   └── README.md
 ├── results/
+│   ├── README.md
 │   └── metrics/
 ├── docs/
+│   ├── README.md
+│   └── LatexThesis_ITA/
 └── progress/
+    ├── README.md
     ├── milestones/
     ├── logs/
     └── notes/
@@ -233,7 +248,7 @@ msc-thesis-ai-robustness-in-digital-forensics/
 
 ## Official Script Sequence
 
-The operational pipeline uses numbered scripts as the official entry points:
+The operational pipeline uses numbered scripts as official entry points:
 
 ```text
 00_download_raw_datasets_bundle.py
@@ -301,13 +316,13 @@ resnet18
 clip
 ```
 
-Main evaluation entry point:
+Main proxy evaluation entry point:
 
 ```text
 evaluation/scripts/15_evaluate_proxy_models.py
 ```
 
-Main output areas:
+Main proxy output areas:
 
 ```text
 evaluation/proxy_models/
@@ -321,7 +336,32 @@ The proxy evaluation covers:
 - adversarial perturbations;
 - anti-forensic transformations;
 - comparative clean-vs-perturbed metrics;
-- final metric tables prepared for thesis reporting and later forensic-tool comparison.
+- thesis-ready metric tables for proxy models.
+
+Commercial forensic-tool results must remain separate until exported outputs are normalized and mapped back to the bundle manifest.
+
+---
+
+## Explainability Status
+
+The explainability workflow uses Integrated Gradients on transparent proxy models. It is intended as qualitative diagnostic support for Chapter 5, not as a primary robustness metric.
+
+Official XAI entry points:
+
+```text
+explainability/scripts/17_generate_integrated_gradients_case_studies.py
+explainability/scripts/18_xai_interactive_launcher.py
+```
+
+Expected XAI outputs:
+
+```text
+explainability/manifests/
+explainability/logs/
+explainability/outputs/integrated_gradients/
+```
+
+Generated figures should be selected manually for thesis inclusion and should distinguish input images, IG overlays, heatmaps, masks, and diagnostic comparisons.
 
 ---
 
@@ -367,31 +407,9 @@ The repository is designed around traceable artifacts:
 - attack manifests;
 - proxy model evaluation outputs;
 - forensic bundle metadata;
-- future normalized forensic tool outputs.
+- future normalized forensic-tool outputs.
 
 The hash-based mapping is especially important because forensic tools may rename files, alter export structures, or provide different reporting formats.
-
----
-
-## Progress Tracking
-
-The `progress/` directory documents operational progress and decisions.
-
-Current milestone structure:
-
-```text
-progress/milestones/
-├── 01_dataset_acquisition.md
-├── 02_prepared_dataset.md
-├── 03_manual_selection.md
-├── 04_split_generation.md
-├── 05_attack_generation.md
-├── 06_proxy_model_training.md
-├── 07_proxy_model_evaluation.md
-├── 08_forensic_evaluation_bundle.md
-├── 09_commercial_forensic_tools_evaluation.md
-└── 10_xai_case_studies.md
-```
 
 ---
 
