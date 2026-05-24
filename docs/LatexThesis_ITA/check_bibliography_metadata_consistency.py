@@ -46,6 +46,42 @@ USER_AGENT = (
 
 
 # ---------------------------------------------------------------------------
+# Manually verified false positives
+# ---------------------------------------------------------------------------
+# These entries have been manually checked and are considered acceptable.
+# They are excluded from the final "requires attention" list even if the
+# automatic DOI/URL/title comparison reports a weak match, a generic webpage
+# title, a blocked URL, a rate limit, or unavailable external metadata.
+
+ACCEPTED_FALSE_POSITIVES = {
+    "casey2011digital",
+    "palmer2001road",
+    "li2022blip",
+    "reith2002examining",
+    "farid2016photo",
+    "cpp1988",
+    "gdpr2016",
+    "aiact2024",
+    "directive2013cyber",
+    "cassazione2020",
+    "cassazione2025",
+    "Ribeiro2016",
+    "swgde_guidelines",
+    "faqir2023digital",
+    "iso27037",
+    "enfsi2022",
+    "nowroozi2024verifying",
+    "magnet",
+    "xways",
+    "cellebrite",
+    "acpo_guidelines",
+    "iso27041",
+    "iso27042",
+    "iso27043",
+    "swgde2014validation",
+}
+
+# ---------------------------------------------------------------------------
 # BibTeX parsing
 # ---------------------------------------------------------------------------
 
@@ -638,6 +674,7 @@ def write_csv_report(rows: List[Dict[str, str]], path: Path) -> None:
         "bibkey",
         "entry_type",
         "status",
+        "original_status",
         "score",
         "identifier",
         "source",
@@ -646,11 +683,13 @@ def write_csv_report(rows: List[Dict[str, str]], path: Path) -> None:
         "message",
     ]
 
+    for row in rows:
+        row.setdefault("original_status", "")
+
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
-
 
 def write_md_summary(rows: List[Dict[str, str]], path: Path) -> None:
     total = len(rows)
@@ -769,6 +808,19 @@ def main() -> None:
         key = entry["key"]
         print(f"[{index:03d}/{len(entries):03d}] Checking {key}...")
         row = audit_entry(entry, cache, args.threshold)
+
+        if row["bibkey"] in ACCEPTED_FALSE_POSITIVES and row["status"] in {
+            "POSSIBLE_INCONGRUENCE",
+            "EXTERNAL_METADATA_NOT_FOUND",
+            "NEEDS_MANUAL_CHECK",
+        }:
+            row["original_status"] = row["status"]
+            row["status"] = "ACCEPTED_FALSE_POSITIVE"
+            row["message"] = (
+                "Automatically flagged, but manually verified as acceptable "
+                "for this thesis bibliography."
+            )
+
         rows.append(row)
 
     save_cache(args.cache, cache)
