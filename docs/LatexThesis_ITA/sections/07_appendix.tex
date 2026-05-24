@@ -189,7 +189,14 @@ python explainability/scripts/17_generate_integrated_gradients_case_studies.py
 python explainability/scripts/18_xai_interactive_launcher.py
 \end{lstlisting}
 
-Lo script \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py} è riservato alla fase successiva di normalizzazione degli export prodotti dagli strumenti forensi commerciali. Per tale ragione non viene incluso nella sequenza di riproduzione degli artefatti già consolidati, ma deve essere considerato il punto di raccordo previsto tra la valutazione black-box dei tool e le metriche comparative finali.
+Lo script \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}
+costituisce il punto di raccordo tra gli export prodotti dagli strumenti forensi
+commerciali e le metriche comparative finali. Nel caso di Magnet AXIOM/Magnet.AI,
+esso è stato utilizzato per normalizzare l'export \texttt{Pictures.csv}, mappare
+le segnalazioni \texttt{Possible weapons} rispetto al forensic evaluation bundle
+e produrre output metrici confrontabili con il livello proxy. Per gli altri tool
+commerciali, lo stesso script rappresenta la base procedurale estendibile qualora
+diventino disponibili export normalizzabili.
 
 \section{Models, attacks and evaluation outputs}
 \label{app:models-attacks-evaluation-outputs}
