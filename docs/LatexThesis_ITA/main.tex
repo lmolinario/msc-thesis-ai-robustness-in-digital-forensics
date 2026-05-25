@@ -11,7 +11,6 @@
 
 \begin{document}
 
-
 % ----------------- Front matter numbering ----------------------
 \pagenumbering{roman}
 
@@ -20,8 +19,6 @@
 
 % ----------------- Frontespizio ----------------------
 \import{./}{title}
-
-
 
 % ----------------- Epigraph and dedication ----------------------
 \cleardoublepage
@@ -60,31 +57,33 @@ Yours is the Earth and everything that's in it. \ldots
 
 \cleardoublepage
 
-
-
 % ----------------- Copyright / License ----------------------
+\clearpage
 \thispagestyle{empty}
 
-\vspace*{\fill}
+\null
+\vfill
 
 \begin{center}
+\small
 \copyright\ 2026 Lello Molinario.
 
 \vspace{1em}
 
-Except where otherwise noted, this work is licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0).
+Except where otherwise noted, this work is licensed under the
+Creative Commons Attribution 4.0 International License (CC BY 4.0).
 
 \vspace{1em}
 
 To view a copy of this license, visit:
 
-\url{https://creativecommons.org/licenses/by/4.0/}
+\href{https://creativecommons.org/licenses/by/4.0/}
+{https://creativecommons.org/licenses/by/4.0/}
 \end{center}
 
-\vspace*{\fill}
+\vspace*{1.5cm}
 
-\cleardoublepage
-
+\clearpage
 
 % ----------------- Indice e liste ----------------------
 \tableofcontents
@@ -105,26 +104,20 @@ To view a copy of this license, visit:
 \clearpage
 
 % ----------------- Front matter text ----------------------
-
-
 \input{sections/0_acknowledgment}
 \input{sections/00_abstract}
+
+% Reset acronym usage again before the thesis body.
 \glsresetall
 
-
-
-
-
-
 % ----------------- Main matter ----------------------
-
 \cleardoublepage
 \pagenumbering{arabic}
+
 \input{sections/01_introduction}
 \input{sections/02_background}
 \input{sections/03_StateoftheArt}
 \input{sections/04_methodology}
-
 \input{sections/05_implementation_&_experiments}
 \input{sections/06_conclusions}
 
