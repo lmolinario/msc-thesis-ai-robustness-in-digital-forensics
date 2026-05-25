@@ -71,10 +71,13 @@ To view a copy of this license, visit:
 
 \listoftables
 
-
 % Print all defined acronyms, even if not used before this point.
 \glsaddall[types=\acronymtype]
+
+\begingroup
+\let\cleardoublepage\clearpage
 \printglossary[type=\acronymtype,title={Acronyms}]
+\endgroup
 
 % Reset acronym usage so first occurrences in the thesis body are expanded.
 \glsresetall

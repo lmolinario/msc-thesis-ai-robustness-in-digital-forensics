@@ -126,6 +126,19 @@ sortcites=true
 
 % --- Chapter title format ---
 \usepackage{titlesec}
+\usepackage{ragged2e}
+
+\titleformat{\section}
+  {\normalfont\Large\bfseries\RaggedRight}
+  {\thesection}{1em}{}
+
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\RaggedRight}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\RaggedRight}
+  {\thesubsubsection}{1em}{}
 
 % --- Code listings ---
 \usepackage{listings}
