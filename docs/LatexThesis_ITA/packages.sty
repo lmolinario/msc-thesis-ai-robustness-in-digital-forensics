@@ -88,11 +88,19 @@ sortcites=true
 
 % --- Language ---
 \usepackage{siunitx}
-\usepackage[british]{babel}
-\addto\extrasbritish{
+
+% Current thesis version: Italian text with English headings and terminology.
+\usepackage[main=italian,british]{babel}
+
+% Keep front-matter labels in English while using Italian hyphenation rules.
+\addto\captionsitalian{
     \renewcommand*\contentsname{Contents}
     \renewcommand{\listfigurename}{List of Figures}
     \renewcommand{\listtablename}{List of Tables}
+    \renewcommand{\bibname}{References}
+}
+
+\addto\extrasitalian{
     \def\equationautorefname{Equation}
     \def\figureautorefname{Figure}
     \def\tableautorefname{Table}
@@ -119,10 +127,60 @@ sortcites=true
 \usepackage[a4paper,top=3cm,bottom=3cm,left=3.5cm,right=3cm]{geometry}
 \usepackage{parskip}
 
+
+% --- Typography ---
+\usepackage{microtype}
+
+% Improve line breaking and reduce visually unpleasant hyphenation.
+\emergencystretch=2em
+\tolerance=1500
+\pretolerance=1000
+\hyphenpenalty=5000
+\exhyphenpenalty=5000
+
+% Prevent bad hyphenation for frequent technical and thesis-specific terms.
+\hyphenation{
+adversarial
+anti-forensic
+anti-forensics
+forensic
+workflow
+workflows
+dataset
+datasets
+benchmark
+benchmarks
+robustness
+explainability
+classification
+classifier
+classifiers
+classificazione
+classificatore
+classificatori
+sperimentale
+sperimentali
+investigativo
+investigativi
+probatorio
+probatori
+metodologico
+metodologica
+robustezza
+tracciabilita
+verificabilita
+}
+
+
 % --- Tables ---
 \usepackage{longtable}
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{array}
+
+% Ragged-right column types to avoid ugly word hyphenation in tables.
+\newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
 
 % --- Chapter title format ---
 \usepackage{titlesec}
