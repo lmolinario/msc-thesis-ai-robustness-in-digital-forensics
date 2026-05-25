@@ -13,6 +13,7 @@
 
 % ----------------- Front matter numbering ----------------------
 \pagenumbering{roman}
+\pagestyle{frontmatterstyle}
 
 % ----------------- Acronyms and glossary definitions ----------------------
 \input{sections/000_acronyms}
@@ -52,7 +53,14 @@ To view a copy of this license, visit:
 
 % ----------------- Front matter text ----------------------
 \input{sections/0_acknowledgment}
+
+% Abstract without visible page numbering.
+\clearpage
+\pagestyle{empty}
 \input{sections/00_abstract}
+\clearpage
+\pagestyle{plain}
+
 
 % ----------------- Indice e liste ----------------------
 \tableofcontents
@@ -80,6 +88,8 @@ To view a copy of this license, visit:
 % ----------------- Main matter ----------------------
 \cleardoublepage
 \pagenumbering{arabic}
+\pagestyle{mainmatterstyle}
+
 
 \input{sections/01_introduction}
 \input{sections/02_background}
