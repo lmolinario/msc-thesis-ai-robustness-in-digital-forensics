@@ -20,42 +20,6 @@
 % ----------------- Frontespizio ----------------------
 \import{./}{title}
 
-% ----------------- Epigraph and dedication ----------------------
-\cleardoublepage
-\thispagestyle{empty}
-
-\vspace*{\fill}
-
-\begin{flushright}
-\begin{minipage}{0.52\textwidth}
-\itshape
-
-If you can keep your head when all about you\\
-Are losing theirs and blaming it on you, \ldots
-
-\vspace{0.8em}
-
-If you can dream---and not make dreams your master; \ldots
-
-\vspace{0.8em}
-
-If you can force your heart and nerve and sinew\\
-To serve your turn long after they are gone, \ldots
-
-\vspace{0.8em}
-
-Yours is the Earth and everything that's in it. \ldots
-
-\vspace{1.5em}
-
-\raggedleft
---- Rudyard Kipling, \textit{If---} (1910)
-\end{minipage}
-\end{flushright}
-
-\vspace*{\fill}
-
-\cleardoublepage
 
 % ----------------- Copyright / License ----------------------
 \clearpage
@@ -85,6 +49,11 @@ To view a copy of this license, visit:
 
 \clearpage
 
+
+% ----------------- Front matter text ----------------------
+\input{sections/0_acknowledgment}
+\input{sections/00_abstract}
+
 % ----------------- Indice e liste ----------------------
 \tableofcontents
 \clearpage
@@ -103,9 +72,7 @@ To view a copy of this license, visit:
 \glsresetall
 \clearpage
 
-% ----------------- Front matter text ----------------------
-\input{sections/0_acknowledgment}
-\input{sections/00_abstract}
+
 
 % Reset acronym usage again before the thesis body.
 \glsresetall
