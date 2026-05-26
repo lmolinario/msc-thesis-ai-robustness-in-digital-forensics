@@ -6,18 +6,32 @@ Commercial forensic tools are treated as **operational black boxes**. The goal i
 
 ---
 
+## Current Tool Status
+
+| Tool | Status | Notes |
+|---|---|---|
+| Magnet AXIOM / Magnet.AI | Completed and normalized | The forensic evaluation bundle has been processed and the `Pictures.csv` export has been normalized against the bundle manifest. |
+| X-Ways Forensics / Excire Photo AI | Pending / planned extension | Requires tool/module availability and an export format that can be mapped back to the bundle. |
+| Cellebrite UFED | Pending / planned extension | Requires confirmation of AI-based image-classification support and exportability for this experimental setup. |
+| Oxygen Forensic Detective | Pending / planned extension | Requires available AI modules and normalized export mapping. |
+
+---
+
 ## Target Tools
 
-The planned/active forensic-tool evaluation phase covers:
+The commercial forensic-tool evaluation phase covers one consolidated tool and three optional extensions:
 
 ```text
-Magnet AXIOM / Magnet.AI
-X-Ways Forensics / Excire
-Cellebrite UFED
-Oxygen Forensic Detective
+Consolidated:
+- Magnet AXIOM / Magnet.AI
+
+Pending / planned extensions:
+- X-Ways Forensics / Excire Photo AI
+- Cellebrite UFED
+- Oxygen Forensic Detective
 ```
 
-Each tool should be documented separately, including import procedure, export format, relevant AI labels/categories, and any operational limitations observed during analysis.
+Each tool should be documented separately, including import procedure, export format, relevant AI labels/categories, software version, and operational limitations observed during analysis.
 
 ---
 
@@ -60,6 +74,30 @@ forensic_tools/
 ```
 
 Large proprietary case files and heavy exports should not be committed unless strictly necessary and legally/ethically appropriate. Prefer normalized CSV/JSON outputs and methodological notes.
+
+---
+
+## Magnet AXIOM / Magnet.AI Consolidated Run
+
+The consolidated commercial-tool run currently available in the repository is:
+
+```text
+forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02
+```
+
+The normalized outputs are stored in:
+
+```text
+evaluation/forensic_tools/normalized_predictions.csv
+evaluation/forensic_tools/magnet_axiom_normalized_predictions.csv
+evaluation/forensic_tools/tool_export_audit.csv
+evaluation/forensic_tools/tool_version_log.csv
+evaluation/forensic_tools/normalization_summary.json
+results/metrics/forensic_tools_metrics.csv
+results/metrics/magnet_axiom_metrics.csv
+```
+
+The Magnet normalization maps the exported `Possible weapons` tag to `weapon_detected=true` and the absence of that tag to `weapon_detected=false`. This is an operational recoding of observable tool output, not access to Magnet.AI internal model logic.
 
 ---
 
@@ -110,11 +148,13 @@ Manual matching decisions should be logged.
 
 ## Reporting Principle
 
-Commercial tool results should be reported separately from proxy model results until normalization is complete.
+Commercial tool results should be reported separately from proxy model results unless their exports have been normalized and mapped back to the forensic evaluation bundle.
 
 The thesis should distinguish:
 
 - transparent proxy model robustness;
 - black-box commercial forensic-tool behavior;
+- Magnet AXIOM / Magnet.AI as the consolidated commercial-tool result;
+- X-Ways/Excire, Cellebrite UFED and Oxygen as pending extensions unless comparable exports become available;
 - operational implications for AI-assisted triage;
 - limitations caused by proprietary labels, export formats, and unknown internal model behavior.
