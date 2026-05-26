@@ -68,6 +68,7 @@ datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
 datasets/scripts/attacks/14_generate_adversarial_attacks.py
 evaluation/scripts/15_evaluate_proxy_models.py
 datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
+evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
 Implemented and generated anti-forensic transformations:
@@ -95,7 +96,9 @@ Operational status:
 ```text
 attack generation completed
 proxy model evaluation completed
-forensic bundle construction started
+forensic evaluation bundle generated and validated
+Magnet AXIOM / Magnet.AI evaluation completed and normalized
+additional commercial forensic tools pending / planned extension
 ```
 
 ---
@@ -185,6 +188,40 @@ The evaluation compares clean, OOD, adversarial, and anti-forensic samples acros
 
 ---
 
+## Commercial Forensic-Tool Evaluation Status
+
+The forensic evaluation bundle generated from the clean, OOD, adversarial and anti-forensic artifacts has already been processed with:
+
+```text
+Magnet AXIOM / Magnet.AI
+```
+
+The Magnet export has been normalized through:
+
+```text
+evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
+```
+
+Consolidated outputs:
+
+```text
+evaluation/forensic_tools/normalized_predictions.csv
+evaluation/forensic_tools/magnet_axiom_normalized_predictions.csv
+evaluation/forensic_tools/normalization_summary.json
+results/metrics/forensic_tools_metrics.csv
+results/metrics/magnet_axiom_metrics.csv
+```
+
+The same bundle can later be used for additional black-box commercial-tool extensions, provided that comparable exports are available:
+
+```text
+X-Ways Forensics / Excire Photo AI
+Cellebrite UFED
+Oxygen Forensic Detective
+```
+
+---
+
 ## Official Generation Commands
 
 Anti-forensic transformations:
@@ -243,10 +280,10 @@ Smoke tests can be performed with `--limit 10` before full regeneration.
 
 ---
 
-## Next Operational Step
+## Current Reporting Step
 
-The attack generation stage is complete. The current operational focus is:
+The attack generation, proxy evaluation, forensic bundle construction, and Magnet AXIOM / Magnet.AI normalization stages are complete. The current operational focus is:
 
 ```text
-validate forensic evaluation bundle → run forensic tools → normalize tool outputs → compare with proxy results
+finalize Chapter 5 reporting → finalize XAI case studies → keep additional commercial tools as optional extensions unless normalized exports become available
 ```
