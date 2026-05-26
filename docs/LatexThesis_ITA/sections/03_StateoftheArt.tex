@@ -305,26 +305,54 @@ affrontato nella presente tesi.
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabular}{|p{4.0cm}|p{5.0cm}|p{5.0cm}|}
+\footnotesize
+\renewcommand{\arraystretch}{1.18}
+\begin{tabularx}{\textwidth}{|
+>{\RaggedRight\arraybackslash}p{3.2cm}|
+>{\RaggedRight\arraybackslash}X|
+>{\RaggedRight\arraybackslash}X|}
 \hline
-\textbf{Filone della letteratura} & \textbf{Contributo principale} & \textbf{Limite rispetto alla presente tesi} \\
+\textbf{Filone della letteratura} &
+\textbf{Contributo principale} &
+\textbf{Limite rispetto alla presente tesi} \\
 \hline
-\gls{ai} nella \gls{df} & Mostra il ruolo dell'automazione nel triage, nell'esame e nell'analisi di grandi volumi di dati digitali. & Non valuta sistematicamente la robustezza dei sistemi automatici in presenza di input manipolati o fuori distribuzione. \\
+
+\gls{ai} nella \gls{df} &
+Mostra il ruolo dell'automazione nel triage, nell'esame e nell'analisi di grandi volumi di dati digitali. &
+Non valuta sistematicamente la robustezza dei sistemi automatici in presenza di input manipolati o fuori distribuzione. \\
 \hline
-Tool forensi \gls{ai}-based & Evidenzia l'utilità operativa dei moduli automatici e i primi problemi di robustezza dei tool commerciali. & Rimane limitata la validazione indipendente e comparativa di strumenti proprietari in scenari avversi realistici. \\
+
+Tool forensi \gls{ai}-based &
+Evidenzia l'utilità operativa dei moduli automatici e i primi problemi di robustezza dei tool commerciali. &
+Rimane limitata la validazione indipendente e comparativa di strumenti proprietari in scenari avversi realistici. \\
 \hline
-Classificazione automatica di immagini & Mostra l'efficacia di modelli di computer vision e vision-language per object recognition, visual triage e classificazione semantica di contenuti rilevanti. & I benchmark sono spesso generici o controllati e non sempre riflettono la complessità del materiale investigativo. \\
+
+Classificazione automatica di immagini &
+Mostra l'efficacia di modelli di computer vision e vision-language per object recognition, visual triage e classificazione semantica di contenuti rilevanti. &
+I benchmark sono spesso generici o controllati e non sempre riflettono la complessità del materiale investigativo. \\
 \hline
-Valutazione della robustezza & Documenta degradi sistematici delle prestazioni in presenza di corruzioni, input fuori distribuzione e perturbazioni rispetto a modelli valutati solo su dati puliti. & Mancano benchmark specifici per collegare la robustezza algoritmica all'impatto sul workflow forense. \\
+
+Valutazione della robustezza &
+Documenta degradi sistematici delle prestazioni in presenza di corruzioni, input fuori distribuzione e perturbazioni rispetto a modelli valutati solo su dati puliti. &
+Mancano benchmark specifici per collegare la robustezza algoritmica all'impatto sul workflow forense. \\
 \hline
-\gls{aml} & Mostra la vulnerabilità dei classificatori a perturbazioni intenzionali e trasferibili. & La maggior parte degli studi resta centrata su modelli accademici o benchmark standard, non su tool forensi operativi. \\
+
+\gls{aml} &
+Mostra la vulnerabilità dei classificatori a perturbazioni intenzionali e trasferibili. &
+La maggior parte degli studi resta centrata su modelli accademici o benchmark standard, non su tool forensi operativi. \\
 \hline
-Anti-forensics su immagini & Analizza trasformazioni che alterano tracce, qualità e struttura statistica dell'immagine. & L'impatto di tali trasformazioni sulla classificazione automatizzata forense è ancora poco integrato con l'analisi adversariale. \\
+
+Anti-forensics su immagini &
+Analizza trasformazioni che alterano tracce, qualità e struttura statistica dell'immagine. &
+L'impatto di tali trasformazioni sulla classificazione automatizzata forense è ancora poco integrato con l'analisi adversariale. \\
 \hline
-\gls{xai} & Documenta tecniche di attribuzione visuale capaci di evidenziare le regioni dell'immagine che influenzano la predizione nei modelli di classificazione profonda. & Le spiegazioni visuali sono raramente integrate in protocolli completi di robustezza forense. \\
+
+\gls{xai} &
+Documenta tecniche di attribuzione visuale capaci di evidenziare le regioni dell'immagine che influenzano la predizione nei modelli di classificazione profonda. &
+Le spiegazioni visuali sono raramente integrate in protocolli completi di robustezza forense. \\
 \hline
-\end{tabular}
+
+\end{tabularx}
 \caption{Sintesi dei principali filoni della letteratura e dei limiti rilevanti rispetto alla valutazione della robustezza operativa di sistemi \gls{ai}-based in \gls{df}.}
 \label{tab:sota-gap-summary}
 \end{table}

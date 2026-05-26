@@ -510,7 +510,13 @@ def generate_accuracy_drop_heatmap(
                 text_color = "black"
             else:
                 label = f"{value:+.3f}"
-                text_color = "white" if value >= 0.71 else "black"
+
+                if attack_family == "adversarial":
+                    text_color = "white" if value >= 0.71 else "black"
+                elif attack_family == "anti_forensic":
+                    text_color = "white" if value >= 0.02 else "black"
+                else:
+                    text_color = "black"
 
             ax.text(
                 j,
