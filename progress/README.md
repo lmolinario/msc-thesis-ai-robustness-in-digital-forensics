@@ -49,9 +49,36 @@ progress/milestones/10_xai_case_studies.md
 | Proxy model training | Completed |
 | Proxy model evaluation | Completed |
 | Forensic evaluation bundle | Generated and validated |
-| Commercial forensic-tool evaluation | In progress |
+| Magnet AXIOM / Magnet.AI evaluation | Completed and normalized |
+| Additional commercial forensic tools | Pending / planned extension |
 | XAI case studies | In progress for Chapter 5 |
 | Thesis reporting | In progress |
+
+---
+
+## Commercial Forensic-Tool Status
+
+The consolidated black-box commercial-tool result currently available is:
+
+```text
+Magnet AXIOM / Magnet.AI
+```
+
+The Magnet AXIOM / Magnet.AI export has been normalized and mapped back to the forensic evaluation bundle. The resulting metrics are available in:
+
+```text
+evaluation/forensic_tools/
+results/metrics/forensic_tools_metrics.csv
+results/metrics/magnet_axiom_metrics.csv
+```
+
+The following tools remain pending or planned extensions unless comparable, normalized exports become available:
+
+```text
+X-Ways Forensics / Excire Photo AI
+Cellebrite UFED
+Oxygen Forensic Detective
+```
 
 ---
 
