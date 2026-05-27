@@ -1,11 +1,12 @@
 {
-  "script": "results/scripts/20_generate_experimental_reporting_assets.py",
-  "created_at": "2026-05-26T05:05:33+00:00",
+  "script": "evaluation/scripts/20_generate_experimental_reporting_assets.py",
+  "created_at": "2026-05-27T21:15:59+00:00",
   "inputs": {
     "core_metrics_csv": "results/metrics/final_core_metrics.csv",
     "robustness_metrics_csv": "results/metrics/final_robustness_metrics.csv",
     "confusion_matrices_csv": "results/metrics/final_confusion_matrices.csv",
     "ood_metrics_csv": "results/metrics/final_ood_metrics.csv",
+    "forensic_tools_metrics_csv": "results/metrics/forensic_tools_metrics.csv",
     "predictions_csv": "evaluation/proxy_models/proxy_model_predictions.csv"
   },
   "outputs": {
@@ -18,17 +19,29 @@
     "png"
   ],
   "dpi": 300,
-  "figure_count_unique": 8,
-  "file_count": 16,
+  "figure_count_unique": 20,
+  "file_count": 35,
   "figure_ids": [
     "fig_adversarial_accuracy_drop_heatmap",
     "fig_anti_forensic_accuracy_drop_heatmap",
     "fig_clean_confusion_matrix_clip",
     "fig_clean_confusion_matrix_efficientnet_b0",
     "fig_clean_confusion_matrix_resnet18",
+    "fig_forensic_tools_adversarial_accuracy_drop_heatmap",
+    "fig_forensic_tools_anti_forensic_accuracy_drop_heatmap",
+    "fig_forensic_tools_attack_family_accuracy",
+    "fig_forensic_tools_attack_family_fpr",
+    "fig_forensic_tools_attack_family_recall_weapon",
+    "fig_forensic_tools_clean_metrics_comparison",
+    "fig_forensic_tools_ood_weapon_flag_rate",
     "fig_max_accuracy_drop_by_model",
     "fig_ood_confidence_distribution",
-    "fig_ood_weapon_rate_and_confidence"
+    "fig_ood_weapon_rate_and_confidence",
+    "tab_forensic_tools_attack_family_metrics",
+    "tab_forensic_tools_attack_name_metrics",
+    "tab_forensic_tools_clean_metrics",
+    "tab_forensic_tools_ood_metrics",
+    "tab_forensic_tools_sensitivity_summary"
   ],
   "warnings": [],
   "methodological_note": "This script only generates thesis figures from consolidated metric outputs. It does not regenerate datasets, perturbations, model predictions, or metrics."
