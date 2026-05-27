@@ -931,6 +931,7 @@ def build_tool_version_row(
     tool_dir: Path,
     export_files_found: int,
     selected_run_dirs: list[Path] | None = None,
+    row_tool_name: str | None = None,
 ) -> dict[str, Any]:
     roots = selected_run_dirs if selected_run_dirs else [tool_dir / "raw_exports"]
     summary_files: list[Path] = []
@@ -966,7 +967,7 @@ def build_tool_version_row(
         notes = "Fill manually after tool execution/export."
 
     return {
-        "tool_name": tool_name,
+        "tool_name": row_tool_name or tool_name,
         "tool_version": extracted.get("tool_version", ""),
         "tool_build": extracted.get("tool_build", ""),
         "case_name": extracted.get("case_name", ""),
@@ -1143,6 +1144,7 @@ def normalize_xways_excire_prompt_exports(
     tool_dir: Path,
     selected_run_dirs: list[Path] | None,
     bundle_df: pd.DataFrame,
+    effective_tool_name: str | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
     """
     Normalize X-Ways / Excire Photo AI prompt hit-list exports.
@@ -1153,6 +1155,7 @@ def normalize_xways_excire_prompt_exports(
     table to one row per bundle image so that accuracy, FNR/FPR and OOD weapon
     flag rate can be computed consistently with Magnet AXIOM.
     """
+    output_tool_name = effective_tool_name or tool_name
     roots = get_scan_roots(tool_name, tool_dir, selected_run_dirs)
     all_export_files = discover_export_files_in_roots(roots)
     prediction_files = [path for path in all_export_files if is_excire_prompt_export_file(path)]
@@ -1208,7 +1211,7 @@ def normalize_xways_excire_prompt_exports(
 
         audit_rows.append(
             {
-                "tool_name": tool_name,
+                "tool_name": output_tool_name,
                 "raw_export_file": repo_relative_string(export_file),
                 "run_dir": infer_run_dir_name(tool_dir, export_file),
                 "extension": export_file.suffix.lower(),
@@ -1244,7 +1247,7 @@ def normalize_xways_excire_prompt_exports(
         ]
 
         base = {
-            "tool_name": tool_name,
+            "tool_name": output_tool_name,
             "bundle_id": safe_str(bundle_row.get("bundle_id", "")),
             "match_method": "bundle_manifest_completion",
             "matched": "true",
@@ -1555,6 +1558,37 @@ def build_selected_run_dirs_from_cli(selected_run_dirs: list[str]) -> dict[str, 
     return dict(selected_by_tool)
 
 
+def infer_excire_distance_from_run_dir(run_dir: Path) -> str:
+    """Infer the Excire distance value from a run directory name."""
+    match = re.search(r"d(\d+)", run_dir.name, flags=re.IGNORECASE)
+    return match.group(1) if match else ""
+
+
+def excire_variant_tool_name(base_tool_name: str, run_dir: Path) -> str:
+    """Build a stable tool identifier for one Excire distance setting."""
+    distance = infer_excire_distance_from_run_dir(run_dir)
+    if distance:
+        return f"{base_tool_name}_d{distance}"
+    return f"{base_tool_name}_{run_dir.name.lower()}"
+
+
+def resolve_excire_run_dirs(
+    tool_name: str,
+    tool_dir: Path,
+    selected_run_dirs: list[Path],
+) -> list[Path]:
+    """
+    Return the Excire run directories that must be normalized separately.
+
+    Each EXCIRE_Dxx_FIREARM_PROMPTS folder is a distinct operational setting.
+    They must not be merged, because D20, D50 and D80 represent different
+    semantic-distance policies.
+    """
+    if selected_run_dirs:
+        return selected_run_dirs
+    return discover_raw_run_dirs(tool_name, tool_dir.parent)
+
+
 def main() -> None:
     args = parse_args()
     setup_logging(args.verbose)
@@ -1621,32 +1655,60 @@ def main() -> None:
             )
 
         if tool_name == "xways_excire":
-            tool_normalized_rows, tool_audit_rows, raw_hit_rows = normalize_xways_excire_prompt_exports(
-                tool_name=tool_name,
-                tool_dir=tool_dir,
-                selected_run_dirs=selected_run_dirs or None,
-                bundle_df=bundle_df,
-            )
-            pre_normalized_rows.extend(tool_normalized_rows)
-            audit_rows.extend(tool_audit_rows)
-            per_tool_raw_row_counts[tool_name] = raw_hit_rows
+            excire_run_dirs = resolve_excire_run_dirs(tool_name, tool_dir, selected_run_dirs)
+            if strict and not excire_run_dirs:
+                raise FileNotFoundError(f"No Excire run folders found under {tool_dir / 'raw_exports'}")
+
+            for run_dir in excire_run_dirs:
+                effective_tool_name = excire_variant_tool_name(tool_name, run_dir)
+                run_prediction_files = discover_prediction_export_files(tool_name, tool_dir, [run_dir])
+                run_all_export_files = discover_all_export_files(tool_dir, [run_dir])
+
+                if strict and not run_prediction_files:
+                    raise FileNotFoundError(
+                        f"No Excire prediction export files found for {effective_tool_name}. "
+                        f"Selected run dir: {repo_relative_string(run_dir)}"
+                    )
+
+                tool_normalized_rows, tool_audit_rows, raw_hit_rows = normalize_xways_excire_prompt_exports(
+                    tool_name=tool_name,
+                    tool_dir=tool_dir,
+                    selected_run_dirs=[run_dir],
+                    bundle_df=bundle_df,
+                    effective_tool_name=effective_tool_name,
+                )
+                pre_normalized_rows.extend(tool_normalized_rows)
+                audit_rows.extend(tool_audit_rows)
+
+                per_tool_prediction_export_counts[effective_tool_name] = len(run_prediction_files)
+                per_tool_total_export_counts[effective_tool_name] = len(run_all_export_files)
+                per_tool_raw_row_counts[effective_tool_name] = raw_hit_rows
+
+                version_rows.append(
+                    build_tool_version_row(
+                        tool_name=tool_name,
+                        tool_dir=tool_dir,
+                        export_files_found=len(run_all_export_files),
+                        selected_run_dirs=[run_dir],
+                        row_tool_name=effective_tool_name,
+                    )
+                )
         else:
             raw_rows, tool_audit_rows = parse_tool_exports(tool_name, tool_dir, selected_run_dirs or None)
             all_raw_rows.extend(raw_rows)
             audit_rows.extend(tool_audit_rows)
             per_tool_raw_row_counts[tool_name] = len(raw_rows)
+            per_tool_prediction_export_counts[tool_name] = len(prediction_files)
+            per_tool_total_export_counts[tool_name] = len(all_export_files)
 
-        per_tool_prediction_export_counts[tool_name] = len(prediction_files)
-        per_tool_total_export_counts[tool_name] = len(all_export_files)
-
-        version_rows.append(
-            build_tool_version_row(
-                tool_name=tool_name,
-                tool_dir=tool_dir,
-                export_files_found=len(all_export_files),
-                selected_run_dirs=selected_run_dirs or None,
+            version_rows.append(
+                build_tool_version_row(
+                    tool_name=tool_name,
+                    tool_dir=tool_dir,
+                    export_files_found=len(all_export_files),
+                    selected_run_dirs=selected_run_dirs or None,
+                )
             )
-        )
 
     normalized_before_deduplication = [
         *normalize_rows(all_raw_rows, sha_index, md5_index, filename_index),
@@ -1660,13 +1722,20 @@ def main() -> None:
     write_csv(tool_version_log_path, version_rows)
     write_csv(forensic_tool_metrics_path, metrics_rows)
 
-    for tool_name in tools:
-        tool_rows = [row for row in normalized_rows if safe_str(row.get("tool_name", "")) == tool_name]
-        tool_metrics = [row for row in metrics_rows if safe_str(row.get("tool_name", "")) == tool_name]
+    output_tool_names = sorted(
+        {
+            safe_str(row.get("tool_name", ""))
+            for row in [*normalized_rows, *metrics_rows]
+            if safe_str(row.get("tool_name", ""))
+        }
+    )
+    for output_tool_name in output_tool_names:
+        tool_rows = [row for row in normalized_rows if safe_str(row.get("tool_name", "")) == output_tool_name]
+        tool_metrics = [row for row in metrics_rows if safe_str(row.get("tool_name", "")) == output_tool_name]
         if tool_rows:
-            write_csv(output_dir / f"{tool_name}_normalized_predictions.csv", tool_rows)
+            write_csv(output_dir / f"{output_tool_name}_normalized_predictions.csv", tool_rows)
         if tool_metrics:
-            write_csv(metrics_dir / f"{tool_name}_metrics.csv", tool_metrics)
+            write_csv(metrics_dir / f"{output_tool_name}_metrics.csv", tool_metrics)
 
     matched_before = sum(1 for row in normalized_before_deduplication if row.get("matched") == "true")
     matched_after = sum(1 for row in normalized_rows if row.get("matched") == "true")
@@ -1688,7 +1757,9 @@ def main() -> None:
         "per_tool_prediction_export_counts": per_tool_prediction_export_counts,
         "per_tool_total_export_counts": per_tool_total_export_counts,
         "per_tool_raw_row_counts": per_tool_raw_row_counts,
-        "raw_rows_parsed": len(all_raw_rows) + sum(per_tool_raw_row_counts.get(tool, 0) for tool in tools if tool == "xways_excire"),
+        "raw_rows_parsed": len(all_raw_rows) + sum(
+            count for name, count in per_tool_raw_row_counts.items() if name.startswith("xways_excire")
+        ),
         "pre_normalized_rows": len(pre_normalized_rows),
         "normalized_rows_before_deduplication": len(normalized_before_deduplication),
         "matched_rows_before_deduplication": matched_before,
@@ -1712,7 +1783,9 @@ def main() -> None:
 
     logging.info(
         "Raw rows parsed: %d",
-        len(all_raw_rows) + sum(per_tool_raw_row_counts.get(tool, 0) for tool in tools if tool == "xways_excire"),
+        len(all_raw_rows) + sum(
+            count for name, count in per_tool_raw_row_counts.items() if name.startswith("xways_excire")
+        ),
     )
     logging.info("Pre-normalized rows: %d", len(pre_normalized_rows))
     logging.info("Normalized rows before deduplication: %d", len(normalized_before_deduplication))
