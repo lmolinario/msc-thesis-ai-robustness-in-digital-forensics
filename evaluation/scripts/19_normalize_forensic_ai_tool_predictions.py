@@ -1558,6 +1558,124 @@ def build_selected_run_dirs_from_cli(selected_run_dirs: list[str]) -> dict[str, 
     return dict(selected_by_tool)
 
 
+def cleanup_legacy_excire_outputs(output_dir: Path, metrics_dir: Path, output_tool_names: list[str]) -> list[str]:
+    """Remove stale legacy Excire aggregate files when D20/D50/D80 variants are produced.
+
+    Earlier versions of the pipeline produced xways_excire_metrics.csv and
+    xways_excire_normalized_predictions.csv for a single Excire setting. Once
+    the sensitivity-analysis pipeline is used, those files become ambiguous and
+    can lead to wrong reporting if left in the repository.
+    """
+    has_excire_variants = any(name.startswith("xways_excire_d") for name in output_tool_names)
+    if not has_excire_variants:
+        return []
+
+    stale_paths = [
+        output_dir / "xways_excire_normalized_predictions.csv",
+        metrics_dir / "xways_excire_metrics.csv",
+    ]
+    removed: list[str] = []
+    for stale_path in stale_paths:
+        if stale_path.exists():
+            stale_path.unlink()
+            removed.append(repo_relative_string(stale_path))
+            logging.info("Removed stale legacy Excire output: %s", repo_relative_string(stale_path))
+    return removed
+
+
+def validate_metric_outputs(
+    metrics_rows: list[dict[str, Any]],
+    metrics_dir: Path,
+    forensic_tool_metrics_path: Path,
+    output_tool_names: list[str],
+) -> dict[str, Any]:
+    """Validate that the aggregate metric CSV mirrors the per-tool metric CSVs.
+
+    The aggregate forensic_tools_metrics.csv is the canonical file consumed by
+    the reporting script. This check makes the workflow reproducible by ensuring
+    that the aggregate file is generated from the same in-memory rows used to
+    create the per-tool metrics.
+    """
+    rows_by_tool: dict[str, int] = defaultdict(int)
+    for row in metrics_rows:
+        tool_name = safe_str(row.get("tool_name", ""))
+        if tool_name:
+            rows_by_tool[tool_name] += 1
+
+    per_tool_files: dict[str, dict[str, Any]] = {}
+    for tool_name in output_tool_names:
+        metric_file = metrics_dir / f"{tool_name}_metrics.csv"
+        exists = metric_file.exists()
+        row_count = 0
+        if exists:
+            try:
+                row_count = len(pd.read_csv(metric_file))
+            except Exception as exc:  # pragma: no cover - defensive branch
+                per_tool_files[tool_name] = {
+                    "path": repo_relative_string(metric_file),
+                    "exists": True,
+                    "rows": "",
+                    "expected_rows": rows_by_tool.get(tool_name, 0),
+                    "matches_expected": False,
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
+                continue
+        per_tool_files[tool_name] = {
+            "path": repo_relative_string(metric_file),
+            "exists": exists,
+            "rows": row_count,
+            "expected_rows": rows_by_tool.get(tool_name, 0),
+            "matches_expected": bool(exists and row_count == rows_by_tool.get(tool_name, 0)),
+            "error": "",
+        }
+
+    aggregate_exists = forensic_tool_metrics_path.exists()
+    aggregate_rows = 0
+    aggregate_tool_counts: dict[str, int] = {}
+    aggregate_error = ""
+    if aggregate_exists:
+        try:
+            aggregate_df = pd.read_csv(forensic_tool_metrics_path)
+            aggregate_rows = len(aggregate_df)
+            if "tool_name" in aggregate_df.columns:
+                aggregate_tool_counts = {
+                    str(key): int(value)
+                    for key, value in aggregate_df["tool_name"].astype(str).value_counts().sort_index().items()
+                }
+        except Exception as exc:  # pragma: no cover - defensive branch
+            aggregate_error = f"{type(exc).__name__}: {exc}"
+
+    expected_tool_counts = {key: int(value) for key, value in sorted(rows_by_tool.items())}
+    aggregate_matches_memory = (
+        aggregate_exists
+        and not aggregate_error
+        and aggregate_rows == len(metrics_rows)
+        and aggregate_tool_counts == expected_tool_counts
+    )
+    per_tool_files_match_memory = all(item["matches_expected"] for item in per_tool_files.values())
+
+    validation = {
+        "aggregate_path": repo_relative_string(forensic_tool_metrics_path),
+        "aggregate_exists": aggregate_exists,
+        "aggregate_rows": aggregate_rows,
+        "expected_aggregate_rows": len(metrics_rows),
+        "aggregate_tool_counts": aggregate_tool_counts,
+        "expected_tool_counts": expected_tool_counts,
+        "aggregate_matches_memory": aggregate_matches_memory,
+        "aggregate_error": aggregate_error,
+        "per_tool_files": per_tool_files,
+        "per_tool_files_match_memory": per_tool_files_match_memory,
+        "all_metric_outputs_consistent": bool(aggregate_matches_memory and per_tool_files_match_memory),
+    }
+
+    if not validation["all_metric_outputs_consistent"]:
+        logging.warning("Metric output validation did not pass. Check normalization_summary.json.")
+    else:
+        logging.info("Metric output validation passed: aggregate and per-tool metrics are consistent.")
+
+    return validation
+
+
 def infer_excire_distance_from_run_dir(run_dir: Path) -> str:
     """Infer the Excire distance value from a run directory name."""
     match = re.search(r"d(\d+)", run_dir.name, flags=re.IGNORECASE)
@@ -1737,6 +1855,14 @@ def main() -> None:
         if tool_metrics:
             write_csv(metrics_dir / f"{output_tool_name}_metrics.csv", tool_metrics)
 
+    stale_outputs_removed = cleanup_legacy_excire_outputs(output_dir, metrics_dir, output_tool_names)
+    metric_output_validation = validate_metric_outputs(
+        metrics_rows=metrics_rows,
+        metrics_dir=metrics_dir,
+        forensic_tool_metrics_path=forensic_tool_metrics_path,
+        output_tool_names=output_tool_names,
+    )
+
     matched_before = sum(1 for row in normalized_before_deduplication if row.get("matched") == "true")
     matched_after = sum(1 for row in normalized_rows if row.get("matched") == "true")
     unmatched_after = len(normalized_rows) - matched_after
@@ -1757,6 +1883,9 @@ def main() -> None:
         "per_tool_prediction_export_counts": per_tool_prediction_export_counts,
         "per_tool_total_export_counts": per_tool_total_export_counts,
         "per_tool_raw_row_counts": per_tool_raw_row_counts,
+        "output_tool_names": output_tool_names,
+        "stale_outputs_removed": stale_outputs_removed,
+        "metric_output_validation": metric_output_validation,
         "raw_rows_parsed": len(all_raw_rows) + sum(
             count for name, count in per_tool_raw_row_counts.items() if name.startswith("xways_excire")
         ),
