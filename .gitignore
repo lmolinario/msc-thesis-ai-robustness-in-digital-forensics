@@ -256,7 +256,6 @@ datasets/final/reports/backups/
 # normalized CSV/JSON outputs under evaluation/forensic_tools/ and results/metrics/.
 forensic_tools/**/case_files/
 forensic_tools/**/cases/
-forensic_tools/**/raw_exports/
 forensic_tools/**/tmp/
 forensic_tools/**/temp/
 
