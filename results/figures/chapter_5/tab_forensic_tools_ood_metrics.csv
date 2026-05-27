@@ -1,0 +1,5 @@
+tool_name,tool_display,scope,sample_type,attack_family,accuracy,balanced_accuracy,precision_weapon,recall_weapon,false_negative_rate,false_positive_rate,tp,fp,tn,fn,ood_rows,ood_weapon_flags,ood_weapon_flag_rate
+magnet_axiom,Magnet AXIOM,sample_type,ood,all,,,,,,,0,0,0,0,500,180,0.36
+xways_excire_d20,Excire D20,sample_type,ood,all,,,,,,,0,0,0,0,500,119,0.238
+xways_excire_d50,Excire D50,sample_type,ood,all,,,,,,,0,0,0,0,500,170,0.34
+xways_excire_d80,Excire D80,sample_type,ood,all,,,,,,,0,0,0,0,500,261,0.522
