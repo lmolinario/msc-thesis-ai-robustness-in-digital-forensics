@@ -69,116 +69,56 @@ di valutazione al momento della redazione.
 
 \begin{table}[H]
 \centering
+\small
+\setlength{\tabcolsep}{6pt}
 \caption{Stato corrente del workflow di valutazione sperimentale.}
 \label{tab:results-evaluation-status}
-\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\begin{tabular}{@{}l l@{}}
 \toprule
-\textbf{Componente} & \textbf{Stato} & \textbf{Note} \\
+\textbf{Componente} & \textbf{Stato} \\
 \midrule
 
-Dataset finale
-&
-\textbf{Congelato}
-&
-1500 immagini suddivise in tre classi: 500 \texttt{weapon}, 500
-\texttt{non\_weapon} e 500 \texttt{ood}. \\
+Dataset finale & \textbf{Congelato} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize 1500 immagini suddivise in tre classi: 500 \texttt{weapon}, 500 \texttt{non\_weapon} e 500 \texttt{ood}.} \\[3pt]
 
-Subset binario
-&
-\textbf{Congelato}
-&
-1000 immagini, composte da 500 campioni \texttt{weapon} e 500 campioni
-\texttt{non\_weapon}. Il subset è utilizzato per gli split clean, per gli
-attacchi adversariali e per le trasformazioni anti-forensi. \\
+Subset binario & \textbf{Congelato} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize 1000 immagini, composte da 500 campioni \texttt{weapon} e 500 campioni \texttt{non\_weapon}. Utilizzato per gli split clean, gli attacchi adversariali e le trasformazioni anti-forensi.} \\[3pt]
 
-Split clean e OOD
-&
-\textbf{Completati}
-&
-Sono stati generati cinque fold binari clean e un insieme di valutazione
-out-of-distribution separato, entrambi derivati dai manifest congelati. \\
+Split clean e OOD & \textbf{Completati} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Cinque fold binari clean e un insieme di valutazione out-of-distribution separato, derivati dai manifest congelati.} \\[3pt]
 
-Addestramento dei modelli proxy
-&
-\textbf{Completato}
-&
-Sono stati prodotti checkpoint fold-aware per \texttt{efficientnet\_b0},
-\texttt{resnet18} e \texttt{clip}. \\
+Addestramento dei modelli proxy & \textbf{Completato} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Checkpoint fold-aware prodotti per \texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}.} \\[3pt]
 
-Valutazione dei modelli proxy
-&
-\textbf{Completata}
-&
-Il livello proxy è stato valutato su input clean, OOD, adversariali e
-anti-forensi, producendo output a livello di predizione e tabelle metriche
-finali. \\
+Valutazione dei modelli proxy & \textbf{Completata} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Livello proxy valutato su input clean, OOD, adversariali e anti-forensi; output a livello di predizione e tabelle metriche finali.} \\[3pt]
 
-Attacchi adversariali
-&
-\textbf{Generati}
-&
-Sono state generate cinque famiglie di perturbazioni: \texttt{fgsm},
-\texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e
-\texttt{color\_shift}. \\
+Attacchi adversariali & \textbf{Generati} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Cinque famiglie di perturbazioni: \texttt{fgsm}, \texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e \texttt{color\_shift}.} \\[3pt]
 
-Trasformazioni anti-forensi
-&
-\textbf{Generate}
-&
-Sono state generate cinque trasformazioni model-agnostic:
-\texttt{jpeg\_recompression}, \texttt{resample\_resize},
-\texttt{gaussian\_blur}, \texttt{histogram\_modification} e
-\texttt{contrast\_stretching}. \\
+Trasformazioni anti-forensi & \textbf{Generate} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Cinque trasformazioni model-agnostic: \texttt{jpeg\_recompression}, \texttt{resample\_resize}, \texttt{gaussian\_blur}, \texttt{histogram\_modification} e \texttt{contrast\_stretching}.} \\[3pt]
 
-Forensic evaluation bundle
-&
-\textbf{Generato}
-&
-11500 file predisposti per la valutazione black-box degli strumenti forensi,
-includendo campioni clean, OOD, adversariali e anti-forensi. \\
+Forensic evaluation bundle & \textbf{Generato} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize 11\,500 file predisposti per la valutazione black-box, includendo campioni clean, OOD, adversariali e anti-forensi.} \\[3pt]
 
-Magnet AXIOM / Magnet.AI
-&
-\textbf{Disponibile}
-&
-Bundle processato ed export normalizzato in formato metrico CSV; i risultati
-sono consolidati per la valutazione black-box di Magnet AXIOM / Magnet.AI,
-mentre il confronto con gli altri strumenti commerciali resta subordinato alla
-disponibilità dei rispettivi export. \\
+Magnet AXIOM / Magnet.AI & \textbf{Normalizzato / consolidato} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Bundle processato ed export normalizzato rispetto alla ground truth sperimentale. Il tag \texttt{Possible weapons} è ricondotto alla predizione positiva per la classe \texttt{weapon}.} \\[3pt]
 
-X-Ways Forensics / Excire
-&
-\textbf{In attesa}
-&
-La valutazione dipende dalla disponibilità del tool, dai moduli di
-classificazione visuale abilitati e dal formato di esportazione disponibile. \\
+X-Ways Forensics / Excire Photo AI & \textbf{Normalizzato / consolidato} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Valutato come sistema black-box di semantic retrieval, non come classificatore nativo \texttt{weapon}/\texttt{non\_weapon}. Tre configurazioni operative del parametro \texttt{Distance limit}: \texttt{D20}, \texttt{D50} e \texttt{D80}.} \\[3pt]
 
-Cellebrite UFED
-&
-\textbf{In attesa}
-&
-La valutazione dipende dalla disponibilità del tool e dal supporto
-all'importazione e all'esportazione di risultati di classificazione delle
-immagini. \\
+Cellebrite UFED & \textbf{Non incluso nella comparazione quantitativa} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Lo strumento rimane rilevante nella pipeline operativo-forense, ma non sono disponibili export normalizzati, riproducibili e direttamente associabili al forensic evaluation bundle. La sua rilevanza è discussa sul piano metodologico e procedurale.} \\[3pt]
 
-Oxygen Forensic Detective
-&
-\textbf{In attesa}
-&
-La valutazione dipende dalla disponibilità del tool, dai moduli \gls{ai}
-abilitati e dagli output di classificazione effettivamente esportabili. \\
+Oxygen Forensic Detective & \textbf{Non incluso nella comparazione quantitativa} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Lo strumento rimane rilevante nella pipeline operativo-forense, ma la sua inclusione quantitativa richiederebbe output strutturati, normalizzabili e riconducibili in modo univoco alla ground truth sperimentale.} \\[3pt]
 
-Casi di studio di explainability
-&
-\textbf{Completati / integrati}
-&
-Le attribution map basate su Integrated Gradients sono state generate e
-selezionate per cinque casi rappresentativi di EfficientNet-B0. L'analisi ha
-valore qualitativo e diagnostico e non costituisce una metrica primaria di
-valutazione. \\
+Casi di studio di explainability & \textbf{Completati / integrati} \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Attribution map basate su Integrated Gradients generate per cinque casi rappresentativi di EfficientNet-B0. L'analisi ha valore qualitativo e diagnostico; non costituisce una metrica primaria di valutazione.} \\
 
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 Il corpus sperimentale risultante è organizzato in condizioni clean,
@@ -463,6 +403,8 @@ ResNet18        & 2500 & 1094 & 1406 & 0.438 & 0.890 & 0.647 \\
 \textit{W-rate} indica la quota di campioni \gls{ood} classificati come
 \texttt{weapon}; \textit{Conf.} indica la confidenza media; \textit{HC-rate}
 indica la quota di predizioni con confidenza almeno pari a 0.9.
+Il totale di 2500 predizioni per modello è ottenuto valutando le 500 immagini
+\gls{ood} attraverso ciascuno dei cinque checkpoint fold-aware.
 \end{table}
 
 
@@ -581,8 +523,9 @@ segno del drop visualizzato nella heatmap è opposto rispetto alla colonna
 \end{figure}
 
 I risultati mostrano che le trasformazioni anti-forensi producono effetti
-complessivamente più contenuti rispetto agli attacchi adversariali analizzati
-nella Sezione~\ref{sec:results-adversarial}. EfficientNet-B0 mantiene
+complessivamente contenuti; il confronto con le perturbazioni adversariali,
+presentato nella sezione successiva, permette di contestualizzare questi valori
+all'interno del profilo di robustezza complessivo dei modelli proxy. EfficientNet-B0 mantiene
 prestazioni elevate in tutte le condizioni, ma risulta maggiormente sensibile a
 \gls{gaussianblur}, con una variazione pari a -0.013. ResNet18 mostra invece la
 maggiore degradazione in corrispondenza di \gls{histogrammodification}, con una
@@ -673,7 +616,12 @@ l'accuracy passa da 0.978 a 0.015, con una variazione pari a -0.963. Tale valore
 indica una compromissione quasi completa della capacità classificativa del
 modello, limitata tuttavia alla configurazione white-box in cui l'attacco è
 ottimizzato direttamente contro EfficientNet-B0 con accesso pieno ai suoi
-parametri. Anche \gls{fgsm}, generato contro EfficientNet-B0, produce un degrado
+parametri. In termini operativi, tale risultato implica un \gls{fnr} prossimo
+all'unità per la classe \texttt{weapon}: nello scenario white-box considerato,
+il modello diventa inadatto al triage automatico di immagini contenenti armi,
+nonostante la baseline clean risulti la più elevata tra i modelli proxy.
+
+Anche \gls{fgsm}, generato contro EfficientNet-B0, produce un degrado
 rilevante, riducendo l'accuracy a 0.575 e determinando una variazione pari a
 -0.403. \gls{superdeepfool} produce invece un effetto più contenuto sullo stesso
 modello, con accuracy pari a 0.931 e variazione pari a -0.047.
@@ -844,69 +792,73 @@ classe \texttt{weapon}, falsi positivi sulle classi \texttt{non\_weapon} e
 anti-forensi.
 
 
+
 \subsection{Tool availability and export normalization}
 \label{subsec:results-commercial-availability}
 
 La Tabella~\ref{tab:results-commercial-tool-status} riassume lo stato della
-valutazione dei tool commerciali considerati. In questa fase, la valutazione
-quantitativa consolidata riguarda Magnet AXIOM/Magnet.AI, mentre gli altri tool
-rimangono subordinati alla disponibilità effettiva dei moduli di classificazione,
-alla possibilità di importare il forensic evaluation bundle e alla presenza di
-export normalizzabili.
+valutazione dei tool commerciali considerati. In questa versione dei risultati,
+la valutazione quantitativa black-box è consolidata per Magnet AXIOM/Magnet.AI
+e per X-Ways Forensics/Excire Photo AI. I due strumenti non sono tuttavia
+equivalenti dal punto di vista funzionale: Magnet.AI espone un tag operativo
+riconducibile alla categoria \texttt{Possible weapons}, mentre Excire Photo AI è
+stato valutato come sistema di ricerca semantica visuale, nel quale la decisione
+operativa dipende dal recupero o meno dell'immagine rispetto a query e soglie di
+similarità configurate.
+
+Per tale ragione, Excire non viene trattato come classificatore nativo
+\texttt{weapon}/\texttt{non\_weapon}, ma come semantic retrieval-based
+classifier. La sensitivity analysis sul parametro \texttt{Distance limit}
+consente di osservare come il comportamento operativo cambi al variare della
+soglia: \texttt{D20} rappresenta una configurazione restrittiva, \texttt{D50}
+una configurazione intermedia orientata al triage forense, e \texttt{D80} una
+configurazione permissiva ad alto richiamo.
 
 \begin{table}[H]
 \centering
+\small
+\setlength{\tabcolsep}{6pt}
 \caption{Stato della valutazione black-box degli strumenti forensi commerciali.}
 \label{tab:results-commercial-tool-status}
-\small
-\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\begin{tabular}{@{}l l@{}}
 \toprule
-\textbf{Tool} & \textbf{Stato} & \textbf{Implicazione metodologica} \\
+\textbf{Tool} & \textbf{Stato} \\
 \midrule
 
-Magnet AXIOM / Magnet.AI
-&
-Consolidato
-&
-Il forensic evaluation bundle è stato processato e l'export \texttt{Pictures.csv}
-è stato normalizzato rispetto alla ground truth sperimentale. I risultati sono
-inclusi nella valutazione black-box commerciale. \\
+Magnet AXIOM / Magnet.AI & Consolidato \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Il forensic evaluation bundle è stato processato e l'export normalizzato rispetto alla ground truth sperimentale. Il tag \texttt{Possible weapons} è utilizzato come segnale operativo positivo per la classe \texttt{weapon}.} \\[3pt]
 
-X-Ways Forensics / Excire Photo AI
-&
-In attesa
-&
-La valutazione dipende dalla disponibilità del modulo, dal tipo di categorie
-visuali esportabili e dalla possibilità di ricondurre i risultati ai file del
-bundle tramite identificativi o hash. \\
+X-Ways / Excire Photo AI -- \texttt{D20} & Consolidato \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Configurazione restrittiva di semantic retrieval. Riduce i falsi positivi e il weapon flag rate sugli \gls{ood}, ma aumenta il rischio di falsi negativi sulla classe \texttt{weapon}.} \\[3pt]
 
-Cellebrite UFED
-&
-In attesa
-&
-Lo strumento è rilevante nel workflow forense, ma la valutazione della
-classificazione automatica di immagini dipende dalla presenza di funzionalità
-\gls{ai}-based esportabili e comparabili. \\
+X-Ways / Excire Photo AI -- \texttt{D50} & Consolidato \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Configurazione intermedia, adottata come setting principale per il confronto operativo. Presenta, nel contesto sperimentale considerato, un profilo equilibrato tra alto richiamo sulla classe \texttt{weapon} e controllo gestibile dei falsi positivi.} \\[3pt]
 
-Oxygen Forensic Detective
-&
-In attesa
-&
-La valutazione è subordinata alla disponibilità dei moduli automatici, alla
-struttura degli export e alla possibilità di normalizzare gli output rispetto
-alla ground truth sperimentale. \\
+X-Ways / Excire Photo AI -- \texttt{D80} & Consolidato \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Configurazione permissiva. Massimizza il recall sulla classe \texttt{weapon}, ma aumenta sensibilmente il \gls{fpr} e il weapon flag rate sugli input \gls{ood}.} \\[3pt]
+
+Cellebrite UFED & Non incluso nella comparazione quantitativa \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Lo strumento rimane rilevante nel workflow forense, ma non sono disponibili output normalizzati e comparabili rispetto al forensic evaluation bundle.} \\[3pt]
+
+Oxygen Forensic Detective & Non incluso nella comparazione quantitativa \\
+\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize La valutazione quantitativa richiederebbe moduli automatici, export strutturati e mapping verificabile rispetto alla ground truth sperimentale.} \\
 
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 Per Magnet AXIOM/Magnet.AI, la normalizzazione è stata condotta sul run
 \texttt{FAIRLAB\_AXIOM\_RUN\_02}, selezionato come esportazione di riferimento
 per la completezza e la consistenza degli output prodotti. Nel run selezionato
 sono stati individuati cinque file di export complessivi, di cui un file
-predittivo principale, \texttt{Pictures.csv}, utilizzato per ricostruire le
-segnalazioni \texttt{Possible weapons}.
+predittivo principale utilizzato per ricostruire le segnalazioni
+\texttt{Possible weapons}.
 
+Per X-Ways Forensics/Excire Photo AI, la normalizzazione è stata condotta su tre
+run distinti, corrispondenti alle configurazioni \texttt{D20}, \texttt{D50} e
+\texttt{D80}. Le tre configurazioni non rappresentano ripetizioni dello stesso
+esperimento e non devono quindi essere mediate tra loro: ciascuna descrive un
+profilo operativo differente del sistema di semantic retrieval.
 
 \subsection{Magnet AXIOM / Magnet.AI results}
 \label{subsec:results-magnet}
@@ -989,42 +941,27 @@ condizioni perturbate hanno peso maggiore nella metrica aggregata.
 \caption{Comportamento di Magnet.AI per condizione sperimentale.}
 \label{tab:results-magnet-condition-metrics}
 \small
-\begin{tabularx}{\textwidth}{@{}l r r r r X@{}}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l r r r r@{}}
 \toprule
 \textbf{Condizione} &
 \textbf{Accuracy} &
 \textbf{Recall weapon} &
 \textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} &
-\textbf{Nota operativa} \\
+\textbf{\gls{fpr}} \\
 \midrule
 
-Clean &
-0.950 &
-0.930 &
-0.070 &
-0.030 &
-Baseline commerciale su 1\,000 immagini non perturbate. \\
+Clean & 0.950 & 0.930 & 0.070 & 0.030 \\
+\multicolumn{5}{@{}p{\linewidth}@{}}{\footnotesize Baseline commerciale su 1\,000 immagini non perturbate.} \\[3pt]
 
-Perturbed &
-0.932 &
-0.899 &
-0.101 &
-0.035 &
-Valori calcolati su 10\,000 immagini adversariali e anti-forensi; il degrado
-principale riguarda l'aumento dei falsi negativi sulla classe \texttt{weapon}. \\
+Perturbed & 0.932 & 0.899 & 0.101 & 0.035 \\
+\multicolumn{5}{@{}p{\linewidth}@{}}{\footnotesize Valori calcolati su 10\,000 immagini adversariali e anti-forensi; il degrado principale riguarda l'aumento dei falsi negativi sulla classe \texttt{weapon}.} \\[3pt]
 
-OOD &
--- &
--- &
--- &
--- &
-Weapon flag rate pari a 0.360: 180 immagini \gls{ood} su 500 sono state
-segnalate come \texttt{Possible weapons}. Le metriche binarie standard non sono
-applicabili. \\
+OOD & -- & -- & -- & -- \\
+\multicolumn{5}{@{}p{\linewidth}@{}}{\footnotesize Weapon flag rate pari a 0.360: 180 immagini \gls{ood} su 500 segnalate come \texttt{Possible weapons}. Le metriche binarie standard non sono applicabili.} \\
 
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 Tra le condizioni perturbate, gli attacchi adversariali producono una
@@ -1132,31 +1069,176 @@ l'output automatico deve essere trattato come supporto al triage e non come
 decisione conclusiva o autosufficiente.
 
 
-\subsection{Pending commercial tools}
-\label{subsec:results-commercial-pending}
 
-Per X-Ways Forensics/Excire Photo AI, Cellebrite UFED e Oxygen Forensic
-Detective, la valutazione rimane pianificata ma non consolidata nella presente
-versione dei risultati. Questa scelta non rappresenta una lacuna metodologica,
-ma una conseguenza della natura operativa della sperimentazione: i tool
-commerciali differiscono per licenze, moduli disponibili, categorie esportabili,
-formati di output e grado di tracciabilità dei risultati.
+\subsection{X-Ways / Excire Photo AI results and sensitivity analysis}
+\label{subsec:results-excire}
 
-Per X-Ways Forensics con Excire Photo AI, la criticità principale riguarda la
-necessità di ottenere un export strutturato che consenta di associare in modo
-univoco ogni risultato classificatorio ai file del forensic evaluation bundle,
-preferibilmente tramite nome normalizzato, path o hash. Per Cellebrite UFED e
-Oxygen Forensic Detective, la comparabilità dipende invece dalla disponibilità
-effettiva di moduli \gls{ai}-based per la classificazione automatica di immagini,
-dalla licenza disponibile, dalla versione del software e dalla granularità degli
-output esportabili.
+La valutazione di X-Ways Forensics/Excire Photo AI richiede una cautela
+interpretativa specifica. A differenza di Magnet.AI, Excire non è stato trattato
+come un classificatore nativo per la distinzione binaria
+\texttt{weapon}/\texttt{non\_weapon}, ma come un sistema black-box di semantic
+retrieval. La predizione operativa è stata quindi derivata dalla presenza o
+assenza del campione tra i risultati recuperati dal tool rispetto alla ricerca
+semantica configurata. Questa ricodifica consente una valutazione quantitativa
+rispetto alla ground truth sperimentale, ma non deve essere interpretata come
+accesso alla logica classificatoria interna del sistema.
 
-In assenza di export normalizzati, non è metodologicamente corretto aggregare
-tali strumenti in una comparazione quantitativa diretta con Magnet.AI. Il
-livello commerciale della presente versione deve quindi essere interpretato come
-una valutazione black-box consolidata per Magnet AXIOM/Magnet.AI e come una base
-procedurale estendibile agli altri tool quando saranno disponibili output
-comparabili.
+Per valutare la sensibilità del comportamento operativo alla soglia di recupero,
+sono state considerate tre configurazioni del parametro \texttt{Distance limit}.
+La configurazione \texttt{D20} rappresenta un'impostazione restrittiva, orientata
+a ridurre falsi positivi e recuperi semanticamente deboli. La configurazione
+\texttt{D50} è adottata come setting principale di questa valutazione perché
+presenta, nel contesto sperimentale considerato, il profilo di compromesso più
+equilibrato tra recall della classe \texttt{weapon} e controllo dei falsi
+positivi. La scelta della soglia operativa ottimale rimane tuttavia dipendente
+dal contesto investigativo specifico, dai requisiti di auditabilità e dalla
+tolleranza al rumore nel workflow di revisione. La
+configurazione \texttt{D80} rappresenta invece un'impostazione permissiva,
+orientata a massimizzare il recall ma esposta a un aumento rilevante dei falsi
+positivi.
+
+\begin{table}[H]
+\centering
+\caption{Sensitivity analysis di Excire Photo AI rispetto al parametro \texttt{Distance limit}.}
+\label{tab:results-excire-sensitivity}
+\small
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l r r r r r@{}}
+\toprule
+\textbf{Setting} &
+\textbf{Clean acc.} &
+\textbf{Clean recall} &
+\textbf{Clean \gls{fnr}} &
+\textbf{Clean \gls{fpr}} &
+\textbf{OOD weapon rate} \\
+\midrule
+
+\texttt{D20} & 0.927 & 0.880 & 0.120 & 0.026 & 0.238 \\
+\multicolumn{6}{@{}p{\linewidth}@{}}{\footnotesize\textit{Configurazione restrittiva}: limita falsi positivi e segnalazioni \gls{ood}, ma incrementa il rischio di mancata segnalazione di immagini \texttt{weapon}.} \\[4pt]
+
+\texttt{D50} & 0.944 & 0.958 & 0.042 & 0.070 & 0.340 \\
+\multicolumn{6}{@{}p{\linewidth}@{}}{\footnotesize\textit{Configurazione intermedia}: rappresenta, nel contesto sperimentale considerato, un compromesso equilibrato tra recall della classe \texttt{weapon} e controllo dei falsi positivi.} \\[4pt]
+
+\texttt{D80} & 0.915 & 0.986 & 0.014 & 0.156 & 0.522 \\
+\multicolumn{6}{@{}p{\linewidth}@{}}{\footnotesize\textit{Configurazione permissiva}: massimizza il recall, ma produce un aumento marcato dei falsi positivi e delle segnalazioni su immagini fuori distribuzione.} \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+Il confronto tra le tre configurazioni conferma che il parametro
+\texttt{Distance limit} non agisce come una semplice variabile tecnica, ma come
+una soglia operativa che modifica il profilo di rischio del tool. \texttt{D20}
+è più conservativo e riduce il carico di revisione derivante da falsi positivi,
+ma può non recuperare contenuti \texttt{weapon} rilevanti. \texttt{D50} appare
+come la configurazione più equilibrata per un workflow di triage, poiché mantiene
+un recall elevato sulla classe \texttt{weapon} senza produrre il livello di
+rumore osservato in \texttt{D80}. Quest'ultimo, pur riducendo drasticamente i
+falsi negativi, incrementa in modo sostanziale i falsi positivi e segnala come
+rilevante oltre la metà degli input \gls{ood}.
+
+\begin{table}[H]
+\centering
+\caption{Prestazioni aggregate di Excire Photo AI sulle condizioni perturbate.}
+\label{tab:results-excire-perturbed-summary}
+\small
+\begin{tabular}{l l r r r r}
+\toprule
+\textbf{Setting} &
+\textbf{Condizione} &
+\textbf{Accuracy} &
+\textbf{Recall weapon} &
+\textbf{\gls{fnr}} &
+\textbf{\gls{fpr}} \\
+\midrule
+
+\texttt{D20} & Anti-forensic & 0.927 & 0.875 & 0.125 & 0.022 \\
+\texttt{D50} & Anti-forensic & 0.941 & 0.957 & 0.043 & 0.074 \\
+\texttt{D80} & Anti-forensic & 0.908 & 0.984 & 0.016 & 0.169 \\
+\midrule
+\texttt{D20} & Adversarial & 0.892 & 0.834 & 0.166 & 0.051 \\
+\texttt{D50} & Adversarial & 0.904 & 0.938 & 0.062 & 0.130 \\
+\texttt{D80} & Adversarial & 0.861 & 0.977 & 0.023 & 0.256 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+I risultati aggregati sulle condizioni perturbate confermano che le
+trasformazioni anti-forensi producono un impatto contenuto rispetto agli attacchi
+adversariali. Anche in questo caso, tuttavia, il profilo operativo cambia in modo
+sostanziale al variare della soglia: \texttt{D20} mantiene il \gls{fpr} più
+basso ma presenta il \gls{fnr} più elevato, \texttt{D80} riduce quasi
+completamente i falsi negativi ma incrementa il rumore operativo, mentre
+\texttt{D50} mantiene un compromesso più equilibrato tra richiamo e selettività
+nel contesto sperimentale considerato.
+
+Un caso particolarmente rilevante è rappresentato da \gls{sigmazero}. A
+differenza di una semplice dinamica di evasione, in cui l'effetto principale
+sarebbe l'aumento dei falsi negativi sulla classe \texttt{weapon}, Excire mostra
+nelle configurazioni \texttt{D50} e \texttt{D80} un comportamento di
+over-triggering semantico. In tali condizioni, il sistema continua a recuperare
+molte immagini \texttt{weapon}, ma aumenta in modo molto marcato la quota di
+immagini \texttt{non\_weapon} erroneamente recuperate come rilevanti.
+
+\begin{table}[H]
+\centering
+\caption{Comportamento dei tool commerciali sulla perturbazione \gls{sigmazero}.}
+\label{tab:results-commercial-sigma-zero}
+\small
+\begin{tabular}{l r r r r r r}
+\toprule
+\textbf{Tool / setting} &
+\textbf{Accuracy} &
+\textbf{Recall} &
+\textbf{\gls{fnr}} &
+\textbf{\gls{fpr}} &
+\textbf{FN} &
+\textbf{FP} \\
+\midrule
+
+Magnet.AI & 0.916 & 0.856 & 0.144 & 0.024 & 72 & 12 \\
+Excire \texttt{D20} & 0.815 & 0.820 & 0.180 & 0.190 & 90 & 95 \\
+Excire \texttt{D50} & 0.742 & 0.926 & 0.074 & 0.442 & 37 & 221 \\
+Excire \texttt{D80} & 0.657 & 0.976 & 0.024 & 0.662 & 12 & 331 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+Questo comportamento è operativo-forensicamente significativo. In un workflow di
+triage, una configurazione permissiva può sembrare preferibile perché riduce il
+rischio di mancata segnalazione, ma può generare un volume elevato di falsi
+positivi, saturando la revisione umana e riducendo l'efficienza del filtro
+automatico. Pertanto, nel caso di Excire, \gls{sigmazero} non evidenzia soltanto
+una vulnerabilità di evasione, ma anche un rischio di amplificazione del rumore
+semantico.
+
+
+
+\subsection{Commercial tools not included in the quantitative comparison}
+\label{subsec:results-commercial-not-included}
+
+Cellebrite UFED e Oxygen Forensic Detective rimangono rilevanti nel workflow
+operativo-forense della tesi, ma non sono inclusi nella comparazione quantitativa
+finale del Capitolo~\ref{chap:results}. La ragione non riguarda la loro
+irrilevanza investigativa, bensì la mancanza, nella presente fase sperimentale,
+di output normalizzati, riproducibili e comparabili rispetto al forensic
+evaluation bundle.
+
+In particolare, l'inclusione quantitativa di un tool commerciale richiede che i
+risultati esportati siano associabili in modo univoco ai file del bundle, tramite
+nome normalizzato, path, identificativo interno o hash, e che il significato
+operativo della categoria esportata possa essere ricondotto in modo documentato
+alla ground truth sperimentale. In assenza di tali condizioni, l'inserimento del
+tool in una tabella comparativa rischierebbe di introdurre una falsa equivalenza
+metodologica tra sistemi con output non omogenei.
+
+Pertanto, la valutazione quantitativa commerciale è consolidata per Magnet
+AXIOM/Magnet.AI e per X-Ways Forensics/Excire Photo AI, mentre UFED e Oxygen
+sono mantenuti come strumenti della pipeline operativo-forense da discutere sul
+piano metodologico e procedurale.
+
 
 
 \section{Comparative Robustness Discussion}
@@ -1166,79 +1248,79 @@ I risultati ottenuti consentono di confrontare tre livelli della pipeline:
 modelli proxy trasparenti, perturbazioni sperimentali controllate e valutazione
 black-box commerciale. I modelli proxy permettono di osservare in modo
 controllato il degrado prestazionale rispetto a clean, \gls{ood}, adversarial e
-anti-forensic input. Magnet.AI, invece, permette di verificare come uno strumento
-professionale black-box reagisca allo stesso bundle sperimentale, pur senza
-accesso alla logica interna del classificatore.
+anti-forensic input. Magnet.AI ed Excire Photo AI permettono invece di verificare
+come strumenti professionali black-box reagiscano allo stesso bundle
+sperimentale, pur senza accesso alla logica interna del classificatore o del
+motore di retrieval.
 
 La Tabella~\ref{tab:results-comparative-summary} sintetizza i principali
 risultati comparativi. Il confronto non deve essere interpretato come ranking
-diretto tra modelli proxy e tool commerciale, perché i primi espongono
-predizioni controllate su classi binarie note, mentre il secondo opera tramite
-categorie proprietarie e tag esportati. Il valore del confronto è operativo:
-mostrare se le tendenze di fragilità osservate nei proxy si riflettono anche in
-uno strumento black-box.
+diretto tra modelli proxy e tool commerciali, perché i primi espongono
+predizioni controllate su classi binarie note, mentre i secondi operano tramite
+categorie proprietarie, tag esportati o recupero semantico. Il valore del
+confronto è operativo: mostrare se le tendenze di fragilità osservate nei proxy
+si riflettono anche in strumenti black-box utilizzati in workflow investigativi.
 
 \begin{table}[H]
 \centering
-\caption{Sintesi comparativa tra modelli proxy e Magnet.AI.}
+\caption{Sintesi comparativa tra modelli proxy e tool commerciali black-box.}
 \label{tab:results-comparative-summary}
 \small
-\begin{tabularx}{\textwidth}{@{}p{1.7cm} r r r X@{}}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{@{}l r r r@{}}
 \toprule
 \textbf{Sistema} &
 \textbf{Clean accuracy} &
 \textbf{Clean \gls{fnr}} &
-\textbf{OOD weapon rate} &
-\textbf{Osservazione principale} \\
+\textbf{OOD weapon rate} \\
 \midrule
 
-EfficientNet-B0 &
-0.978 &
-0.016 &
-0.370 &
-Migliore baseline clean, ma fortemente vulnerabile ad alcune perturbazioni
-adversariali, in particolare Sigma Zero e FGSM. \\
+EfficientNet-B0 & 0.978 & 0.016 & 0.370 \\
+\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Migliore baseline clean tra i proxy, ma vulnerabilità marcata ad alcune perturbazioni adversariali, in particolare \gls{sigmazero} e \gls{fgsm}.} \\[3pt]
 
-ResNet18 &
-0.964 &
-0.030 &
-0.438 &
-Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 in alcuni
-scenari adversariali, pur con vulnerabilità osservabili. \\
+ResNet18 & 0.964 & 0.030 & 0.438 \\
+\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 in alcuni scenari adversariali, pur con vulnerabilità osservabili.} \\[3pt]
 
-CLIP &
-0.927 &
-0.012 &
-0.836 &
-Accuracy clean inferiore ai modelli supervisionati, ma forte tendenza a
-segnalare come \texttt{weapon} immagini fuori distribuzione. \\
+\gls{clip} & 0.927 & 0.012 & 0.836 \\
+\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Accuracy clean inferiore ai modelli supervisionati, ma forte tendenza a segnalare come \texttt{weapon} immagini fuori distribuzione.} \\[3pt]
 
-Magnet AXIOM / Magnet.AI &
-0.950 &
-0.070 &
-0.360 &
-Buona baseline commerciale, ma aumento dei falsi negativi su input perturbati e
-weapon flag rate non trascurabile sulle immagini \gls{ood}. \\
+Magnet AXIOM / Magnet.AI & 0.950 & 0.070 & 0.360 \\
+\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Comportamento relativamente conservativo: basso \gls{fpr}, ma rischio non trascurabile di falsi negativi sulla classe \texttt{weapon}.} \\[3pt]
+
+X-Ways / Excire Photo AI \texttt{D50} & 0.944 & 0.042 & 0.340 \\
+\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Setting principale di triage: recall elevato sulla classe \texttt{weapon}, con incremento controllato dei falsi positivi rispetto alle configurazioni più permissive.} \\
 
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
-Una divergenza rilevante emerge nel confronto tra CLIP e i modelli
-supervisionati. CLIP mostra un weapon rate su immagini \gls{ood} molto più alto
-rispetto a EfficientNet-B0 e ResNet18, pur con una confidenza media inferiore.
-Magnet.AI, invece, mostra un weapon flag rate su \gls{ood} pari a 0.360, più
-vicino al comportamento di EfficientNet-B0 che a quello di CLIP. CLIP tende ad
-assegnare più facilmente la classe \texttt{weapon} su input fuori distribuzione
-\mbox{(weapon rate 0.836)}, mentre i modelli supervisionati e Magnet.AI mostrano
-un comportamento più selettivo, con weapon rate compreso tra 0.360 e 0.438.
+Excire \texttt{D20} e \texttt{D80} non sono inclusi nella tabella come valori da
+mediare con \texttt{D50}, poiché rappresentano configurazioni operative diverse.
+\texttt{D20} descrive un uso restrittivo del semantic retrieval, adatto a
+contenere falsi positivi e segnalazioni \gls{ood}; \texttt{D80} descrive invece
+un uso permissivo, utile quando l'obiettivo prioritario è massimizzare il recall,
+ma con un aumento rilevante del rumore operativo. La configurazione
+\texttt{D50} viene quindi adottata come riferimento principale per il confronto
+con Magnet.AI, mentre \texttt{D20} e \texttt{D80} sono interpretate come
+sensitivity analysis.
 
-Questa differenza suggerisce che i sistemi non reagiscono agli input fuori
-distribuzione nello stesso modo. Dal punto di vista operativo, tale variabilità
-conferma che la robustezza non può essere dedotta dalla sola accuracy clean, ma
-deve essere valutata rispetto a condizioni specifiche di impiego, inclusi input
-anomali, borderline o semanticamente distanti dalla distribuzione attesa.
+Una divergenza rilevante emerge nel confronto tra \gls{clip}, i modelli
+supervisionati e i tool commerciali. \gls{clip} mostra un weapon rate su
+immagini \gls{ood} molto più alto rispetto a EfficientNet-B0 e ResNet18, pur con
+una confidenza media inferiore. Magnet.AI ed Excire \texttt{D50} mostrano invece
+weapon flag rate più contenuti, rispettivamente pari a 0.360 e 0.340. Questo non
+rende automaticamente tali strumenti più affidabili in senso assoluto, ma indica
+che il comportamento su input fuori distribuzione dipende sia dall'architettura
+del sistema sia dalla configurazione operativa adottata.
 
+Questa differenza conferma che la robustezza non può essere dedotta dalla sola
+accuracy clean, ma deve essere valutata rispetto a condizioni specifiche di
+impiego, inclusi input anomali, borderline o semanticamente distanti dalla
+distribuzione attesa. Nei workflow di \gls{df}, il problema non è soltanto
+stabilire quale sistema sia più accurato in condizioni nominali, ma comprendere
+quale profilo di errore esso introduca nel processo di triage: mancata
+segnalazione di contenuti rilevanti, aumento del rumore operativo, assorbimento
+di casi \gls{ood} o sensibilità a perturbazioni mirate.
 
 
 \section{Explainability Analysis and Representative Failure Cases}
@@ -1540,11 +1622,15 @@ per i modelli proxy sia per i tool commerciali black-box.
 
 La seconda implicazione riguarda gli input \gls{ood}. Le immagini fuori
 distribuzione non devono essere valutate come una normale terza classe del task
-binario, ma come stress test della capacità del sistema di gestire input
-ambigui, sintetici, borderline o semanticamente distanti dalla distribuzione
-attesa. Il comportamento osservato su Magnet.AI, che segnala 180 immagini
-\gls{ood} su 500 come \texttt{Possible weapons}, mostra come tali input possano
-generare rumore operativo e aumentare il carico di revisione dell'analista.
+binario, ma come stress test della capacità del sistema di gestire input ambigui,
+sintetici, borderline o semanticamente distanti dalla distribuzione attesa. Il
+comportamento osservato nei tool commerciali conferma che il problema non è
+limitato ai modelli proxy: Magnet.AI segnala 180 immagini \gls{ood} su 500 come
+\texttt{Possible weapons}, mentre Excire varia in modo significativo al variare
+del parametro \texttt{Distance limit}, passando da un weapon flag rate pari a
+0.238 in \texttt{D20} a 0.522 in \texttt{D80}. Questo risultato mostra che la
+gestione degli \gls{ood} dipende non solo dal modello o dal tool, ma anche dalla
+configurazione operativa adottata.
 
 La terza implicazione riguarda la tracciabilità. La pipeline proposta mantiene
 separati dataset, manifest, hash, bundle cieco, predizioni, metriche e output
@@ -1556,21 +1642,39 @@ operativo.
 
 La valutazione presenta limiti che devono essere dichiarati esplicitamente. I
 tool commerciali sono valutati come black-box e non consentono di ispezionare
-modello, training set, soglie o preprocessing interno. Inoltre, la valutazione
-quantitativa commerciale è al momento consolidata per Magnet AXIOM/Magnet.AI,
-mentre X-Ways/Excire, Cellebrite UFED e Oxygen Forensic Detective richiedono
-ulteriori export normalizzabili. Infine, la selezione delle perturbazioni non
-mira a coprire in modo esaustivo l'intero spazio dell'\gls{aml}, ma a costruire
-uno stress test operativo coerente con la finalità forense della tesi.
+modello, training set, soglie interne o preprocessing proprietario. Inoltre,
+Magnet.AI ed Excire Photo AI producono output di natura diversa: il primo espone
+un tag operativo riconducibile a \texttt{Possible weapons}, mentre il secondo è
+stato valutato come sistema di semantic retrieval. La comparazione tra i due
+strumenti deve quindi essere interpretata come confronto operativo di triage, non
+come confronto tra classificatori omogenei.
+
+Un'ulteriore implicazione riguarda la configurazione operativa dei sistemi di
+semantic retrieval. Nel caso di Excire Photo AI, il parametro
+\texttt{Distance limit} non rappresenta una semplice opzione tecnica, ma una
+scelta che modifica direttamente il profilo di rischio del workflow: una soglia
+restrittiva riduce falsi positivi e segnalazioni \gls{ood}, ma può aumentare i
+falsi negativi; una soglia permissiva massimizza il recall, ma accresce il rumore
+operativo e il carico di revisione umana. In un contesto forense, tale
+configurazione dovrebbe essere documentata, motivata e mantenuta tracciabile nel
+report di analisi, analogamente agli altri parametri rilevanti del processo
+investigativo.
+
+Infine, Cellebrite UFED e Oxygen Forensic Detective non sono inclusi nella
+comparazione quantitativa finale perché non risultano disponibili, nella presente
+fase sperimentale, export normalizzati e direttamente comparabili rispetto alla
+ground truth del bundle. La selezione delle perturbazioni, inoltre, non mira a
+coprire in modo esaustivo l'intero spazio dell'\gls{aml}, ma a costruire uno
+stress test operativo coerente con la finalità forense della tesi.
 
 I risultati di \gls{fairlab} mostrano che sistemi con accuracy clean elevata,
 come EfficientNet-B0 e ResNet18, possono produrre un incremento significativo
-dei falsi negativi in presenza di perturbazioni adversariali, e che un tool
-commerciale con buona baseline può segnalare come rilevanti immagini fuori
-distribuzione con weapon flag rate pari a 0.360. Questi valori indicano che
-l'affidabilità operativa non può essere dedotta dalla sola performance nominale
-su dati clean, ma richiede validazione sperimentale esplicita nelle condizioni
-attese di utilizzo. In conclusione, l'\gls{ai} può supportare il triage e la
-prioritizzazione delle evidenze, ma deve rimanere inserita in un workflow
-human-in-the-loop, tracciabile e soggetto a verifica critica da parte
-dell'analista forense.
+dei falsi negativi in presenza di perturbazioni adversariali, e che tool
+commerciali con buona baseline possono comunque segnalare come rilevanti immagini
+fuori distribuzione o produrre profili di errore molto diversi al variare delle
+soglie operative. Questi valori indicano che l'affidabilità operativa non può
+essere dedotta dalla sola performance nominale su dati clean, ma richiede
+validazione sperimentale esplicita nelle condizioni attese di utilizzo. In
+conclusione, l'\gls{ai} può supportare il triage e la prioritizzazione delle
+evidenze, ma deve rimanere inserita in un workflow human-in-the-loop, tracciabile
+e soggetto a verifica critica da parte dell'analista forense.
