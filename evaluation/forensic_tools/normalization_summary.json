@@ -1,25 +1,26 @@
 {
   "script": "evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py",
-  "created_at": "2026-05-21T19:27:35+00:00",
+  "created_at": "2026-05-27T20:16:30+00:00",
   "bundle_rows": 11500,
   "tools_requested": [
-    "magnet_axiom"
+    "xways_excire"
   ],
   "selected_run_dirs_by_tool": {
-    "magnet_axiom": [
-      "forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02"
+    "xways_excire": [
+      "forensic_tools/xways_excire/raw_exports/EXCIRE_D50_FIREARM_PROMPTS"
     ]
   },
   "per_tool_prediction_export_counts": {
-    "magnet_axiom": 1
+    "xways_excire": 8
   },
   "per_tool_total_export_counts": {
-    "magnet_axiom": 5
+    "xways_excire": 8
   },
   "per_tool_raw_row_counts": {
-    "magnet_axiom": 11500
+    "xways_excire": 32076
   },
-  "raw_rows_parsed": 11500,
+  "raw_rows_parsed": 32076,
+  "pre_normalized_rows": 11500,
   "normalized_rows_before_deduplication": 11500,
   "matched_rows_before_deduplication": 11500,
   "deduplication_enabled": true,
@@ -27,8 +28,8 @@
   "matched_rows_after_deduplication": 11500,
   "unmatched_rows_after_deduplication": 0,
   "interpretable_rows_after_deduplication": 11500,
-  "weapon_detected_true_after_deduplication": 5329,
-  "weapon_detected_false_after_deduplication": 6171,
+  "weapon_detected_true_after_deduplication": 5934,
+  "weapon_detected_false_after_deduplication": 5566,
   "weapon_detected_unknown_after_deduplication": 0,
   "outputs": {
     "normalized_predictions": "evaluation/forensic_tools/normalized_predictions.csv",
