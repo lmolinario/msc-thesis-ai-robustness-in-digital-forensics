@@ -1,6 +1,6 @@
 {
   "script": "evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py",
-  "created_at": "2026-05-27T21:07:42+00:00",
+  "created_at": "2026-05-27T21:27:16+00:00",
   "bundle_rows": 11500,
   "tools_requested": [
     "magnet_axiom",
@@ -33,6 +33,72 @@
     "xways_excire_d20": 20329,
     "xways_excire_d50": 32076,
     "xways_excire_d80": 43736
+  },
+  "output_tool_names": [
+    "magnet_axiom",
+    "xways_excire_d20",
+    "xways_excire_d50",
+    "xways_excire_d80"
+  ],
+  "stale_outputs_removed": [
+    "evaluation/forensic_tools/xways_excire_normalized_predictions.csv",
+    "results/metrics/xways_excire_metrics.csv"
+  ],
+  "metric_output_validation": {
+    "aggregate_path": "results/metrics/forensic_tools_metrics.csv",
+    "aggregate_exists": true,
+    "aggregate_rows": 124,
+    "expected_aggregate_rows": 124,
+    "aggregate_tool_counts": {
+      "magnet_axiom": 31,
+      "xways_excire_d20": 31,
+      "xways_excire_d50": 31,
+      "xways_excire_d80": 31
+    },
+    "expected_tool_counts": {
+      "magnet_axiom": 31,
+      "xways_excire_d20": 31,
+      "xways_excire_d50": 31,
+      "xways_excire_d80": 31
+    },
+    "aggregate_matches_memory": true,
+    "aggregate_error": "",
+    "per_tool_files": {
+      "magnet_axiom": {
+        "path": "results/metrics/magnet_axiom_metrics.csv",
+        "exists": true,
+        "rows": 31,
+        "expected_rows": 31,
+        "matches_expected": true,
+        "error": ""
+      },
+      "xways_excire_d20": {
+        "path": "results/metrics/xways_excire_d20_metrics.csv",
+        "exists": true,
+        "rows": 31,
+        "expected_rows": 31,
+        "matches_expected": true,
+        "error": ""
+      },
+      "xways_excire_d50": {
+        "path": "results/metrics/xways_excire_d50_metrics.csv",
+        "exists": true,
+        "rows": 31,
+        "expected_rows": 31,
+        "matches_expected": true,
+        "error": ""
+      },
+      "xways_excire_d80": {
+        "path": "results/metrics/xways_excire_d80_metrics.csv",
+        "exists": true,
+        "rows": 31,
+        "expected_rows": 31,
+        "matches_expected": true,
+        "error": ""
+      }
+    },
+    "per_tool_files_match_memory": true,
+    "all_metric_outputs_consistent": true
   },
   "raw_rows_parsed": 107641,
   "pre_normalized_rows": 34500,
