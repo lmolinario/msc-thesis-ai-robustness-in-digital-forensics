@@ -69,56 +69,120 @@ di valutazione al momento della redazione.
 
 \begin{table}[H]
 \centering
-\small
-\setlength{\tabcolsep}{6pt}
 \caption{Stato corrente del workflow di valutazione sperimentale.}
 \label{tab:results-evaluation-status}
-\begin{tabular}{@{}l l@{}}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
-\textbf{Componente} & \textbf{Stato} \\
+\textbf{Componente} & \textbf{Stato} & \textbf{Note} \\
 \midrule
 
-Dataset finale & \textbf{Congelato} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize 1500 immagini suddivise in tre classi: 500 \texttt{weapon}, 500 \texttt{non\_weapon} e 500 \texttt{ood}.} \\[3pt]
+Dataset finale
+&
+\textbf{Congelato}
+&
+1500 immagini suddivise in tre classi: 500 \texttt{weapon}, 500
+\texttt{non\_weapon} e 500 \texttt{ood}. \\
 
-Subset binario & \textbf{Congelato} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize 1000 immagini, composte da 500 campioni \texttt{weapon} e 500 campioni \texttt{non\_weapon}. Utilizzato per gli split clean, gli attacchi adversariali e le trasformazioni anti-forensi.} \\[3pt]
+Subset binario
+&
+\textbf{Congelato}
+&
+1000 immagini, composte da 500 campioni \texttt{weapon} e 500 campioni
+\texttt{non\_weapon}. Il subset è utilizzato per gli split clean, per gli
+attacchi adversariali e per le trasformazioni anti-forensi. \\
 
-Split clean e OOD & \textbf{Completati} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Cinque fold binari clean e un insieme di valutazione out-of-distribution separato, derivati dai manifest congelati.} \\[3pt]
+Split clean e OOD
+&
+\textbf{Completati}
+&
+Sono stati generati cinque fold binari clean e un insieme di valutazione
+out-of-distribution separato, entrambi derivati dai manifest congelati. \\
 
-Addestramento dei modelli proxy & \textbf{Completato} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Checkpoint fold-aware prodotti per \texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}.} \\[3pt]
+Addestramento dei modelli proxy
+&
+\textbf{Completato}
+&
+Sono stati prodotti checkpoint fold-aware per \texttt{efficientnet\_b0},
+\texttt{resnet18} e \texttt{clip}. \\
 
-Valutazione dei modelli proxy & \textbf{Completata} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Livello proxy valutato su input clean, OOD, adversariali e anti-forensi; output a livello di predizione e tabelle metriche finali.} \\[3pt]
+Valutazione dei modelli proxy
+&
+\textbf{Completata}
+&
+Il livello proxy è stato valutato su input clean, OOD, adversariali e
+anti-forensi, producendo output a livello di predizione e tabelle metriche
+finali. \\
 
-Attacchi adversariali & \textbf{Generati} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Cinque famiglie di perturbazioni: \texttt{fgsm}, \texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e \texttt{color\_shift}.} \\[3pt]
+Attacchi adversariali
+&
+\textbf{Generati}
+&
+Sono state generate cinque famiglie di perturbazioni: \texttt{fgsm},
+\texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e
+\texttt{color\_shift}. \\
 
-Trasformazioni anti-forensi & \textbf{Generate} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Cinque trasformazioni model-agnostic: \texttt{jpeg\_recompression}, \texttt{resample\_resize}, \texttt{gaussian\_blur}, \texttt{histogram\_modification} e \texttt{contrast\_stretching}.} \\[3pt]
+Trasformazioni anti-forensi
+&
+\textbf{Generate}
+&
+Sono state generate cinque trasformazioni model-agnostic:
+\texttt{jpeg\_recompression}, \texttt{resample\_resize},
+\texttt{gaussian\_blur}, \texttt{histogram\_modification} e
+\texttt{contrast\_stretching}. \\
 
-Forensic evaluation bundle & \textbf{Generato} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize 11\,500 file predisposti per la valutazione black-box, includendo campioni clean, OOD, adversariali e anti-forensi.} \\[3pt]
+Forensic evaluation bundle
+&
+\textbf{Generato}
+&
+11500 file predisposti per la valutazione black-box degli strumenti forensi,
+includendo campioni clean, OOD, adversariali e anti-forensi. \\
 
-Magnet AXIOM / Magnet.AI & \textbf{Normalizzato / consolidato} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Bundle processato ed export normalizzato rispetto alla ground truth sperimentale. Il tag \texttt{Possible weapons} è ricondotto alla predizione positiva per la classe \texttt{weapon}.} \\[3pt]
+Magnet AXIOM / Magnet.AI
+&
+\textbf{Normalizzato / consolidato}
+&
+Bundle processato ed export normalizzato rispetto alla ground truth
+sperimentale. Il tag \texttt{Possible weapons} è stato ricondotto
+operativamente alla predizione positiva per la classe \texttt{weapon}. \\
 
-X-Ways Forensics / Excire Photo AI & \textbf{Normalizzato / consolidato} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Valutato come sistema black-box di semantic retrieval, non come classificatore nativo \texttt{weapon}/\texttt{non\_weapon}. Tre configurazioni operative del parametro \texttt{Distance limit}: \texttt{D20}, \texttt{D50} e \texttt{D80}.} \\[3pt]
+X-Ways Forensics / Excire Photo AI
+&
+\textbf{Normalizzato / consolidato}
+&
+Excire Photo AI è stato valutato come classificatore black-box basato su
+semantic retrieval, non come classificatore nativo
+\texttt{weapon}/\texttt{non\_weapon}. Sono state considerate tre configurazioni
+operative del parametro \texttt{Distance limit}: \texttt{D20}, \texttt{D50} e
+\texttt{D80}. \\
 
-Cellebrite UFED & \textbf{Non incluso nella comparazione quantitativa} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Lo strumento rimane rilevante nella pipeline operativo-forense, ma non sono disponibili export normalizzati, riproducibili e direttamente associabili al forensic evaluation bundle. La sua rilevanza è discussa sul piano metodologico e procedurale.} \\[3pt]
+Cellebrite UFED
+&
+\textbf{Non incluso nella comparazione quantitativa}
+&
+Lo strumento rimane rilevante nella pipeline operativo-forense, ma non è incluso
+nella comparazione quantitativa finale in assenza di export normalizzati,
+riproducibili e direttamente associabili al forensic evaluation bundle. La sua
+rilevanza è pertanto discussa sul piano metodologico e procedurale. \\
 
-Oxygen Forensic Detective & \textbf{Non incluso nella comparazione quantitativa} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Lo strumento rimane rilevante nella pipeline operativo-forense, ma la sua inclusione quantitativa richiederebbe output strutturati, normalizzabili e riconducibili in modo univoco alla ground truth sperimentale.} \\[3pt]
+Oxygen Forensic Detective
+&
+\textbf{Non incluso nella comparazione quantitativa}
+&
+Lo strumento rimane rilevante nella pipeline operativo-forense, ma la sua
+inclusione quantitativa richiederebbe output strutturati, normalizzabili e
+riconducibili in modo univoco alla ground truth sperimentale. \\
 
-Casi di studio di explainability & \textbf{Completati / integrati} \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Attribution map basate su Integrated Gradients generate per cinque casi rappresentativi di EfficientNet-B0. L'analisi ha valore qualitativo e diagnostico; non costituisce una metrica primaria di valutazione.} \\
+Casi di studio di explainability
+&
+\textbf{Completati / integrati}
+&
+Le attribution map basate su Integrated Gradients sono state generate e
+selezionate per cinque casi rappresentativi di EfficientNet-B0. L'analisi ha
+valore qualitativo e diagnostico e non costituisce una metrica primaria di
+valutazione. \\
 
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Il corpus sperimentale risultante è organizzato in condizioni clean,
@@ -816,35 +880,64 @@ configurazione permissiva ad alto richiamo.
 
 \begin{table}[H]
 \centering
-\small
-\setlength{\tabcolsep}{6pt}
 \caption{Stato della valutazione black-box degli strumenti forensi commerciali.}
 \label{tab:results-commercial-tool-status}
-\begin{tabular}{@{}l l@{}}
+\small
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
-\textbf{Tool} & \textbf{Stato} \\
+\textbf{Tool} & \textbf{Stato} & \textbf{Implicazione metodologica} \\
 \midrule
 
-Magnet AXIOM / Magnet.AI & Consolidato \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Il forensic evaluation bundle è stato processato e l'export normalizzato rispetto alla ground truth sperimentale. Il tag \texttt{Possible weapons} è utilizzato come segnale operativo positivo per la classe \texttt{weapon}.} \\[3pt]
+Magnet AXIOM / Magnet.AI
+&
+Consolidato
+&
+Il forensic evaluation bundle è stato processato e l'export è stato normalizzato
+rispetto alla ground truth sperimentale. Il tag \texttt{Possible weapons} è
+utilizzato come segnale operativo positivo per la classe \texttt{weapon}. \\
 
-X-Ways / Excire Photo AI -- \texttt{D20} & Consolidato \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Configurazione restrittiva di semantic retrieval. Riduce i falsi positivi e il weapon flag rate sugli \gls{ood}, ma aumenta il rischio di falsi negativi sulla classe \texttt{weapon}.} \\[3pt]
+X-Ways Forensics / Excire Photo AI -- \texttt{D20}
+&
+Consolidato
+&
+Configurazione restrittiva di semantic retrieval. Riduce i falsi positivi e il
+weapon flag rate sugli \gls{ood}, ma aumenta il rischio di falsi negativi sulla
+classe \texttt{weapon}. \\
 
-X-Ways / Excire Photo AI -- \texttt{D50} & Consolidato \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Configurazione intermedia, adottata come setting principale per il confronto operativo. Presenta, nel contesto sperimentale considerato, un profilo equilibrato tra alto richiamo sulla classe \texttt{weapon} e controllo gestibile dei falsi positivi.} \\[3pt]
+X-Ways Forensics / Excire Photo AI -- \texttt{D50}
+&
+Consolidato
+&
+Configurazione intermedia, utilizzata come setting principale per il confronto
+operativo. Presenta, nel contesto sperimentale considerato, un profilo
+equilibrato tra alto richiamo sulla classe \texttt{weapon} e controllo ancora
+gestibile dei falsi positivi. \\
 
-X-Ways / Excire Photo AI -- \texttt{D80} & Consolidato \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Configurazione permissiva. Massimizza il recall sulla classe \texttt{weapon}, ma aumenta sensibilmente il \gls{fpr} e il weapon flag rate sugli input \gls{ood}.} \\[3pt]
+X-Ways Forensics / Excire Photo AI -- \texttt{D80}
+&
+Consolidato
+&
+Configurazione permissiva. Massimizza il recall sulla classe \texttt{weapon}, ma
+aumenta sensibilmente il \gls{fpr} e il weapon flag rate sugli input
+\gls{ood}. \\
 
-Cellebrite UFED & Non incluso nella comparazione quantitativa \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize Lo strumento rimane rilevante nel workflow forense, ma non sono disponibili output normalizzati e comparabili rispetto al forensic evaluation bundle.} \\[3pt]
+Cellebrite UFED
+&
+Non incluso nella comparazione quantitativa finale
+&
+Lo strumento rimane rilevante nel workflow forense, ma non sono disponibili
+output normalizzati e comparabili per la classificazione automatizzata di
+immagini rispetto al forensic evaluation bundle. \\
 
-Oxygen Forensic Detective & Non incluso nella comparazione quantitativa \\
-\multicolumn{2}{@{}p{\linewidth}@{}}{\footnotesize La valutazione quantitativa richiederebbe moduli automatici, export strutturati e mapping verificabile rispetto alla ground truth sperimentale.} \\
+Oxygen Forensic Detective
+&
+Non incluso nella comparazione quantitativa finale
+&
+La valutazione quantitativa richiede moduli automatici, export strutturati e
+mapping verificabile rispetto alla ground truth sperimentale. \\
 
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Per Magnet AXIOM/Magnet.AI, la normalizzazione è stata condotta sul run
@@ -941,27 +1034,42 @@ condizioni perturbate hanno peso maggiore nella metrica aggregata.
 \caption{Comportamento di Magnet.AI per condizione sperimentale.}
 \label{tab:results-magnet-condition-metrics}
 \small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{@{}l r r r r@{}}
+\begin{tabularx}{\textwidth}{@{}l r r r r X@{}}
 \toprule
 \textbf{Condizione} &
 \textbf{Accuracy} &
 \textbf{Recall weapon} &
 \textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} \\
+\textbf{\gls{fpr}} &
+\textbf{Nota operativa} \\
 \midrule
 
-Clean & 0.950 & 0.930 & 0.070 & 0.030 \\
-\multicolumn{5}{@{}p{\linewidth}@{}}{\footnotesize Baseline commerciale su 1\,000 immagini non perturbate.} \\[3pt]
+Clean &
+0.950 &
+0.930 &
+0.070 &
+0.030 &
+Baseline commerciale su 1\,000 immagini non perturbate. \\
 
-Perturbed & 0.932 & 0.899 & 0.101 & 0.035 \\
-\multicolumn{5}{@{}p{\linewidth}@{}}{\footnotesize Valori calcolati su 10\,000 immagini adversariali e anti-forensi; il degrado principale riguarda l'aumento dei falsi negativi sulla classe \texttt{weapon}.} \\[3pt]
+Perturbed &
+0.932 &
+0.899 &
+0.101 &
+0.035 &
+Valori calcolati su 10\,000 immagini adversariali e anti-forensi; il degrado
+principale riguarda l'aumento dei falsi negativi sulla classe \texttt{weapon}. \\
 
-OOD & -- & -- & -- & -- \\
-\multicolumn{5}{@{}p{\linewidth}@{}}{\footnotesize Weapon flag rate pari a 0.360: 180 immagini \gls{ood} su 500 segnalate come \texttt{Possible weapons}. Le metriche binarie standard non sono applicabili.} \\
+OOD &
+-- &
+-- &
+-- &
+-- &
+Weapon flag rate pari a 0.360: 180 immagini \gls{ood} su 500 sono state
+segnalate come \texttt{Possible weapons}. Le metriche binarie standard non sono
+applicabili. \\
 
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Tra le condizioni perturbate, gli attacchi adversariali producono una
@@ -1266,32 +1374,53 @@ si riflettono anche in strumenti black-box utilizzati in workflow investigativi.
 \caption{Sintesi comparativa tra modelli proxy e tool commerciali black-box.}
 \label{tab:results-comparative-summary}
 \small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{@{}l r r r@{}}
+\begin{tabularx}{\textwidth}{@{}p{2.4cm} r r r X@{}}
 \toprule
 \textbf{Sistema} &
 \textbf{Clean accuracy} &
 \textbf{Clean \gls{fnr}} &
-\textbf{OOD weapon rate} \\
+\textbf{OOD weapon rate} &
+\textbf{Osservazione principale} \\
 \midrule
 
-EfficientNet-B0 & 0.978 & 0.016 & 0.370 \\
-\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Migliore baseline clean tra i proxy, ma vulnerabilità marcata ad alcune perturbazioni adversariali, in particolare \gls{sigmazero} e \gls{fgsm}.} \\[3pt]
+EfficientNet-B0 &
+0.978 &
+0.016 &
+0.370 &
+Migliore baseline clean tra i proxy, ma vulnerabilità marcata ad alcune
+perturbazioni adversariali, in particolare \gls{sigmazero} e \gls{fgsm}. \\
 
-ResNet18 & 0.964 & 0.030 & 0.438 \\
-\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 in alcuni scenari adversariali, pur con vulnerabilità osservabili.} \\[3pt]
+ResNet18 &
+0.964 &
+0.030 &
+0.438 &
+Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 in alcuni
+scenari adversariali, pur con vulnerabilità osservabili. \\
 
-\gls{clip} & 0.927 & 0.012 & 0.836 \\
-\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Accuracy clean inferiore ai modelli supervisionati, ma forte tendenza a segnalare come \texttt{weapon} immagini fuori distribuzione.} \\[3pt]
+\gls{clip} &
+0.927 &
+0.012 &
+0.836 &
+Accuracy clean inferiore ai modelli supervisionati, ma forte tendenza a
+segnalare come \texttt{weapon} immagini fuori distribuzione. \\
 
-Magnet AXIOM / Magnet.AI & 0.950 & 0.070 & 0.360 \\
-\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Comportamento relativamente conservativo: basso \gls{fpr}, ma rischio non trascurabile di falsi negativi sulla classe \texttt{weapon}.} \\[3pt]
+Magnet AXIOM / Magnet.AI &
+0.950 &
+0.070 &
+0.360 &
+Comportamento relativamente conservativo: basso \gls{fpr}, ma rischio non
+trascurabile di falsi negativi sulla classe \texttt{weapon}. \\
 
-X-Ways / Excire Photo AI \texttt{D50} & 0.944 & 0.042 & 0.340 \\
-\multicolumn{4}{@{}p{\linewidth}@{}}{\footnotesize Setting principale di triage: recall elevato sulla classe \texttt{weapon}, con incremento controllato dei falsi positivi rispetto alle configurazioni più permissive.} \\
+X-Ways / Excire Photo AI \texttt{D50} &
+0.944 &
+0.042 &
+0.340 &
+Setting principale di triage: recall elevato sulla classe \texttt{weapon}, con
+incremento controllato dei falsi positivi rispetto alle configurazioni più
+permissive. \\
 
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Excire \texttt{D20} e \texttt{D80} non sono inclusi nella tabella come valori da
