@@ -20,6 +20,12 @@ Implemented normalization logic
   - maps empty Tags to not flagged / predicted non_weapon;
   - deduplicates duplicated export rows to one prediction per tool + bundle_id.
 
+- X-Ways / Excire Photo AI semantic prompt exports:
+  - reads one hit-list CSV per fixed firearm-oriented text prompt;
+  - builds the union of all retrieved filenames as predicted weapon;
+  - completes all bundle rows not retrieved by any prompt as predicted non_weapon;
+  - preserves per-prompt hit flags for auditability.
+
 - Generic forensic AI tool exports:
   - supports CSV, TSV, JSON, JSONL and TXT exports;
   - attempts to infer filename/hash, label/category and confidence columns;
@@ -112,6 +118,22 @@ KNOWN_TOOL_NAMES = [
 ]
 
 SUPPORTED_GENERIC_EXPORT_EXTENSIONS = {".csv", ".tsv", ".json", ".jsonl", ".txt"}
+
+EXCIRE_FIREARM_PROMPTS = (
+    "firearm",
+    "gun",
+    "pistol",
+    "handgun",
+    "revolver",
+    "rifle",
+    "shotgun",
+    "assault_rifle",
+)
+
+EXCIRE_PROMPT_EXPORT_RE = re.compile(
+    r"^excire_(?P<prompt>[a-z0-9_]+)_distance(?P<distance>\d+)\.csv$",
+    flags=re.IGNORECASE,
+)
 
 SHA256_COLUMNS = {
     "sha256",
@@ -417,6 +439,8 @@ def ask_index(prompt: str, min_value: int, max_value: int, default: int) -> int:
 def prediction_export_name_for_tool(tool_name: str) -> str:
     if tool_name == "magnet_axiom":
         return "Pictures.csv"
+    if tool_name == "xways_excire":
+        return "Excire prompt hit-list CSVs"
     return "prediction export"
 
 
@@ -681,6 +705,12 @@ def discover_prediction_export_files_in_roots(tool_name: str, roots: list[Path])
                 for path in root.rglob("*")
                 if path.is_file() and path.name.lower() == "pictures.csv"
             )
+        elif tool_name == "xways_excire":
+            files.extend(
+                path
+                for path in root.rglob("*")
+                if path.is_file() and is_excire_prompt_export_file(path)
+            )
         else:
             files.extend(
                 path
@@ -919,13 +949,21 @@ def build_tool_version_row(
         summary_file = repo_relative_string(summary_files[0])
         extracted = extract_version_fields_from_summary(summary_files[0])
 
-    notes = (
-        "Magnet AXIOM export. Predictions are derived from Pictures.csv Tags; "
-        "Tags='Possible weapons' is mapped to weapon_detected=true; empty Tags "
-        "is mapped to weapon_detected=false."
-        if tool_name == "magnet_axiom"
-        else "Fill manually after tool execution/export."
-    )
+    if tool_name == "magnet_axiom":
+        notes = (
+            "Magnet AXIOM export. Predictions are derived from Pictures.csv Tags; "
+            "Tags='Possible weapons' is mapped to weapon_detected=true; empty Tags "
+            "is mapped to weapon_detected=false."
+        )
+    elif tool_name == "xways_excire":
+        notes = (
+            "X-Ways / Excire Photo AI semantic retrieval export. Predictions are derived "
+            "from fixed firearm-oriented prompt hit-list CSVs. An image retrieved by at "
+            "least one prompt is mapped to weapon_detected=true; all remaining bundle "
+            "images are completed as weapon_detected=false."
+        )
+    else:
+        notes = "Fill manually after tool execution/export."
 
     return {
         "tool_name": tool_name,
@@ -1055,6 +1093,211 @@ def build_base_match_fields(raw_row: RawToolRow, bundle_row: dict[str, Any] | No
         "original_image_id": safe_str(bundle_row.get("original_image_id", "")),
         "generated_image_id": safe_str(bundle_row.get("generated_image_id", "")),
     }
+
+
+# =============================================================================
+# X-Ways / Excire Photo AI semantic prompt-hit normalization
+# =============================================================================
+
+def is_excire_prompt_export_file(path: Path) -> bool:
+    """Return True for fixed Excire Photo AI prompt hit-list CSV exports."""
+    match = EXCIRE_PROMPT_EXPORT_RE.match(path.name)
+    if not match:
+        return False
+    return match.group("prompt").lower() in EXCIRE_FIREARM_PROMPTS
+
+
+def infer_excire_prompt_and_distance(path: Path) -> tuple[str, str] | None:
+    """Infer semantic prompt and distance limit from an Excire export filename."""
+    match = EXCIRE_PROMPT_EXPORT_RE.match(path.name)
+    if not match:
+        return None
+    prompt = match.group("prompt").lower()
+    if prompt not in EXCIRE_FIREARM_PROMPTS:
+        return None
+    return prompt, match.group("distance")
+
+
+def read_excire_hit_list(path: Path) -> list[str]:
+    """
+    Read an Excire Photo AI prompt export.
+
+    Excire exports used in this pipeline are plain hit lists: one image path per
+    line, usually without a header. This reader intentionally avoids pandas CSV
+    inference because quoted Windows paths and headerless files must be handled
+    deterministically.
+    """
+    hits: list[str] = []
+    for raw_line in path.read_text(encoding="utf-8-sig", errors="replace").splitlines():
+        line = raw_line.strip().strip('"').strip("'")
+        if not line:
+            continue
+        if line.lower() in {"path", "file", "filename", "file_path", "filepath"}:
+            continue
+        hits.append(line)
+    return hits
+
+
+def normalize_xways_excire_prompt_exports(
+    tool_name: str,
+    tool_dir: Path,
+    selected_run_dirs: list[Path] | None,
+    bundle_df: pd.DataFrame,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
+    """
+    Normalize X-Ways / Excire Photo AI prompt hit-list exports.
+
+    The Excire workflow used for this thesis exports only retrieved images for a
+    given semantic prompt. Therefore, absence from all fixed prompt hit lists is
+    an operational negative prediction. This function completes the prediction
+    table to one row per bundle image so that accuracy, FNR/FPR and OOD weapon
+    flag rate can be computed consistently with Magnet AXIOM.
+    """
+    roots = get_scan_roots(tool_name, tool_dir, selected_run_dirs)
+    all_export_files = discover_export_files_in_roots(roots)
+    prediction_files = [path for path in all_export_files if is_excire_prompt_export_file(path)]
+
+    hits_by_prompt: dict[str, dict[str, dict[str, Any]]] = {prompt: {} for prompt in EXCIRE_FIREARM_PROMPTS}
+    distance_values: set[str] = set()
+    audit_rows: list[dict[str, Any]] = []
+    raw_hit_rows = 0
+
+    prediction_file_set = {path.resolve() for path in prediction_files}
+
+    for export_file in all_export_files:
+        is_prediction_file = export_file.resolve() in prediction_file_set
+        status = "parsed_prediction_file" if is_prediction_file else "parsed_audit_only"
+        error = ""
+        parsed_rows = 0
+
+        if is_prediction_file:
+            inferred = infer_excire_prompt_and_distance(export_file)
+            if inferred is None:
+                status = "parse_error"
+                error = "Could not infer Excire prompt/distance from filename."
+            else:
+                prompt, distance = inferred
+                distance_values.add(distance)
+                try:
+                    rows = read_excire_hit_list(export_file)
+                    parsed_rows = len(rows)
+                    raw_hit_rows += parsed_rows
+                    for original_path in rows:
+                        filename = basename_from_path(original_path)
+                        key = filename.lower()
+                        if not key:
+                            continue
+                        hits_by_prompt[prompt][key] = {
+                            "filename": filename,
+                            "example_original_path": original_path,
+                            "raw_export_file": repo_relative_string(export_file),
+                        }
+                except Exception as exc:  # pragma: no cover - defensive IO branch
+                    status = "parse_error"
+                    error = f"{type(exc).__name__}: {exc}"
+                    logging.warning("Could not parse Excire export %s: %s", export_file, error)
+        else:
+            try:
+                if export_file.suffix.lower() == ".csv":
+                    parsed_rows = len(read_excire_hit_list(export_file))
+                else:
+                    parsed_rows = len(read_export_records(export_file))
+            except Exception as exc:  # pragma: no cover - audit-only branch
+                status = "parse_error"
+                error = f"{type(exc).__name__}: {exc}"
+
+        audit_rows.append(
+            {
+                "tool_name": tool_name,
+                "raw_export_file": repo_relative_string(export_file),
+                "run_dir": infer_run_dir_name(tool_dir, export_file),
+                "extension": export_file.suffix.lower(),
+                "is_prediction_file": str(is_prediction_file).lower(),
+                "status": status,
+                "parsed_rows": parsed_rows,
+                "error": error,
+            }
+        )
+
+    distance_limit = unique_join(sorted(distance_values), separator="|")
+    normalized_rows: list[dict[str, Any]] = []
+
+    for bundle_row in bundle_df.to_dict(orient="records"):
+        filename_key = safe_str(bundle_row.get("_filename_key", ""))
+        prompt_hits = {
+            prompt: int(bool(filename_key) and filename_key in hits_by_prompt[prompt])
+            for prompt in EXCIRE_FIREARM_PROMPTS
+        }
+        hit_prompts = [prompt for prompt in EXCIRE_FIREARM_PROMPTS if prompt_hits[prompt] == 1]
+        weapon_detected = "true" if hit_prompts else "false"
+        normalized_prediction = "weapon" if weapon_detected == "true" else "non_weapon"
+
+        hit_export_files = [
+            hits_by_prompt[prompt][filename_key]["raw_export_file"]
+            for prompt in hit_prompts
+            if filename_key in hits_by_prompt[prompt]
+        ]
+        hit_original_paths = [
+            hits_by_prompt[prompt][filename_key]["example_original_path"]
+            for prompt in hit_prompts
+            if filename_key in hits_by_prompt[prompt]
+        ]
+
+        base = {
+            "tool_name": tool_name,
+            "bundle_id": safe_str(bundle_row.get("bundle_id", "")),
+            "match_method": "bundle_manifest_completion",
+            "matched": "true",
+            "tool_input_filename": safe_str(bundle_row.get("tool_input_filename", "")),
+            "sha256": safe_str(bundle_row.get("_sha256_key", "")),
+            "md5": safe_str(bundle_row.get("_md5_key", "")),
+            "sample_type": safe_str(bundle_row.get("sample_type", "")),
+            "attack_family": safe_str(bundle_row.get("attack_family", "")),
+            "attack_name": safe_str(bundle_row.get("attack_name", "")),
+            "attack_target_model": safe_str(bundle_row.get("attack_target_model", "")),
+            "fold": safe_str(bundle_row.get("fold", "")),
+            "final_label": safe_str(bundle_row.get("final_label", "")),
+            "source_dataset": safe_str(bundle_row.get("source_dataset", "")),
+            "original_image_id": safe_str(bundle_row.get("original_image_id", "")),
+            "generated_image_id": safe_str(bundle_row.get("generated_image_id", "")),
+        }
+        correct, false_negative, false_positive = compute_correctness(base["final_label"], weapon_detected)
+
+        normalized_rows.append(
+            {
+                **base,
+                "raw_export_file": unique_join(hit_export_files),
+                "raw_row_number": "",
+                "raw_filename_or_path": unique_join(hit_original_paths) or base["tool_input_filename"],
+                "tool_raw_label": unique_join(hit_prompts),
+                "tool_raw_confidence": "",
+                "tool_confidence_numeric": "",
+                "weapon_detected": weapon_detected,
+                "normalized_prediction": normalized_prediction,
+                "mapping_reason": (
+                    f"xways_excire_semantic_prompt_hit:{unique_join(hit_prompts, separator='|')}"
+                    if hit_prompts
+                    else "xways_excire_semantic_prompt_no_hit"
+                ),
+                "correct": correct,
+                "false_negative": false_negative,
+                "false_positive": false_positive,
+                "raw_row_count_after_deduplication": max(len(hit_prompts), 1),
+                "excire_distance_limit": distance_limit,
+                "excire_promptset": unique_join(list(EXCIRE_FIREARM_PROMPTS), separator="|"),
+                "n_prompt_hits": len(hit_prompts),
+                "hit_prompts": unique_join(hit_prompts, separator="|"),
+                **{f"prompt_{prompt}_hit": prompt_hits[prompt] for prompt in EXCIRE_FIREARM_PROMPTS},
+            }
+        )
+
+    logging.info(
+        "Tool %s: completed %d bundle-level semantic predictions from %d raw prompt hits.",
+        tool_name,
+        len(normalized_rows),
+        raw_hit_rows,
+    )
+    return normalized_rows, audit_rows, raw_hit_rows
 
 
 def normalize_rows(
@@ -1351,6 +1594,7 @@ def main() -> None:
     sha_index, md5_index, filename_index = build_bundle_indexes(bundle_df)
 
     all_raw_rows: list[RawToolRow] = []
+    pre_normalized_rows: list[dict[str, Any]] = []
     audit_rows: list[dict[str, Any]] = []
     version_rows: list[dict[str, Any]] = []
     per_tool_prediction_export_counts: dict[str, int] = {}
@@ -1376,13 +1620,24 @@ def main() -> None:
                 f"Selected run dirs: {[repo_relative_string(path) for path in selected_run_dirs]}"
             )
 
-        raw_rows, tool_audit_rows = parse_tool_exports(tool_name, tool_dir, selected_run_dirs or None)
-        all_raw_rows.extend(raw_rows)
-        audit_rows.extend(tool_audit_rows)
+        if tool_name == "xways_excire":
+            tool_normalized_rows, tool_audit_rows, raw_hit_rows = normalize_xways_excire_prompt_exports(
+                tool_name=tool_name,
+                tool_dir=tool_dir,
+                selected_run_dirs=selected_run_dirs or None,
+                bundle_df=bundle_df,
+            )
+            pre_normalized_rows.extend(tool_normalized_rows)
+            audit_rows.extend(tool_audit_rows)
+            per_tool_raw_row_counts[tool_name] = raw_hit_rows
+        else:
+            raw_rows, tool_audit_rows = parse_tool_exports(tool_name, tool_dir, selected_run_dirs or None)
+            all_raw_rows.extend(raw_rows)
+            audit_rows.extend(tool_audit_rows)
+            per_tool_raw_row_counts[tool_name] = len(raw_rows)
 
         per_tool_prediction_export_counts[tool_name] = len(prediction_files)
         per_tool_total_export_counts[tool_name] = len(all_export_files)
-        per_tool_raw_row_counts[tool_name] = len(raw_rows)
 
         version_rows.append(
             build_tool_version_row(
@@ -1393,7 +1648,10 @@ def main() -> None:
             )
         )
 
-    normalized_before_deduplication = normalize_rows(all_raw_rows, sha_index, md5_index, filename_index)
+    normalized_before_deduplication = [
+        *normalize_rows(all_raw_rows, sha_index, md5_index, filename_index),
+        *pre_normalized_rows,
+    ]
     normalized_rows = deduplicate_predictions(normalized_before_deduplication) if deduplicate else normalized_before_deduplication
     metrics_rows = compute_metrics(normalized_rows)
 
@@ -1430,7 +1688,8 @@ def main() -> None:
         "per_tool_prediction_export_counts": per_tool_prediction_export_counts,
         "per_tool_total_export_counts": per_tool_total_export_counts,
         "per_tool_raw_row_counts": per_tool_raw_row_counts,
-        "raw_rows_parsed": len(all_raw_rows),
+        "raw_rows_parsed": len(all_raw_rows) + sum(per_tool_raw_row_counts.get(tool, 0) for tool in tools if tool == "xways_excire"),
+        "pre_normalized_rows": len(pre_normalized_rows),
         "normalized_rows_before_deduplication": len(normalized_before_deduplication),
         "matched_rows_before_deduplication": matched_before,
         "deduplication_enabled": deduplicate,
@@ -1451,7 +1710,11 @@ def main() -> None:
     }
     write_json(normalization_summary_path, summary)
 
-    logging.info("Raw rows parsed: %d", len(all_raw_rows))
+    logging.info(
+        "Raw rows parsed: %d",
+        len(all_raw_rows) + sum(per_tool_raw_row_counts.get(tool, 0) for tool in tools if tool == "xways_excire"),
+    )
+    logging.info("Pre-normalized rows: %d", len(pre_normalized_rows))
     logging.info("Normalized rows before deduplication: %d", len(normalized_before_deduplication))
     logging.info("Matched rows before deduplication: %d", matched_before)
     logging.info("Deduplication enabled: %s", str(deduplicate).lower())
