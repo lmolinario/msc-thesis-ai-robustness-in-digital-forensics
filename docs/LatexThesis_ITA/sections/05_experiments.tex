@@ -278,9 +278,12 @@ inferiore ma ancora elevata, con accuracy pari a 0.964. \gls{clip} ottiene
 un'accuracy pari a 0.927, mostrando una dinamica diversa rispetto ai due modelli
 supervisionati: il recall sulla classe \texttt{weapon} è molto alto, pari a
 0.988, ma il valore di \gls{fpr} risulta sensibilmente superiore, pari a 0.134.
-Questo comportamento suggerisce che \gls{clip} tende a privilegiare una maggiore
-sensibilità verso la classe \texttt{weapon}, al costo di un numero più elevato di
-falsi positivi sulla classe \texttt{non\_weapon}.
+Questo comportamento è coerente con la natura zero-shot di \gls{clip}: il modello
+non è addestrato direttamente sul task binario \texttt{weapon}/\texttt{non\_weapon}
+e la tendenza osservata a produrre un recall elevato sulla classe
+\texttt{weapon}, al costo di un maggiore \gls{fpr}, riflette il meccanismo di
+matching semantico adottato dal modello più che una scelta progettuale esplicita
+orientata alla sensibilità.
 
 La Tabella~\ref{tab:results-clean-confusion-matrices} riporta le confusion
 matrix aggregate per modello, utilizzando il layout\\
@@ -629,10 +632,13 @@ l'accuracy passa da 0.978 a 0.015, con una variazione pari a -0.963. Tale valore
 indica una compromissione quasi completa della capacità classificativa del
 modello, limitata tuttavia alla configurazione white-box in cui l'attacco è
 ottimizzato direttamente contro EfficientNet-B0 con accesso pieno ai suoi
-parametri. In termini operativi, tale risultato implica un \gls{fnr} prossimo
-all'unità per la classe \texttt{weapon}: nello scenario white-box considerato,
-il modello diventa inadatto al triage automatico di immagini contenenti armi,
-nonostante la baseline clean risulti la più elevata tra i modelli proxy.
+parametri. In termini operativi, tale risultato implica un \gls{fnr} prossimo all'unità
+per la classe \texttt{weapon} nello scenario white-box considerato: in tale
+configurazione, il modello risulta operativamente non affidabile per il triage
+automatico di immagini contenenti armi, nonostante la baseline clean risulti la
+più elevata tra i modelli proxy. Questo scenario presuppone che l'avversario
+disponga di accesso completo ai parametri del modello; in condizioni di accesso
+parziale o nullo, il degrado osservabile potrebbe essere inferiore.
 
 Anche \gls{fgsm}, generato contro EfficientNet-B0, produce un degrado
 rilevante, riducendo l'accuracy a 0.575 e determinando una variazione pari a
@@ -647,11 +653,10 @@ mentre rimane sostanzialmente stabile rispetto a \gls{superdeepfool},
 ancora più contenute, con il peggioramento massimo pari a -0.013 sotto
 \gls{fgsm}. In alcuni casi, come \gls{sigmazero}, l'accuracy perturbata di
 \gls{clip} e ResNet18 risulta lievemente superiore alla rispettiva baseline
-clean. Questo risultato suggerisce che le perturbazioni ottimizzate contro
-EfficientNet-B0 alterano caratteristiche pixel-level non necessariamente
-diagnostiche per ResNet18 e \gls{clip}, comportandosi per tali architetture come
-una trasformazione neutra o lievemente favorevole, piuttosto che come una
-perturbazione effettivamente trasferibile.
+clean. Nel caso di \gls{clip}, tale comportamento è coerente con l'uso di
+rappresentazioni visivo-testuali più semantiche, potenzialmente meno sensibili ad
+alcune perturbazioni pixel-level ottimizzate contro un modello supervisionato
+specifico.
 
 La Figura~\ref{fig:results-adversarial-accuracy-drop-heatmap} rende
 visivamente evidente il contrasto tra la colonna EfficientNet-B0, dominata da
@@ -875,7 +880,7 @@ configurazioni di Excire.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.88\textwidth]{images/fig_forensic_tools_clean_metrics_comparison.pdf}
-\caption{Confronto delle metriche clean per Magnet.AI ed Excire Photo AI nelle configurazioni \texttt{D20}, \texttt{D50} e \texttt{D80}.}
+\caption{Confronto delle metriche clean per Magnet.AI ed Excire Photo AI nelle configurazioni \texttt{D20}, \texttt{D50} e \texttt{D80}. La figura riporta accuracy, recall della classe \texttt{weapon}, \gls{fnr} e \gls{fpr}.}
 \label{fig:results-forensic-tools-clean-comparison}
 \end{figure}
 
@@ -961,14 +966,20 @@ False positives & 191 \\
 False negatives & 542 \\
 \bottomrule
 \end{tabular}
+    \vspace{0.4em}
+\footnotesize
+\textit{Nota.} Le metriche sono calcolate sulle 11\,000 immagini appartenenti al
+task binario \texttt{weapon}/\texttt{non\_weapon}. Il valore aggregato non
+corrisponde alla media aritmetica tra clean e perturbed, poiché il bundle include
+1\,000 immagini clean e 10\,000 immagini perturbate.
 \end{table}
 
-Le metriche complessive riportate nella Tabella~\ref{tab:results-magnet-global-metrics}
-sono calcolate sulle 11\,000 immagini appartenenti al task binario
-\texttt{weapon}/\texttt{non\_weapon}. Il valore globale non corrisponde alla
-media aritmetica semplice tra clean e perturbed, poiché il bundle contiene
-1\,000 immagini clean e 10\,000 immagini perturbate. Di conseguenza, le
-condizioni perturbate hanno peso maggiore nella metrica aggregata.
+La nota riportata nella Tabella~\ref{tab:results-magnet-global-metrics}
+chiarisce che il valore aggregato è influenzato dalla composizione sbilanciata
+del bundle, nel quale le immagini perturbate sono numericamente prevalenti
+rispetto ai campioni clean. Le metriche complessive devono quindi essere lette
+insieme alla disaggregazione per condizione sperimentale riportata nella
+Tabella~\ref{tab:results-magnet-condition-metrics}.
 
 \begin{table}[H]
 \centering
@@ -997,8 +1008,9 @@ Perturbed &
 0.899 &
 0.101 &
 0.035 &
-Valori calcolati su 10\,000 immagini adversariali e anti-forensi; il degrado
-principale riguarda l'aumento dei falsi negativi sulla classe \texttt{weapon}. \\
+Valori calcolati su 10\,000 immagini perturbate: 5\,000 adversariali e 5\,000
+anti-forensi. Il degrado principale riguarda l'aumento dei falsi negativi sulla
+classe \texttt{weapon}. \\
 
 OOD &
 -- &
@@ -1014,9 +1026,13 @@ applicabili. \\
 \end{table}
 
 Tra le condizioni perturbate, gli attacchi adversariali producono una
-degradazione più marcata rispetto alle trasformazioni anti-forensi: il
+degradazione più marcata rispetto alle trasformazioni anti-forensi: considerando
+l'insieme completo delle metriche normalizzate per famiglia di perturbazione, il
 \gls{fnr} medio adversariale è pari a 0.116, contro 0.087 per le trasformazioni
-anti-forensi. Questo risultato conferma che, nel caso di Magnet.AI, le
+anti-forensi. La Tabella~\ref{tab:results-magnet-attack-metrics} riporta alcune
+condizioni rappresentative di tale comportamento.
+
+Questo risultato conferma che, nel caso di Magnet.AI, le
 perturbazioni progettate per interferire con il comportamento del classificatore
 hanno un impatto operativo superiore rispetto alle trasformazioni realistiche di
 degradazione o manipolazione dell'immagine.
@@ -1101,11 +1117,14 @@ Histogram Modification &
 \end{tabular}
 \end{table}
 
-Nel complesso, Magnet.AI mostra prestazioni elevate in condizioni clean, ma
-evidenzia una riduzione della capacità di segnalazione della classe
-\texttt{weapon} in presenza di perturbazioni adversariali. Il dato più rilevante
-non è la sola riduzione di accuracy, ma l'aumento dei falsi negativi: in uno
-scenario di triage, un'immagine \texttt{weapon} non segnalata dal modulo
+Nel complesso, Magnet.AI mostra una buona accuratezza complessiva in condizioni
+clean, pari a 0.950, con un \gls{fpr} contenuto pari a 0.030; tuttavia, il
+\gls{fnr} pari a 0.070 indica che anche in assenza di perturbazioni una quota non
+trascurabile di immagini \texttt{weapon} non viene segnalata.
+Tale valore aumenta in presenza di alcune perturbazioni adversariali, con un
+impatto operativo rilevante per il triage. In questa prospettiva, il dato più
+rilevante non è la sola riduzione di accuracy, ma l'aumento dei falsi negativi:
+in uno scenario di triage, un'immagine \texttt{weapon} non segnalata dal modulo
 automatico può ricevere minore priorità di revisione umana.
 
 Questi risultati devono essere interpretati come indicatori di affidabilità
@@ -1134,13 +1153,16 @@ accesso alla logica classificatoria interna del sistema.
 
 Per valutare la sensibilità del comportamento operativo alla soglia di recupero,
 sono state considerate tre configurazioni del parametro \texttt{Distance limit}.
+
+
 La configurazione \texttt{D20} rappresenta un'impostazione restrittiva, orientata
-a ridurre falsi positivi e recuperi semanticamente deboli. \texttt{D50} rappresenta, nel contesto sperimentale considerato, una
-configurazione intermedia orientata al triage, poiché mantiene un recall elevato
-sulla classe \texttt{weapon} senza produrre il livello di rumore osservato in
-\texttt{D80}. La configurazione \texttt{D80} rappresenta invece un'impostazione permissiva,
-orientata a massimizzare il recall ma esposta a un aumento rilevante dei falsi
-positivi.
+a ridurre falsi positivi e recuperi semanticamente deboli. \texttt{D50}
+rappresenta, nel contesto sperimentale considerato, una configurazione
+intermedia orientata al triage. La configurazione \texttt{D80} rappresenta
+invece un'impostazione permissiva, orientata a massimizzare il recall ma esposta
+a un aumento rilevante dei falsi positivi.
+
+
 
 \begin{table}[H]
 \centering
@@ -1261,7 +1283,7 @@ operativo prodotto dai tool commerciali.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.84\textwidth]{images/fig_forensic_tools_attack_family_fpr.pdf}
-\caption{\gls{fpr} aggregato dei tool commerciali per famiglia di perturbazione.}
+\caption{\gls{fpr} aggregato dei tool commerciali per famiglia di perturbazione, includendo trasformazioni anti-forensi e perturbazioni adversariali. Excire Photo AI è riportato nelle tre configurazioni operative \texttt{D20}, \texttt{D50} e \texttt{D80}.}
 \label{fig:results-forensic-tools-attack-family-fpr}
 \end{figure}
 
@@ -1307,7 +1329,7 @@ visivo alla lettura del comportamento anomalo osservato su \gls{sigmazero}.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.88\textwidth]{images/fig_forensic_tools_adversarial_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop dei tool commerciali black-box sotto perturbazioni adversariali.}
+\caption{Accuracy drop dei tool commerciali black-box sotto perturbazioni adversariali. La figura evidenzia in particolare il comportamento anomalo di Excire Photo AI nelle configurazioni \texttt{D50} e \texttt{D80} in corrispondenza di \gls{sigmazero}.}
 \label{fig:results-forensic-tools-adversarial-drop}
 \end{figure}
 
@@ -1426,10 +1448,11 @@ mediare con \texttt{D50}, poiché rappresentano configurazioni operative diverse
 \texttt{D20} descrive un uso restrittivo del semantic retrieval, adatto a
 contenere falsi positivi e segnalazioni \gls{ood}; \texttt{D80} descrive invece
 un uso permissivo, utile quando l'obiettivo prioritario è massimizzare il recall,
-ma con un aumento rilevante del rumore operativo. La configurazione
-\texttt{D50} viene quindi adottata come riferimento principale per il confronto
-con Magnet.AI, mentre \texttt{D20} e \texttt{D80} sono interpretate come
-sensitivity analysis.
+ma con un aumento rilevante del rumore operativo. La scelta di \texttt{D50} come riferimento comparativo deriva dal profilo
+intermedio osservato nella sensitivity analysis: rispetto a \texttt{D20}, riduce
+il rischio di mancata segnalazione della classe \texttt{weapon}; rispetto a
+\texttt{D80}, limita il rumore operativo e il weapon flag rate sugli input
+\gls{ood}.
 
 Una divergenza rilevante emerge nel confronto tra \gls{clip}, i modelli
 supervisionati e i tool commerciali. \gls{clip} mostra un weapon rate su
@@ -1794,12 +1817,12 @@ ground truth del bundle. La selezione delle perturbazioni, inoltre, non mira a
 coprire in modo esaustivo l'intero spazio dell'\gls{aml}, ma a costruire uno
 stress test operativo coerente con la finalità forense della tesi.
 
-I risultati di \gls{fairlab} mostrano che sistemi con accuracy clean elevata,
-come EfficientNet-B0 e ResNet18, possono produrre un incremento significativo
-dei falsi negativi in presenza di perturbazioni adversariali, e che tool
-commerciali con buona baseline possono comunque segnalare come rilevanti immagini
-fuori distribuzione o produrre profili di errore molto diversi al variare delle
-soglie operative. Questi valori indicano che l'affidabilità operativa non può
+Nel contesto sperimentale di \gls{fairlab}, i risultati mostrano che sistemi con
+accuracy clean elevata, come EfficientNet-B0 e ResNet18, possono produrre un
+incremento significativo dei falsi negativi in presenza di specifiche
+perturbazioni adversariali, e che tool commerciali con buona baseline possono
+comunque segnalare come rilevanti immagini fuori distribuzione o produrre profili
+di errore sostanzialmente diversi al variare delle soglie operative adottate. Questi valori indicano che l'affidabilità operativa non può
 essere dedotta dalla sola performance nominale su dati clean, ma richiede
 validazione sperimentale esplicita nelle condizioni attese di utilizzo. In
 conclusione, l'\gls{ai} può supportare il triage e la prioritizzazione delle
