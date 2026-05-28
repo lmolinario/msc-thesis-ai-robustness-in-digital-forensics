@@ -69,117 +69,67 @@ di valutazione al momento della redazione.
 
 \begin{table}[H]
 \centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
 \caption{Stato corrente del workflow di valutazione sperimentale.}
 \label{tab:results-evaluation-status}
-\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth} p{0.22\textwidth} X@{}}
 \toprule
-\textbf{Componente} & \textbf{Stato} & \textbf{Note} \\
+\textbf{Componente} & \textbf{Stato} & \textbf{Sintesi operativa} \\
 \midrule
 
-Dataset finale
-&
-\textbf{Congelato}
-&
-1500 immagini suddivise in tre classi: 500 \texttt{weapon}, 500
-\texttt{non\_weapon} e 500 \texttt{ood}. \\
+Dataset finale &
+\textbf{Congelato} &
+1500 immagini bilanciate: 500 \texttt{weapon}, 500 \texttt{non\_weapon} e 500 \texttt{ood}. \\
 
-Subset binario
-&
-\textbf{Congelato}
-&
-1000 immagini, composte da 500 campioni \texttt{weapon} e 500 campioni
-\texttt{non\_weapon}. Il subset è utilizzato per gli split clean, per gli
-attacchi adversariali e per le trasformazioni anti-forensi. \\
+Subset binario &
+\textbf{Congelato} &
+1000 immagini: 500 \texttt{weapon} e 500 \texttt{non\_weapon}; usato per clean, adversarial e anti-forensic evaluation. \\
 
-Split clean e OOD
-&
-\textbf{Completati}
-&
-Sono stati generati cinque fold binari clean e un insieme di valutazione
-out-of-distribution separato, entrambi derivati dai manifest congelati. \\
+Split clean e OOD &
+\textbf{Completati} &
+Cinque fold binari clean e un insieme \gls{ood} separato, derivati dai manifest congelati. \\
 
-Addestramento dei modelli proxy
-&
-\textbf{Completato}
-&
-Sono stati prodotti checkpoint fold-aware per \texttt{efficientnet\_b0},
-\texttt{resnet18} e \texttt{clip}. \\
+Addestramento proxy &
+\textbf{Completato} &
+Checkpoint fold-aware prodotti per \texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}. \\
 
-Valutazione dei modelli proxy
-&
-\textbf{Completata}
-&
-Il livello proxy è stato valutato su input clean, OOD, adversariali e
-anti-forensi, producendo output a livello di predizione e tabelle metriche
-finali. \\
+Valutazione proxy &
+\textbf{Completata} &
+Valutazione su input clean, \gls{ood}, adversariali e anti-forensi. \\
 
-Attacchi adversariali
-&
-\textbf{Generati}
-&
-Sono state generate cinque famiglie di perturbazioni: \texttt{fgsm},
-\texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e
-\texttt{color\_shift}. \\
+Attacchi adversariali &
+\textbf{Generati} &
+\texttt{fgsm}, \texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel}, \texttt{color\_shift}. \\
 
-Trasformazioni anti-forensi
-&
-\textbf{Generate}
-&
-Sono state generate cinque trasformazioni model-agnostic:
-\texttt{jpeg\_recompression}, \texttt{resample\_resize},
-\texttt{gaussian\_blur}, \texttt{histogram\_modification} e
-\texttt{contrast\_stretching}. \\
+Trasformazioni anti-forensi &
+\textbf{Generate} &
+\texttt{jpeg\_recompression}, \texttt{resample\_resize}, \texttt{gaussian\_blur}, \texttt{histogram\_modification}, \texttt{contrast\_stretching}. \\
 
-Forensic evaluation bundle
-&
-\textbf{Generato}
-&
-11500 file predisposti per la valutazione black-box degli strumenti forensi,
-includendo campioni clean, OOD, adversariali e anti-forensi. \\
+Forensic evaluation bundle &
+\textbf{Generato} &
+11\,500 file predisposti per la valutazione black-box dei tool forensi. \\
 
-Magnet AXIOM / Magnet.AI
-&
-\textbf{Normalizzato / consolidato}
-&
-Bundle processato ed export normalizzato rispetto alla ground truth
-sperimentale. Il tag \texttt{Possible weapons} è stato ricondotto
-operativamente alla predizione positiva per la classe \texttt{weapon}. \\
+Magnet AXIOM / Magnet.AI &
+\textbf{Consolidato} &
+Bundle processato ed export normalizzato; \texttt{Possible weapons} ricondotto alla predizione positiva \texttt{weapon}. \\
 
-X-Ways Forensics / Excire Photo AI
-&
-\textbf{Normalizzato / consolidato}
-&
-Excire Photo AI è stato valutato come classificatore black-box basato su
-semantic retrieval, non come classificatore nativo
-\texttt{weapon}/\texttt{non\_weapon}. Sono state considerate tre configurazioni
-operative del parametro \texttt{Distance limit}: \texttt{D20}, \texttt{D50} e
-\texttt{D80}. \\
+X-Ways / Excire Photo AI &
+\textbf{Consolidato} &
+Valutato come semantic retrieval black-box con tre configurazioni: \texttt{D20}, \texttt{D50}, \texttt{D80}. \\
 
-Cellebrite UFED
-&
-\textbf{Non incluso nella comparazione quantitativa}
-&
-Lo strumento rimane rilevante nella pipeline operativo-forense, ma non è incluso
-nella comparazione quantitativa finale in assenza di export normalizzati,
-riproducibili e direttamente associabili al forensic evaluation bundle. La sua
-rilevanza è pertanto discussa sul piano metodologico e procedurale. \\
+Cellebrite UFED &
+\textbf{Fuori confronto quantitativo} &
+Rilevante nella pipeline operativo-forense, ma privo di export normalizzati comparabili per il bundle. \\
 
-Oxygen Forensic Detective
-&
-\textbf{Non incluso nella comparazione quantitativa}
-&
-Lo strumento rimane rilevante nella pipeline operativo-forense, ma la sua
-inclusione quantitativa richiederebbe output strutturati, normalizzabili e
-riconducibili in modo univoco alla ground truth sperimentale. \\
+Oxygen Forensic Detective &
+\textbf{Fuori confronto quantitativo} &
+Non incluso nella comparazione quantitativa per assenza di output strutturati e direttamente mappabili alla ground truth. \\
 
-Casi di studio di explainability
-&
-\textbf{Completati / integrati}
-&
-Le attribution map basate su Integrated Gradients sono state generate e
-selezionate per cinque casi rappresentativi di EfficientNet-B0. L'analisi ha
-valore qualitativo e diagnostico e non costituisce una metrica primaria di
-valutazione. \\
+Explainability &
+\textbf{Integrata} &
+Casi rappresentativi generati con \gls{ig}; analisi qualitativa e diagnostica, non metrica primaria. \\
 
 \bottomrule
 \end{tabularx}
@@ -237,7 +187,7 @@ immagini, con 1000 file generati per ciascuna trasformazione. \\
 \midrule
 \textbf{Totale}
 &
-\textbf{11500}
+\textbf{11\,500}
 &
 Forensic evaluation bundle completo, predisposto per la valutazione dei modelli
 proxy e per il processamento mediante strumenti forensi black-box. \\
@@ -467,8 +417,6 @@ ResNet18        & 2500 & 1094 & 1406 & 0.438 & 0.890 & 0.647 \\
 \textit{W-rate} indica la quota di campioni \gls{ood} classificati come
 \texttt{weapon}; \textit{Conf.} indica la confidenza media; \textit{HC-rate}
 indica la quota di predizioni con confidenza almeno pari a 0.9.
-Il totale di 2500 predizioni per modello è ottenuto valutando le 500 immagini
-\gls{ood} attraverso ciascuno dei cinque checkpoint fold-aware.
 \end{table}
 
 
@@ -734,7 +682,7 @@ A differenza della composizione generale del corpus sperimentale riportata nella
 Sezione~\ref{sec:results-status}, la Tabella~\ref{tab:results-bundle-operational-layout}
 descrive il bundle dal punto di vista operativo, distinguendo tra contenuto
 sottoposto ai tool, naming cieco e ruolo dei metadati nella fase di audit. Il
-totale è pari a 11500 file, comprendenti 1000 campioni clean, 500 campioni
+totale è pari a 11\,500 file, comprendenti 1000 campioni clean, 500 campioni
 \gls{ood}, 5000 campioni adversariali e 5000 campioni anti-forensi.
 
 \begin{table}[H]
@@ -774,7 +722,7 @@ Registra trasformazione applicata, immagine sorgente e mapping verso il
 campione clean corrispondente. \\
 \midrule
 \textbf{Totale} &
-\textbf{11500} &
+\textbf{11\,500} &
 \texttt{bundle\_*.jpg} &
 Abilita matching, normalizzazione post-export e audit hash-based. \\
 \bottomrule
@@ -880,61 +828,39 @@ configurazione permissiva ad alto richiamo.
 
 \begin{table}[H]
 \centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
 \caption{Stato della valutazione black-box degli strumenti forensi commerciali.}
 \label{tab:results-commercial-tool-status}
-\small
-\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.26\textwidth} p{0.20\textwidth} X@{}}
 \toprule
-\textbf{Tool} & \textbf{Stato} & \textbf{Implicazione metodologica} \\
+\textbf{Tool / configurazione} & \textbf{Stato} & \textbf{Implicazione metodologica} \\
 \midrule
 
-Magnet AXIOM / Magnet.AI
-&
-Consolidato
-&
-Il forensic evaluation bundle è stato processato e l'export è stato normalizzato
-rispetto alla ground truth sperimentale. Il tag \texttt{Possible weapons} è
-utilizzato come segnale operativo positivo per la classe \texttt{weapon}. \\
+Magnet.AI &
+Consolidato &
+Export normalizzato rispetto alla ground truth; il tag \texttt{Possible weapons} è usato come segnale operativo positivo per \texttt{weapon}. \\
 
-X-Ways Forensics / Excire Photo AI -- \texttt{D20}
-&
-Consolidato
-&
-Configurazione restrittiva di semantic retrieval. Riduce i falsi positivi e il
-weapon flag rate sugli \gls{ood}, ma aumenta il rischio di falsi negativi sulla
-classe \texttt{weapon}. \\
+Excire \texttt{D20} &
+Consolidato &
+Configurazione restrittiva: riduce falsi positivi e segnalazioni \gls{ood}, ma aumenta il rischio di falsi negativi. \\
 
-X-Ways Forensics / Excire Photo AI -- \texttt{D50}
-&
-Consolidato
-&
-Configurazione intermedia, utilizzata come setting principale per il confronto
-operativo. Presenta, nel contesto sperimentale considerato, un profilo
-equilibrato tra alto richiamo sulla classe \texttt{weapon} e controllo ancora
-gestibile dei falsi positivi. \\
+Excire \texttt{D50} &
+Consolidato &
+Configurazione intermedia adottata come riferimento principale per il confronto operativo. \\
 
-X-Ways Forensics / Excire Photo AI -- \texttt{D80}
-&
-Consolidato
-&
-Configurazione permissiva. Massimizza il recall sulla classe \texttt{weapon}, ma
-aumenta sensibilmente il \gls{fpr} e il weapon flag rate sugli input
-\gls{ood}. \\
+Excire \texttt{D80} &
+Consolidato &
+Configurazione permissiva: massimizza il recall, ma aumenta \gls{fpr} e weapon flag rate sugli input \gls{ood}. \\
 
-Cellebrite UFED
-&
-Non incluso nella comparazione quantitativa finale
-&
-Lo strumento rimane rilevante nel workflow forense, ma non sono disponibili
-output normalizzati e comparabili per la classificazione automatizzata di
-immagini rispetto al forensic evaluation bundle. \\
+Cellebrite UFED &
+Fuori confronto quantitativo &
+Rilevante nel workflow forense, ma non valutato quantitativamente per assenza di export normalizzati comparabili. \\
 
-Oxygen Forensic Detective
-&
-Non incluso nella comparazione quantitativa finale
-&
-La valutazione quantitativa richiede moduli automatici, export strutturati e
-mapping verificabile rispetto alla ground truth sperimentale. \\
+Oxygen Forensic Detective &
+Fuori confronto quantitativo &
+Non incluso nella comparazione quantitativa finale per assenza di output strutturati e mappabili alla ground truth. \\
 
 \bottomrule
 \end{tabularx}
@@ -1195,43 +1121,56 @@ Per valutare la sensibilità del comportamento operativo alla soglia di recupero
 sono state considerate tre configurazioni del parametro \texttt{Distance limit}.
 La configurazione \texttt{D20} rappresenta un'impostazione restrittiva, orientata
 a ridurre falsi positivi e recuperi semanticamente deboli. La configurazione
-\texttt{D50} è adottata come setting principale di questa valutazione perché
-presenta, nel contesto sperimentale considerato, il profilo di compromesso più
-equilibrato tra recall della classe \texttt{weapon} e controllo dei falsi
-positivi. La scelta della soglia operativa ottimale rimane tuttavia dipendente
-dal contesto investigativo specifico, dai requisiti di auditabilità e dalla
-tolleranza al rumore nel workflow di revisione. La
+\texttt{D50} rappresenta il setting principale della valutazione, poiché bilancia
+richiamo della classe \texttt{weapon} e controllo del rumore operativo. La
 configurazione \texttt{D80} rappresenta invece un'impostazione permissiva,
 orientata a massimizzare il recall ma esposta a un aumento rilevante dei falsi
 positivi.
 
 \begin{table}[H]
 \centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
 \caption{Sensitivity analysis di Excire Photo AI rispetto al parametro \texttt{Distance limit}.}
 \label{tab:results-excire-sensitivity}
-\small
-\setlength{\tabcolsep}{5pt}
-\begin{tabular}{@{}l r r r r r@{}}
+\begin{tabularx}{0.95\textwidth}{@{}l r r r r r X@{}}
 \toprule
 \textbf{Setting} &
-\textbf{Clean acc.} &
-\textbf{Clean recall} &
-\textbf{Clean \gls{fnr}} &
-\textbf{Clean \gls{fpr}} &
-\textbf{OOD weapon rate} \\
+\textbf{Acc.} &
+\textbf{Recall} &
+\textbf{\gls{fnr}} &
+\textbf{\gls{fpr}} &
+\textbf{OOD rate} &
+\textbf{Profilo operativo} \\
 \midrule
 
-\texttt{D20} & 0.927 & 0.880 & 0.120 & 0.026 & 0.238 \\
-\multicolumn{6}{@{}p{\linewidth}@{}}{\footnotesize\textit{Configurazione restrittiva}: limita falsi positivi e segnalazioni \gls{ood}, ma incrementa il rischio di mancata segnalazione di immagini \texttt{weapon}.} \\[4pt]
+\texttt{D20} &
+0.927 &
+0.880 &
+0.120 &
+0.026 &
+0.238 &
+Restrittivo: basso rumore, maggiore rischio di falsi negativi. \\
 
-\texttt{D50} & 0.944 & 0.958 & 0.042 & 0.070 & 0.340 \\
-\multicolumn{6}{@{}p{\linewidth}@{}}{\footnotesize\textit{Configurazione intermedia}: rappresenta, nel contesto sperimentale considerato, un compromesso equilibrato tra recall della classe \texttt{weapon} e controllo dei falsi positivi.} \\[4pt]
+\texttt{D50} &
+0.944 &
+0.958 &
+0.042 &
+0.070 &
+0.340 &
+Intermedio: compromesso equilibrato nel contesto sperimentale. \\
 
-\texttt{D80} & 0.915 & 0.986 & 0.014 & 0.156 & 0.522 \\
-\multicolumn{6}{@{}p{\linewidth}@{}}{\footnotesize\textit{Configurazione permissiva}: massimizza il recall, ma produce un aumento marcato dei falsi positivi e delle segnalazioni su immagini fuori distribuzione.} \\
+\texttt{D80} &
+0.915 &
+0.986 &
+0.014 &
+0.156 &
+0.522 &
+Permissivo: alto recall, maggiore rumore operativo. \\
 
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 Il confronto tra le tre configurazioni conferma che il parametro
@@ -1278,8 +1217,8 @@ adversariali. Anche in questo caso, tuttavia, il profilo operativo cambia in mod
 sostanziale al variare della soglia: \texttt{D20} mantiene il \gls{fpr} più
 basso ma presenta il \gls{fnr} più elevato, \texttt{D80} riduce quasi
 completamente i falsi negativi ma incrementa il rumore operativo, mentre
-\texttt{D50} mantiene un compromesso più equilibrato tra richiamo e selettività
-nel contesto sperimentale considerato.
+\texttt{D50} mantiene un compromesso più equilibrato tra richiamo e
+selettività nel contesto sperimentale considerato.
 
 Un caso particolarmente rilevante è rappresentato da \gls{sigmazero}. A
 differenza di una semplice dinamica di evasione, in cui l'effetto principale
