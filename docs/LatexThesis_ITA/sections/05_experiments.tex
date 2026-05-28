@@ -377,7 +377,7 @@ realistico: in un workflow investigativo, immagini ambigue o non perfettamente
 aderenti alle classi del modello possono essere comunque sottoposte ad analisi
 automatica \cite{hendrycks2017baseline,liang2018odin,fort2021exploring}.
 
-Le metriche sono aggregate su 2500 predizioni, ottenute valutando le 500 immagini
+Le metriche sono aggregate su 2\,500 predizioni, ottenute valutando le 500 immagini
 \gls{ood} attraverso i cinque checkpoint fold-aware di ciascun modello. Questa
 scelta mantiene la coerenza con la strategia di valutazione adottata per il
 subset binario, pur preservando la separazione concettuale tra campioni
@@ -404,9 +404,9 @@ confidenza almeno pari a 0.9.
 \textbf{Conf.} &
 \textbf{HC-rate} \\
 \midrule
-EfficientNet-B0 & 2500 & 924  & 1576 & 0.370 & 0.850 & 0.501 \\
-ResNet18        & 2500 & 1094 & 1406 & 0.438 & 0.890 & 0.647 \\
-\acrshort{clip} & 2500 & 2089 & 411  & 0.836 & 0.536 & 0.000 \\
+EfficientNet-B0 & 2\,500 & 924  & 1576 & 0.370 & 0.850 & 0.501 \\
+ResNet18        & 2\,500 & 1094 & 1406 & 0.438 & 0.890 & 0.647 \\
+\acrshort{clip} & 2\,500 & 2089 & 411  & 0.836 & 0.536 & 0.000 \\
 \bottomrule
 \end{tabular}
 
@@ -416,7 +416,8 @@ ResNet18        & 2500 & 1094 & 1406 & 0.438 & 0.890 & 0.647 \\
 \textit{Pred. nw} indica le predizioni \texttt{non\_weapon};
 \textit{W-rate} indica la quota di campioni \gls{ood} classificati come
 \texttt{weapon}; \textit{Conf.} indica la confidenza media; \textit{HC-rate}
-indica la quota di predizioni con confidenza almeno pari a 0.9.
+indica la quota di predizioni con confidenza almeno pari a 0.9. Il totale di 2\,500 predizioni per modello è ottenuto valutando le 500 immagini
+\gls{ood} attraverso ciascuno dei cinque checkpoint fold-aware.
 \end{table}
 
 
@@ -866,6 +867,20 @@ Non incluso nella comparazione quantitativa finale per assenza di output struttu
 \end{tabularx}
 \end{table}
 
+La Figura~\ref{fig:results-forensic-tools-clean-comparison} visualizza il
+confronto delle metriche clean tra Magnet.AI ed Excire Photo AI, evidenziando il
+diverso bilanciamento tra recall, falsi negativi e falsi positivi nelle tre
+configurazioni di Excire.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{images/fig_forensic_tools_clean_metrics_comparison.pdf}
+\caption{Confronto delle metriche clean per Magnet.AI ed Excire Photo AI nelle configurazioni \texttt{D20}, \texttt{D50} e \texttt{D80}.}
+\label{fig:results-forensic-tools-clean-comparison}
+\end{figure}
+
+
+
 Per Magnet AXIOM/Magnet.AI, la normalizzazione è stata condotta sul run
 \texttt{FAIRLAB\_AXIOM\_RUN\_02}, selezionato come esportazione di riferimento
 per la completezza e la consistenza degli output prodotti. Nel run selezionato
@@ -1120,10 +1135,10 @@ accesso alla logica classificatoria interna del sistema.
 Per valutare la sensibilità del comportamento operativo alla soglia di recupero,
 sono state considerate tre configurazioni del parametro \texttt{Distance limit}.
 La configurazione \texttt{D20} rappresenta un'impostazione restrittiva, orientata
-a ridurre falsi positivi e recuperi semanticamente deboli. La configurazione
-\texttt{D50} rappresenta il setting principale della valutazione, poiché bilancia
-richiamo della classe \texttt{weapon} e controllo del rumore operativo. La
-configurazione \texttt{D80} rappresenta invece un'impostazione permissiva,
+a ridurre falsi positivi e recuperi semanticamente deboli. \texttt{D50} rappresenta, nel contesto sperimentale considerato, una
+configurazione intermedia orientata al triage, poiché mantiene un recall elevato
+sulla classe \texttt{weapon} senza produrre il livello di rumore osservato in
+\texttt{D80}. La configurazione \texttt{D80} rappresenta invece un'impostazione permissiva,
 orientata a massimizzare il recall ma esposta a un aumento rilevante dei falsi
 positivi.
 
@@ -1177,12 +1192,29 @@ Il confronto tra le tre configurazioni conferma che il parametro
 \texttt{Distance limit} non agisce come una semplice variabile tecnica, ma come
 una soglia operativa che modifica il profilo di rischio del tool. \texttt{D20}
 è più conservativo e riduce il carico di revisione derivante da falsi positivi,
-ma può non recuperare contenuti \texttt{weapon} rilevanti. \texttt{D50} appare
-come la configurazione più equilibrata per un workflow di triage, poiché mantiene
-un recall elevato sulla classe \texttt{weapon} senza produrre il livello di
-rumore osservato in \texttt{D80}. Quest'ultimo, pur riducendo drasticamente i
+ma può non recuperare contenuti \texttt{weapon} rilevanti. \texttt{D50} rappresenta, nel contesto sperimentale considerato, una
+configurazione intermedia orientata al triage, poiché mantiene un recall elevato
+sulla classe \texttt{weapon} senza produrre il livello di rumore osservato in
+\texttt{D80}. Quest'ultimo, pur riducendo drasticamente i
 falsi negativi, incrementa in modo sostanziale i falsi positivi e segnala come
 rilevante oltre la metà degli input \gls{ood}.
+
+
+
+La Figura~\ref{fig:results-forensic-tools-ood-weapon-flag-rate} mostra
+visivamente come il weapon flag rate sugli input \gls{ood} vari al variare della
+configurazione operativa, confermando che il parametro \texttt{Distance limit}
+incide direttamente sul profilo di rischio del sistema.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{images/fig_forensic_tools_ood_weapon_flag_rate.pdf}
+\caption{Weapon flag rate sugli input \gls{ood} per Magnet.AI ed Excire Photo AI nelle configurazioni \texttt{D20}, \texttt{D50} e \texttt{D80}.}
+\label{fig:results-forensic-tools-ood-weapon-flag-rate}
+\end{figure}
+
+
 
 \begin{table}[H]
 \centering
@@ -1217,8 +1249,23 @@ adversariali. Anche in questo caso, tuttavia, il profilo operativo cambia in mod
 sostanziale al variare della soglia: \texttt{D20} mantiene il \gls{fpr} più
 basso ma presenta il \gls{fnr} più elevato, \texttt{D80} riduce quasi
 completamente i falsi negativi ma incrementa il rumore operativo, mentre
-\texttt{D50} mantiene un compromesso più equilibrato tra richiamo e
-selettività nel contesto sperimentale considerato.
+\texttt{D50} mantiene un compromesso intermedio tra richiamo e selettività nel
+contesto sperimentale considerato.
+
+La Figura~\ref{fig:results-forensic-tools-attack-family-fpr} sintetizza il
+\gls{fpr} aggregato per famiglia di perturbazione, rendendo più evidente il
+diverso contributo delle condizioni adversariali e anti-forensi al rumore
+operativo prodotto dai tool commerciali.
+
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.84\textwidth]{images/fig_forensic_tools_attack_family_fpr.pdf}
+\caption{\gls{fpr} aggregato dei tool commerciali per famiglia di perturbazione.}
+\label{fig:results-forensic-tools-attack-family-fpr}
+\end{figure}
+
+
 
 Un caso particolarmente rilevante è rappresentato da \gls{sigmazero}. A
 differenza di una semplice dinamica di evasione, in cui l'effetto principale
@@ -1252,6 +1299,18 @@ Excire \texttt{D80} & 0.657 & 0.976 & 0.024 & 0.662 & 12 & 331 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+La Figura~\ref{fig:results-forensic-tools-adversarial-drop} riporta l'accuracy
+drop dei tool commerciali sotto perturbazioni adversariali, fornendo un supporto
+visivo alla lettura del comportamento anomalo osservato su \gls{sigmazero}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{images/fig_forensic_tools_adversarial_accuracy_drop_heatmap.pdf}
+\caption{Accuracy drop dei tool commerciali black-box sotto perturbazioni adversariali.}
+\label{fig:results-forensic-tools-adversarial-drop}
+\end{figure}
+
 
 Questo comportamento è operativo-forensicamente significativo. In un workflow di
 triage, una configurazione permissiva può sembrare preferibile perché riduce il
