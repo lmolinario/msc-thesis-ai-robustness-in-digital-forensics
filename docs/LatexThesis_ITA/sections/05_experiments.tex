@@ -889,9 +889,10 @@ configurazioni di Excire.
 Per Magnet AXIOM/Magnet.AI, la normalizzazione è stata condotta sul run
 \texttt{FAIRLAB\_AXIOM\_RUN\_02}, selezionato come esportazione di riferimento
 per la completezza e la consistenza degli output prodotti. Nel run selezionato
-sono stati individuati cinque file di export complessivi, di cui un file
-predittivo principale utilizzato per ricostruire le segnalazioni
-\texttt{Possible weapons}.
+sono stati individuati cinque file di export complessivi; ai fini della
+valutazione quantitativa, la ricostruzione delle segnalazioni
+\texttt{Possible weapons} è stata effettuata utilizzando il file contenente
+l'output predittivo rilevante per il task sperimentale.
 
 Per X-Ways Forensics/Excire Photo AI, la normalizzazione è stata condotta su tre
 run distinti, corrispondenti alle configurazioni \texttt{D20}, \texttt{D50} e
@@ -1029,8 +1030,7 @@ Tra le condizioni perturbate, gli attacchi adversariali producono una
 degradazione più marcata rispetto alle trasformazioni anti-forensi: considerando
 l'insieme completo delle metriche normalizzate per famiglia di perturbazione, il
 \gls{fnr} medio adversariale è pari a 0.116, contro 0.087 per le trasformazioni
-anti-forensi. La Tabella~\ref{tab:results-magnet-attack-metrics} riporta alcune
-condizioni rappresentative di tale comportamento.
+anti-forensi.
 
 Questo risultato conferma che, nel caso di Magnet.AI, le
 perturbazioni progettate per interferire con il comportamento del classificatore
@@ -1052,18 +1052,25 @@ senza indicazione quantitativa del grado di certezza. Questa caratteristica
 preclude il confronto diretto con le distribuzioni di confidenza dei modelli
 proxy e costituisce un ulteriore limite alla tracciabilità dell'output.
 
-La Tabella~\ref{tab:results-magnet-attack-metrics} riporta le condizioni più
-rilevanti tra attacchi adversariali e trasformazioni anti-forensi. FGSM risulta
-la condizione più critica per Magnet.AI, con accuracy pari a 0.867, recall
-\texttt{weapon} pari a 0.808 e \gls{fnr} pari a 0.192.
+La Tabella~\ref{tab:results-magnet-attack-metrics} riporta il comportamento di
+Magnet.AI rispetto a tutte le perturbazioni considerate nel forensic evaluation
+bundle. Tra gli attacchi adversariali, \gls{fgsm} costituisce la condizione più
+critica per il tool, con accuracy pari a 0.867, recall sulla classe
+\texttt{weapon} pari a 0.808 e \gls{fnr} pari a 0.192. Tra le trasformazioni
+anti-forensi, \gls{gaussianblur} produce il valore di \gls{fnr} più elevato,
+pari a 0.120.
+
 
 \begin{table}[H]
 \centering
-\caption{Prestazioni di Magnet.AI nelle principali condizioni perturbate.}
+\caption{Prestazioni di Magnet.AI nelle condizioni adversariali e anti-forensi.}
 \label{tab:results-magnet-attack-metrics}
-\small
-\begin{tabular}{l r r r r r r}
+\scriptsize
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}l l r r r r r r@{}}
 \toprule
+\textbf{Famiglia} &
 \textbf{Condizione} &
 \textbf{Accuracy} &
 \textbf{Recall} &
@@ -1073,7 +1080,17 @@ la condizione più critica per Magnet.AI, con accuracy pari a 0.867, recall
 \textbf{FP} \\
 \midrule
 
-FGSM &
+Adversarial &
+\gls{colorshift} &
+0.951 &
+0.934 &
+0.066 &
+0.032 &
+33 &
+16 \\
+
+Adversarial &
+\gls{fgsm} &
 0.867 &
 0.808 &
 0.192 &
@@ -1081,7 +1098,17 @@ FGSM &
 96 &
 37 \\
 
-Sigma Zero &
+Adversarial &
+\gls{onepixel} &
+0.950 &
+0.930 &
+0.070 &
+0.030 &
+35 &
+15 \\
+
+Adversarial &
+\gls{sigmazero} &
 0.916 &
 0.856 &
 0.144 &
@@ -1089,7 +1116,8 @@ Sigma Zero &
 72 &
 12 \\
 
-SuperDeepFool &
+Adversarial &
+\gls{superdeepfool} &
 0.932 &
 0.894 &
 0.106 &
@@ -1097,7 +1125,19 @@ SuperDeepFool &
 53 &
 15 \\
 
-Gaussian Blur &
+\midrule
+
+Anti-forensic &
+\gls{contraststretching} &
+0.951 &
+0.930 &
+0.070 &
+0.028 &
+35 &
+14 \\
+
+Anti-forensic &
+\gls{gaussianblur} &
 0.927 &
 0.880 &
 0.120 &
@@ -1105,13 +1145,32 @@ Gaussian Blur &
 60 &
 13 \\
 
-Histogram Modification &
+Anti-forensic &
+\gls{histogrammodification} &
 0.936 &
 0.920 &
 0.080 &
 0.048 &
 40 &
 24 \\
+
+Anti-forensic &
+\gls{jpegrecompression} &
+0.944 &
+0.928 &
+0.072 &
+0.040 &
+36 &
+20 \\
+
+Anti-forensic &
+\gls{resampleresize} &
+0.943 &
+0.906 &
+0.094 &
+0.020 &
+47 &
+10 \\
 
 \bottomrule
 \end{tabular}
@@ -1155,12 +1214,12 @@ Per valutare la sensibilità del comportamento operativo alla soglia di recupero
 sono state considerate tre configurazioni del parametro \texttt{Distance limit}.
 
 
-La configurazione \texttt{D20} rappresenta un'impostazione restrittiva, orientata
-a ridurre falsi positivi e recuperi semanticamente deboli. \texttt{D50}
-rappresenta, nel contesto sperimentale considerato, una configurazione
-intermedia orientata al triage. La configurazione \texttt{D80} rappresenta
-invece un'impostazione permissiva, orientata a massimizzare il recall ma esposta
-a un aumento rilevante dei falsi positivi.
+La configurazione \texttt{D20} rappresenta un'impostazione restrittiva,
+orientata a ridurre falsi positivi e recuperi semanticamente deboli;
+\texttt{D50} costituisce la configurazione intermedia della sensitivity
+analysis; \texttt{D80} rappresenta invece un'impostazione permissiva,
+orientata a massimizzare il recall ma esposta a un aumento rilevante dei
+falsi positivi.
 
 
 
@@ -1414,8 +1473,9 @@ ResNet18 &
 0.964 &
 0.030 &
 0.438 &
-Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 in alcuni
-scenari adversariali, pur con vulnerabilità osservabili. \\
+Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 per alcune
+perturbazioni generate nello scenario white-box considerato, pur con
+vulnerabilità osservabili. \\
 
 \gls{clip} &
 0.927 &
