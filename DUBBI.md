@@ -81,7 +81,7 @@ metodologie di acquisizione e analisi, altrimenti chi non conosce la materia non
 
 Nel 3.7 quando dici “ne consegue che la xai, nel contesto forense, deve essere intesa come supporto…” cita il 
 lavoro https://arxiv.org/abs/2510.14638 altrimenti sembra una tua affermazione e a meno che nella parte dei risultati o della 
-metodologia etc non devi fare affermazioni tue
+metodologia etc non devi fare affermazioni tue **(OK)**
 
 3.8 quindi stai creando un framework? Non sono sicura che sia un framework, a meno che mi sia persa qualcosa, qualche contributo 
 principale della tua tesi **(protocollo sperimentale adottato nella tesi.... c'é ne vuole a farlo diventare un Framework...)**

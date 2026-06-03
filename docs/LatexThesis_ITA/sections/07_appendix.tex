@@ -59,13 +59,6 @@ msc-thesis-ai-robustness-in-digital-forensics/
 La directory \codepath{datasets/} contiene la pipeline dati, dalla raccolta iniziale fino al bundle di valutazione forense. La directory \codepath{attacks/} raccoglie gli output delle perturbazioni adversariali e delle trasformazioni anti-forensi, mentre \codepath{models/} contiene gli script e i checkpoint dei modelli proxy. La directory \codepath{evaluation/} raccoglie gli script e gli output della valutazione automatizzata, distinta dalla futura normalizzazione degli output esportati dai tool forensi commerciali. La directory \codepath{explainability/} è riservata alla generazione dei casi studio basati su \gls{xai}, mentre \codepath{docs/LatexThesis_ITA/} contiene la versione LaTeX della tesi.
 
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.28\textwidth]{images/msc_thesis_repo_qr.png}
-    \caption{QR code per l'accesso diretto alla repository GitHub della tesi.}
-    \label{fig:repo-qrcode}
-\end{figure}
-
 \section{Official experimental artifacts}
 \label{app:official-experimental-artifacts}
 
@@ -201,7 +194,7 @@ diventino disponibili export normalizzabili.
 \section{Models, attacks and evaluation outputs}
 \label{app:models-attacks-evaluation-outputs}
 
-La pipeline accademica consolidata utilizza tre modelli proxy:
+Il protocollo sperimentale consolidato utilizza tre modelli proxy:
 \texttt{efficientnet\_b0}, \texttt{resnet18} e \gls{clip}. Tali modelli
 sono impiegati come baseline trasparenti e ispezionabili per osservare in modo
 controllato il comportamento dei classificatori rispetto a input puliti,
@@ -214,12 +207,12 @@ l'analisi nel più ampio contesto della robustezza dei sistemi di \gls{ml} e
 
 Gli attacchi adversariali generati nella pipeline sono \texttt{fgsm}, \texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e \texttt{color\_shift}. Le trasformazioni anti-forensi sono \texttt{jpeg\_recompression}, \texttt{resample\_resize}, \texttt{gaussian\_blur}, \texttt{histogram\_modification} e \texttt{contrast\_stretching}. Questa distinzione è metodologicamente importante: gli attacchi adversariali sono utilizzati per valutare la vulnerabilità decisionale dei modelli, mentre le trasformazioni anti-forensi simulano manipolazioni realistiche del contenuto o del file immagine che possono alterare la visibilità, la qualità o le tracce tecniche dell'artefatto \cite{stamm2010anti,nowroozi2021survey,croce2020robustbench}.
 
-Gli output della valutazione dei modelli proxy sono raccolti nelle directory \codepath{evaluation/proxy_models/} e \codepath{results/metrics/}. Tali output includono predizioni, metriche aggregate, matrici di confusione e confronti tra condizioni pulite, adversariali, anti-forensi e \gls{ood}. La loro funzione non è soltanto quantitativa, ma anche metodologica: essi permettono di confrontare il comportamento controllato dei modelli proxy con quello, successivamente osservato, degli strumenti forensi commerciali.
+Gli output della valutazione dei modelli proxy sono raccolti nelle directory \codepath{evaluation/proxy_models/} e \codepath{results/metrics/}. Tali output includono predizioni, metriche aggregate, matrici di confusione e confronti tra condizioni pulite, adversariali, anti-forensi e \gls{ood}. La loro funzione non è soltanto quantitativa, ma anche metodologica: essi permettono di confrontare il comportamento controllato dei modelli proxy con quello, successivamente osservato, dei software AI-based valutati in modalità \textit{black-box}.
 
 \section{Forensic evaluation bundle}
 \label{app:forensic-evaluation-bundle}
 
-Il bundle di valutazione forense costituisce il ponte operativo tra la pipeline sperimentale locale e la fase di test con strumenti \gls{cots} impiegati in contesti investigativi. Esso è generato dallo script \codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py} e viene salvato nella directory \codepath{datasets/forensic_evaluation_bundle/}. La sua struttura è progettata per separare rigorosamente gli input ciechi destinati ai tool dai metadati contenenti ground truth, provenienza, perturbazioni e mapping tramite hash.
+Il \textit{forensic evaluation bundle} costituisce l'artefatto operativo utilizzato per sottoporre ai software AI-based valutati in modalità \textit{black-box} un insieme comune di immagini senza rivelare preventivamente la relativa ground truth. La sua funzione metodologica è evitare che nomi dei file, struttura delle directory o metadati sperimentali possano influenzare la procedura di analisi o rendere immediatamente riconoscibili la classe reale e la trasformazione applicata. Il bundle è generato dallo script \codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py} e viene salvato nella directory \codepath{datasets/forensic_evaluation_bundle/}; la sua struttura separa rigorosamente gli input ciechi destinati ai software dai metadati necessari alla successiva valutazione mediante mapping basato su hash.
 
 \begin{lstlisting}[caption={Struttura logica del forensic evaluation bundle.}, label={lst:forensic-evaluation-bundle-structure}]
 datasets/forensic_evaluation_bundle/
@@ -232,7 +225,7 @@ datasets/forensic_evaluation_bundle/
   structured_audit_view/
 \end{lstlisting}
 
-Nella valutazione black-box devono essere importati nei tool forensi esclusivamente i file contenuti in \codepath{blind_tool_input/files/}. Le directory \codepath{metadata/} e \codepath{structured_audit_view/} non devono essere importate negli strumenti, poiché contengono informazioni che rivelerebbero classi reali, sorgenti, attacchi, trasformazioni e mapping sperimentali. Questa separazione riduce il rischio di bias indotto dai nomi dei file, dalla struttura delle directory o dalla conoscenza preventiva della ground truth.
+Nella valutazione \textit{black-box} devono essere importati nei software considerati esclusivamente i file contenuti in \codepath{blind_tool_input/files/}. Le directory \codepath{metadata/} e \codepath{structured_audit_view/} non devono essere importate, poiché contengono informazioni che rivelerebbero classi reali, sorgenti, perturbazioni, trasformazioni e mapping sperimentali. Questa separazione riduce il rischio di bias indotto dai nomi dei file, dalla struttura delle directory o dalla conoscenza preventiva della ground truth. Le directory \codepath{metadata/} e \codepath{structured_audit_view/} non devono essere importate negli strumenti, poiché contengono informazioni che rivelerebbero classi reali, sorgenti, attacchi, trasformazioni e mapping sperimentali. Questa separazione riduce il rischio di bias indotto dai nomi dei file, dalla struttura delle directory o dalla conoscenza preventiva della ground truth.
 
 Il bundle corrente comprende immagini pulite, campioni \gls{ood}, perturbazioni adversariali e trasformazioni anti-forensi. Il riepilogo operativo del bundle documenta 11500 file complessivi: 1000 immagini pulite, 500 campioni \gls{ood}, 5000 campioni adversariali e 5000 campioni anti-forensi. I controlli di validazione includono unicità del \texttt{bundle\_id}, unicità degli hash effettivi, corrispondenza degli hash quando presenti nel manifest, pulizia semantica dei percorsi ciechi e separazione dei metadati dagli input destinati ai tool.
 
@@ -263,12 +256,12 @@ La pipeline è implementata prevalentemente in Python e utilizza librerie per la
 \end{tabularx}
 \end{table}
 
-La valutazione operativo-forense richiede inoltre strumenti commerciali quali Magnet AXIOM/Magnet.AI, X-Ways Forensics/Excire, Cellebrite \gls{ufed} e Oxygen Forensic Detective. Diversamente dagli script Python, tali strumenti introducono una componente non completamente automatizzabile, dovuta a licenze, interfacce grafiche, versioni software, configurazioni interne e formati di esportazione. Per questo motivo, la loro valutazione deve essere documentata tramite bundle cieco, istruzioni operative, export normalizzati e mapping hash-based.
+La valutazione operativo-forense comprende inoltre software AI-based osservati in modalità \textit{black-box}: \textit{Magnet AXIOM} con la funzionalità \textit{Magnet.AI}, \textit{Excire Foto 2025} utilizzato come applicazione standalone general-purpose con funzionalità AI, e il componente Cellebrite effettivamente impiegato per l'analisi o la classificazione dei contenuti multimediali. Diversamente dagli script Python e dai modelli proxy, tali software introducono una componente non completamente automatizzabile, dovuta a licenze, interfacce grafiche, versioni software, configurazioni operative e formati di esportazione. Per questo motivo, la loro valutazione è documentata mediante bundle cieco, istruzioni operative, export normalizzati e mapping basato su hash. Diversamente dagli script Python, tali strumenti introducono una componente non completamente automatizzabile, dovuta a licenze, interfacce grafiche, versioni software, configurazioni interne e formati di esportazione. Per questo motivo, la loro valutazione deve essere documentata tramite bundle cieco, istruzioni operative, export normalizzati e mapping hash-based.
 
 \section{Logs, reports and audit outputs}
 \label{app:logs-reports-audit-outputs}
 
-Oltre ai manifest principali, la repository conserva log, riepiloghi e report intermedi utili per verificare le operazioni effettuate. Questi artefatti non hanno tutti lo stesso ruolo: alcuni descrivono lo stato della selezione manuale, altri riepilogo la generazione degli split, altri ancora documentano la composizione del bundle o la valutazione dei modelli proxy. La loro funzione complessiva è rendere ispezionabile il percorso sperimentale e supportare eventuali controlli successivi.
+Oltre ai manifest principali, la repository conserva log, riepiloghi e report intermedi utili per verificare le operazioni effettuate. Questi artefatti non hanno tutti lo stesso ruolo: alcuni descrivono lo stato della selezione manuale, altri riepilogano la generazione degli split, altri ancora documentano la composizione del bundle o la valutazione dei modelli proxy. La loro funzione complessiva è rendere ispezionabile il percorso sperimentale e supportare eventuali controlli successivi.
 
 \begin{lstlisting}[caption={Esempio schematico di output della fase di preparazione del dataset.}, label={lst:dataset-preparation-log}]
 [INFO] Scanning raw dataset sources...
