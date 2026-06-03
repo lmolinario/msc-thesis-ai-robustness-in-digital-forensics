@@ -86,9 +86,9 @@ metodologia etc non devi fare affermazioni tue **(OK)**
 3.8 quindi stai creando un framework? Non sono sicura che sia un framework, a meno che mi sia persa qualcosa, qualche contributo 
 principale della tua tesi **(protocollo sperimentale adottato nella tesi.... c'é ne vuole a farlo diventare un Framework...)**
 
-Figura a.1 NON si mette il QR code, metti direttamente il link…
+Figura a.1 NON si mette il QR code, metti direttamente il link… **(OK)**
 
-Mi sfugge utilità a6
+Mi sfugge utilità a6 **(ora rileggendo mi sembra una ripetizione: ho gia'dichiarato la sua fduzione nella cap4..rivedo tutta l'appendice alla fine della stesura di tutti i capitoli)**
 
 Comunque se mi mandi link di overleaf divento io proprietario così non c’è limite compilazione e i commenti si mettono direttamente lì senza questi passaggi
 
