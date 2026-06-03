@@ -1,6 +1,6 @@
 \chapter{Technical Background Concepts}\label{chap:background}
 
-Questo capitolo introduce i concetti teorici necessari per comprendere la valutazione della robustezza operativa di strumenti \gls{ai}-based impiegati nella classificazione automatizzata di immagini in ambito forense. Il quadro teorico è costruito a partire dai fondamenti della \gls{df} e della prova digitale, per poi esaminare il ruolo dell'\gls{ai} nei workflow forensi, la rilevanza delle immagini come evidenze digitali, i principi di \gls{ml} e \gls{dl} applicati alla computer vision, l'\gls{aml}, le tecniche anti-forensi applicate a contenuti visivi e il ruolo dell'\gls{xai} nella valutazione dell'affidabilità dei modelli. La trattazione mantiene un livello concettuale e definitorio: la descrizione della pipeline sperimentale, dei dataset, dei modelli e degli strumenti utilizzati è demandata ai capitoli metodologici successivi.
+Questo capitolo introduce i concetti teorici necessari per comprendere la valutazione della robustezza operativa di strumenti \gls{ai}-based impiegati nella classificazione automatizzata di immagini in ambito forense. Il quadro teorico è costruito a partire dai fondamenti della \gls{df} e della prova digitale, per poi esaminare il ruolo dell'\gls{ai} nei workflow forensi, la rilevanza delle immagini come evidenze digitali, i principi di \gls{ml} e \gls{dl} applicati alla computer vision, l'\gls{advml}, le tecniche anti-forensi applicate a contenuti visivi e il ruolo dell'\gls{xai} nella valutazione dell'affidabilità dei modelli. La trattazione mantiene un livello concettuale e definitorio: la descrizione della pipeline sperimentale, dei dataset, dei modelli e degli strumenti utilizzati è demandata ai capitoli metodologici successivi.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Digital Forensics e prova digitale}
@@ -174,7 +174,7 @@ La computer vision forense deve quindi confrontarsi con una tensione metodologic
 \section{Adversarial Machine Learning}
 \label{sec:background_adversarial_ml}
 % ─────────────────────────────────────────────────────────────────────────────
-L'\gls{aml} studia il comportamento dei sistemi di apprendimento automatico in presenza di input costruiti o modificati con l'obiettivo di alterarne il funzionamento. A differenza degli errori dovuti a rumore casuale, scarsa qualità dei dati o limiti di generalizzazione, gli attacchi adversariali presuppongono la presenza di un attore che modifica deliberatamente l'input per indurre il modello a produrre una predizione errata. Nel dominio della computer vision, questo problema assume particolare rilevanza perché piccole variazioni del contenuto digitale possono essere sufficienti a modificare la classificazione prodotta da un modello, anche quando l'immagine resta apparentemente simile per un osservatore umano \cite{szegedy2014intriguing,goodfellow2015explaining}.
+L'\gls{advml} studia il comportamento dei sistemi di apprendimento automatico in presenza di input costruiti o modificati con l'obiettivo di alterarne il funzionamento. A differenza degli errori dovuti a rumore casuale, scarsa qualità dei dati o limiti di generalizzazione, gli attacchi adversariali presuppongono la presenza di un attore che modifica deliberatamente l'input per indurre il modello a produrre una predizione errata. Nel dominio della computer vision, questo problema assume particolare rilevanza perché piccole variazioni del contenuto digitale possono essere sufficienti a modificare la classificazione prodotta da un modello, anche quando l'immagine resta apparentemente simile per un osservatore umano \cite{szegedy2014intriguing,goodfellow2015explaining}.
 
 Un adversarial example può essere descritto, in termini generali, come un input modificato rispetto a un campione originario, ma costruito in modo tale da indurre il classificatore a produrre un'etichetta non corretta. Indicando con \(x\) l'immagine originale, con \(y\) la sua classe corretta e con \(f(\cdot)\) il classificatore, l'obiettivo dell'attaccante è generare una versione perturbata \(x'\), tale che \(x'\) rimanga sufficientemente vicina a \(x\) secondo un vincolo di distanza o percettibilità, ma venga classificata in modo diverso dal modello. In forma semplificata, il problema può essere espresso come la ricerca di una perturbazione \(\delta\) tale che:
 \[
@@ -194,7 +194,7 @@ La Figura~\ref{fig:adv_example} rappresenta in forma concettuale questo meccanis
     \resizebox{\textwidth}{!}{%
         \includegraphics{images/adversarial_example_logic}
     }
-    \caption[\gls{aml} and conceptual representation of an evasion attack]{\gls{aml} and conceptual representation of an evasion attack. A bounded perturbation \(\delta\) is added to the original input \(x\) to obtain an adversarial image \(x'\), which induces a wrong classifier prediction while preserving visual coherence for a human analyst.}
+    \caption[\gls{advml} and conceptual representation of an evasion attack]{\gls{advml} and conceptual representation of an evasion attack. A bounded perturbation \(\delta\) is added to the original input \(x\) to obtain an adversarial image \(x'\), which induces a wrong classifier prediction while preserving visual coherence for a human analyst.}
     \label{fig:adv_example}
 \end{figure}
 
@@ -211,7 +211,7 @@ In ambito forense, il problema adversarial non riguarda soltanto la vulnerabilit
 \subsection{Threat model e assunzioni dell'attaccante}
 \label{subsec:background_threat_model}
 % ─────────────────────────────────────────────────────────────────────────────
-Il threat model definisce le assunzioni relative alle capacità, agli obiettivi e ai vincoli dell'attaccante. In \gls{aml}, esso è necessario per delimitare in modo rigoroso lo scenario di attacco e per evitare valutazioni di robustezza prive di un contesto operativo. Senza un threat model esplicito, il risultato di un test adversarial rischia di essere difficilmente interpretabile, poiché non è chiaro quale tipo di avversario il sistema sia in grado di tollerare e quali condizioni siano invece escluse dall'analisi \cite{carlini2017towards,yuan2019adversarial}.
+Il threat model definisce le assunzioni relative alle capacità, agli obiettivi e ai vincoli dell'attaccante. In \gls{advml}, esso è necessario per delimitare in modo rigoroso lo scenario di attacco e per evitare valutazioni di robustezza prive di un contesto operativo. Senza un threat model esplicito, il risultato di un test adversarial rischia di essere difficilmente interpretabile, poiché non è chiaro quale tipo di avversario il sistema sia in grado di tollerare e quali condizioni siano invece escluse dall'analisi \cite{carlini2017towards,yuan2019adversarial}.
 
 Nel contesto della classificazione automatica di immagini in ambito forense, l'attaccante può essere modellato come un soggetto interessato a ridurre la probabilità che determinati contenuti vengano correttamente identificati da uno strumento automatico. L'obiettivo principale non è necessariamente compromettere l'intero workflow forense, ma alterare la risposta del classificatore su specifici input visivi. In termini operativi, ciò può tradursi nella volontà di trasformare un'immagine rilevante in un'immagine classificata come non rilevante, ambigua o appartenente a una categoria diversa da quella attesa. Questo scenario è coerente con un attacco di evasion, poiché la manipolazione avviene sull'input analizzato e non sulla fase di addestramento del modello.
 
@@ -253,7 +253,7 @@ La Tabella~\ref{tab:threat_model} sintetizza le principali dimensioni del threat
 \subsection{Famiglie di attacco considerate nella pipeline sperimentale}
 \label{subsec:background_attack_families}
 
-Nel quadro generale dell'\gls{aml}, la presente tesi considera un insieme di
+Nel quadro generale dell'\gls{advml}, la presente tesi considera un insieme di
 attacchi adversariali selezionati per rappresentare famiglie diverse di
 perturbazione degli input immagine. La scelta non mira a coprire in modo
 esaustivo l'intero panorama degli attacchi esistenti, ma a includere tecniche
