@@ -73,11 +73,11 @@ Nel 2.6 cosa intendi con “nel contesto dell’image forensics molte analisi si
 
 
 
-Paragrafo 3.1 quando dici “in terzo luogo, la validazione dei sistemi …” lì come citazione ci vanno 9 e 10 non 9 e 11
+Paragrafo 3.1 quando dici “in terzo luogo, la validazione dei sistemi …” lì come citazione ci vanno 9 e 10 non 9 e 11 **(OK)**
 
 Nel 3.2 quando parli degli strumenti forensi, io farei una sezione a parte dove li descrivi ciascuno ed evidenzi 
 caratteristiche e limiti. Ricorda che nella parte di background è importante anche parlare delle fasi forensi e 
-metodologie di acquisizione e analisi, altrimenti chi non conosce la materia non può capire bene il contributo e lo studio
+metodologie di acquisizione e analisi, altrimenti chi non conosce la materia non può capire bene il contributo e lo studio **(OK - Giustissimo)**
 
 Nel 3.7 quando dici “ne consegue che la xai, nel contesto forense, deve essere intesa come supporto…” cita il 
 lavoro https://arxiv.org/abs/2510.14638 altrimenti sembra una tua affermazione e a meno che nella parte dei risultati o della 
