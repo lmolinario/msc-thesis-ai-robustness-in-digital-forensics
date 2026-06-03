@@ -48,32 +48,32 @@ Lo usi spesso questo termine accademico ma io non l’ho mai visto negli articol
 | pipeline operativo-forense                                                  | valutazione operativa black-box dei software AI-based selezionati                                                           |
 | integrazione di una pipeline accademica e di una pipeline operativo-forense | integrazione tra la valutazione controllata dei modelli proxy e la valutazione operativa black-box dei software selezionati |
 
-
-
 1.5 dataset OOD, anche qui spiegare significato acronimo **(OK Acronimo espanso come prima ricorrerza)**
-
 
 Nel paragrafo 1.7 quando scrivi “Il problema assume rilievo particolare quando i sistemi automatici operano 
 in modalità sostanzialmente opaca” qui citerei anche i lavori di explainable AI. Anche perché poi si ritrova 
-dal nulla nel capitolo 2 e serve flusso e coerenza (OK)
+dal nulla nel capitolo 2 e serve flusso e coerenza **(OK)**
 
-1.8 più corto, di solito si scrive in una frase per capitolo
+1.8 più corto, di solito si scrive in una frase per capitolo **(OK)**
 
 AML? Non ho mai visto adversarial machine learning abbreviato così e non puoi introdurlo così nella tesi (scusa) **(Adv-ML?? Come fa Nowroozi? nel frattempo lo tolgo dappertutto )**
 
-Nel capitolo 2 manca discutere delle fasi forensi e soprattutto delle principali tecniche di acquisizione e analisi
+
+
+Nel capitolo 2 manca discutere delle fasi forensi e soprattutto delle principali tecniche di acquisizione e analisi **(OK)**
 
 Nel 2.4 parlerei anche di riconoscimento di oggetti che è proprio quello che fanno (suppongo) gli algoritmi di AI nei tool 
-forensi perché riconoscono appunto l’oggetto esempio arma dentro immagine.
+forensi perché riconoscono appunto l’oggetto esempio arma dentro immagine. **(OK)**
 
 2.5.1 dici nell’ultimo paragrafo che “la definizione del threat model consente infine di collegare gli attacchi adversariali 
 alle trasformazioni anti-forensi” e si capisce che un attacco antiforense può essere fatto solo se legato ad attacco adversarial
 ma così non è. Infatti poi nel 2.6 lo spieghi bene
 
-Nel 2.6 cosa intendi con “nel contesto dell’image forensics molte analisi si badano … su caratteristiche del sensore”. Che sensore?
+Nel 2.6 cosa intendi con “nel contesto dell’image forensics molte analisi si badano … su caratteristiche del sensore”. Che sensore? **(hai ragione non ho spiegato bene mi riferivo al (PRNU)  CCD o CMOS vedi 2.3)**
+
+
 
 Paragrafo 3.1 quando dici “in terzo luogo, la validazione dei sistemi …” lì come citazione ci vanno 9 e 10 non 9 e 11
-
 
 Nel 3.2 quando parli degli strumenti forensi, io farei una sezione a parte dove li descrivi ciascuno ed evidenzi 
 caratteristiche e limiti. Ricorda che nella parte di background è importante anche parlare delle fasi forensi e 
