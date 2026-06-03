@@ -454,7 +454,24 @@ and is aligned with research areas including Digital Forensics, AI-based forensi
 
 ## Citation
 
-Citation details will be added upon thesis completion.
+This repository contains the experimental artifacts developed for the following forthcoming Master's thesis:
+
+> Molinario, L. (2026). *Evaluating the Operational Robustness of AI-Based Image Classification Tools in Digital Forensics: An Experimental Assessment Against Adversarial Perturbations and Anti-Forensic Manipulations*. Master's thesis, University of Cagliari, Department of Engineering, Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence. Academic Year 2025/2026. Thesis in preparation.
+
+### BibTeX
+
+```bibtex
+@mastersthesis{molinario2026operationalrobustness,
+  author  = {Molinario, Lello},
+  title   = {Evaluating the Operational Robustness of {AI}-Based Image Classification Tools in Digital Forensics: An Experimental Assessment Against Adversarial Perturbations and Anti-Forensic Manipulations},
+  school  = {University of Cagliari, Department of Engineering},
+  type    = {Master's thesis},
+  address = {Cagliari, Italy},
+  year    = {2026},
+  note    = {Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence. Academic Year 2025/2026. Thesis in preparation.}
+}
+```
+
 
 ---
 
