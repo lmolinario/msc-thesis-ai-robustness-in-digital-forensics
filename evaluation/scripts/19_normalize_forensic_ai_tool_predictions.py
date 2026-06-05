@@ -112,9 +112,8 @@ DEFAULT_METRICS_DIR = REPO_ROOT / "results" / "metrics"
 
 KNOWN_TOOL_NAMES = [
     "magnet_axiom",
-    "xways_excire",
-    "cellebrite_ufed",
-    "oxygen_forensic_detective",
+    "excire_foto_2025",
+    "cellebrite_inseyets",
 ]
 
 SUPPORTED_GENERIC_EXPORT_EXTENSIONS = {".csv", ".tsv", ".json", ".jsonl", ".txt"}
