@@ -1,41 +1,51 @@
 tool_name,tool_display,scope,sample_type,attack_family,attack_name,accuracy,balanced_accuracy,precision_weapon,recall_weapon,false_negative_rate,false_positive_rate,tp,fp,tn,fn,ood_rows,ood_weapon_flags,ood_weapon_flag_rate,attack_display
-magnet_axiom,Magnet AXIOM,attack_name,all,adversarial,color_shift,0.951,0.951,0.966874,0.934,0.066,0.032,467,16,484,33,0,0,,Color Shift
-magnet_axiom,Magnet AXIOM,attack_name,all,adversarial,fgsm,0.867,0.867,0.9161,0.808,0.192,0.074,404,37,463,96,0,0,,FGSM
-magnet_axiom,Magnet AXIOM,attack_name,all,adversarial,one_pixel,0.95,0.95,0.96875,0.93,0.07,0.03,465,15,485,35,0,0,,One Pixel
-magnet_axiom,Magnet AXIOM,attack_name,all,adversarial,sigma_zero,0.916,0.916,0.972727,0.856,0.144,0.024,428,12,488,72,0,0,,Sigma Zero
-magnet_axiom,Magnet AXIOM,attack_name,all,adversarial,superdeepfool,0.932,0.932,0.967532,0.894,0.106,0.03,447,15,485,53,0,0,,SuperDeepFool
-magnet_axiom,Magnet AXIOM,attack_name,all,anti_forensic,contrast_stretching,0.951,0.951,0.970772,0.93,0.07,0.028,465,14,486,35,0,0,,Contrast stretching
-magnet_axiom,Magnet AXIOM,attack_name,all,anti_forensic,gaussian_blur,0.927,0.927,0.971302,0.88,0.12,0.026,440,13,487,60,0,0,,Gaussian blur
-magnet_axiom,Magnet AXIOM,attack_name,all,anti_forensic,histogram_modification,0.936,0.936,0.950413,0.92,0.08,0.048,460,24,476,40,0,0,,Histogram modification
-magnet_axiom,Magnet AXIOM,attack_name,all,anti_forensic,jpeg_recompression,0.944,0.944,0.958678,0.928,0.072,0.04,464,20,480,36,0,0,,JPEG recompression
-magnet_axiom,Magnet AXIOM,attack_name,all,anti_forensic,resample_resize,0.943,0.943,0.978402,0.906,0.094,0.02,453,10,490,47,0,0,,Resample + resize
-xways_excire_d20,Excire D20,attack_name,all,adversarial,color_shift,0.937,0.937,0.984479,0.888,0.112,0.014,444,7,493,56,0,0,,Color Shift
-xways_excire_d20,Excire D20,attack_name,all,adversarial,fgsm,0.873,0.873,0.984416,0.758,0.242,0.012,379,6,494,121,0,0,,FGSM
-xways_excire_d20,Excire D20,attack_name,all,adversarial,one_pixel,0.926,0.926,0.969163,0.88,0.12,0.028,440,14,486,60,0,0,,One Pixel
-xways_excire_d20,Excire D20,attack_name,all,adversarial,sigma_zero,0.815,0.815,0.811881,0.82,0.18,0.19,410,95,405,90,0,0,,Sigma Zero
-xways_excire_d20,Excire D20,attack_name,all,adversarial,superdeepfool,0.907,0.907,0.98568,0.826,0.174,0.012,413,6,494,87,0,0,,SuperDeepFool
-xways_excire_d20,Excire D20,attack_name,all,anti_forensic,contrast_stretching,0.931,0.931,0.982103,0.878,0.122,0.016,439,8,492,61,0,0,,Contrast stretching
-xways_excire_d20,Excire D20,attack_name,all,anti_forensic,gaussian_blur,0.928,0.928,0.969298,0.884,0.116,0.028,442,14,486,58,0,0,,Gaussian blur
-xways_excire_d20,Excire D20,attack_name,all,anti_forensic,histogram_modification,0.92,0.92,0.96875,0.868,0.132,0.028,434,14,486,66,0,0,,Histogram modification
-xways_excire_d20,Excire D20,attack_name,all,anti_forensic,jpeg_recompression,0.927,0.927,0.977629,0.874,0.126,0.02,437,10,490,63,0,0,,JPEG recompression
-xways_excire_d20,Excire D20,attack_name,all,anti_forensic,resample_resize,0.927,0.927,0.979775,0.872,0.128,0.018,436,9,491,64,0,0,,Resample + resize
-xways_excire_d50,Excire D50,attack_name,all,adversarial,color_shift,0.949,0.949,0.934236,0.966,0.034,0.068,483,34,466,17,0,0,,Color Shift
-xways_excire_d50,Excire D50,attack_name,all,adversarial,fgsm,0.926,0.926,0.959052,0.89,0.11,0.038,445,19,481,55,0,0,,FGSM
-xways_excire_d50,Excire D50,attack_name,all,adversarial,one_pixel,0.946,0.946,0.930502,0.964,0.036,0.072,482,36,464,18,0,0,,One Pixel
-xways_excire_d50,Excire D50,attack_name,all,adversarial,sigma_zero,0.742,0.742,0.676901,0.926,0.074,0.442,463,221,279,37,0,0,,Sigma Zero
-xways_excire_d50,Excire D50,attack_name,all,adversarial,superdeepfool,0.956,0.956,0.967213,0.944,0.056,0.032,472,16,484,28,0,0,,SuperDeepFool
-xways_excire_d50,Excire D50,attack_name,all,anti_forensic,contrast_stretching,0.941,0.941,0.931507,0.952,0.048,0.07,476,35,465,24,0,0,,Contrast stretching
-xways_excire_d50,Excire D50,attack_name,all,anti_forensic,gaussian_blur,0.941,0.941,0.924855,0.96,0.04,0.078,480,39,461,20,0,0,,Gaussian blur
-xways_excire_d50,Excire D50,attack_name,all,anti_forensic,histogram_modification,0.932,0.932,0.915385,0.952,0.048,0.088,476,44,456,24,0,0,,Histogram modification
-xways_excire_d50,Excire D50,attack_name,all,anti_forensic,jpeg_recompression,0.946,0.946,0.935547,0.958,0.042,0.066,479,33,467,21,0,0,,JPEG recompression
-xways_excire_d50,Excire D50,attack_name,all,anti_forensic,resample_resize,0.947,0.947,0.932302,0.964,0.036,0.07,482,35,465,18,0,0,,Resample + resize
-xways_excire_d80,Excire D80,attack_name,all,adversarial,color_shift,0.914,0.914,0.860627,0.988,0.012,0.16,494,80,420,6,0,0,,Color Shift
-xways_excire_d80,Excire D80,attack_name,all,adversarial,fgsm,0.898,0.898,0.857914,0.954,0.046,0.158,477,79,421,23,0,0,,FGSM
-xways_excire_d80,Excire D80,attack_name,all,adversarial,one_pixel,0.911,0.911,0.858639,0.984,0.016,0.162,492,81,419,8,0,0,,One Pixel
-xways_excire_d80,Excire D80,attack_name,all,adversarial,sigma_zero,0.657,0.657,0.595849,0.976,0.024,0.662,488,331,169,12,0,0,,Sigma Zero
-xways_excire_d80,Excire D80,attack_name,all,adversarial,superdeepfool,0.924,0.924,0.878571,0.984,0.016,0.136,492,68,432,8,0,0,,SuperDeepFool
-xways_excire_d80,Excire D80,attack_name,all,anti_forensic,contrast_stretching,0.922,0.922,0.874113,0.986,0.014,0.142,493,71,429,7,0,0,,Contrast stretching
-xways_excire_d80,Excire D80,attack_name,all,anti_forensic,gaussian_blur,0.908,0.908,0.854167,0.984,0.016,0.168,492,84,416,8,0,0,,Gaussian blur
-xways_excire_d80,Excire D80,attack_name,all,anti_forensic,histogram_modification,0.878,0.878,0.811881,0.984,0.016,0.228,492,114,386,8,0,0,,Histogram modification
-xways_excire_d80,Excire D80,attack_name,all,anti_forensic,jpeg_recompression,0.914,0.914,0.863158,0.984,0.016,0.156,492,78,422,8,0,0,,JPEG recompression
-xways_excire_d80,Excire D80,attack_name,all,anti_forensic,resample_resize,0.917,0.917,0.867725,0.984,0.016,0.15,492,75,425,8,0,0,,Resample + resize
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,adversarial,color_shift,0.964,0.964,0.960317,0.968,0.032,0.04,484,20,480,16,0,0,,Color Shift
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,adversarial,fgsm,0.918,0.918,0.939076,0.894,0.106,0.058,447,29,471,53,0,0,,FGSM
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,adversarial,one_pixel,0.962,0.962,0.956522,0.968,0.032,0.044,484,22,478,16,0,0,,One Pixel
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,adversarial,sigma_zero,0.97,0.97,0.981557,0.958,0.042,0.018,479,9,491,21,0,0,,Sigma Zero
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,adversarial,superdeepfool,0.961,0.961,0.95825,0.964,0.036,0.042,482,21,479,18,0,0,,SuperDeepFool
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,anti_forensic,contrast_stretching,0.967,0.967,0.962376,0.972,0.028,0.038,486,19,481,14,0,0,,Contrast stretching
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,anti_forensic,gaussian_blur,0.954,0.954,0.945098,0.964,0.036,0.056,482,28,472,18,0,0,,Gaussian blur
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,anti_forensic,histogram_modification,0.949,0.949,0.95723,0.94,0.06,0.042,470,21,479,30,0,0,,Histogram modification
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,anti_forensic,jpeg_recompression,0.966,0.966,0.960474,0.972,0.028,0.04,486,20,480,14,0,0,,JPEG recompression
+cellebrite_inseyets,Cellebrite Inseyets,attack_name,all,anti_forensic,resample_resize,0.964,0.964,0.960317,0.968,0.032,0.04,484,20,480,16,0,0,,Resample + resize
+excire_foto_2025_d20,Excire D20,attack_name,all,adversarial,color_shift,0.937,0.937,0.984479,0.888,0.112,0.014,444,7,493,56,0,0,,Color Shift
+excire_foto_2025_d20,Excire D20,attack_name,all,adversarial,fgsm,0.873,0.873,0.984416,0.758,0.242,0.012,379,6,494,121,0,0,,FGSM
+excire_foto_2025_d20,Excire D20,attack_name,all,adversarial,one_pixel,0.926,0.926,0.969163,0.88,0.12,0.028,440,14,486,60,0,0,,One Pixel
+excire_foto_2025_d20,Excire D20,attack_name,all,adversarial,sigma_zero,0.815,0.815,0.811881,0.82,0.18,0.19,410,95,405,90,0,0,,Sigma Zero
+excire_foto_2025_d20,Excire D20,attack_name,all,adversarial,superdeepfool,0.907,0.907,0.98568,0.826,0.174,0.012,413,6,494,87,0,0,,SuperDeepFool
+excire_foto_2025_d20,Excire D20,attack_name,all,anti_forensic,contrast_stretching,0.931,0.931,0.982103,0.878,0.122,0.016,439,8,492,61,0,0,,Contrast stretching
+excire_foto_2025_d20,Excire D20,attack_name,all,anti_forensic,gaussian_blur,0.928,0.928,0.969298,0.884,0.116,0.028,442,14,486,58,0,0,,Gaussian blur
+excire_foto_2025_d20,Excire D20,attack_name,all,anti_forensic,histogram_modification,0.92,0.92,0.96875,0.868,0.132,0.028,434,14,486,66,0,0,,Histogram modification
+excire_foto_2025_d20,Excire D20,attack_name,all,anti_forensic,jpeg_recompression,0.927,0.927,0.977629,0.874,0.126,0.02,437,10,490,63,0,0,,JPEG recompression
+excire_foto_2025_d20,Excire D20,attack_name,all,anti_forensic,resample_resize,0.927,0.927,0.979775,0.872,0.128,0.018,436,9,491,64,0,0,,Resample + resize
+excire_foto_2025_d50,Excire D50,attack_name,all,adversarial,color_shift,0.949,0.949,0.934236,0.966,0.034,0.068,483,34,466,17,0,0,,Color Shift
+excire_foto_2025_d50,Excire D50,attack_name,all,adversarial,fgsm,0.926,0.926,0.959052,0.89,0.11,0.038,445,19,481,55,0,0,,FGSM
+excire_foto_2025_d50,Excire D50,attack_name,all,adversarial,one_pixel,0.946,0.946,0.930502,0.964,0.036,0.072,482,36,464,18,0,0,,One Pixel
+excire_foto_2025_d50,Excire D50,attack_name,all,adversarial,sigma_zero,0.742,0.742,0.676901,0.926,0.074,0.442,463,221,279,37,0,0,,Sigma Zero
+excire_foto_2025_d50,Excire D50,attack_name,all,adversarial,superdeepfool,0.956,0.956,0.967213,0.944,0.056,0.032,472,16,484,28,0,0,,SuperDeepFool
+excire_foto_2025_d50,Excire D50,attack_name,all,anti_forensic,contrast_stretching,0.941,0.941,0.931507,0.952,0.048,0.07,476,35,465,24,0,0,,Contrast stretching
+excire_foto_2025_d50,Excire D50,attack_name,all,anti_forensic,gaussian_blur,0.941,0.941,0.924855,0.96,0.04,0.078,480,39,461,20,0,0,,Gaussian blur
+excire_foto_2025_d50,Excire D50,attack_name,all,anti_forensic,histogram_modification,0.932,0.932,0.915385,0.952,0.048,0.088,476,44,456,24,0,0,,Histogram modification
+excire_foto_2025_d50,Excire D50,attack_name,all,anti_forensic,jpeg_recompression,0.946,0.946,0.935547,0.958,0.042,0.066,479,33,467,21,0,0,,JPEG recompression
+excire_foto_2025_d50,Excire D50,attack_name,all,anti_forensic,resample_resize,0.947,0.947,0.932302,0.964,0.036,0.07,482,35,465,18,0,0,,Resample + resize
+excire_foto_2025_d80,Excire D80,attack_name,all,adversarial,color_shift,0.914,0.914,0.860627,0.988,0.012,0.16,494,80,420,6,0,0,,Color Shift
+excire_foto_2025_d80,Excire D80,attack_name,all,adversarial,fgsm,0.898,0.898,0.857914,0.954,0.046,0.158,477,79,421,23,0,0,,FGSM
+excire_foto_2025_d80,Excire D80,attack_name,all,adversarial,one_pixel,0.911,0.911,0.858639,0.984,0.016,0.162,492,81,419,8,0,0,,One Pixel
+excire_foto_2025_d80,Excire D80,attack_name,all,adversarial,sigma_zero,0.657,0.657,0.595849,0.976,0.024,0.662,488,331,169,12,0,0,,Sigma Zero
+excire_foto_2025_d80,Excire D80,attack_name,all,adversarial,superdeepfool,0.924,0.924,0.878571,0.984,0.016,0.136,492,68,432,8,0,0,,SuperDeepFool
+excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,contrast_stretching,0.922,0.922,0.874113,0.986,0.014,0.142,493,71,429,7,0,0,,Contrast stretching
+excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,gaussian_blur,0.908,0.908,0.854167,0.984,0.016,0.168,492,84,416,8,0,0,,Gaussian blur
+excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,histogram_modification,0.878,0.878,0.811881,0.984,0.016,0.228,492,114,386,8,0,0,,Histogram modification
+excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,jpeg_recompression,0.914,0.914,0.863158,0.984,0.016,0.156,492,78,422,8,0,0,,JPEG recompression
+excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,resample_resize,0.917,0.917,0.867725,0.984,0.016,0.15,492,75,425,8,0,0,,Resample + resize
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,adversarial,color_shift,0.951,0.951,0.966874,0.934,0.066,0.032,467,16,484,33,0,0,,Color Shift
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,adversarial,fgsm,0.867,0.867,0.9161,0.808,0.192,0.074,404,37,463,96,0,0,,FGSM
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,adversarial,one_pixel,0.95,0.95,0.96875,0.93,0.07,0.03,465,15,485,35,0,0,,One Pixel
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,adversarial,sigma_zero,0.916,0.916,0.972727,0.856,0.144,0.024,428,12,488,72,0,0,,Sigma Zero
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,adversarial,superdeepfool,0.932,0.932,0.967532,0.894,0.106,0.03,447,15,485,53,0,0,,SuperDeepFool
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,anti_forensic,contrast_stretching,0.951,0.951,0.970772,0.93,0.07,0.028,465,14,486,35,0,0,,Contrast stretching
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,anti_forensic,gaussian_blur,0.927,0.927,0.971302,0.88,0.12,0.026,440,13,487,60,0,0,,Gaussian blur
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,anti_forensic,histogram_modification,0.936,0.936,0.950413,0.92,0.08,0.048,460,24,476,40,0,0,,Histogram modification
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,anti_forensic,jpeg_recompression,0.944,0.944,0.958678,0.928,0.072,0.04,464,20,480,36,0,0,,JPEG recompression
+magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,anti_forensic,resample_resize,0.943,0.943,0.978402,0.906,0.094,0.02,453,10,490,47,0,0,,Resample + resize

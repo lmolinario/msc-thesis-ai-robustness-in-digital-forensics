@@ -104,14 +104,20 @@ DEFAULT_FORENSIC_TOOLS_METRICS_CSV = METRICS_DIR / "forensic_tools_metrics.csv"
 
 FORENSIC_TOOL_ORDER = (
     "magnet_axiom",
-    "xways_excire_d20",
-    "xways_excire_d50",
-    "xways_excire_d80",
+    "excire_foto_2025_d20",
+    "excire_foto_2025_d50",
+    "excire_foto_2025_d80",
+    "cellebrite_inseyets",
 )
 
 FORENSIC_TOOL_DISPLAY = {
-    "magnet_axiom": "Magnet AXIOM",
-    "excire_foto_2025": "Excire",
+    "magnet_axiom": "Magnet AXIOM / Magnet.AI",
+    "excire_foto_2025": "Excire Foto 2025",
+    "excire_foto_2025_d20": "Excire D20",
+    "excire_foto_2025_d50": "Excire D50",
+    "excire_foto_2025_d80": "Excire D80",
+    "cellebrite_inseyets": "Cellebrite Inseyets",
+    # Backward-compatible display names for historical outputs only.
     "xways_excire_d20": "Excire D20",
     "xways_excire_d50": "Excire D50",
     "xways_excire_d80": "Excire D80",
@@ -310,6 +316,172 @@ def save_figure(
 def set_axis_percent(ax: plt.Axes) -> None:
     """Format y-axis values in the [0, 1] range as percentages."""
     ax.yaxis.set_major_formatter(lambda value, _: f"{value:.0%}")
+
+
+# =============================================================================
+# Console reporting utilities
+# =============================================================================
+
+
+def _round_console_metrics(df: pd.DataFrame, digits: int = 4) -> pd.DataFrame:
+    """Return a copy with numeric columns rounded for readable console output."""
+    output = df.copy()
+    for column in output.columns:
+        if pd.api.types.is_numeric_dtype(output[column]):
+            output[column] = output[column].round(digits)
+    return output
+
+
+def _print_console_table(title: str, df: pd.DataFrame | None, columns: list[str] | None = None) -> None:
+    """Print a complete metric table to stdout in a readable format."""
+    print("\n" + "=" * 100)
+    print(title)
+    print("=" * 100)
+
+    if df is None or df.empty:
+        print("No rows available.")
+        return
+
+    table = df.copy()
+    if columns is not None:
+        existing_columns = [column for column in columns if column in table.columns]
+        if existing_columns:
+            table = table[existing_columns]
+
+    table = _round_console_metrics(table)
+
+    with pd.option_context(
+        "display.max_rows",
+        None,
+        "display.max_columns",
+        None,
+        "display.width",
+        240,
+        "display.max_colwidth",
+        80,
+    ):
+        print(table.to_string(index=False))
+
+
+def print_consolidated_metrics_to_console(
+    core_df: pd.DataFrame,
+    robustness_df: pd.DataFrame,
+    confusion_df: pd.DataFrame,
+    ood_df: pd.DataFrame,
+    forensic_tools_df: pd.DataFrame | None,
+) -> None:
+    """
+    Print the consolidated metrics used by this reporting script.
+
+    The script does not recompute experimental metrics. It reads the consolidated
+    CSV files produced by the evaluation pipeline and prints the metric tables
+    that are used to generate Chapter 5 reporting assets.
+    """
+    print("\n" + "#" * 100)
+    print("CONSOLIDATED FAIR-LAB METRICS USED FOR CHAPTER 5 REPORTING")
+    print("#" * 100)
+
+    core_columns = [
+        "evaluated_model",
+        "sample_type",
+        "attack_family",
+        "attack_name",
+        "accuracy",
+        "balanced_accuracy",
+        "precision_weapon",
+        "recall_weapon",
+        "false_negative_rate",
+        "false_positive_rate",
+        "tp",
+        "fp",
+        "tn",
+        "fn",
+    ]
+    _print_console_table("Proxy-model core metrics", core_df, core_columns)
+
+    robustness_columns = [
+        "evaluated_model",
+        "sample_type",
+        "attack_family",
+        "attack_name",
+        "accuracy_clean",
+        "accuracy_perturbed",
+        "accuracy_drop",
+        "recall_weapon_clean",
+        "recall_weapon_perturbed",
+        "recall_weapon_drop",
+        "false_negative_rate_clean",
+        "false_negative_rate_perturbed",
+        "false_positive_rate_clean",
+        "false_positive_rate_perturbed",
+    ]
+    _print_console_table("Proxy-model robustness metrics", robustness_df, robustness_columns)
+
+    confusion_columns = [
+        "evaluated_model",
+        "sample_type",
+        "attack_family",
+        "attack_name",
+        "tn",
+        "fp",
+        "fn",
+        "tp",
+    ]
+    _print_console_table("Proxy-model confusion matrices", confusion_df, confusion_columns)
+
+    ood_columns = [
+        "evaluated_model",
+        "ood_rows",
+        "predicted_weapon_count",
+        "predicted_weapon_rate",
+        "confidence_mean",
+        "confidence_std",
+        "high_confidence_count",
+        "high_confidence_rate",
+    ]
+    _print_console_table("Proxy-model OOD metrics", ood_df, ood_columns)
+
+    if forensic_tools_df is not None and not forensic_tools_df.empty:
+        forensic_print_df = forensic_tools_df.copy()
+        if "tool_name" in forensic_print_df.columns:
+            forensic_print_df.insert(
+                1,
+                "tool_display",
+                forensic_print_df["tool_name"].map(display_forensic_tool),
+            )
+        if "attack_name" in forensic_print_df.columns:
+            forensic_print_df["attack_display"] = forensic_print_df["attack_name"].map(display_attack)
+
+        forensic_columns = [
+            "tool_name",
+            "tool_display",
+            "scope",
+            "sample_type",
+            "attack_family",
+            "attack_name",
+            "attack_display",
+            "n",
+            "accuracy",
+            "balanced_accuracy",
+            "precision_weapon",
+            "recall_weapon",
+            "false_negative_rate",
+            "false_positive_rate",
+            "tp",
+            "fp",
+            "tn",
+            "fn",
+            "ood_rows",
+            "ood_weapon_flags",
+            "ood_weapon_flag_rate",
+        ]
+        _print_console_table("Commercial black-box forensic-tool metrics", forensic_print_df, forensic_columns)
+    else:
+        _print_console_table("Commercial black-box forensic-tool metrics", None)
+
+    print("\n" + "#" * 100)
+    print("END OF CONSOLIDATED METRIC PRINTOUT")
+    print("#" * 100 + "\n")
 
 
 # =============================================================================
@@ -841,7 +1013,7 @@ def generate_forensic_clean_comparison_figure(
     dpi: int,
     manifest_rows: list[dict[str, Any]],
 ) -> None:
-    """Generate a clean-set comparison figure for Magnet and Excire settings."""
+    """Generate a clean-set comparison figure for commercial black-box tools."""
     clean_df = filter_forensic_metrics(forensic_df, "sample_type", sample_type="clean")
     if clean_df.empty:
         raise ValueError("No clean rows found in forensic_tools_metrics.csv.")
@@ -874,7 +1046,7 @@ def generate_forensic_clean_comparison_figure(
     ax.set_ylim(0, 1.08)
     set_axis_percent(ax)
     ax.set_ylabel("Metric value")
-    ax.set_title("Clean-set comparison of forensic AI tools")
+    ax.set_title("Clean-set comparison of black-box forensic AI tools")
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=4, frameon=False)
     ax.grid(axis="y", linestyle="--", linewidth=0.5, alpha=0.6)
     fig.tight_layout()
@@ -899,7 +1071,7 @@ def generate_forensic_ood_weapon_flag_figure(
     dpi: int,
     manifest_rows: list[dict[str, Any]],
 ) -> None:
-    """Generate OOD weapon-flag comparison for Magnet and Excire settings."""
+    """Generate OOD weapon-flag comparison for commercial black-box tools."""
     ood_df = filter_forensic_metrics(forensic_df, "sample_type", sample_type="ood")
     if ood_df.empty:
         raise ValueError("No OOD rows found in forensic_tools_metrics.csv.")
@@ -931,7 +1103,7 @@ def generate_forensic_ood_weapon_flag_figure(
     ax.set_ylim(0, min(1.0, max(0.1, float(np.nanmax(values)) + 0.18)))
     set_axis_percent(ax)
     ax.set_ylabel("OOD weapon flag rate")
-    ax.set_title("OOD weapon flag rate in forensic AI tools")
+    ax.set_title("OOD weapon flag rate in black-box forensic AI tools")
     ax.grid(axis="y", linestyle="--", linewidth=0.5, alpha=0.6)
     fig.tight_layout()
 
@@ -1055,7 +1227,7 @@ def generate_forensic_accuracy_drop_heatmap(
     figure_id: str,
     title: str,
 ) -> None:
-    """Generate accuracy-drop heatmap for forensic tools and Excire distance settings."""
+    """Generate accuracy-drop heatmap for commercial black-box tools."""
     pivot, attacks, tools = build_forensic_accuracy_drop_matrix(forensic_df, attack_family, attack_order)
     values = pivot.astype(float).to_numpy()
     max_value = max(float(np.nanmax(values)), 0.001)
@@ -1084,7 +1256,7 @@ def generate_forensic_accuracy_drop_heatmap(
                 text_color = "white" if value >= threshold else "black"
             ax.text(j, i, label, ha="center", va="center", fontsize=9, color=text_color)
 
-    ax.set_xlabel("Forensic tool / setting")
+    ax.set_xlabel("Commercial tool / configuration")
     ax.set_ylabel("Perturbation" if attack_family == "adversarial" else "Transformation")
     fig.tight_layout()
 
@@ -1223,6 +1395,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dpi", type=int, default=300)
     parser.add_argument("--skip-optional-prediction-figures", action="store_true")
     parser.add_argument("--skip-forensic-tool-assets", action="store_true")
+    parser.add_argument(
+        "--no-console-metrics",
+        action="store_true",
+        help="Do not print consolidated metrics to stdout before generating reporting assets.",
+    )
     parser.add_argument("--verbose", action="store_true")
     return parser.parse_args()
 
@@ -1264,6 +1441,15 @@ def main() -> int:
     predictions_df: pd.DataFrame | None = None
     if not args.skip_optional_prediction_figures:
         predictions_df = read_optional_csv(predictions_csv, "prediction-level CSV", warnings)
+
+    if not args.no_console_metrics:
+        print_consolidated_metrics_to_console(
+            core_df=_core_df,
+            robustness_df=robustness_df,
+            confusion_df=confusion_df,
+            ood_df=ood_df,
+            forensic_tools_df=forensic_tools_df,
+        )
 
     logging.info("Generating Chapter 5 figures in %s", repo_relative_string(output_dir))
 
@@ -1365,6 +1551,7 @@ def main() -> int:
         },
         "formats": args.formats,
         "dpi": args.dpi,
+        "console_metrics_printed": not args.no_console_metrics,
         "figure_count_unique": len(figure_ids),
         "file_count": len(manifest_rows),
         "figure_ids": figure_ids,

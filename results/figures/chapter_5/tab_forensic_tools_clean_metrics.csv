@@ -1,5 +1,6 @@
 tool_name,tool_display,scope,sample_type,attack_family,accuracy,balanced_accuracy,precision_weapon,recall_weapon,false_negative_rate,false_positive_rate,tp,fp,tn,fn,ood_rows,ood_weapon_flags,ood_weapon_flag_rate
-magnet_axiom,Magnet AXIOM,sample_type,clean,all,0.95,0.95,0.96875,0.93,0.07,0.03,465,15,485,35,0,0,
-xways_excire_d20,Excire D20,sample_type,clean,all,0.927,0.927,0.971302,0.88,0.12,0.026,440,13,487,60,0,0,
-xways_excire_d50,Excire D50,sample_type,clean,all,0.944,0.944,0.931907,0.958,0.042,0.07,479,35,465,21,0,0,
-xways_excire_d80,Excire D80,sample_type,clean,all,0.915,0.915,0.863398,0.986,0.014,0.156,493,78,422,7,0,0,
+cellebrite_inseyets,Cellebrite Inseyets,sample_type,clean,all,0.964,0.964,0.960317,0.968,0.032,0.04,484,20,480,16,0,0,
+excire_foto_2025_d20,Excire D20,sample_type,clean,all,0.927,0.927,0.971302,0.88,0.12,0.026,440,13,487,60,0,0,
+excire_foto_2025_d50,Excire D50,sample_type,clean,all,0.944,0.944,0.931907,0.958,0.042,0.07,479,35,465,21,0,0,
+excire_foto_2025_d80,Excire D80,sample_type,clean,all,0.915,0.915,0.863398,0.986,0.014,0.156,493,78,422,7,0,0,
+magnet_axiom,Magnet AXIOM / Magnet.AI,sample_type,clean,all,0.95,0.95,0.96875,0.93,0.07,0.03,465,15,485,35,0,0,
