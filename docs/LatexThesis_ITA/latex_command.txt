@@ -14,9 +14,21 @@ pdflatex main.tex
 
 
 
+
 pdflatex main.tex
 makeindex -s main.ist -t main.alg -o main.acr main.acn
 makeglossaries main
 biber main
+pdflatex main.tex
+pdflatex main.tex
+
+
+$perlRoot = "D:\strawberry-perl-5.42.0.1-64bit-portable"
+$env:Path = "$perlRoot\perl\bin;$perlRoot\c\bin;$env:Path"
+
+
+pdflatex main.tex
+biber main
+makeindex -s main.ist -t main.alg -o main.acr main.acn
 pdflatex main.tex
 pdflatex main.tex
