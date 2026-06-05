@@ -26,6 +26,23 @@ pdflatex main.tex
 $perlRoot = "D:\strawberry-perl-5.42.0.1-64bit-portable"
 $env:Path = "$perlRoot\perl\bin;$perlRoot\c\bin;$env:Path"
 
+$perlRoot = "D:\strawberry-perl-5.42.0.1-64bit-portable"
+
+$pathsToAdd = @(
+    "$perlRoot\perl\bin",
+    "$perlRoot\c\bin"
+)
+
+$currentUserPath = [Environment]::GetEnvironmentVariable("Path", "User")
+
+foreach ($p in $pathsToAdd) {
+    if ($currentUserPath -notlike "*$p*") {
+        $currentUserPath = "$currentUserPath;$p"
+    }
+}
+
+[Environment]::SetEnvironmentVariable("Path", $currentUserPath, "User")
+
 
 pdflatex main.tex
 biber main
