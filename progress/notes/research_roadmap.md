@@ -14,9 +14,9 @@ Main goals:
 
 - evaluate robustness degradation under adversarial perturbations;
 - evaluate robustness degradation under realistic anti-forensic image transformations;
-- compare local AI models with forensic AI tools;
+- compare local transparent proxy models with forensic AI tools;
 - document how failures affect forensic reliability and evidentiary interpretation;
-- support the analysis with explainability and traceable experimental artifacts.
+- support the analysis with traceable experimental artifacts and qualitative explainability.
 
 ---
 
@@ -32,7 +32,7 @@ The dataset is built from heterogeneous sources:
 05_deepweb
 ```
 
-The current benchmark is based on a human-in-the-loop selection protocol.
+The benchmark is based on a human-in-the-loop selection protocol.
 
 Official frozen dataset:
 
@@ -63,7 +63,7 @@ Composition:
 
 OOD samples are retained as a separate evaluation set and are not attacked.
 
-Expected split structure:
+Split structure:
 
 ```text
 datasets/splits/clean/fold_1/
@@ -78,20 +78,20 @@ datasets/splits/ood/ood_eval_set/
 
 ## 3. Academic AI pipeline
 
-Planned model families:
+Consolidated proxy models:
 
-- ResNet18;
 - EfficientNet-B0;
-- CLIP;
-- BLIP;
-- SVM baseline.
+- ResNet18;
+- CLIP.
+
+BLIP may be discussed as a semantic/caption-based evaluator where relevant, but it is not a primary adversarial generation target. SVM is retained only as historical/baseline context if needed and is not central to the final Chapter 5 reporting.
 
 Main evaluation stages:
 
 1. clean baseline inference;
-2. adversarial inference;
+2. OOD behavior evaluation;
 3. anti-forensic inference;
-4. OOD behavior evaluation;
+4. adversarial inference;
 5. robustness comparison across models.
 
 Core metrics:
@@ -120,7 +120,7 @@ Robustness metrics:
 
 ### 4.1 Adversarial attacks
 
-Planned attacks:
+Generated attacks:
 
 - FGSM;
 - SuperDeepFool;
@@ -130,7 +130,7 @@ Planned attacks:
 
 ### 4.2 Anti-forensic transformations
 
-Planned transformations:
+Generated transformations:
 
 - JPEG recompression;
 - Resample and resize;
@@ -138,7 +138,7 @@ Planned transformations:
 - Histogram modification;
 - Contrast stretching.
 
-The perturbation stage must preserve traceability between clean and manipulated samples through manifests and hashes.
+The perturbation stage preserves traceability between clean and manipulated samples through manifests and hashes.
 
 ---
 
@@ -148,38 +148,52 @@ Explainability is used as a qualitative diagnostic layer.
 
 Main method:
 
-- Integrated Gradients, where feasible.
+- Integrated Gradients.
 
-Expected use cases:
+The Chapter 5 XAI selection is completed and integrated into the thesis text. Selected representative cases:
 
-- compare clean vs perturbed attribution maps;
-- inspect successful attacks;
-- inspect false positives and false negatives;
-- analyze disagreement between local models and forensic tools;
-- support the final discussion with representative visual evidence.
+```text
+xai_case_0001 = clean correct weapon
+xai_case_0006 = clean false negative weapon
+xai_case_0009 = OOD classified as weapon
+xai_case_0010 = anti-forensic false negative under histogram modification
+xai_case_0015 = high-confidence adversarial false positive under sigma_zero
+```
+
+XAI is used to interpret transparent proxy-model behavior only. It is not treated as a primary robustness metric and is not used to explain proprietary black-box forensic tools.
 
 ---
 
 ## 6. Forensic tool pipeline
 
-Target forensic tools:
+Final forensic-tool perimeter:
 
-- X-Ways;
-- Magnet AXIOM;
-- Cellebrite UFED;
-- Oxygen Forensic Detective.
+```text
+Completed and normalized:
+- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
+
+Completed / analyzed:
+- X-Ways Forensics / Excire Foto 2025, version 4.1.5
+
+Pending / to be consolidated:
+- Cellebrite Inseyets, version 10.9
+
+Excluded:
+- Oxygen Forensic Detective
+- Autopsy
+```
 
 Main workflow:
 
 1. build a forensic evaluation bundle;
-2. import clean, adversarial, anti-forensic, and OOD samples into the tools;
-3. export reports, logs, and classification outputs;
-4. normalize the outputs into a shared schema;
-5. compare tool behavior against the local AI models.
+2. import clean, adversarial, anti-forensic, and OOD samples into eligible tools;
+3. export reports, logs, and classification or retrieval outputs;
+4. normalize the outputs into a shared schema when possible;
+5. compare tool behavior against the local AI models when outputs are comparable.
 
 Expected tool-side metrics:
 
-- detection rate;
+- detection / retrieval rate;
 - false positive rate;
 - false negative rate;
 - clean vs perturbed detection drop;
@@ -195,8 +209,9 @@ The final analysis compares:
 - local models against each other;
 - clean results against perturbed results;
 - adversarial attacks against anti-forensic transformations;
-- local AI models against forensic AI tools;
-- nominal binary behavior against OOD behavior.
+- local AI models against eligible forensic AI tools;
+- nominal binary behavior against OOD behavior;
+- quantitative metrics against qualitative Integrated Gradients case studies.
 
 Expected final outputs:
 
@@ -226,14 +241,21 @@ The discussion should connect technical findings with forensic implications, inc
 
 ## 9. Current operational priorities
 
-Current next stages:
+Completed:
 
-1. keep the frozen dataset and adversarial subset as the official starting point;
-2. generate clean folds and the OOD evaluation set;
-3. generate adversarial and anti-forensic outputs;
-4. build the forensic evaluation bundle;
-5. evaluate local AI models;
-6. evaluate forensic tools;
-7. normalize outputs and aggregate comparative metrics;
-8. produce explainability case studies;
-9. write the experimental and discussion chapters.
+1. frozen dataset and adversarial subset;
+2. clean folds and OOD evaluation set;
+3. adversarial and anti-forensic outputs;
+4. forensic evaluation bundle;
+5. local proxy-model evaluation;
+6. Magnet AXIOM / Magnet.AI normalization;
+7. Excire Foto 2025 semantic retrieval analysis;
+8. Integrated Gradients representative case studies;
+9. Chapter 5 XAI integration.
+
+Remaining priorities:
+
+1. consolidate Cellebrite Inseyets 10.9 only if comparable exports become available;
+2. finalize Chapter 5 and Chapter 6;
+3. perform final thesis-wide revision;
+4. prepare the future English version.
