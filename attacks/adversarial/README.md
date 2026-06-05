@@ -33,6 +33,8 @@ Operational status:
 ```text
 adversarial generation completed
 proxy model evaluation completed
+commercial-tool comparison completed for Magnet AXIOM / Magnet.AI and Excire Foto 2025
+Chapter 5 XAI case selection completed and integrated
 ```
 
 ---
@@ -64,16 +66,24 @@ BLIP
 
 BLIP is used only as a semantic/caption-based evaluator. It is not used as a primary adversarial target.
 
-Black-box forensic evaluation targets:
+Black-box / operational forensic evaluation perimeter:
 
 ```text
-Magnet AI
-X-Ways / Excire
-Cellebrite
-Oxygen
+Completed and normalized:
+- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
+
+Completed / analyzed:
+- X-Ways Forensics / Excire Foto 2025, version 4.1.5
+
+Pending / to be consolidated:
+- Cellebrite Inseyets, version 10.9
+
+Excluded from the final experimental perimeter:
+- Oxygen Forensic Detective
+- Autopsy
 ```
 
-Commercial forensic tools are treated as operational black boxes. The goal is not to know or reproduce their internal models, but to evaluate whether perturbations generated on transparent local proxy models transfer to AI-assisted forensic triage systems.
+Commercial forensic tools are treated as operational black boxes. The goal is not to know or reproduce their internal models, but to evaluate whether perturbations generated on transparent local proxy models correspond to observable robustness risks in AI-assisted forensic triage systems.
 
 ---
 
@@ -244,6 +254,12 @@ results/metrics/proxy_model_evaluation_summary.json
 ```
 
 The comparative metrics match perturbed predictions to clean predictions through model, fold, and original image identifier.
+
+---
+
+## XAI Status
+
+Integrated Gradients case studies for Chapter 5 have been completed and integrated into the thesis text. The selected cases include clean, OOD, anti-forensic, and adversarial scenarios, with `sigma_zero` represented as a high-confidence adversarial failure.
 
 ---
 
