@@ -669,7 +669,7 @@ def generate_optional_ood_confidence_distribution(
         return
 
     fig, ax = plt.subplots(figsize=(7.4, 4.8))
-    ax.boxplot(data, labels=labels, showmeans=True)
+    ax.boxplot(data, tick_labels=labels, showmeans=True)
     ax.set_ylim(0, 1.02)
     set_axis_percent(ax)
     ax.set_ylabel("Prediction confidence")
