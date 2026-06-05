@@ -15,6 +15,8 @@ The evaluation follows the thesis methodology and uses the official forensic eva
 | Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Completed and normalized | The forensic evaluation bundle has been processed and the `Pictures.csv` export has been normalized against the bundle manifest. |
 | Excire Foto 2025 | 4.1.5 | Completed / analyzed | Evaluated as a standalone general-purpose AI-assisted image retrieval tool in a controlled forensic context. Results are interpreted as semantic retrieval behavior, not as native forensic classification. |
 | Cellebrite Inseyets | 10.9 | Pending / to be consolidated | Included in the final experimental perimeter. Requires documentation of the media-analysis workflow, export format, observable AI labels/categories, and comparability with the bundle ground truth. |
+| Oxygen Forensic Detective | -- | Excluded | Not included in the final experimental perimeter. |
+| Autopsy | -- | Excluded | Not included in the final experimental perimeter. |
 
 ---
 
@@ -29,9 +31,13 @@ Consolidated / analyzed:
 
 Pending / to be consolidated:
 - Cellebrite Inseyets, version 10.9
-````
 
-Each tool must be documented separately, including:
+Excluded from final experimental perimeter:
+- Oxygen Forensic Detective
+- Autopsy
+```
+
+Each included tool must be documented separately, including:
 
 * import procedure;
 * software version;
@@ -174,7 +180,7 @@ The notes should include:
 * whether the output supports quantitative comparison with Magnet AXIOM / Magnet.AI and Excire Foto 2025;
 * limitations caused by proprietary processing, export granularity, or unavailable internal model information.
 
-The thesis should avoid attributing generic AI-based image-classification behavior to Cellebrite UFED unless the specific component and export used in the experiment support that claim.
+The thesis should avoid attributing generic AI-based image-classification behavior to Cellebrite unless the specific Inseyets component and export used in the experiment support that claim.
 
 ---
 
@@ -236,9 +242,8 @@ The thesis must distinguish:
 * Magnet AXIOM / Magnet.AI as a consolidated commercial-tool result;
 * Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool evaluated in a controlled forensic context;
 * Cellebrite Inseyets 10.9 as the Cellebrite tool included in the final experimental perimeter;
+* Oxygen Forensic Detective and Autopsy as excluded tools;
 * operational implications for AI-assisted triage;
 * limitations caused by proprietary labels, export formats, unavailable confidence scores, and unknown internal model behavior.
 
 Commercial-tool outputs are interpreted as observable operational signals, not as direct evidence of internal AI model performance.
-
-
