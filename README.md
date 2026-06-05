@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="docs/assets/repository_header.png" alt="Experimental Evaluation of the Robustness of AI-Based Forensic Tools" width="100%">
+  <img src="docs/assets/repository_header.png" alt="Evaluating the Robustness of AI-based Forensics Tools" width="100%">
 </p>
 
 # MSc Thesis – AI Robustness in Digital Forensics
 
-## Experimental Evaluation of the Robustness of AI-Based Forensic Tools for Automated Image Classification Under Adversarial and Anti-Forensic Attacks
+## Evaluating the Robustness of AI-based Forensics Tools under Adversarial and Anti-Forensics Attacks
 
 This repository contains the working research pipeline for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
 
@@ -32,8 +32,10 @@ The repository is currently aligned with the following state.
 | Proxy model evaluation | Completed | `evaluation/proxy_models/proxy_model_predictions.csv`, `results/metrics/` |
 | Forensic evaluation bundle | Generated and validated | `datasets/forensic_evaluation_bundle/` |
 | Magnet AXIOM / Magnet.AI evaluation | Completed and normalized | `evaluation/forensic_tools/`, `results/metrics/forensic_tools_metrics.csv` |
-| Additional commercial forensic tools | Pending / planned extension | X-Ways/Excire, Cellebrite UFED, Oxygen Forensic Detective |
-| Explainability case studies | In progress for Chapter 5 | `explainability/scripts/17_generate_integrated_gradients_case_studies.py`, `explainability/scripts/18_xai_interactive_launcher.py` |
+| Excire Foto 2025 evaluation | Completed / analyzed | Semantic retrieval evaluation with `D20`, `D50`, `D80` configurations |
+| Cellebrite Inseyets evaluation | Pending / to be consolidated | Version 10.9; final Cellebrite tool in the experimental perimeter |
+| Oxygen / Autopsy | Excluded from final experimental perimeter | Not included in the final quantitative comparison |
+| Explainability / XAI | Completed and integrated in Chapter 5 | Five representative Integrated Gradients case studies selected and included in the thesis text |
 | Thesis reporting | In progress | `docs/LatexThesis_ITA/` |
 
 Proxy evaluation summary:
@@ -82,7 +84,16 @@ metadata_separated_from_tool_input       = true
 
 ## Immediate Operational Focus
 
-The reproducible proxy-model layer and the Magnet AXIOM / Magnet.AI black-box commercial-tool layer are already consolidated in the repository.
+The reproducible proxy-model layer, the Magnet AXIOM / Magnet.AI black-box commercial-tool layer, the Excire Foto 2025 semantic retrieval evaluation, and the Chapter 5 Integrated Gradients case studies are consolidated.
+
+The remaining operational focus is:
+
+```text
+consolidate Cellebrite Inseyets 10.9 if exportable and mappable
+finalize Chapter 5 / Chapter 6 reporting
+perform final thesis-wide revision
+prepare the future English version
+```
 
 For black-box forensic-tool evaluation, import only:
 
@@ -99,18 +110,21 @@ datasets/forensic_evaluation_bundle/structured_audit_view/
 
 Those directories contain ground-truth labels, perturbation metadata, source information, and hash mappings. They are reserved for post-export normalization and audit.
 
-The consolidated commercial tool is:
+The consolidated commercial / black-box evaluation perimeter is:
 
 ```text
-Magnet AXIOM / Magnet.AI
-```
+Completed and normalized:
+- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
 
-Additional tools remain planned extensions, subject to licensing, module availability, and export normalization feasibility:
+Completed / analyzed:
+- Excire Foto 2025, version 4.1.5
 
-```text
-X-Ways Forensics / Excire
-Cellebrite UFED
-Oxygen Forensic Detective
+Pending / to be consolidated:
+- Cellebrite Inseyets, version 10.9
+
+Excluded from the final experimental perimeter:
+- Oxygen Forensic Detective
+- Autopsy
 ```
 
 Official forensic-tool prediction normalization entry point:
@@ -201,6 +215,7 @@ datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
 datasets/forensic_evaluation_bundle/
     ↓
 Magnet AXIOM / Magnet.AI
+X-Ways Forensics / Excire Foto 2025
     ↓
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
     ↓
@@ -209,6 +224,8 @@ results/metrics/forensic_tools_metrics.csv
     ↓
 explainability/scripts/17_generate_integrated_gradients_case_studies.py
 explainability/scripts/18_xai_interactive_launcher.py
+    ↓
+Chapter 5 representative XAI case studies
 ```
 
 `datasets/forensic_evaluation_bundle/` is the operational bridge between the local experimental pipeline and the forensic AI tool evaluation phase. It provides blind tool inputs while preserving internal traceability through metadata and hashes.
@@ -359,7 +376,7 @@ evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
 ```
 
-Additional commercial tools should be reported as planned extensions unless comparable, normalized exports become available.
+Excire Foto 2025 is treated as a standalone AI-assisted semantic retrieval tool evaluated in a controlled forensic context. Cellebrite Inseyets 10.9 remains pending unless comparable, normalized exports become available.
 
 ---
 
@@ -374,15 +391,17 @@ explainability/scripts/17_generate_integrated_gradients_case_studies.py
 explainability/scripts/18_xai_interactive_launcher.py
 ```
 
-Expected XAI outputs:
+The Chapter 5 XAI selection has been completed and integrated into the thesis text. The selected representative cases are:
 
 ```text
-explainability/manifests/
-explainability/logs/
-explainability/outputs/integrated_gradients/
+xai_case_0001 = clean correct weapon
+xai_case_0006 = clean false negative weapon
+xai_case_0009 = OOD classified as weapon
+xai_case_0010 = anti-forensic false negative under histogram modification
+xai_case_0015 = high-confidence adversarial false positive under sigma_zero
 ```
 
-Generated figures should be selected manually for thesis inclusion and should distinguish input images, IG overlays, heatmaps, masks, and diagnostic comparisons.
+Integrated Gradients are generated only for transparent proxy models and are not claimed as explanations of commercial black-box forensic tools.
 
 ---
 
@@ -428,7 +447,8 @@ The repository is designed around traceable artifacts:
 - attack manifests;
 - proxy model evaluation outputs;
 - forensic bundle metadata;
-- normalized forensic-tool outputs.
+- normalized forensic-tool outputs;
+- XAI case-study manifests and thesis figure references where applicable.
 
 The hash-based mapping is especially important because forensic tools may rename files, alter export structures, or provide different reporting formats.
 
@@ -456,14 +476,14 @@ and is aligned with research areas including Digital Forensics, AI-based forensi
 
 This repository contains the experimental artifacts developed for the following forthcoming Master's thesis:
 
-> Molinario, L. (2026). *Evaluating the Operational Robustness of AI-Based Image Classification Tools in Digital Forensics: An Experimental Assessment Against Adversarial Perturbations and Anti-Forensic Manipulations*. Master's thesis, University of Cagliari, Department of Engineering, Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence. Academic Year 2025/2026. Thesis in preparation.
+> Molinario, L. (2026). *Evaluating the Robustness of AI-based Forensics Tools under Adversarial and Anti-Forensics Attacks*. Master's thesis, University of Cagliari, Department of Engineering, Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence. Academic Year 2025/2026. Thesis in preparation.
 
 ### BibTeX
 
 ```bibtex
-@mastersthesis{molinario2026operationalrobustness,
+@mastersthesis{molinario2026robustnessforensictools,
   author  = {Molinario, Lello},
-  title   = {Evaluating the Operational Robustness of {AI}-Based Image Classification Tools in Digital Forensics: An Experimental Assessment Against Adversarial Perturbations and Anti-Forensic Manipulations},
+  title   = {Evaluating the Robustness of {AI}-based Forensics Tools under Adversarial and Anti-Forensics Attacks},
   school  = {University of Cagliari, Department of Engineering},
   type    = {Master's thesis},
   address = {Cagliari, Italy},
@@ -471,7 +491,6 @@ This repository contains the experimental artifacts developed for the following 
   note    = {Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence. Academic Year 2025/2026. Thesis in preparation.}
 }
 ```
-
 
 ---
 
