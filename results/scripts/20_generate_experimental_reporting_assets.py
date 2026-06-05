@@ -111,7 +111,7 @@ FORENSIC_TOOL_ORDER = (
 
 FORENSIC_TOOL_DISPLAY = {
     "magnet_axiom": "Magnet AXIOM",
-    "xways_excire": "Excire",
+    "excire_foto_2025": "Excire",
     "xways_excire_d20": "Excire D20",
     "xways_excire_d50": "Excire D50",
     "xways_excire_d80": "Excire D80",
