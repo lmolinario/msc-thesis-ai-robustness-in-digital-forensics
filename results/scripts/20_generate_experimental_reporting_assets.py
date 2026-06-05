@@ -170,7 +170,7 @@ def read_required_csv(path: Path, description: str) -> pd.DataFrame:
     if not path.is_file():
         raise FileNotFoundError(f"Missing required {description}: {repo_relative_string(path)}")
     try:
-        return pd.read_csv(path)
+        return pd.read_csv(path, low_memory=False)
     except pd.errors.EmptyDataError as exc:
         raise ValueError(f"Required CSV is empty: {repo_relative_string(path)}") from exc
 
@@ -181,7 +181,7 @@ def read_optional_csv(path: Path, description: str, warnings: list[str]) -> pd.D
         warnings.append(f"Optional {description} not found: {repo_relative_string(path)}")
         return None
     try:
-        return pd.read_csv(path)
+        return pd.read_csv(path, low_memory=False)
     except pd.errors.EmptyDataError:
         warnings.append(f"Optional {description} is empty: {repo_relative_string(path)}")
         return None
