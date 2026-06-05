@@ -4,6 +4,8 @@ This directory contains the qualitative explainability workflow used to support 
 
 The thesis uses **Integrated Gradients (IG)** as diagnostic support for transparent proxy models. XAI outputs are not treated as primary robustness metrics and are not generated for commercial black-box forensic tools.
 
+The Chapter 5 XAI selection is completed and integrated into the thesis text.
+
 ---
 
 ## Methodological Role
@@ -62,7 +64,7 @@ resnet18
 clip
 ```
 
-Integrated Gradients are computed only on transparent proxy models. Commercial forensic tools such as Magnet.AI, Excire, Cellebrite UFED, and Oxygen are treated as black boxes and are not explainable through this workflow.
+Integrated Gradients are computed only on transparent proxy models. Commercial forensic tools such as Magnet AXIOM / Magnet.AI, Excire Foto 2025 and Cellebrite Inseyets are treated as black boxes or operationally opaque tools and are not explained through this workflow.
 
 ---
 
@@ -79,7 +81,35 @@ chapter5_core
 all
 ```
 
-Chapter 5 case selection should remain human-in-the-loop: candidate cases can be generated automatically, but final thesis figures should be selected manually for interpretability, visual quality, and methodological relevance.
+Chapter 5 case selection follows the human-in-the-loop methodology: candidate cases can be generated automatically, but final thesis figures are selected manually for interpretability, visual quality, and methodological relevance.
+
+---
+
+## Completed Chapter 5 Case Selection
+
+The final Chapter 5 XAI section uses five representative EfficientNet-B0 Integrated Gradients cases:
+
+| Case ID | Scenario | Manual label | Prediction | Operational role |
+|---|---|---|---|---|
+| `xai_case_0001` | `clean` | `weapon` | `weapon` | Clean correct reference case |
+| `xai_case_0006` | `clean` | `weapon` | `non_weapon` | Clean false negative |
+| `xai_case_0009` | `ood` | `ood` | `weapon` | OOD sample classified as weapon |
+| `xai_case_0010` | `histogram_modification` | `weapon` | `non_weapon` | Anti-forensic false negative |
+| `xai_case_0015` | `sigma_zero` | `non_weapon` | `weapon` | High-confidence adversarial false positive |
+
+These cases are already integrated in:
+
+```text
+docs/LatexThesis_ITA/sections/05_experiments.tex
+```
+
+The corresponding thesis figure references use the following naming convention:
+
+```text
+docs/LatexThesis_ITA/images/fig_xai_case*_input.png
+docs/LatexThesis_ITA/images/fig_xai_case*_heatmap.png
+docs/LatexThesis_ITA/images/fig_xai_case*_overlay.png
+```
 
 ---
 
@@ -88,13 +118,13 @@ Chapter 5 case selection should remain human-in-the-loop: candidate cases can be
 The official XAI scripts save separate assets for each case:
 
 ```text
-__input.png                         = input image
-__overlay.png                       = Integrated Gradients overlay
-__heatmap.png                       = heatmap only
-__comparison.png                    = diagnostic side-by-side panel
-__mask.png                          = normalized attribution mask
-__top*_mask.png                     = top-percentile attribution mask
-__distribution.png                  = attribution distribution
+__input.png                          = input image
+__overlay.png                        = Integrated Gradients overlay
+__heatmap.png                        = heatmap only
+__comparison.png                     = diagnostic side-by-side panel
+__mask.png                           = normalized attribution mask
+__top*_mask.png                      = top-percentile attribution mask
+__distribution.png                   = attribution distribution
 ```
 
 For thesis inclusion, prefer separate input and overlay images or compact manually curated panels. Avoid turning Chapter 5 into an image gallery.
@@ -103,24 +133,31 @@ For thesis inclusion, prefer separate input and overlay images or compact manual
 
 ## Thesis Usage
 
-Recommended use in Chapter 5:
+The XAI section is positioned after the quantitative robustness results and is framed as diagnostic interpretation of selected proxy-model failures and successes.
+
+Its status is:
 
 ```text
-5 main XAI cases in the chapter
-+ optional additional cases in appendix or supplementary material
+completed and integrated in Chapter 5
 ```
 
-The XAI section should be positioned after the quantitative robustness results and should be framed as diagnostic interpretation of selected proxy-model failures and successes.
+XAI is not used to explain Magnet AXIOM / Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, or any other proprietary black-box tool.
 
 ---
 
 ## Traceability
 
-Manual XAI selection must be preserved through manifests and logs in:
+Manual XAI selection should be preserved through manifests and logs in:
 
 ```text
 explainability/manifests/
 explainability/logs/
 ```
 
-This keeps the qualitative selection process reproducible and consistent with the human-in-the-loop methodology of the thesis.
+The final thesis-level selection is also traceable through the LaTeX section and figure references in:
+
+```text
+docs/LatexThesis_ITA/sections/05_experiments.tex
+```
+
+This keeps the qualitative selection process consistent with the human-in-the-loop methodology of the thesis.
