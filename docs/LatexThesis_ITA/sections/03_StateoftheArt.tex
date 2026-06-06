@@ -53,11 +53,14 @@ Tale distinzione è essenziale per l'interpretazione dei risultati: \textit{Exci
 \subsection{Cellebrite Inseyets e classificazione automatica dei media}
 \label{subsec:sota_cellebrite}
 
-L'ecosistema Cellebrite è ampiamente associato alle attività di mobile forensics, comprendendo funzionalità di acquisizione, elaborazione ed esame di dati provenienti da dispositivi mobili. In relazione ai contenuti visivi, la documentazione del produttore descrive funzionalità di \textit{media classification} orientate alla categorizzazione automatica di immagini e video mediante tecniche AI-based \cite{cellebrite_media_classification}.
+L'ecosistema Cellebrite è ampiamente associato alle attività di mobile forensics e digital investigation. La documentazione del produttore descrive \textit{Cellebrite Inseyets} come una suite integrata per l'accesso, l'estrazione, l'elaborazione, l'analisi e la produzione di report relativi a evidenze digitali provenienti soprattutto da dispositivi mobili \cite{cellebrite_inseyets_official}. In tale prospettiva, Inseyets non rappresenta un singolo modulo isolato, ma un ambiente operativo che combina funzionalità di estrazione, analisi, triage e gestione del workflow investigativo.
 
-Nel contesto della presente tesi, \textit{Cellebrite Inseyets} è rilevante perché rappresenta un esempio di software commerciale in cui funzionalità AI-assisted vengono integrate all'interno di workflow professionali di analisi forense mobile. Rispetto a strumenti focalizzati prevalentemente sull'analisi di immagini in ambienti desktop o general-purpose, Cellebrite consente di estendere il ragionamento sulla robustezza operativa anche a un contesto più vicino alla mobile forensics, dove grandi quantità di contenuti multimediali possono essere sottoposte a categorizzazione automatica durante l'esame dei dati estratti.
+In relazione ai contenuti visivi, la documentazione Cellebrite descrive inoltre funzionalità di \textit{media classification} orientate alla categorizzazione automatica di immagini e video mediante tecniche AI-based \cite{cellebrite}. Tali funzionalità si inseriscono in una tendenza più ampia della Digital Forensics contemporanea, nella quale strumenti commerciali integrano moduli automatici per supportare il triage, la selezione e la prioritizzazione di grandi quantità di contenuti multimediali.
 
-Tale prospettiva conferma una tendenza più ampia della Digital Forensics contemporanea: l'adozione di moduli AI-based per supportare il triage, la selezione e la prioritizzazione dei contenuti visivi. Tuttavia, come per gli altri strumenti commerciali considerati nello stato dell'arte, l'integrazione di funzionalità automatiche non elimina la necessità di valutarne affidabilità, limiti e comportamento in presenza di input degradati, manipolati o non pienamente rappresentativi delle condizioni ideali di funzionamento. Per questo motivo, Cellebrite Inseyets viene richiamato come ulteriore caso significativo di software commerciale black-box rispetto al problema generale della robustezza operativa dei sistemi AI-assisted in ambito forense.
+Nel contesto della presente tesi, \textit{Cellebrite Inseyets} è quindi rilevante come esempio di software commerciale black-box in cui funzionalità AI-assisted sono integrate all'interno di workflow professionali di analisi forense mobile. Rispetto a strumenti desktop o general-purpose orientati principalmente alla ricerca e categorizzazione fotografica, Cellebrite consente di estendere il ragionamento sulla robustezza operativa a un contesto più vicino alla mobile forensics, dove l'analista può trovarsi a esaminare grandi volumi di immagini e video estratti da dispositivi o supporti digitali.
+
+Come per gli altri strumenti commerciali considerati nello stato dell'arte, l'integrazione di funzionalità automatiche non elimina tuttavia la necessità di valutarne affidabilità, limiti e comportamento in presenza di input degradati, manipolati o non pienamente rappresentativi delle condizioni ideali di funzionamento. Per questo motivo, Cellebrite Inseyets viene richiamato come ulteriore caso significativo di software commerciale black-box rispetto al problema generale della robustezza operativa dei sistemi AI-assisted in ambito forense.
+
 
 
 
@@ -96,8 +99,8 @@ Alla luce di tali limiti, il contributo della presente tesi non consiste nel car
         Cellebrite Inseyets &
         Categorizzazione AI-assisted di immagini e video nell'ambito dell'analisi mobile &
         Consente di verificare l'applicabilità del bundle a un workflow di analisi mobile, sulla base degli output concretamente esportabili dal software &
-        Tool commerciale black-box; la confrontabilità dipende dal formato degli output esportabili e dalla ricodifica operativa delle classificazioni \
-
+        Tool commerciale black-box; la confrontabilità dipende dal formato degli output esportabili e dalla ricodifica operativa delle classificazioni  \\
+        \addlinespace
 
         \bottomrule
     \end{tabularx}
@@ -305,6 +308,7 @@ La Figura~\ref{fig:sota-literature-gap} visualizza sinteticamente questa
 frammentazione: i sette filoni recensiti convergono verso uno spazio
 metodologico che la letteratura non affronta ancora in modo unitario.
 
+
 \begin{figure}[H]
 \centering
 \begin{tikzpicture}[
@@ -313,8 +317,15 @@ metodologico che la letteratura non affronta ancora in modo unitario.
         rectangle, rounded corners,
         draw=black, thick,
         fill=gray!10,
-        minimum width=3.4cm,
+        minimum width=3.5cm,
         minimum height=1.0cm
+    },
+    central/.style={
+        rectangle, rounded corners,
+        draw=black, thick,
+        fill=blue!10,
+        minimum width=4.4cm,
+        minimum height=1.1cm
     },
     gap/.style={
         rectangle, rounded corners,
@@ -326,39 +337,52 @@ metodologico che la letteratura non affronta ancora in modo unitario.
     arrow/.style={->, thick, >=stealth}
 ]
 
-%% Riga alta (y=6)
-\node[field] (ai_df)          at (0,   6) {Automazione\\nella \gls{df}};
-\node[field] (robustness)     at (9,   6) {Valutazione\\della robustezza};
+% Riga superiore
+\node[field]   (ai_df)      at (0,   5.8) {Automazione\\nella \gls{df}};
+\node[central] (advml)      at (4.7, 5.8) {\gls{advml}\\su immagini};
+\node[field]   (robustness) at (9.4, 5.8) {Valutazione\\della robustezza};
 
-%% Riga media (y=4)
-\node[field] (tools)          at (0,   4) {Software \gls{ai}-based\\in contesti forensi};
-\node[field] (aml)            at (4.5, 4) {\gls{advml}\\su immagini};
-\node[field] (antiforensics)  at (9,   4) {Anti-forensics\\su immagini};
+% Riga centrale
+\node[field] (tools)         at (0,   3.7) {Software \gls{ai}-based\\in contesti forensi};
+\node[gap]   (gap)           at (4.7, 3.7) {Gap metodologico:\\valutazione integrata\\della robustezza operativa};
+\node[field] (antiforensics) at (9.4, 3.7) {Anti-forensics\\su immagini};
 
-%% Riga bassa (y=2)
-\node[field] (classification) at (0,   2) {Classificazione\\automatica di immagini};
-\node[field] (xai)            at (9,   2) {\gls{xai}\\e affidabilità};
+% Riga inferiore
+\node[field] (classification) at (0,   1.6) {Classificazione\\automatica di immagini};
+\node[field] (xai)            at (9.4, 1.6) {\gls{xai}\\e affidabilità};
 
-%% Gap — nodo terminale, sotto tutto (y=0)
-\node[gap]   (gap)            at (4.5, 0) {Gap metodologico:\\valutazione integrata\\della robustezza operativa};
+% Punti distinti di ingresso sul box gap
+\coordinate (gapNW) at ([yshift=0.45cm]gap.west);
+\coordinate (gapW)  at (gap.west);
+\coordinate (gapSW) at ([yshift=-0.45cm]gap.west);
 
-%% Frecce verso il gap (convergenza)
-\draw[arrow] (ai_df)         -- (gap);
-\draw[arrow] (tools)         -- (gap);
-\draw[arrow] (classification)-- (gap);
-\draw[arrow] (robustness)    -- (gap);
-\draw[arrow] (aml)           -- (gap);
-\draw[arrow] (antiforensics) -- (gap);
-\draw[arrow] (xai)           -- (gap);
+\coordinate (gapNE) at ([yshift=0.45cm]gap.east);
+\coordinate (gapE)  at (gap.east);
+\coordinate (gapSE) at ([yshift=-0.45cm]gap.east);
+
+
+
+% Frecce da sinistra verso il gap
+\draw[arrow] (ai_df.east)          -- ++(0.25,0) |- (gapNW);
+\draw[arrow] (tools.east)          -- (gapW);
+\draw[arrow] (classification.east) -- ++(0.25,0) |- (gapSW);
+
+% Frecce da destra verso il gap
+\draw[arrow] (robustness.west)     -- ++(-0.25,0) |- (gapNE);
+\draw[arrow] (antiforensics.west)  -- (gapE);
+\draw[arrow] (xai.west)            -- ++(-0.25,0) |- (gapSE);
+
+
+% Freccia centrale
+\draw[arrow] (advml.south) -- (gap.north);
 
 \end{tikzpicture}
 
-
-\caption{Convergenza dei principali filoni della letteratura verso il gap metodologico affrontato dalla presente tesi.}
-
-
+\caption{Strutturazione dei principali filoni della letteratura rispetto al gap metodologico affrontato dalla presente tesi.}
 \label{fig:sota-literature-gap}
 \end{figure}
+
+
 
 
 Il gap specifico individuato dalla presente tesi riguarda quindi la limitata disponibilità di protocolli sperimentali integrati che combinino, nello stesso disegno valutativo, classificazione automatizzata o recupero semantico di immagini, validazione \textit{human-in-the-loop} del dataset, modelli proxy eterogenei, software AI-based selezionati per la valutazione operativa in contesto forense, perturbazioni adversariali, trasformazioni anti-forensi, metriche quantitative e analisi spiegabile del comportamento dei modelli. La rilevanza di tale integrazione deriva dal fatto che, in un contesto forense, l'affidabilità di un sistema automatico non può essere valutata soltanto come proprietà isolata del classificatore. Essa dipende anche dalla qualità e dalla rappresentatività dei dati, dalla presenza di casi borderline o fuori distribuzione, dalla natura delle manipolazioni applicate, dalla trasparenza del software impiegato e dall'effetto che eventuali errori possono produrre sul triage e sulla selezione delle evidenze.
