@@ -34,7 +34,6 @@ The repository is currently aligned with the following state.
 | Magnet AXIOM / Magnet.AI evaluation | Completed and normalized | `evaluation/forensic_tools/`, `results/metrics/forensic_tools_metrics.csv` |
 | Excire Foto 2025 evaluation | Completed / analyzed | Semantic retrieval evaluation with `D20`, `D50`, `D80` configurations |
 | Cellebrite Inseyets evaluation | Pending / to be consolidated | Version 10.9; final Cellebrite tool in the experimental perimeter |
-| Oxygen / Autopsy | Excluded from final experimental perimeter | Not included in the final quantitative comparison |
 | Explainability / XAI | Completed and integrated in Chapter 5 | Five representative Integrated Gradients case studies selected and included in the thesis text |
 | Thesis reporting | In progress | `docs/LatexThesis_ITA/` |
 
@@ -122,9 +121,7 @@ Completed / analyzed:
 Pending / to be consolidated:
 - Cellebrite Inseyets, version 10.9
 
-Excluded from the final experimental perimeter:
-- Oxygen Forensic Detective
-- Autopsy
+
 ```
 
 Official forensic-tool prediction normalization entry point:
