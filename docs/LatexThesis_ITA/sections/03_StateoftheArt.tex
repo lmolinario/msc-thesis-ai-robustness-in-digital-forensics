@@ -55,9 +55,10 @@ Tale distinzione è essenziale per l'interpretazione dei risultati: \textit{Exci
 
 L'ecosistema Cellebrite è ampiamente associato alle attività di mobile forensics, comprendendo funzionalità di acquisizione, elaborazione ed esame di dati provenienti da dispositivi mobili. In relazione ai contenuti visivi, la documentazione del produttore descrive funzionalità di \textit{media classification} orientate alla categorizzazione automatica di immagini e video mediante tecniche AI-based \cite{cellebrite_media_classification}.
 
-Nel perimetro della presente tesi, la valutazione sperimentale è riferita a \textit{Cellebrite Inseyets}, versione 10.9, trattato come software commerciale \textit{black-box} per analisi AI-assisted dei media. L'ambiente di esportazione dei risultati è \textit{Cellebrite Physical Analyzer} 10.9.0.3029. Il riferimento a \textit{UFED}, pur presente nel report di esportazione come componente dell'ecosistema Cellebrite, non deve essere interpretato come riferimento a un classificatore di immagini, ma come elemento distinto rispetto alla fase di acquisizione o gestione del dispositivo.
+Nel perimetro della presente tesi, \textit{Cellebrite Inseyets} viene considerato come software commerciale \textit{black-box} per analisi AI-assisted dei media. La versione specificamente impiegata, l'ambiente di esportazione degli output e le scelte di normalizzazione saranno documentati nel capitolo metodologico, dove verrà distinta la fase di acquisizione o gestione del dispositivo dalla fase di analisi e categorizzazione dei contenuti visivi.
 
-Questa distinzione è metodologicamente rilevante perché consente di separare la fase di acquisizione dei dati dalla successiva fase di analisi o classificazione dei media. Di conseguenza, nella presente tesi Cellebrite viene incluso nel confronto sperimentale esclusivamente in relazione agli output concretamente disponibili per l'analisi delle immagini, esportati e normalizzati rispetto alla ground truth del bundle sperimentale. Tale impostazione evita di attribuire genericamente a \textit{UFED} funzionalità di classificazione visuale non direttamente osservate e mantiene la valutazione nel perimetro dei software commerciali osservabili in modalità \textit{black-box}.
+Questa distinzione è metodologicamente rilevante perché consente di evitare attribuzioni generiche all'intero ecosistema Cellebrite e di mantenere la valutazione nel perimetro degli output concretamente osservabili. Di conseguenza, nella presente tesi Cellebrite viene incluso nel confronto sperimentale esclusivamente in relazione alle classificazioni disponibili per l'analisi delle immagini, esportabili e normalizzabili rispetto alla ground truth del bundle sperimentale.
+
 
 \subsection{Limiti comuni della valutazione black-box}
 \label{subsec:sota_black_box_limits}
@@ -93,8 +94,9 @@ Alla luce di tali limiti, il contributo della presente tesi non consiste nel car
 
         Cellebrite Inseyets &
         Categorizzazione AI-assisted di immagini e video nell'ambito dell'analisi mobile &
-        Consente di verificare l'applicabilità del bundle a un workflow di analisi mobile, sulla base degli output esportati da Cellebrite Physical Analyzer 10.9.0.3029 &
-        Tool commerciale black-box; la confrontabilità dipende dal formato degli output esportabili e dalla ricodifica operativa delle classificazioni \\
+        Consente di verificare l'applicabilità del bundle a un workflow di analisi mobile, sulla base degli output concretamente esportabili dal software &
+        Tool commerciale black-box; la confrontabilità dipende dal formato degli output esportabili e dalla ricodifica operativa delle classificazioni \
+
 
         \bottomrule
     \end{tabularx}

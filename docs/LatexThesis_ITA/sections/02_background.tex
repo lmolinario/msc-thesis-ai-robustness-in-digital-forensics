@@ -1,7 +1,7 @@
 % ─────────────────────────────────────────────────────────────────────────────
 \chapter{Technical Background Concepts}\label{chap:background}
 % ─────────────────────────────────────────────────────────────────────────────
-Questo capitolo introduce i concetti teorici necessari per comprendere la valutazione della robustezza operativa di modelli proxy e software AI-based impiegati, nel contesto della \gls{df}, per la classificazione automatizzata o il recupero semantico di immagini. Il quadro teorico è costruito a partire dai fondamenti della \gls{df} e della prova digitale, per poi esaminare il ruolo dell'\gls{ai} nei workflow forensi, la rilevanza delle immagini come evidenze digitali, i principi di \gls{ml} e \gls{dl} applicati alla computer vision, l'\gls{advml}, le tecniche anti-forensi applicate a contenuti visivi e il ruolo dell'\gls{xai} nella valutazione dell'affidabilità dei modelli. Nel presente capitolo tali tecniche sono inquadrate sul piano concettuale; la motivazione della selezione, le configurazioni adottate e le procedure di applicazione nel protocollo sperimentale sono discusse nel capitolo metodologico.
+Questo capitolo introduce i concetti teorici necessari per comprendere la valutazione della robustezza operativa di modelli proxy e software AI-based impiegati, nel contesto della \gls{df}, per la classificazione automatizzata o il recupero semantico di immagini. Il quadro teorico è costruito a partire dai fondamenti della \gls{df} e della prova digitale, per poi esaminare il ruolo dell'\gls{ai} nei workflow forensi, la rilevanza delle immagini come evidenze digitali, i principi di \gls{ml} e \gls{dl} applicati alla computer vision, l'\textbf{\gls{advml}}, le tecniche anti-forensi applicate a contenuti visivi e il ruolo dell'\gls{xai} nella valutazione dell'affidabilità dei modelli. Nel presente capitolo tali tecniche sono inquadrate sul piano concettuale; la motivazione della selezione, le configurazioni adottate e le procedure di applicazione nel protocollo sperimentale sono discusse nel capitolo metodologico.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Digital Forensics e prova digitale}
@@ -287,7 +287,7 @@ La Tabella~\ref{tab:threat_model} sintetizza le principali dimensioni del threat
 Nel quadro generale dell'\gls{advml}, la presente tesi considera un insieme di perturbazioni incluse nella valutazione adversariale, comprendente sia attacchi costruiti rispetto al comportamento del modello sia una trasformazione \textit{adversarial-style} model-agnostic. La scelta non mira a coprire in modo esaustivo l'intero panorama delle tecniche esistenti, ma a includere perturbazioni eterogenee per costo computazionale, livello di conoscenza richiesto sull'architettura del modello, vincolo di alterazione e plausibilità operativa. In particolare, vengono considerate perturbazioni gradient-based, sparse, iterative e model-agnostic, così da osservare il comportamento dei sistemi AI-based rispetto a manipolazioni con caratteristiche differenti.
 
 
-Il \gls{fgsm} rappresenta una baseline adversariale semplice ed efficiente.
+Il \textbf{\acrfull{fgsm}} rappresenta una baseline adversariale semplice ed efficiente.
 Dato un classificatore \(f\), una funzione di perdita \(\mathcal{L}\), un'immagine
 \(x\) e la corrispondente etichetta corretta \(y\), l'attacco genera un'immagine
 perturbata muovendosi nella direzione del segno del gradiente della perdita
@@ -302,7 +302,7 @@ valutare rapidamente la sensibilità del classificatore a una perturbazione
 white-box a singolo passo, costruita direttamente rispetto alla funzione di
 perdita del modello \cite{goodfellow2015explaining}.
 
-Il One Pixel Attack rappresenta invece una famiglia di attacchi sparse e
+Il \textbf{\gls{onepixel}} rappresenta invece una famiglia di attacchi sparse e
 black-box, nei quali la perturbazione è vincolata alla modifica di un numero
 molto limitato di pixel. In forma generale, l'obiettivo consiste nel trovare una
 versione \(x'\) dell'immagine tale che:
@@ -312,11 +312,11 @@ f(x') \neq f(x)
 \|x - x'\|_0 \leq k,
 \]
 dove \(k\) indica il numero massimo di pixel modificabili. Nel caso estremo del
-One Pixel Attack, \(k=1\). L'attacco è rilevante perché mostra come variazioni
+\gls{onepixel}, \(k=1\). L'attacco è rilevante perché mostra come variazioni
 estremamente localizzate possano alterare la decisione di una rete neurale,
 anche senza accesso diretto ai gradienti del modello \cite{su2019onepixel}.
 
-Sigma Zero appartiene alla famiglia degli attacchi orientati alla sparsità e
+\textbf{\gls{sigmazero}} appartiene alla famiglia degli attacchi orientati alla sparsità e
 alla norma \(L_0\). A differenza degli attacchi che limitano l'ampiezza globale
 della perturbazione mediante norme \(L_2\) o \(L_\infty\), gli attacchi \(L_0\)
 mirano a ridurre il numero di componenti modificate dell'input. L'obiettivo può
@@ -331,7 +331,7 @@ perturbazioni sparse possono essere difficili da individuare mediante controlli
 visivi ordinari e possono non degradare in modo evidente la qualità percettiva
 dell'immagine \cite{zhao2024sigmazero}.
 
-SuperDeepFool viene considerato come attacco iterativo ispirato alla famiglia
+\textbf{\gls{superdeepfool}} viene considerato come attacco iterativo ispirato alla famiglia
 DeepFool. L'idea generale di DeepFool è stimare iterativamente una perturbazione
 capace di attraversare il confine decisionale del classificatore, cercando una
 modifica di ampiezza contenuta sufficiente a cambiare la predizione del modello.
@@ -349,20 +349,37 @@ senza attribuire alla tecnica una capacità generale di superare ogni possibile
 difesa o forma di pre-processing \cite{moosavi2016deepfool,zhang2024superdeepfool}.
 Tale cautela è coerente con la letteratura che ha evidenziato come alcune difese
 possano produrre una robustezza apparente, ad esempio attraverso gradient masking o
-obfuscated gradients, senza garantire una reale resistenza ad attacchi adattivi \cite{athalye2018obfuscated}.
+obfuscated gradients, senza garantire una reale resistenza ad attacchi adattivi
+\cite{athalye2018obfuscated}.
 
-Un ulteriore attacco frequentemente impiegato nella valutazione della robustezza adversariale è \gls{pgd}, che estende l'idea degli attacchi gradient-based mediante aggiornamenti iterativi vincolati entro un intorno perturbativo ed è stato ampiamente utilizzato come riferimento per formulare la robustezza adversariale come problema di sicurezza del modello \cite{madry2018towards}. Nella presente tesi, tuttavia, \gls{pgd} non viene incluso nel protocollo sperimentale principale. La scelta deriva dalla volontà di mantenere il workflow computazionalmente sostenibile e focalizzato sulla robustezza operativa in ambito forense, utilizzando \textit{SuperDeepFool} e \textit{Sigma Zero} come rappresentanti, rispettivamente, di perturbazioni iterative e sparse coerenti con gli obiettivi del protocollo sperimentale.
-Accanto agli attacchi costruiti rispetto al comportamento del modello,
-la tesi considera anche una perturbazione model-agnostic basata sullo spostamento dei canali colore.
-Il color shift modifica globalmente la rappresentazione cromatica dell'immagine, ad esempio mediante offset o
-fattori moltiplicativi applicati ai canali \(R\), \(G\) e \(B\).
-Esso rappresenta un caso intermedio rispetto alla distinzione classica tra attacchi adversariali
-model-dependent e trasformazioni anti-forensi. In questa tesi viene trattato come perturbazione
-\textit{adversarial-style} di tipo model-agnostic: non utilizza informazioni di gradiente né
-ottimizza direttamente una funzione di perdita del modello, ma viene applicato con la finalità
-sperimentale di valutare l'effetto di alterazioni semanticamente conservative sulla classificazione automatizzata.
-Per tale motivo, pur condividendo alcune caratteristiche visive con trasformazioni realistiche dell'immagine,
-viene mantenuto nel gruppo sperimentale delle perturbazioni adversariali, qualificandolo esplicitamente come trasformazione \textit{adversarial-style} model-agnostic e non come attacco ottimizzato rispetto al modello.
+Un ulteriore attacco frequentemente impiegato nella valutazione della robustezza
+adversariale è \textbf{\acrfull{pgd}}, che estende l'idea degli attacchi
+gradient-based mediante aggiornamenti iterativi vincolati entro un intorno
+perturbativo ed è stato ampiamente utilizzato come riferimento per formulare la
+robustezza adversariale come problema di sicurezza del modello
+\cite{madry2018towards}. Nella presente tesi, tuttavia, \gls{pgd} non viene
+incluso nel protocollo sperimentale principale. La scelta deriva dalla volontà di
+mantenere il workflow computazionalmente sostenibile e focalizzato sulla
+robustezza operativa in ambito forense, utilizzando \gls{superdeepfool} e
+\gls{sigmazero} come rappresentanti, rispettivamente, di perturbazioni iterative
+e sparse coerenti con gli obiettivi del protocollo sperimentale.
+
+Accanto agli attacchi costruiti rispetto al comportamento del modello, la tesi
+considera anche una perturbazione model-agnostic basata sullo spostamento dei
+canali colore. La \textbf{\gls{colorshift}} modifica globalmente la rappresentazione
+cromatica dell'immagine, ad esempio mediante offset o fattori moltiplicativi
+applicati ai canali \(R\), \(G\) e \(B\). Essa rappresenta un caso intermedio
+rispetto alla distinzione classica tra attacchi adversariali model-dependent e
+trasformazioni anti-forensi. In questa tesi viene trattata come perturbazione
+\textit{adversarial-style} di tipo model-agnostic: non utilizza informazioni di
+gradiente né ottimizza direttamente una funzione di perdita del modello, ma viene
+applicata con la finalità sperimentale di valutare l'effetto di alterazioni
+semanticamente conservative sulla classificazione automatizzata. Per tale motivo,
+pur condividendo alcune caratteristiche visive con trasformazioni realistiche
+dell'immagine, viene mantenuta nel gruppo sperimentale delle perturbazioni
+adversariali, qualificandola esplicitamente come trasformazione
+\textit{adversarial-style} model-agnostic e non come attacco ottimizzato rispetto
+al modello.
 
 La Tabella~\ref{tab:background_attack_families} sintetizza le perturbazioni adversariali e \textit{adversarial-style} considerate nel protocollo sperimentale.
 \begin{table}[htbp]
@@ -444,19 +461,20 @@ ragione, tali trasformazioni costituiscono un ponte tra l'image forensics
 tradizionale e la valutazione della robustezza operativa di sistemi
 \gls{ai}-based.
 
-La ricompressione \gls{jpeg} consiste nel salvare nuovamente un'immagine mediante
-compressione con perdita. Poiché il formato \gls{jpeg} opera sulle componenti
-frequenziali dell'immagine e introduce artefatti dipendenti dal livello di
-qualità, una ricompressione può modificare o sovrascrivere tracce precedenti,
-alterare le statistiche locali e degradare dettagli visivi rilevanti per i
-classificatori. Dal punto di vista forense, tale trasformazione è rilevante
+
+La trasformazione \textbf{\gls{jpegrecompression}} consiste nel salvare nuovamente
+un'immagine mediante compressione con perdita. Poiché il formato \gls{jpeg} opera
+sulle componenti frequenziali dell'immagine e introduce artefatti dipendenti dal
+livello di qualità, una ricompressione può modificare o sovrascrivere tracce
+precedenti, alterare le statistiche locali e degradare dettagli visivi rilevanti
+per i classificatori. Dal punto di vista forense, tale trasformazione è rilevante
 perché può interferire sia con analisi basate su artefatti di compressione sia
 con modelli \gls{ai}-based sensibili a texture, bordi e pattern locali
 \cite{stamm2010anti,stamm2013information}.
 
-Le operazioni di resampling e resizing modificano la risoluzione e la griglia
-spaziale dell'immagine. Indicando con \(x\) l'immagine originale, una
-trasformazione di ridimensionamento può essere modellata come:
+La trasformazione \textbf{\gls{resampleresize}} modifica la risoluzione e la griglia
+spaziale dell'immagine. Indicando con (x) l'immagine originale, una trasformazione
+di ridimensionamento può essere modellata come:
 \[
 x' = \mathcal{R}(x; s, \mathcal{I}),
 \]
@@ -467,9 +485,9 @@ sostituita da valori interpolati. Questo processo può alterare correlazioni tra
 pixel, tracce geometriche e pattern locali utilizzati tanto dagli strumenti
 forensi quanto dai modelli di classificazione \cite{popescu2005exposing,farid2016photo}.
 
-Il Gaussian blur introduce una sfocatura controllata mediante convoluzione con
-un kernel gaussiano. In forma semplificata, l'operazione può essere descritta
-come:
+La trasformazione \textbf{\gls{gaussianblur}} introduce una sfocatura controllata
+mediante convoluzione con un kernel gaussiano. In forma semplificata, l'operazione
+può essere descritta come:
 \[
 x' = x * G_{\sigma},
 \]
@@ -480,10 +498,10 @@ della classificazione automatica, il blur è rilevante perché molti modelli
 \gls{cnn} apprendono feature nei primi livelli convoluzionali fortemente legate
 a bordi, texture e variazioni locali di intensità.
 
-Le modifiche dell'istogramma intervengono sulla distribuzione dei valori di
-intensità dell'immagine. Nel caso dell'histogram equalization, l'obiettivo è
-rimappare i livelli di intensità utilizzando la funzione di distribuzione
-cumulativa, secondo una trasformazione del tipo:
+La trasformazione \textbf{\gls{histogrammodification}} interviene sulla distribuzione
+dei valori di intensità dell'immagine. Nel caso dell'\textit{histogram equalization},
+l'obiettivo è rimappare i livelli di intensità utilizzando la funzione di
+distribuzione cumulativa, secondo una trasformazione del tipo:
 \[
 x'_i = \left\lfloor (L-1)\cdot \operatorname{CDF}(x_i) \right\rfloor,
 \]
@@ -493,10 +511,10 @@ il contrasto percepito, ma può anche modificare statistiche globali e locali
 utilizzate da strumenti di image forensics e classificatori automatici
 \cite{barni2018cf}.
 
-Il contrast stretching applica una normalizzazione lineare della gamma dinamica.
-Indicando con \(I_{\min}\) e \(I_{\max}\) due estremi di intensità, eventualmente
-calcolati tramite percentili per ridurre l'influenza degli outlier, la
-trasformazione può essere espressa come:
+La trasformazione \textbf{\gls{contraststretching}} applica una normalizzazione
+lineare della gamma dinamica. Indicando con (\(I_{\min}\) e \(I_{\max}\) due
+estremi di intensità, eventualmente calcolati tramite percentili per ridurre
+l'influenza degli outlier, la trasformazione può essere espressa come:
 \[
 x'_i =
 \begin{cases}
@@ -508,6 +526,10 @@ x'_i =
 Questa operazione modifica il contrasto globale dell'immagine e può alterare la
 risposta dei modelli rispetto a regioni scure, sovraesposte o caratterizzate da
 bassa separazione tonale.
+
+
+
+
 
 La Tabella~\ref{tab:background_antiforensic_transformations} sintetizza le
 trasformazioni anti-forensi considerate nel protocollo sperimentale.
