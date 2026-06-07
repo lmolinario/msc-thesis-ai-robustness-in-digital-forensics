@@ -359,7 +359,7 @@ delle categorie operative utilizzate nel protocollo di revisione manuale. Gli
 esempi hanno funzione esclusivamente illustrativa e non esauriscono la variabilità
 interna delle classi.
 
-\begin{figure}[H]
+\begin{figure}[h]
 \centering
 
 \begin{minipage}[t]{0.31\textwidth}
@@ -465,6 +465,8 @@ costruire un benchmark visivamente omogeneo, ma un pool iniziale sufficientement
 vario da rappresentare alcune delle condizioni di eterogeneità che caratterizzano
 le indagini digitali contemporanee.
 
+
+
 \begin{table}[H]
 \centering
 \caption{Sorgenti grezze utilizzate nella pipeline dataset.}
@@ -499,13 +501,13 @@ assegna etichette semantiche definitive, ma produce una base tecnica validata
 attraverso controlli di leggibilità, filtraggio dimensionale, calcolo degli hash
 e rimozione dei duplicati esatti. In particolare, ogni immagine candidata viene
 verificata come file immagine valido, sottoposta a soglia minima di dimensione,
-associata a un valore SHA256 e copiata nel pool preparato solo se supera i
+associata a un valore \gls{sha256} e copiata nel pool preparato solo se supera i
 controlli tecnici.
 
 Il risultato principale della fase di preparazione è il file
 \texttt{metadata.csv}, che registra per ciascun campione informazioni quali
 \texttt{image\_id}, nome del file preparato, sorgente di provenienza, percorso
-relativo originario, hash SHA256, dimensioni, estensione e dimensione del file.
+relativo originario, hash \gls{sha256}, dimensioni, estensione e dimensione del file.
 La disponibilità di tali metadati consente di mantenere un collegamento stabile
 tra la sorgente originaria e la versione normalizzata inclusa nel pool
 sperimentale. Gli output di reportistica, tra cui \texttt{invalid\_images.csv},
@@ -533,6 +535,124 @@ pool iniziale, contribuisce al dataset congelato con 100 immagini
 La distribuzione finale per sorgente e classe è riportata nella
 Tabella~\ref{tab:final-dataset-source-distribution} della
 Sezione~\ref{sec:methodology-human-review}.
+
+La Figura~\ref{fig:methodology-dataset-source-consolidation} sintetizza il processo
+di consolidamento delle sorgenti e di selezione progressiva del dataset finale.
+Le sorgenti grezze vengono utilizzate come pool candidato eterogeneo, mentre le
+classi finali sono assegnate solo tramite revisione manuale documentata.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.58\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.6cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.6cm,
+        fill=blue!8
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.05cm,
+        minimum width=7.6cm,
+        fill=gray!5
+    },
+    final/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.6cm,
+        fill=green!10
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    }
+]
+
+\node[block] (raw) at (0,0)
+{\shortstack{
+    \textbf{Raw heterogeneous sources}\\[1mm]
+    \scriptsize five source folders: public datasets, specialized repositories,\\
+    \scriptsize web scraping, OSINT-oriented sources and deep web-oriented material
+}};
+
+\node[process] (prepared) at (0,-2.0)
+{\shortstack{
+    \textbf{Technical preparation}\\[1mm]
+    \scriptsize readability checks, dimensional filtering, SHA-256 hashing\\
+    \scriptsize and exact duplicate removal
+}};
+
+\node[process] (manifest) at (0,-4.0)
+{\shortstack{
+    \textbf{Prepared candidate pool}\\[1mm]
+    \scriptsize 15\,321 candidate images with metadata and review manifest
+}};
+
+\node[note] (rule) at (0,-6.0)
+{\shortstack{
+    \textbf{No inherited semantic labels}\\[1mm]
+    \scriptsize source folders, filenames and pre-labels are not used\\
+    \scriptsize as final class assignments
+}};
+
+\node[process] (review) at (0,-8.0)
+{\shortstack{
+    \textbf{Human-in-the-loop manual review}\\[1mm]
+    \scriptsize explicit criteria for \texttt{weapon}, \texttt{non\_weapon},\\
+    \scriptsize \texttt{ood} and \texttt{exclude}; reviewer actions logged
+}};
+
+\node[final] (finaldataset) at (0,-10.0)
+{\shortstack{
+    \textbf{Final frozen dataset}\\[1mm]
+    \scriptsize 1500 images: 500 \texttt{weapon}, 500 \texttt{non\_weapon}, 500 \texttt{ood}
+}};
+
+\node[final] (subset) at (0,-12.0)
+{\shortstack{
+    \textbf{Binary adversarial subset}\\[1mm]
+    \scriptsize 1000 images: 500 \texttt{weapon} + 500 \texttt{non\_weapon}
+}};
+
+\draw[arrow] (raw) -- (prepared);
+\draw[arrow] (prepared) -- (manifest);
+\draw[arrow] (manifest) -- (rule);
+\draw[arrow] (rule) -- (review);
+\draw[arrow] (review) -- (finaldataset);
+\draw[arrow] (finaldataset) -- (subset);
+
+\end{tikzpicture}%
+}
+\caption[Dataset source consolidation and final selection process]{Dataset source consolidation and final selection process. The raw sources are first converted into a technically validated candidate pool. Final class assignments are not inherited from source folders or filenames, but are produced through a documented human-in-the-loop review process.}
+\label{fig:methodology-dataset-source-consolidation}
+\end{figure}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -789,7 +909,131 @@ capacità del sistema di gestire input che non appartengono alla distribuzione
 operativa del task binario.
 
 
+La Figura~\ref{fig:methodology-split-to-proxy-training} colloca la fase di
+split generation all'interno della pipeline sperimentale. A partire dai manifest
+congelati, il subset binario viene organizzato in cinque fold puliti, mentre il
+set \gls{ood} viene mantenuto separato e non utilizzato per il training dei
+proxy model né per la generazione delle perturbazioni.
 
+\begin{figure}[H]
+\centering
+\resizebox{0.72\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.4cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.4cm,
+        fill=blue!8
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.4cm,
+        fill=green!10
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.05cm,
+        minimum width=7.4cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% -------------------------------------------------------------------------
+% Vertical split-to-training workflow
+% -------------------------------------------------------------------------
+\node[block] (final) at (0,0)
+{\shortstack{
+    \textbf{Frozen manual selection manifests}\\[1mm]
+    \scriptsize \texttt{manual\_selection\_final\_1500.csv}\\
+    \scriptsize \texttt{manual\_selection\_adversarial\_subset.csv}
+}};
+
+\node[process] (split) at (0,-2.1)
+{\shortstack{
+    \textbf{Split generation}\\[1mm]
+    \scriptsize deterministic seed, file copy, hash checks\\
+    \scriptsize and consistency validation
+}};
+
+\node[output] (folds) at (0,-4.2)
+{\shortstack{
+    \textbf{Clean binary folds}\\[1mm]
+    \scriptsize 5 folds $\times$ 200 images\\
+    \scriptsize each fold: 100 \texttt{weapon} + 100 \texttt{non\_weapon}
+}};
+
+\node[note] (ood) at (0,-6.3)
+{\shortstack{
+    \textbf{Clean OOD evaluation set}\\[1mm]
+    \scriptsize 500 clean \gls{ood} images kept separate\\
+    \scriptsize not used for proxy training or perturbation generation
+}};
+
+\node[process] (training) at (0,-8.4)
+{\shortstack{
+    \textbf{Fold-aware proxy model training}\\[1mm]
+    \scriptsize for each target fold: train on the other four folds\\
+    \scriptsize and hold out the selected fold
+}};
+
+\node[output] (registry) at (0,-10.5)
+{\shortstack{
+    \textbf{Proxy model artifacts}\\[1mm]
+    \scriptsize fold-specific checkpoints and \texttt{model\_registry.json}\\
+    \scriptsize with architecture, class mapping and SHA-256 hashes
+}};
+
+% -------------------------------------------------------------------------
+% Arrows
+% -------------------------------------------------------------------------
+\draw[arrow] (final) -- (split);
+\draw[arrow] (split) -- (folds);
+\draw[dashedarrow] (split.east) -| ([xshift=2.0cm]ood.east) -- (ood.east);
+\draw[arrow] (folds) -- (training);
+\draw[arrow] (training) -- (registry);
+
+\end{tikzpicture}%
+}
+\caption[Split generation and proxy model training position in the pipeline]{Position of split generation and proxy model training in the experimental pipeline. The frozen manual selection manifests are transformed into balanced clean binary folds and a separate clean \gls{ood} evaluation set. Only the binary folds are used for fold-aware proxy model training, while the \gls{ood} set remains separate and is not used for training or perturbation generation.}
+\label{fig:methodology-split-to-proxy-training}
+\end{figure}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
