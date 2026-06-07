@@ -2663,16 +2663,18 @@ campioni perturbati e casi fuori distribuzione.
 
 Lo script ufficiale utilizzato per questa fase è
 \codepath{explainability/scripts/17_generate_integrated_gradients_case_studies.py}.
-La tecnica considerata è Integrated Gradients, applicabile ai proxy model
-trasparenti per i quali sono disponibili architettura, pesi e pipeline di
-pre-processing \cite{Sundararajan2017}. Integrated Gradients viene applicato esclusivamente ai proxy model, poiché
-richiede accesso al modello differenziabile, ai pesi e alla pipeline di
-pre-processing.La tecnica non è invece applicabile
-internamente ai tool proprietari black-box o quasi black-box, poiché per tali strumenti non sono
-disponibili il modello sottostante, i gradienti, le soglie decisionali o le
-funzioni di scoring proprietarie. Eventuali confronti con strumenti proprietari o professionali
-potranno quindi avvenire solo a livello di output osservabile, non di
-attribuzione interna.
+La tecnica considerata è Integrated Gradients, applicabile esclusivamente ai
+proxy model trasparenti per i quali sono disponibili architettura, pesi e
+pipeline di pre-processing \cite{Sundararajan2017}. Integrated Gradients richiede
+infatti accesso al modello differenziabile, ai gradienti e alla trasformazione
+degli input adottata durante la valutazione.
+
+La tecnica non è invece applicabile internamente ai tool proprietari black-box o
+quasi black-box, poiché per tali strumenti non sono disponibili il modello
+sottostante, i gradienti, le soglie decisionali o le funzioni di scoring
+proprietarie. Eventuali confronti con strumenti proprietari o professionali
+possono quindi avvenire solo a livello di output osservabile, non di attribuzione
+interna.
 
 L'input principale della fase \gls{xai} è
 \codepath{evaluation/proxy_models/proxy_model_predictions.csv}. A partire da
@@ -2713,7 +2715,7 @@ artefatto. \\
 Divergenze proxy/tool, ove disponibili
 &
 Predisporre casi per il confronto qualitativo con gli output osservabili degli
-strumenti forensi valutati, quando tali output siano disponibili e normalizzati.
+strumenti forensi valutati, quando tali output siano disponibili e normalizzati. \\
 \bottomrule
 \end{tabularx}
 \end{table}
