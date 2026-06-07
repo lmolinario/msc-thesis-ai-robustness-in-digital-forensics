@@ -11,8 +11,9 @@ in workflow forensi realistici, il capitolo non si limita a descrivere
 singoli componenti tecnici, ma formalizza un disegno sperimentale integrato.
 Tale disegno collega dataset, modelli, perturbazioni adversariali e
 anti-forensi, strumenti forensi, metriche, approccio di \gls{xai} e controlli
-di tracciabilità all'interno del framework \gls{fairlab}, mantenendo una
-distinzione netta tra metodologia sperimentale e analisi dei risultati.
+di tracciabilità all'interno del protocollo sperimentale \gls{fairlab},
+mantenendo una distinzione netta tra metodologia sperimentale e analisi dei
+risultati.
 
 Il capitolo è organizzato in quattordici sezioni. Le prime sei
 (\S\S\,\ref{sec:methodology-fairlab-overview}--\ref{sec:methodology-split-generation})
@@ -33,14 +34,17 @@ modelli e strumenti e le interpretazioni sperimentali vengono demandati al
 capitolo dedicato ai risultati.
 
 
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Overview of the FAIR-Lab methodology}
 \label{sec:methodology-fairlab-overview}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La metodologia della tesi è organizzata attorno al framework \gls{fairlab},
-inteso come pipeline sperimentale per la valutazione della robustezza operativa
-di sistemi \gls{ai}-based in scenari di \gls{df}. Il framework nasce
+La metodologia della tesi è organizzata attorno al protocollo sperimentale
+\gls{fairlab}, inteso come struttura operativa per rendere riproducibile la
+costruzione del dataset, la generazione delle perturbazioni, la valutazione dei
+modelli proxy e l'analisi black-box dei software selezionati. Il protocollo nasce
 dall'esigenza di superare una valutazione puramente algoritmica della
 classificazione di immagini, collegando le prestazioni dei modelli alla loro
 possibile funzione operativa nei workflow di triage e prioritizzazione delle
@@ -49,18 +53,19 @@ soltanto come proprietà tecnica del classificatore, ma come requisito
 metodologico per l'impiego prudente dell'automazione in un contesto
 investigativo.
 
-Il framework integra due livelli complementari. Il primo è una pipeline
-accademica, nella quale dataset, modelli, perturbazioni, metriche e approcci
-di \gls{xai} vengono definiti in modo controllato e comparabile. Il secondo è
-una pipeline operativo-forense, nella quale gli artefatti prodotti dalla
-pipeline accademica vengono predisposti per essere analizzati da strumenti
-professionali di \gls{df}, secondo una logica più vicina alle condizioni
-applicative reali. Questa distinzione consente di mantenere separati il
-controllo sperimentale proprio della ricerca accademica e la valutazione
-black-box o quasi black-box richiesta dall'analisi di strumenti professionali o proprietari,
-spesso caratterizzati da moduli non pienamente ispezionabili \cite{sanna2024preliminary,sanna2025pixelperfect}.
+Il protocollo integra due livelli complementari. Il primo riguarda la
+valutazione controllata dei modelli proxy, nella quale dataset, modelli,
+perturbazioni, metriche e approcci di \gls{xai} vengono definiti in modo
+riproducibile e comparabile. Il secondo riguarda la valutazione operativa
+black-box dei software selezionati, nella quale gli artefatti prodotti dal
+protocollo sperimentale vengono predisposti per essere analizzati da strumenti
+professionali o general-purpose dotati di funzionalità \gls{ai}-based. Questa
+distinzione consente di mantenere separati il controllo sperimentale proprio dei
+modelli ispezionabili e la valutazione black-box richiesta dall'analisi di
+strumenti proprietari, spesso caratterizzati da moduli non pienamente
+accessibili \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
-Nel protocollo sperimentale consolidato, la pipeline comprende la costruzione
+Nel protocollo sperimentale consolidato, la metodologia comprende la costruzione
 degli artefatti dataset, la generazione degli split puliti, la produzione delle
 principali famiglie di perturbazioni adversariali e anti-forensi e la
 predisposizione del bundle per la valutazione forense. In particolare, sono
@@ -73,6 +78,192 @@ costruzione degli artefatti dalla successiva analisi quantitativa dei risultati.
 Questa distinzione è essenziale per evitare che modifiche future ai dati, ai
 modelli o ai file manipolati alterino retroattivamente il perimetro della
 valutazione.
+
+La Figura~\ref{fig:methodology-fairlab-overview} sintetizza la struttura complessiva del protocollo sperimentale \gls{fairlab}. La figura evidenzia la separazione tra il subset binario destinato alla generazione delle perturbazioni e il ramo \gls{ood}, che viene mantenuto pulito e valutato separatamente. Gli artefatti clean, \gls{ood}, adversariali e anti-forensi confluiscono quindi nel forensic evaluation bundle, utilizzato sia per la valutazione controllata dei modelli proxy sia per la valutazione black-box dei software selezionati.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.84\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.4cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.4cm,
+        fill=blue!8
+    },
+    subset/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.10cm,
+        minimum width=6.4cm,
+        fill=yellow!12
+    },
+    eval/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=6.8cm,
+        fill=orange!12
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=8.0cm,
+        fill=green!10
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% -------------------------------------------------------------------------
+% Main workflow
+% -------------------------------------------------------------------------
+\node[block] (sources) at (0,0)
+{\shortstack{
+    \textbf{Source image pool}\\[1mm]
+    \scriptsize heterogeneous image sources and initial metadata
+}};
+
+\node[process] (review) at (0,-1.9)
+{\shortstack{
+    \textbf{Human-in-the-loop review}\\[1mm]
+    \scriptsize manual validation, cleaning and dataset freezing
+}};
+
+\node[process] (dataset) at (0,-3.8)
+{\shortstack{
+    \textbf{Final frozen dataset}\\[1mm]
+    \scriptsize 1500 images: 500 weapon, 500 non-weapon, 500 OOD
+}};
+
+% -------------------------------------------------------------------------
+% Split into binary and OOD
+% -------------------------------------------------------------------------
+\node[subset] (binary) at (-4.3,-6.2)
+{\shortstack{
+    \textbf{Binary evaluation subset}\\[1mm]
+    \scriptsize 1000 images: 500 weapon and 500 non-weapon
+}};
+
+\node[subset] (ood) at (4.3,-6.2)
+{\shortstack{
+    \textbf{Clean OOD evaluation set}\\[1mm]
+    \scriptsize 500 clean out-of-distribution images\\
+    \scriptsize no adversarial or anti-forensic perturbations
+}};
+
+% -------------------------------------------------------------------------
+% Perturbations generated only from binary subset
+% -------------------------------------------------------------------------
+\node[process] (perturb) at (-4.3,-8.8)
+{\shortstack{
+    \textbf{Perturbation generation}\\[1mm]
+    \scriptsize adversarial attacks and anti-forensic transformations\\
+    \scriptsize applied only to the binary subset
+}};
+
+% -------------------------------------------------------------------------
+% Common bundle
+% -------------------------------------------------------------------------
+\node[process] (bundle) at (0,-11.3)
+{\shortstack{
+    \textbf{Forensic evaluation bundle}\\[1mm]
+    \scriptsize 1000 clean + 500 clean OOD + 5000 adversarial\\
+    \scriptsize + 5000 anti-forensic samples
+}};
+
+% -------------------------------------------------------------------------
+% Evaluation branches
+% -------------------------------------------------------------------------
+\node[eval] (proxy) at (-4.3,-14.1)
+{\shortstack{
+    \textbf{Controlled proxy model evaluation}\\[1mm]
+    \scriptsize structured evaluation on bundle artifacts\\
+    \scriptsize EfficientNet-B0, ResNet18 and CLIP
+}};
+
+\node[eval] (tools) at (4.3,-14.1)
+{\shortstack{
+    \textbf{Black-box tool evaluation}\\[1mm]
+    \scriptsize blind bundle input and output normalization\\
+    \scriptsize Magnet.AI, Excire Foto 2025 and Cellebrite Inseyets
+}};
+
+% -------------------------------------------------------------------------
+% Final layer
+% -------------------------------------------------------------------------
+\node[output] (results) at (0,-17.0)
+{\shortstack{
+    \textbf{Metrics, XAI and traceability}\\[1mm]
+    \scriptsize robustness analysis, output normalization, Integrated Gradients,\\
+    \scriptsize audit artifacts and reproducibility controls
+}};
+
+% -------------------------------------------------------------------------
+% Arrows
+% -------------------------------------------------------------------------
+\draw[arrow] (sources) -- (review);
+\draw[arrow] (review) -- (dataset);
+
+\draw[arrow] (dataset.south west) -- (binary.north);
+\draw[arrow] (dataset.south east) -- (ood.north);
+
+\draw[arrow] (binary.south) -- (perturb.north);
+
+% Contributions to the forensic evaluation bundle (no curves)
+\draw[arrow] (ood.south) |- (bundle.east);
+\draw[arrow] (perturb.south) |- (bundle.west);
+
+% Bundle to evaluation branches
+\draw[arrow] (bundle.south west) -- (proxy.north);
+\draw[arrow] (bundle.south east) -- (tools.north);
+
+% Final analysis layer
+\draw[arrow] (proxy.south east) -- (results.north);
+\draw[arrow] (tools.south west) -- (results.north);
+
+
+\end{tikzpicture}%
+}
+\caption[FAIR-Lab experimental protocol overview]{Overview of the FAIR-Lab experimental protocol. The final frozen dataset is split into a binary subset and a separate clean \gls{ood} set. Adversarial and anti-forensic perturbations are generated only from the binary subset, while the \gls{ood} branch is preserved clean and evaluated separately. Clean binary samples, clean \gls{ood} samples, and perturbed binary samples are then combined into the forensic evaluation bundle, which is used both for the controlled evaluation of proxy models and for the black-box evaluation of the selected software tools.}
+\label{fig:methodology-fairlab-overview}
+\end{figure}
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -481,12 +672,12 @@ operativa del task binario.
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline accademica di \gls{fairlab} utilizza un insieme di proxy model
+La valutazione controllata dei modelli proxy utilizza un insieme di architetture
 trasparenti e riproducibili per rappresentare il comportamento di classificatori
 \gls{ai}-based sottoposti a dati puliti, input adversariali e trasformazioni
 anti-forensi. Tali modelli non devono essere interpretati come strumenti forensi valutati
-nella pipeline operativo-forense, né come sostituti dei software analizzati
-in tale livello del protocollo. Essi costituiscono invece componenti sperimentali controllate,
+nella fase black-box del protocollo, né come sostituti dei software commerciali
+analizzati. Essi costituiscono invece componenti sperimentali controllate,
 necessarie per definire un riferimento algoritmico ispezionabile, generare
 perturbazioni model-dependent e studiare la possibile trasferibilità degli
 effetti osservati verso altri sistemi di classificazione.
@@ -510,7 +701,7 @@ consolidata e relativamente compatta, utile per disporre di un riferimento
 \gls{cnn} standard nel task binario \cite{he2016deep}. EfficientNet-B0 viene
 utilizzato come modello convoluzionale più efficiente e costituisce il primary
 proxy target per la generazione degli attacchi adversariali model-dependent
-nella pipeline corrente \cite{tan2019efficientnet}. \gls{clip}, invece, viene
+nel protocollo sperimentale corrente \cite{tan2019efficientnet}. \gls{clip}, invece, viene
 impiegato nella forma di visual encoder congelato con una testa binaria addestrata
 sul task \texttt{non\_weapon}/\texttt{weapon}, così da includere nel protocollo
 un modello vision-language pre-addestrato e successivamente adattato alla
@@ -519,7 +710,7 @@ riassume il ruolo metodologico dei tre modelli.
 
 \begin{table}[H]
 \centering
-\caption{Proxy model utilizzati nella pipeline accademica.}
+\caption{Proxy model utilizzati nella valutazione controllata.}
 \label{tab:methodology-proxy-models}
 \begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
@@ -610,24 +801,24 @@ differenti, quali ResNet18 e \gls{clip}.
 
 
 È infine necessario distinguere i proxy model dagli strumenti forensi valutati
-nella pipeline operativo-forense. I proxy model sono
-componenti accademiche aperte, configurabili e documentate, per le quali sono
-noti architettura, checkpoint, mapping delle classi, protocollo di addestramento
-e hash dei file. Gli strumenti forensi, al contrario, vengono trattati
-come sistemi black-box o quasi black-box: l'analisi non presuppone accesso alla
-loro architettura interna, ma si concentra sugli output osservabili, sulla loro
-coerenza rispetto ai manifest sperimentali e sul loro comportamento in presenza
-di immagini pulite, manipolate o fuori distribuzione. Questa distinzione consente
-di mantenere separati il controllo sperimentale della pipeline accademica e la
-valutazione operativa dei tool forensi.
+nella fase black-box del protocollo. I proxy model sono componenti aperte,
+configurabili e documentate, per le quali sono noti architettura, checkpoint,
+mapping delle classi, protocollo di addestramento e hash dei file. Gli strumenti
+forensi, al contrario, vengono trattati come sistemi black-box o quasi
+black-box: l'analisi non presuppone accesso alla loro architettura interna, ma
+si concentra sugli output osservabili, sulla loro coerenza rispetto ai manifest
+sperimentali e sul loro comportamento in presenza di immagini pulite,
+manipolate o fuori distribuzione. Questa distinzione consente di mantenere
+separati il controllo sperimentale dei proxy model e la valutazione operativa
+dei software selezionati.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial attack selection and generation}
 \label{sec:methodology-adversarial-attacks}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline adversariale di \gls{fairlab} è progettata per generare versioni
-manipolate delle immagini appartenenti al subset binario
+La fase adversariale del protocollo \gls{fairlab} è progettata per generare
+versioni manipolate delle immagini appartenenti al subset binario
 \texttt{weapon}/\texttt{non\_weapon}, preservando il collegamento tra ciascun
 campione perturbato e la corrispondente immagine pulita. La generazione degli
 attacchi utilizza come input il manifest
@@ -648,7 +839,7 @@ attacchi model-dependent, costruiti rispetto a un proxy model specifico, e
 trasformazioni model-agnostic, applicate senza accesso al gradiente o al
 comportamento decisionale del classificatore.
 
-Gli attacchi model-dependent utilizzati nella pipeline corrente sono
+Gli attacchi model-dependent utilizzati nel protocollo sperimentale finale sono
 \gls{fgsm}, One Pixel Attack, Sigma Zero Attack e SuperDeepFool. Essi vengono
 generati rispetto a EfficientNet-B0, assunto come primary proxy target. Per ogni
 immagine appartenente a un determinato fold, lo script carica il checkpoint
@@ -665,7 +856,7 @@ senza interrogare il modello e senza utilizzare informazioni di gradiente.
 Questa distinzione è metodologicamente rilevante perché consente di separare le perturbazioni
 costruite rispetto a un classificatore specifico da alterazioni visive più generali.
 
-All'interno della pipeline, \texttt{color\_shift} viene comunque incluso nel gruppo adversarial
+All'interno del protocollo sperimentale, \texttt{color\_shift} viene comunque incluso nel gruppo adversarial
 perché la sua finalità sperimentale non è simulare un ordinario intervento di post-processing forense,
 ma verificare se una variazione cromatica semanticamente conservativa possa alterare il comportamento
 dei classificatori automatici.
@@ -881,7 +1072,7 @@ successivamente, al capitolo dei risultati sperimentali.
 \label{sec:methodology-anti-forensic-transformations}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline anti-forense di \gls{fairlab} introduce un insieme di trasformazioni
+La fase anti-forense del protocollo \gls{fairlab} introduce un insieme di trasformazioni
 realistiche dell'artefatto immagine, applicate al subset binario
 \texttt{weapon}/\texttt{non\_weapon}. A differenza degli attacchi adversariali
 model-dependent descritti nella Sezione~\ref{sec:methodology-adversarial-attacks},
@@ -906,7 +1097,7 @@ Tale organizzazione consente di preservare il collegamento tra ciascuna immagine
 trasformata, il fold di appartenenza, la classe originaria e il corrispondente
 campione pulito.
 
-Le trasformazioni incluse nella pipeline sono \gls{jpeg} recompression,
+Le trasformazioni incluse nel protocollo finale sono \gls{jpeg} recompression,
 resample~+~resize, Gaussian blur, histogram modification e contrast stretching.
 La ricompressione \gls{jpeg} applica una nuova codifica lossy dell'immagine,
 introducendo artefatti compatibili con scenari ordinari di salvataggio,
@@ -1232,8 +1423,9 @@ Plausibile come post-processing semplice con possibile impatto sui classificator
 \label{sec:methodology-forensic-evaluation-bundle}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline operativo-forense di \gls{fairlab} richiede che gli artefatti
-prodotti nella pipeline accademica siano trasferiti verso gli strumenti forensi oggetto di valutazione
+La valutazione operativa black-box dei software selezionati richiede che gli
+artefatti prodotti dal protocollo sperimentale siano trasferiti verso gli
+strumenti oggetto di valutazione
 senza esporre, durante l'importazione, informazioni semantiche che
 possano influenzare l'analisi. Per questa ragione, dopo la generazione degli
 split puliti, delle immagini adversariali e delle trasformazioni anti-forensi,
@@ -1582,10 +1774,10 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
 % ─────────────────────────────────────────────────────────────────────────────
 
 Il protocollo metrico di \gls{fairlab} è progettato per valutare due livelli
-distinti della pipeline: i proxy model accademici, per i quali sono disponibili
-predizioni, confidenze, checkpoint e mapping delle classi, e gli strumenti
-forensi valutati, per i quali l'analisi si basa sugli output esportati dal
-tool. In entrambi i casi, l'obiettivo non è misurare soltanto l'accuratezza
+distinti: i proxy model controllati, per i quali sono disponibili predizioni,
+confidenze, checkpoint e mapping delle classi, e gli strumenti commerciali
+black-box, per i quali l'analisi si basa esclusivamente sugli output esportati
+dal tool. In entrambi i casi, l'obiettivo non è misurare soltanto l'accuratezza
 aggregata, ma qualificare il comportamento operativo dei sistemi rispetto a
 input puliti, manipolati e fuori distribuzione. In ambito forense, infatti, un
 falso negativo su un contenuto rilevante può avere implicazioni operative più
@@ -1892,9 +2084,9 @@ della valutazione corrente.
 \label{sec:methodology-traceability-controls}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La tracciabilità costituisce un requisito trasversale dell'intero framework
+La tracciabilità costituisce un requisito trasversale dell'intero protocollo
 \gls{fairlab}. Essa non riguarda soltanto la costruzione del dataset, ma
-attraversa tutte le fasi della pipeline: preparazione tecnica, revisione
+attraversa tutte le fasi del workflow sperimentale: preparazione tecnica, revisione
 \textit{human-in-the-loop}, freezing, split generation, addestramento dei proxy
 model, generazione adversariale, trasformazioni anti-forensi, costruzione del
 bundle, valutazione metrica e approccio di \gls{xai}. In coerenza con i principi della
