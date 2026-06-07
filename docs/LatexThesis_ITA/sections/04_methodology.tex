@@ -912,12 +912,13 @@ operativa del task binario.
 La Figura~\ref{fig:methodology-split-to-proxy-training} colloca la fase di
 split generation all'interno della pipeline sperimentale. A partire dai manifest
 congelati, il subset binario viene organizzato in cinque fold puliti, mentre il
-set \gls{ood} viene mantenuto separato e non utilizzato per il training dei
-proxy model né per la generazione delle perturbazioni.
+set \gls{ood} viene generato come ramo separato, mantenuto pulito e non
+utilizzato né per il training dei proxy model né per la generazione delle
+perturbazioni.
 
 \begin{figure}[H]
 \centering
-\resizebox{0.72\textwidth}{!}{%
+\resizebox{0.92\textwidth}{!}{%
 \begin{tikzpicture}[
     >=latex,
     font=\small,
@@ -928,7 +929,7 @@ proxy model né per la generazione delle perturbazioni.
         thick,
         align=center,
         minimum height=1.15cm,
-        minimum width=7.4cm,
+        minimum width=6.9cm,
         fill=gray!10
     },
     process/.style={
@@ -938,7 +939,7 @@ proxy model né per la generazione delle perturbazioni.
         thick,
         align=center,
         minimum height=1.15cm,
-        minimum width=7.4cm,
+        minimum width=6.9cm,
         fill=blue!8
     },
     output/.style={
@@ -948,7 +949,7 @@ proxy model né per la generazione delle perturbazioni.
         thick,
         align=center,
         minimum height=1.15cm,
-        minimum width=7.4cm,
+        minimum width=6.9cm,
         fill=green!10
     },
     note/.style={
@@ -958,8 +959,8 @@ proxy model né per la generazione delle perturbazioni.
         dashed,
         thick,
         align=center,
-        minimum height=1.05cm,
-        minimum width=7.4cm,
+        minimum height=1.20cm,
+        minimum width=6.2cm,
         fill=gray!5
     },
     arrow/.style={
@@ -976,7 +977,7 @@ proxy model né per la generazione delle perturbazioni.
 ]
 
 % -------------------------------------------------------------------------
-% Vertical split-to-training workflow
+% Left column - Main binary pipeline
 % -------------------------------------------------------------------------
 \node[block] (final) at (0,0)
 {\shortstack{
@@ -999,21 +1000,14 @@ proxy model né per la generazione delle perturbazioni.
     \scriptsize each fold: 100 \texttt{weapon} + 100 \texttt{non\_weapon}
 }};
 
-\node[note] (ood) at (0,-6.3)
-{\shortstack{
-    \textbf{Clean OOD evaluation set}\\[1mm]
-    \scriptsize 500 clean \gls{ood} images kept separate\\
-    \scriptsize not used for proxy training or perturbation generation
-}};
-
-\node[process] (training) at (0,-8.4)
+\node[process] (training) at (0,-6.3)
 {\shortstack{
     \textbf{Fold-aware proxy model training}\\[1mm]
     \scriptsize for each target fold: train on the other four folds\\
     \scriptsize and hold out the selected fold
 }};
 
-\node[output] (registry) at (0,-10.5)
+\node[output] (registry) at (0,-8.4)
 {\shortstack{
     \textbf{Proxy model artifacts}\\[1mm]
     \scriptsize fold-specific checkpoints and \texttt{model\_registry.json}\\
@@ -1021,13 +1015,27 @@ proxy model né per la generazione delle perturbazioni.
 }};
 
 % -------------------------------------------------------------------------
+% Right column - Separate OOD branch
+% -------------------------------------------------------------------------
+\node[note] (ood) at (8.0,-2.1)
+{\shortstack{
+    \textbf{Clean OOD evaluation set}\\[1mm]
+    \scriptsize 500 clean \gls{ood} images\\
+    \scriptsize kept separate from the binary folds\\
+    \scriptsize not used for proxy training\\
+    \scriptsize not used for perturbation generation
+}};
+
+% -------------------------------------------------------------------------
 % Arrows
 % -------------------------------------------------------------------------
 \draw[arrow] (final) -- (split);
 \draw[arrow] (split) -- (folds);
-\draw[dashedarrow] (split.east) -| ([xshift=2.0cm]ood.east) -- (ood.east);
 \draw[arrow] (folds) -- (training);
 \draw[arrow] (training) -- (registry);
+
+% OOD branch generated during split generation, but kept separate
+\draw[dashedarrow] (split.east) -- (ood.west);
 
 \end{tikzpicture}%
 }
@@ -1121,7 +1129,7 @@ tra training e holdout sperimentale.
 \centering
 \caption{Protocollo fold-aware per l'addestramento dei proxy model.}
 \label{tab:methodology-fold-aware-training}
-\begin{tabular}{lrrrr}
+\begin{tabularx}{\textwidth}{@{}L{7.8cm}X@{}}
 \toprule
 \textbf{Checkpoint target} & \textbf{Fold utilizzati per l'addestramento} \\
 \midrule
@@ -1131,7 +1139,7 @@ tra training e holdout sperimentale.
 \texttt{fold\_4.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_5} \\
 \texttt{fold\_5.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 
@@ -1154,8 +1162,9 @@ dei singoli modelli, sono documentati nello script di training e, ove applicabil
 metadati registrati in \codepath{models/model_registry.json}, così da mantenere separata la
 descrizione metodologica del protocollo dalla riproduzione dettagliata della configurazione implementativa.
 
-Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target}
-per la generazione degli attacchi adversariali model-dependent. Questa scelta non implica che
+Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target}, ossia di
+modello controllato principale rispetto al quale vengono generate le
+perturbazioni adversariali model-dependent. Questa scelta non implica che
 EfficientNet-B0 rappresenti il modello più robusto o più accurato in senso assoluto, né che esaurisca
 l'analisi comparativa della tesi. Indica invece il modello controllato rispetto al quale vengono costruite,
 in questa fase della pipeline, le perturbazioni che richiedono accesso al gradiente, al classificatore
@@ -1180,6 +1189,304 @@ sperimentali e sul loro comportamento in presenza di immagini pulite,
 manipolate o fuori distribuzione. Questa distinzione consente di mantenere
 separati il controllo sperimentale dei proxy model e la valutazione operativa
 dei software selezionati.
+
+
+\section{Perturbation selection rationale and operational relevance}
+\label{sec:methodology-perturbation-selection-rationale}
+
+La selezione delle perturbazioni non è stata guidata esclusivamente dalla
+forza teorica degli attacchi, ma anche dalla loro sostenibilità computazionale
+e dalla loro coerenza con uno scenario operativo realistico di \gls{df}. In un
+workflow forense, infatti, un sistema di triage visuale deve poter trattare
+volumi elevati di dati entro tempi compatibili con le esigenze investigative.
+Di conseguenza, il costo computazionale delle perturbazioni rappresenta un criterio
+metodologico rilevante, sia per la riproducibilità dell'esperimento sia per
+l'interpretazione della plausibilità operativa delle manipolazioni considerate.
+
+Le trasformazioni anti-forensi, come ricompressione \gls{jpeg},
+resample~+~resize, Gaussian blur, histogram modification e contrast stretching,
+presentano un costo computazionale contenuto e possono essere applicate in modo
+batch anche su grandi collezioni di immagini. Esse sono quindi particolarmente
+rilevanti dal punto di vista operativo, poiché simulano manipolazioni semplici,
+economiche e plausibili che un soggetto potrebbe applicare per degradare,
+alterare o normalizzare un'immagine prima dell'acquisizione o dell'analisi
+forense.
+
+Gli attacchi adversariali model-dependent, al contrario, richiedono
+l'interazione con un modello target e, in alcuni casi, procedure iterative o di
+ottimizzazione. \gls{fgsm} rappresenta una baseline efficiente, poiché richiede
+una singola stima del gradiente per immagine. Attacchi come
+\texttt{one\_pixel}, \texttt{sigma\_zero} e \texttt{superdeepfool} sono invece
+più onerosi e vengono inclusi non perché rappresentino necessariamente lo
+scenario operativo più probabile, ma perché consentono di stressare il
+comportamento dei classificatori in condizioni controllate. La perturbazione
+\texttt{color\_shift}, pur essendo inclusa nel gruppo adversarial per finalità
+sperimentale, rimane model-agnostic e presenta un costo computazionale ridotto.
+
+Questa impostazione è coerente con l'obiettivo della tesi: valutare la
+robustezza operativa di sistemi \gls{ai}-based in un contesto forense, non
+produrre una classifica esaustiva degli attacchi adversariali più forti in senso
+strettamente algoritmico. Per tale ragione, il protocollo privilegia un insieme
+eterogeneo di perturbazioni, bilanciando severità sperimentale, sostenibilità
+computazionale, riproducibilità e rilevanza rispetto a possibili scenari
+anti-forensi reali.
+
+\begin{table}[H]
+\centering
+\caption{Costo computazionale qualitativo e rilevanza operativa delle perturbazioni.}
+\label{tab:methodology-attack-cost-operational-relevance}
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{0.22\textwidth}
+    >{\raggedright\arraybackslash}p{0.24\textwidth}
+    >{\raggedright\arraybackslash}p{0.13\textwidth}
+    X
+@{}}
+\toprule
+\textbf{Perturbazione} &
+\textbf{Tipo} &
+\textbf{Costo} &
+\textbf{Rilevanza operativa} \\
+\midrule
+
+\glsentryshort{fgsm}
+&
+Adversarial model-dependent
+&
+Basso/medio
+&
+Baseline efficiente per valutare la sensibilità del modello a perturbazioni gradient-based. \\
+
+\glsentryname{onepixel}
+&
+Adversarial model-dependent
+&
+Alto
+&
+Stress test localizzato; utile per valutare la vulnerabilità a modifiche minime ma ottimizzate. \\
+
+\glsentryname{sigmazero}
+&
+Adversarial model-dependent
+&
+Medio/alto
+&
+Stress test adversarial controllato, più rilevante sul piano sperimentale che operativo. \\
+
+\glsentryname{superdeepfool}
+&
+Adversarial model-dependent
+&
+Medio/alto
+&
+Attacco utile per analizzare la sensibilità del classificatore rispetto al confine decisionale. \\
+
+\glsentryname{colorshift}
+&
+Adversarial-style model-agnostic
+&
+Basso
+&
+Manipolazione cromatica semplice, plausibile e semanticamente conservativa. \\
+
+\glsentryname{jpegrecompression}
+&
+Anti-forensic
+&
+Basso
+&
+Molto plausibile in scenari reali; altera qualità e rappresentazione del file. \\
+
+\glsentryname{resampleresize}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile come effetto di ridimensionamento, inoltro o normalizzazione dell'immagine. \\
+
+\glsentryname{gaussianblur}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile per degradare dettagli visivi rilevanti. \\
+
+\glsentryname{histogrammodification}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile per alterare distribuzione tonale e caratteristiche statistiche dell'immagine. \\
+
+\glsentryname{contraststretching}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile come post-processing semplice con possibile impatto sui classificatori. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+La Figura~\ref{fig:methodology-perturbation-workflow} sintetizza il workflow di
+generazione delle perturbazioni adottato nel protocollo sperimentale. A partire
+dai clean binary folds, la pipeline genera separatamente il ramo adversarial e
+il ramo anti-forense. Il set \gls{ood} non viene incluso in questa fase e
+rimane escluso dalla generazione delle perturbazioni. Gli artefatti risultanti
+vengono quindi documentati tramite manifest dedicati, hash di integrità e
+successiva integrazione nel forensic evaluation bundle.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.86\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=blue!8
+    },
+    branch/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=5.6cm,
+        fill=yellow!12
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=5.6cm,
+        fill=green!10
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.00cm,
+        minimum width=5.2cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% Main input
+\node[block] (folds) at (0,0)
+{\shortstack{
+    \textbf{Clean binary folds}\\[1mm]
+    \scriptsize 1000 clean images from the binary subset\\
+    \scriptsize 500 \texttt{weapon} + 500 \texttt{non\_weapon}
+}};
+
+\node[process] (perturb) at (0,-2.2)
+{\shortstack{
+    \textbf{Perturbation generation}\\[1mm]
+    \scriptsize controlled generation of adversarial attacks\\
+    \scriptsize and anti-forensic transformations
+}};
+
+\node[note] (oodnote) at (7.2,-2.2)
+{\shortstack{
+    \textbf{OOD exclusion rule}\\[1mm]
+    \scriptsize the \gls{ood} set is not used\\
+    \scriptsize for perturbation generation
+}};
+
+% Branches
+\node[branch] (advbranch) at (-4.2,-4.8)
+{\shortstack{
+    \textbf{Adversarial branch}\\[1mm]
+    \scriptsize gradient-based or model-guided\\
+    \scriptsize perturbation generation
+}};
+
+\node[branch] (afbranch) at (4.2,-4.8)
+{\shortstack{
+    \textbf{Anti-forensic branch}\\[1mm]
+    \scriptsize realistic file/content transformations\\
+    \scriptsize without supervised OOD generation
+}};
+
+% Outputs per branch
+\node[output] (advout) at (-4.2,-7.0)
+{\shortstack{
+    \textbf{5000 adversarial samples}\\[1mm]
+    \scriptsize 1000 clean binary inputs $\times$ 5 attacks
+}};
+
+\node[output] (afout) at (4.2,-7.0)
+{\shortstack{
+    \textbf{5000 anti-forensic samples}\\[1mm]
+    \scriptsize 1000 clean binary inputs $\times$ 5 transformations
+}};
+
+% Final integration
+\node[process] (bundle) at (0,-9.6)
+{\shortstack{
+    \textbf{Manifests, hashes and forensic evaluation bundle}\\[1mm]
+    \scriptsize attack/transformation manifests, \gls{sha256} hashes\\
+    \scriptsize and integration into the final evaluation bundle
+}};
+
+% Arrows
+\draw[arrow] (folds) -- (perturb);
+\draw[dashedarrow] (perturb.east) -- (oodnote.west);
+
+\draw[arrow] (perturb.south west) -- (advbranch.north);
+\draw[arrow] (perturb.south east) -- (afbranch.north);
+
+\draw[arrow] (advbranch) -- (advout);
+\draw[arrow] (afbranch) -- (afout);
+
+\draw[arrow] (advout.south east) -- (bundle.north);
+\draw[arrow] (afout.south west) -- (bundle.north);
+
+\end{tikzpicture}%
+}
+\caption[Perturbation generation workflow]{Perturbation generation workflow used in the experimental protocol. Starting from the clean binary folds, the pipeline generates two separate branches: adversarial samples and anti-forensic samples. The \gls{ood} set is excluded from this phase. The resulting artifacts are documented through manifests and \gls{sha256} hashes and are then integrated into the forensic evaluation bundle.}
+\label{fig:methodology-perturbation-workflow}
+\end{figure}
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial attack selection and generation}
@@ -1437,7 +1744,7 @@ viene demandata alla sezione dedicata al protocollo di valutazione e,
 successivamente, al capitolo dei risultati sperimentali.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Anti-forensic transformation pipeline}
+\section{Anti-forensic transformation selection and generation}
 \label{sec:methodology-anti-forensic-transformations}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1646,146 +1953,6 @@ coerenza tecnica della generazione degli artefatti anti-forensi. L'analisi
 dell'impatto di tali trasformazioni sulle prestazioni dei modelli e, in seguito,
 sugli strumenti forensi viene demandata alle sezioni dedicate al
 protocollo metrico e al capitolo dei risultati.
-
-\subsection*{Computational cost and operational relevance}
-
-La selezione delle perturbazioni non è stata guidata esclusivamente dalla
-forza teorica degli attacchi, ma anche dalla loro sostenibilità computazionale
-e dalla loro coerenza con uno scenario operativo realistico di \gls{df}. In un
-workflow forense, infatti, un sistema di triage visuale deve poter trattare
-volumi elevati di dati entro tempi compatibili con le esigenze investigative.
-Di conseguenza, il costo computazionale delle perturbazioni rappresenta un criterio
-metodologico rilevante, sia per la riproducibilità dell'esperimento sia per
-l'interpretazione della plausibilità operativa delle manipolazioni considerate.
-
-Le trasformazioni anti-forensi, come ricompressione \gls{jpeg},
-resample~+~resize, Gaussian blur, histogram modification e contrast stretching,
-presentano un costo computazionale contenuto e possono essere applicate in modo
-batch anche su grandi collezioni di immagini. Esse sono quindi particolarmente
-rilevanti dal punto di vista operativo, poiché simulano manipolazioni semplici,
-economiche e plausibili che un soggetto potrebbe applicare per degradare,
-alterare o normalizzare un'immagine prima dell'acquisizione o dell'analisi
-forense.
-
-Gli attacchi adversariali model-dependent, al contrario, richiedono
-l'interazione con un modello target e, in alcuni casi, procedure iterative o di
-ottimizzazione. \gls{fgsm} rappresenta una baseline efficiente, poiché richiede
-una singola stima del gradiente per immagine. Attacchi come
-\texttt{one\_pixel}, \texttt{sigma\_zero} e \texttt{superdeepfool} sono invece
-più onerosi e vengono inclusi non perché rappresentino necessariamente lo
-scenario operativo più probabile, ma perché consentono di stressare il
-comportamento dei classificatori in condizioni controllate. La perturbazione
-\texttt{color\_shift}, pur essendo inclusa nel gruppo adversarial per finalità
-sperimentale, rimane model-agnostic e presenta un costo computazionale ridotto.
-
-Questa impostazione è coerente con l'obiettivo della tesi: valutare la
-robustezza operativa di sistemi \gls{ai}-based in un contesto forense, non
-produrre una classifica esaustiva degli attacchi adversariali più forti in senso
-strettamente algoritmico. Per tale ragione, il protocollo privilegia un insieme
-eterogeneo di perturbazioni, bilanciando severità sperimentale, sostenibilità
-computazionale, riproducibilità e rilevanza rispetto a possibili scenari
-anti-forensi reali.
-
-\begin{table}[H]
-\centering
-\caption{Costo computazionale qualitativo e rilevanza operativa delle perturbazioni.}
-\label{tab:methodology-attack-cost-operational-relevance}
-\begin{tabularx}{\textwidth}{@{}
-    >{\raggedright\arraybackslash}p{0.22\textwidth}
-    >{\raggedright\arraybackslash}p{0.24\textwidth}
-    >{\raggedright\arraybackslash}p{0.13\textwidth}
-    X
-@{}}
-\toprule
-\textbf{Perturbazione} &
-\textbf{Tipo} &
-\textbf{Costo} &
-\textbf{Rilevanza operativa} \\
-\midrule
-
-\glsentryshort{fgsm}
-&
-Adversarial model-dependent
-&
-Basso/medio
-&
-Baseline efficiente per valutare la sensibilità del modello a perturbazioni gradient-based. \\
-
-\glsentryname{onepixel}
-&
-Adversarial model-dependent
-&
-Alto
-&
-Stress test localizzato; utile per valutare la vulnerabilità a modifiche minime ma ottimizzate. \\
-
-\glsentryname{sigmazero}
-&
-Adversarial model-dependent
-&
-Medio/alto
-&
-Stress test adversarial controllato, più rilevante sul piano sperimentale che operativo. \\
-
-\glsentryname{superdeepfool}
-&
-Adversarial model-dependent
-&
-Medio/alto
-&
-Attacco utile per analizzare la sensibilità del classificatore rispetto al confine decisionale. \\
-
-\glsentryname{colorshift}
-&
-Adversarial-style model-agnostic
-&
-Basso
-&
-Manipolazione cromatica semplice, plausibile e semanticamente conservativa. \\
-
-\glsentryname{jpegrecompression}
-&
-Anti-forensic
-&
-Basso
-&
-Molto plausibile in scenari reali; altera qualità e rappresentazione del file. \\
-
-\glsentryname{resampleresize}
-&
-Anti-forensic
-&
-Basso
-&
-Plausibile come effetto di ridimensionamento, inoltro o normalizzazione dell'immagine. \\
-
-\glsentryname{gaussianblur}
-&
-Anti-forensic
-&
-Basso
-&
-Plausibile per degradare dettagli visivi rilevanti. \\
-
-\glsentryname{histogrammodification}
-&
-Anti-forensic
-&
-Basso
-&
-Plausibile per alterare distribuzione tonale e caratteristiche statistiche dell'immagine. \\
-
-\glsentryname{contraststretching}
-&
-Anti-forensic
-&
-Basso
-&
-Plausibile come post-processing semplice con possibile impatto sui classificatori. \\
-
-\bottomrule
-\end{tabularx}
-\end{table}
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic evaluation bundle}
@@ -2137,6 +2304,8 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
 \caption[Forensic tool evaluation workflow]{Forensic tool evaluation workflow based on blind bundle import, tool-side indexing and categorization, export of observable outputs, and normalization against the experimental manifest.}
 \label{fig:methodology-forensic-tool-workflow}
 \end{figure}
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Evaluation metrics}
 \label{sec:methodology-evaluation-metrics}
@@ -2319,12 +2488,136 @@ Comportamento \gls{ood}
 \texttt{non\_weapon} e \gls{ood} high-confidence rate. \\
 Strumenti forensi
 &
-True positive, false negative, false positive, true negative, unknown,
-not detected, uncategorized, weapon recall, weapon false negative rate,
-false positive rate e balanced accuracy dove applicabile. \\
+True positive, false negative, false positive, true negative, matching rate,
+unknown rate, unmapped rate, not detected, uncategorized, weapon recall,
+weapon false negative rate, false positive rate e balanced accuracy dove applicabile. \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
+La Figura~\ref{fig:methodology-metric-layers} sintetizza i tre livelli metrici
+utilizzati nel protocollo di valutazione: classificazione e robustezza dei proxy
+model, comportamento fuori distribuzione e normalizzazione degli output prodotti
+dagli strumenti commerciali black-box.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.82\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=gray!10
+    },
+    metric/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.25cm,
+        minimum width=6.8cm,
+        fill=blue!8
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.20cm,
+        minimum width=7.4cm,
+        fill=green!10
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.10cm,
+        minimum width=6.8cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+\node[block] (inputs) at (0,0)
+{\shortstack{
+    \textbf{Evaluation inputs}\\[1mm]
+    \scriptsize clean, adversarial, anti-forensic and clean OOD samples
+}};
+
+\node[metric] (proxy) at (-4.4,-2.7)
+{\shortstack{
+    \textbf{Proxy model metrics}\\[1mm]
+    \scriptsize accuracy, balanced accuracy, precision, recall, F1\\
+    \scriptsize confidence, confusion matrix and accuracy drop
+}};
+
+\node[metric] (ood) at (4.4,-2.7)
+{\shortstack{
+    \textbf{OOD behavior metrics}\\[1mm]
+    \scriptsize OOD predicted as weapon/non-weapon\\
+    \scriptsize mean confidence and high-confidence rate
+}};
+
+\node[metric] (tools) at (0,-5.4)
+{\shortstack{
+    \textbf{Commercial tool metrics}\\[1mm]
+    \scriptsize TP, FP, TN, FN, weapon recall, FNR, FPR\\
+    \scriptsize unknown, unmapped and matching rates
+}};
+
+\node[note] (auroc) at (0,-7.7)
+{\shortstack{
+    \textbf{Operational comparability rule}\\[1mm]
+    \scriptsize AUROC is not used as a central metric because\\
+    \scriptsize black-box tools may not expose calibrated scores
+}};
+
+\node[output] (summary) at (0,-10.0)
+{\shortstack{
+    \textbf{Final robustness interpretation}\\[1mm]
+    \scriptsize clean baseline, degradation under perturbation, OOD risk\\
+    \scriptsize and black-box tool reliability
+}};
+
+\draw[arrow] (inputs.south west) -- (proxy.north);
+\draw[arrow] (inputs.south east) -- (ood.north);
+
+\draw[arrow] (proxy.south east) -- (tools.north);
+\draw[arrow] (ood.south west) -- (tools.north);
+
+\draw[dashedarrow] (tools) -- (auroc);
+\draw[arrow] (auroc) -- (summary);
+
+\end{tikzpicture}%
+}
+\caption[Metric layers used in the evaluation protocol]{Metric layers used in the evaluation protocol. Proxy models are evaluated with standard classification, robustness and confidence-based metrics. The \gls{ood} set is evaluated separately to measure whether out-of-distribution samples are forced into operational classes. Commercial tools are evaluated through normalized black-box outputs, including detection, error and unknown/unmapped states.}
+\label{fig:methodology-metric-layers}
+\end{figure}
+
+
 
 Metriche threshold-independent come AUROC non vengono considerate come output principale
 del protocollo corrente, poiché la valutazione deve rimanere confrontabile anche con
@@ -2368,11 +2661,13 @@ utilizzata per osservare quali regioni dell'immagine contribuiscano alla
 predizione del modello e per confrontare, a livello qualitativo, campioni puliti,
 campioni perturbati e casi fuori distribuzione.
 
-Lo script ufficiale previsto per questa fase è
+Lo script ufficiale utilizzato per questa fase è
 \codepath{explainability/scripts/17_generate_integrated_gradients_case_studies.py}.
 La tecnica considerata è Integrated Gradients, applicabile ai proxy model
 trasparenti per i quali sono disponibili architettura, pesi e pipeline di
-pre-processing \cite{Sundararajan2017}. La tecnica non è invece applicabile
+pre-processing \cite{Sundararajan2017}. Integrated Gradients viene applicato esclusivamente ai proxy model, poiché
+richiede accesso al modello differenziabile, ai pesi e alla pipeline di
+pre-processing.La tecnica non è invece applicabile
 internamente ai tool proprietari black-box o quasi black-box, poiché per tali strumenti non sono
 disponibili il modello sottostante, i gradienti, le soglie decisionali o le
 funzioni di scoring proprietarie. Eventuali confronti con strumenti proprietari o professionali
@@ -2415,13 +2710,64 @@ Divergenze tra proxy model
 &
 Confrontare il comportamento di architetture diverse rispetto allo stesso
 artefatto. \\
-Divergenze proxy/tool
+Divergenze proxy/tool, ove disponibili
 &
 Predisporre casi per il confronto qualitativo con gli output osservabili degli
-strumenti forensi valutati, ove disponibili. \\
+strumenti forensi valutati, quando tali output siano disponibili e normalizzati.
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
+La Figura~\ref{fig:methodology-integrated-gradients-example} mostra un esempio
+rappresentativo della struttura degli output prodotti dall'analisi con Integrated
+Gradients. L'esempio ha funzione metodologica e illustra il tipo di artefatti
+utilizzati per l'analisi qualitativa: immagine in input, mappa di attribuzione,
+overlay sull'immagine originale e maschera delle regioni a maggiore attribuzione.
+
+\begin{figure}[H]
+\centering
+
+\begin{minipage}[t]{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.4cm,keepaspectratio]{images/xai_case_0002__input.png}
+    \vspace{1mm}
+
+    \textbf{Input image}\\
+    \footnotesize Campione analizzato dal proxy model.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.4cm,keepaspectratio]{images/xai_case_0002__predicted_label_weapon__heatmap.png}
+    \vspace{1mm}
+
+    \textbf{IG heatmap}\\
+    \footnotesize Mappa di attribuzione normalizzata.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.4cm,keepaspectratio]{images/xai_case_0002__predicted_label_weapon__overlay.png}
+    \vspace{1mm}
+
+    \textbf{IG overlay}\\
+    \footnotesize Attribuzione sovrapposta all'immagine.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.4cm,keepaspectratio]{images/xai_case_0002__predicted_label_weapon__top10_mask.png}
+    \vspace{1mm}
+
+    \textbf{Top attribution mask}\\
+    \footnotesize Regioni con attribuzione più elevata.
+\end{minipage}
+
+\caption[Integrated Gradients output structure]{Integrated Gradients output structure used for qualitative explainability analysis. The figure illustrates the artifacts generated for a representative proxy-model case: input image, attribution heatmap, overlay visualization and top-attribution mask. The example is methodological and does not replace the quantitative robustness metrics.}
+\label{fig:methodology-integrated-gradients-example}
+\end{figure}
+
 
 Gli output previsti sono salvati in
 \codepath{explainability/outputs/integrated_gradients/} e documentati mediante
