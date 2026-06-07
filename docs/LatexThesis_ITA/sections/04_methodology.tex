@@ -265,7 +265,6 @@ La Figura~\ref{fig:methodology-fairlab-overview} sintetizza la struttura comples
 \end{figure}
 
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Research design and experimental assumptions}
 \label{sec:methodology-research-design}
@@ -274,14 +273,132 @@ La Figura~\ref{fig:methodology-fairlab-overview} sintetizza la struttura comples
 Il disegno sperimentale assume come scenario di riferimento un'attività di
 triage visuale in ambito forense, nella quale un sistema automatico supporta
 l'analista nell'individuazione preliminare di immagini potenzialmente
-rilevanti. Il caso di studio riguarda la classificazione di immagini in tre
-categorie metodologiche: \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}.
-La prima categoria rappresenta la classe investigativamente rilevante nel task
-considerato; la seconda raccoglie esempi negativi realistici e coerenti con il
-dominio; la terza comprende casi borderline, anomali o fuori distribuzione che
-non dovrebbero essere forzati in modo acritico nelle due classi binarie
-principali.
+rilevanti. Il caso di studio riguarda la classificazione di immagini rispetto a
+tre categorie metodologiche principali: \texttt{weapon}, \texttt{non\_weapon} e
+\texttt{ood}. Tali categorie non devono essere interpretate come qualificazioni
+giuridiche del contenuto, né come classi semantiche generali valide in ogni
+contesto, ma come etichette operative definite per il protocollo sperimentale
+della tesi.
 
+Nel task binario principale, la classe \texttt{weapon} rappresenta la classe
+positiva, cioè l'insieme delle immagini nelle quali è visibile un oggetto
+riconducibile alla categoria investigativamente rilevante considerata dal
+protocollo. La classe \texttt{non\_weapon} rappresenta invece la classe negativa
+in-domain: essa include immagini realistiche e interpretabili prive dell'oggetto
+di interesse, ma comunque compatibili con il dominio visuale della raccolta
+sperimentale. La classe \texttt{ood} costituisce un ramo separato della
+valutazione e raccoglie immagini che non devono essere forzate nella dicotomia
+\texttt{weapon}/\texttt{non\_weapon}, poiché ambigue, anomale, sintetiche,
+degradate, borderline o appartenenti a distribuzioni visive differenti.
+
+I criteri di assegnazione delle classi sono stati formalizzati anche nello
+strumento di revisione manuale utilizzato per la costruzione del dataset finale.
+Questa scelta consente di rendere esplicito il collegamento tra definizione
+metodologica delle classi, processo \textit{human-in-the-loop} e manifest finali
+prodotti dalla pipeline. La Tabella~\ref{tab:methodology-operational-classes}
+sintetizza tali criteri in forma operativa.
+
+\begin{table}[H]
+\centering
+\caption{Definizione operativa delle classi utilizzate nel protocollo sperimentale.}
+\label{tab:methodology-operational-classes}
+\begin{tabularx}{\textwidth}{@{}L{3.0cm}L{3.6cm}X@{}}
+\toprule
+\textbf{Label} & \textbf{Ruolo nel protocollo} & \textbf{Criterio operativo di assegnazione} \\
+\midrule
+\texttt{weapon}
+&
+Classe positiva del task binario
+&
+Immagini contenenti una vera arma come oggetto rilevante principale,
+visivamente riconoscibile con sufficiente chiarezza e semanticamente coerente
+con il task di classificazione. Sono inclusi, ad esempio, casi in cui siano
+chiaramente visibili pistole, fucili, mitragliette, shotgun o altre armi reali
+riconducibili al target sperimentale. Sono esclusi i casi in cui l'oggetto sia
+marginale, troppo piccolo, fortemente occluso, eccessivamente ambiguo,
+sintetico, toy-like o non riconducibile con affidabilità a una vera arma. \\
+\texttt{non\_weapon}
+&
+Classe negativa in-domain del task binario
+&
+Immagini realistiche, utilizzabili e visivamente interpretabili nelle quali non
+è presente alcuna vera arma. La classe comprende esempi negativi plausibili
+rispetto al contesto visuale del dataset, quali persone, ambienti, veicoli,
+oggetti, interni, esterni o scene ordinarie. Non include contenuti
+semanticamente borderline, sintetici, anomali o immagini contenenti coltelli,
+spade, repliche, airsoft, armi giocattolo, armi da videogame, rendering o
+elementi visivi che possano introdurre ambiguità rispetto al task. \\
+\texttt{ood}
+&
+Ramo separato di stress test operativo
+&
+Immagini fuori distribuzione, borderline o non rappresentative di un campione
+positivo o negativo pulito. Include, ad esempio, coltelli o spade, repliche,
+giocattoli, airsoft, armi da videogame o \gls{cgi}, immagini sintetiche o
+generate, carri armati, missili, esplosioni, scene di guerra, immagini
+fortemente degradate, anomale, bizzarre o semanticamente ambigue. Rientrano in
+questa classe anche immagini contestualmente collegate a violenza o armi, ma
+non valide come campioni puliti per il task binario \texttt{weapon}/
+\texttt{non\_weapon}. \\
+\texttt{exclude}
+&
+Label operativa di esclusione
+&
+Immagini inutilizzabili, corrotte, illeggibili, non interpretabili o
+semanticamente irrilevanti rispetto al protocollo sperimentale. Questa label è
+utilizzata durante la revisione manuale per rimuovere elementi non idonei dalla
+selezione finale. Le immagini marcate come \texttt{exclude} non contribuiscono
+né al dataset finale congelato né al subset binario destinato alle perturbazioni. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+La Figura~\ref{fig:methodology-class-examples} mostra tre esempi rappresentativi
+delle categorie operative utilizzate nel protocollo di revisione manuale. Gli
+esempi hanno funzione esclusivamente illustrativa e non esauriscono la variabilità
+interna delle classi.
+
+\begin{figure}[H]
+\centering
+
+\begin{minipage}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.0cm,keepaspectratio]{images/Arma}
+    \vspace{1mm}
+
+    \textbf{\texttt{weapon}}\\
+    \footnotesize Arma reale visivamente riconoscibile e coerente con il task binario.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.0cm,keepaspectratio]{images/Non_Arma}
+    \vspace{1mm}
+
+    \textbf{\texttt{non\_weapon}}\\
+    \footnotesize Esempio negativo realistico, interpretabile e privo di armi.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.0cm,keepaspectratio]{images/ood}
+    \vspace{1mm}
+
+    \textbf{\texttt{ood}}\\
+    \footnotesize Caso borderline o fuori distribuzione, non forzato nel task binario.
+\end{minipage}
+
+\caption[Representative examples of operational class definitions]{Representative examples of the operational class definitions used during the manual review process. The examples are illustrative and do not provide an exhaustive definition of the internal variability of the \texttt{weapon}, \texttt{non\_weapon} and \texttt{ood} classes.}
+\label{fig:methodology-class-examples}
+\end{figure}
+
+La presenza della label operativa \texttt{exclude} non modifica la struttura del
+dataset finale, che rimane composta dalle tre categorie metodologiche
+\texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Essa svolge invece una
+funzione di controllo qualitativo durante il processo di revisione, consentendo
+di documentare e separare gli elementi rimossi rispetto ai campioni effettivamente
+inclusi nel benchmark.
 
 La scelta di includere una classe \gls{ood} esplicita risponde a un'esigenza
 metodologica specifica. In un contesto operativo reale, i sistemi di
@@ -291,13 +408,17 @@ pertinenti o appartenenti a distribuzioni differenti. La letteratura sulla
 \gls{ood} detection ha mostrato che i classificatori possono produrre predizioni
 ad alta confidenza anche su input estranei al dominio di addestramento,
 rendendo necessario distinguere gli errori su classi note dalla gestione di
-campioni che non dovrebbero essere classificati come positivi o negativi ordinari
-\cite{hendrycks2017baseline,fort2021exploring}.
+campioni che non dovrebbero essere classificati come positivi o negativi
+ordinari \cite{hendrycks2017baseline,fort2021exploring}.
 
 La classe \texttt{ood} non deve quindi essere interpretata come una categoria
-semantica omogenea, ma come un insieme metodologico di stress test volto a
-verificare la tendenza dei sistemi automatici a forzare contenuti anomali,
-borderline o esterni al dominio entro classi operative note.
+semantica omogenea, né come una semplice sottoclasse della categoria
+\texttt{non\_weapon}. Essa rappresenta invece un insieme metodologico di stress
+test volto a verificare la tendenza dei sistemi automatici a forzare contenuti
+anomali, borderline o esterni al dominio entro classi operative note. Per questa
+ragione, gli esempi \gls{ood} vengono mantenuti separati dal subset binario e
+non vengono sottoposti alle perturbazioni adversariali o anti-forensi generate
+per il task \texttt{weapon}/\texttt{non\_weapon}.
 
 La metodologia distingue inoltre tra classificazione automatica, robustezza e
 validazione operativa. La classificazione automatica riguarda la capacità del
@@ -310,13 +431,17 @@ analitico e classificazioni improprie di campioni \gls{ood}. Questa distinzione
 permette di evitare che l'accuratezza nominale su dati puliti venga interpretata
 come garanzia sufficiente di affidabilità in scenari investigativi.
 
-Il protocollo adotta infine un'impostazione \textit{human-in-the-loop}.
-La componente manuale non viene trattata come elemento esterno o residuale,
-ma come parte documentata della metodologia. In ambito forense, la costruzione
-del dataset non può dipendere esclusivamente da etichette automatiche o da
-directory originarie delle sorgenti: è necessario che i criteri semantici di
-inclusione, esclusione e assegnazione alle classi siano espliciti, tracciabili
-e coerenti con il task investigativo.
+Il protocollo adotta infine un'impostazione \textit{human-in-the-loop}. La
+componente manuale non viene trattata come elemento esterno o residuale, ma come
+parte documentata della metodologia. In ambito forense, la costruzione del
+dataset non può dipendere esclusivamente da etichette automatiche o da directory
+originarie delle sorgenti: è necessario che i criteri semantici di inclusione,
+esclusione e assegnazione alle classi siano espliciti, tracciabili e coerenti
+con il task investigativo. Questa impostazione consente di documentare non solo
+il risultato finale della selezione, ma anche le regole operative che hanno
+guidato la costruzione del dataset congelato.
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
