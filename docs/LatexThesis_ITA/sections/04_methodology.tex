@@ -1374,137 +1374,57 @@ e controllati separatamente, poiché potrebbero essere indicizzati da alcuni
 strumenti forensi e influenzare l'analisi oltre il solo contenuto visuale.
 
 
-
-% ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic tools evaluation protocol}
 \label{sec:methodology-forensic-tools}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline operativo-forense di \gls{fairlab} prevede la valutazione di
-strumenti forensi professionali e, ove opportuno, di ambienti open-source di
-supporto al workflow sperimentale, con particolare attenzione alla gestione,
-all'indicizzazione, alla categorizzazione e all'esportazione di contenuti
-immagine. A differenza dei proxy model descritti nella
-Sezione~\ref{sec:methodology-models-classification}, tali strumenti vengono
-trattati come sistemi black-box o quasi black-box quando integrano moduli
-proprietari di analisi automatizzata; nei casi in cui lo strumento non includa
-funzionalità \gls{ai} direttamente comparabili, esso viene utilizzato come
-ambiente di ingest, hashing, visualizzazione, tagging, reporting o integrazione
-con workflow esterni.
+La pipeline operativo-forense di \gls{fairlab} prevede la valutazione di strumenti commerciali dotati di funzionalità di analisi automatizzata o assistita da \gls{ai} per contenuti multimediali. A differenza dei proxy model descritti nella Sezione~\ref{sec:methodology-models-classification}, tali strumenti vengono trattati come sistemi black-box: l'analisi non assume accesso all'architettura interna, ai dati di addestramento, alle soglie decisionali o ai pesi dei modelli eventualmente integrati, ma considera esclusivamente gli output osservabili prodotti durante un workflow sperimentale controllato.
 
-L'obiettivo di questa fase non è certificare in senso generale l'affidabilità
-dei prodotti considerati, ma valutare in condizioni controllate il loro
-comportamento operativo rispetto a immagini pulite, immagini fuori distribuzione
-e immagini manipolate mediante perturbazioni adversariali e trasformazioni
-anti-forensi. In questo modo, il protocollo consente di confrontare la risposta degli strumenti forensi valutati con quella dei proxy model accademici, mantenendo tuttavia
-distinti i due livelli di analisi: da un lato, modelli pienamente ispezionabili
-e riproducibili; dall'altro, strumenti professionali caratterizzati da logiche
-interne non completamente accessibili.
+L'obiettivo di questa fase non è certificare in senso generale l'affidabilità dei prodotti considerati, né confrontare in modo assoluto piattaforme commerciali eterogenee. Lo scopo è invece valutare, in condizioni riproducibili, il comportamento operativo di strumenti \gls{ai}-based quando vengono esposti a immagini pulite, immagini fuori distribuzione e immagini manipolate mediante perturbazioni adversariali o trasformazioni anti-forensi. In questo modo, la valutazione dei tool commerciali integra la valutazione dei proxy model, mantenendo tuttavia distinti i due livelli di analisi: da un lato modelli accademici pienamente ispezionabili e riproducibili; dall'altro strumenti professionali caratterizzati da logiche interne non completamente accessibili e da categorie proprietarie di output.
 
-La valutazione utilizza come input esclusivo la directory cieca del bundle,
-ossia \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}.
-Tale directory contiene file rinominati con identificativi neutri, privi di
-informazioni semantiche sulla classe, sulla sorgente, sul fold, sulla famiglia
-di attacco o sul modello target. La ground truth sperimentale viene conservata
-separatamente nel file
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv} e
-non viene esposta al tool durante l'importazione. Questa separazione riduce il
-rischio di bias indotto dai nomi dei file o dai percorsi e consente di
-normalizzare gli output solo in una fase successiva.
+La valutazione utilizza come input esclusivo la directory cieca del bundle, ossia \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}. Tale directory contiene file rinominati con identificativi neutri, privi di informazioni semantiche sulla classe, sulla sorgente, sul fold, sulla famiglia di attacco o sul modello target. La ground truth sperimentale viene conservata separatamente nel file \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv} e non viene esposta ai tool durante l'importazione. Questa separazione riduce il rischio di bias indotto dai nomi dei file o dai percorsi e consente di normalizzare gli output solo in una fase successiva.
 
-Ai fini della valutazione operativo-forense, gli strumenti considerati nel
-protocollo sono distinti in tre categorie metodologiche. La prima comprende
-gli strumenti effettivamente sottoposti a valutazione sperimentale, per i quali
-gli output prodotti sono esportati, normalizzati e confrontati con il ground
-truth del dataset congelato. La seconda comprende gli strumenti predisposti nel
-protocollo, ma non necessariamente inclusi nella valutazione quantitativa finale
-qualora gli output non risultino disponibili in forma sufficientemente
-strutturata o comparabile. La terza comprende strumenti di supporto utilizzati
-per attività accessorie, quali ingest, indicizzazione, visualizzazione, tagging
-o reporting, senza attribuire loro il ruolo di classificatori \gls{ai}-based
-comparabili ai sistemi commerciali dotati di moduli di categorizzazione
-automatizzata.
+Gli strumenti inclusi nella valutazione finale sono \gls{magnetaxiomtool} con il modulo \gls{magnetai}, \gls{excirefoto2025} e \gls{cellebriteinseyets}. \gls{magnetaxiomtool} è stato considerato come piattaforma forense commerciale con funzionalità di categorizzazione automatizzata dei contenuti multimediali tramite \gls{magnetai}. \gls{excirefoto2025} è stato considerato come software standalone general-purpose con funzionalità di ricerca semantica e analisi visuale basate su \gls{ai}; esso non viene quindi presentato come strumento sviluppato esclusivamente per finalità forensi, ma come componente black-box di image retrieval e classificazione operativa. \gls{cellebriteinseyets} è stato considerato come piattaforma commerciale di analisi assistita dei contenuti multimediali, valutata attraverso gli output osservabili esportati nell'ambiente \texttt{Cellebrite Physical Analyzer 10.9.0.3029}. In questo contesto, \gls{ufed} non viene trattato come classificatore immagini, ma solo come eventuale componente dell'ecosistema Cellebrite di acquisizione e gestione dei dati.
 
-In questa prospettiva, \texttt{Magnet AXIOM} e il relativo modulo
-\texttt{Magnet.AI}, \texttt{X-Ways Forensics} in combinazione con
-\texttt{Excire Photo AI}, \texttt{Cellebrite UFED} e \texttt{Oxygen Forensics}
-sono trattati come componenti della pipeline operativo-forense
-\cite{magnet,xways,ufed,oxygen,cellebrite}. Tuttavia, la
-loro inclusione nell'analisi quantitativa dipende dalla disponibilità di
-esportazioni strutturate e riconducibili alle categorie sperimentali definite
-nel presente protocollo. \texttt{Autopsy} viene invece considerato come
-ambiente open-source di supporto per ingest, hashing, visualizzazione, tagging
-e reporting, non come equivalente diretto ai tool proprietari con moduli di
-categorizzazione automatizzata. Tale distinzione consente di evitare una
-sovrapposizione impropria tra predisposizione metodologica del test,
-disponibilità effettiva degli output e comparabilità quantitativa dei risultati.
 
 \begin{table}[H]
 \centering
-\caption{Strumenti forensi considerati nella pipeline operativo-forense.}
+\caption{Strumenti commerciali inclusi nella valutazione operativo-forense finale.}
 \label{tab:methodology-forensic-tools}
-\begin{tabularx}{\textwidth}{@{}lX@{}}
+\begin{tabularx}{\textwidth}{@{}L{3.7cm}L{3.2cm}X@{}}
 \toprule
-\textbf{Strumento} & \textbf{Ruolo metodologico nel protocollo} \\
+\textbf{Strumento} & \textbf{Versione / ambiente} & \textbf{Ruolo metodologico nel protocollo} \\
 \midrule
-\texttt{Magnet AXIOM / Magnet.AI}
+\gls{magnetaxiomtool} / \gls{magnetai}
 &
-Strumento commerciale considerato per la valutazione degli output prodotti dai
-moduli disponibili di analisi, categorizzazione o triage automatizzato dei
-contenuti multimediali rispetto agli artefatti del forensic evaluation bundle. \\
-\texttt{X-Ways Forensics / Excire Photo AI}
+\texttt{Magnet AXIOM 10.1.0.48673}
 &
-Ambiente forense professionale considerato in combinazione con
-\texttt{Excire Photo AI} per l'ispezione, la gestione e l'analisi visuale di
-contenuti immagine, incluse funzionalità di categorizzazione, ricerca visuale o
-riconoscimento ove disponibili ed esportabili. \\
-\texttt{Cellebrite UFED}
+Piattaforma forense commerciale valutata attraverso gli output prodotti dal modulo \gls{magnetai} per la categorizzazione automatizzata di contenuti immagine, con particolare riferimento alla rilevazione di possibili armi. \\
+\gls{excirefoto2025}
 &
-Strumento professionale mobile-oriented predisposto nel protocollo operativo
-qualora gli artefatti e gli output disponibili siano compatibili con una
-valutazione strutturata rispetto al manifest del bundle. \\
-\texttt{Oxygen Forensics}
+\texttt{Excire Foto 2025 4.1.5}
 &
-Strumento professionale mobile/cloud-oriented predisposto nel protocollo
-operativo qualora gli output esportati consentano una normalizzazione
-riconducibile alle categorie sperimentali del bundle. \\
-\texttt{Autopsy}
+Software standalone general-purpose con funzionalità \gls{ai}-based di ricerca semantica e gestione visuale delle immagini, valutato come black-box image retrieval tool mediante prompt testuali orientati alla classe weapon. \\
+\gls{cellebriteinseyets}
 &
-Ambiente forense open-source utilizzato come supporto per ingest, hashing,
-visualizzazione, tagging e reporting; non viene trattato come equivalente
-diretto ai tool proprietari con moduli di categorizzazione automatizzata. \\
+\texttt{Inseyets 10.9} / \texttt{Physical Analyzer 10.9.0.3029}
+&
+Piattaforma commerciale di analisi assistita dei contenuti multimediali, valutata attraverso le classificazioni esportate dal report di \texttt{Cellebrite Physical Analyzer} e normalizzate rispetto al forensic evaluation bundle. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
+Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
 
+La normalizzazione degli output è necessaria perché le categorie interne dei tool non coincidono direttamente con le classi sperimentali \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo motivo, la pipeline applica un mapping esplicito e documentato delle label proprietarie verso una rappresentazione binaria operativa, basata sul campo \texttt{weapon\_detected}. Tale campo non deve essere interpretato come una dichiarazione semantica assoluta sull'immagine, ma come il risultato osservabile della capacità del tool di segnalare o meno la presenza di contenuti riconducibili alla categoria weapon nel contesto del protocollo sperimentale.
 
+Nel caso di \gls{magnetaxiomtool}, gli output esportati da \gls{magnetai} vengono normalizzati interpretando il tag \texttt{Possible weapons} come rilevamento positivo della categoria weapon. Le immagini prive di tale tag vengono considerate come non segnalate dal tool rispetto alla categoria di interesse. Nel caso di \gls{excirefoto2025}, la valutazione si basa su esportazioni generate mediante un insieme controllato di prompt semantici firearm-oriented; un'immagine recuperata da almeno uno dei prompt viene ricodificata come rilevamento positivo, mentre le immagini non recuperate da alcun prompt vengono considerate come non segnalate. Nel caso di \gls{cellebriteinseyets}, la normalizzazione utilizza la colonna osservabile \texttt{Classifications} del report esportato, ricodificando come rilevamento positivo le classificazioni riconducibili a categorie quali \texttt{Armi}, \texttt{Pistola} o \texttt{Fucile}. Questa ricodifica è operativa e non implica accesso o inferenza diretta sulle logiche interne del modello proprietario.
 
-Per ciascun tool, il protocollo prevede tre passaggi. In primo luogo, viene
-importata o indicizzata esclusivamente la vista cieca del bundle. In secondo
-luogo, vengono esportati i risultati prodotti dallo strumento, includendo ove
-disponibili il nome del file, l'hash, la categoria assegnata, eventuali tag,
-punteggi di confidenza, stati di mancato rilevamento e metadati rilevanti. In
-terzo luogo, gli output vengono ricondotti al file
-\texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, nome del file cieco
-o hash, così da confrontare le categorie prodotte dal tool con la ground truth
-sperimentale.
+La distinzione tra mancato rilevamento, classificazione negativa e stato non interpretabile è mantenuta durante la fase di normalizzazione. Nei casi in cui l'output del tool non sia riconducibile in modo affidabile al task binario considerato, la predizione viene marcata come \texttt{unknown} o trattata separatamente nell'audit di esportazione. Questa scelta evita di trasformare automaticamente output ambigui o non strutturati in falsi negativi o veri negativi, preservando la tracciabilità del processo di interpretazione.
 
-La normalizzazione degli output prodotti dagli strumenti forensi richiede particolare cautela,
-poiché le categorie interne dei tool potrebbero non coincidere direttamente con
-le classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo
-motivo, la pipeline prevede una fase di mapping esplicito, nella quale le label
-proprietarie vengono ricondotte, quando possibile, a categorie operative
-comparabili. Gli stati ambigui, non rilevati o non categorizzati non vengono
-convertiti automaticamente in \texttt{non\_weapon}, ma mantenuti come stati
-distinti, poiché in un workflow forense l'assenza di rilevamento non equivale
-necessariamente a una classificazione negativa.
+Gli output normalizzati vengono prodotti tramite lo script \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}, che genera file CSV comparabili per i tre tool inclusi nella valutazione finale. Lo script produce, oltre alle predizioni normalizzate, un audit degli export, un log delle versioni dei tool, un sommario della normalizzazione e file metrici aggregati. Questa separazione tra export grezzo, normalizzazione e calcolo delle metriche consente di mantenere una catena di tracciabilità tra artefatto originale, output del tool, regola di mapping applicata e risultato quantitativo finale.
 
-Questa impostazione consente di valutare la robustezza operativa degli strumenti valutati senza attribuire loro proprietà interne non verificabili. La
-valutazione rimane quindi ancorata agli output osservabili e alla loro coerenza
-rispetto al manifest sperimentale, mantenendo separati il piano metodologico,
-la misurazione quantitativa e la successiva interpretazione dei risultati.
-
+Questa impostazione consente di valutare la robustezza operativa degli strumenti commerciali senza attribuire loro proprietà interne non verificabili. La valutazione rimane quindi ancorata agli output osservabili e alla loro coerenza rispetto al manifest sperimentale, mantenendo separati il piano metodologico, la misurazione quantitativa e la successiva interpretazione dei risultati.
 
 La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow metodologico adottato per la valutazione degli strumenti forensi: i tool ricevono esclusivamente la vista cieca del bundle, mentre la ground truth sperimentale rimane separata fino alla fase di normalizzazione degli output.
 
@@ -1605,12 +1525,12 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
 {\shortstack{
     \textbf{Metric computation}\\
     \textbf{and comparison}\\[1mm]
-    \scriptsize TP, FP, FN, TN, unknown,\\
+    \scriptsize TP, FP, FN, TN, unknown outputs,\\
     \scriptsize recall, FNR and FPR
 }};
 
 % -------------------------------------------------------------------------
-% Row 3 - Metadata and normalization on the same line
+% Row 3 - Metadata and normalization
 % -------------------------------------------------------------------------
 \node[note] (manifest) at (6.8,-5.5)
 {\shortstack{
