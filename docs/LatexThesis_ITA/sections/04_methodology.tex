@@ -893,7 +893,7 @@ Gli output principali della fase di split generation sono tre artefatti:
 di file, ma artefatti di controllo che registrano, per ciascun campione,
 l'identificativo dell'immagine, la classe finale, il fold o il set di
 appartenenza, la sorgente, il percorso dell'immagine preparata, il percorso
-nello split, l'hash SHA256, l'MD5 e le informazioni relative al tipo di
+nello split, l'hash \gls{sha256}, l'\gls{md5} e le informazioni relative al tipo di
 campione. Il file di summary documenta i controlli di consistenza eseguiti
 sulla generazione degli split, inclusa l'unicità degli \texttt{image\_id},
 l'unicità degli hash e la corrispondenza tra i conteggi attesi e quelli
@@ -1152,7 +1152,7 @@ applica il mapping binario \texttt{non\_weapon}~$\rightarrow 0$ e
 \codepath{models/checkpoints/<model_name>/<fold>.pt} e aggiorna il registro
 \codepath{models/model_registry.json}. Il registro dei modelli documenta, per
 ciascuna architettura e per ciascun fold, il pattern del checkpoint, la
-dimensione di input, la normalizzazione utilizzata e l'hash SHA256 del file
+dimensione di input, la normalizzazione utilizzata e l'hash \gls{sha256} del file
 prodotto. La registrazione dell'hash del checkpoint è metodologicamente rilevante
 perché consente di verificare che le fasi successive della pipeline, incluse la
 generazione degli attacchi model-dependent e le valutazioni di robustezza, siano
@@ -1726,7 +1726,7 @@ pulito originario attraverso campi quali \texttt{generated\_image\_id},
 \texttt{clean\_relative\_path}, \texttt{perturbed\_relative\_path},
 \texttt{sha256\_original}, \texttt{sha256\_perturbed}, \texttt{md5\_original}
 e \texttt{md5\_perturbed}. Per gli attacchi model-dependent, il manifest
-registra inoltre il modello target, il checkpoint utilizzato e l'hash SHA256 del
+registra inoltre il modello target, il checkpoint utilizzato e l'hash \gls{sha256} del
 checkpoint, così da rendere verificabile la relazione tra immagine perturbata e
 versione specifica del proxy model.
 
@@ -1946,7 +1946,7 @@ tracciabilità tra input, trasformazione applicata e output generato.
 
 Il file di sintesi documenta inoltre i controlli di consistenza della fase di
 generazione: corrispondenza tra immagini attese e immagini effettivamente
-prodotte, unicità degli identificativi generati, unicità degli hash SHA256 delle
+prodotte, unicità degli identificativi generati, unicità degli hash \gls{sha256} delle
 immagini trasformate e corretta scrittura del manifest. Tali controlli non
 costituiscono una valutazione dei risultati di robustezza, ma attestano la
 coerenza tecnica della generazione degli artefatti anti-forensi. L'analisi
@@ -2077,7 +2077,7 @@ sperimentale, al tipo di attacco o trasformazione, al fold e alla sorgente. Il
 file \texttt{bundle\_hashes\_sha256.csv} contiene 11\,500 righe e 13 colonne, e
 fornisce una vista focalizzata sugli hash e sui percorsi. Il file
 \texttt{bundle\_summary.json} riassume i conteggi e i controlli di integrità,
-tra cui unicità dei \texttt{bundle\_id}, unicità degli SHA256 effettivi,
+tra cui unicità dei \texttt{bundle\_id}, unicità degli \gls{sha256} effettivi,
 corrispondenza degli hash quando presenti nei manifest sorgente, assenza di
 blind path mancanti, pulizia semantica dei percorsi ciechi e separazione dei
 metadata dagli input dei tool.
@@ -2811,13 +2811,13 @@ bundle, valutazione metrica e approccio di \gls{xai}. In coerenza con i principi
 modo da consentire la ricostruzione del percorso tra file originario, artefatto
 derivato, output sperimentale e metadati di verifica \cite{casey2011digital,nist2006guide,iso27037}.
 
-Il valore SHA256 è l'identificatore crittografico principale della pipeline.
+Il valore \gls{sha256} è l'identificatore crittografico principale della pipeline.
 Esso viene calcolato sui file preparati, propagato nei manifest successivi e
 ricalcolato sugli artefatti generati, incluse immagini adversariali, immagini
-anti-forensi e file del bundle. L'MD5 viene registrato come hash ausiliario,
+anti-forensi e file del bundle. L'\gls{md5} viene registrato come hash ausiliario,
 soprattutto per facilitare il confronto con strumenti forensi che possono
 esporre tale valore nei propri report o nei propri hash set. Questa doppia
-registrazione non attribuisce all'MD5 il ruolo di identificatore primario, ma ne
+registrazione non attribuisce all'\gls{md5} il ruolo di identificatore primario, ma ne
 preserva l'utilità operativa nel raccordo con tool e formati eterogenei.
 
 La pipeline utilizza manifest progressivi. Il passaggio da
@@ -2842,7 +2842,7 @@ per verificare che un risultato sia riferito al file corretto.
 \midrule
 \texttt{metadata.csv}
 &
-Registra identità tecnica, sorgente, path, dimensioni e SHA256 del pool
+Registra identità tecnica, sorgente, path, dimensioni e \gls{sha256} del pool
 preparato. \\
 \texttt{review\_manifest\_full.csv}
 &
@@ -2881,11 +2881,157 @@ Documenta i casi selezionati per l'analisi qualitativa mediante \gls{xai}. \\
 \end{tabularx}
 \end{table}
 
+
+La Figura~\ref{fig:methodology-traceability-chain} sintetizza la catena di
+tracciabilità adottata nel protocollo sperimentale. Ogni fase conserva o genera
+identificativi, path, hash e manifest che consentono di ricostruire il legame
+tra file originario, artefatto derivato, output del modello o del tool e risultato
+metrico finale.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.72\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=blue!8
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=green!10
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.05cm,
+        minimum width=5.6cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% -------------------------------------------------------------------------
+% Main vertical chain
+% -------------------------------------------------------------------------
+\node[block] (raw) at (0,0)
+{\shortstack{
+    \textbf{Prepared image}\\[1mm]
+    \scriptsize \texttt{image\_id}, source path, \gls{sha256} and metadata
+}};
+
+\node[process] (selection) at (0,-2.1)
+{\shortstack{
+    \textbf{Manual selection}\\[1mm]
+    \scriptsize final label, reviewer state and frozen manifests
+}};
+
+\node[process] (splits) at (0,-4.2)
+{\shortstack{
+    \textbf{Splits and OOD set}\\[1mm]
+    \scriptsize fold, class, path and clean manifests
+}};
+
+\node[process] (derived) at (0,-6.3)
+{\shortstack{
+    \textbf{Derived artifacts}\\[1mm]
+    \scriptsize adversarial and anti-forensic samples\\
+    \scriptsize with generated identifiers
+}};
+
+\node[process] (bundle) at (0,-8.4)
+{\shortstack{
+    \textbf{Forensic bundle}\\[1mm]
+    \scriptsize \texttt{bundle\_id}, blind path and separated ground truth
+}};
+
+\node[output] (outputs) at (0,-10.5)
+{\shortstack{
+    \textbf{Model and tool outputs}\\[1mm]
+    \scriptsize proxy predictions, tool exports and normalized outputs
+}};
+
+\node[output] (results) at (0,-12.6)
+{\shortstack{
+    \textbf{Metrics and XAI}\\[1mm]
+    \scriptsize robustness metrics, OOD behavior\\
+    \scriptsize and case-study manifests
+}};
+
+% -------------------------------------------------------------------------
+% Side integrity controls
+% -------------------------------------------------------------------------
+\node[note] (controls) at (7.2,-8.4)
+{\shortstack{
+    \textbf{Integrity controls}\\[1mm]
+    \scriptsize hash verification, expected counts,\\
+    \scriptsize uniqueness checks and JSON summaries
+}};
+
+% -------------------------------------------------------------------------
+% Arrows
+% -------------------------------------------------------------------------
+\draw[arrow] (raw) -- (selection);
+\draw[arrow] (selection) -- (splits);
+\draw[arrow] (splits) -- (derived);
+\draw[arrow] (derived) -- (bundle);
+\draw[arrow] (bundle) -- (outputs);
+\draw[arrow] (outputs) -- (results);
+
+\draw[dashedarrow] (derived.east) -| (controls.north);
+\draw[dashedarrow] (bundle.east) -- (controls.west);
+\draw[dashedarrow] (outputs.east) -| (controls.south);
+
+\end{tikzpicture}%
+}
+\caption[Traceability chain across the FAIR-Lab protocol]{Traceability chain across the FAIR-Lab protocol. Each experimental stage preserves or generates identifiers, paths, cryptographic hashes and manifests, enabling reconstruction from the original prepared image to derived artifacts, bundle entries, model or tool outputs, metrics and explainability case studies.}
+\label{fig:methodology-traceability-chain}
+\end{figure}
+
+
+
 La riproducibilità è rafforzata da controlli deterministici e da registri di
 configurazione. La generazione degli split utilizza seed 42, mentre i proxy
 model sono addestrati secondo un protocollo fold-aware. Per ogni modello e fold,
 il file \codepath{models/model_registry.json} registra il checkpoint, la
-normalizzazione, la dimensione di input e l'hash SHA256 del file
+normalizzazione, la dimensione di input e l'hash \gls{sha256} del file
 \texttt{.pt}. Gli attacchi model-dependent utilizzano checkpoint specifici del
 fold, riducendo il rischio di leakage tra immagini usate per l'addestramento e
 immagini perturbate o valutate. Tale controllo anti-leakage è centrale perché
@@ -2903,7 +3049,7 @@ presenti nel path o nel nome del file.
 
 I controlli automatici registrati nei summary JSON verificano la corrispondenza
 tra conteggi attesi e prodotti, l'unicità degli identificativi generati,
-l'unicità degli hash SHA256, la corretta scrittura dei manifest e, nel caso del
+l'unicità degli hash \gls{sha256}, la corretta scrittura dei manifest e, nel caso del
 bundle, la separazione dei metadata dagli input ciechi. Tali controlli non
 sostituiscono l'analisi critica dei risultati, ma garantiscono che gli
 esperimenti siano eseguiti su artefatti coerenti con il protocollo.
@@ -2921,6 +3067,8 @@ valutazione può essere considerata verificabile, riproducibile e metodologicame
 difendibile.
 
 Le versioni software, i moduli abilitati, le impostazioni di importazione e le
-modalità di esportazione dei tool forensi saranno documentati nel capitolo dei
-risultati e, ove necessario, in appendice, così da mantenere separati il
-protocollo metodologico e la configurazione effettiva dei run sperimentali.
+modalità di esportazione dei tool forensi sono documentati nelle sezioni
+metodologiche dedicate e saranno richiamati, ove necessario, nel capitolo dei
+risultati e nelle appendici. In questo modo, la descrizione del protocollo rimane
+separata dalla discussione degli esiti sperimentali, ma conserva il collegamento
+con le configurazioni effettivamente utilizzate nei run.
