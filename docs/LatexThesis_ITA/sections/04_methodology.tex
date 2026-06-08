@@ -2107,14 +2107,16 @@ metadata dagli input dei tool.
 
 
 La cecità del bundle riguarda principalmente i nomi dei file, i percorsi e la
-struttura delle directory. Poiché alcuni strumenti forensi possono indicizzare
-anche metadati embedded nei file immagine, quali campi EXIF, XMP, IPTC o altre
-informazioni residue conservate dai file originari, la costruzione del bundle è
-stata accompagnata da un audit automatico dei metadati presenti nella vista
-cieca. Tale controllo non modifica gli artefatti, ma verifica la presenza di
-termini potenzialmente riconducibili alle classi sperimentali, ai fold, alle
-famiglie di perturbazione, ai modelli proxy o a descrittori semantici del
-contenuto visuale.
+struttura delle directory. Poiché i metadati embedded possono contenere
+informazioni rilevanti sul dispositivo di acquisizione, sul software di
+elaborazione, sulla provenienza o su descrittori semantici del contenuto, e
+poiché tali informazioni possono essere utilizzate in analisi forensi dei
+contenuti multimediali, la costruzione del bundle è stata accompagnata da un
+audit automatico dei metadati presenti nella vista cieca
+\cite{xiang2021forensicmetadata,lee2023forensicmethodology,zheng2023exif}.
+Tale controllo non modifica gli artefatti, ma verifica la presenza di termini
+potenzialmente riconducibili alle classi sperimentali, ai fold, alle famiglie di
+perturbazione, ai modelli proxy o a descrittori semantici del contenuto visuale.
 
 Nel run consolidato, l'audit ha controllato 11,500 file della directory
 \codepath{blind_tool_input/files/}, rilevando 7,640 file con metadati

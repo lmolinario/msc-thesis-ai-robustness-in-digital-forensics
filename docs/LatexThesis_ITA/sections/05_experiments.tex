@@ -798,25 +798,25 @@ trasformazioni anti-forensi, ma rappresenta un limite operativo residuale della
 cecità del bundle.
 
 Per valutare l'eventuale impatto di tali metadati sugli output osservati, i
-relativi \texttt{bundle_id} sono stati incrociati con la ground truth, le
+relativi \texttt{bundle\_id} sono stati incrociati con la ground truth, le
 predizioni dei modelli proxy e gli output normalizzati degli strumenti
 black-box. Sui campioni clean, EfficientNet-B0 e ResNet18 risultano corretti in
 tutti gli 11 casi, mentre \gls{clip} produce un falso positivo su un'immagine
-\texttt{non_weapon}. Per gli strumenti black-box, Magnet AXIOM/Magnet.AI ed
-Excire Foto 2025 classificano correttamente 9 casi clean su 11, mentre
-Cellebrite Inseyets classifica correttamente tutti gli 11 campioni clean.
+\texttt{non\_weapon}. Per gli strumenti black-box, \gls{axiom} \gls{magnetai}   ed
+\gls{excire}  classificano correttamente 9 casi clean su 11, mentre
+\gls{cellebriteinseyets} classifica correttamente tutti gli 11 campioni clean.
 
 Due casi risultano particolarmente rilevanti dal punto di vista interpretativo:
-\texttt{bundle_000320} e \texttt{bundle_000948}. Entrambi sono immagini
+\texttt{bundle\_000320} e \texttt{bundle\_000948}. Entrambi sono immagini
 \texttt{weapon} e contengono metadati esplicitamente weapon-related, ma vengono
-comunque classificati come \texttt{non_weapon} da Magnet AXIOM/Magnet.AI ed
-Excire Foto 2025. Questo risultato suggerisce che la presenza di termini
+comunque classificati come \texttt{non\_weapon} da \gls{axiom} \gls{magnetai} ed
+\gls{excire}. Questo risultato suggerisce che la presenza di termini
 descrittivi nei metadati embedded non determina automaticamente una
 classificazione positiva da parte dei tool black-box.
 
-Nei 4 casi \gls{ood}, Magnet AXIOM/Magnet.AI ed Excire Foto 2025 producono
-sempre una classificazione \texttt{weapon}, mentre Cellebrite Inseyets produce
-tre classificazioni \texttt{weapon} e una classificazione \texttt{non_weapon}.
+Nei 4 casi \gls{ood}, \gls{axiom} \gls{magnetai}   ed \gls{excire} producono
+sempre una classificazione \texttt{weapon}, mentre \gls{cellebriteinseyets} produce
+tre classificazioni \texttt{weapon} e una classificazione \texttt{non\_weapon}.
 Questi casi vengono interpretati come parte del più generale rischio operativo
 associato a input fuori distribuzione e semanticamente weapon-adjacent, per i
 quali non è possibile stabilire se l'output derivi dal contenuto visuale, dai
