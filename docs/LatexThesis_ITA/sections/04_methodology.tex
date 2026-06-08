@@ -11,8 +11,9 @@ in workflow forensi realistici, il capitolo non si limita a descrivere
 singoli componenti tecnici, ma formalizza un disegno sperimentale integrato.
 Tale disegno collega dataset, modelli, perturbazioni adversariali e
 anti-forensi, strumenti forensi, metriche, approccio di \gls{xai} e controlli
-di tracciabilità all'interno del framework \gls{fairlab}, mantenendo una
-distinzione netta tra metodologia sperimentale e analisi dei risultati.
+di tracciabilità all'interno del protocollo sperimentale \gls{fairlab},
+mantenendo una distinzione netta tra metodologia sperimentale e analisi dei
+risultati.
 
 Il capitolo è organizzato in quattordici sezioni. Le prime sei
 (\S\S\,\ref{sec:methodology-fairlab-overview}--\ref{sec:methodology-split-generation})
@@ -33,14 +34,17 @@ modelli e strumenti e le interpretazioni sperimentali vengono demandati al
 capitolo dedicato ai risultati.
 
 
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Overview of the FAIR-Lab methodology}
 \label{sec:methodology-fairlab-overview}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La metodologia della tesi è organizzata attorno al framework \gls{fairlab},
-inteso come pipeline sperimentale per la valutazione della robustezza operativa
-di sistemi \gls{ai}-based in scenari di \gls{df}. Il framework nasce
+La metodologia della tesi è organizzata attorno al protocollo sperimentale
+\gls{fairlab}, inteso come struttura operativa per rendere riproducibile la
+costruzione del dataset, la generazione delle perturbazioni, la valutazione dei
+modelli proxy e l'analisi black-box dei software selezionati. Il protocollo nasce
 dall'esigenza di superare una valutazione puramente algoritmica della
 classificazione di immagini, collegando le prestazioni dei modelli alla loro
 possibile funzione operativa nei workflow di triage e prioritizzazione delle
@@ -49,18 +53,19 @@ soltanto come proprietà tecnica del classificatore, ma come requisito
 metodologico per l'impiego prudente dell'automazione in un contesto
 investigativo.
 
-Il framework integra due livelli complementari. Il primo è una pipeline
-accademica, nella quale dataset, modelli, perturbazioni, metriche e approcci
-di \gls{xai} vengono definiti in modo controllato e comparabile. Il secondo è
-una pipeline operativo-forense, nella quale gli artefatti prodotti dalla
-pipeline accademica vengono predisposti per essere analizzati da strumenti
-professionali di \gls{df}, secondo una logica più vicina alle condizioni
-applicative reali. Questa distinzione consente di mantenere separati il
-controllo sperimentale proprio della ricerca accademica e la valutazione
-black-box o quasi black-box richiesta dall'analisi di strumenti professionali o proprietari,
-spesso caratterizzati da moduli non pienamente ispezionabili \cite{sanna2024preliminary,sanna2025pixelperfect}.
+Il protocollo integra due livelli complementari. Il primo riguarda la
+valutazione controllata dei modelli proxy, nella quale dataset, modelli,
+perturbazioni, metriche e approcci di \gls{xai} vengono definiti in modo
+riproducibile e comparabile. Il secondo riguarda la valutazione operativa
+black-box dei software selezionati, nella quale gli artefatti prodotti dal
+protocollo sperimentale vengono predisposti per essere analizzati da strumenti
+professionali o general-purpose dotati di funzionalità \gls{ai}-based. Questa
+distinzione consente di mantenere separati il controllo sperimentale proprio dei
+modelli ispezionabili e la valutazione black-box richiesta dall'analisi di
+strumenti proprietari, spesso caratterizzati da moduli non pienamente
+accessibili \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
-Nel protocollo sperimentale consolidato, la pipeline comprende la costruzione
+Nel protocollo sperimentale consolidato, la metodologia comprende la costruzione
 degli artefatti dataset, la generazione degli split puliti, la produzione delle
 principali famiglie di perturbazioni adversariali e anti-forensi e la
 predisposizione del bundle per la valutazione forense. In particolare, sono
@@ -74,6 +79,191 @@ Questa distinzione è essenziale per evitare che modifiche future ai dati, ai
 modelli o ai file manipolati alterino retroattivamente il perimetro della
 valutazione.
 
+La Figura~\ref{fig:methodology-fairlab-overview} sintetizza la struttura complessiva del protocollo sperimentale \gls{fairlab}. La figura evidenzia la separazione tra il subset binario destinato alla generazione delle perturbazioni e il ramo \gls{ood}, che viene mantenuto pulito e valutato separatamente. Gli artefatti clean, \gls{ood}, adversariali e anti-forensi confluiscono quindi nel forensic evaluation bundle, utilizzato sia per la valutazione controllata dei modelli proxy sia per la valutazione black-box dei software selezionati.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.84\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.4cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.4cm,
+        fill=blue!8
+    },
+    subset/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.10cm,
+        minimum width=6.4cm,
+        fill=yellow!12
+    },
+    eval/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=6.8cm,
+        fill=orange!12
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=8.0cm,
+        fill=green!10
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% -------------------------------------------------------------------------
+% Main workflow
+% -------------------------------------------------------------------------
+\node[block] (sources) at (0,0)
+{\shortstack{
+    \textbf{Source image pool}\\[1mm]
+    \scriptsize heterogeneous image sources and initial metadata
+}};
+
+\node[process] (review) at (0,-1.9)
+{\shortstack{
+    \textbf{Human-in-the-loop review}\\[1mm]
+    \scriptsize manual validation, cleaning and dataset freezing
+}};
+
+\node[process] (dataset) at (0,-3.8)
+{\shortstack{
+    \textbf{Final frozen dataset}\\[1mm]
+    \scriptsize 1500 images: 500 weapon, 500 non-weapon, 500 OOD
+}};
+
+% -------------------------------------------------------------------------
+% Split into binary and OOD
+% -------------------------------------------------------------------------
+\node[subset] (binary) at (-4.3,-6.2)
+{\shortstack{
+    \textbf{Binary evaluation subset}\\[1mm]
+    \scriptsize 1000 images: 500 weapon and 500 non-weapon
+}};
+
+\node[subset] (ood) at (4.3,-6.2)
+{\shortstack{
+    \textbf{Clean OOD evaluation set}\\[1mm]
+    \scriptsize 500 clean out-of-distribution images\\
+    \scriptsize no adversarial or anti-forensic perturbations
+}};
+
+% -------------------------------------------------------------------------
+% Perturbations generated only from binary subset
+% -------------------------------------------------------------------------
+\node[process] (perturb) at (-4.3,-8.8)
+{\shortstack{
+    \textbf{Perturbation generation}\\[1mm]
+    \scriptsize adversarial attacks and anti-forensic transformations\\
+    \scriptsize applied only to the binary subset
+}};
+
+% -------------------------------------------------------------------------
+% Common bundle
+% -------------------------------------------------------------------------
+\node[process] (bundle) at (0,-11.3)
+{\shortstack{
+    \textbf{Forensic evaluation bundle}\\[1mm]
+    \scriptsize 1000 clean + 500 clean OOD + 5000 adversarial\\
+    \scriptsize + 5000 anti-forensic samples
+}};
+
+% -------------------------------------------------------------------------
+% Evaluation branches
+% -------------------------------------------------------------------------
+\node[eval] (proxy) at (-4.3,-14.1)
+{\shortstack{
+    \textbf{Controlled proxy model evaluation}\\[1mm]
+    \scriptsize structured evaluation on bundle artifacts\\
+    \scriptsize EfficientNet-B0, ResNet18 and CLIP
+}};
+
+\node[eval] (tools) at (4.3,-14.1)
+{\shortstack{
+    \textbf{Black-box tool evaluation}\\[1mm]
+    \scriptsize blind bundle input and output normalization\\
+    \scriptsize Magnet.AI, Excire Foto 2025 and Cellebrite Inseyets
+}};
+
+% -------------------------------------------------------------------------
+% Final layer
+% -------------------------------------------------------------------------
+\node[output] (results) at (0,-17.0)
+{\shortstack{
+    \textbf{Metrics, XAI and traceability}\\[1mm]
+    \scriptsize robustness analysis, output normalization, Integrated Gradients,\\
+    \scriptsize audit artifacts and reproducibility controls
+}};
+
+% -------------------------------------------------------------------------
+% Arrows
+% -------------------------------------------------------------------------
+\draw[arrow] (sources) -- (review);
+\draw[arrow] (review) -- (dataset);
+
+\draw[arrow] (dataset.south west) -- (binary.north);
+\draw[arrow] (dataset.south east) -- (ood.north);
+
+\draw[arrow] (binary.south) -- (perturb.north);
+
+% Contributions to the forensic evaluation bundle (no curves)
+\draw[arrow] (ood.south) |- (bundle.east);
+\draw[arrow] (perturb.south) |- (bundle.west);
+
+% Bundle to evaluation branches
+\draw[arrow] (bundle.south west) -- (proxy.north);
+\draw[arrow] (bundle.south east) -- (tools.north);
+
+% Final analysis layer
+\draw[arrow] (proxy.south east) -- (results.north);
+\draw[arrow] (tools.south west) -- (results.north);
+
+
+\end{tikzpicture}%
+}
+\caption[FAIR-Lab experimental protocol overview]{Overview of the FAIR-Lab experimental protocol. The final frozen dataset is split into a binary subset and a separate clean \gls{ood} set. Adversarial and anti-forensic perturbations are generated only from the binary subset, while the \gls{ood} branch is preserved clean and evaluated separately. Clean binary samples, clean \gls{ood} samples, and perturbed binary samples are then combined into the forensic evaluation bundle, which is used both for the controlled evaluation of proxy models and for the black-box evaluation of the selected software tools.}
+\label{fig:methodology-fairlab-overview}
+\end{figure}
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Research design and experimental assumptions}
@@ -83,14 +273,132 @@ valutazione.
 Il disegno sperimentale assume come scenario di riferimento un'attività di
 triage visuale in ambito forense, nella quale un sistema automatico supporta
 l'analista nell'individuazione preliminare di immagini potenzialmente
-rilevanti. Il caso di studio riguarda la classificazione di immagini in tre
-categorie metodologiche: \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}.
-La prima categoria rappresenta la classe investigativamente rilevante nel task
-considerato; la seconda raccoglie esempi negativi realistici e coerenti con il
-dominio; la terza comprende casi borderline, anomali o fuori distribuzione che
-non dovrebbero essere forzati in modo acritico nelle due classi binarie
-principali.
+rilevanti. Il caso di studio riguarda la classificazione di immagini rispetto a
+tre categorie metodologiche principali: \texttt{weapon}, \texttt{non\_weapon} e
+\texttt{ood}. Tali categorie non devono essere interpretate come qualificazioni
+giuridiche del contenuto, né come classi semantiche generali valide in ogni
+contesto, ma come etichette operative definite per il protocollo sperimentale
+della tesi.
 
+Nel task binario principale, la classe \texttt{weapon} rappresenta la classe
+positiva, cioè l'insieme delle immagini nelle quali è visibile un oggetto
+riconducibile alla categoria investigativamente rilevante considerata dal
+protocollo. La classe \texttt{non\_weapon} rappresenta invece la classe negativa
+in-domain: essa include immagini realistiche e interpretabili prive dell'oggetto
+di interesse, ma comunque compatibili con il dominio visuale della raccolta
+sperimentale. La classe \texttt{ood} costituisce un ramo separato della
+valutazione e raccoglie immagini che non devono essere forzate nella dicotomia
+\texttt{weapon}/\texttt{non\_weapon}, poiché ambigue, anomale, sintetiche,
+degradate, borderline o appartenenti a distribuzioni visive differenti.
+
+I criteri di assegnazione delle classi sono stati formalizzati anche nello
+strumento di revisione manuale utilizzato per la costruzione del dataset finale.
+Questa scelta consente di rendere esplicito il collegamento tra definizione
+metodologica delle classi, processo \textit{human-in-the-loop} e manifest finali
+prodotti dalla pipeline. La Tabella~\ref{tab:methodology-operational-classes}
+sintetizza tali criteri in forma operativa.
+
+\begin{table}[H]
+\centering
+\caption{Definizione operativa delle classi utilizzate nel protocollo sperimentale.}
+\label{tab:methodology-operational-classes}
+\begin{tabularx}{\textwidth}{@{}L{3.0cm}L{3.6cm}X@{}}
+\toprule
+\textbf{Label} & \textbf{Ruolo nel protocollo} & \textbf{Criterio operativo di assegnazione} \\
+\midrule
+\texttt{weapon}
+&
+Classe positiva del task binario
+&
+Immagini contenenti una vera arma come oggetto rilevante principale,
+visivamente riconoscibile con sufficiente chiarezza e semanticamente coerente
+con il task di classificazione. Sono inclusi, ad esempio, casi in cui siano
+chiaramente visibili pistole, fucili, mitragliette, shotgun o altre armi reali
+riconducibili al target sperimentale. Sono esclusi i casi in cui l'oggetto sia
+marginale, troppo piccolo, fortemente occluso, eccessivamente ambiguo,
+sintetico, toy-like o non riconducibile con affidabilità a una vera arma. \\
+\texttt{non\_weapon}
+&
+Classe negativa in-domain del task binario
+&
+Immagini realistiche, utilizzabili e visivamente interpretabili nelle quali non
+è presente alcuna vera arma. La classe comprende esempi negativi plausibili
+rispetto al contesto visuale del dataset, quali persone, ambienti, veicoli,
+oggetti, interni, esterni o scene ordinarie. Non include contenuti
+semanticamente borderline, sintetici, anomali o immagini contenenti coltelli,
+spade, repliche, airsoft, armi giocattolo, armi da videogame, rendering o
+elementi visivi che possano introdurre ambiguità rispetto al task. \\
+\texttt{ood}
+&
+Ramo separato di stress test operativo
+&
+Immagini fuori distribuzione, borderline o non rappresentative di un campione
+positivo o negativo pulito. Include, ad esempio, coltelli o spade, repliche,
+giocattoli, airsoft, armi da videogame o \gls{cgi}, immagini sintetiche o
+generate, carri armati, missili, esplosioni, scene di guerra, immagini
+fortemente degradate, anomale, bizzarre o semanticamente ambigue. Rientrano in
+questa classe anche immagini contestualmente collegate a violenza o armi, ma
+non valide come campioni puliti per il task binario \texttt{weapon}/
+\texttt{non\_weapon}. \\
+\texttt{exclude}
+&
+Label operativa di esclusione
+&
+Immagini inutilizzabili, corrotte, illeggibili, non interpretabili o
+semanticamente irrilevanti rispetto al protocollo sperimentale. Questa label è
+utilizzata durante la revisione manuale per rimuovere elementi non idonei dalla
+selezione finale. Le immagini marcate come \texttt{exclude} non contribuiscono
+né al dataset finale congelato né al subset binario destinato alle perturbazioni. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+La Figura~\ref{fig:methodology-class-examples} mostra tre esempi rappresentativi
+delle categorie operative utilizzate nel protocollo di revisione manuale. Gli
+esempi hanno funzione esclusivamente illustrativa e non esauriscono la variabilità
+interna delle classi.
+
+\begin{figure}[h]
+\centering
+
+\begin{minipage}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.0cm,keepaspectratio]{images/Arma}
+    \vspace{1mm}
+
+    \textbf{\texttt{weapon}}\\
+    \footnotesize Arma reale visivamente riconoscibile e coerente con il task binario.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.0cm,keepaspectratio]{images/Non_Arma}
+    \vspace{1mm}
+
+    \textbf{\texttt{non\_weapon}}\\
+    \footnotesize Esempio negativo realistico, interpretabile e privo di armi.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.31\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.0cm,keepaspectratio]{images/ood}
+    \vspace{1mm}
+
+    \textbf{\texttt{ood}}\\
+    \footnotesize Caso borderline o fuori distribuzione, non forzato nel task binario.
+\end{minipage}
+
+\caption[Representative examples of operational class definitions]{Representative examples of the operational class definitions used during the manual review process. The examples are illustrative and do not provide an exhaustive definition of the internal variability of the \texttt{weapon}, \texttt{non\_weapon} and \texttt{ood} classes.}
+\label{fig:methodology-class-examples}
+\end{figure}
+
+La presenza della label operativa \texttt{exclude} non modifica la struttura del
+dataset finale, che rimane composta dalle tre categorie metodologiche
+\texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Essa svolge invece una
+funzione di controllo qualitativo durante il processo di revisione, consentendo
+di documentare e separare gli elementi rimossi rispetto ai campioni effettivamente
+inclusi nel benchmark.
 
 La scelta di includere una classe \gls{ood} esplicita risponde a un'esigenza
 metodologica specifica. In un contesto operativo reale, i sistemi di
@@ -100,13 +408,17 @@ pertinenti o appartenenti a distribuzioni differenti. La letteratura sulla
 \gls{ood} detection ha mostrato che i classificatori possono produrre predizioni
 ad alta confidenza anche su input estranei al dominio di addestramento,
 rendendo necessario distinguere gli errori su classi note dalla gestione di
-campioni che non dovrebbero essere classificati come positivi o negativi ordinari
-\cite{hendrycks2017baseline,fort2021exploring}.
+campioni che non dovrebbero essere classificati come positivi o negativi
+ordinari \cite{hendrycks2017baseline,fort2021exploring}.
 
 La classe \texttt{ood} non deve quindi essere interpretata come una categoria
-semantica omogenea, ma come un insieme metodologico di stress test volto a
-verificare la tendenza dei sistemi automatici a forzare contenuti anomali,
-borderline o esterni al dominio entro classi operative note.
+semantica omogenea, né come una semplice sottoclasse della categoria
+\texttt{non\_weapon}. Essa rappresenta invece un insieme metodologico di stress
+test volto a verificare la tendenza dei sistemi automatici a forzare contenuti
+anomali, borderline o esterni al dominio entro classi operative note. Per questa
+ragione, gli esempi \gls{ood} vengono mantenuti separati dal subset binario e
+non vengono sottoposti alle perturbazioni adversariali o anti-forensi generate
+per il task \texttt{weapon}/\texttt{non\_weapon}.
 
 La metodologia distingue inoltre tra classificazione automatica, robustezza e
 validazione operativa. La classificazione automatica riguarda la capacità del
@@ -119,13 +431,17 @@ analitico e classificazioni improprie di campioni \gls{ood}. Questa distinzione
 permette di evitare che l'accuratezza nominale su dati puliti venga interpretata
 come garanzia sufficiente di affidabilità in scenari investigativi.
 
-Il protocollo adotta infine un'impostazione \textit{human-in-the-loop}.
-La componente manuale non viene trattata come elemento esterno o residuale,
-ma come parte documentata della metodologia. In ambito forense, la costruzione
-del dataset non può dipendere esclusivamente da etichette automatiche o da
-directory originarie delle sorgenti: è necessario che i criteri semantici di
-inclusione, esclusione e assegnazione alle classi siano espliciti, tracciabili
-e coerenti con il task investigativo.
+Il protocollo adotta infine un'impostazione \textit{human-in-the-loop}. La
+componente manuale non viene trattata come elemento esterno o residuale, ma come
+parte documentata della metodologia. In ambito forense, la costruzione del
+dataset non può dipendere esclusivamente da etichette automatiche o da directory
+originarie delle sorgenti: è necessario che i criteri semantici di inclusione,
+esclusione e assegnazione alle classi siano espliciti, tracciabili e coerenti
+con il task investigativo. Questa impostazione consente di documentare non solo
+il risultato finale della selezione, ma anche le regole operative che hanno
+guidato la costruzione del dataset congelato.
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -148,6 +464,8 @@ ottenute mediante scraping controllato, contenuti acquisiti secondo una logica
 costruire un benchmark visivamente omogeneo, ma un pool iniziale sufficientemente
 vario da rappresentare alcune delle condizioni di eterogeneità che caratterizzano
 le indagini digitali contemporanee.
+
+
 
 \begin{table}[H]
 \centering
@@ -183,13 +501,13 @@ assegna etichette semantiche definitive, ma produce una base tecnica validata
 attraverso controlli di leggibilità, filtraggio dimensionale, calcolo degli hash
 e rimozione dei duplicati esatti. In particolare, ogni immagine candidata viene
 verificata come file immagine valido, sottoposta a soglia minima di dimensione,
-associata a un valore SHA256 e copiata nel pool preparato solo se supera i
+associata a un valore \gls{sha256} e copiata nel pool preparato solo se supera i
 controlli tecnici.
 
 Il risultato principale della fase di preparazione è il file
 \texttt{metadata.csv}, che registra per ciascun campione informazioni quali
 \texttt{image\_id}, nome del file preparato, sorgente di provenienza, percorso
-relativo originario, hash SHA256, dimensioni, estensione e dimensione del file.
+relativo originario, hash \gls{sha256}, dimensioni, estensione e dimensione del file.
 La disponibilità di tali metadati consente di mantenere un collegamento stabile
 tra la sorgente originaria e la versione normalizzata inclusa nel pool
 sperimentale. Gli output di reportistica, tra cui \texttt{invalid\_images.csv},
@@ -217,6 +535,124 @@ pool iniziale, contribuisce al dataset congelato con 100 immagini
 La distribuzione finale per sorgente e classe è riportata nella
 Tabella~\ref{tab:final-dataset-source-distribution} della
 Sezione~\ref{sec:methodology-human-review}.
+
+La Figura~\ref{fig:methodology-dataset-source-consolidation} sintetizza il processo
+di consolidamento delle sorgenti e di selezione progressiva del dataset finale.
+Le sorgenti grezze vengono utilizzate come pool candidato eterogeneo, mentre le
+classi finali sono assegnate solo tramite revisione manuale documentata.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.58\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.6cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.6cm,
+        fill=blue!8
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.05cm,
+        minimum width=7.6cm,
+        fill=gray!5
+    },
+    final/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.6cm,
+        fill=green!10
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    }
+]
+
+\node[block] (raw) at (0,0)
+{\shortstack{
+    \textbf{Raw heterogeneous sources}\\[1mm]
+    \scriptsize five source folders: public datasets, specialized repositories,\\
+    \scriptsize web scraping, OSINT-oriented sources and deep web-oriented material
+}};
+
+\node[process] (prepared) at (0,-2.0)
+{\shortstack{
+    \textbf{Technical preparation}\\[1mm]
+    \scriptsize readability checks, dimensional filtering, SHA-256 hashing\\
+    \scriptsize and exact duplicate removal
+}};
+
+\node[process] (manifest) at (0,-4.0)
+{\shortstack{
+    \textbf{Prepared candidate pool}\\[1mm]
+    \scriptsize 15\,321 candidate images with metadata and review manifest
+}};
+
+\node[note] (rule) at (0,-6.0)
+{\shortstack{
+    \textbf{No inherited semantic labels}\\[1mm]
+    \scriptsize source folders, filenames and pre-labels are not used\\
+    \scriptsize as final class assignments
+}};
+
+\node[process] (review) at (0,-8.0)
+{\shortstack{
+    \textbf{Human-in-the-loop manual review}\\[1mm]
+    \scriptsize explicit criteria for \texttt{weapon}, \texttt{non\_weapon},\\
+    \scriptsize \texttt{ood} and \texttt{exclude}; reviewer actions logged
+}};
+
+\node[final] (finaldataset) at (0,-10.0)
+{\shortstack{
+    \textbf{Final frozen dataset}\\[1mm]
+    \scriptsize 1500 images: 500 \texttt{weapon}, 500 \texttt{non\_weapon}, 500 \texttt{ood}
+}};
+
+\node[final] (subset) at (0,-12.0)
+{\shortstack{
+    \textbf{Binary adversarial subset}\\[1mm]
+    \scriptsize 1000 images: 500 \texttt{weapon} + 500 \texttt{non\_weapon}
+}};
+
+\draw[arrow] (raw) -- (prepared);
+\draw[arrow] (prepared) -- (manifest);
+\draw[arrow] (manifest) -- (rule);
+\draw[arrow] (rule) -- (review);
+\draw[arrow] (review) -- (finaldataset);
+\draw[arrow] (finaldataset) -- (subset);
+
+\end{tikzpicture}%
+}
+\caption[Dataset source consolidation and final selection process]{Dataset source consolidation and final selection process. The raw sources are first converted into a technically validated candidate pool. Final class assignments are not inherited from source folders or filenames, but are produced through a documented human-in-the-loop review process.}
+\label{fig:methodology-dataset-source-consolidation}
+\end{figure}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -457,7 +893,7 @@ Gli output principali della fase di split generation sono tre artefatti:
 di file, ma artefatti di controllo che registrano, per ciascun campione,
 l'identificativo dell'immagine, la classe finale, il fold o il set di
 appartenenza, la sorgente, il percorso dell'immagine preparata, il percorso
-nello split, l'hash SHA256, l'MD5 e le informazioni relative al tipo di
+nello split, l'hash \gls{sha256}, l'\gls{md5} e le informazioni relative al tipo di
 campione. Il file di summary documenta i controlli di consistenza eseguiti
 sulla generazione degli split, inclusa l'unicità degli \texttt{image\_id},
 l'unicità degli hash e la corrispondenza tra i conteggi attesi e quelli
@@ -473,7 +909,139 @@ capacità del sistema di gestire input che non appartengono alla distribuzione
 operativa del task binario.
 
 
+La Figura~\ref{fig:methodology-split-to-proxy-training} colloca la fase di
+split generation all'interno della pipeline sperimentale. A partire dai manifest
+congelati, il subset binario viene organizzato in cinque fold puliti, mentre il
+set \gls{ood} viene generato come ramo separato, mantenuto pulito e non
+utilizzato né per il training dei proxy model né per la generazione delle
+perturbazioni.
 
+\begin{figure}[H]
+\centering
+\resizebox{0.92\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=6.9cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=6.9cm,
+        fill=blue!8
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=6.9cm,
+        fill=green!10
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.20cm,
+        minimum width=6.2cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% -------------------------------------------------------------------------
+% Left column - Main binary pipeline
+% -------------------------------------------------------------------------
+\node[block] (final) at (0,0)
+{\shortstack{
+    \textbf{Frozen manual selection manifests}\\[1mm]
+    \scriptsize \texttt{manual\_selection\_final\_1500.csv}\\
+    \scriptsize \texttt{manual\_selection\_adversarial\_subset.csv}
+}};
+
+\node[process] (split) at (0,-2.1)
+{\shortstack{
+    \textbf{Split generation}\\[1mm]
+    \scriptsize deterministic seed, file copy, hash checks\\
+    \scriptsize and consistency validation
+}};
+
+\node[output] (folds) at (0,-4.2)
+{\shortstack{
+    \textbf{Clean binary folds}\\[1mm]
+    \scriptsize 5 folds $\times$ 200 images\\
+    \scriptsize each fold: 100 \texttt{weapon} + 100 \texttt{non\_weapon}
+}};
+
+\node[process] (training) at (0,-6.3)
+{\shortstack{
+    \textbf{Fold-aware proxy model training}\\[1mm]
+    \scriptsize for each target fold: train on the other four folds\\
+    \scriptsize and hold out the selected fold
+}};
+
+\node[output] (registry) at (0,-8.4)
+{\shortstack{
+    \textbf{Proxy model artifacts}\\[1mm]
+    \scriptsize fold-specific checkpoints and \texttt{model\_registry.json}\\
+    \scriptsize with architecture, class mapping and SHA-256 hashes
+}};
+
+% -------------------------------------------------------------------------
+% Right column - Separate OOD branch
+% -------------------------------------------------------------------------
+\node[note] (ood) at (8.0,-2.1)
+{\shortstack{
+    \textbf{Clean OOD evaluation set}\\[1mm]
+    \scriptsize 500 clean \gls{ood} images\\
+    \scriptsize kept separate from the binary folds\\
+    \scriptsize not used for proxy training\\
+    \scriptsize not used for perturbation generation
+}};
+
+% -------------------------------------------------------------------------
+% Arrows
+% -------------------------------------------------------------------------
+\draw[arrow] (final) -- (split);
+\draw[arrow] (split) -- (folds);
+\draw[arrow] (folds) -- (training);
+\draw[arrow] (training) -- (registry);
+
+% OOD branch generated during split generation, but kept separate
+\draw[dashedarrow] (split.east) -- (ood.west);
+
+\end{tikzpicture}%
+}
+\caption[Split generation and proxy model training position in the pipeline]{Position of split generation and proxy model training in the experimental pipeline. The frozen manual selection manifests are transformed into balanced clean binary folds and a separate clean \gls{ood} evaluation set. Only the binary folds are used for fold-aware proxy model training, while the \gls{ood} set remains separate and is not used for training or perturbation generation.}
+\label{fig:methodology-split-to-proxy-training}
+\end{figure}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -481,12 +1049,12 @@ operativa del task binario.
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline accademica di \gls{fairlab} utilizza un insieme di proxy model
+La valutazione controllata dei modelli proxy utilizza un insieme di architetture
 trasparenti e riproducibili per rappresentare il comportamento di classificatori
 \gls{ai}-based sottoposti a dati puliti, input adversariali e trasformazioni
 anti-forensi. Tali modelli non devono essere interpretati come strumenti forensi valutati
-nella pipeline operativo-forense, né come sostituti dei software analizzati
-in tale livello del protocollo. Essi costituiscono invece componenti sperimentali controllate,
+nella fase black-box del protocollo, né come sostituti dei software commerciali
+analizzati. Essi costituiscono invece componenti sperimentali controllate,
 necessarie per definire un riferimento algoritmico ispezionabile, generare
 perturbazioni model-dependent e studiare la possibile trasferibilità degli
 effetti osservati verso altri sistemi di classificazione.
@@ -510,7 +1078,7 @@ consolidata e relativamente compatta, utile per disporre di un riferimento
 \gls{cnn} standard nel task binario \cite{he2016deep}. EfficientNet-B0 viene
 utilizzato come modello convoluzionale più efficiente e costituisce il primary
 proxy target per la generazione degli attacchi adversariali model-dependent
-nella pipeline corrente \cite{tan2019efficientnet}. \gls{clip}, invece, viene
+nel protocollo sperimentale corrente \cite{tan2019efficientnet}. \gls{clip}, invece, viene
 impiegato nella forma di visual encoder congelato con una testa binaria addestrata
 sul task \texttt{non\_weapon}/\texttt{weapon}, così da includere nel protocollo
 un modello vision-language pre-addestrato e successivamente adattato alla
@@ -519,7 +1087,7 @@ riassume il ruolo metodologico dei tre modelli.
 
 \begin{table}[H]
 \centering
-\caption{Proxy model utilizzati nella pipeline accademica.}
+\caption{Proxy model utilizzati nella valutazione controllata.}
 \label{tab:methodology-proxy-models}
 \begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
@@ -561,7 +1129,7 @@ tra training e holdout sperimentale.
 \centering
 \caption{Protocollo fold-aware per l'addestramento dei proxy model.}
 \label{tab:methodology-fold-aware-training}
-\begin{tabular}{lrrrr}
+\begin{tabularx}{\textwidth}{@{}L{7.8cm}X@{}}
 \toprule
 \textbf{Checkpoint target} & \textbf{Fold utilizzati per l'addestramento} \\
 \midrule
@@ -571,7 +1139,7 @@ tra training e holdout sperimentale.
 \texttt{fold\_4.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_5} \\
 \texttt{fold\_5.pt} & \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4} \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 
@@ -584,7 +1152,7 @@ applica il mapping binario \texttt{non\_weapon}~$\rightarrow 0$ e
 \codepath{models/checkpoints/<model_name>/<fold>.pt} e aggiorna il registro
 \codepath{models/model_registry.json}. Il registro dei modelli documenta, per
 ciascuna architettura e per ciascun fold, il pattern del checkpoint, la
-dimensione di input, la normalizzazione utilizzata e l'hash SHA256 del file
+dimensione di input, la normalizzazione utilizzata e l'hash \gls{sha256} del file
 prodotto. La registrazione dell'hash del checkpoint è metodologicamente rilevante
 perché consente di verificare che le fasi successive della pipeline, incluse la
 generazione degli attacchi model-dependent e le valutazioni di robustezza, siano
@@ -594,8 +1162,9 @@ dei singoli modelli, sono documentati nello script di training e, ove applicabil
 metadati registrati in \codepath{models/model_registry.json}, così da mantenere separata la
 descrizione metodologica del protocollo dalla riproduzione dettagliata della configurazione implementativa.
 
-Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target}
-per la generazione degli attacchi adversariali model-dependent. Questa scelta non implica che
+Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target}, ossia di
+modello controllato principale rispetto al quale vengono generate le
+perturbazioni adversariali model-dependent. Questa scelta non implica che
 EfficientNet-B0 rappresenti il modello più robusto o più accurato in senso assoluto, né che esaurisca
 l'analisi comparativa della tesi. Indica invece il modello controllato rispetto al quale vengono costruite,
 in questa fase della pipeline, le perturbazioni che richiedono accesso al gradiente, al classificatore
@@ -610,24 +1179,322 @@ differenti, quali ResNet18 e \gls{clip}.
 
 
 È infine necessario distinguere i proxy model dagli strumenti forensi valutati
-nella pipeline operativo-forense. I proxy model sono
-componenti accademiche aperte, configurabili e documentate, per le quali sono
-noti architettura, checkpoint, mapping delle classi, protocollo di addestramento
-e hash dei file. Gli strumenti forensi, al contrario, vengono trattati
-come sistemi black-box o quasi black-box: l'analisi non presuppone accesso alla
-loro architettura interna, ma si concentra sugli output osservabili, sulla loro
-coerenza rispetto ai manifest sperimentali e sul loro comportamento in presenza
-di immagini pulite, manipolate o fuori distribuzione. Questa distinzione consente
-di mantenere separati il controllo sperimentale della pipeline accademica e la
-valutazione operativa dei tool forensi.
+nella fase black-box del protocollo. I proxy model sono componenti aperte,
+configurabili e documentate, per le quali sono noti architettura, checkpoint,
+mapping delle classi, protocollo di addestramento e hash dei file. Gli strumenti
+forensi, al contrario, vengono trattati come sistemi black-box o quasi
+black-box: l'analisi non presuppone accesso alla loro architettura interna, ma
+si concentra sugli output osservabili, sulla loro coerenza rispetto ai manifest
+sperimentali e sul loro comportamento in presenza di immagini pulite,
+manipolate o fuori distribuzione. Questa distinzione consente di mantenere
+separati il controllo sperimentale dei proxy model e la valutazione operativa
+dei software selezionati.
+
+
+\section{Perturbation selection rationale and operational relevance}
+\label{sec:methodology-perturbation-selection-rationale}
+
+La selezione delle perturbazioni non è stata guidata esclusivamente dalla
+forza teorica degli attacchi, ma anche dalla loro sostenibilità computazionale
+e dalla loro coerenza con uno scenario operativo realistico di \gls{df}. In un
+workflow forense, infatti, un sistema di triage visuale deve poter trattare
+volumi elevati di dati entro tempi compatibili con le esigenze investigative.
+Di conseguenza, il costo computazionale delle perturbazioni rappresenta un criterio
+metodologico rilevante, sia per la riproducibilità dell'esperimento sia per
+l'interpretazione della plausibilità operativa delle manipolazioni considerate.
+
+Le trasformazioni anti-forensi, come ricompressione \gls{jpeg},
+resample~+~resize, Gaussian blur, histogram modification e contrast stretching,
+presentano un costo computazionale contenuto e possono essere applicate in modo
+batch anche su grandi collezioni di immagini. Esse sono quindi particolarmente
+rilevanti dal punto di vista operativo, poiché simulano manipolazioni semplici,
+economiche e plausibili che un soggetto potrebbe applicare per degradare,
+alterare o normalizzare un'immagine prima dell'acquisizione o dell'analisi
+forense.
+
+Gli attacchi adversariali model-dependent, al contrario, richiedono
+l'interazione con un modello target e, in alcuni casi, procedure iterative o di
+ottimizzazione. \gls{fgsm} rappresenta una baseline efficiente, poiché richiede
+una singola stima del gradiente per immagine. Attacchi come
+\texttt{one\_pixel}, \texttt{sigma\_zero} e \texttt{superdeepfool} sono invece
+più onerosi e vengono inclusi non perché rappresentino necessariamente lo
+scenario operativo più probabile, ma perché consentono di stressare il
+comportamento dei classificatori in condizioni controllate. La perturbazione
+\texttt{color\_shift}, pur essendo inclusa nel gruppo adversarial per finalità
+sperimentale, rimane model-agnostic e presenta un costo computazionale ridotto.
+
+Questa impostazione è coerente con l'obiettivo della tesi: valutare la
+robustezza operativa di sistemi \gls{ai}-based in un contesto forense, non
+produrre una classifica esaustiva degli attacchi adversariali più forti in senso
+strettamente algoritmico. Per tale ragione, il protocollo privilegia un insieme
+eterogeneo di perturbazioni, bilanciando severità sperimentale, sostenibilità
+computazionale, riproducibilità e rilevanza rispetto a possibili scenari
+anti-forensi reali.
+
+\begin{table}[H]
+\centering
+\caption{Costo computazionale qualitativo e rilevanza operativa delle perturbazioni.}
+\label{tab:methodology-attack-cost-operational-relevance}
+\begin{tabularx}{\textwidth}{@{}
+    >{\raggedright\arraybackslash}p{0.22\textwidth}
+    >{\raggedright\arraybackslash}p{0.24\textwidth}
+    >{\raggedright\arraybackslash}p{0.13\textwidth}
+    X
+@{}}
+\toprule
+\textbf{Perturbazione} &
+\textbf{Tipo} &
+\textbf{Costo} &
+\textbf{Rilevanza operativa} \\
+\midrule
+
+\glsentryshort{fgsm}
+&
+Adversarial model-dependent
+&
+Basso/medio
+&
+Baseline efficiente per valutare la sensibilità del modello a perturbazioni gradient-based. \\
+
+\glsentryname{onepixel}
+&
+Adversarial model-dependent
+&
+Alto
+&
+Stress test localizzato; utile per valutare la vulnerabilità a modifiche minime ma ottimizzate. \\
+
+\glsentryname{sigmazero}
+&
+Adversarial model-dependent
+&
+Medio/alto
+&
+Stress test adversarial controllato, più rilevante sul piano sperimentale che operativo. \\
+
+\glsentryname{superdeepfool}
+&
+Adversarial model-dependent
+&
+Medio/alto
+&
+Attacco utile per analizzare la sensibilità del classificatore rispetto al confine decisionale. \\
+
+\glsentryname{colorshift}
+&
+Adversarial-style model-agnostic
+&
+Basso
+&
+Manipolazione cromatica semplice, plausibile e semanticamente conservativa. \\
+
+\glsentryname{jpegrecompression}
+&
+Anti-forensic
+&
+Basso
+&
+Molto plausibile in scenari reali; altera qualità e rappresentazione del file. \\
+
+\glsentryname{resampleresize}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile come effetto di ridimensionamento, inoltro o normalizzazione dell'immagine. \\
+
+\glsentryname{gaussianblur}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile per degradare dettagli visivi rilevanti. \\
+
+\glsentryname{histogrammodification}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile per alterare distribuzione tonale e caratteristiche statistiche dell'immagine. \\
+
+\glsentryname{contraststretching}
+&
+Anti-forensic
+&
+Basso
+&
+Plausibile come post-processing semplice con possibile impatto sui classificatori. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+La Figura~\ref{fig:methodology-perturbation-workflow} sintetizza il workflow di
+generazione delle perturbazioni adottato nel protocollo sperimentale. A partire
+dai clean binary folds, la pipeline genera separatamente il ramo adversarial e
+il ramo anti-forense. Il set \gls{ood} non viene incluso in questa fase e
+rimane escluso dalla generazione delle perturbazioni. Gli artefatti risultanti
+vengono quindi documentati tramite manifest dedicati, hash di integrità e
+successiva integrazione nel forensic evaluation bundle.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.86\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=blue!8
+    },
+    branch/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=5.6cm,
+        fill=yellow!12
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=5.6cm,
+        fill=green!10
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.00cm,
+        minimum width=5.2cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% Main input
+\node[block] (folds) at (0,0)
+{\shortstack{
+    \textbf{Clean binary folds}\\[1mm]
+    \scriptsize 1000 clean images from the binary subset\\
+    \scriptsize 500 \texttt{weapon} + 500 \texttt{non\_weapon}
+}};
+
+\node[process] (perturb) at (0,-2.2)
+{\shortstack{
+    \textbf{Perturbation generation}\\[1mm]
+    \scriptsize controlled generation of adversarial attacks\\
+    \scriptsize and anti-forensic transformations
+}};
+
+\node[note] (oodnote) at (7.2,-2.2)
+{\shortstack{
+    \textbf{OOD exclusion rule}\\[1mm]
+    \scriptsize the \gls{ood} set is not used\\
+    \scriptsize for perturbation generation
+}};
+
+% Branches
+\node[branch] (advbranch) at (-4.2,-4.8)
+{\shortstack{
+    \textbf{Adversarial branch}\\[1mm]
+    \scriptsize gradient-based or model-guided\\
+    \scriptsize perturbation generation
+}};
+
+\node[branch] (afbranch) at (4.2,-4.8)
+{\shortstack{
+    \textbf{Anti-forensic branch}\\[1mm]
+    \scriptsize realistic file/content transformations\\
+    \scriptsize without supervised OOD generation
+}};
+
+% Outputs per branch
+\node[output] (advout) at (-4.2,-7.0)
+{\shortstack{
+    \textbf{5000 adversarial samples}\\[1mm]
+    \scriptsize 1000 clean binary inputs $\times$ 5 attacks
+}};
+
+\node[output] (afout) at (4.2,-7.0)
+{\shortstack{
+    \textbf{5000 anti-forensic samples}\\[1mm]
+    \scriptsize 1000 clean binary inputs $\times$ 5 transformations
+}};
+
+% Final integration
+\node[process] (bundle) at (0,-9.6)
+{\shortstack{
+    \textbf{Manifests, hashes and forensic evaluation bundle}\\[1mm]
+    \scriptsize attack/transformation manifests, \gls{sha256} hashes\\
+    \scriptsize and integration into the final evaluation bundle
+}};
+
+% Arrows
+\draw[arrow] (folds) -- (perturb);
+\draw[dashedarrow] (perturb.east) -- (oodnote.west);
+
+\draw[arrow] (perturb.south west) -- (advbranch.north);
+\draw[arrow] (perturb.south east) -- (afbranch.north);
+
+\draw[arrow] (advbranch) -- (advout);
+\draw[arrow] (afbranch) -- (afout);
+
+\draw[arrow] (advout.south east) -- (bundle.north);
+\draw[arrow] (afout.south west) -- (bundle.north);
+
+\end{tikzpicture}%
+}
+\caption[Perturbation generation workflow]{Perturbation generation workflow used in the experimental protocol. Starting from the clean binary folds, the pipeline generates two separate branches: adversarial samples and anti-forensic samples. The \gls{ood} set is excluded from this phase. The resulting artifacts are documented through manifests and \gls{sha256} hashes and are then integrated into the forensic evaluation bundle.}
+\label{fig:methodology-perturbation-workflow}
+\end{figure}
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial attack selection and generation}
 \label{sec:methodology-adversarial-attacks}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline adversariale di \gls{fairlab} è progettata per generare versioni
-manipolate delle immagini appartenenti al subset binario
+La fase adversariale del protocollo \gls{fairlab} è progettata per generare
+versioni manipolate delle immagini appartenenti al subset binario
 \texttt{weapon}/\texttt{non\_weapon}, preservando il collegamento tra ciascun
 campione perturbato e la corrispondente immagine pulita. La generazione degli
 attacchi utilizza come input il manifest
@@ -648,7 +1515,7 @@ attacchi model-dependent, costruiti rispetto a un proxy model specifico, e
 trasformazioni model-agnostic, applicate senza accesso al gradiente o al
 comportamento decisionale del classificatore.
 
-Gli attacchi model-dependent utilizzati nella pipeline corrente sono
+Gli attacchi model-dependent utilizzati nel protocollo sperimentale finale sono
 \gls{fgsm}, One Pixel Attack, Sigma Zero Attack e SuperDeepFool. Essi vengono
 generati rispetto a EfficientNet-B0, assunto come primary proxy target. Per ogni
 immagine appartenente a un determinato fold, lo script carica il checkpoint
@@ -665,7 +1532,7 @@ senza interrogare il modello e senza utilizzare informazioni di gradiente.
 Questa distinzione è metodologicamente rilevante perché consente di separare le perturbazioni
 costruite rispetto a un classificatore specifico da alterazioni visive più generali.
 
-All'interno della pipeline, \texttt{color\_shift} viene comunque incluso nel gruppo adversarial
+All'interno del protocollo sperimentale, \texttt{color\_shift} viene comunque incluso nel gruppo adversarial
 perché la sua finalità sperimentale non è simulare un ordinario intervento di post-processing forense,
 ma verificare se una variazione cromatica semanticamente conservativa possa alterare il comportamento
 dei classificatori automatici.
@@ -859,7 +1726,7 @@ pulito originario attraverso campi quali \texttt{generated\_image\_id},
 \texttt{clean\_relative\_path}, \texttt{perturbed\_relative\_path},
 \texttt{sha256\_original}, \texttt{sha256\_perturbed}, \texttt{md5\_original}
 e \texttt{md5\_perturbed}. Per gli attacchi model-dependent, il manifest
-registra inoltre il modello target, il checkpoint utilizzato e l'hash SHA256 del
+registra inoltre il modello target, il checkpoint utilizzato e l'hash \gls{sha256} del
 checkpoint, così da rendere verificabile la relazione tra immagine perturbata e
 versione specifica del proxy model.
 
@@ -877,11 +1744,11 @@ viene demandata alla sezione dedicata al protocollo di valutazione e,
 successivamente, al capitolo dei risultati sperimentali.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Anti-forensic transformation pipeline}
+\section{Anti-forensic transformation selection and generation}
 \label{sec:methodology-anti-forensic-transformations}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline anti-forense di \gls{fairlab} introduce un insieme di trasformazioni
+La fase anti-forense del protocollo \gls{fairlab} introduce un insieme di trasformazioni
 realistiche dell'artefatto immagine, applicate al subset binario
 \texttt{weapon}/\texttt{non\_weapon}. A differenza degli attacchi adversariali
 model-dependent descritti nella Sezione~\ref{sec:methodology-adversarial-attacks},
@@ -906,7 +1773,7 @@ Tale organizzazione consente di preservare il collegamento tra ciascuna immagine
 trasformata, il fold di appartenenza, la classe originaria e il corrispondente
 campione pulito.
 
-Le trasformazioni incluse nella pipeline sono \gls{jpeg} recompression,
+Le trasformazioni incluse nel protocollo finale sono \gls{jpeg} recompression,
 resample~+~resize, Gaussian blur, histogram modification e contrast stretching.
 La ricompressione \gls{jpeg} applica una nuova codifica lossy dell'immagine,
 introducendo artefatti compatibili con scenari ordinari di salvataggio,
@@ -1079,7 +1946,7 @@ tracciabilità tra input, trasformazione applicata e output generato.
 
 Il file di sintesi documenta inoltre i controlli di consistenza della fase di
 generazione: corrispondenza tra immagini attese e immagini effettivamente
-prodotte, unicità degli identificativi generati, unicità degli hash SHA256 delle
+prodotte, unicità degli identificativi generati, unicità degli hash \gls{sha256} delle
 immagini trasformate e corretta scrittura del manifest. Tali controlli non
 costituiscono una valutazione dei risultati di robustezza, ma attestano la
 coerenza tecnica della generazione degli artefatti anti-forensi. L'analisi
@@ -1087,153 +1954,14 @@ dell'impatto di tali trasformazioni sulle prestazioni dei modelli e, in seguito,
 sugli strumenti forensi viene demandata alle sezioni dedicate al
 protocollo metrico e al capitolo dei risultati.
 
-\subsection*{Computational cost and operational relevance}
-
-La selezione delle perturbazioni non è stata guidata esclusivamente dalla
-forza teorica degli attacchi, ma anche dalla loro sostenibilità computazionale
-e dalla loro coerenza con uno scenario operativo realistico di \gls{df}. In un
-workflow forense, infatti, un sistema di triage visuale deve poter trattare
-volumi elevati di dati entro tempi compatibili con le esigenze investigative.
-Di conseguenza, il costo computazionale delle perturbazioni rappresenta un criterio
-metodologico rilevante, sia per la riproducibilità dell'esperimento sia per
-l'interpretazione della plausibilità operativa delle manipolazioni considerate.
-
-Le trasformazioni anti-forensi, come ricompressione \gls{jpeg},
-resample~+~resize, Gaussian blur, histogram modification e contrast stretching,
-presentano un costo computazionale contenuto e possono essere applicate in modo
-batch anche su grandi collezioni di immagini. Esse sono quindi particolarmente
-rilevanti dal punto di vista operativo, poiché simulano manipolazioni semplici,
-economiche e plausibili che un soggetto potrebbe applicare per degradare,
-alterare o normalizzare un'immagine prima dell'acquisizione o dell'analisi
-forense.
-
-Gli attacchi adversariali model-dependent, al contrario, richiedono
-l'interazione con un modello target e, in alcuni casi, procedure iterative o di
-ottimizzazione. \gls{fgsm} rappresenta una baseline efficiente, poiché richiede
-una singola stima del gradiente per immagine. Attacchi come
-\texttt{one\_pixel}, \texttt{sigma\_zero} e \texttt{superdeepfool} sono invece
-più onerosi e vengono inclusi non perché rappresentino necessariamente lo
-scenario operativo più probabile, ma perché consentono di stressare il
-comportamento dei classificatori in condizioni controllate. La perturbazione
-\texttt{color\_shift}, pur essendo inclusa nel gruppo adversarial per finalità
-sperimentale, rimane model-agnostic e presenta un costo computazionale ridotto.
-
-Questa impostazione è coerente con l'obiettivo della tesi: valutare la
-robustezza operativa di sistemi \gls{ai}-based in un contesto forense, non
-produrre una classifica esaustiva degli attacchi adversariali più forti in senso
-strettamente algoritmico. Per tale ragione, il protocollo privilegia un insieme
-eterogeneo di perturbazioni, bilanciando severità sperimentale, sostenibilità
-computazionale, riproducibilità e rilevanza rispetto a possibili scenari
-anti-forensi reali.
-
-\begin{table}[H]
-\centering
-\caption{Costo computazionale qualitativo e rilevanza operativa delle perturbazioni.}
-\label{tab:methodology-attack-cost-operational-relevance}
-\begin{tabularx}{\textwidth}{@{}
-    >{\raggedright\arraybackslash}p{0.22\textwidth}
-    >{\raggedright\arraybackslash}p{0.24\textwidth}
-    >{\raggedright\arraybackslash}p{0.13\textwidth}
-    X
-@{}}
-\toprule
-\textbf{Perturbazione} &
-\textbf{Tipo} &
-\textbf{Costo} &
-\textbf{Rilevanza operativa} \\
-\midrule
-
-\glsentryshort{fgsm}
-&
-Adversarial model-dependent
-&
-Basso/medio
-&
-Baseline efficiente per valutare la sensibilità del modello a perturbazioni gradient-based. \\
-
-\glsentryname{onepixel}
-&
-Adversarial model-dependent
-&
-Alto
-&
-Stress test localizzato; utile per valutare la vulnerabilità a modifiche minime ma ottimizzate. \\
-
-\glsentryname{sigmazero}
-&
-Adversarial model-dependent
-&
-Medio/alto
-&
-Stress test adversarial controllato, più rilevante sul piano sperimentale che operativo. \\
-
-\glsentryname{superdeepfool}
-&
-Adversarial model-dependent
-&
-Medio/alto
-&
-Attacco utile per analizzare la sensibilità del classificatore rispetto al confine decisionale. \\
-
-\glsentryname{colorshift}
-&
-Adversarial-style model-agnostic
-&
-Basso
-&
-Manipolazione cromatica semplice, plausibile e semanticamente conservativa. \\
-
-\glsentryname{jpegrecompression}
-&
-Anti-forensic
-&
-Basso
-&
-Molto plausibile in scenari reali; altera qualità e rappresentazione del file. \\
-
-\glsentryname{resampleresize}
-&
-Anti-forensic
-&
-Basso
-&
-Plausibile come effetto di ridimensionamento, inoltro o normalizzazione dell'immagine. \\
-
-\glsentryname{gaussianblur}
-&
-Anti-forensic
-&
-Basso
-&
-Plausibile per degradare dettagli visivi rilevanti. \\
-
-\glsentryname{histogrammodification}
-&
-Anti-forensic
-&
-Basso
-&
-Plausibile per alterare distribuzione tonale e caratteristiche statistiche dell'immagine. \\
-
-\glsentryname{contraststretching}
-&
-Anti-forensic
-&
-Basso
-&
-Plausibile come post-processing semplice con possibile impatto sui classificatori. \\
-
-\bottomrule
-\end{tabularx}
-\end{table}
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic evaluation bundle}
 \label{sec:methodology-forensic-evaluation-bundle}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline operativo-forense di \gls{fairlab} richiede che gli artefatti
-prodotti nella pipeline accademica siano trasferiti verso gli strumenti forensi oggetto di valutazione
+La valutazione operativa black-box dei software selezionati richiede che gli
+artefatti prodotti dal protocollo sperimentale siano trasferiti verso gli
+strumenti oggetto di valutazione
 senza esporre, durante l'importazione, informazioni semantiche che
 possano influenzare l'analisi. Per questa ragione, dopo la generazione degli
 split puliti, delle immagini adversariali e delle trasformazioni anti-forensi,
@@ -1349,7 +2077,7 @@ sperimentale, al tipo di attacco o trasformazione, al fold e alla sorgente. Il
 file \texttt{bundle\_hashes\_sha256.csv} contiene 11\,500 righe e 13 colonne, e
 fornisce una vista focalizzata sugli hash e sui percorsi. Il file
 \texttt{bundle\_summary.json} riassume i conteggi e i controlli di integrità,
-tra cui unicità dei \texttt{bundle\_id}, unicità degli SHA256 effettivi,
+tra cui unicità dei \texttt{bundle\_id}, unicità degli \gls{sha256} effettivi,
 corrispondenza degli hash quando presenti nei manifest sorgente, assenza di
 blind path mancanti, pulizia semantica dei percorsi ciechi e separazione dei
 metadata dagli input dei tool.
@@ -1374,137 +2102,57 @@ e controllati separatamente, poiché potrebbero essere indicizzati da alcuni
 strumenti forensi e influenzare l'analisi oltre il solo contenuto visuale.
 
 
-
-% ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic tools evaluation protocol}
 \label{sec:methodology-forensic-tools}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline operativo-forense di \gls{fairlab} prevede la valutazione di
-strumenti forensi professionali e, ove opportuno, di ambienti open-source di
-supporto al workflow sperimentale, con particolare attenzione alla gestione,
-all'indicizzazione, alla categorizzazione e all'esportazione di contenuti
-immagine. A differenza dei proxy model descritti nella
-Sezione~\ref{sec:methodology-models-classification}, tali strumenti vengono
-trattati come sistemi black-box o quasi black-box quando integrano moduli
-proprietari di analisi automatizzata; nei casi in cui lo strumento non includa
-funzionalità \gls{ai} direttamente comparabili, esso viene utilizzato come
-ambiente di ingest, hashing, visualizzazione, tagging, reporting o integrazione
-con workflow esterni.
+La pipeline operativo-forense di \gls{fairlab} prevede la valutazione di strumenti commerciali dotati di funzionalità di analisi automatizzata o assistita da \gls{ai} per contenuti multimediali. A differenza dei proxy model descritti nella Sezione~\ref{sec:methodology-models-classification}, tali strumenti vengono trattati come sistemi black-box: l'analisi non assume accesso all'architettura interna, ai dati di addestramento, alle soglie decisionali o ai pesi dei modelli eventualmente integrati, ma considera esclusivamente gli output osservabili prodotti durante un workflow sperimentale controllato.
 
-L'obiettivo di questa fase non è certificare in senso generale l'affidabilità
-dei prodotti considerati, ma valutare in condizioni controllate il loro
-comportamento operativo rispetto a immagini pulite, immagini fuori distribuzione
-e immagini manipolate mediante perturbazioni adversariali e trasformazioni
-anti-forensi. In questo modo, il protocollo consente di confrontare la risposta degli strumenti forensi valutati con quella dei proxy model accademici, mantenendo tuttavia
-distinti i due livelli di analisi: da un lato, modelli pienamente ispezionabili
-e riproducibili; dall'altro, strumenti professionali caratterizzati da logiche
-interne non completamente accessibili.
+L'obiettivo di questa fase non è certificare in senso generale l'affidabilità dei prodotti considerati, né confrontare in modo assoluto piattaforme commerciali eterogenee. Lo scopo è invece valutare, in condizioni riproducibili, il comportamento operativo di strumenti \gls{ai}-based quando vengono esposti a immagini pulite, immagini fuori distribuzione e immagini manipolate mediante perturbazioni adversariali o trasformazioni anti-forensi. In questo modo, la valutazione dei tool commerciali integra la valutazione dei proxy model, mantenendo tuttavia distinti i due livelli di analisi: da un lato modelli accademici pienamente ispezionabili e riproducibili; dall'altro strumenti professionali caratterizzati da logiche interne non completamente accessibili e da categorie proprietarie di output.
 
-La valutazione utilizza come input esclusivo la directory cieca del bundle,
-ossia \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}.
-Tale directory contiene file rinominati con identificativi neutri, privi di
-informazioni semantiche sulla classe, sulla sorgente, sul fold, sulla famiglia
-di attacco o sul modello target. La ground truth sperimentale viene conservata
-separatamente nel file
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv} e
-non viene esposta al tool durante l'importazione. Questa separazione riduce il
-rischio di bias indotto dai nomi dei file o dai percorsi e consente di
-normalizzare gli output solo in una fase successiva.
+La valutazione utilizza come input esclusivo la directory cieca del bundle, ossia \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}. Tale directory contiene file rinominati con identificativi neutri, privi di informazioni semantiche sulla classe, sulla sorgente, sul fold, sulla famiglia di attacco o sul modello target. La ground truth sperimentale viene conservata separatamente nel file \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv} e non viene esposta ai tool durante l'importazione. Questa separazione riduce il rischio di bias indotto dai nomi dei file o dai percorsi e consente di normalizzare gli output solo in una fase successiva.
 
-Ai fini della valutazione operativo-forense, gli strumenti considerati nel
-protocollo sono distinti in tre categorie metodologiche. La prima comprende
-gli strumenti effettivamente sottoposti a valutazione sperimentale, per i quali
-gli output prodotti sono esportati, normalizzati e confrontati con il ground
-truth del dataset congelato. La seconda comprende gli strumenti predisposti nel
-protocollo, ma non necessariamente inclusi nella valutazione quantitativa finale
-qualora gli output non risultino disponibili in forma sufficientemente
-strutturata o comparabile. La terza comprende strumenti di supporto utilizzati
-per attività accessorie, quali ingest, indicizzazione, visualizzazione, tagging
-o reporting, senza attribuire loro il ruolo di classificatori \gls{ai}-based
-comparabili ai sistemi commerciali dotati di moduli di categorizzazione
-automatizzata.
+Gli strumenti inclusi nella valutazione finale sono \gls{magnetaxiomtool} con il modulo \gls{magnetai}, \gls{excirefoto2025} e \gls{cellebriteinseyets}. \gls{magnetaxiomtool} è stato considerato come piattaforma forense commerciale con funzionalità di categorizzazione automatizzata dei contenuti multimediali tramite \gls{magnetai}. \gls{excirefoto2025} è stato considerato come software standalone general-purpose con funzionalità di ricerca semantica e analisi visuale basate su \gls{ai}; esso non viene quindi presentato come strumento sviluppato esclusivamente per finalità forensi, ma come componente black-box di image retrieval e classificazione operativa. \gls{cellebriteinseyets} è stato considerato come piattaforma commerciale di analisi assistita dei contenuti multimediali, valutata attraverso gli output osservabili esportati nell'ambiente \texttt{Cellebrite Physical Analyzer 10.9.0.3029}. In questo contesto, \gls{ufed} non viene trattato come classificatore immagini, ma solo come eventuale componente dell'ecosistema Cellebrite di acquisizione e gestione dei dati.
 
-In questa prospettiva, \texttt{Magnet AXIOM} e il relativo modulo
-\texttt{Magnet.AI}, \texttt{X-Ways Forensics} in combinazione con
-\texttt{Excire Photo AI}, \texttt{Cellebrite UFED} e \texttt{Oxygen Forensics}
-sono trattati come componenti della pipeline operativo-forense
-\cite{magnet,xways,ufed,oxygen,cellebrite}. Tuttavia, la
-loro inclusione nell'analisi quantitativa dipende dalla disponibilità di
-esportazioni strutturate e riconducibili alle categorie sperimentali definite
-nel presente protocollo. \texttt{Autopsy} viene invece considerato come
-ambiente open-source di supporto per ingest, hashing, visualizzazione, tagging
-e reporting, non come equivalente diretto ai tool proprietari con moduli di
-categorizzazione automatizzata. Tale distinzione consente di evitare una
-sovrapposizione impropria tra predisposizione metodologica del test,
-disponibilità effettiva degli output e comparabilità quantitativa dei risultati.
 
 \begin{table}[H]
 \centering
-\caption{Strumenti forensi considerati nella pipeline operativo-forense.}
+\caption{Strumenti commerciali inclusi nella valutazione operativo-forense finale.}
 \label{tab:methodology-forensic-tools}
-\begin{tabularx}{\textwidth}{@{}lX@{}}
+\begin{tabularx}{\textwidth}{@{}L{3.7cm}L{3.2cm}X@{}}
 \toprule
-\textbf{Strumento} & \textbf{Ruolo metodologico nel protocollo} \\
+\textbf{Strumento} & \textbf{Versione / ambiente} & \textbf{Ruolo metodologico nel protocollo} \\
 \midrule
-\texttt{Magnet AXIOM / Magnet.AI}
+\gls{magnetaxiomtool} / \gls{magnetai}
 &
-Strumento commerciale considerato per la valutazione degli output prodotti dai
-moduli disponibili di analisi, categorizzazione o triage automatizzato dei
-contenuti multimediali rispetto agli artefatti del forensic evaluation bundle. \\
-\texttt{X-Ways Forensics / Excire Photo AI}
+\texttt{Magnet AXIOM 10.1.0.48673}
 &
-Ambiente forense professionale considerato in combinazione con
-\texttt{Excire Photo AI} per l'ispezione, la gestione e l'analisi visuale di
-contenuti immagine, incluse funzionalità di categorizzazione, ricerca visuale o
-riconoscimento ove disponibili ed esportabili. \\
-\texttt{Cellebrite UFED}
+Piattaforma forense commerciale valutata attraverso gli output prodotti dal modulo \gls{magnetai} per la categorizzazione automatizzata di contenuti immagine, con particolare riferimento alla rilevazione di possibili armi. \\
+\gls{excirefoto2025}
 &
-Strumento professionale mobile-oriented predisposto nel protocollo operativo
-qualora gli artefatti e gli output disponibili siano compatibili con una
-valutazione strutturata rispetto al manifest del bundle. \\
-\texttt{Oxygen Forensics}
+\texttt{Excire Foto 2025 4.1.5}
 &
-Strumento professionale mobile/cloud-oriented predisposto nel protocollo
-operativo qualora gli output esportati consentano una normalizzazione
-riconducibile alle categorie sperimentali del bundle. \\
-\texttt{Autopsy}
+Software standalone general-purpose con funzionalità \gls{ai}-based di ricerca semantica e gestione visuale delle immagini, valutato come black-box image retrieval tool mediante prompt testuali orientati alla classe weapon. \\
+\gls{cellebriteinseyets}
 &
-Ambiente forense open-source utilizzato come supporto per ingest, hashing,
-visualizzazione, tagging e reporting; non viene trattato come equivalente
-diretto ai tool proprietari con moduli di categorizzazione automatizzata. \\
+\texttt{Inseyets 10.9} / \texttt{Physical Analyzer 10.9.0.3029}
+&
+Piattaforma commerciale di analisi assistita dei contenuti multimediali, valutata attraverso le classificazioni esportate dal report di \texttt{Cellebrite Physical Analyzer} e normalizzate rispetto al forensic evaluation bundle. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
+Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
 
+La normalizzazione degli output è necessaria perché le categorie interne dei tool non coincidono direttamente con le classi sperimentali \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo motivo, la pipeline applica un mapping esplicito e documentato delle label proprietarie verso una rappresentazione binaria operativa, basata sul campo \texttt{weapon\_detected}. Tale campo non deve essere interpretato come una dichiarazione semantica assoluta sull'immagine, ma come il risultato osservabile della capacità del tool di segnalare o meno la presenza di contenuti riconducibili alla categoria weapon nel contesto del protocollo sperimentale.
 
+Nel caso di \gls{magnetaxiomtool}, gli output esportati da \gls{magnetai} vengono normalizzati interpretando il tag \texttt{Possible weapons} come rilevamento positivo della categoria weapon. Le immagini prive di tale tag vengono considerate come non segnalate dal tool rispetto alla categoria di interesse. Nel caso di \gls{excirefoto2025}, la valutazione si basa su esportazioni generate mediante un insieme controllato di prompt semantici firearm-oriented; un'immagine recuperata da almeno uno dei prompt viene ricodificata come rilevamento positivo, mentre le immagini non recuperate da alcun prompt vengono considerate come non segnalate. Nel caso di \gls{cellebriteinseyets}, la normalizzazione utilizza la colonna osservabile \texttt{Classifications} del report esportato, ricodificando come rilevamento positivo le classificazioni riconducibili a categorie quali \texttt{Armi}, \texttt{Pistola} o \texttt{Fucile}. Questa ricodifica è operativa e non implica accesso o inferenza diretta sulle logiche interne del modello proprietario.
 
-Per ciascun tool, il protocollo prevede tre passaggi. In primo luogo, viene
-importata o indicizzata esclusivamente la vista cieca del bundle. In secondo
-luogo, vengono esportati i risultati prodotti dallo strumento, includendo ove
-disponibili il nome del file, l'hash, la categoria assegnata, eventuali tag,
-punteggi di confidenza, stati di mancato rilevamento e metadati rilevanti. In
-terzo luogo, gli output vengono ricondotti al file
-\texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, nome del file cieco
-o hash, così da confrontare le categorie prodotte dal tool con la ground truth
-sperimentale.
+La distinzione tra mancato rilevamento, classificazione negativa e stato non interpretabile è mantenuta durante la fase di normalizzazione. Nei casi in cui l'output del tool non sia riconducibile in modo affidabile al task binario considerato, la predizione viene marcata come \texttt{unknown} o trattata separatamente nell'audit di esportazione. Questa scelta evita di trasformare automaticamente output ambigui o non strutturati in falsi negativi o veri negativi, preservando la tracciabilità del processo di interpretazione.
 
-La normalizzazione degli output prodotti dagli strumenti forensi richiede particolare cautela,
-poiché le categorie interne dei tool potrebbero non coincidere direttamente con
-le classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo
-motivo, la pipeline prevede una fase di mapping esplicito, nella quale le label
-proprietarie vengono ricondotte, quando possibile, a categorie operative
-comparabili. Gli stati ambigui, non rilevati o non categorizzati non vengono
-convertiti automaticamente in \texttt{non\_weapon}, ma mantenuti come stati
-distinti, poiché in un workflow forense l'assenza di rilevamento non equivale
-necessariamente a una classificazione negativa.
+Gli output normalizzati vengono prodotti tramite lo script \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}, che genera file CSV comparabili per i tre tool inclusi nella valutazione finale. Lo script produce, oltre alle predizioni normalizzate, un audit degli export, un log delle versioni dei tool, un sommario della normalizzazione e file metrici aggregati. Questa separazione tra export grezzo, normalizzazione e calcolo delle metriche consente di mantenere una catena di tracciabilità tra artefatto originale, output del tool, regola di mapping applicata e risultato quantitativo finale.
 
-Questa impostazione consente di valutare la robustezza operativa degli strumenti valutati senza attribuire loro proprietà interne non verificabili. La
-valutazione rimane quindi ancorata agli output osservabili e alla loro coerenza
-rispetto al manifest sperimentale, mantenendo separati il piano metodologico,
-la misurazione quantitativa e la successiva interpretazione dei risultati.
-
+Questa impostazione consente di valutare la robustezza operativa degli strumenti commerciali senza attribuire loro proprietà interne non verificabili. La valutazione rimane quindi ancorata agli output osservabili e alla loro coerenza rispetto al manifest sperimentale, mantenendo separati il piano metodologico, la misurazione quantitativa e la successiva interpretazione dei risultati.
 
 La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow metodologico adottato per la valutazione degli strumenti forensi: i tool ricevono esclusivamente la vista cieca del bundle, mentre la ground truth sperimentale rimane separata fino alla fase di normalizzazione degli output.
 
@@ -1605,12 +2253,12 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
 {\shortstack{
     \textbf{Metric computation}\\
     \textbf{and comparison}\\[1mm]
-    \scriptsize TP, FP, FN, TN, unknown,\\
+    \scriptsize TP, FP, FN, TN, unknown outputs,\\
     \scriptsize recall, FNR and FPR
 }};
 
 % -------------------------------------------------------------------------
-% Row 3 - Metadata and normalization on the same line
+% Row 3 - Metadata and normalization
 % -------------------------------------------------------------------------
 \node[note] (manifest) at (6.8,-5.5)
 {\shortstack{
@@ -1656,16 +2304,18 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
 \caption[Forensic tool evaluation workflow]{Forensic tool evaluation workflow based on blind bundle import, tool-side indexing and categorization, export of observable outputs, and normalization against the experimental manifest.}
 \label{fig:methodology-forensic-tool-workflow}
 \end{figure}
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Evaluation metrics}
 \label{sec:methodology-evaluation-metrics}
 % ─────────────────────────────────────────────────────────────────────────────
 
 Il protocollo metrico di \gls{fairlab} è progettato per valutare due livelli
-distinti della pipeline: i proxy model accademici, per i quali sono disponibili
-predizioni, confidenze, checkpoint e mapping delle classi, e gli strumenti
-forensi valutati, per i quali l'analisi si basa sugli output esportati dal
-tool. In entrambi i casi, l'obiettivo non è misurare soltanto l'accuratezza
+distinti: i proxy model controllati, per i quali sono disponibili predizioni,
+confidenze, checkpoint e mapping delle classi, e gli strumenti commerciali
+black-box, per i quali l'analisi si basa esclusivamente sugli output esportati
+dal tool. In entrambi i casi, l'obiettivo non è misurare soltanto l'accuratezza
 aggregata, ma qualificare il comportamento operativo dei sistemi rispetto a
 input puliti, manipolati e fuori distribuzione. In ambito forense, infatti, un
 falso negativo su un contenuto rilevante può avere implicazioni operative più
@@ -1838,12 +2488,136 @@ Comportamento \gls{ood}
 \texttt{non\_weapon} e \gls{ood} high-confidence rate. \\
 Strumenti forensi
 &
-True positive, false negative, false positive, true negative, unknown,
-not detected, uncategorized, weapon recall, weapon false negative rate,
-false positive rate e balanced accuracy dove applicabile. \\
+True positive, false negative, false positive, true negative, matching rate,
+unknown rate, unmapped rate, not detected, uncategorized, weapon recall,
+weapon false negative rate, false positive rate e balanced accuracy dove applicabile. \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
+La Figura~\ref{fig:methodology-metric-layers} sintetizza i tre livelli metrici
+utilizzati nel protocollo di valutazione: classificazione e robustezza dei proxy
+model, comportamento fuori distribuzione e normalizzazione degli output prodotti
+dagli strumenti commerciali black-box.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.82\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=gray!10
+    },
+    metric/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.25cm,
+        minimum width=6.8cm,
+        fill=blue!8
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.20cm,
+        minimum width=7.4cm,
+        fill=green!10
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.10cm,
+        minimum width=6.8cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+\node[block] (inputs) at (0,0)
+{\shortstack{
+    \textbf{Evaluation inputs}\\[1mm]
+    \scriptsize clean, adversarial, anti-forensic and clean OOD samples
+}};
+
+\node[metric] (proxy) at (-4.4,-2.7)
+{\shortstack{
+    \textbf{Proxy model metrics}\\[1mm]
+    \scriptsize accuracy, balanced accuracy, precision, recall, F1\\
+    \scriptsize confidence, confusion matrix and accuracy drop
+}};
+
+\node[metric] (ood) at (4.4,-2.7)
+{\shortstack{
+    \textbf{OOD behavior metrics}\\[1mm]
+    \scriptsize OOD predicted as weapon/non-weapon\\
+    \scriptsize mean confidence and high-confidence rate
+}};
+
+\node[metric] (tools) at (0,-5.4)
+{\shortstack{
+    \textbf{Commercial tool metrics}\\[1mm]
+    \scriptsize TP, FP, TN, FN, weapon recall, FNR, FPR\\
+    \scriptsize unknown, unmapped and matching rates
+}};
+
+\node[note] (auroc) at (0,-7.7)
+{\shortstack{
+    \textbf{Operational comparability rule}\\[1mm]
+    \scriptsize AUROC is not used as a central metric because\\
+    \scriptsize black-box tools may not expose calibrated scores
+}};
+
+\node[output] (summary) at (0,-10.0)
+{\shortstack{
+    \textbf{Final robustness interpretation}\\[1mm]
+    \scriptsize clean baseline, degradation under perturbation, OOD risk\\
+    \scriptsize and black-box tool reliability
+}};
+
+\draw[arrow] (inputs.south west) -- (proxy.north);
+\draw[arrow] (inputs.south east) -- (ood.north);
+
+\draw[arrow] (proxy.south east) -- (tools.north);
+\draw[arrow] (ood.south west) -- (tools.north);
+
+\draw[dashedarrow] (tools) -- (auroc);
+\draw[arrow] (auroc) -- (summary);
+
+\end{tikzpicture}%
+}
+\caption[Metric layers used in the evaluation protocol]{Metric layers used in the evaluation protocol. Proxy models are evaluated with standard classification, robustness and confidence-based metrics. The \gls{ood} set is evaluated separately to measure whether out-of-distribution samples are forced into operational classes. Commercial tools are evaluated through normalized black-box outputs, including detection, error and unknown/unmapped states.}
+\label{fig:methodology-metric-layers}
+\end{figure}
+
+
 
 Metriche threshold-independent come AUROC non vengono considerate come output principale
 del protocollo corrente, poiché la valutazione deve rimanere confrontabile anche con
@@ -1887,16 +2661,20 @@ utilizzata per osservare quali regioni dell'immagine contribuiscano alla
 predizione del modello e per confrontare, a livello qualitativo, campioni puliti,
 campioni perturbati e casi fuori distribuzione.
 
-Lo script ufficiale previsto per questa fase è
+Lo script ufficiale utilizzato per questa fase è
 \codepath{explainability/scripts/17_generate_integrated_gradients_case_studies.py}.
-La tecnica considerata è Integrated Gradients, applicabile ai proxy model
-trasparenti per i quali sono disponibili architettura, pesi e pipeline di
-pre-processing \cite{Sundararajan2017}. La tecnica non è invece applicabile
-internamente ai tool proprietari black-box o quasi black-box, poiché per tali strumenti non sono
-disponibili il modello sottostante, i gradienti, le soglie decisionali o le
-funzioni di scoring proprietarie. Eventuali confronti con strumenti proprietari o professionali
-potranno quindi avvenire solo a livello di output osservabile, non di
-attribuzione interna.
+La tecnica considerata è Integrated Gradients, applicabile esclusivamente ai
+proxy model trasparenti per i quali sono disponibili architettura, pesi e
+pipeline di pre-processing \cite{Sundararajan2017}. Integrated Gradients richiede
+infatti accesso al modello differenziabile, ai gradienti e alla trasformazione
+degli input adottata durante la valutazione.
+
+La tecnica non è invece applicabile internamente ai tool proprietari black-box o
+quasi black-box, poiché per tali strumenti non sono disponibili il modello
+sottostante, i gradienti, le soglie decisionali o le funzioni di scoring
+proprietarie. Eventuali confronti con strumenti proprietari o professionali
+possono quindi avvenire solo a livello di output osservabile, non di attribuzione
+interna.
 
 L'input principale della fase \gls{xai} è
 \codepath{evaluation/proxy_models/proxy_model_predictions.csv}. A partire da
@@ -1934,13 +2712,64 @@ Divergenze tra proxy model
 &
 Confrontare il comportamento di architetture diverse rispetto allo stesso
 artefatto. \\
-Divergenze proxy/tool
+Divergenze proxy/tool, ove disponibili
 &
 Predisporre casi per il confronto qualitativo con gli output osservabili degli
-strumenti forensi valutati, ove disponibili. \\
+strumenti forensi valutati, quando tali output siano disponibili e normalizzati. \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
+La Figura~\ref{fig:methodology-integrated-gradients-example} mostra un esempio
+rappresentativo della struttura degli output prodotti dall'analisi con Integrated
+Gradients. L'esempio ha funzione metodologica e illustra il tipo di artefatti
+utilizzati per l'analisi qualitativa: immagine in input, mappa di attribuzione,
+overlay sull'immagine originale e maschera delle regioni a maggiore attribuzione.
+
+\begin{figure}[H]
+\centering
+
+\begin{minipage}[t]{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.4cm,keepaspectratio]{images/xai_case_0002__input.png}
+    \vspace{1mm}
+
+    \textbf{Input image}\\
+    \footnotesize Campione analizzato dal proxy model.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.4cm,keepaspectratio]{images/xai_case_0002__predicted_label_weapon__heatmap.png}
+    \vspace{1mm}
+
+    \textbf{IG heatmap}\\
+    \footnotesize Mappa di attribuzione normalizzata.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.4cm,keepaspectratio]{images/xai_case_0002__predicted_label_weapon__overlay.png}
+    \vspace{1mm}
+
+    \textbf{IG overlay}\\
+    \footnotesize Attribuzione sovrapposta all'immagine.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.4cm,keepaspectratio]{images/xai_case_0002__predicted_label_weapon__top10_mask.png}
+    \vspace{1mm}
+
+    \textbf{Top attribution mask}\\
+    \footnotesize Regioni con attribuzione più elevata.
+\end{minipage}
+
+\caption[Integrated Gradients output structure]{Integrated Gradients output structure used for qualitative explainability analysis. The figure illustrates the artifacts generated for a representative proxy-model case: input image, attribution heatmap, overlay visualization and top-attribution mask. The example is methodological and does not replace the quantitative robustness metrics.}
+\label{fig:methodology-integrated-gradients-example}
+\end{figure}
+
 
 Gli output previsti sono salvati in
 \codepath{explainability/outputs/integrated_gradients/} e documentati mediante
@@ -1972,9 +2801,9 @@ della valutazione corrente.
 \label{sec:methodology-traceability-controls}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La tracciabilità costituisce un requisito trasversale dell'intero framework
+La tracciabilità costituisce un requisito trasversale dell'intero protocollo
 \gls{fairlab}. Essa non riguarda soltanto la costruzione del dataset, ma
-attraversa tutte le fasi della pipeline: preparazione tecnica, revisione
+attraversa tutte le fasi del workflow sperimentale: preparazione tecnica, revisione
 \textit{human-in-the-loop}, freezing, split generation, addestramento dei proxy
 model, generazione adversariale, trasformazioni anti-forensi, costruzione del
 bundle, valutazione metrica e approccio di \gls{xai}. In coerenza con i principi della
@@ -1982,13 +2811,13 @@ bundle, valutazione metrica e approccio di \gls{xai}. In coerenza con i principi
 modo da consentire la ricostruzione del percorso tra file originario, artefatto
 derivato, output sperimentale e metadati di verifica \cite{casey2011digital,nist2006guide,iso27037}.
 
-Il valore SHA256 è l'identificatore crittografico principale della pipeline.
+Il valore \gls{sha256} è l'identificatore crittografico principale della pipeline.
 Esso viene calcolato sui file preparati, propagato nei manifest successivi e
 ricalcolato sugli artefatti generati, incluse immagini adversariali, immagini
-anti-forensi e file del bundle. L'MD5 viene registrato come hash ausiliario,
+anti-forensi e file del bundle. L'\gls{md5} viene registrato come hash ausiliario,
 soprattutto per facilitare il confronto con strumenti forensi che possono
 esporre tale valore nei propri report o nei propri hash set. Questa doppia
-registrazione non attribuisce all'MD5 il ruolo di identificatore primario, ma ne
+registrazione non attribuisce all'\gls{md5} il ruolo di identificatore primario, ma ne
 preserva l'utilità operativa nel raccordo con tool e formati eterogenei.
 
 La pipeline utilizza manifest progressivi. Il passaggio da
@@ -2013,7 +2842,7 @@ per verificare che un risultato sia riferito al file corretto.
 \midrule
 \texttt{metadata.csv}
 &
-Registra identità tecnica, sorgente, path, dimensioni e SHA256 del pool
+Registra identità tecnica, sorgente, path, dimensioni e \gls{sha256} del pool
 preparato. \\
 \texttt{review\_manifest\_full.csv}
 &
@@ -2052,11 +2881,157 @@ Documenta i casi selezionati per l'analisi qualitativa mediante \gls{xai}. \\
 \end{tabularx}
 \end{table}
 
+
+La Figura~\ref{fig:methodology-traceability-chain} sintetizza la catena di
+tracciabilità adottata nel protocollo sperimentale. Ogni fase conserva o genera
+identificativi, path, hash e manifest che consentono di ricostruire il legame
+tra file originario, artefatto derivato, output del modello o del tool e risultato
+metrico finale.
+
+\begin{figure}[H]
+\centering
+\resizebox{0.72\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    block/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=blue!8
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.15cm,
+        minimum width=7.2cm,
+        fill=green!10
+    },
+    note/.style={
+        rectangle,
+        rounded corners,
+        draw=black!65,
+        dashed,
+        thick,
+        align=center,
+        minimum height=1.05cm,
+        minimum width=5.6cm,
+        fill=gray!5
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    },
+    dashedarrow/.style={
+        ->,
+        thick,
+        dashed,
+        draw=black!75
+    }
+]
+
+% -------------------------------------------------------------------------
+% Main vertical chain
+% -------------------------------------------------------------------------
+\node[block] (raw) at (0,0)
+{\shortstack{
+    \textbf{Prepared image}\\[1mm]
+    \scriptsize \texttt{image\_id}, source path, \gls{sha256} and metadata
+}};
+
+\node[process] (selection) at (0,-2.1)
+{\shortstack{
+    \textbf{Manual selection}\\[1mm]
+    \scriptsize final label, reviewer state and frozen manifests
+}};
+
+\node[process] (splits) at (0,-4.2)
+{\shortstack{
+    \textbf{Splits and OOD set}\\[1mm]
+    \scriptsize fold, class, path and clean manifests
+}};
+
+\node[process] (derived) at (0,-6.3)
+{\shortstack{
+    \textbf{Derived artifacts}\\[1mm]
+    \scriptsize adversarial and anti-forensic samples\\
+    \scriptsize with generated identifiers
+}};
+
+\node[process] (bundle) at (0,-8.4)
+{\shortstack{
+    \textbf{Forensic bundle}\\[1mm]
+    \scriptsize \texttt{bundle\_id}, blind path and separated ground truth
+}};
+
+\node[output] (outputs) at (0,-10.5)
+{\shortstack{
+    \textbf{Model and tool outputs}\\[1mm]
+    \scriptsize proxy predictions, tool exports and normalized outputs
+}};
+
+\node[output] (results) at (0,-12.6)
+{\shortstack{
+    \textbf{Metrics and XAI}\\[1mm]
+    \scriptsize robustness metrics, OOD behavior\\
+    \scriptsize and case-study manifests
+}};
+
+% -------------------------------------------------------------------------
+% Side integrity controls
+% -------------------------------------------------------------------------
+\node[note] (controls) at (7.2,-8.4)
+{\shortstack{
+    \textbf{Integrity controls}\\[1mm]
+    \scriptsize hash verification, expected counts,\\
+    \scriptsize uniqueness checks and JSON summaries
+}};
+
+% -------------------------------------------------------------------------
+% Arrows
+% -------------------------------------------------------------------------
+\draw[arrow] (raw) -- (selection);
+\draw[arrow] (selection) -- (splits);
+\draw[arrow] (splits) -- (derived);
+\draw[arrow] (derived) -- (bundle);
+\draw[arrow] (bundle) -- (outputs);
+\draw[arrow] (outputs) -- (results);
+
+\draw[dashedarrow] (derived.east) -| (controls.north);
+\draw[dashedarrow] (bundle.east) -- (controls.west);
+\draw[dashedarrow] (outputs.east) -| (controls.south);
+
+\end{tikzpicture}%
+}
+\caption[Traceability chain across the FAIR-Lab protocol]{Traceability chain across the FAIR-Lab protocol. Each experimental stage preserves or generates identifiers, paths, cryptographic hashes and manifests, enabling reconstruction from the original prepared image to derived artifacts, bundle entries, model or tool outputs, metrics and explainability case studies.}
+\label{fig:methodology-traceability-chain}
+\end{figure}
+
+
+
 La riproducibilità è rafforzata da controlli deterministici e da registri di
 configurazione. La generazione degli split utilizza seed 42, mentre i proxy
 model sono addestrati secondo un protocollo fold-aware. Per ogni modello e fold,
 il file \codepath{models/model_registry.json} registra il checkpoint, la
-normalizzazione, la dimensione di input e l'hash SHA256 del file
+normalizzazione, la dimensione di input e l'hash \gls{sha256} del file
 \texttt{.pt}. Gli attacchi model-dependent utilizzano checkpoint specifici del
 fold, riducendo il rischio di leakage tra immagini usate per l'addestramento e
 immagini perturbate o valutate. Tale controllo anti-leakage è centrale perché
@@ -2074,7 +3049,7 @@ presenti nel path o nel nome del file.
 
 I controlli automatici registrati nei summary JSON verificano la corrispondenza
 tra conteggi attesi e prodotti, l'unicità degli identificativi generati,
-l'unicità degli hash SHA256, la corretta scrittura dei manifest e, nel caso del
+l'unicità degli hash \gls{sha256}, la corretta scrittura dei manifest e, nel caso del
 bundle, la separazione dei metadata dagli input ciechi. Tali controlli non
 sostituiscono l'analisi critica dei risultati, ma garantiscono che gli
 esperimenti siano eseguiti su artefatti coerenti con il protocollo.
@@ -2092,6 +3067,8 @@ valutazione può essere considerata verificabile, riproducibile e metodologicame
 difendibile.
 
 Le versioni software, i moduli abilitati, le impostazioni di importazione e le
-modalità di esportazione dei tool forensi saranno documentati nel capitolo dei
-risultati e, ove necessario, in appendice, così da mantenere separati il
-protocollo metodologico e la configurazione effettiva dei run sperimentali.
+modalità di esportazione dei tool forensi sono documentati nelle sezioni
+metodologiche dedicate e saranno richiamati, ove necessario, nel capitolo dei
+risultati e nelle appendici. In questo modo, la descrizione del protocollo rimane
+separata dalla discussione degli esiti sperimentali, ma conserva il collegamento
+con le configurazioni effettivamente utilizzate nei run.

@@ -98,7 +98,10 @@ attack generation completed
 proxy model evaluation completed
 forensic evaluation bundle generated and validated
 Magnet AXIOM / Magnet.AI evaluation completed and normalized
-additional commercial forensic tools pending / planned extension
+Excire Foto 2025 semantic retrieval evaluation completed / analyzed
+Integrated Gradients XAI case studies completed and integrated in Chapter 5
+Cellebrite Inseyets 10.9 pending / to be consolidated
+Oxygen and Autopsy excluded from final experimental perimeter
 ```
 
 ---
@@ -194,6 +197,7 @@ The forensic evaluation bundle generated from the clean, OOD, adversarial and an
 
 ```text
 Magnet AXIOM / Magnet.AI
+X-Ways Forensics / Excire Foto 2025
 ```
 
 The Magnet export has been normalized through:
@@ -212,13 +216,9 @@ results/metrics/forensic_tools_metrics.csv
 results/metrics/magnet_axiom_metrics.csv
 ```
 
-The same bundle can later be used for additional black-box commercial-tool extensions, provided that comparable exports are available:
+Excire Foto 2025 is analyzed as a standalone semantic retrieval tool, not as a native forensic binary classifier.
 
-```text
-X-Ways Forensics / Excire Photo AI
-Cellebrite UFED
-Oxygen Forensic Detective
-```
+Cellebrite Inseyets 10.9 remains pending / to be consolidated if comparable outputs become available. Oxygen Forensic Detective and Autopsy are excluded from the final experimental perimeter.
 
 ---
 
@@ -282,8 +282,8 @@ Smoke tests can be performed with `--limit 10` before full regeneration.
 
 ## Current Reporting Step
 
-The attack generation, proxy evaluation, forensic bundle construction, and Magnet AXIOM / Magnet.AI normalization stages are complete. The current operational focus is:
+The attack generation, proxy evaluation, forensic bundle construction, Magnet AXIOM / Magnet.AI normalization, Excire analysis, and Chapter 5 XAI case-study integration are complete. The current operational focus is:
 
 ```text
-finalize Chapter 5 reporting → finalize XAI case studies → keep additional commercial tools as optional extensions unless normalized exports become available
+consolidate Cellebrite Inseyets if feasible → finalize Chapter 5 / Chapter 6 → thesis-wide revision
 ```

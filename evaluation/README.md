@@ -28,9 +28,10 @@ evaluation/
     ├── normalization_summary.json
     ├── magnet_axiom_normalized_predictions.csv
     ├── xways_excire_normalized_predictions.csv
-    ├── cellebrite_ufed_normalized_predictions.csv
-    └── oxygen_forensic_detective_normalized_predictions.csv
+    └── cellebrite_inseyets_normalized_predictions.csv
 ```
+
+`cellebrite_inseyets_normalized_predictions.csv` is a target filename only if comparable Cellebrite Inseyets exports become available and can be mapped to the forensic evaluation bundle.
 
 ---
 
@@ -69,7 +70,7 @@ results/metrics/proxy_model_comparative_metrics.csv
 results/metrics/proxy_model_evaluation_summary.json
 ```
 
-The proxy evaluation is considered consolidated for the thesis reporting phase. It provides the reproducible baseline against which black-box forensic-tool behavior can later be compared.
+The proxy evaluation is considered consolidated for the thesis reporting phase. It provides the reproducible baseline against which black-box forensic-tool behavior can be compared.
 
 ---
 
@@ -92,14 +93,24 @@ datasets/forensic_evaluation_bundle/structured_audit_view/
 
 These directories contain ground truth, perturbation metadata, provenance, labels, and hash mappings. They are reserved for post-export normalization.
 
-Target tools:
+Final tool perimeter:
 
 ```text
-Magnet AXIOM / Magnet.AI
-X-Ways Forensics / Excire
-Cellebrite UFED
-Oxygen Forensic Detective
+Completed and normalized:
+- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
+
+Completed / analyzed:
+- X-Ways Forensics / Excire Foto 2025, version 4.1.5
+
+Pending / to be consolidated:
+- Cellebrite Inseyets, version 10.9
+
+Excluded:
+- Oxygen Forensic Detective
+- Autopsy
 ```
+
+Excire Foto 2025 is evaluated as a standalone AI-assisted semantic retrieval tool. Its results must be interpreted as controlled semantic retrieval behavior, not as native forensic binary classification.
 
 ---
 
@@ -119,7 +130,7 @@ Purpose:
 - compute tool-level metrics;
 - generate thesis-ready metrics and audit tables.
 
-Implemented behavior:
+Implemented / consolidated behavior:
 
 - Magnet AXIOM / Magnet.AI normalization from `Pictures.csv`;
 - mapping of `Possible weapons` to `weapon_detected=true`;
@@ -133,6 +144,24 @@ Expected normalized output area:
 ```text
 evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
+```
+
+Cellebrite Inseyets outputs should be normalized only if the export structure supports reproducible mapping to the bundle manifest and the exported labels/categories can be operationally related to the thesis ground truth.
+
+---
+
+## XAI / Explainability Status
+
+Integrated Gradients is not part of the commercial-tool normalization layer. It is used only for transparent proxy models and has been completed for the Chapter 5 representative case-study discussion.
+
+Selected Chapter 5 cases:
+
+```text
+xai_case_0001 = clean correct weapon
+xai_case_0006 = clean false negative weapon
+xai_case_0009 = OOD classified as weapon
+xai_case_0010 = anti-forensic false negative under histogram modification
+xai_case_0015 = high-confidence adversarial false positive under sigma_zero
 ```
 
 ---

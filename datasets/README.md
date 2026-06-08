@@ -108,6 +108,7 @@ datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
 datasets/forensic_evaluation_bundle/
     ↓
 Magnet AXIOM / Magnet.AI black-box processing
+X-Ways Forensics / Excire Foto 2025 semantic retrieval evaluation
     ↓
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
     ↓
@@ -351,15 +352,16 @@ The forensic evaluation bundle has been processed with:
 
 ```text
 Magnet AXIOM / Magnet.AI
+X-Ways Forensics / Excire Foto 2025
 ```
 
-The Magnet AXIOM / Magnet.AI export has been normalized through:
+Magnet AXIOM / Magnet.AI has been normalized through:
 
 ```text
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
-Consolidated normalized outputs:
+Consolidated normalized outputs include:
 
 ```text
 evaluation/forensic_tools/normalized_predictions.csv
@@ -369,13 +371,38 @@ results/metrics/forensic_tools_metrics.csv
 results/metrics/magnet_axiom_metrics.csv
 ```
 
-Additional commercial tools remain planned extensions unless comparable exports become available:
+Excire Foto 2025 is evaluated as a standalone AI-assisted semantic retrieval tool, not as a native forensic classifier.
+
+The remaining Cellebrite tool in the final experimental perimeter is:
 
 ```text
-X-Ways Forensics / Excire Photo AI
-Cellebrite UFED
-Oxygen Forensic Detective
+Cellebrite Inseyets, version 10.9
 ```
+
+It remains pending / to be consolidated unless exportable and mappable outputs become available.
+
+Excluded from the final experimental perimeter:
+
+```text
+Oxygen Forensic Detective
+Autopsy
+```
+
+---
+
+## Explainability / XAI Status
+
+The Integrated Gradients workflow is completed for Chapter 5 reporting. Five representative EfficientNet-B0 case studies have been selected and integrated into the thesis text:
+
+```text
+xai_case_0001 = clean correct weapon
+xai_case_0006 = clean false negative weapon
+xai_case_0009 = OOD classified as weapon
+xai_case_0010 = anti-forensic false negative under histogram modification
+xai_case_0015 = high-confidence adversarial false positive under sigma_zero
+```
+
+XAI remains qualitative and diagnostic. It is not a primary robustness metric and is not used to explain proprietary black-box commercial forensic tools.
 
 ---
 
@@ -393,7 +420,8 @@ Dataset traceability is based on:
 - split generation summaries;
 - attack manifests;
 - forensic bundle metadata;
-- normalized forensic-tool outputs.
+- normalized forensic-tool outputs;
+- XAI case-study manifests and thesis figure references where applicable.
 
 SHA256 is the primary integrity hash for the thesis pipeline.
 
@@ -412,18 +440,13 @@ Completed stages:
 - anti-forensic transformation generation;
 - adversarial attack generation;
 - forensic evaluation bundle construction and validation;
-- Magnet AXIOM / Magnet.AI processing;
-- Magnet AXIOM / Magnet.AI export normalization;
-- commercial-tool metrics generation for Magnet AXIOM / Magnet.AI.
+- proxy model training and evaluation;
+- Magnet AXIOM / Magnet.AI processing and export normalization;
+- Excire Foto 2025 semantic retrieval evaluation;
+- Integrated Gradients representative case selection and Chapter 5 integration.
 
 Current stage:
 
 ```text
-thesis reporting, XAI case-study finalization, and optional extension to additional commercial forensic tools
-```
-
-Next operational step:
-
-```text
-finalize Chapter 5 reporting and keep X-Ways/Excire, Cellebrite UFED and Oxygen as pending extensions unless normalized exports become available
+Cellebrite Inseyets consolidation if feasible, final Chapter 5 / Chapter 6 reporting, and thesis-wide revision
 ```

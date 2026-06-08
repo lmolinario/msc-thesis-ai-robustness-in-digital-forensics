@@ -19,9 +19,10 @@ results/
     ├── forensic_tools_metrics.csv
     ├── magnet_axiom_metrics.csv
     ├── xways_excire_metrics.csv
-    ├── cellebrite_ufed_metrics.csv
-    └── oxygen_forensic_detective_metrics.csv
+    └── cellebrite_inseyets_metrics.csv
 ```
+
+`cellebrite_inseyets_metrics.csv` is a target artifact only if Cellebrite Inseyets 10.9 exports become available and can be normalized against the forensic evaluation bundle. Oxygen Forensic Detective and Autopsy are excluded from the final experimental perimeter.
 
 ---
 
@@ -73,7 +74,42 @@ results/metrics/forensic_tools_metrics.csv
 results/metrics/<tool_name>_metrics.csv
 ```
 
+Consolidated / analyzed commercial-tool status:
+
+```text
+Completed and normalized:
+- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
+
+Completed / analyzed:
+- X-Ways Forensics / Excire Foto 2025, version 4.1.5
+
+Pending / to be consolidated:
+- Cellebrite Inseyets, version 10.9
+
+Excluded:
+- Oxygen Forensic Detective
+- Autopsy
+```
+
 Commercial tool metrics should not be manually merged with proxy metrics before the bundle mapping has been verified.
+
+---
+
+## XAI / Explainability Results
+
+The Integrated Gradients analysis is completed for Chapter 5 as qualitative diagnostic support, not as a primary robustness metric.
+
+Selected Chapter 5 XAI cases:
+
+```text
+xai_case_0001 = clean correct weapon
+xai_case_0006 = clean false negative weapon
+xai_case_0009 = OOD classified as weapon
+xai_case_0010 = anti-forensic false negative under histogram modification
+xai_case_0015 = high-confidence adversarial false positive under sigma_zero
+```
+
+These cases are used to interpret representative proxy-model behavior. They are not claimed as explanations of Magnet AXIOM / Magnet.AI, Excire Foto 2025, or Cellebrite Inseyets, which remain black-box or operationally opaque tools.
 
 ---
 
@@ -112,4 +148,6 @@ When results are moved into LaTeX tables:
 - report drops relative to clean baselines where useful;
 - treat XAI as qualitative diagnostic evidence, not as a primary metric;
 - preserve exact dataset sizes and sample counts;
-- document any manual mapping or export-normalization decisions.
+- document any manual mapping or export-normalization decisions;
+- do not report Oxygen or Autopsy as final experimental tools;
+- refer to Cellebrite as Cellebrite Inseyets 10.9 when discussing the remaining Cellebrite evaluation perimeter.

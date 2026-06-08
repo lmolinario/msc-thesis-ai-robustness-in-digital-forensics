@@ -272,20 +272,36 @@ Comparative metrics match perturbed predictions to clean predictions through mod
 
 ### 3.5 Explainability
 
-Expected method:
+Method:
 
-- Integrated Gradients where feasible.
+- Integrated Gradients.
 
-Expected outputs:
+Status:
+
+```text
+completed and integrated in Chapter 5
+```
+
+Selected representative cases:
+
+```text
+xai_case_0001 = clean correct weapon
+xai_case_0006 = clean false negative weapon
+xai_case_0009 = OOD classified as weapon
+xai_case_0010 = anti-forensic false negative under histogram modification
+xai_case_0015 = high-confidence adversarial false positive under sigma_zero
+```
+
+Output areas:
 
 ```text
 explainability/outputs/integrated_gradients/
-explainability/outputs/case_studies/
-explainability/manifests/integrated_gradients_manifest.csv
-explainability/manifests/xai_case_studies_manifest.csv
+explainability/manifests/
+explainability/logs/
+docs/LatexThesis_ITA/images/fig_xai_case*_*.png
 ```
 
-The explainability layer is qualitative and diagnostic. It is used to interpret representative failures, not to replace quantitative robustness metrics.
+The explainability layer is qualitative and diagnostic. It is used to interpret representative proxy-model failures and successes, not to replace quantitative robustness metrics or explain proprietary black-box forensic tools.
 
 ---
 
@@ -293,12 +309,22 @@ The explainability layer is qualitative and diagnostic. It is used to interpret 
 
 The third layer evaluates professional forensic tools under the same data conditions.
 
-Target tools:
+Final tool perimeter:
 
-- X-Ways;
-- Magnet AXIOM;
-- Cellebrite UFED;
-- Oxygen Forensic Detective.
+```text
+Completed and normalized:
+- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
+
+Completed / analyzed:
+- X-Ways Forensics / Excire Foto 2025, version 4.1.5
+
+Pending / to be consolidated:
+- Cellebrite Inseyets, version 10.9
+
+Excluded:
+- Oxygen Forensic Detective
+- Autopsy
+```
 
 ### 4.1 Forensic evaluation bundle
 
@@ -322,7 +348,7 @@ datasets/forensic_evaluation_bundle/metadata/
 datasets/forensic_evaluation_bundle/structured_audit_view/
 ```
 
-The bundle should include:
+The bundle includes:
 
 - clean folds;
 - adversarial outputs;
@@ -347,21 +373,22 @@ Before running forensic tools, the bundle must be checked for:
 
 ### 4.3 Tool execution
 
-Each tool should be tested on comparable inputs:
+Eligible tools should be tested on comparable inputs:
 
 - clean images;
 - adversarially perturbed images;
 - anti-forensically transformed images;
 - OOD samples.
 
-Expected tool-specific areas:
+Current tool-specific areas:
 
 ```text
 forensic_tools/magnet_axiom/
-forensic_tools/xways/
-forensic_tools/cellebrite_ufed/
-forensic_tools/oxygen/
+forensic_tools/excire_foto_2025/
+forensic_tools/cellebrite_inseyets/
 ```
+
+Large proprietary case files, installers, licensed databases, and heavy exports should not be committed unless strictly necessary and legally/ethically appropriate.
 
 ### 4.4 Forensic output normalization
 
@@ -378,7 +405,7 @@ Tool exports should be linked back to the dataset primarily through:
 2. MD5, if available;
 3. filename or `image_id` as fallback.
 
-The normalized schema should make commercial-tool outputs comparable with local proxy-model predictions.
+The normalized schema should make commercial-tool outputs comparable with local proxy-model predictions when such comparison is methodologically justified.
 
 ---
 
@@ -388,7 +415,7 @@ The final analysis compares:
 
 - clean vs perturbed behavior;
 - model vs model;
-- local proxy models vs forensic AI tools;
+- local proxy models vs eligible forensic AI tools;
 - adversarial attacks vs anti-forensic transformations;
 - nominal binary classification vs OOD behavior;
 - quantitative robustness metrics vs qualitative explainability findings.
@@ -416,17 +443,19 @@ proxy model training
 anti-forensic transformation generation
 adversarial attack generation
 proxy model evaluation
-initial forensic evaluation bundle construction
+forensic evaluation bundle construction and validation
+Magnet AXIOM / Magnet.AI normalization
+Excire Foto 2025 semantic retrieval analysis
+Integrated Gradients Chapter 5 case-study integration
 ```
 
 Current focus:
 
 ```text
-validate forensic evaluation bundle
-run forensic AI tools
-normalize forensic tool outputs
-compare forensic tool outputs with proxy model metrics
-select representative failure cases for explainability and thesis discussion
+consolidate Cellebrite Inseyets if feasible
+finalize Chapter 5 and Chapter 6
+perform final thesis-wide revision
+prepare future English version
 ```
 
 ---
@@ -449,7 +478,8 @@ The workflow is organized around three levels of trust:
    - clean/perturbed comparability;
    - attack manifests;
    - proxy model predictions;
-   - confidence and robustness analysis.
+   - confidence and robustness analysis;
+   - qualitative XAI case-study traceability.
 
 3. **Trust in the forensic interpretation**
    - forensic tool reports;

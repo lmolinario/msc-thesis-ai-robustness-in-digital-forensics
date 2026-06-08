@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-05-04T19:52:09+00:00",
+  "timestamp": "2026-06-07T07:09:27+00:00",
   "reviewer_id": "Lello",
-  "current_start": 320,
-  "selected_df_index": 15288,
+  "current_start": 150,
+  "selected_df_index": 13842,
   "last_action": "quit",
   "last_action_stack": [
     {
@@ -126,7 +126,7 @@
       "previous_state": "pending"
     }
   ],
-  "session_mode": "review_pending",
-  "review_class": "",
-  "review_source": "05_deepweb"
+  "session_mode": "review_selection",
+  "review_class": "ood",
+  "review_source": ""
 }

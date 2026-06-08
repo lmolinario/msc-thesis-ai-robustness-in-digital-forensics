@@ -1,6 +1,6 @@
 {
   "script": "evaluation/scripts/20_generate_experimental_reporting_assets.py",
-  "created_at": "2026-05-27T21:27:50+00:00",
+  "created_at": "2026-06-07T06:41:48+00:00",
   "inputs": {
     "core_metrics_csv": "results/metrics/final_core_metrics.csv",
     "robustness_metrics_csv": "results/metrics/final_robustness_metrics.csv",
@@ -19,6 +19,7 @@
     "png"
   ],
   "dpi": 300,
+  "console_metrics_printed": true,
   "figure_count_unique": 20,
   "file_count": 35,
   "figure_ids": [

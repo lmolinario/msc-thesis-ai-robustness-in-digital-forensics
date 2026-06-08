@@ -115,8 +115,15 @@ KNOWN_TOOL_NAMES = [
     "excire_foto_2025",
     "cellebrite_inseyets",
 ]
-
-SUPPORTED_GENERIC_EXPORT_EXTENSIONS = {".csv", ".tsv", ".json", ".jsonl", ".txt"}
+SUPPORTED_GENERIC_EXPORT_EXTENSIONS = {
+    ".csv",
+    ".tsv",
+    ".json",
+    ".jsonl",
+    ".txt",
+    ".xlsx",
+    ".xls",
+}
 
 EXCIRE_FIREARM_PROMPTS = (
     "firearm",
@@ -158,11 +165,13 @@ FILENAME_COLUMNS = {
     "file name",
     "file_name",
     "name",
+    "nome",
     "item_name",
     "artifact_name",
     "original_filename",
     "tool_input_filename",
     "path",
+    "percorso",
     "file_path",
     "filepath",
     "source_path",
@@ -178,6 +187,9 @@ LABEL_COLUMNS = {
     "tag",
     "tags",
     "classification",
+    "Classifications",
+    "Classification",
+    "Classificazioni",
     "class",
     "ai_label",
     "ai_category",
@@ -242,6 +254,15 @@ OOD_HINT_KEYWORDS = {
     "synthetic",
 }
 
+CELLEBRITE_WEAPON_CLASSIFICATIONS_EXTENDED = {
+    "armi",
+    "pistola",
+    "fucile",
+}
+
+CELLEBRITE_WEAPON_CLASSIFICATIONS_STRICT = {
+    "armi",
+}
 
 # =============================================================================
 # Data structures
@@ -430,6 +451,33 @@ def ask_index(prompt: str, min_value: int, max_value: int, default: int) -> int:
             return choice
         print(f"Choose a value between {min_value} and {max_value}.")
 
+def parse_cellebrite_classifications(value: Any) -> set[str]:
+    """
+    Parse Cellebrite Inseyets / Physical Analyzer image classifications.
+
+    Examples:
+    - "Armi (100%)"
+    - "Pistola (100%); Armi (100%)"
+    - "Fucile (91%) | Oggetto tenuto in mano (78%)"
+    """
+    text = safe_str(value).lower()
+    if not text:
+        return set()
+
+    text = text.replace("_x000d_", "\n")
+    text = text.replace("\\r", "\n").replace("\\n", "\n")
+
+    parts = re.split(r"[;|,\r\n]+", text)
+    labels: set[str] = set()
+
+    for part in parts:
+        cleaned = re.sub(r"\(\s*\d+(?:[.,]\d+)?\s*%\s*\)", "", part)
+        cleaned = cleaned.replace("_x000d_", "")
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+        if cleaned:
+            labels.add(cleaned)
+
+    return labels
 
 # =============================================================================
 # Raw export discovery and interactive menu
@@ -438,7 +486,7 @@ def ask_index(prompt: str, min_value: int, max_value: int, default: int) -> int:
 def prediction_export_name_for_tool(tool_name: str) -> str:
     if tool_name == "magnet_axiom":
         return "Pictures.csv"
-    if tool_name == "xways_excire":
+    if tool_name == "excire_foto_2025":
         return "Excire prompt hit-list CSVs"
     return "prediction export"
 
@@ -704,7 +752,7 @@ def discover_prediction_export_files_in_roots(tool_name: str, roots: list[Path])
                 for path in root.rglob("*")
                 if path.is_file() and path.name.lower() == "pictures.csv"
             )
-        elif tool_name == "xways_excire":
+        elif tool_name == "excire_foto_2025":
             files.extend(
                 path
                 for path in root.rglob("*")
@@ -814,6 +862,10 @@ def read_export_records(path: Path) -> list[dict[str, Any]]:
         return read_json_records(path)
     if suffix == ".txt":
         return read_txt_records(path)
+    if path.suffix.lower() in {".xlsx", ".xls"}:
+        df = pd.read_excel(path, sheet_name="Immagini", dtype=str, header=1)
+        df.columns = [safe_str(col) for col in df.columns]
+        return df.fillna("").to_dict(orient="records")
     return []
 
 
@@ -951,19 +1003,39 @@ def build_tool_version_row(
 
     if tool_name == "magnet_axiom":
         notes = (
-            "Magnet AXIOM export. Predictions are derived from Pictures.csv Tags; "
-            "Tags='Possible weapons' is mapped to weapon_detected=true; empty Tags "
+            "Magnet AXIOM / Magnet.AI export. Predictions are derived from Pictures.csv "
+            "Tags; Tags='Possible weapons' is mapped to weapon_detected=true; empty Tags "
             "is mapped to weapon_detected=false."
         )
-    elif tool_name == "xways_excire":
+
+    elif tool_name == "excire_foto_2025":
         notes = (
-            "X-Ways / Excire Photo AI semantic retrieval export. Predictions are derived "
-            "from fixed firearm-oriented prompt hit-list CSVs. An image retrieved by at "
-            "least one prompt is mapped to weapon_detected=true; all remaining bundle "
-            "images are completed as weapon_detected=false."
+            "Excire Foto 2025 semantic retrieval export. Predictions are derived from "
+            "fixed firearm-oriented prompt hit-list CSVs. An image retrieved by at least "
+            "one prompt is mapped to weapon_detected=true; all remaining bundle images "
+            "are completed as weapon_detected=false."
         )
+
+    elif tool_name == "cellebrite_inseyets":
+        notes = (
+            "Cellebrite Inseyets 10.9 / Physical Analyzer image-classification export. "
+            "Predictions are derived from the Excel report sheet 'Immagini' and the "
+            "observable 'Classifications' column. The extended mapping treats an image "
+            "as weapon_detected=true when Classifications contains at least one among "
+            "'Armi', 'Pistola', or 'Fucile'. This is an operational recoding of exported "
+            "tool output and does not imply access to Cellebrite internal AI model logic."
+        )
+
     else:
-        notes = "Fill manually after tool execution/export."
+        notes = "Unsupported or non-final tool. Fill manually only if intentionally used."
+
+    if tool_name == "cellebrite_inseyets":
+        extracted.setdefault("tool_version", "Cellebrite Inseyets 10.9")
+        extracted.setdefault("tool_build", "Physical Analyzer 10.9.0.3029 / UFED 10.9.0.284")
+        extracted.setdefault("case_name", "CHIAVETTA USB")
+        extracted.setdefault("export_status", "completed")
+        extracted.setdefault("export_timestamp", "2026-06-05 13:04:59")
+        extracted.setdefault("ai_modules_enabled", "media classifications / image classifications")
 
     return {
         "tool_name": row_tool_name or tool_name,
@@ -974,7 +1046,7 @@ def build_tool_version_row(
         "export_timestamp": extracted.get("export_timestamp", ""),
         "summary_file": summary_file,
         "selected_run_dirs": unique_join([repo_relative_string(path) for path in (selected_run_dirs or [])]),
-        "ai_modules_enabled": "",
+        "ai_modules_enabled": extracted.get("ai_modules_enabled", ""),
         "os_environment": "",
         "import_path": "datasets/forensic_evaluation_bundle/blind_tool_input/files/",
         "export_files_found": export_files_found,
@@ -999,6 +1071,16 @@ def interpret_weapon_detection(tool_name: str, raw_label: str) -> tuple[str, str
         if "weapon" in text_clean or "weapons" in text_clean:
             return "true", "magnet_axiom_tag:weapon_keyword"
         return "unknown", "magnet_axiom_unmapped_tag"
+
+    if tool_name == "cellebrite_inseyets":
+        labels = parse_cellebrite_classifications(raw_label)
+
+        weapon_terms = CELLEBRITE_WEAPON_CLASSIFICATIONS_EXTENDED
+
+        if labels.intersection(weapon_terms):
+            return "true", "cellebrite_extended_armi_pistola_fucile"
+
+        return "false", "cellebrite_extended_armi_pistola_fucile"
 
     if not text_clean:
         return "unknown", "empty_label"
@@ -1379,15 +1461,29 @@ def consolidate_matched_rows(rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def deduplicate_predictions(normalized_rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Deduplicate normalized predictions to one row per matched tool/bundle item.
+
+    Unmatched rows are intentionally excluded from the normalized prediction
+    table because they do not belong to the official forensic evaluation bundle.
+    They remain documented through the export audit and raw parsed-row counts.
+    """
     matched_groups: dict[tuple[str, str], list[dict[str, Any]]] = defaultdict(list)
-    unmatched_rows: list[dict[str, Any]] = []
+
     for row in normalized_rows:
         if safe_str(row.get("matched", "")) == "true" and safe_str(row.get("bundle_id", "")):
-            matched_groups[(safe_str(row.get("tool_name", "")), safe_str(row.get("bundle_id", "")))].append(row)
-        else:
-            unmatched_rows.append(row)
-    deduplicated_rows = [consolidate_matched_rows(group) for _, group in sorted(matched_groups.items())]
-    deduplicated_rows.extend(unmatched_rows)
+            matched_groups[
+                (
+                    safe_str(row.get("tool_name", "")),
+                    safe_str(row.get("bundle_id", "")),
+                )
+            ].append(row)
+
+    deduplicated_rows = [
+        consolidate_matched_rows(group)
+        for _, group in sorted(matched_groups.items())
+    ]
+
     return deduplicated_rows
 
 
@@ -1771,7 +1867,7 @@ def main() -> None:
                 f"Selected run dirs: {[repo_relative_string(path) for path in selected_run_dirs]}"
             )
 
-        if tool_name == "xways_excire":
+        if tool_name == "excire_foto_2025":
             excire_run_dirs = resolve_excire_run_dirs(tool_name, tool_dir, selected_run_dirs)
             if strict and not excire_run_dirs:
                 raise FileNotFoundError(f"No Excire run folders found under {tool_dir / 'raw_exports'}")
@@ -1886,7 +1982,7 @@ def main() -> None:
         "stale_outputs_removed": stale_outputs_removed,
         "metric_output_validation": metric_output_validation,
         "raw_rows_parsed": len(all_raw_rows) + sum(
-            count for name, count in per_tool_raw_row_counts.items() if name.startswith("xways_excire")
+            count for name, count in per_tool_raw_row_counts.items() if name.startswith("excire_foto_2025")
         ),
         "pre_normalized_rows": len(pre_normalized_rows),
         "normalized_rows_before_deduplication": len(normalized_before_deduplication),
@@ -1912,7 +2008,7 @@ def main() -> None:
     logging.info(
         "Raw rows parsed: %d",
         len(all_raw_rows) + sum(
-            count for name, count in per_tool_raw_row_counts.items() if name.startswith("xways_excire")
+            count for name, count in per_tool_raw_row_counts.items() if name.startswith("excire_foto_2025")
         ),
     )
     logging.info("Pre-normalized rows: %d", len(pre_normalized_rows))

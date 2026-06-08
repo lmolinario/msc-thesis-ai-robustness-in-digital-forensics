@@ -20,7 +20,9 @@
 % -----------------------
 
 % --- Encoding ---
+\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{lmodern}
 
 % --- Appendices ---
 \usepackage{appendix}
@@ -35,6 +37,9 @@
 % --- Acronyms ---
 \usepackage[acronym,toc,nonumberlist,nopostdot]{glossaries}
 \makeglossaries
+% Print glossary/acronym occurrences in bold in the text.
+%\renewcommand*{\glstextformat}[1]{\textbf{#1}}
+
 
 % --- Bibliography & References ---
 \usepackage[

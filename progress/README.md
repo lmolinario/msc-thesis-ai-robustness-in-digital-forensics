@@ -50,8 +50,10 @@ progress/milestones/10_xai_case_studies.md
 | Proxy model evaluation | Completed |
 | Forensic evaluation bundle | Generated and validated |
 | Magnet AXIOM / Magnet.AI evaluation | Completed and normalized |
-| Additional commercial forensic tools | Pending / planned extension |
-| XAI case studies | In progress for Chapter 5 |
+| Excire Foto 2025 evaluation | Completed / analyzed |
+| Cellebrite Inseyets evaluation | Pending / to be consolidated |
+| Oxygen / Autopsy | Excluded from final experimental perimeter |
+| XAI case studies | Completed and integrated in Chapter 5 |
 | Thesis reporting | In progress |
 
 ---
@@ -72,13 +74,40 @@ results/metrics/forensic_tools_metrics.csv
 results/metrics/magnet_axiom_metrics.csv
 ```
 
-The following tools remain pending or planned extensions unless comparable, normalized exports become available:
+Excire Foto 2025 has been evaluated as a standalone AI-assisted semantic retrieval tool. It is interpreted as an operational semantic retrieval signal, not as a native forensic binary classifier.
+
+The remaining Cellebrite tool in the final experimental perimeter is:
 
 ```text
-X-Ways Forensics / Excire Photo AI
-Cellebrite UFED
-Oxygen Forensic Detective
+Cellebrite Inseyets, version 10.9
 ```
+
+It remains pending / to be consolidated unless comparable, normalized exports become available.
+
+Excluded from the final experimental perimeter:
+
+```text
+Oxygen Forensic Detective
+Autopsy
+```
+
+---
+
+## XAI Status
+
+Integrated Gradients XAI case studies are completed and integrated in Chapter 5.
+
+Selected representative cases:
+
+```text
+xai_case_0001 = clean correct weapon
+xai_case_0006 = clean false negative weapon
+xai_case_0009 = OOD classified as weapon
+xai_case_0010 = anti-forensic false negative under histogram modification
+xai_case_0015 = high-confidence adversarial false positive under sigma_zero
+```
+
+The XAI layer remains qualitative and diagnostic. It is used to interpret transparent proxy-model behavior and is not a primary robustness metric.
 
 ---
 
@@ -113,6 +142,7 @@ evaluation/proxy_models/
 results/metrics/
 datasets/forensic_evaluation_bundle/metadata/
 evaluation/forensic_tools/
+docs/LatexThesis_ITA/sections/05_experiments.tex
 ```
 
-Progress notes explain why and when decisions were made; manifests and metrics define what was actually produced.
+Progress notes explain why and when decisions were made; manifests, metrics, normalized exports, and thesis text define what was actually produced and reported.
