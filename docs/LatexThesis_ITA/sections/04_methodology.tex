@@ -842,37 +842,29 @@ freezing: \texttt{manual\_selection\_final\_1500.csv} e
 i manifest finali, ma produce copie organizzate delle immagini e manifest
 specifici per le successive fasi sperimentali.
 
-Il subset binario composto dalle classi \texttt{weapon} e \texttt{non\_weapon}
-viene suddiviso in cinque fold deterministici, denominati \texttt{fold\_1},
-\texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4} e \texttt{fold\_5}.
-Ciascun fold contiene 200 immagini, equamente distribuite tra le due classi
-operative del task binario. La procedura di split utilizza un seed pseudo-casuale
-fissato a 42, in modo che la partizione possa essere rigenerata in modo
-riproducibile a partire dai manifest ufficiali e dallo script indicato.
-In questa fase, il termine \texttt{fold} indica unità sperimentali bilanciate e
-tracciabili, non partizioni di addestramento nel senso della cross-validation
-tradizionale. L'impiego dei fold nelle fasi di addestramento e valutazione dei
-modelli viene descritto nella Sezione~\ref{sec:methodology-models-classification}.
+Il subset binario composto dalle classi \texttt{weapon} e
+\texttt{non\_weapon} viene suddiviso in cinque fold deterministici,
+denominati \texttt{fold\_1}, \texttt{fold\_2}, \texttt{fold\_3},
+\texttt{fold\_4} e \texttt{fold\_5}. Ciascun fold contiene 200 immagini,
+equamente distribuite tra le due classi operative del task binario. La
+procedura di split utilizza un seed pseudo-casuale fissato a 42, in modo
+che la partizione possa essere rigenerata in modo riproducibile a partire
+dai manifest ufficiali e dallo script indicato.
 
-
-
-In questa fase, il termine \texttt{fold} indica unità sperimentali bilanciate e
-tracciabili, non partizioni di addestramento nel senso della cross-validation
-tradizionale. L'impiego dei fold nelle fasi di addestramento e valutazione dei
-modelli viene descritto nella Sezione~\ref{sec:methodology-models-classification}.
-
-La scelta di adottare cinque fold bilanciati risponde a una duplice esigenza
-metodologica. Da un lato, consente di suddividere il subset binario in unità
-sperimentali omogenee per dimensione e composizione di classe, facilitando il
-confronto tra valutazione baseline, generazione delle perturbazioni e analisi
-dei risultati. Dall'altro lato, permette di mantenere una separazione controllata
-tra i campioni utilizzati per l'addestramento dei proxy model e quelli impiegati
-come holdout sperimentale, riducendo il rischio di leakage nella successiva
-valutazione di robustezza. I fold non sono quindi introdotti per stimare una
-prestazione media tramite cross-validation tradizionale, ma per garantire una
-struttura sperimentale riproducibile, bilanciata e coerente con la generazione
-fold-aware dei checkpoint e degli artefatti perturbati.
-
+In questa fase, il termine \texttt{fold} indica unità sperimentali
+bilanciate e tracciabili, non partizioni di addestramento nel senso della
+cross-validation tradizionale. La scelta di adottare cinque fold risponde
+a una duplice esigenza metodologica. Da un lato, consente di suddividere
+il subset binario in unità omogenee per dimensione e composizione di
+classe, facilitando il confronto tra valutazione baseline, generazione
+delle perturbazioni e analisi dei risultati. Dall'altro lato, permette di
+mantenere una separazione controllata tra i campioni utilizzati per
+l'addestramento dei proxy model e quelli impiegati come holdout
+sperimentale, riducendo il rischio di leakage nella successiva valutazione
+di robustezza. I fold non sono quindi introdotti per stimare una
+prestazione media tramite cross-validation tradizionale, ma per garantire
+una struttura sperimentale riproducibile, bilanciata e coerente con la
+generazione fold-aware dei checkpoint e degli artefatti perturbati.
 
 \begin{table}[H]
 \centering
@@ -1808,6 +1800,8 @@ stretching applica una normalizzazione del contrasto attraverso autocontrast
 con cutoff controllato. Tali trasformazioni sono coerenti con una prospettiva
 anti-forense perché intervengono sull'artefatto immagine senza introdurre,
 almeno intenzionalmente, una perturbazione costruita sul modello.
+
+
 \begin{table}[H]
 \centering
 \caption{Trasformazioni anti-forensi generate sul subset binario.}
@@ -1955,12 +1949,12 @@ La pipeline produce il manifest
 \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}, nel quale ogni
 riga descrive un'immagine trasformata e mantiene il collegamento con il campione
 pulito originario. Il manifest registra campi quali
-\codepath{generated\_image\_id}, \codepath{original\_image\_id}, \codepath{fold},
-\codepath{final\_label}, \codepath{source\_dataset}, \codepath{clean\_relative\_path},
-\codepath{perturbed\_relative\_path}, \codepath{attack\_family},
-\codepath{attack\_name}, \codepath{attack\_parameters}, \codepath{sha256\_original},
-\codepath{md5\_original}, \codepath{sha256\_perturbed} e
-\codepath{md5\_perturbed}. La registrazione degli hash consente di verificare sia
+\texttt{generated\_image\_id}, \texttt{original\_image\_id}, \texttt{fold},
+\texttt{final\_label}, \texttt{source\_dataset}, \texttt{clean\_relative\_path},
+\texttt{perturbed\_relative\_path}, \texttt{attack\_family},
+\texttt{attack\_name}, \texttt{attack\_parameters}, \texttt{sha256\_original},
+\texttt{md5\_original}, \texttt{sha256\_perturbed} e
+\texttt{md5\_perturbed}. La registrazione degli hash consente di verificare sia
 l'identità del file pulito sia quella dell'artefatto trasformato, preservando la
 tracciabilità tra input, trasformazione applicata e output generato.
 
@@ -1981,13 +1975,13 @@ protocollo metrico e al capitolo dei risultati.
 
 La valutazione operativa black-box dei software selezionati richiede che gli
 artefatti prodotti dal protocollo sperimentale siano trasferiti verso gli
-strumenti oggetto di valutazione
-senza esporre, durante l'importazione, informazioni semantiche che
-possano influenzare l'analisi. Per questa ragione, dopo la generazione degli
-split puliti, delle immagini adversariali e delle trasformazioni anti-forensi,
-viene costruito un \textit{forensic evaluation bundle}, cioè un corpus
-organizzato e tracciabile destinato alla valutazione operativa mediante strumenti
-forensi professionali o open-source. Tale bundle non modifica la ground truth sperimentale, ma la separa
+strumenti oggetto di valutazione senza esporre, durante l'importazione,
+informazioni semantiche che possano influenzare l'analisi. Per questa ragione,
+dopo la generazione degli split puliti, delle immagini adversariali e delle
+trasformazioni anti-forensi, viene costruito un \textit{forensic evaluation
+bundle}, cioè un corpus organizzato e tracciabile destinato alla valutazione
+operativa mediante strumenti commerciali, professionali o general-purpose
+selezionati. Tale bundle non modifica la ground truth sperimentale, ma la separa
 dagli input effettivamente sottoposti agli strumenti, preservandola nei metadati
 di controllo.
 
@@ -2118,14 +2112,14 @@ Tale controllo non modifica gli artefatti, ma verifica la presenza di termini
 potenzialmente riconducibili alle classi sperimentali, ai fold, alle famiglie di
 perturbazione, ai modelli proxy o a descrittori semantici del contenuto visuale.
 
-Nel run consolidato, l'audit ha controllato 11,500 file della directory
-\codepath{blind_tool_input/files/}, rilevando 7,640 file con metadati
+Nel run consolidato, l'audit ha controllato 11\,500 file della directory
+\codepath{blind_tool_input/files/}, rilevando 7\,640 file con metadati
 embedded e 15 file contenenti termini potenzialmente sensibili. L'esito del
 controllo è stato salvato nei file
 \codepath{metadata/embedded_metadata_audit.csv} e
 \codepath{metadata/embedded_metadata_audit_summary.json}. I casi individuati
-non vengono trattati come variabile sperimentale primaria, ma come controllo di
-sensitività e come limite operativo della cecità del bundle, da analizzare
+non vengono trattati come variabile sperimentale primaria, ma come sensitivity
+check e come limite operativo controllato della cecità del bundle, da analizzare
 separatamente nel capitolo dei risultati rispetto alle predizioni dei proxy
 model e agli output normalizzati degli strumenti black-box.
 
@@ -2155,7 +2149,23 @@ L'obiettivo di questa fase non è certificare in senso generale l'affidabilità 
 
 La valutazione utilizza come input esclusivo la directory cieca del bundle, ossia \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}. Tale directory contiene file rinominati con identificativi neutri, privi di informazioni semantiche sulla classe, sulla sorgente, sul fold, sulla famiglia di attacco o sul modello target. La ground truth sperimentale viene conservata separatamente nel file \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv} e non viene esposta ai tool durante l'importazione. Questa separazione riduce il rischio di bias indotto dai nomi dei file o dai percorsi e consente di normalizzare gli output solo in una fase successiva.
 
-Gli strumenti inclusi nella valutazione finale sono \gls{magnetaxiomtool} con il modulo \gls{magnetai}, \gls{excirefoto2025} e \gls{cellebriteinseyets}. \gls{magnetaxiomtool} è stato considerato come piattaforma forense commerciale con funzionalità di categorizzazione automatizzata dei contenuti multimediali tramite \gls{magnetai}. \gls{excirefoto2025} è stato considerato come software standalone general-purpose con funzionalità di ricerca semantica e analisi visuale basate su \gls{ai}; esso non viene quindi presentato come strumento sviluppato esclusivamente per finalità forensi, ma come componente black-box di image retrieval e classificazione operativa. \gls{cellebriteinseyets} è stato considerato come piattaforma commerciale di analisi assistita dei contenuti multimediali, valutata attraverso gli output osservabili esportati nell'ambiente \texttt{Cellebrite Physical Analyzer 10.9.0.3029}. In questo contesto, \gls{ufed} non viene trattato come classificatore immagini, ma solo come eventuale componente dell'ecosistema Cellebrite di acquisizione e gestione dei dati.
+Gli strumenti inclusi nella valutazione finale sono \gls{magnetaxiomtool} con
+il modulo \gls{magnetai}, \gls{excirefoto2025} e \gls{cellebriteinseyets}.
+\gls{magnetaxiomtool} è considerato come piattaforma forense commerciale dotata
+di funzionalità di categorizzazione automatizzata dei contenuti multimediali
+tramite \gls{magnetai}. \gls{excirefoto2025} è invece considerato come software
+standalone general-purpose con funzionalità \gls{ai}-based di ricerca semantica
+e gestione visuale delle immagini; esso non viene quindi presentato come prodotto
+sviluppato esclusivamente per finalità forensi, ma come componente black-box di
+image retrieval e classificazione operativa.
+
+\gls{cellebriteinseyets} è considerato come piattaforma commerciale di analisi
+assistita dei contenuti multimediali, valutata attraverso gli output osservabili
+esportati nell'ambiente \texttt{Cellebrite Physical Analyzer 10.9.0.3029}. In
+questo contesto, \gls{ufed} non viene trattato come classificatore immagini, ma
+solo come eventuale componente dell'ecosistema Cellebrite di acquisizione e
+gestione dei dati.
+
 
 
 \begin{table}[H]
@@ -2497,12 +2507,13 @@ ma anche la stabilità della fiducia assegnata dal modello alla classe corretta.
 
 La valutazione \gls{ood} viene mantenuta concettualmente separata dalla
 classificazione binaria. Per i campioni \texttt{ood}, il protocollo registra se
-essi vengono classificati come \texttt{weapon} o \texttt{non\_weapon}, e misura
-l'eventuale tasso di predizioni ad alta confidenza. Questa impostazione evita di
-trattare la classe \texttt{ood} come una terza classe supervisionata ordinaria:
-il punto metodologico non è stimare una accuracy multiclass, ma verificare se
-un sistema tenda a forzare input anomali o borderline dentro una delle due
-classi operative del task.
+essi vengono classificati come \texttt{weapon} o \texttt{non\_weapon}, misura la
+confidenza media associata alle predizioni e calcola l'eventuale tasso di
+predizioni ad alta confidenza. Questa impostazione evita di trattare la classe
+\texttt{ood} come una terza classe supervisionata ordinaria: il punto
+metodologico non è stimare una accuracy multiclass, ma verificare se un sistema
+tenda a forzare input anomali o borderline dentro una delle due classi operative
+del task.
 
 \begin{table}[H]
 \centering
@@ -2528,7 +2539,8 @@ ai falsi negativi su contenuti rilevanti. \\
 Comportamento \gls{ood}
 &
 \gls{ood} predicted as \texttt{weapon}, \gls{ood} predicted as
-\texttt{non\_weapon} e \gls{ood} high-confidence rate. \\
+\texttt{non\_weapon}, mean confidence on \gls{ood} e \gls{ood}
+high-confidence rate. \\
 Strumenti forensi
 &
 True positive, false negative, false positive, true negative, matching rate,
@@ -2838,6 +2850,11 @@ senza introdurre ulteriori livelli di approssimazione legati a metodi
 surrogati. Tecniche alternative, quali Grad-CAM, SHAP o LIME, rimangono
 compatibili con estensioni future del protocollo, ma non costituiscono il focus
 della valutazione corrente.
+
+L'analisi \gls{xai} non viene utilizzata per attribuire validità probatoria
+autonoma alla decisione automatica, ma come supporto diagnostico per interpretare
+casi selezionati e per discutere, in modo qualitativo, possibili variazioni del
+comportamento del modello in presenza di input manipolati o fuori distribuzione.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Traceability and reproducibility controls}
