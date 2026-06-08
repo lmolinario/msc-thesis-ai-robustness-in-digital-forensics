@@ -778,6 +778,59 @@ stesso, abilita una normalizzazione post-export basata su identificativi e hash
 verificabili, condizione necessaria per distinguere errori di classificazione
 genuini da artefatti del processo di export.
 
+
+
+\subsection{Embedded Metadata Sensitivity Check}
+\label{subsec:results-embedded-metadata-sensitivity}
+
+La cecità del forensic evaluation bundle è stata progettata principalmente a
+livello di nomi dei file, percorsi e struttura delle directory. Tuttavia, poiché
+alcuni strumenti forensi possono indicizzare anche metadati embedded nei file
+immagine, è stato eseguito un controllo di sensitività sui casi in cui l'audit
+dei metadati ha individuato termini potenzialmente informativi.
+
+L'audit ha rilevato 15 file su 11,500 contenenti termini semanticamente o
+sperimentalmente sensibili nei metadati embedded. Tali casi non interessano gli
+artefatti adversariali o anti-forensi, ma soltanto 11 immagini clean e 4 immagini
+\gls{ood}. Di conseguenza, il fenomeno non incide direttamente sul confronto
+principale relativo alla robustezza sotto perturbazioni adversariali e
+trasformazioni anti-forensi, ma rappresenta un limite operativo residuale della
+cecità del bundle.
+
+Per valutare l'eventuale impatto di tali metadati sugli output osservati, i
+relativi \texttt{bundle_id} sono stati incrociati con la ground truth, le
+predizioni dei modelli proxy e gli output normalizzati degli strumenti
+black-box. Sui campioni clean, EfficientNet-B0 e ResNet18 risultano corretti in
+tutti gli 11 casi, mentre \gls{clip} produce un falso positivo su un'immagine
+\texttt{non_weapon}. Per gli strumenti black-box, Magnet AXIOM/Magnet.AI ed
+Excire Foto 2025 classificano correttamente 9 casi clean su 11, mentre
+Cellebrite Inseyets classifica correttamente tutti gli 11 campioni clean.
+
+Due casi risultano particolarmente rilevanti dal punto di vista interpretativo:
+\texttt{bundle_000320} e \texttt{bundle_000948}. Entrambi sono immagini
+\texttt{weapon} e contengono metadati esplicitamente weapon-related, ma vengono
+comunque classificati come \texttt{non_weapon} da Magnet AXIOM/Magnet.AI ed
+Excire Foto 2025. Questo risultato suggerisce che la presenza di termini
+descrittivi nei metadati embedded non determina automaticamente una
+classificazione positiva da parte dei tool black-box.
+
+Nei 4 casi \gls{ood}, Magnet AXIOM/Magnet.AI ed Excire Foto 2025 producono
+sempre una classificazione \texttt{weapon}, mentre Cellebrite Inseyets produce
+tre classificazioni \texttt{weapon} e una classificazione \texttt{non_weapon}.
+Questi casi vengono interpretati come parte del più generale rischio operativo
+associato a input fuori distribuzione e semanticamente weapon-adjacent, per i
+quali non è possibile stabilire se l'output derivi dal contenuto visuale, dai
+metadati embedded o da una combinazione dei due fattori.
+
+L'esclusione dei 15 file non modifica in modo sostanziale le metriche aggregate
+dei tool commerciali. Pertanto, i casi individuati vengono mantenuti nel
+benchmark e discussi come controllo di sensitività e limite operativo
+documentato della cecità del bundle, piuttosto che come fattore invalidante dei
+risultati sperimentali.
+
+
+
+
 \section{Commercial Forensic Tools Evaluation}
 \label{sec:results-commercial}
 
@@ -1818,8 +1871,6 @@ come strumenti di supporto alla revisione, alla validazione e alla discussione
 critica dei risultati, mantenendo centrale il ruolo dell'analista umano nella
 valutazione finale.
 
-
-
 \section{Operational Forensic Implications and Limitations}
 \label{sec:results-implications}
 
@@ -1828,19 +1879,18 @@ sistemi \gls{ai}-based nella \gls{df}. La prima riguarda i falsi negativi. In
 un workflow di triage, un falso negativo sulla classe \texttt{weapon} è più
 critico di un falso positivo, poiché può ridurre la probabilità che un contenuto
 investigativamente rilevante venga sottoposto a revisione umana. Questo vale sia
-per i modelli proxy sia per i tool commerciali black-box.
+per i modelli proxy sia per gli strumenti commerciali black-box.
 
 La seconda implicazione riguarda gli input \gls{ood}. Le immagini fuori
 distribuzione non devono essere valutate come una normale terza classe del task
 binario, ma come stress test della capacità del sistema di gestire input ambigui,
 sintetici, borderline o semanticamente distanti dalla distribuzione attesa. Il
 comportamento osservato nei tool commerciali conferma che il problema non è
-limitato ai modelli proxy: Magnet.AI segnala 180 immagini \gls{ood} su 500 come
-\texttt{Possible weapons}, mentre Excire varia in modo significativo al variare
-del parametro \texttt{Distance limit}, passando da un weapon flag rate pari a
-0.238 in \texttt{D20} a 0.522 in \texttt{D80}. Questo risultato mostra che la
-gestione degli \gls{ood} dipende non solo dal modello o dal tool, ma anche dalla
-configurazione operativa adottata.
+limitato ai modelli proxy: Magnet.AI segnala una quota non trascurabile di
+immagini \gls{ood} come \texttt{Possible weapons}, mentre Excire Foto 2025 varia
+in modo significativo al variare del parametro \texttt{Distance limit}. Questo
+risultato mostra che la gestione degli \gls{ood} dipende non solo dal modello o
+dal tool, ma anche dalla configurazione operativa adottata.
 
 La terza implicazione riguarda la tracciabilità. La pipeline proposta mantiene
 separati dataset, manifest, hash, bundle cieco, predizioni, metriche e output
@@ -1851,16 +1901,19 @@ riproducibilità e la documentazione del processo assumono valore metodologico e
 operativo.
 
 La valutazione presenta limiti che devono essere dichiarati esplicitamente. I
-tool commerciali sono valutati come black-box e non consentono di ispezionare
-modello, training set, soglie interne o preprocessing proprietario. Inoltre,
-Magnet.AI ed Excire Photo AI producono output di natura diversa: il primo espone
-un tag operativo riconducibile a \texttt{Possible weapons}, mentre il secondo è
-stato valutato come sistema di semantic retrieval. La comparazione tra i due
-strumenti deve quindi essere interpretata come confronto operativo di triage, non
-come confronto tra classificatori omogenei.
+tool commerciali sono valutati come black-box o quasi black-box e non consentono
+di ispezionare modello, training set, soglie interne o preprocessing
+proprietario. Inoltre, Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite
+Inseyets producono output di natura diversa. Magnet.AI espone un tag operativo
+riconducibile alla categoria \texttt{Possible weapons}; Excire Foto 2025 è stato
+valutato come sistema di semantic retrieval, la cui decisione operativa dipende
+dalla soglia di similarità configurata; Cellebrite Inseyets produce categorie e
+classificazioni proprietarie esportate attraverso l'ambiente di analisi
+forense. La comparazione tra tali strumenti deve quindi essere interpretata come
+confronto operativo di triage, non come confronto tra classificatori omogenei.
 
 Un'ulteriore implicazione riguarda la configurazione operativa dei sistemi di
-semantic retrieval. Nel caso di Excire Photo AI, il parametro
+semantic retrieval. Nel caso di Excire Foto 2025, il parametro
 \texttt{Distance limit} non rappresenta una semplice opzione tecnica, ma una
 scelta che modifica direttamente il profilo di rischio del workflow: una soglia
 restrittiva riduce falsi positivi e segnalazioni \gls{ood}, ma può aumentare i
@@ -1870,21 +1923,35 @@ configurazione dovrebbe essere documentata, motivata e mantenuta tracciabile nel
 report di analisi, analogamente agli altri parametri rilevanti del processo
 investigativo.
 
-Infine, Cellebrite UFED e Oxygen Forensic Detective non sono inclusi nella
-comparazione quantitativa finale perché non risultano disponibili, nella presente
-fase sperimentale, export normalizzati e direttamente comparabili rispetto alla
-ground truth del bundle. La selezione delle perturbazioni, inoltre, non mira a
-coprire in modo esaustivo l'intero spazio dell'\gls{advml}, ma a costruire uno
-stress test operativo coerente con la finalità forense della tesi.
+Un ulteriore limite controllato riguarda la possibile presenza residuale di
+metadati embedded nei file immagine. L'audit dedicato ha individuato un numero
+limitato di casi, analizzati separatamente nella
+Sezione~\ref{subsec:results-embedded-metadata-sensitivity}; tali casi non
+modificano in modo sostanziale le metriche aggregate, ma confermano che la
+cecità strutturale del bundle non deve essere confusa con l'assenza assoluta di
+informazioni embedded nei file originari. Questo aspetto è particolarmente
+rilevante in ambito forense, poiché alcuni strumenti possono indicizzare
+informazioni non strettamente visuali, quali campi EXIF, XMP, IPTC o metadati
+descrittivi residui.
+
+La selezione delle perturbazioni, inoltre, non mira a coprire in modo esaustivo
+l'intero spazio dell'\gls{advml}, ma a costruire uno stress test operativo
+coerente con la finalità forense della tesi. Gli attacchi adversariali e le
+trasformazioni anti-forensi sono quindi utilizzati come strumenti sperimentali
+per valutare la robustezza operativa e non come benchmark completo di sicurezza
+del machine learning.
 
 Nel contesto sperimentale di \gls{fairlab}, i risultati mostrano che sistemi con
 accuracy clean elevata, come EfficientNet-B0 e ResNet18, possono produrre un
 incremento significativo dei falsi negativi in presenza di specifiche
 perturbazioni adversariali, e che tool commerciali con buona baseline possono
 comunque segnalare come rilevanti immagini fuori distribuzione o produrre profili
-di errore sostanzialmente diversi al variare delle soglie operative adottate. Questi valori indicano che l'affidabilità operativa non può
-essere dedotta dalla sola performance nominale su dati clean, ma richiede
-validazione sperimentale esplicita nelle condizioni attese di utilizzo. In
-conclusione, l'\gls{ai} può supportare il triage e la prioritizzazione delle
+di errore sostanzialmente diversi al variare delle soglie operative adottate.
+Questi valori indicano che l'affidabilità operativa non può essere dedotta dalla
+sola performance nominale su dati clean, ma richiede validazione sperimentale
+esplicita nelle condizioni attese di utilizzo.
+
+In conclusione, l'\gls{ai} può supportare il triage e la prioritizzazione delle
 evidenze, ma deve rimanere inserita in un workflow human-in-the-loop, tracciabile
 e soggetto a verifica critica da parte dell'analista forense.
+

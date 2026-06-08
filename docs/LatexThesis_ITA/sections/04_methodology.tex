@@ -2019,9 +2019,11 @@ Tabella~\ref{tab:methodology-forensic-bundle-layout}.
 \midrule
 \codepath{metadata/}
 &
-Contiene \texttt{bundle\_manifest.csv}, \texttt{bundle\_hashes\_sha256.csv}
-e \texttt{bundle\_summary.json}. Conserva ground truth, provenienza, classi,
-famiglia di attacco, fold, hash e percorsi di controllo. \\
+Contiene \texttt{bundle\_manifest.csv}, \texttt{bundle\_hashes\_sha256.csv},
+\texttt{bundle\_summary.json}, \texttt{embedded\_metadata\_audit.csv} e
+\texttt{embedded\_metadata\_audit\_summary.json}. Conserva ground truth,
+provenienza, classi, famiglia di attacco, fold, hash, percorsi di controllo e
+audit dei metadati embedded. \\
 \codepath{blind_tool_input/files/}
 &
 Contiene la vista cieca da importare nei tool forensi valutati. I file sono rinominati
@@ -2102,6 +2104,29 @@ corrispondenza degli hash quando presenti nei manifest sorgente, assenza di
 blind path mancanti, pulizia semantica dei percorsi ciechi e separazione dei
 metadata dagli input dei tool.
 
+
+
+La cecità del bundle riguarda principalmente i nomi dei file, i percorsi e la
+struttura delle directory. Poiché alcuni strumenti forensi possono indicizzare
+anche metadati embedded nei file immagine, quali campi EXIF, XMP, IPTC o altre
+informazioni residue conservate dai file originari, la costruzione del bundle è
+stata accompagnata da un audit automatico dei metadati presenti nella vista
+cieca. Tale controllo non modifica gli artefatti, ma verifica la presenza di
+termini potenzialmente riconducibili alle classi sperimentali, ai fold, alle
+famiglie di perturbazione, ai modelli proxy o a descrittori semantici del
+contenuto visuale.
+
+Nel run consolidato, l'audit ha controllato 11,500 file della directory
+\codepath{blind_tool_input/files/}, rilevando 7,640 file con metadati
+embedded e 15 file contenenti termini potenzialmente sensibili. L'esito del
+controllo è stato salvato nei file
+\codepath{metadata/embedded_metadata_audit.csv} e
+\codepath{metadata/embedded_metadata_audit_summary.json}. I casi individuati
+non vengono trattati come variabile sperimentale primaria, ma come controllo di
+sensitività e come limite operativo della cecità del bundle, da analizzare
+separatamente nel capitolo dei risultati rispetto alle predizioni dei proxy
+model e agli output normalizzati degli strumenti black-box.
+
 La successiva valutazione operativa con strumenti forensi utilizza il bundle
 come input controllato e separa la fase di importazione dei file dalla
 fase di normalizzazione degli output. Gli strumenti che integrano moduli proprietari o non pienamente ispezionabili
@@ -2115,13 +2140,9 @@ la validazione sperimentale con una certificazione generale del prodotto
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 
-La cecità del bundle riguarda principalmente nomi dei file, percorsi e struttura
-delle directory. Eventuali metadati embedded nei file immagine, quali campi EXIF
-o informazioni residue prodotte dalle trasformazioni, devono essere documentati
-e controllati separatamente, poiché potrebbero essere indicizzati da alcuni
-strumenti forensi e influenzare l'analisi oltre il solo contenuto visuale.
 
 
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic tools evaluation protocol}
 \label{sec:methodology-forensic-tools}
 % ─────────────────────────────────────────────────────────────────────────────
