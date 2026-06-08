@@ -216,10 +216,17 @@ commerciali, le metriche sono derivate da
 
 Nel seguito del capitolo viene adottata una convenzione unica per il calcolo del
 drop prestazionale:
-\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\)
+\[
+\text{accuracy drop} =
+\text{accuracy}_{clean} - \text{accuracy}_{perturbed}.
+\]
 
 Valori positivi indicano quindi una degradazione della prestazione rispetto alla
 baseline clean; valori pari a zero indicano stabilità; valori negativi indicano
+un lieve incremento dell'accuracy nella condizione perturbata. Tali incrementi,
+quando presenti, non sono interpretati come prova di robustezza generale, ma come
+oscillazioni dipendenti dalla distribuzione dei campioni e dalla specifica
+trasformazione applicata. valori pari a zero indicano stabilità; valori negativi indicano
 un lieve incremento dell'accuracy nella condizione perturbata. Tali incrementi,
 quando presenti, non sono interpretati come prova di robustezza generale, ma come
 oscillazioni dipendenti dalla distribuzione dei campioni e dalla specifica
@@ -2405,7 +2412,7 @@ Profilo stabile in media, ma più sensibile alle alterazioni tonali, con errori
 in entrambe le direzioni operative. \\
 
 CLIP &
-0.928 / no drop &
+0.928 / -0.001&
 Histogram modification; 13 induced errors &
 Numero limitato di errori indotti &
 Elevata stabilità rispetto alle trasformazioni considerate; la criticità
