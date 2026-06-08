@@ -216,10 +216,7 @@ commerciali, le metriche sono derivate da
 
 Nel seguito del capitolo viene adottata una convenzione unica per il calcolo del
 drop prestazionale:
-\[
-\text{accuracy drop} =
-\text{accuracy}_{clean} - \text{accuracy}_{perturbed}.
-\]
+\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\)
 
 Valori positivi indicano quindi una degradazione della prestazione rispetto alla
 baseline clean; valori pari a zero indicano stabilità; valori negativi indicano
@@ -960,7 +957,11 @@ abilita una normalizzazione post-export basata su identificativi e hash
 verificabili, condizione necessaria per distinguere errori di classificazione
 genuini da artefatti del processo di export o da limiti del mapping operativo.
 
-
+Un controllo specifico sui metadati embedded residui nella vista cieca del
+bundle viene discusso nella
+Sezione~\ref{subsec:results-embedded-metadata-sensitivity}, dopo la presentazione
+degli output normalizzati degli strumenti commerciali, poiché la sua
+interpretazione richiede il confronto con i risultati black-box osservati.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Commercial Forensic Tools Evaluation}
@@ -2019,11 +2020,14 @@ input perturbati, fuori distribuzione o semanticamente ambigui.
 \label{subsec:results-embedded-metadata-sensitivity}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La cecità del forensic evaluation bundle è stata progettata principalmente a
-livello di nomi dei file, percorsi e struttura delle directory. Tuttavia, poiché
-alcuni strumenti black-box possono indicizzare anche metadati embedded nei file
-immagine, è stato eseguito un controllo di sensitività sui casi in cui l'audit
-dei metadati ha individuato termini potenzialmente informativi.
+Dopo la normalizzazione degli output commerciali, è stato eseguito un controllo
+di sensitività sui metadati embedded residui presenti nella vista cieca del
+forensic evaluation bundle. La cecità del bundle è stata progettata
+principalmente a livello di nomi dei file, percorsi e struttura delle directory;
+tuttavia, alcuni strumenti black-box possono indicizzare anche metadati embedded
+nei file immagine. Per questa ragione, i casi individuati dall'audit sono stati
+analizzati dopo il matching con ground truth, predizioni dei modelli proxy e
+output normalizzati dei tool commerciali.
 
 L'audit ha controllato 11,500 file della directory cieca
 \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files},
@@ -2067,6 +2071,173 @@ del più generale rischio operativo associato a input fuori distribuzione e
 semanticamente weapon-adjacent, per i quali non è possibile stabilire, sulla base
 dei soli output osservabili, se la classificazione derivi dal contenuto visuale,
 dai metadati embedded o da una combinazione dei due fattori.
+
+
+
+Per quantificare l'impatto potenziale dei casi individuati sulle metriche
+aggregate, è stata inoltre calcolata una verifica di esclusione
+(\emph{leave-out sensitivity check}) limitata ai 15 file con sensitive hits. Tale
+verifica non consente di stabilire un nesso causale tra metadati embedded e
+classificazione, poiché gli strumenti commerciali rimangono black-box; consente
+però di misurare quanto le metriche aggregate cambierebbero qualora tali file
+fossero esclusi dal computo.
+
+
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\caption{Impatto quantitativo dei sensitive metadata hits sulle metriche aggregate.}
+\label{tab:results-embedded-metadata-impact}
+\begin{tabularx}{\textwidth}{@{}p{0.23\textwidth} r r r X@{}}
+\toprule
+\textbf{Area metrica} &
+\textbf{Casi} &
+\textbf{Denominatore} &
+\textbf{Peso} &
+\textbf{Impatto osservato} \\
+\midrule
+
+Bundle completo &
+15 &
+11\,500 &
+0.130\% &
+I casi con sensitive hits rappresentano una quota molto limitata del forensic
+evaluation bundle. \\
+
+Metriche binarie complessive &
+11 &
+11\,000 &
+0.100\% &
+L'impatto massimo sulle metriche binarie aggregate è trascurabile, poiché i casi
+coinvolti appartengono solo alla componente clean del task
+\texttt{weapon}/\texttt{non\_weapon}. \\
+
+Clean baseline &
+11 &
+1\,000 &
+1.100\% &
+L'impatto è limitato alla baseline clean; la variazione osservata
+dell'accuracy, dopo esclusione dei casi, rimane nell'ordine di pochi millesimi. \\
+
+Adversarial robustness &
+0 &
+5\,000 &
+0.000\% &
+Nessun caso con sensitive hits appartiene agli artefatti adversariali; le
+metriche adversariali non sono quindi influenzate da questo controllo. \\
+
+Anti-forensic robustness &
+0 &
+5\,000 &
+0.000\% &
+Nessun caso con sensitive hits appartiene agli artefatti anti-forensi; le
+metriche anti-forensi non sono quindi influenzate da questo controllo. \\
+
+OOD weapon flag rate &
+4 &
+500 &
+0.800\% &
+L'impatto è limitato al weapon flag rate sui campioni \gls{ood}; la variazione
+rimane contenuta e non modifica l'interpretazione qualitativa dei risultati. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
+
+La Tabella~\ref{tab:results-embedded-metadata-tool-delta} riporta la variazione
+delle metriche commerciali più direttamente interessate, confrontando il valore
+originale con il valore ottenuto escludendo i file con sensitive hits. Per
+\gls{excirefoto2025} viene riportata la configurazione \texttt{D50}, utilizzata
+come riferimento principale nella discussione comparativa.
+
+
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\caption{Variazione delle metriche commerciali dopo esclusione dei sensitive metadata hits.}
+\label{tab:results-embedded-metadata-tool-delta}
+\begin{tabular}{@{}l l r r r@{}}
+\toprule
+\textbf{Sistema} &
+\textbf{Metrica} &
+\textbf{Originale} &
+\textbf{Senza sensitive hits} &
+\textbf{\(\Delta\)} \\
+\midrule
+
+\gls{magnetaxiomtool}/\gls{magnetai} &
+Clean accuracy &
+0.9500 &
+0.9515 &
++0.0015 \\
+
+\gls{excirefoto2025} \texttt{D50} &
+Clean accuracy &
+0.9440 &
+0.9454 &
++0.0014 \\
+
+\gls{cellebriteinseyets} &
+Clean accuracy &
+0.9640 &
+0.9636 &
+-0.0004 \\
+
+\midrule
+
+\gls{magnetaxiomtool}/\gls{magnetai} &
+OOD weapon flag rate &
+0.3600 &
+0.3548 &
+-0.0052 \\
+
+\gls{excirefoto2025} \texttt{D50} &
+OOD weapon flag rate &
+0.3400 &
+0.3347 &
+-0.0053 \\
+
+\gls{cellebriteinseyets} &
+OOD weapon flag rate &
+0.2920 &
+0.2883 &
+-0.0037 \\
+
+\bottomrule
+\end{tabular}
+
+\vspace{0.4em}
+\footnotesize
+\textit{Nota.} I valori ``senza sensitive hits'' sono ottenuti escludendo gli
+11 casi clean e i 4 casi \gls{ood} individuati dall'audit dei metadati embedded.
+Le variazioni riportate misurano l'impatto quantitativo dell'esclusione sulle
+metriche aggregate, ma non stabiliscono un nesso causale tra metadati embedded e
+decisione del tool.
+\end{table}
+
+
+
+I risultati del controllo mostrano che l'esclusione dei file con sensitive hits
+non modifica in modo sostanziale le metriche aggregate. Le variazioni di clean
+accuracy rimangono comprese tra -0.0004 e +0.0015, mentre le variazioni del
+weapon flag rate sui campioni \gls{ood} rimangono inferiori a 0.006 in valore
+assoluto. Inoltre, poiché nessuno dei 15 casi appartiene agli artefatti
+adversariali o anti-forensi, le metriche di robustezza sotto perturbazioni non
+sono interessate da questo limite residuale. Il sensitivity check conferma quindi
+che i metadati embedded individuati costituiscono un limite operativo da
+documentare, ma non un fattore capace di alterare l'interpretazione complessiva
+dei risultati sperimentali.
+
+
 
 L'eventuale esclusione dei 15 file non altera l'interpretazione complessiva delle
 metriche aggregate dei tool commerciali. Pertanto, i casi individuati vengono
