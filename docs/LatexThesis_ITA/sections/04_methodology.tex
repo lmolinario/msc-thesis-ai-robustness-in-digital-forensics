@@ -424,7 +424,7 @@ La metodologia distingue inoltre tra classificazione automatica, robustezza e
 validazione operativa. La classificazione automatica riguarda la capacità del
 sistema di assegnare una classe a un'immagine. La robustezza riguarda la
 stabilità di tale comportamento quando l'input viene degradato, alterato o
-manipolato. La validazione operativa riguarda invece l'impatto dell'output
+manipolato. La valutazione operativa riguarda invece l'impatto dell'output
 automatico sul workflow forense, in particolare rispetto al rischio di falsi
 negativi su contenuti rilevanti, falsi positivi che aumentano il carico
 analitico e classificazioni improprie di campioni \gls{ood}. Questa distinzione
@@ -2883,7 +2883,7 @@ preserva l'utilità operativa nel raccordo con tool e formati eterogenei.
 La pipeline utilizza manifest progressivi. Il passaggio da
 \texttt{metadata.csv} a \texttt{review\_manifest\_full.csv}, poi a
 \texttt{manual\_selection\_final\_1500.csv},
-\codepath{manual\_selection\_adversarial\_subset.csv},
+\texttt{manual\_selection\_adversarial\_subset.csv},
 \texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv},
 manifest degli attacchi, manifest anti-forense, \texttt{bundle\_manifest.csv},
 predizioni dei proxy model e manifest \gls{xai}, consente di ricostruire il
@@ -3110,9 +3110,9 @@ presenti nel path o nel nome del file.
 I controlli automatici registrati nei summary JSON verificano la corrispondenza
 tra conteggi attesi e prodotti, l'unicità degli identificativi generati,
 l'unicità degli hash \gls{sha256}, la corretta scrittura dei manifest e, nel caso del
-bundle, la separazione dei metadata dagli input ciechi. Tali controlli non
-sostituiscono l'analisi critica dei risultati, ma garantiscono che gli
-esperimenti siano eseguiti su artefatti coerenti con il protocollo.
+bundle, la separazione dei metadata dagli input ciechi. Tali controlli non sostituiscono l'analisi critica dei risultati, ma consentono
+di documentare la coerenza tra gli artefatti sperimentali prodotti e il
+protocollo definito.
 
 La metodologia presenta infine alcuni limiti espliciti. La revisione semantica
 del dataset è stata condotta da un singolo revisore, quindi non include una
