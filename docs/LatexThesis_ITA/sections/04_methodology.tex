@@ -15,12 +15,12 @@ di tracciabilità all'interno del protocollo sperimentale \gls{fairlab},
 mantenendo una distinzione netta tra metodologia sperimentale e analisi dei
 risultati.
 
-Il capitolo è organizzato in quattordici sezioni. Le prime sei
+Il capitolo è organizzato in quindici sezioni. Le prime sei
 (\S\S\,\ref{sec:methodology-fairlab-overview}--\ref{sec:methodology-split-generation})
 descrivono la costruzione della base sperimentale, includendo il disegno
 metodologico, la preparazione del dataset, la generazione del manifest di
 revisione, il protocollo \textit{human-in-the-loop}, il freezing del dataset e
-la produzione degli split. Le successive otto
+la produzione degli split. Le successive nove
 (\S\S\,\ref{sec:methodology-models-classification}--\ref{sec:methodology-traceability-controls})
 descrivono il paradigma di classificazione, la selezione e la generazione
 delle perturbazioni adversariali e anti-forensi, il \textit{forensic evaluation
@@ -854,6 +854,26 @@ tracciabili, non partizioni di addestramento nel senso della cross-validation
 tradizionale. L'impiego dei fold nelle fasi di addestramento e valutazione dei
 modelli viene descritto nella Sezione~\ref{sec:methodology-models-classification}.
 
+
+
+In questa fase, il termine \texttt{fold} indica unità sperimentali bilanciate e
+tracciabili, non partizioni di addestramento nel senso della cross-validation
+tradizionale. L'impiego dei fold nelle fasi di addestramento e valutazione dei
+modelli viene descritto nella Sezione~\ref{sec:methodology-models-classification}.
+
+La scelta di adottare cinque fold bilanciati risponde a una duplice esigenza
+metodologica. Da un lato, consente di suddividere il subset binario in unità
+sperimentali omogenee per dimensione e composizione di classe, facilitando il
+confronto tra valutazione baseline, generazione delle perturbazioni e analisi
+dei risultati. Dall'altro lato, permette di mantenere una separazione controllata
+tra i campioni utilizzati per l'addestramento dei proxy model e quelli impiegati
+come holdout sperimentale, riducendo il rischio di leakage nella successiva
+valutazione di robustezza. I fold non sono quindi introdotti per stimare una
+prestazione media tramite cross-validation tradizionale, ma per garantire una
+struttura sperimentale riproducibile, bilanciata e coerente con la generazione
+fold-aware dei checkpoint e degli artefatti perturbati.
+
+
 \begin{table}[H]
 \centering
 \caption{Distribuzione degli split puliti generati dal subset binario.}
@@ -1216,11 +1236,11 @@ Gli attacchi adversariali model-dependent, al contrario, richiedono
 l'interazione con un modello target e, in alcuni casi, procedure iterative o di
 ottimizzazione. \gls{fgsm} rappresenta una baseline efficiente, poiché richiede
 una singola stima del gradiente per immagine. Attacchi come
-\texttt{one\_pixel}, \texttt{sigma\_zero} e \texttt{superdeepfool} sono invece
+ \gls{onepixel},  \gls{sigmazero} e \gls{superdeepfool} sono invece
 più onerosi e vengono inclusi non perché rappresentino necessariamente lo
 scenario operativo più probabile, ma perché consentono di stressare il
 comportamento dei classificatori in condizioni controllate. La perturbazione
-\texttt{color\_shift}, pur essendo inclusa nel gruppo adversarial per finalità
+\gls{colorshift}, pur essendo inclusa nel gruppo adversarial per finalità
 sperimentale, rimane model-agnostic e presenta un costo computazionale ridotto.
 
 Questa impostazione è coerente con l'obiettivo della tesi: valutare la
@@ -1526,13 +1546,13 @@ definita nella fase di training dei proxy model. La procedura evita quindi di
 trattare il dataset come un insieme indistinto e preserva il legame tra split,
 checkpoint e artefatto generato.
 
-La trasformazione \texttt{color\_shift} viene invece trattata come perturbazione \textit{adversarial-style}
+La trasformazione \gls{colorshift}  viene invece trattata come perturbazione \textit{adversarial-style}
 model-agnostic. Essa modifica globalmente le componenti cromatiche dell'immagine,
 senza interrogare il modello e senza utilizzare informazioni di gradiente.
 Questa distinzione è metodologicamente rilevante perché consente di separare le perturbazioni
 costruite rispetto a un classificatore specifico da alterazioni visive più generali.
 
-All'interno del protocollo sperimentale, \texttt{color\_shift} viene comunque incluso nel gruppo adversarial
+All'interno del protocollo sperimentale, \gls{colorshift} viene comunque incluso nel gruppo adversarial
 perché la sua finalità sperimentale non è simulare un ordinario intervento di post-processing forense,
 ma verificare se una variazione cromatica semanticamente conservativa possa alterare il comportamento
 dei classificatori automatici.
