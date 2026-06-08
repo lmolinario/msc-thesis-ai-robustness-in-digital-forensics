@@ -465,6 +465,16 @@ di 2,500 predizioni per modello è ottenuto valutando le 500 immagini \gls{ood}
 attraverso ciascuno dei cinque checkpoint fold-aware.
 \end{table}
 
+
+Il valore nullo di \textit{HC-rate} per \gls{clip} non indica assenza di
+classificazioni \texttt{weapon} sui campioni \gls{ood}, ma assenza di predizioni
+con confidenza pari o superiore alla soglia di alta confidenza fissata a 0.9.
+Infatti, \gls{clip} ricondduce alla classe \texttt{weapon} l'83.56\% delle
+predizioni \gls{ood}, ma con una confidenza media pari a 0.5358. Questo
+comportamento evidenzia una tendenza semantica verso la classe
+\texttt{weapon}, non accompagnata però da predizioni ad alta confidenza.
+
+
 La Figura~\ref{fig:results-ood-weapon-rate-confidence} visualizza il confronto
 tra weapon rate, confidenza media e high-confidence rate, mentre la
 Figura~\ref{fig:results-ood-confidence-distribution} mostra la distribuzione
@@ -949,71 +959,6 @@ l'esposizione dei tool a informazioni semantiche non necessarie. Al tempo stesso
 abilita una normalizzazione post-export basata su identificativi e hash
 verificabili, condizione necessaria per distinguere errori di classificazione
 genuini da artefatti del processo di export o da limiti del mapping operativo.
-
-
-
-% ─────────────────────────────────────────────────────────────────────────────
-\subsection{Embedded Metadata Sensitivity Check}
-\label{subsec:results-embedded-metadata-sensitivity}
-% ─────────────────────────────────────────────────────────────────────────────
-
-La cecità del forensic evaluation bundle è stata progettata principalmente a
-livello di nomi dei file, percorsi e struttura delle directory. Tuttavia, poiché
-alcuni strumenti black-box possono indicizzare anche metadati embedded nei file
-immagine, è stato eseguito un controllo di sensitività sui casi in cui l'audit
-dei metadati ha individuato termini potenzialmente informativi.
-
-L'audit ha controllato 11,500 file della directory cieca
-\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files},
-rilevando 7,640 file con metadati embedded e 15 file contenenti termini
-semanticamente o sperimentalmente sensibili. L'audit non modifica gli artefatti,
-ma registra i casi potenzialmente rilevanti nel file
-\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv}
-e nel summary
-\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit_summary.json}.
-I 15 casi con sensitive hits non interessano gli artefatti adversariali o
-anti-forensi, ma soltanto 11 immagini clean e 4 immagini \gls{ood}. Di
-conseguenza, il fenomeno non incide direttamente sul confronto principale
-relativo alla robustezza sotto perturbazioni adversariali e trasformazioni
-anti-forensi, ma rappresenta un limite operativo residuale della cecità del
-bundle.
-
-Per valutare l'eventuale impatto di tali metadati sugli output osservati, i
-relativi \texttt{bundle\_id} sono stati incrociati con la ground truth, con le
-predizioni dei modelli proxy e con gli output normalizzati degli strumenti
-black-box. Sui campioni clean, EfficientNet-B0 e ResNet18 risultano corretti in
-tutti gli 11 casi, mentre \gls{clip} produce un falso positivo su un'immagine
-\texttt{non\_weapon}. Per gli strumenti black-box,
-\gls{magnetaxiomtool}/\gls{magnetai} e \gls{excirefoto2025} classificano
-correttamente 9 casi clean su 11, mentre \gls{cellebriteinseyets} classifica
-correttamente tutti gli 11 campioni clean.
-
-Due casi risultano particolarmente rilevanti dal punto di vista interpretativo:
-\texttt{bundle\_000320} e \texttt{bundle\_000948}. Entrambi sono immagini
-\texttt{weapon} e contengono metadati esplicitamente weapon-related, ma vengono
-comunque classificati come \texttt{non\_weapon} da
-\gls{magnetaxiomtool}/\gls{magnetai} e da \gls{excirefoto2025}. Questo risultato
-suggerisce che la presenza di termini descrittivi nei metadati embedded non
-determina automaticamente una classificazione positiva da parte degli strumenti
-black-box.
-
-Nei 4 casi \gls{ood}, \gls{magnetaxiomtool}/\gls{magnetai} e
-\gls{excirefoto2025} producono sempre una classificazione \texttt{weapon}, mentre
-\gls{cellebriteinseyets} produce tre classificazioni \texttt{weapon} e una
-classificazione \texttt{non\_weapon}. Questi casi vengono interpretati come parte
-del più generale rischio operativo associato a input fuori distribuzione e
-semanticamente weapon-adjacent, per i quali non è possibile stabilire, sulla base
-dei soli output osservabili, se la classificazione derivi dal contenuto visuale,
-dai metadati embedded o da una combinazione dei due fattori.
-
-L'eventuale esclusione dei 15 file non altera l'interpretazione complessiva delle
-metriche aggregate dei tool commerciali. Pertanto, i casi individuati vengono
-mantenuti nel benchmark e discussi come controllo di sensitività e limite
-operativo documentato della cecità del bundle, piuttosto che come fattore
-invalidante dei risultati sperimentali. In termini metodologici, questo controllo
-rafforza la tracciabilità dell'esperimento: il bundle rimane utilizzabile per la
-valutazione black-box, ma la presenza residuale di metadati embedded
-potenzialmente informativi viene esplicitata e trattata come limite controllato.
 
 
 
@@ -2066,6 +2011,71 @@ robustezza generale, ma come comportamento osservato nel protocollo sperimentale
 definito. Anche in questo caso, l'output automatico deve essere trattato come
 supporto al triage e non come decisione conclusiva, soprattutto in presenza di
 input perturbati, fuori distribuzione o semanticamente ambigui.
+
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Embedded Metadata Sensitivity Check}
+\label{subsec:results-embedded-metadata-sensitivity}
+% ─────────────────────────────────────────────────────────────────────────────
+
+La cecità del forensic evaluation bundle è stata progettata principalmente a
+livello di nomi dei file, percorsi e struttura delle directory. Tuttavia, poiché
+alcuni strumenti black-box possono indicizzare anche metadati embedded nei file
+immagine, è stato eseguito un controllo di sensitività sui casi in cui l'audit
+dei metadati ha individuato termini potenzialmente informativi.
+
+L'audit ha controllato 11,500 file della directory cieca
+\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files},
+rilevando 7,640 file con metadati embedded e 15 file contenenti termini
+semanticamente o sperimentalmente sensibili. L'audit non modifica gli artefatti,
+ma registra i casi potenzialmente rilevanti nel file
+\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv}
+e nel summary
+\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit_summary.json}.
+I 15 casi con sensitive hits non interessano gli artefatti adversariali o
+anti-forensi, ma soltanto 11 immagini clean e 4 immagini \gls{ood}. Di
+conseguenza, il fenomeno non incide direttamente sul confronto principale
+relativo alla robustezza sotto perturbazioni adversariali e trasformazioni
+anti-forensi, ma rappresenta un limite operativo residuale della cecità del
+bundle.
+
+Per valutare l'eventuale impatto di tali metadati sugli output osservati, i
+relativi \texttt{bundle\_id} sono stati incrociati con la ground truth, con le
+predizioni dei modelli proxy e con gli output normalizzati degli strumenti
+black-box. Sui campioni clean, EfficientNet-B0 e ResNet18 risultano corretti in
+tutti gli 11 casi, mentre \gls{clip} produce un falso positivo su un'immagine
+\texttt{non\_weapon}. Per gli strumenti black-box,
+\gls{magnetaxiomtool}/\gls{magnetai} e \gls{excirefoto2025} classificano
+correttamente 9 casi clean su 11, mentre \gls{cellebriteinseyets} classifica
+correttamente tutti gli 11 campioni clean.
+
+Due casi risultano particolarmente rilevanti dal punto di vista interpretativo:
+\texttt{bundle\_000320} e \texttt{bundle\_000948}. Entrambi sono immagini
+\texttt{weapon} e contengono metadati esplicitamente weapon-related, ma vengono
+comunque classificati come \texttt{non\_weapon} da
+\gls{magnetaxiomtool}/\gls{magnetai} e da \gls{excirefoto2025}. Questo risultato
+suggerisce che la presenza di termini descrittivi nei metadati embedded non
+determina automaticamente una classificazione positiva da parte degli strumenti
+black-box.
+
+Nei 4 casi \gls{ood}, \gls{magnetaxiomtool}/\gls{magnetai} e
+\gls{excirefoto2025} producono sempre una classificazione \texttt{weapon}, mentre
+\gls{cellebriteinseyets} produce tre classificazioni \texttt{weapon} e una
+classificazione \texttt{non\_weapon}. Questi casi vengono interpretati come parte
+del più generale rischio operativo associato a input fuori distribuzione e
+semanticamente weapon-adjacent, per i quali non è possibile stabilire, sulla base
+dei soli output osservabili, se la classificazione derivi dal contenuto visuale,
+dai metadati embedded o da una combinazione dei due fattori.
+
+L'eventuale esclusione dei 15 file non altera l'interpretazione complessiva delle
+metriche aggregate dei tool commerciali. Pertanto, i casi individuati vengono
+mantenuti nel benchmark e discussi come controllo di sensitività e limite
+operativo documentato della cecità del bundle, piuttosto che come fattore
+invalidante dei risultati sperimentali. In termini metodologici, questo controllo
+rafforza la tracciabilità dell'esperimento: il bundle rimane utilizzabile per la
+valutazione black-box, ma la presenza residuale di metadati embedded
+potenzialmente informativi viene esplicitata e trattata come limite controllato.
 
 
 
