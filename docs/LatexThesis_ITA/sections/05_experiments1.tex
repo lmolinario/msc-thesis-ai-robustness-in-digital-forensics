@@ -2325,6 +2325,8 @@ falsi negativi, falsi positivi e assorbimento operativo dei campioni \gls{ood}. 
 
 
 
+
+
 La Tabella~\ref{tab:results-comparative-robustness-profile} estende il confronto
 precedente concentrandosi sulla robustezza operativa rispetto alle due famiglie
 di manipolazione considerate: trasformazioni anti-forensi e perturbazioni
@@ -2339,10 +2341,10 @@ dai sistemi valutati.
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{2.8pt}
+\setlength{\tabcolsep}{2.5pt}
 \caption{Profilo comparativo di robustezza operativa sotto trasformazioni anti-forensi e perturbazioni adversariali.}
 \label{tab:results-comparative-robustness-profile}
-\begin{tabularx}{\textwidth}{@{}p{2.55cm} c c p{2.65cm} p{2.65cm} X@{}}
+\begin{tabularx}{\textwidth}{@{}p{2.45cm} p{1.45cm} p{1.45cm} p{2.75cm} p{2.75cm} X@{}}
 \toprule
 \textbf{Sistema} &
 \textbf{Anti acc./drop} &
@@ -2355,53 +2357,53 @@ dai sistemi valutati.
 EfficientNet-B0 &
 0.973 / 0.005 &
 0.695 / 0.283 &
-\gls{gaussianblur}: drop 0.013; 17 W(\rightarrow)NW &
-\gls{sigmazero}: accuracy 0.015; drop 0.963; 489 W(\rightarrow)NW &
+Gaussian blur: drop 0.013; 17 W$\rightarrow$NW &
+Sigma Zero: accuracy 0.015; drop 0.963; 489 W$\rightarrow$NW &
 Baseline clean più elevata tra i proxy, ma vulnerabilità estrema nello scenario
-white-box contro \gls{sigmazero} e degradazione rilevante sotto \gls{fgsm}. \\
+white-box contro Sigma Zero e degradazione rilevante sotto FGSM. \\
 
 ResNet18 &
 0.957 / 0.007 &
 0.955 / 0.009 &
-\gls{histogrammodification}: drop 0.030; 23 W(\rightarrow)NW &
-\gls{fgsm}: drop 0.046; 27 W(\rightarrow)NW &
-Profilo più stabile rispetto a EfficientNet-B0 rispetto agli attacchi generati
-contro il target white-box, ma con sensibilità anti-forense osservabile sulle
-modifiche tonali. \\
+Histogram modification: drop 0.030; 23 W$\rightarrow$NW &
+FGSM: drop 0.046; 27 W$\rightarrow$NW &
+Profilo più stabile rispetto a EfficientNet-B0 per gli attacchi generati contro
+il target white-box, ma con sensibilità anti-forense osservabile sulle modifiche
+tonali. \\
 
-\gls{clip} &
+CLIP &
 0.928 / -0.001 &
 0.927 / 0.000 &
-\gls{histogrammodification}: 13 induced errors &
-\gls{fgsm}: drop 0.013; 8 W(\rightarrow)NW &
-Robustezza apparente elevata rispetto alle perturbazioni considerate, ma
-comportamento \gls{ood} molto esposto all'assorbimento semantico verso
+Histogram modification: 13 induced errors &
+FGSM: drop 0.013; 8 W$\rightarrow$NW &
+Stabilità osservata elevata rispetto alle perturbazioni considerate, ma
+comportamento OOD molto esposto all'assorbimento semantico verso
 \texttt{weapon}. \\
 
-\gls{magnetaxiomtool}/\gls{magnetai} &
+Magnet AXIOM / Magnet.AI &
 0.940 / 0.010 &
 0.923 / 0.027 &
-\gls{gaussianblur}: \gls{fnr} 0.120; 60 FN &
-\gls{fgsm}: accuracy 0.867; \gls{fnr} 0.192; 96 FN &
+Gaussian blur: FNR 0.120; 60 FN &
+FGSM: accuracy 0.867; FNR 0.192; 96 FN &
 Comportamento relativamente conservativo, ma con aumento dei falsi negativi su
 alcune perturbazioni, rilevante per il triage automatico. \\
 
-\gls{excirefoto2025} \texttt{D50} &
+Excire Foto 2025 \texttt{D50} &
 0.941 / 0.003 &
 0.904 / 0.040 &
-\gls{histogrammodification}: accuracy 0.932; \gls{fpr} 0.088 &
-\gls{sigmazero}: accuracy 0.742; \gls{fpr} 0.442 &
+Histogram modification: accuracy 0.932; FPR 0.088 &
+Sigma Zero: accuracy 0.742; FPR 0.442 &
 Profilo dipendente dalla soglia di retrieval: nella configurazione intermedia
 riduce i falsi negativi, ma può produrre over-triggering semantico, soprattutto
-su \gls{sigmazero}. \\
+su Sigma Zero. \\
 
-\gls{cellebriteinseyets} &
+Cellebrite Inseyets &
 0.960 / 0.004 &
 0.955 / 0.009 &
-\gls{histogrammodification}: accuracy 0.949; \gls{fnr} 0.060 &
-\gls{fgsm}: accuracy 0.918; \gls{fnr} 0.106 &
+Histogram modification: accuracy 0.949; FNR 0.060 &
+FGSM: accuracy 0.918; FNR 0.106 &
 Profilo commerciale più stabile nel bundle considerato, senza degradazione
-estrema su \gls{sigmazero}, ma con sensibilità residua a \gls{fgsm} e ad alcune
+estrema su Sigma Zero, ma con sensibilità residua a FGSM e ad alcune
 trasformazioni anti-forensi. \\
 
 \bottomrule
@@ -2413,10 +2415,11 @@ trasformazioni anti-forensi. \\
 calcolati come media delle cinque condizioni sperimentali di ciascuna famiglia.
 Per i sistemi commerciali, i valori riportano le metriche aggregate normalizzate
 sulle rispettive famiglie di input. Il drop è definito come
-(\text{accuracy}\textit{{clean}-\text{accuracy}}{perturbed}). Per
-\gls{excirefoto2025} viene riportata la configurazione \texttt{D50}, utilizzata
-come riferimento comparativo principale. W(\rightarrow)NW indica transizioni da
-\texttt{weapon} a \texttt{non\_weapon}; FN indica falsi negativi.
+\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). Per Excire Foto 2025
+viene riportata la configurazione \texttt{D50}, utilizzata come riferimento
+comparativo principale. W$\rightarrow$NW indica transizioni da \texttt{weapon} a
+\texttt{non\_weapon}; FN indica falsi negativi; FNR indica false negative rate;
+FPR indica false positive rate.
 \end{table}
 
 La Tabella~\ref{tab:results-comparative-robustness-profile} evidenzia che la
@@ -2428,13 +2431,10 @@ EfficientNet-B0, ma presentano criticità differenti: ResNet18 conserva una
 maggiore confidenza sugli input \gls{ood}, mentre \gls{clip} tende ad assorbire
 molti campioni fuori distribuzione nella classe \texttt{weapon}. Nel livello
 commerciale, \gls{cellebriteinseyets} mostra il profilo più stabile nel bundle
-considerato, \gls{magnetai} mantiene un comportamento relativamente
-conservativo ma con falsi negativi non trascurabili, mentre
-\gls{excirefoto2025} evidenzia una dipendenza marcata dalla soglia di retrieval e
-un rischio di over-triggering semantico su alcune perturbazioni.
-
-
-
+considerato, \gls{magnetai} mantiene un comportamento relativamente conservativo
+ma con falsi negativi non trascurabili, mentre \gls{excirefoto2025} evidenzia
+una dipendenza marcata dalla soglia di retrieval e un rischio di over-triggering
+semantico su alcune perturbazioni.
 
 
 
