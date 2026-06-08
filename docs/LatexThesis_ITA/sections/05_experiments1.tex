@@ -2231,289 +2231,438 @@ valutazione black-box, ma la presenza residuale di metadati embedded
 potenzialmente informativi viene esplicitata e trattata come limite controllato.
 
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Comparative Robustness Discussion}
 \label{sec:results-comparative}
 % ─────────────────────────────────────────────────────────────────────────────
 
-I risultati ottenuti consentono di confrontare tre livelli della pipeline:
-modelli proxy trasparenti, perturbazioni sperimentali controllate e valutazione
-black-box commerciale. I modelli proxy permettono di osservare in modo
-controllato il degrado prestazionale rispetto a input clean, \gls{ood},
-adversariali e anti-forensi. \gls{magnetaxiomtool}/\gls{magnetai},
-\gls{excirefoto2025} e \gls{cellebriteinseyets} permettono invece di verificare
-come sistemi black-box reagiscano allo stesso forensic evaluation bundle, pur
-senza accesso alla logica interna dei rispettivi classificatori, moduli di media
-analysis o motori di semantic retrieval.
+I risultati presentati nelle sezioni precedenti consentono di interpretare la
+robustezza dei sistemi valutati su tre livelli complementari. Il primo livello
+riguarda i modelli proxy, che permettono di osservare in modo controllato e
+trasparente il comportamento di classificatori basati su \gls{ai} in presenza di
+input clean, \gls{ood}, anti-forensi e adversariali. Il secondo livello riguarda
+i tool commerciali, valutati come sistemi black-box attraverso i soli output
+osservabili ed esportabili. Il terzo livello riguarda il forensic evaluation
+bundle, che consente di sottoporre modelli proxy e tool commerciali alle stesse
+famiglie di input, mantenendo tuttavia distinta la valutazione white-box dei
+proxy dalla valutazione operativa black-box dei sistemi commerciali.
 
-La Tabella~\ref{tab:results-comparative-summary} sintetizza i principali
-risultati comparativi. Il confronto non deve essere interpretato come ranking
-diretto tra modelli proxy e tool commerciali, perché i primi espongono predizioni
-controllate su classi binarie note, mentre i secondi operano tramite categorie
-proprietarie, tag esportati, classificazioni osservabili o recupero semantico. Il
-valore del confronto è operativo: mostrare se le tendenze di fragilità osservate
-nei proxy si riflettono anche in strumenti black-box utilizzati o potenzialmente
-utilizzabili in workflow investigativi.
+Il confronto non deve quindi essere interpretato come un ranking diretto tra
+modelli proxy e prodotti commerciali. I modelli proxy operano su un task binario
+controllato, con etichette esplicite, score di confidenza e predizioni
+riproducibili. I tool commerciali, invece, espongono categorie proprietarie,
+risultati di semantic retrieval o output di media analysis che devono essere
+normalizzati nelle etichette operative \texttt{weapon}, \texttt{non\_weapon} e,
+dove necessario, in categorie non informative o non mappabili. Il valore del
+confronto è quindi metodologico e operativo: esso permette di comprendere quali
+tipi di errore possono emergere quando l'automazione \gls{ai}-based viene
+utilizzata come supporto al triage forense di immagini.
+
+\paragraph{Prestazioni clean e comportamento out-of-distribution.}
+
+La Tabella~\ref{tab:results-comparative-clean-ood} riassume le prestazioni clean
+e il comportamento sugli input \gls{ood}. La clean accuracy misura la prestazione
+nominale sul task binario, mentre l'OOD weapon rate misura la frequenza con cui
+immagini esterne alla distribuzione prevista vengono comunque ricondotte alla
+classe operativa \texttt{weapon}. In un workflow forense, queste due dimensioni
+devono essere lette congiuntamente: un sistema può ottenere una buona accuratezza
+su dati clean, ma generare comunque rischio operativo se tende ad assorbire input
+anomali nella classe di interesse investigativo.
 
 \begin{table}[H]
 \centering
-\caption{Sintesi comparativa tra modelli proxy e sistemi commerciali black-box.}
-\label{tab:results-comparative-summary}
+\caption{Confronto tra prestazioni clean e comportamento OOD dei modelli proxy e dei sistemi commerciali black-box.}
+\label{tab:results-comparative-clean-ood}
 \small
-\renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{3.5pt}
-\begin{tabularx}{\textwidth}{@{}p{2.8cm} r r r X@{}}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}p{2.65cm} p{1.75cm} r r r X@{}}
 \toprule
 \textbf{Sistema} &
-\textbf{Clean accuracy} &
-\textbf{Clean \gls{fnr}} &
-\textbf{OOD weapon rate} &
-\textbf{Osservazione principale} \\
+\textbf{Tipo} &
+\textbf{Clean acc.} &
+\textbf{Clean FNR} &
+\textbf{OOD W-rate} &
+\textbf{Lettura operativa} \\
 \midrule
 
 EfficientNet-B0 &
+Proxy &
 0.978 &
 0.016 &
 0.370 &
-Migliore baseline clean tra i proxy, ma vulnerabilità marcata ad alcune
-perturbazioni adversariali nello scenario white-box, in particolare
-\gls{sigmazero} e \gls{fgsm}. \\
+Migliore baseline clean tra i proxy, con basso tasso di falsi negativi sulla
+classe \texttt{weapon}; tuttavia, una quota non trascurabile di input OOD viene
+ricondotta alla classe \texttt{weapon}. \\
 
 ResNet18 &
+Proxy &
 0.964 &
 0.030 &
 0.438 &
-Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 per alcune
-perturbazioni generate contro il target white-box, pur con una maggiore
-confidenza sugli input \gls{ood}. \\
+Baseline clean solida, ma con FNR superiore a EfficientNet-B0 e maggiore
+assorbimento OOD verso \texttt{weapon}; la confidenza media sugli OOD rende tale
+comportamento rilevante per il triage. \\
 
-\gls{clip} &
+CLIP &
+Proxy &
 0.927 &
 0.012 &
 0.836 &
-Accuracy clean inferiore ai modelli supervisionati, ma forte tendenza a
-ricondurre immagini fuori distribuzione alla classe \texttt{weapon}, sebbene con
-confidenza media inferiore. \\
+Accuracy clean inferiore rispetto ai modelli supervisionati, ma FNR molto
+contenuto; il principale rischio operativo è l'elevato weapon flag rate sugli
+input OOD. \\
 
-\gls{magnetaxiomtool}/\gls{magnetai} &
+Magnet AXIOM / Magnet.AI &
+Commerciale black-box &
 0.950 &
 0.070 &
 0.360 &
-Comportamento relativamente conservativo: \gls{fpr} clean contenuto, ma rischio
-non trascurabile di falsi negativi sulla classe \texttt{weapon}. \\
+Prestazione clean elevata e comportamento relativamente conservativo, ma con un
+rischio non trascurabile di mancata segnalazione di immagini \texttt{weapon}. \\
 
-\gls{excirefoto2025} \texttt{D50} &
+Excire Foto 2025 D50 &
+Commerciale black-box &
 0.944 &
 0.042 &
 0.340 &
-Configurazione intermedia di semantic retrieval: recall elevato sulla classe
-\texttt{weapon}, con rumore operativo più contenuto rispetto alla configurazione
-permissiva \texttt{D80}. \\
+Configurazione intermedia del semantic retrieval, con un buon compromesso tra
+recall sulla classe \texttt{weapon}, falsi positivi e assorbimento OOD. \\
 
-\gls{cellebriteinseyets} &
+Cellebrite Inseyets &
+Commerciale black-box &
 0.964 &
 0.032 &
 0.292 &
-Profilo commerciale più stabile nel bundle considerato, con buon equilibrio tra
-falsi negativi, falsi positivi e assorbimento operativo dei campioni \gls{ood}. \\
+Migliore equilibrio commerciale nel clean set, con OOD weapon flag rate più
+contenuto rispetto agli altri tool black-box valutati. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
+Il confronto sui dati clean mostra che la prestazione nominale non è sufficiente
+per descrivere la robustezza operativa di un sistema. EfficientNet-B0 raggiunge
+la clean accuracy più elevata tra i proxy, mentre Cellebrite Inseyets ottiene il
+profilo clean più solido tra i tool commerciali. Tuttavia, il comportamento sugli
+input \gls{ood} evidenzia una dimensione ulteriore del rischio. \gls{clip}
+assegna la classe \texttt{weapon} alla maggioranza degli input \gls{ood}, con un
+OOD weapon rate pari a 0.836. Questo comportamento non implica necessariamente
+la produzione di evidenza forense affidabile, ma indica una forte attrazione
+semantica verso il concetto di arma anche per immagini esterne al task binario.
 
+EfficientNet-B0 e ResNet18 mostrano OOD weapon rate inferiori, rispettivamente
+pari a 0.370 e 0.438. Tuttavia, la loro maggiore confidenza media sugli input
+\gls{ood} rende tali errori potenzialmente più critici in un processo automatico
+di prioritizzazione. I tool commerciali presentano valori più contenuti:
+\gls{magnetai} raggiunge un OOD weapon flag rate pari a 0.360,
+\gls{excirefoto2025} in configurazione \texttt{D50} pari a 0.340 e
+\gls{cellebriteinseyets} pari a 0.292. Questi risultati suggeriscono una risposta
+operativa più conservativa agli input fuori distribuzione. Tuttavia, poiché i
+meccanismi interni, le soglie e la calibrazione dei tool commerciali non sono
+accessibili, tali valori non devono essere interpretati come prova di effettiva
+capacità di riconoscimento OOD, ma come comportamento osservabile nel protocollo
+sperimentale adottato.
 
+\paragraph{Robustezza rispetto alle trasformazioni anti-forensi.}
 
-
-
-La Tabella~\ref{tab:results-comparative-robustness-profile} estende il confronto
-precedente concentrandosi sulla robustezza operativa rispetto alle due famiglie
-di manipolazione considerate: trasformazioni anti-forensi e perturbazioni
-adversariali. Per ciascun sistema vengono riportati l'andamento aggregato sotto
-trasformazioni anti-forensi, l'andamento aggregato sotto perturbazioni
-adversariali, il caso più critico osservato in ciascuna famiglia e una sintesi
-del profilo operativo. Il confronto non deve essere interpretato come ranking
-assoluto, ma come lettura comparativa dei diversi profili di rischio introdotti
-dai sistemi valutati.
+La Tabella~\ref{tab:results-comparative-antiforensic} riporta il comportamento
+comparativo dei sistemi sotto trasformazioni anti-forensi. Queste manipolazioni
+non sono ottimizzate contro uno specifico confine decisionale del modello. Esse
+rappresentano invece trasformazioni realistiche a livello di immagine, che possono
+derivare da ricompressione, ridimensionamento, sfocatura, alterazioni tonali,
+ricondivisione dei file o manipolazioni intenzionali. Per questa ragione, anche
+drop apparentemente contenuti possono avere rilievo operativo.
 
 \begin{table}[H]
 \centering
-\scriptsize
-\renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{2.5pt}
-\caption{Profilo comparativo di robustezza operativa sotto trasformazioni anti-forensi e perturbazioni adversariali.}
-\label{tab:results-comparative-robustness-profile}
-\begin{tabularx}{\textwidth}{@{}p{2.45cm} p{1.45cm} p{1.45cm} p{2.75cm} p{2.75cm} X@{}}
+\caption{Confronto della robustezza sotto trasformazioni anti-forensi.}
+\label{tab:results-comparative-antiforensic}
+\small
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}p{2.7cm} p{1.8cm} p{3.1cm} p{2.8cm} X@{}}
 \toprule
 \textbf{Sistema} &
 \textbf{Anti acc./drop} &
-\textbf{Adv acc./drop} &
-\textbf{Caso anti-forensic più critico} &
-\textbf{Caso adversarial più critico} &
-\textbf{Profilo operativo} \\
+\textbf{Condizione più critica} &
+\textbf{Errore principale} &
+\textbf{Interpretazione di robustezza} \\
 \midrule
 
 EfficientNet-B0 &
 0.973 / 0.005 &
-0.695 / 0.283 &
-Gaussian blur: drop 0.013; 17 W$\rightarrow$NW &
-Sigma Zero: accuracy 0.015; drop 0.963; 489 W$\rightarrow$NW &
-Baseline clean più elevata tra i proxy, ma vulnerabilità estrema nello scenario
-white-box contro Sigma Zero e degradazione rilevante sotto FGSM. \\
+Gaussian blur; acc. 0.965; drop 0.013 &
+17 induced errors, tutti W$\rightarrow$NW &
+Robustezza anti-forense complessivamente elevata, ma la sfocatura introduce un
+rischio mirato di falsi negativi sulla classe \texttt{weapon}. \\
 
 ResNet18 &
 0.957 / 0.007 &
-0.955 / 0.009 &
-Histogram modification: drop 0.030; 23 W$\rightarrow$NW &
-FGSM: drop 0.046; 27 W$\rightarrow$NW &
-Profilo più stabile rispetto a EfficientNet-B0 per gli attacchi generati contro
-il target white-box, ma con sensibilità anti-forense osservabile sulle modifiche
-tonali. \\
+Histogram modification; acc. 0.934; drop 0.030 &
+39 induced errors; 23 W$\rightarrow$NW e 16 NW$\rightarrow$W &
+Profilo stabile in media, ma più sensibile alle alterazioni tonali, con errori
+in entrambe le direzioni operative. \\
 
 CLIP &
-0.928 / -0.001 &
-0.927 / 0.000 &
-Histogram modification: 13 induced errors &
-FGSM: drop 0.013; 8 W$\rightarrow$NW &
-Stabilità osservata elevata rispetto alle perturbazioni considerate, ma
-comportamento OOD molto esposto all'assorbimento semantico verso
-\texttt{weapon}. \\
+0.928 / no drop &
+Histogram modification; 13 induced errors &
+Numero limitato di errori indotti &
+Elevata stabilità rispetto alle trasformazioni considerate; la criticità
+principale resta il comportamento OOD, non la degradazione anti-forense. \\
 
 Magnet AXIOM / Magnet.AI &
 0.940 / 0.010 &
-0.923 / 0.027 &
-Gaussian blur: FNR 0.120; 60 FN &
-FGSM: accuracy 0.867; FNR 0.192; 96 FN &
-Comportamento relativamente conservativo, ma con aumento dei falsi negativi su
-alcune perturbazioni, rilevante per il triage automatico. \\
+Gaussian blur; FNR 0.120 &
+60 FN &
+Buona robustezza aggregata, ma alcune trasformazioni aumentano i falsi negativi
+su \texttt{weapon}, con impatto diretto sul triage. \\
 
-Excire Foto 2025 \texttt{D50} &
+Excire Foto 2025 D50 &
 0.941 / 0.003 &
-0.904 / 0.040 &
-Histogram modification: accuracy 0.932; FPR 0.088 &
-Sigma Zero: accuracy 0.742; FPR 0.442 &
-Profilo dipendente dalla soglia di retrieval: nella configurazione intermedia
-riduce i falsi negativi, ma può produrre over-triggering semantico, soprattutto
-su Sigma Zero. \\
+Histogram modification; acc. 0.932; FPR 0.088 &
+Aumento dei falsi positivi &
+Profilo anti-forense stabile nella configurazione D50, con criticità più legata
+al rumore operativo che alla mancata rilevazione di \texttt{weapon}. \\
 
 Cellebrite Inseyets &
 0.960 / 0.004 &
-0.955 / 0.009 &
-Histogram modification: accuracy 0.949; FNR 0.060 &
-FGSM: accuracy 0.918; FNR 0.106 &
-Profilo commerciale più stabile nel bundle considerato, senza degradazione
-estrema su Sigma Zero, ma con sensibilità residua a FGSM e ad alcune
-trasformazioni anti-forensi. \\
+Histogram modification; acc. 0.949; FNR 0.060 &
+Falsi negativi residui su immagini \texttt{weapon} &
+Migliore profilo commerciale aggregato sotto trasformazioni anti-forensi, pur
+con sensibilità residua alle modifiche tonali. \\
 
 \bottomrule
 \end{tabularx}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Nota.} Per i modelli proxy, i valori anti-forensic e adversarial sono
-calcolati come media delle cinque condizioni sperimentali di ciascuna famiglia.
-Per i sistemi commerciali, i valori riportano le metriche aggregate normalizzate
-sulle rispettive famiglie di input. Il drop è definito come
-\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). Per Excire Foto 2025
-viene riportata la configurazione \texttt{D50}, utilizzata come riferimento
-comparativo principale. W$\rightarrow$NW indica transizioni da \texttt{weapon} a
-\texttt{non\_weapon}; FN indica falsi negativi; FNR indica false negative rate;
-FPR indica false positive rate.
+\textit{Nota.} Per i modelli proxy, i valori aggregati sono calcolati sulle
+cinque trasformazioni anti-forensi considerate. Per i sistemi commerciali, i
+valori derivano dagli output normalizzati sul forensic evaluation bundle. Il drop
+è definito come
+\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). W$\rightarrow$NW indica
+transizioni da \texttt{weapon} a \texttt{non\_weapon}; FN indica falsi negativi;
+FNR indica false negative rate; FPR indica false positive rate.
 \end{table}
 
-La Tabella~\ref{tab:results-comparative-robustness-profile} evidenzia che la
-robustezza operativa non coincide con la sola prestazione clean. EfficientNet-B0,
-pur essendo il modello proxy con la migliore baseline nominale, mostra il profilo
-più fragile nello scenario white-box sotto \gls{sigmazero}. ResNet18 e
-\gls{clip} risultano più stabili rispetto agli attacchi generati contro
-EfficientNet-B0, ma presentano criticità differenti: ResNet18 conserva una
-maggiore confidenza sugli input \gls{ood}, mentre \gls{clip} tende ad assorbire
-molti campioni fuori distribuzione nella classe \texttt{weapon}. Nel livello
-commerciale, \gls{cellebriteinseyets} mostra il profilo più stabile nel bundle
-considerato, \gls{magnetai} mantiene un comportamento relativamente conservativo
-ma con falsi negativi non trascurabili, mentre \gls{excirefoto2025} evidenzia
-una dipendenza marcata dalla soglia di retrieval e un rischio di over-triggering
-semantico su alcune perturbazioni.
+I risultati anti-forensi mostrano una degradazione generalmente contenuta sia
+nei modelli proxy sia nei tool commerciali. Questo risultato è importante perché
+distingue l'effetto operativo di trasformazioni realistiche dall'effetto più
+aggressivo delle perturbazioni adversariali. Per EfficientNet-B0, la condizione
+più critica è il Gaussian blur, che produce 17 errori indotti, tutti nella
+direzione \texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}. Anche se il drop
+aggregato è limitato, questa direzione dell'errore è forensicamente rilevante,
+perché corrisponde a mancate segnalazioni di immagini contenenti armi.
 
+ResNet18 mostra la degradazione anti-forense più marcata sotto Histogram
+modification, con accuracy pari a 0.934 e 39 errori indotti. A differenza di
+EfficientNet-B0, il pattern di errore è bidirezionale: sono presenti sia mancate
+rilevazioni della classe \texttt{weapon}, sia falsi flag \texttt{weapon} su
+immagini \texttt{non\_weapon}. \gls{clip} rimane invece relativamente stabile
+rispetto alle trasformazioni testate. Questo conferma che, nel presente
+protocollo, la principale criticità di \gls{clip} non riguarda la degradazione
+anti-forense, ma la tendenza ad assorbire input \gls{ood} nella classe
+\texttt{weapon}.
 
+Anche i tool commerciali mostrano una degradazione aggregata limitata.
+\gls{cellebriteinseyets} ottiene la migliore accuracy anti-forense aggregata,
+pari a 0.960, seguito da \gls{excirefoto2025} in configurazione \texttt{D50} e
+da \gls{magnetai}. Tuttavia, l'interpretazione operativa varia da tool a tool.
+\gls{magnetai} risulta più esposto ai falsi negativi sotto Gaussian blur.
+\gls{excirefoto2025} mostra invece una criticità più legata all'aumento dei
+falsi positivi sotto Histogram modification. \gls{cellebriteinseyets} mantiene
+il profilo più stabile, ma anche in questo caso le modifiche tonali producono un
+effetto misurabile sui falsi negativi. Questi risultati indicano che la
+robustezza anti-forense deve essere valutata non solo attraverso l'accuracy
+aggregata, ma anche attraverso la direzione degli errori e il loro impatto sulla
+prioritizzazione investigativa.
 
+\paragraph{Robustezza rispetto alle perturbazioni adversariali.}
 
-Le configurazioni \texttt{D20} e \texttt{D80} di \gls{excirefoto2025} non sono
-incluse nella Tabella~\ref{tab:results-comparative-robustness-profile} come
-valori da mediare con \texttt{D50}, poiché rappresentano profili operativi
-differenti. \texttt{D20} descrive un uso restrittivo del semantic retrieval,
-adatto a contenere falsi positivi e segnalazioni \gls{ood}, ma più esposto al
-rischio di mancata segnalazione della classe \texttt{weapon}. \texttt{D80}
-descrive invece un uso permissivo, utile quando l'obiettivo prioritario è
-massimizzare il recall, ma associato a un aumento rilevante del rumore operativo
-e del weapon flag rate sugli input \gls{ood}. La scelta di \texttt{D50} come
-riferimento comparativo deriva quindi dal suo profilo intermedio: rispetto a
-\texttt{D20}, riduce il rischio di falsi negativi; rispetto a \texttt{D80},
-limita l'aumento dei falsi positivi e delle segnalazioni \gls{ood}.
+La Tabella~\ref{tab:results-comparative-adversarial} sintetizza il profilo di
+robustezza adversarial. A differenza delle trasformazioni anti-forensi, le
+perturbazioni adversariali sono progettate per stressare il comportamento
+decisionale dei sistemi basati su \gls{ai}. Per questo motivo producono effetti
+più eterogenei e più dipendenti dal modello. I risultati evidenziano una
+distinzione importante tra vulnerabilità white-box dei proxy e comportamento
+operativo black-box dei tool commerciali.
 
+\begin{table}[H]
+\centering
+\caption{Confronto della robustezza sotto perturbazioni adversariali.}
+\label{tab:results-comparative-adversarial}
+\small
+\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{@{}p{2.7cm} p{1.8cm} p{3.1cm} p{2.8cm} X@{}}
+\toprule
+\textbf{Sistema} &
+\textbf{Adv acc./drop} &
+\textbf{Condizione più critica} &
+\textbf{Errore principale} &
+\textbf{Interpretazione di robustezza} \\
+\midrule
 
+EfficientNet-B0 &
+0.695 / 0.283 &
+Sigma Zero; acc. 0.015; drop 0.963 &
+963 induced errors; 489 W$\rightarrow$NW e 474 NW$\rightarrow$W &
+Massima vulnerabilità proxy nello scenario white-box; l'elevata clean accuracy
+non garantisce robustezza adversarial. \\
 
-Una divergenza rilevante emerge nel confronto tra \gls{clip}, i modelli
-supervisionati e i sistemi commerciali. \gls{clip} mostra il weapon rate
-\gls{ood} più elevato, pari a 0.836, pur con una confidenza media inferiore
-rispetto ai modelli supervisionati. EfficientNet-B0 e ResNet18 producono weapon
-rate \gls{ood} più contenuti, rispettivamente pari a 0.370 e 0.438, ma con
-confidenze medie sensibilmente più alte. Nel livello commerciale,
-\gls{magnetai}, \gls{excirefoto2025} \texttt{D50} e \gls{cellebriteinseyets}
-mostrano weapon flag rate pari rispettivamente a 0.360, 0.340 e 0.292. Questo
-non rende automaticamente tali strumenti più affidabili in senso assoluto, ma
-indica che il comportamento su input fuori distribuzione dipende sia
-dall'architettura o logica interna del sistema sia dalla configurazione operativa
-adottata.
+ResNet18 &
+0.955 / 0.009 &
+FGSM; acc. 0.918; drop 0.046 &
+47 induced errors; 27 W$\rightarrow$NW e 20 NW$\rightarrow$W &
+Profilo adversarial più stabile rispetto a EfficientNet-B0, ma con degradazione
+residua sotto FGSM. \\
 
-Il confronto adversarial mostra una seconda divergenza. Nel livello proxy,
-EfficientNet-B0 risulta fortemente vulnerabile a \gls{sigmazero}, con accuracy
-pari a 0.015 e accuracy drop pari a 0.963. Tale comportamento non si trasferisce
-in modo equivalente agli altri modelli proxy né ai sistemi commerciali
-black-box. Nel caso di \gls{magnetai}, \gls{sigmazero} produce un aumento dei
-falsi negativi sulla classe \texttt{weapon}, ma non una degradazione estrema
-comparabile a quella osservata sul target white-box. Nel caso di
-\gls{excirefoto2025}, invece, la stessa perturbazione produce soprattutto un
-fenomeno di over-triggering semantico nelle configurazioni più permissive, con
-incremento marcato del \gls{fpr}. \gls{cellebriteinseyets} mostra un profilo più
-stabile su \gls{sigmazero}, mentre la condizione adversarial più critica per il
-tool è \gls{fgsm}. Queste differenze evidenziano che la robustezza osservata è
-fortemente dipendente dal sistema, dal tipo di output e dalla modalità con cui la
-predizione viene ricodificata nel task operativo.
+CLIP &
+0.927 / 0.000 &
+FGSM; acc. 0.914; drop 0.013 &
+23 induced errors; 8 W$\rightarrow$NW e 15 NW$\rightarrow$W &
+Degradazione limitata rispetto agli attacchi testati; la stabilità adversarial
+non elimina il rischio OOD. \\
 
-La comparazione tra trasformazioni anti-forensi e perturbazioni adversariali
-mostra inoltre una differenza di natura operativa. Le trasformazioni anti-forensi
-producono, sui proxy, drop generalmente contenuti; tuttavia esse sono più
-realistiche rispetto a molti scenari di manipolazione quotidiana, perché possono
-derivare da ricompressione, ridimensionamento, sfocatura, alterazioni tonali o
-ricondivisione dei file. Gli attacchi adversariali, al contrario, producono in
-alcuni casi degradazioni molto più marcate, ma presuppongono condizioni di
-conoscenza o controllo del modello che non sono sempre disponibili in scenari
-investigativi reali. Per questa ragione, entrambi i livelli sono necessari: le
-trasformazioni anti-forensi documentano fragilità realistiche e model-agnostic,
-mentre gli attacchi adversariali rappresentano stressor controllati per esplorare
-scenari di manipolazione deliberata.
+Magnet AXIOM / Magnet.AI &
+0.923 / 0.027 &
+FGSM; acc. 0.867; FNR 0.192 &
+96 FN &
+Robustezza aggregata discreta, ma FGSM aumenta sensibilmente i falsi negativi
+sulla classe \texttt{weapon}. \\
 
-Questi risultati mostrano che la robustezza non può essere dedotta dalla sola
-accuracy clean, ma deve essere valutata rispetto a condizioni specifiche di
-impiego, inclusi input anomali, borderline, semanticamente distanti dalla
-distribuzione attesa o manipolati. Nei workflow di \gls{df}, il problema non è
-soltanto stabilire quale sistema sia più accurato in condizioni nominali, ma
-comprendere quale profilo di errore esso introduca nel processo di triage:
-mancata segnalazione di contenuti rilevanti, aumento del rumore operativo,
-assorbimento di casi \gls{ood}, sensibilità a perturbazioni mirate o assenza di
-confidenza numerica esportabile.
+Excire Foto 2025 D50 &
+0.904 / 0.040 &
+Sigma Zero; acc. 0.742; FPR 0.442 &
+221 FP &
+La perturbazione produce soprattutto over-triggering semantico, più che
+occultamento sistematico di immagini \texttt{weapon}. \\
+
+Cellebrite Inseyets &
+0.955 / 0.009 &
+FGSM; acc. 0.918; FNR 0.106 &
+53 FN &
+Migliore stabilità commerciale aggregata anche nello scenario adversarial, ma
+FGSM resta la condizione più critica. \\
+
+\bottomrule
+\end{tabularx}
+
+\vspace{0.4em}
+\footnotesize
+\textit{Nota.} Per i modelli proxy, i valori aggregati sono calcolati sulle
+cinque perturbazioni adversariali considerate. Per i sistemi commerciali, i
+valori derivano dagli output normalizzati sul forensic evaluation bundle. Il drop
+è definito come
+\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). W$\rightarrow$NW indica
+transizioni da \texttt{weapon} a \texttt{non\_weapon}; FN indica falsi negativi;
+FNR indica false negative rate; FPR indica false positive rate.
+\end{table}
+
+Il confronto adversarial mostra che la degradazione più severa si verifica nel
+livello proxy, in particolare per EfficientNet-B0 sotto Sigma Zero. Il modello
+passa da una clean accuracy pari a 0.978 a una accuracy pari a 0.015, con 963
+errori indotti. Questo risultato dimostra che un modello può essere molto
+accurato in condizioni nominali e, allo stesso tempo, estremamente fragile
+rispetto a perturbazioni adversariali ottimizzate. Anche \gls{fgsm} produce una
+degradazione significativa per EfficientNet-B0, con accuracy pari a 0.575 e drop
+pari a 0.403. La vulnerabilità osservata non è quindi limitata a una singola
+condizione adversarial.
+
+ResNet18 e \gls{clip} mostrano un profilo più stabile nel presente setting
+sperimentale. ResNet18 è maggiormente influenzato da \gls{fgsm}, ma il drop
+rimane molto inferiore rispetto a quello osservato per EfficientNet-B0.
+\gls{clip} risulta ancora meno degradato dalle perturbazioni testate. Tuttavia,
+questo risultato deve essere interpretato con cautela: gli attacchi non sono
+stati ottimizzati primariamente contro \gls{clip} come target white-box, e
+\gls{clip} presenta già una diversa criticità sugli input \gls{ood}. Pertanto,
+la stabilità adversarial osservata per \gls{clip} non deve essere generalizzata
+oltre il threat model valutato.
+
+I tool commerciali mostrano un pattern differente. \gls{magnetai} non riproduce
+la degradazione catastrofica osservata su EfficientNet-B0 sotto Sigma Zero, ma
+risulta sensibilmente influenzato da \gls{fgsm}, con FNR pari a 0.192. Dal punto
+di vista forense, questo è un errore critico, perché la mancata segnalazione di
+immagini \texttt{weapon} può portare alla deprioritizzazione di materiale
+rilevante. \gls{excirefoto2025} in configurazione \texttt{D50} reagisce invece
+in modo diverso: Sigma Zero produce soprattutto un aumento del false positive
+rate, pari a 0.442, generando over-triggering semantico piuttosto che
+occultamento sistematico della classe \texttt{weapon}. \gls{cellebriteinseyets}
+mostra la migliore stabilità adversarial aggregata tra i tool commerciali, ma
+\gls{fgsm} produce comunque un FNR pari a 0.106. Anche il sistema commerciale
+più stabile rimane quindi sensibile ad alcune perturbazioni specifiche.
+
+\paragraph{Sensibilità alla soglia e interpretazione black-box.}
+
+I risultati di \gls{excirefoto2025} richiedono una lettura separata, perché il
+sistema è stato valutato come motore di semantic retrieval e non come
+classificatore forense nativo. Il parametro Distance limit definisce il grado di
+restrittività operativa del recupero semantico. La configurazione \texttt{D20} è
+restrittiva: riduce i falsi positivi e i weapon flag sugli input \gls{ood}, ma
+aumenta il rischio di mancata segnalazione di immagini \texttt{weapon}. La
+configurazione \texttt{D80} è permissiva: massimizza il recall, ma aumenta i
+falsi positivi e l'assegnazione di immagini non pertinenti o perturbate alla
+query semantica relativa alle armi. La configurazione \texttt{D50} è stata
+utilizzata come principale punto di confronto perché rappresenta un profilo
+intermedio.
+
+Questa dipendenza dalla soglia è particolarmente evidente sotto Sigma Zero. In
+configurazione \texttt{D20}, \gls{excirefoto2025} ottiene accuracy pari a 0.815,
+FNR pari a 0.180 e FPR pari a 0.190. In configurazione \texttt{D50}, l'accuracy
+scende a 0.742, mentre il FNR migliora a 0.074 e il FPR aumenta a 0.442. In
+configurazione \texttt{D80}, il recall migliora ulteriormente, ma il FPR sale a
+0.662. Lo stesso tool può quindi supportare priorità forensi differenti in base
+al punto operativo scelto: \texttt{D20} è più adatto a contenere il rumore,
+\texttt{D80} a massimizzare il recall, e \texttt{D50} a bilanciare falsi
+negativi e falsi positivi.
+
+La natura black-box dei tool commerciali limita inoltre il tipo di conclusioni
+che possono essere formulate. A differenza dei proxy, questi sistemi non
+espongono confini decisionali, score calibrati, architetture, dati di training o
+logiche interne di soglia. I loro output possono quindi essere valutati solo a
+livello operativo, attraverso categorie osservabili, tag esportati, matching
+rate, output non mappabili, falsi negativi, falsi positivi e comportamento sugli
+input \gls{ood}. Questa limitazione non rappresenta una debolezza del protocollo
+di valutazione; al contrario, riflette la reale condizione in cui gli analisti
+forensi interagiscono con strumenti commerciali \gls{ai}-assisted.
+
+\paragraph{Interpretazione operativa complessiva.}
+
+L'analisi comparativa conferma che la robustezza nel triage forense di immagini
+assistito da \gls{ai} è una proprietà multidimensionale. La clean accuracy misura
+la prestazione nominale, ma non cattura l'assorbimento degli input \gls{ood}, la
+sensibilità alle perturbazioni, il rischio di falsi negativi, l'over-triggering
+semantico o l'effetto delle soglie nei sistemi black-box. Nei workflow di
+\gls{df}, queste dimensioni sono almeno altrettanto rilevanti dell'accuracy
+aggregata, perché influenzano l'attenzione dell'analista, la prioritizzazione dei
+contenuti e la strategia di revisione manuale.
+
+Emergono tre risultati principali. Primo, i modelli proxy sono utili perché
+rendono osservabili pattern di degradazione controllati e permettono di misurare
+confidence shift, errori indotti e direzione degli errori. Tuttavia, il loro
+comportamento non può essere trasferito automaticamente ai tool commerciali, che
+adottano meccanismi proprietari di classificazione, tagging o retrieval.
+Secondo, i tool commerciali mostrano una stabilità aggregata superiore rispetto
+al proxy più vulnerabile, ma presentano comunque failure mode operativamente
+rilevanti, in particolare falsi negativi su immagini \texttt{weapon} sotto
+\gls{fgsm} e falsi positivi in configurazioni permissive di semantic retrieval.
+Terzo, il comportamento \gls{ood} resta un rischio autonomo: esso può aumentare
+il carico dell'analista, produrre prioritizzazioni fuorvianti e generare flag
+relativi ad armi su materiale non appartenente al task binario previsto.
 
 Nel complesso, i risultati supportano una lettura prudente dell'automazione
-\gls{ai}-based in ambito forense. I modelli proxy consentono di isolare e
-misurare fragilità controllate; gli strumenti commerciali mostrano comportamenti
-più vicini al contesto operativo, ma meno trasparenti e non pienamente
-ispezionabili. In entrambi i casi, l'output automatico deve essere trattato come
-supporto al triage e alla prioritizzazione, non come decisione conclusiva o
-autosufficiente.
-
-
+\gls{ai}-based in ambito forense. I sistemi valutati possono fornire un supporto
+utile per il triage, la prioritizzazione e la revisione su larga scala di
+contenuti multimediali. Tuttavia, i loro output non devono essere trattati come
+evidenza conclusiva né come sostituti della validazione esperta. In particolare,
+le mancate rilevazioni di immagini \texttt{weapon}, le assegnazioni OOD ad alta
+confidenza e gli errori dipendenti dalla soglia devono essere documentati
+esplicitamente quando strumenti \gls{ai}-assisted vengono utilizzati in workflow
+forensi. Il protocollo FAIR-Lab risponde a questa esigenza combinando dataset
+congelati, manifest tracciabili, riproducibilità basata su hash, famiglie di
+perturbazioni controllate, normalizzazione degli output black-box e auditabilità
+manuale dell'interpretazione finale.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability Analysis and Representative Failure Cases}
