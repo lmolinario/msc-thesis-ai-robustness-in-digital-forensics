@@ -1,0 +1,256 @@
+% Revised LaTeX replacement blocks for Chapter 5.
+% Generated to align Chapter 5 with the frozen Chapter 4 methodology.
+% These blocks are not compiled directly unless explicitly input from main.tex.
+
+% -----------------------------------------------------------------------------
+% BLOCK 1 -- Replace Experimental Evaluation Status table and introductory text
+% -----------------------------------------------------------------------------
+
+La valutazione sperimentale si basa sugli artefatti generati attraverso la
+metodologia descritta nel Capitolo~\ref{chap:methodology}. La pipeline finale
+comprende la costruzione del dataset congelato, la generazione degli split,
+l'addestramento e la valutazione dei modelli proxy, la produzione delle
+perturbazioni adversariali e delle trasformazioni anti-forensi, la costruzione
+del forensic evaluation bundle e la normalizzazione degli output prodotti dagli
+strumenti commerciali black-box. La valutazione commerciale è quindi trattata
+come un livello operativo distinto rispetto ai proxy model, ma è inclusa nel
+confronto finale mediante output osservabili e ricodificati rispetto alla ground
+truth sperimentale \cite{sanna2024preliminary,sanna2025pixelperfect,magnet,cellebrite}.
+
+Questa separazione è metodologicamente rilevante. Il livello dei modelli proxy
+fornisce una baseline trasparente e riproducibile, poiché architetture,
+checkpoint, fold di addestramento, predizioni e metriche sono disponibili per
+ispezione e verifica. Il livello degli strumenti commerciali riflette invece una
+condizione operativa differente: l'analista interagisce con sistemi professionali
+o general-purpose la cui logica interna di classificazione non è pienamente
+accessibile, e la valutazione deve quindi basarsi sugli output osservabili, sulle
+categorie esportate, sui tag assegnati e sul matching rispetto al forensic
+evaluation bundle \cite{casey2011digital,nist2006guide,iso27041,iso27042}.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\caption{Stato finale del workflow di valutazione sperimentale.}
+\label{tab:results-evaluation-status}
+\begin{tabularx}{\textwidth}{@{}p{0.28\textwidth} p{0.22\textwidth} X@{}}
+\toprule
+\textbf{Componente} & \textbf{Stato} & \textbf{Sintesi operativa} \\
+\midrule
+Dataset finale & \textbf{Congelato} & 1500 immagini bilanciate: 500 \texttt{weapon}, 500 \texttt{non\_weapon} e 500 \texttt{ood}. \\
+Subset binario & \textbf{Congelato} & 1000 immagini: 500 \texttt{weapon} e 500 \texttt{non\_weapon}; usato per clean, adversarial e anti-forensic evaluation. \\
+Split clean e \gls{ood} & \textbf{Completati} & Cinque fold binari clean e un insieme \gls{ood} separato, derivati dai manifest congelati. \\
+Addestramento proxy & \textbf{Completato} & Checkpoint fold-aware prodotti per \texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}. \\
+Valutazione proxy & \textbf{Completata} & Valutazione su input clean, \gls{ood}, adversariali e anti-forensi. \\
+Attacchi adversariali & \textbf{Generati} & \gls{fgsm}, \gls{superdeepfool}, \gls{sigmazero}, \gls{onepixel} e \gls{colorshift}. \\
+Trasformazioni anti-forensi & \textbf{Generate} & \gls{jpegrecompression}, \gls{resampleresize}, \gls{gaussianblur}, \gls{histogrammodification} e \gls{contraststretching}. \\
+Forensic evaluation bundle & \textbf{Generato} & 11\,500 file predisposti per la valutazione dei proxy model e degli strumenti black-box. \\
+\gls{magnetaxiomtool} / \gls{magnetai} & \textbf{Consolidato} & Bundle processato ed export normalizzato; il tag \texttt{Possible weapons} è ricondotto alla predizione positiva \texttt{weapon}. \\
+\gls{excirefoto2025} & \textbf{Consolidato} & Valutato come software standalone general-purpose di semantic retrieval, con tre configurazioni operative: \texttt{D20}, \texttt{D50}, \texttt{D80}. \\
+\gls{cellebriteinseyets} & \textbf{Consolidato} & Export normalizzato da ambiente \texttt{Cellebrite Physical Analyzer 10.9.0.3029}; le classificazioni osservabili sono ricodificate nel task operativo \texttt{weapon}/\texttt{non\_weapon}. \\
+Explainability & \textbf{Integrata} & Casi rappresentativi generati con \gls{ig}; analisi qualitativa e diagnostica, non metrica primaria. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------------
+% BLOCK 2 -- Replace Excire subsection title and opening paragraphs
+% -----------------------------------------------------------------------------
+
+\subsection{\gls{excirefoto2025} results and sensitivity analysis}
+\label{subsec:results-excire}
+
+La valutazione di \gls{excirefoto2025} richiede una cautela interpretativa
+specifica. Il software non viene trattato come prodotto sviluppato esclusivamente
+per finalità forensi, né come classificatore nativo per la distinzione binaria
+\texttt{weapon}/\texttt{non\_weapon}. Nel protocollo \gls{fairlab}, esso viene
+valutato come sistema black-box di semantic retrieval con funzionalità
+\gls{ai}-based. La predizione operativa viene quindi derivata dalla presenza o
+assenza del campione tra i risultati recuperati rispetto a prompt firearm-oriented
+e a una specifica configurazione del parametro \texttt{Distance limit}. Questa
+ricodifica consente una valutazione quantitativa rispetto alla ground truth
+sperimentale, ma non deve essere interpretata come accesso alla logica
+classificatoria interna del sistema.
+
+Per valutare la sensibilità del comportamento operativo alla soglia di recupero,
+sono state considerate tre configurazioni del parametro \texttt{Distance limit}:
+\texttt{D20}, \texttt{D50} e \texttt{D80}. La configurazione \texttt{D20}
+rappresenta un'impostazione restrittiva, orientata a ridurre falsi positivi e
+recuperi semanticamente deboli; \texttt{D50} costituisce la configurazione
+intermedia della sensitivity analysis; \texttt{D80} rappresenta invece
+un'impostazione permissiva, orientata a massimizzare il recall ma esposta a un
+aumento rilevante dei falsi positivi.
+
+% -----------------------------------------------------------------------------
+% BLOCK 3 -- New Cellebrite Inseyets subsection
+% -----------------------------------------------------------------------------
+
+\subsection{\gls{cellebriteinseyets} results}
+\label{subsec:results-cellebrite}
+
+La valutazione di \gls{cellebriteinseyets} completa il livello commerciale
+black-box della pipeline. Il tool viene considerato come piattaforma commerciale
+di analisi assistita dei contenuti multimediali, valutata attraverso gli output
+osservabili esportati nell'ambiente \texttt{Cellebrite Physical Analyzer
+10.9.0.3029}. In coerenza con la metodologia del Capitolo~\ref{chap:methodology},
+\gls{ufed} non viene trattato come classificatore immagini, ma solo come eventuale
+componente dell'ecosistema Cellebrite di acquisizione e gestione dei dati.
+
+\begin{table}[H]
+\centering
+\caption{Prestazioni complessive di \gls{cellebriteinseyets} sul forensic evaluation bundle.}
+\label{tab:results-cellebrite-global-metrics}
+\small
+\begin{tabular}{lr}
+\toprule
+\textbf{Metrica} & \textbf{Valore} \\
+\midrule
+Accuracy complessiva sul task binario & 0.958 \\
+Balanced accuracy & 0.958 \\
+Precision \texttt{weapon} & 0.958 \\
+Recall \texttt{weapon} & 0.958 \\
+F1 \texttt{weapon} & 0.958 \\
+False negative rate & 0.042 \\
+False positive rate & 0.042 \\
+True positives & 5\,268 \\
+True negatives & 5\,271 \\
+False positives & 229 \\
+False negatives & 232 \\
+\gls{ood} weapon flag rate & 0.292 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Nel confronto aggregato, \gls{cellebriteinseyets} mostra il profilo commerciale
+più stabile tra i tool finali: l'accuracy complessiva sul task binario è pari a
+0.958, con \gls{fnr} e \gls{fpr} entrambi prossimi a 0.042. Tale equilibrio è
+operativamente rilevante perché indica una distribuzione relativamente bilanciata
+tra rischio di mancata segnalazione della classe \texttt{weapon} e rischio di
+rumore operativo generato da falsi positivi. Il valore non deve tuttavia essere
+interpretato come misura della robustezza interna del prodotto, poiché la logica
+di classificazione rimane black-box e l'analisi si basa esclusivamente sugli
+output esportati e normalizzati.
+
+\begin{table}[H]
+\centering
+\caption{Comportamento di \gls{cellebriteinseyets} per condizione sperimentale.}
+\label{tab:results-cellebrite-condition-metrics}
+\small
+\begin{tabularx}{\textwidth}{@{}l r r r r X@{}}
+\toprule
+\textbf{Condizione} & \textbf{Accuracy} & \textbf{Recall weapon} & \textbf{\gls{fnr}} & \textbf{\gls{fpr}} & \textbf{Nota operativa} \\
+\midrule
+Clean & 0.964 & 0.968 & 0.032 & 0.040 & Baseline commerciale su 1\,000 immagini non perturbate. \\
+Perturbed & 0.958 & 0.957 & 0.043 & 0.042 & Valori calcolati su 10\,000 immagini perturbate: 5\,000 adversariali e 5\,000 anti-forensi. \\
+Adversarial & 0.955 & 0.950 & 0.050 & 0.040 & Degrado contenuto rispetto alla baseline clean; \gls{fgsm} rappresenta la condizione più critica. \\
+Anti-forensic & 0.960 & 0.963 & 0.037 & 0.043 & Stabilità elevata rispetto alle trasformazioni model-agnostic considerate. \\
+\gls{ood} & -- & -- & -- & -- & Weapon flag rate pari a 0.292: 146 immagini \gls{ood} su 500 sono state ricondotte alla classe operativa \texttt{weapon}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Il comportamento sulle immagini \gls{ood} è più contenuto rispetto a quello
+osservato per \gls{clip}, \gls{magnetai} ed \gls{excirefoto2025} nella
+configurazione \texttt{D50}. In particolare, 146 immagini \gls{ood} su 500 sono
+ricondotte alla classe operativa \texttt{weapon}. Questo valore non rappresenta
+un errore binario in senso stretto, poiché i campioni \gls{ood} non appartengono
+alla ground truth \texttt{weapon}/\texttt{non\_weapon}; esso descrive piuttosto
+la tendenza del tool a segnalare come potenzialmente rilevanti contenuti
+borderline, ambigui o semanticamente weapon-adjacent.
+
+\begin{table}[H]
+\centering
+\caption{Prestazioni di \gls{cellebriteinseyets} nelle condizioni adversariali e anti-forensi.}
+\label{tab:results-cellebrite-attack-metrics}
+\scriptsize
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}l l r r r r r r@{}}
+\toprule
+\textbf{Famiglia} & \textbf{Condizione} & \textbf{Accuracy} & \textbf{Recall} & \textbf{\gls{fnr}} & \textbf{\gls{fpr}} & \textbf{FN} & \textbf{FP} \\
+\midrule
+Adversarial & \gls{colorshift} & 0.964 & 0.968 & 0.032 & 0.040 & 16 & 20 \\
+Adversarial & \gls{fgsm} & 0.918 & 0.894 & 0.106 & 0.058 & 53 & 29 \\
+Adversarial & \gls{onepixel} & 0.962 & 0.968 & 0.032 & 0.044 & 16 & 22 \\
+Adversarial & \gls{sigmazero} & 0.970 & 0.958 & 0.042 & 0.018 & 21 & 9 \\
+Adversarial & \gls{superdeepfool} & 0.961 & 0.964 & 0.036 & 0.042 & 18 & 21 \\
+\midrule
+Anti-forensic & \gls{contraststretching} & 0.967 & 0.972 & 0.028 & 0.038 & 14 & 19 \\
+Anti-forensic & \gls{gaussianblur} & 0.954 & 0.964 & 0.036 & 0.056 & 18 & 28 \\
+Anti-forensic & \gls{histogrammodification} & 0.949 & 0.940 & 0.060 & 0.042 & 30 & 21 \\
+Anti-forensic & \gls{jpegrecompression} & 0.966 & 0.972 & 0.028 & 0.040 & 14 & 20 \\
+Anti-forensic & \gls{resampleresize} & 0.964 & 0.968 & 0.032 & 0.040 & 16 & 20 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La condizione più critica per \gls{cellebriteinseyets} è \gls{fgsm}, con accuracy
+pari a 0.918 e \gls{fnr} pari a 0.106. A differenza di quanto osservato per il
+proxy target EfficientNet-B0 sotto \gls{sigmazero}, il tool non presenta una
+compromissione estrema in corrispondenza degli attacchi sparse o decision-boundary
+considerati. Tra le trasformazioni anti-forensi, \gls{histogrammodification}
+produce il valore di \gls{fnr} più alto, pari a 0.060, mentre \gls{gaussianblur}
+produce il valore di \gls{fpr} più elevato, pari a 0.056. Nel complesso, il
+profilo osservato suggerisce una maggiore stabilità operativa rispetto alle
+perturbazioni del bundle, pur con falsi negativi residui rilevanti per un
+workflow di triage.
+
+% -----------------------------------------------------------------------------
+% BLOCK 4 -- Replace Comparative Robustness Discussion opening and summary table
+% -----------------------------------------------------------------------------
+
+\section{Comparative Robustness Discussion}
+\label{sec:results-comparative}
+
+I risultati ottenuti consentono di confrontare tre livelli della pipeline:
+modelli proxy trasparenti, perturbazioni sperimentali controllate e valutazione
+black-box commerciale. I modelli proxy permettono di osservare in modo
+controllato il degrado prestazionale rispetto a clean, \gls{ood}, adversarial e
+anti-forensic input. \gls{magnetai}, \gls{excirefoto2025} e
+\gls{cellebriteinseyets} permettono invece di verificare come strumenti
+commerciali black-box reagiscano allo stesso bundle sperimentale, pur senza
+accesso alla logica interna dei rispettivi classificatori o motori di retrieval.
+
+\begin{table}[H]
+\centering
+\caption{Sintesi comparativa tra modelli proxy e strumenti commerciali black-box.}
+\label{tab:results-comparative-summary}
+\small
+\begin{tabularx}{\textwidth}{@{}p{2.8cm} r r r X@{}}
+\toprule
+\textbf{Sistema} & \textbf{Clean accuracy} & \textbf{Clean \gls{fnr}} & \textbf{OOD weapon rate} & \textbf{Osservazione principale} \\
+\midrule
+EfficientNet-B0 & 0.978 & 0.016 & 0.370 & Migliore baseline clean tra i proxy, ma vulnerabilità marcata ad alcune perturbazioni adversariali, in particolare \gls{sigmazero} e \gls{fgsm}. \\
+ResNet18 & 0.964 & 0.030 & 0.438 & Buona baseline e maggiore stabilità rispetto a EfficientNet-B0 per alcune perturbazioni generate nello scenario white-box considerato. \\
+\gls{clip} & 0.927 & 0.012 & 0.836 & Accuracy clean inferiore ai modelli supervisionati, ma forte tendenza a segnalare come \texttt{weapon} immagini fuori distribuzione. \\
+\gls{magnetaxiomtool} / \gls{magnetai} & 0.950 & 0.070 & 0.360 & Comportamento relativamente conservativo: basso \gls{fpr}, ma rischio non trascurabile di falsi negativi sulla classe \texttt{weapon}. \\
+\gls{excirefoto2025} \texttt{D50} & 0.944 & 0.042 & 0.340 & Configurazione intermedia di triage: recall elevato sulla classe \texttt{weapon}, con incremento controllato dei falsi positivi rispetto a \texttt{D80}. \\
+\gls{cellebriteinseyets} & 0.964 & 0.032 & 0.292 & Profilo commerciale più stabile nel bundle finale, con buon equilibrio tra falsi negativi, falsi positivi e weapon flag rate sugli input \gls{ood}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Il confronto non deve essere interpretato come ranking assoluto tra modelli proxy
+e strumenti commerciali, perché i primi espongono predizioni controllate su classi
+binarie note, mentre i secondi operano tramite categorie proprietarie, tag
+esportati, classificazioni osservabili o recupero semantico. Il valore del
+confronto è operativo: mostrare se le tendenze di fragilità osservate nei proxy si
+riflettono anche in strumenti black-box utilizzati in workflow investigativi.
+
+La presenza di \gls{cellebriteinseyets} modifica la lettura del livello
+commerciale. Rispetto a \gls{magnetai} ed \gls{excirefoto2025} nella
+configurazione \texttt{D50}, \gls{cellebriteinseyets} mostra una clean accuracy
+pari a 0.964, un clean \gls{fnr} pari a 0.032 e il weapon flag rate \gls{ood} più
+contenuto tra gli strumenti commerciali finali. Questo non consente di attribuire
+al tool una robustezza generale o certificata, ma documenta un comportamento
+operativo più stabile nel bundle sperimentale considerato.
+
+La differenza tra i sistemi conferma che la robustezza non può essere dedotta
+dalla sola accuracy clean, ma deve essere valutata rispetto a condizioni
+specifiche di impiego, inclusi input anomali, borderline o semanticamente
+distanti dalla distribuzione attesa. Nei workflow di \gls{df}, il problema non è
+soltanto stabilire quale sistema sia più accurato in condizioni nominali, ma
+comprendere quale profilo di errore esso introduca nel processo di triage:
+mancata segnalazione di contenuti rilevanti, aumento del rumore operativo,
+assorbimento di casi \gls{ood} o sensibilità a perturbazioni mirate.
