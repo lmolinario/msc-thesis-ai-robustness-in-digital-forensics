@@ -2965,203 +2965,77 @@ critica dei risultati, mantenendo centrale il ruolo dell'analista umano nella
 valutazione finale.
 
 
-
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Operational Implications and Limitations}
+\section{Operational Interpretation and Experimental Limitations}
 \label{sec:results-implications}
 % ─────────────────────────────────────────────────────────────────────────────
 
-I risultati sperimentali hanno implicazioni operative rilevanti per l'impiego di
-sistemi \gls{ai}-based nei workflow di \gls{df}. L'analisi mostra che la
-prestazione nominale su input clean non è sufficiente per valutare
-l'affidabilità di un sistema utilizzato per il triage forense di immagini. In un
-contesto investigativo, infatti, assumono particolare importanza la direzione
-degli errori, il comportamento su input fuori distribuzione, la sensibilità a
-manipolazioni realistiche o deliberate e la possibilità di ricondurre ogni output
-automatico all'artefatto sperimentale corrispondente.
+I risultati del Capitolo~\ref{chap:results} confermano che la robustezza
+operativa dei sistemi \gls{ai}-based per il triage forense di immagini non può
+essere dedotta dalla sola accuracy clean. L'interpretazione dei risultati deve
+considerare congiuntamente la direzione degli errori, il comportamento sugli
+input \gls{ood}, la sensibilità alle perturbazioni, la configurazione operativa
+dei tool e i limiti derivanti dalla valutazione black-box.
 
-\paragraph{Falsi negativi e rischio di mancata prioritizzazione.}
-
-La prima implicazione riguarda i falsi negativi sulla classe
-\texttt{weapon}. In un workflow di triage, un falso negativo è particolarmente
-critico perché può ridurre la probabilità che un contenuto investigativamente
-rilevante venga sottoposto a revisione umana. Questo rischio riguarda sia i
-modelli proxy sia gli strumenti commerciali black-box. In condizioni clean,
-EfficientNet-B0 produce 8 falsi negativi, ResNet18 ne produce 15 e \gls{clip}
-ne produce 6. Tuttavia, nelle condizioni perturbate il rischio può aumentare in
-modo sostanziale.
-
-Il caso più evidente è EfficientNet-B0 sotto \gls{sigmazero}, dove l'accuracy
-scende a 0.015 e vengono introdotte 489 transizioni
+Il primo elemento critico riguarda i falsi negativi sulla classe
+\texttt{weapon}. In un workflow di triage, una mancata segnalazione può ridurre
+la probabilità che un contenuto investigativamente rilevante venga sottoposto a
+revisione umana. Questo rischio è evidente nei modelli proxy, in particolare nel
+caso di EfficientNet-B0 sotto \gls{sigmazero}, dove l'accuracy scende a 0.015 e
+vengono introdotte 489 transizioni
 \texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}. Anche \gls{fgsm} produce un
 effetto rilevante sullo stesso modello, con accuracy pari a 0.575 e 321
 transizioni \texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}. Questi risultati
-mostrano che una baseline clean elevata non consente, da sola, di dedurre
-l'affidabilità operativa del sistema in presenza di input manipolati. Dal punto
-di vista forense, la criticità principale non è soltanto la riduzione
-dell'accuracy, ma il fatto che immagini appartenenti alla classe
-investigativamente rilevante possano essere ricondotte alla classe negativa.
+mostrano che un'elevata baseline clean non garantisce affidabilità in presenza di
+input manipolati.
 
-\paragraph{Input out-of-distribution e assorbimento operativo.}
+Il secondo elemento riguarda il comportamento sugli input \gls{ood}. I campioni
+fuori distribuzione non sono trattati come una terza classe supervisionata, ma
+come rischio operativo autonomo. EfficientNet-B0 riconduce alla classe
+\texttt{weapon} il 36.96\% delle predizioni \gls{ood}, ResNet18 il 43.76\% e
+\gls{clip} l'83.56\%. Anche i tool commerciali mostrano weapon flag rate non
+nulli sui campioni \gls{ood}: 36.00\% per \gls{magnetai}, 34.00\% per
+\gls{excirefoto2025} in configurazione \texttt{D50} e 29.20\% per
+\gls{cellebriteinseyets}. Tali valori non rappresentano errori binari in senso
+stretto, ma descrivono il rischio di assorbimento operativo di contenuti fuori
+distribuzione entro una classe investigativamente sensibile.
 
-La seconda implicazione riguarda gli input \gls{ood}. Le immagini fuori
-distribuzione non devono essere valutate come una normale terza classe
-supervisionata del task binario, ma come stress test della capacità del sistema
-di gestire input ambigui, sintetici, borderline o semanticamente distanti dalla
-distribuzione attesa. In un'indagine reale, tali contenuti possono comparire in
-modo naturale all'interno di collezioni multimediali eterogenee e possono essere
-sottoposti agli stessi strumenti automatici usati per il triage delle immagini
-\texttt{weapon}/\texttt{non\_weapon}.
+Il terzo elemento riguarda la configurazione operativa dei sistemi di semantic
+retrieval. Nel caso di \gls{excirefoto2025}, il parametro
+\texttt{Distance limit} modifica direttamente il profilo di rischio: la
+configurazione \texttt{D20} riduce falsi positivi e weapon flag \gls{ood}, ma
+aumenta il rischio di falsi negativi; \texttt{D80} massimizza il recall, ma
+accresce il rumore operativo; \texttt{D50} rappresenta un compromesso intermedio
+nel protocollo sperimentale. La configurazione del tool deve quindi essere
+documentata come parte integrante della valutazione.
 
-Il comportamento osservato nei modelli proxy evidenzia profili differenti.
-EfficientNet-B0 riconduce alla classe \texttt{weapon} il 36.96\% delle
-predizioni \gls{ood}, ResNet18 il 43.76\%, mentre \gls{clip} raggiunge
-l'83.56\%, pur con una confidenza media più bassa e senza predizioni sopra la
-soglia di alta confidenza. Anche i sistemi commerciali mostrano un rischio
-operativo analogo: \gls{magnetai} segnala come \texttt{Possible weapons} il
-36.00\% dei campioni \gls{ood}, \gls{excirefoto2025} nella configurazione
-\texttt{D50} riconduce alla classe \texttt{weapon} il 34.00\% degli input
-\gls{ood}, mentre \gls{cellebriteinseyets} presenta un weapon flag rate pari al
-29.20\%.
-
-Questi valori non rappresentano errori binari in senso stretto, poiché i
-campioni \gls{ood} non appartengono alla ground truth
-\texttt{weapon}/\texttt{non\_weapon}. Essi descrivono invece il rischio di
-assorbimento operativo di contenuti fuori distribuzione entro una classe
-investigativamente sensibile. Tale rischio può aumentare il carico di revisione
-dell'analista, generare prioritizzazioni fuorvianti o attribuire rilevanza
-operativa a contenuti che richiedono una valutazione contestuale più accurata.
-
-\paragraph{Configurazioni operative e sistemi di semantic retrieval.}
-
-La terza implicazione riguarda la configurazione operativa dei sistemi di
-semantic retrieval. Nel caso di \gls{excirefoto2025}, il parametro
-\texttt{Distance limit} non rappresenta una semplice opzione tecnica, ma una
-scelta che modifica direttamente il profilo di rischio del workflow. La
-configurazione \texttt{D20} riduce falsi positivi e segnalazioni \gls{ood}, ma
-aumenta il rischio di falsi negativi. La configurazione \texttt{D80} massimizza
-il recall sulla classe \texttt{weapon}, ma accresce il rumore operativo e il
-carico di revisione umana. La configurazione \texttt{D50} rappresenta una
-posizione intermedia nel contesto sperimentale considerato.
-
-Questo risultato è particolarmente rilevante perché mostra che, nei sistemi di
-retrieval, l'affidabilità operativa non dipende soltanto dal software utilizzato,
-ma anche dalla configurazione adottata, documentata e mantenuta tracciabile nel
-workflow. Due analisti che utilizzano lo stesso strumento con soglie differenti
-possono ottenere profili di errore diversi, soprattutto in termini di falsi
-positivi, falsi negativi e weapon flag rate sugli input \gls{ood}. Per questa
-ragione, la configurazione operativa deve essere considerata parte integrante
-della metodologia di valutazione e non un dettaglio accessorio.
-
-\paragraph{Tracciabilità e auditabilità del processo.}
-
-La quarta implicazione riguarda la tracciabilità. La pipeline proposta mantiene
-separati dataset, manifest, hash, bundle cieco, predizioni, metriche e output
-dei tool. Questa separazione consente di ricostruire il percorso sperimentale e
-di verificare in modo auditabile il rapporto tra input, manipolazione, output e
-ground truth. Tale requisito è essenziale in ambito forense, dove la
-riproducibilità e la documentazione del processo assumono valore metodologico,
-operativo e probatorio.
-
-Il forensic evaluation bundle, composto da 11\,500 file, consente di collegare
-ogni risultato ai corrispondenti artefatti tramite identificativi neutri e hash
-\gls{sha256}/\gls{md5}. Questa impostazione riduce il rischio che la valutazione
-dipenda da path, nomi di file o informazioni semantiche esposte ai tool. Inoltre,
-la presenza di manifest separati consente di distinguere tra errori di
-classificazione, mancati rilevamenti, output non interpretabili, limiti del
-mapping operativo e problemi derivanti dai formati di export dei singoli
-strumenti.
-
-\paragraph{Limiti della valutazione black-box.}
-
-La valutazione presenta limiti che devono essere dichiarati esplicitamente. I
-tool commerciali sono valutati come black-box o quasi black-box e non consentono
-di ispezionare modello, training set, soglie interne, preprocessing proprietario
-o logica completa di classificazione. Inoltre,
+La valutazione presenta inoltre limiti sperimentali. I tool commerciali sono
+analizzati come sistemi black-box o quasi black-box: non sono disponibili
+architettura, training set, soglie decisionali, preprocessing interno o logica
+completa di classificazione. La comparazione tra
 \gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025} e
-\gls{cellebriteinseyets} producono output di natura diversa. \gls{magnetai}
-espone un tag operativo riconducibile alla categoria \texttt{Possible weapons};
-\gls{excirefoto2025} è valutato come sistema di semantic retrieval, la cui
-decisione operativa dipende dalla soglia di similarità configurata;
-\gls{cellebriteinseyets} produce classificazioni osservabili esportate
-dall'ambiente \texttt{Cellebrite Physical Analyzer 10.9.0.3029}.
-
-La comparazione tra tali strumenti deve quindi essere interpretata come confronto
-operativo di triage, non come confronto tra classificatori omogenei o
-completamente ispezionabili. In altri termini, la valutazione non misura la
-qualità interna dei modelli proprietari, ma il comportamento osservabile dei
-sistemi quando vengono applicati allo stesso forensic evaluation bundle e quando
-i loro output vengono normalizzati rispetto al task sperimentale.
-
-Un ulteriore limite riguarda l'assenza, per alcuni strumenti commerciali, di
-score continui, calibrati e direttamente comparabili. A differenza dei modelli
-proxy, che espongono predizioni e confidenze numeriche, i tool black-box possono
-fornire tag, categorie o risultati di retrieval senza una misura quantitativa
-uniforme del grado di certezza. Per questa ragione, metriche come AUROC non sono
-state assunte come metrica centrale del confronto commerciale. La valutazione si
-concentra invece su \gls{tp}, \gls{tn}, \gls{fp}, \gls{fn}, matching rate,
-output non interpretabili, weapon recall, \gls{fnr}, \gls{fpr}, balanced
-accuracy ove applicabile e weapon flag rate sui campioni \gls{ood}.
-
-\paragraph{Limiti relativi ai metadati embedded.}
+\gls{cellebriteinseyets} deve quindi essere interpretata come confronto operativo
+di triage, non come confronto tra classificatori omogenei e pienamente
+ispezionabili. Per la stessa ragione, metriche come AUROC non sono state assunte
+come metriche centrali del confronto commerciale.
 
 Un limite controllato riguarda la possibile presenza residuale di metadati
-embedded nei file immagine. L'audit dedicato ha controllato tutti gli 11\,500
-file del bundle, rilevando 7\,640 file con metadati embedded e 15 file con
-sensitive hits. Tali casi sono stati analizzati separatamente nella
-Sezione~\ref{subsec:results-embedded-metadata-sensitivity}; non modificano in
-modo sostanziale l'interpretazione delle metriche aggregate, ma mostrano che la
-cecità strutturale del bundle non deve essere confusa con l'assenza assoluta di
-informazioni embedded nei file originari.
+embedded nei file immagine. L'audit ha rilevato 15 file con sensitive hits su
+11\,500 file complessivi. Tali casi sono stati analizzati separatamente nella
+Sezione~\ref{subsec:results-embedded-metadata-sensitivity} e non modificano in
+modo sostanziale l'interpretazione delle metriche aggregate. Essi costituiscono
+tuttavia un limite operativo documentato della cecità del bundle.
 
-Questo aspetto è particolarmente rilevante in ambito forense, poiché alcuni
-strumenti possono indicizzare informazioni non strettamente visuali, quali campi
-EXIF, XMP, IPTC o metadati descrittivi residui. La presenza di tali informazioni
-non invalida il protocollo sperimentale, ma richiede documentazione esplicita e
-controlli di sensitività. In questa tesi, i casi individuati sono trattati come
-limite operativo documentato della cecità del bundle e non come fattore
-invalidante dei risultati, poiché non incidono sugli artefatti adversariali o
-anti-forensi e producono variazioni trascurabili sulle metriche aggregate.
+Infine, la selezione delle perturbazioni non copre in modo esaustivo l'intero
+spazio dell'\gls{advml}. Gli attacchi adversariali e le trasformazioni
+anti-forensi sono stati selezionati come stressor sperimentali coerenti con la
+finalità forense della tesi. In particolare, gli attacchi model-dependent sono
+generati rispetto a EfficientNet-B0 e devono essere interpretati alla luce dello
+scenario white-box considerato; la loro trasferibilità verso altri modelli e tool
+commerciali viene valutata empiricamente, ma non assunta come proprietà generale.
 
-\paragraph{Limiti relativi alla selezione delle perturbazioni.}
-
-La selezione delle perturbazioni non mira a coprire in modo esaustivo l'intero
-spazio dell'\gls{advml}, ma a costruire uno stress test operativo coerente con
-la finalità forense della tesi. Gli attacchi adversariali e le trasformazioni
-anti-forensi sono quindi utilizzati come strumenti sperimentali per valutare la
-robustezza operativa, non come benchmark completo di sicurezza del machine
-learning.
-
-In particolare, gli attacchi model-dependent sono generati rispetto a
-EfficientNet-B0 e devono essere interpretati alla luce dello scenario white-box
-considerato. La loro trasferibilità verso altri modelli e tool commerciali viene
-valutata empiricamente, ma non assunta come proprietà generale. Questo limite è
-metodologicamente rilevante: la severità osservata su EfficientNet-B0 sotto
-\gls{sigmazero} non deve essere automaticamente estesa agli altri sistemi, così
-come la maggiore stabilità apparente di alcuni tool commerciali non deve essere
-interpretata come certificazione generale di robustezza adversarial.
-
-\paragraph{Sintesi operativa.}
-
-Nel contesto sperimentale di \gls{fairlab}, i risultati mostrano che sistemi con
-accuracy clean elevata, come EfficientNet-B0 e ResNet18, possono produrre un
-incremento significativo dei falsi negativi in presenza di specifiche
-perturbazioni adversariali. Allo stesso tempo, tool commerciali con buone
-prestazioni aggregate possono comunque segnalare come rilevanti immagini fuori
-distribuzione, produrre falsi negativi sulla classe \texttt{weapon} o mostrare
-profili di errore sostanzialmente diversi al variare delle soglie operative
-adottate. \gls{cellebriteinseyets} mostra, nel bundle considerato, il profilo
-commerciale più stabile tra i tool finali, con clean accuracy pari a 0.964,
-\gls{fnr} clean pari a 0.032 e weapon flag rate \gls{ood} pari a 0.292. Tali
-valori descrivono tuttavia il comportamento osservato nel protocollo
-sperimentale, non una certificazione generale di robustezza.
-
-In conclusione, i risultati indicano che l'\gls{ai} può supportare il triage e
-la prioritizzazione delle evidenze digitali, ma deve rimanere inserita in un
-workflow human-in-the-loop, tracciabile e soggetto a verifica critica da parte
-dell'analista forense. L'output automatico deve essere interpretato come ausilio
-operativo, non come evidenza autonoma o decisione conclusiva. La robustezza
-operativa richiede quindi valutazioni esplicite su dati clean, input \gls{ood},
-perturbazioni adversariali, trasformazioni anti-forensi e output commerciali
-normalizzati, mantenendo sempre documentati limiti, configurazioni e assunzioni
-del processo sperimentale.
+Nel complesso, questa sezione chiude l'analisi dei risultati evidenziando i
+principali limiti sperimentali e i profili di rischio osservati. Le implicazioni
+più generali per l'uso dell'\gls{ai} nei workflow forensi, incluse le esigenze di
+tracciabilità, validazione indipendente e controllo human-in-the-loop, sono
+riprese nel Capitolo~\ref{chap:conclusions}.
