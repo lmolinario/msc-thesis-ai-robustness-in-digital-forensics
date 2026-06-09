@@ -33,10 +33,10 @@ Il percorso sperimentale ha compreso la costruzione di un dataset frozen da
 produzione del forensic evaluation bundle da 11\,500 file per la valutazione
 black-box di Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets.
 
-Il framework metodologico adottato è denominato \gls{fairlab}. Esso non
-rappresenta un nuovo tool software, ma un protocollo sperimentale riproducibile e
-auditabile per la valutazione della robustezza operativa di sistemi \gls{ai}-based
-in scenari di \gls{df}. La sua struttura consente di collegare dataset, modelli
+Il protocollo sperimentale adottato è denominato \gls{fairlab}. Esso non
+rappresenta un nuovo tool software né una nuova architettura generale, ma una procedura
+riproducibile e auditabile per la valutazione della robustezza operativa di
+sistemi \gls{ai}-based in scenari di \gls{df}. La sua struttura consente di collegare dataset, modelli
 proxy, perturbazioni, trasformazioni, bundle cieco, manifest, hash, output
 commerciali normalizzati, metriche quantitative e analisi qualitativa \gls{xai}
 in un'unica pipeline tracciabile. In questo modo, la coerenza tra costruzione del
@@ -62,7 +62,7 @@ interpretazione forense.
 
 \textbf{Contributo metodologico.} Il primo contributo consiste nella definizione
 di \gls{fairlab} come protocollo sperimentale integrato per la valutazione della
-robustezza operativa di sistemi \gls{ai}-based in \gls{df}. Il framework collega
+robustezza operativa di sistemi \gls{ai}-based in \gls{df}. Il protocollo collega
 in modo esplicito dataset, modelli proxy, perturbazioni adversariali e
 anti-forensi, metriche di valutazione, controlli di tracciabilità, output
 commerciali normalizzati e analisi qualitativa. Il valore del protocollo non
@@ -422,7 +422,7 @@ protocolli condivisi per la validazione dei sistemi \gls{ai}-based in \gls{df}.
 Ciò includerebbe la standardizzazione delle metriche forensi, la definizione di
 dataset controllati, il versioning dei tool e dei modelli, la produzione di
 report riproducibili e la creazione di procedure di audit indipendenti. Il
-framework \gls{fairlab} può offrire elementi utili per tale discussione, nella
+protocollo \gls{fairlab} può offrire elementi utili per tale discussione, nella
 misura in cui venga esteso, replicato e confrontato con approcci alternativi in
 contesti operativi più ampi.
 
@@ -439,7 +439,7 @@ produrre errori rilevanti, anche ad alta confidenza, con implicazioni dirette pe
 il triage investigativo.
 
 Il contributo metodologico del lavoro consiste nel rendere questo problema
-sperimentalmente verificabile e tracciabile attraverso il framework \gls{fairlab}
+sperimentalmente verificabile e tracciabile attraverso il protocollo \gls{fairlab}
 e il forensic evaluation bundle. Il passaggio da una valutazione astratta della
 robustezza a una valutazione orientata alle condizioni operative del triage
 forense rappresenta il principale cambiamento di prospettiva proposto dalla tesi.
@@ -450,6 +450,6 @@ specifici, dipendenti dalla condizione di input, dalla configurazione e dal task
 Questa evidenza non invalida l'uso dell'\gls{ai} nel workflow forense, ma ne
 definisce i prerequisiti metodologici: validazione task-specific,
 documentazione della configurazione operativa, gestione esplicita degli input
-anomali e controllo umano sul risultato. Il framework \gls{fairlab} propone una
+anomali e controllo umano sul risultato. Il protocollo \gls{fairlab} propone una
 struttura sperimentale per rendere tali prerequisiti verificabili, auditabili e
 riproducibili.
