@@ -1,7 +1,3 @@
-parametri attacchi adv e settining antiforensic
-
-
-
 Ciao Lello! Sono riuscita a finire di leggere la tua tesi. ti mando alcuni commenti. mi ricordi quando vorresti laurearti?
 
 Titolo: Evaluating the Robustness of AI-based Forensics Tools under Adversarial and Anti-Forensics Attacks **(ho cambiato titiolo mi sembrava piú leggibile...)**
