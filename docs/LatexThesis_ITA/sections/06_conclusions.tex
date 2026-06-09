@@ -238,193 +238,120 @@ da tool black-box.
 \section{Limitations}
 \label{sec:conclusions-limitations}
 % ─────────────────────────────────────────────────────────────────────────────
+Il presente lavoro presenta alcuni limiti che devono essere dichiarati esplicitamente,
+affinché le conclusioni siano interpretate in modo corretto. Tali limiti non
+invalidano il protocollo sperimentale, ma ne delimitano il perimetro di validità e
+chiariscono in quali condizioni i risultati possono essere generalizzati.
 
-Il presente lavoro presenta limiti che devono essere dichiarati esplicitamente,
-affinché le conclusioni siano interpretate in modo corretto.
+Un primo limite riguarda il dataset e il task sperimentale. Il dataset costruito è
+finalizzato a un problema investigativo specifico: la classificazione binaria tra
+\texttt{weapon} e \texttt{non\_weapon}, con valutazione separata dei campioni
+\gls{ood}. La dimensione complessiva, pari a 1\,500 immagini, consente una
+valutazione controllata e tracciabile, ma non copre l'intera variabilità dei contenuti
+visivi che possono emergere in indagini reali. I risultati non devono quindi essere
+generalizzati automaticamente a task multi-classe, domini visivi differenti, contenuti
+forensi di altra natura o scenari nei quali la rilevanza investigativa dipenda da
+elementi contestuali non rappresentati nel dataset. Inoltre, la costruzione del corpus
+include una componente \textit{human-in-the-loop}: tale scelta aumenta la qualità
+semantica del dataset e riduce il rischio di includere campioni ambigui o non
+pertinenti, ma introduce anche una componente di giudizio umano nella selezione
+finale. Questa componente non viene nascosta né trattata come automatica: è
+documentata mediante manifest, criteri di inclusione, criteri di esclusione e
+bilanciamento. Di conseguenza, la riproducibilità riguarda la pipeline congelata e
+gli artefatti finali, mentre la fase di costruzione del dataset deve essere interpretata
+come processo controllato e auditabile, non come procedura interamente automatica.
 
-\subsection{Dataset and Task Scope}
-\label{subsec:conclusions-limitations-dataset}
+Un secondo limite riguarda la copertura delle perturbazioni e delle trasformazioni
+considerate. Gli attacchi adversariali e le trasformazioni anti-forensi selezionate non
+coprono l'intero spazio delle manipolazioni possibili. La scelta è stata guidata dalla
+rappresentatività operativa, dalla sostenibilità computazionale e dalla coerenza con
+la finalità forense della tesi, non dall'esaustività. Inoltre, gli attacchi dipendenti dal
+modello sono generati rispetto a EfficientNet-B0 e devono essere interpretati alla luce
+dello scenario white-box considerato. Le trasformazioni anti-forensi, invece, sono
+model-agnostic e rappresentano degradazioni realistiche dell'immagine, ma non
+esauriscono tutte le possibili tecniche di occultamento, manipolazione o
+contraffazione applicabili a evidenze visive.
 
-Il dataset costruito è finalizzato a un task investigativo specifico:
-classificazione binaria tra \texttt{weapon} e \texttt{non\_weapon}, con gestione
-separata di campioni \gls{ood}. La sua dimensione, pari a 1\,500 immagini totali,
-consente una valutazione controllata ma non copre l'intera variabilità dei
-contenuti visivi che possono emergere nelle indagini reali. I risultati non
-possono quindi essere generalizzati direttamente a task multi-classe, domini
-visivi differenti o contenuti forensi di altra natura.
+Un terzo limite riguarda la comparabilità tra modelli proxy e strumenti commerciali
+black-box. I proxy model consentono una valutazione controllata, con accesso a
+predizioni, confidenza e condizioni sperimentali pienamente tracciabili. I software
+commerciali, invece, sono osservabili soltanto attraverso gli output esportabili e non
+permettono di accedere ad architettura, dati di addestramento, soglie decisionali,
+logica di pre-processing o meccanismi interni di classificazione. Per questo motivo,
+il confronto tra proxy e tool commerciali deve essere inteso come confronto operativo
+di triage, non come valutazione di classificatori omogenei su label identiche. Anche
+la ricodifica delle categorie commerciali verso le classi \texttt{weapon} e
+\texttt{non\_weapon} introduce una componente di incertezza interpretativa: tale
+mapping è controllato e documentato, ma non può eliminare completamente i limiti
+derivanti dall'opacità dei sistemi black-box.
 
-\subsection{Human-in-the-Loop Selection}
-\label{subsec:conclusions-limitations-human}
-
-Il processo di costruzione del dataset include una componente
-\textit{human-in-the-loop}. Questa scelta aumenta la qualità semantica del dataset
-e riduce il rischio di includere campioni ambigui o non pertinenti, ma introduce
-anche una componente di giudizio umano nella selezione finale. Tale componente
-non viene nascosta né trattata come completamente automatica: è documentata
-mediante manifest, criteri di inclusione, criteri di esclusione e bilanciamento.
-Di conseguenza, la riproducibilità del protocollo riguarda la pipeline congelata
-e gli artefatti finali, mentre la fase di costruzione del dataset deve essere
-interpretata come processo controllato e auditabile, non come procedura
-interamente automatica.
-
-\subsection{Attack and Anti-Forensic Coverage}
-\label{subsec:conclusions-limitations-attacks}
-
-Le perturbazioni adversariali e le trasformazioni anti-forensi selezionate non
-coprono l'intero spazio delle manipolazioni possibili. La scelta è stata guidata
-dalla rappresentatività operativa e dalla coerenza con la finalità forense della
-tesi, non dall'esaustività. Inoltre, gli attacchi dipendenti dal modello sono
-generati rispetto a EfficientNet-B0 e devono essere interpretati alla luce dello
-scenario white-box considerato. La trasferibilità verso altri modelli e tool
-commerciali è valutata empiricamente, ma non assunta come proprietà generale.
-
-\subsection{Proxy Models and Commercial Black-Box Tools}
-\label{subsec:conclusions-limitations-models}
-
-I modelli proxy impiegati sono utili per costruire una baseline trasparente e
-riproducibile, ma non sono equivalenti ai modelli interni dei tool commerciali.
-Gli strumenti valutati espongono solo output osservabili e non consentono di
-ispezionare architettura, training set, soglie decisionali, preprocessing interno
-o logica completa di classificazione. La comparazione tra proxy e tool
-commerciali deve quindi essere interpretata come confronto operativo di triage,
-non come confronto tra classificatori omogenei.
-
-Un ulteriore limite riguarda l'assenza, per alcuni strumenti commerciali, di
-score continui, calibrati e direttamente comparabili. Inoltre, la ricodifica
-delle categorie commerciali verso le classi \texttt{weapon}/\texttt{non\_weapon}
-è una scelta sperimentale controllata e documentata, ma introduce una componente
-di incertezza interpretativa che non può essere eliminata senza accesso alla
-logica interna del tool. Di conseguenza, il confronto tra proxy e tool
-commerciali deve essere inteso come confronto operativo di triage, non come
-valutazione di classificatori omogenei su label identiche. Per questa ragione,
-metriche come AUROC non sono state assunte come metriche centrali del confronto
-commerciale. La valutazione si concentra invece su \gls{tp}, \gls{tn},
-\gls{fp}, \gls{fn}, matching rate, output non interpretabili, weapon recall,
-\gls{fnr}, \gls{fpr}, balanced accuracy ove applicabile e weapon flag rate sui
-campioni \gls{ood}.
-
-\subsection{Embedded Metadata and Bundle Blindness}
-\label{subsec:conclusions-limitations-metadata}
-
-Un limite controllato riguarda la possibile presenza residuale di metadati
-embedded nei file immagine. L'audit dedicato ha controllato tutti gli 11\,500 file
-del bundle, rilevando 7\,640 file con metadati embedded e 15 file con sensitive
-hits. Tali casi non modificano in modo sostanziale l'interpretazione delle
-metriche aggregate, ma mostrano che la cecità strutturale del bundle non deve
-essere confusa con l'assenza assoluta di informazioni embedded nei file originari.
-La presenza di tali informazioni è stata quindi documentata come limite operativo
-controllato.
-
-\subsection{Scope of the XAI Analysis}
-\label{subsec:conclusions-limitations-xai}
-
-L'analisi \gls{xai} basata su \gls{ig} è stata condotta come studio qualitativo
-su cinque casi rappresentativi di EfficientNet-B0. I risultati offrono un
-contributo interpretativo su comportamenti decisionali specifici, ma non
-costituiscono una valutazione sistematica della robustezza e non si estendono ai
-tool commerciali black-box. Le attribution map devono quindi essere interpretate
-come strumenti di supporto alla revisione, non come metriche primarie di
-affidabilità.
-
-\subsection{Legal Admissibility and Evidentiary Validity}
-\label{subsec:conclusions-limitations-legal}
-
-Il presente lavoro non include una valutazione dell'ammissibilità giuridica degli
-output prodotti dai sistemi \gls{ai}-based analizzati. Le metriche adottate,
-come accuracy, weapon recall, \gls{fnr}, matching rate e weapon flag rate, sono
-metriche operative di triage e non criteri di validazione probatoria. L'output di
-un classificatore o di un tool di semantic retrieval non costituisce, di per sé,
-una determinazione probatoria autonoma: la sua rilevanza deve essere valutata
-nel contesto della catena di custodia digitale, della documentazione della
-versione e della configurazione del tool, della validazione indipendente e del
-quadro normativo applicabile. Questa dimensione richiede un percorso di
-validazione separato, che va oltre lo scope sperimentale della presente tesi.
+Un quarto limite riguarda l'interpretazione forense degli output automatici. La
+verifica sui metadata sensibili ha mostrato che una parte degli output commerciali
+può essere influenzata da informazioni incorporate nei file; la costruzione del bundle
+cieco riduce questo rischio, ma non dimostra l'assenza di qualunque forma di
+dipendenza residua da metadati, nomi interni o artefatti non visivi. Analogamente,
+l'analisi \gls{xai} basata su \gls{ig} è stata condotta come studio qualitativo su casi
+rappresentativi di EfficientNet-B0: essa supporta l'interpretazione diagnostica dei
+failure case, ma non costituisce una metrica quantitativa di robustezza né una prova
+della correttezza del modello. Infine, il presente lavoro non include una valutazione
+dell'ammissibilità giuridica degli output prodotti dai sistemi \gls{ai}-based analizzati.
+Le metriche adottate, come accuracy, weapon recall, \gls{fnr}, matching rate e
+weapon flag rate, sono metriche operative di triage e non criteri di validazione
+probatoria. L'output di un classificatore o di un tool di semantic retrieval non
+costituisce, di per sé, una determinazione probatoria autonoma: la sua rilevanza deve
+essere valutata nel contesto della catena di custodia digitale, della documentazione
+della versione e della configurazione del tool, della validazione indipendente e del
+quadro normativo applicabile.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Future Work}
 \label{sec:conclusions-future-work}
 % ─────────────────────────────────────────────────────────────────────────────
+Le direzioni di sviluppo futuro derivano direttamente dai limiti dichiarati e dalle
+evidenze emerse nel corso del lavoro. Esse possono essere ricondotte a tre linee
+principali: estensione della validazione sperimentale, miglioramento della gestione
+dell'incertezza e rafforzamento della riproducibilità.
 
-Le direzioni di sviluppo futuro derivano direttamente dai limiti dichiarati e
-dalle evidenze emerse nel corso del lavoro.
+La prima direzione riguarda l'estensione del protocollo sperimentale a ulteriori
+versioni, configurazioni e categorie operative dei tool commerciali analizzati. Poiché
+Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets sono sistemi
+black-box, i risultati ottenuti su una versione specifica non devono essere assunti
+come validi per release future, impostazioni differenti o funzionalità non esportate
+nel presente studio. Una validazione più ampia dovrebbe quindi ripetere il protocollo
+al variare delle versioni software, delle configurazioni operative e delle categorie
+semantiche disponibili. In parallelo, sarebbe utile estendere il dataset verso task
+multi-classe, domini visivi differenti e immagini acquisite in condizioni operative più
+eterogenee, includendo export da dispositivi reali, contenuti provenienti da piattaforme
+social o app di messaggistica e immagini degradate da pipeline di acquisizione forense.
 
-\subsection{Extension of Commercial Tool Validation}
-\label{subsec:conclusions-future-commercial}
+La seconda direzione riguarda la gestione dell'incertezza e degli input fuori
+distribuzione. I risultati sui campioni \gls{ood} mostrano che i sistemi valutati
+possono assorbire contenuti anomali in una delle classi operative, talvolta con livelli
+di confidenza non trascurabili. Una prosecuzione naturale del lavoro consisterebbe
+nell'integrare meccanismi di uncertainty estimation, rejection option, calibrazione
+della confidenza e \gls{ood} detection, così da ridurre il rischio di classificazioni
+forzate su input non pertinenti al task. In questa prospettiva rientra anche la
+valutazione di ulteriori strategie di attacco e difesa, inclusi attacchi transfer-based,
+adversarial patches, trasformazioni fisiche o ibride, nonché forme di adversarial
+training e pre-processing robusto. Tuttavia, tali estensioni dovrebbero essere
+mantenute subordinate alla finalità forense della valutazione, evitando che il lavoro
+si trasformi in un benchmark puramente algoritmico di \gls{advml}.
 
-Una prima direzione consiste nell'estendere la valutazione a ulteriori versioni,
-configurazioni e categorie operative dei tool commerciali già analizzati.
-Poiché Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets sono
-sistemi black-box, risultati ottenuti su una versione specifica non devono essere
-assunti come validi per versioni future o configurazioni diverse. Sarà quindi
-utile ripetere il protocollo al variare delle release, delle impostazioni
-operative e delle funzionalità esportabili.
-
-\subsection{Dataset Extension and Shared Benchmarks}
-\label{subsec:conclusions-future-dataset}
-
-Un'estensione significativa del lavoro consisterebbe nell'ampliare il dataset
-verso task multi-classe, domini visivi differenti e immagini acquisite in
-condizioni operative più eterogenee, inclusi export da dispositivi reali,
-contenuti provenienti da piattaforme social o app di messaggistica e immagini
-degradate da pipeline di acquisizione forense. In prospettiva più ampia, la
-costruzione di benchmark condivisi e standardizzati per la valutazione
-\gls{ai}-based in \gls{df} costituirebbe una risorsa metodologica rilevante.
-
-\subsection{Reproducibility Packages and Independent Verification}
-\label{subsec:conclusions-future-reproducibility}
-
-Un'ulteriore direzione riguarda la produzione di pacchetti di riproducibilità
-pubblici, compatibilmente con i vincoli di licenza e distribuzione dei dataset.
-Anche quando le immagini non possono essere redistribuite integralmente, script,
+La terza direzione riguarda la verificabilità del protocollo e l'integrazione di strumenti
+interpretativi nei workflow forensi. Anche quando le immagini non possono essere
+redistribuite integralmente per ragioni di licenza o sensibilità del dato, script,
 manifest, configurazioni, hash, metriche aggregate e procedure di normalizzazione
-possono essere resi disponibili per consentire la verifica indipendente del
-protocollo sperimentale. Tale direzione è particolarmente rilevante per i tool
-commerciali black-box, per i quali la ripetibilità della procedura e la chiarezza
-dei criteri di mapping diventano elementi centrali della validazione.
-
-\subsection{Uncertainty Management and OOD Handling}
-\label{subsec:conclusions-future-ood}
-
-I risultati ottenuti sui campioni \gls{ood} mostrano che i sistemi valutati
-possono assorbire input fuori distribuzione in una delle classi operative.
-Sviluppi futuri potranno esplorare meccanismi espliciti di gestione
-dell'incertezza, come reject option, soglie calibrate, confidence calibration e
-flag di revisione umana, in modo da ridurre classificazioni improprie in presenza
-di campioni anomali, borderline o sintetici.
-
-\subsection{Evaluation of Additional Attack and Defense Strategies}
-\label{subsec:conclusions-future-attacks-defense}
-
-Un'ulteriore direzione riguarda l'inclusione di famiglie di attacco non
-considerate nel presente protocollo, incluse perturbazioni generative o
-GAN-based, e la valutazione di strategie difensive come adversarial training,
-denoising, ensemble, preprocessing robusto e detection delle perturbazioni. Tali
-estensioni dovrebbero mantenere il focus sulla robustezza operativa in ambito
-forense, evitando di trasformare il benchmark in una valutazione esaustiva di
-\gls{advml} puro.
-
-\subsection{XAI Integration in Forensic Tools}
-\label{subsec:conclusions-future-xai}
-
-I risultati dell'analisi \gls{ig} suggeriscono che le tecniche di
-interpretabilità possono supportare la revisione critica delle decisioni
-automatiche. Un'estensione naturale consisterebbe nell'integrare meccanismi
-\gls{xai} nei tool forensi commerciali, sotto forma di saliency map, regioni di
-attenzione, motivazione del tag o report esportabile. Tale sviluppo richiederebbe
-però maggiore trasparenza architetturale o interfacce dedicate da parte dei
-produttori.
-
-\subsection{Standardisation of AI Validation in Digital Forensics}
-\label{subsec:conclusions-future-standard}
-
-Tra le direzioni più ampie, una delle più rilevanti riguarda la definizione di
-protocolli condivisi per la validazione dei sistemi \gls{ai}-based in \gls{df}.
-Ciò includerebbe la standardizzazione delle metriche forensi, la definizione di
-dataset controllati, il versioning dei tool e dei modelli, la produzione di
-report riproducibili e la creazione di procedure di audit indipendenti. Il
-protocollo \gls{fairlab} può offrire elementi utili per tale discussione, nella
-misura in cui venga esteso, replicato e confrontato con approcci alternativi in
-contesti operativi più ampi.
+possono essere resi disponibili per consentire una verifica indipendente della
+pipeline sperimentale. Tale esigenza è particolarmente rilevante per i tool commerciali
+black-box, per i quali la ripetibilità della procedura e la chiarezza dei criteri di
+mapping diventano elementi centrali della validazione. In prospettiva, anche
+l'integrazione di metodi \gls{xai} nei software forensi potrebbe migliorare la
+trasparenza degli output automatici, purché tali spiegazioni siano trattate come
+supporto diagnostico e non come prova autonoma della correttezza della
+classificazione. Più in generale, il lavoro suggerisce la necessità di protocolli condivisi
+per la validazione dell'\gls{ai} in \gls{df}, includendo metriche forensi, versioning dei
+tool, documentazione degli errori, benchmark controllati e procedure di audit
+indipendenti.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Closing Remarks}
