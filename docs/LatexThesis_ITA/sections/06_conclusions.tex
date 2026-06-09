@@ -13,7 +13,7 @@ l'affidabilità operativa di sistemi \gls{ai}-based impiegati nel triage forense
 di immagini. In molti scenari applicativi, tali sistemi vengono valutati
 principalmente su dati puliti e semanticamente coerenti. Tuttavia, nei workflow
 di \gls{df}, le immagini possono essere eterogenee, ambigue, fuori distribuzione,
-ricompressse, ridimensionate, alterate o deliberatamente manipolate. In questo
+ricompresse, ridimensionate, alterate o deliberatamente manipolate. In questo
 contesto, la sola prestazione nominale non è sufficiente per stabilire se un
 sistema possa essere utilizzato in modo affidabile come supporto alla revisione
 investigativa.
@@ -35,8 +35,7 @@ controllata. La seconda fase ha riguardato la valutazione dei modelli proxy
 EfficientNet-B0, ResNet18 e \gls{clip} in condizioni clean, \gls{ood},
 anti-forensi e adversariali. La terza fase ha riguardato la costruzione del
 forensic evaluation bundle da 11\,500 file e la valutazione black-box di
-\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025} e
-\gls{cellebriteinseyets}.
+Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets.
 
 Il framework metodologico adottato è denominato \gls{fairlab}. Esso non
 rappresenta un nuovo tool software, ma un protocollo sperimentale riproducibile e
@@ -46,55 +45,62 @@ proxy, perturbazioni, trasformazioni, bundle cieco, manifest, hash, output
 commerciali normalizzati, metriche quantitative e analisi qualitativa \gls{xai}
 in un'unica pipeline tracciabile.
 
+Il risultato complessivo della tesi è che la validazione di strumenti
+\gls{ai}-based in ambito forense non può essere ridotta alla verifica della
+prestazione nominale su dati puliti. Essa deve essere trattata come una procedura
+sperimentale specifica per task, versione del tool, configurazione operativa e
+condizioni di input. In questa prospettiva, la robustezza non è una proprietà
+astratta del modello, ma una proprietà osservabile del sistema nel workflow
+investigativo in cui viene impiegato.
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Main Contributions}
 \label{sec:conclusions-contributions}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Il contributo della tesi si articola su più livelli.
+Il contributo della tesi può essere ricondotto a quattro risultati principali,
+che collegano metodologia, costruzione del benchmark, valutazione sperimentale e
+interpretazione forense.
 
-Il primo contributo consiste nella definizione del framework \gls{fairlab} come
-protocollo sperimentale integrato per la valutazione della robustezza operativa
-di sistemi \gls{ai}-based in \gls{df}. Il framework collega dataset, modelli
-proxy, perturbazioni adversariali e anti-forensi, metriche di valutazione,
-controlli di tracciabilità, output commerciali normalizzati e analisi qualitativa
-in un disegno sperimentale coerente.
+\textbf{Contributo metodologico.} Il primo contributo consiste nella definizione
+di \gls{fairlab} come protocollo sperimentale integrato per la valutazione della
+robustezza operativa di sistemi \gls{ai}-based in \gls{df}. Il framework collega
+in modo esplicito dataset, modelli proxy, perturbazioni adversariali e
+anti-forensi, metriche di valutazione, controlli di tracciabilità, output
+commerciali normalizzati e analisi qualitativa. Il valore del protocollo non
+risiede nella proposta di un nuovo classificatore, ma nella formalizzazione di una
+pipeline auditabile per testare sistemi esistenti in condizioni non ideali.
 
-Il secondo contributo riguarda la costruzione di un dataset frozen da 1500
-immagini bilanciate, articolato nelle classi \texttt{weapon},
-\texttt{non\_weapon} e \texttt{ood}, e di un subset binario ufficiale da 1000
-immagini destinato alla generazione e alla valutazione delle perturbazioni. Il
-processo di selezione adotta un paradigma \textit{human-in-the-loop} documentato
-come parte integrante della metodologia.
+\textbf{Contributo sperimentale.} Il secondo contributo riguarda la costruzione
+di una base sperimentale congelata. Il dataset finale comprende 1500 immagini
+bilanciate nelle classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood},
+mentre il subset binario ufficiale comprende 1000 immagini destinate alla
+generazione e alla valutazione delle perturbazioni. Su questa base sono state
+prodotte cinque famiglie di perturbazioni adversariali, ossia \gls{fgsm},
+\gls{superdeepfool}, \gls{sigmazero}, \gls{onepixel} e \gls{colorshift}, e
+cinque trasformazioni anti-forensi model-agnostic, ossia
+\gls{jpegrecompression}, \gls{resampleresize}, \gls{gaussianblur},
+\gls{histogrammodification} e \gls{contraststretching}.
 
-Il terzo contributo è la generazione sistematica di cinque famiglie di
-perturbazioni adversariali, ossia \gls{fgsm}, \gls{superdeepfool},
-\gls{sigmazero}, \gls{onepixel} e \gls{colorshift}, e di cinque trasformazioni
-anti-forensi model-agnostic, ossia \gls{jpegrecompression},
-\gls{resampleresize}, \gls{gaussianblur}, \gls{histogrammodification} e
-\gls{contraststretching}. Tali condizioni sono state selezionate per costruire
-uno stress test operativo coerente con il contesto forense.
+\textbf{Contributo di benchmark e tracciabilità.} Il terzo contributo consiste
+nella costruzione del forensic evaluation bundle, composto da 11\,500 file
+organizzati in condizioni clean, \gls{ood}, adversariali e anti-forensi. Il
+bundle è predisposto per la valutazione black-box mediante naming cieco,
+manifest separati, identificativi neutri e hash \gls{sha256}/\gls{md5}. Questa
+struttura consente di collegare ogni output finale al relativo artefatto
+sperimentale, mantenendo separati contenuto, condizione di test, provenienza,
+identificativo e risultato metrico.
 
-Il quarto contributo consiste nella costruzione del forensic evaluation bundle,
-composto da 11\,500 file organizzati in condizioni clean, \gls{ood}, adversariali
-e anti-forensi. Il bundle è predisposto per la valutazione black-box mediante
-naming cieco, manifest separati, identificativi neutri e hash \gls{sha256}/\gls{md5}.
-
-Il quinto contributo riguarda la valutazione comparativa dei modelli proxy
-EfficientNet-B0, ResNet18 e \gls{clip}, mantenendo disponibili architetture,
-checkpoint, predizioni, confidenze e metriche per l'ispezione sperimentale.
-
-Il sesto contributo è la valutazione black-box di tre sistemi commerciali finali:
-\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025} e
-\gls{cellebriteinseyets}. I tool sono stati valutati mediante output osservabili,
-export normalizzati e ricodifica operativa rispetto al task
+\textbf{Contributo valutativo e interpretativo.} Il quarto contributo riguarda
+la valutazione comparativa di tre modelli proxy, EfficientNet-B0, ResNet18 e
+\gls{clip}, e di tre sistemi commerciali finali, Magnet AXIOM/Magnet.AI, Excire
+Foto 2025 e Cellebrite Inseyets. I tool commerciali sono stati valutati mediante
+output osservabili, export normalizzati e ricodifica operativa rispetto al task
 \texttt{weapon}/\texttt{non\_weapon}, mantenendo separata la valutazione dei
-campioni \gls{ood}.
-
-Il settimo contributo è l'analisi qualitativa tramite \gls{ig} su casi
-rappresentativi di EfficientNet-B0. Tale analisi supporta l'interpretazione di
-successi e fallimenti specifici, ma non viene trattata come metrica primaria né
-come spiegazione dei tool commerciali black-box.
+campioni \gls{ood}. L'analisi qualitativa tramite \gls{ig} su casi
+rappresentativi di EfficientNet-B0 completa il contributo interpretativo,
+supportando la lettura critica dei failure mode senza sostituire le metriche
+quantitative.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Main Experimental Findings}
@@ -106,11 +112,11 @@ ridotta alla sola accuracy clean. Sistemi con prestazioni nominali elevate posso
 mostrare comportamenti critici in presenza di input fuori distribuzione,
 trasformazioni anti-forensi o perturbazioni adversariali. La
 Tabella~\ref{tab:conclusions-main-findings} riassume le principali evidenze
-emerse dall'analisi.
+emerse dall'analisi in forma interpretativa.
 
 \begin{table}[H]
 \centering
-\caption{Sintesi delle principali evidenze sperimentali per area di valutazione.}
+\caption{Sintesi interpretativa delle principali evidenze sperimentali.}
 \label{tab:conclusions-main-findings}
 \small
 \renewcommand{\arraystretch}{1.2}
@@ -165,6 +171,14 @@ come elemento probatorio autonomo. La predizione del sistema deve essere trattat
 come indicazione tecnica da sottoporre a verifica, contestualizzazione e
 documentazione da parte dell'analista.
 
+In termini forensi, l'output di un sistema \gls{ai}-based deve essere inteso come
+un'indicazione investigativa e non come una determinazione probatoria autonoma.
+La sua utilità dipende dalla possibilità di ricostruire il contesto di
+generazione, la configurazione del tool, il dataset di riferimento, le soglie
+operative e il successivo controllo umano. Questo è particolarmente rilevante per
+i tool black-box, nei quali l'osservabilità è limitata agli output esportati e
+alla loro normalizzazione sperimentale.
+
 La seconda implicazione riguarda i falsi negativi. In un workflow di triage
 forense, un falso negativo sulla classe \texttt{weapon} può essere più critico di
 un falso positivo, perché può ridurre la probabilità che un contenuto rilevante
@@ -181,7 +195,7 @@ produrre prioritizzazioni fuorvianti o generare flag relativi ad armi su materia
 non appartenente al task binario previsto.
 
 La quarta implicazione riguarda la configurazione dei sistemi di semantic
-retrieval. Nel caso di \gls{excirefoto2025}, il parametro \texttt{Distance limit}
+retrieval. Nel caso di Excire Foto 2025, il parametro \texttt{Distance limit}
 modifica direttamente il trade-off tra falsi negativi e falsi positivi. La
 configurazione \texttt{D20} è più restrittiva, \texttt{D80} è più permissiva e
 \texttt{D50} rappresenta un compromesso intermedio nel contesto sperimentale.
@@ -221,6 +235,20 @@ consente una valutazione controllata ma non copre l'intera variabilità dei
 contenuti visivi che possono emergere nelle indagini reali. I risultati non
 possono quindi essere generalizzati direttamente a task multi-classe, domini
 visivi differenti o contenuti forensi di altra natura.
+
+\subsection{Human-in-the-Loop Selection}
+\label{subsec:conclusions-limitations-human}
+
+Il processo di costruzione del dataset include una componente
+\textit{human-in-the-loop}. Questa scelta aumenta la qualità semantica del dataset
+e riduce il rischio di includere campioni ambigui o non pertinenti, ma introduce
+anche una componente di giudizio umano nella selezione finale. Tale componente
+non viene nascosta né trattata come completamente automatica: è documentata
+mediante manifest, criteri di inclusione, criteri di esclusione e bilanciamento.
+Di conseguenza, la riproducibilità del protocollo riguarda la pipeline congelata
+e gli artefatti finali, mentre la fase di costruzione del dataset deve essere
+interpretata come processo controllato e auditabile, non come procedura
+interamente automatica.
 
 \subsection{Attack and Anti-Forensic Coverage}
 \label{subsec:conclusions-limitations-attacks}
@@ -288,11 +316,11 @@ dalle evidenze emerse nel corso del lavoro.
 
 Una prima direzione consiste nell'estendere la valutazione a ulteriori versioni,
 configurazioni e categorie operative dei tool commerciali già analizzati.
-Poiché \gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025} e
-\gls{cellebriteinseyets} sono sistemi black-box, risultati ottenuti su una
-versione specifica non devono essere assunti come validi per versioni future o
-configurazioni diverse. Sarà quindi utile ripetere il protocollo al variare delle
-release, delle impostazioni operative e delle funzionalità esportabili.
+Poiché Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets sono
+sistemi black-box, risultati ottenuti su una versione specifica non devono essere
+assunti come validi per versioni future o configurazioni diverse. Sarà quindi
+utile ripetere il protocollo al variare delle release, delle impostazioni
+operative e delle funzionalità esportabili.
 
 \subsection{Dataset Extension and Shared Benchmarks}
 \label{subsec:conclusions-future-dataset}
@@ -304,6 +332,18 @@ contenuti provenienti da piattaforme social o app di messaggistica e immagini
 degradate da pipeline di acquisizione forense. In prospettiva più ampia, la
 costruzione di benchmark condivisi e standardizzati per la valutazione
 \gls{ai}-based in \gls{df} costituirebbe una risorsa metodologica rilevante.
+
+\subsection{Reproducibility Packages and Independent Verification}
+\label{subsec:conclusions-future-reproducibility}
+
+Un'ulteriore direzione riguarda la produzione di pacchetti di riproducibilità
+pubblici, compatibilmente con i vincoli di licenza e distribuzione dei dataset.
+Anche quando le immagini non possono essere redistribuite integralmente, script,
+manifest, configurazioni, hash, metriche aggregate e procedure di normalizzazione
+possono essere resi disponibili per consentire la verifica indipendente del
+protocollo sperimentale. Tale direzione è particolarmente rilevante per i tool
+commerciali black-box, per i quali la ripetibilità della procedura e la chiarezza
+dei criteri di mapping diventano elementi centrali della validazione.
 
 \subsection{Uncertainty Management and OOD Handling}
 \label{subsec:conclusions-future-ood}
@@ -320,11 +360,11 @@ di campioni anomali, borderline o sintetici.
 
 Un'ulteriore direzione riguarda l'inclusione di famiglie di attacco non
 considerate nel presente protocollo, incluse perturbazioni generative o
-\gls{gan}-based, e la valutazione di strategie difensive come adversarial
-training, denoising, ensemble, preprocessing robusto e detection delle
-perturbazioni. Tali estensioni dovrebbero mantenere il focus sulla robustezza
-operativa in ambito forense, evitando di trasformare il benchmark in una
-valutazione esaustiva di \gls{advml} puro.
+GAN-based, e la valutazione di strategie difensive come adversarial training,
+denoising, ensemble, preprocessing robusto e detection delle perturbazioni. Tali
+estensioni dovrebbero mantenere il focus sulla robustezza operativa in ambito
+forense, evitando di trasformare il benchmark in una valutazione esaustiva di
+\gls{advml} puro.
 
 \subsection{XAI Integration in Forensic Tools}
 \label{subsec:conclusions-future-xai}
@@ -369,7 +409,7 @@ forense rappresenta il principale cambiamento di prospettiva proposto dalla tesi
 In conclusione, l'\gls{ai} può offrire un contributo significativo al supporto
 dell'analisi forense, a condizione che il suo impiego sia accompagnato da una
 consapevolezza metodologica esplicita. Robustezza, tracciabilità,
-interpretabilità, documentazione delle configurazioni e controllo umano non sono
-requisiti accessori rispetto all'efficienza, ma condizioni necessarie affinché
-l'automazione possa essere considerata affidabile e difendibile all'interno di un
-workflow investigativo.
+interpretabilità, documentazione delle configurazioni, riproducibilità e
+controllo umano non sono requisiti accessori rispetto all'efficienza, ma
+condizioni necessarie affinché l'automazione possa essere considerata affidabile
+e difendibile all'interno di un workflow investigativo.
