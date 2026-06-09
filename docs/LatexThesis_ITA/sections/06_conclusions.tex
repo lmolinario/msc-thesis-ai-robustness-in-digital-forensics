@@ -27,15 +27,11 @@ non ideali. L'obiettivo principale è stato quindi verificare se l'automazione
 clean, campioni \gls{ood}, trasformazioni anti-forensi, perturbazioni
 adversariali e output prodotti da strumenti commerciali black-box.
 
-Il percorso sperimentale si è articolato in tre fasi principali. La prima fase ha
-riguardato la costruzione di una base dati frozen, composta da 1\,500 immagini
-bilanciate nelle classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}, e
-la definizione di un subset binario ufficiale da 1\,000 immagini per la valutazione
-controllata. La seconda fase ha riguardato la valutazione dei modelli proxy
-EfficientNet-B0, ResNet18 e \gls{clip} in condizioni clean, \gls{ood},
-anti-forensi e adversariali. La terza fase ha riguardato la costruzione del
-forensic evaluation bundle da 11\,500 file e la valutazione black-box di
-Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets.
+Il percorso sperimentale ha compreso la costruzione di un dataset frozen da
+1\,500 immagini, la valutazione dei modelli proxy EfficientNet-B0, ResNet18 e
+\gls{clip} in condizioni clean, \gls{ood}, anti-forensi e adversariali, e la
+produzione del forensic evaluation bundle da 11\,500 file per la valutazione
+black-box di Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets.
 
 Il framework metodologico adottato è denominato \gls{fairlab}. Esso non
 rappresenta un nuovo tool software, ma un protocollo sperimentale riproducibile e
@@ -43,7 +39,9 @@ auditabile per la valutazione della robustezza operativa di sistemi \gls{ai}-bas
 in scenari di \gls{df}. La sua struttura consente di collegare dataset, modelli
 proxy, perturbazioni, trasformazioni, bundle cieco, manifest, hash, output
 commerciali normalizzati, metriche quantitative e analisi qualitativa \gls{xai}
-in un'unica pipeline tracciabile.
+in un'unica pipeline tracciabile. In questo modo, la coerenza tra costruzione del
+dataset, stress testing e valutazione black-box non dipende da passaggi impliciti,
+ma da artefatti verificabili e ricostruibili.
 
 Il risultato complessivo della tesi è che la validazione di strumenti
 \gls{ai}-based in ambito forense non può essere ridotta alla verifica della
@@ -93,11 +91,14 @@ identificativo e risultato metrico.
 
 \textbf{Contributo valutativo e interpretativo.} Il quarto contributo riguarda
 la valutazione comparativa di tre modelli proxy, EfficientNet-B0, ResNet18 e
-\gls{clip}, e di tre sistemi commerciali finali, Magnet AXIOM/Magnet.AI, Excire
-Foto 2025 e Cellebrite Inseyets. I tool commerciali sono stati valutati mediante
-output osservabili, export normalizzati e ricodifica operativa rispetto al task
-\texttt{weapon}/\texttt{non\_weapon}, mantenendo separata la valutazione dei
-campioni \gls{ood}. L'analisi qualitativa tramite \gls{ig} su casi
+\gls{clip}, e di tre sistemi commerciali finali: Magnet AXIOM/Magnet.AI, Excire
+Foto 2025---valutato come software general-purpose con funzionalità
+\gls{ai}-based di semantic retrieval, non come prodotto esclusivamente
+forense---e Cellebrite Inseyets, considerato come commercial black-box
+\gls{ai}-assisted media analysis tool. I tool commerciali sono stati valutati
+mediante output osservabili, export normalizzati e ricodifica operativa rispetto
+al task \texttt{weapon}/\texttt{non\_weapon}, mantenendo separata la valutazione
+dei campioni \gls{ood}. L'analisi qualitativa tramite \gls{ig} su casi
 rappresentativi di EfficientNet-B0 completa il contributo interpretativo,
 supportando la lettura critica dei failure mode senza sostituire le metriche
 quantitative.
@@ -107,12 +108,12 @@ quantitative.
 \label{sec:conclusions-findings}
 % ─────────────────────────────────────────────────────────────────────────────
 
-I risultati sperimentali mostrano che la robustezza operativa non può essere
-ridotta alla sola accuracy clean. Sistemi con prestazioni nominali elevate possono
-mostrare comportamenti critici in presenza di input fuori distribuzione,
-trasformazioni anti-forensi o perturbazioni adversariali. La
-Tabella~\ref{tab:conclusions-main-findings} riassume le principali evidenze
-emerse dall'analisi in forma interpretativa.
+I risultati sperimentali confermano che la robustezza operativa deve essere
+valutata rispetto a più condizioni di input, non soltanto rispetto alla baseline
+clean. Sistemi con prestazioni nominali elevate possono mostrare comportamenti
+critici in presenza di input fuori distribuzione, trasformazioni anti-forensi o
+perturbazioni adversariali. La Tabella~\ref{tab:conclusions-main-findings}
+riassume le principali evidenze emerse dall'analisi in forma interpretativa.
 
 \begin{table}[H]
 \centering
@@ -125,24 +126,39 @@ emerse dall'analisi in forma interpretativa.
 \textbf{Area} & \textbf{Evidenza principale} & \textbf{Rilevanza operativa} \\
 \midrule
 Clean baseline
-& EfficientNet-B0 raggiunge l'accuracy clean più elevata tra i proxy, pari a 0.978; Cellebrite Inseyets raggiunge la migliore baseline commerciale, pari a 0.964.
-& La prestazione nominale è necessaria ma non sufficiente per valutare l'affidabilità in un workflow forense. \\
+& EfficientNet-B0 mostra la prestazione clean più elevata tra i proxy
+  (0.978); Cellebrite Inseyets presenta la baseline commerciale più solida
+  (0.964).
+& La prestazione nominale è necessaria ma non sufficiente per valutare
+  l'affidabilità in un workflow forense. \\
 
 OOD
-& \gls{clip} mostra un OOD weapon rate pari a 0.8356; i tool commerciali presentano valori inferiori, ma comunque non nulli.
-& Gli input fuori distribuzione possono essere assorbiti nella classe \texttt{weapon}, generando rumore operativo e prioritizzazioni fuorvianti. \\
+& \gls{clip} presenta il weapon flag rate più alto sui campioni \gls{ood}
+  (0.8356); i modelli discriminativi mostrano invece livelli elevati di
+  confidenza anche in assenza di contenuto pertinente al task.
+& Gli input fuori distribuzione possono essere assorbiti nella classe
+  \texttt{weapon}, generando rumore operativo e prioritizzazioni fuorvianti. \\
 
 Anti-forensic
-& Le trasformazioni anti-forensi producono drop generalmente contenuti, ma introducono errori operativamente rilevanti, soprattutto falsi negativi su \texttt{weapon}.
-& Manipolazioni realistiche come blur, ricompressione o alterazioni tonali possono incidere sul triage automatico. \\
+& Le trasformazioni anti-forensi producono drop generalmente contenuti, ma
+  introducono errori operativamente rilevanti, soprattutto falsi negativi su
+  \texttt{weapon}.
+& Manipolazioni realistiche come blur, ricompressione o alterazioni tonali
+  possono incidere sul triage automatico. \\
 
 Adversarial
-& EfficientNet-B0 sotto \gls{sigmazero} scende a 0.015 di accuracy; \gls{fgsm} produce degradazioni rilevanti anche nei tool commerciali.
-& Un'elevata accuracy clean non garantisce robustezza sotto input deliberatamente manipolati. \\
+& EfficientNet-B0 mostra il collasso più marcato sotto \gls{sigmazero}
+  (accuracy 0.015); \gls{fgsm} produce degradazioni rilevanti anche nei tool
+  commerciali.
+& Un'elevata accuracy clean non garantisce robustezza sotto input
+  deliberatamente manipolati. \\
 
 Black-box tools
-& Cellebrite Inseyets mostra il profilo commerciale aggregato più stabile; Magnet.AI ed Excire Foto 2025 evidenziano failure mode differenti.
-& I tool commerciali devono essere interpretati attraverso output osservabili, soglie operative e normalizzazione black-box. \\
+& Cellebrite Inseyets mostra il profilo commerciale aggregato più stabile;
+  Magnet.AI ed Excire Foto 2025, quest'ultimo inteso come software
+  general-purpose di semantic retrieval, evidenziano failure mode differenti.
+& I tool commerciali devono essere interpretati attraverso output osservabili,
+  soglie operative e normalizzazione black-box. \\
 
 XAI
 & Le mappe \gls{ig} rendono ispezionabili casi rappresentativi, ma non costituiscono prova autonoma di robustezza.
@@ -274,7 +290,13 @@ commerciali deve quindi essere interpretata come confronto operativo di triage,
 non come confronto tra classificatori omogenei.
 
 Un ulteriore limite riguarda l'assenza, per alcuni strumenti commerciali, di
-score continui, calibrati e direttamente comparabili. Per questa ragione,
+score continui, calibrati e direttamente comparabili. Inoltre, la ricodifica
+delle categorie commerciali verso le classi \texttt{weapon}/\texttt{non\_weapon}
+è una scelta sperimentale controllata e documentata, ma introduce una componente
+di incertezza interpretativa che non può essere eliminata senza accesso alla
+logica interna del tool. Di conseguenza, il confronto tra proxy e tool
+commerciali deve essere inteso come confronto operativo di triage, non come
+valutazione di classificatori omogenei su label identiche. Per questa ragione,
 metriche come AUROC non sono state assunte come metriche centrali del confronto
 commerciale. La valutazione si concentra invece su \gls{tp}, \gls{tn},
 \gls{fp}, \gls{fn}, matching rate, output non interpretabili, weapon recall,
@@ -303,6 +325,20 @@ costituiscono una valutazione sistematica della robustezza e non si estendono ai
 tool commerciali black-box. Le attribution map devono quindi essere interpretate
 come strumenti di supporto alla revisione, non come metriche primarie di
 affidabilità.
+
+\subsection{Legal Admissibility and Evidentiary Validity}
+\label{subsec:conclusions-limitations-legal}
+
+Il presente lavoro non include una valutazione dell'ammissibilità giuridica degli
+output prodotti dai sistemi \gls{ai}-based analizzati. Le metriche adottate,
+come accuracy, weapon recall, \gls{fnr}, matching rate e weapon flag rate, sono
+metriche operative di triage e non criteri di validazione probatoria. L'output di
+un classificatore o di un tool di semantic retrieval non costituisce, di per sé,
+una determinazione probatoria autonoma: la sua rilevanza deve essere valutata
+nel contesto della catena di custodia digitale, della documentazione della
+versione e della configurazione del tool, della validazione indipendente e del
+quadro normativo applicabile. Questa dimensione richiede un percorso di
+validazione separato, che va oltre lo scope sperimentale della presente tesi.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Future Work}
@@ -386,8 +422,9 @@ protocolli condivisi per la validazione dei sistemi \gls{ai}-based in \gls{df}.
 Ciò includerebbe la standardizzazione delle metriche forensi, la definizione di
 dataset controllati, il versioning dei tool e dei modelli, la produzione di
 report riproducibili e la creazione di procedure di audit indipendenti. Il
-framework \gls{fairlab} può costituire un punto di partenza per tali protocolli,
-purché esteso e validato in contesti operativi più ampi.
+framework \gls{fairlab} può offrire elementi utili per tale discussione, nella
+misura in cui venga esteso, replicato e confrontato con approcci alternativi in
+contesti operativi più ampi.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Closing Remarks}
@@ -407,10 +444,12 @@ e il forensic evaluation bundle. Il passaggio da una valutazione astratta della
 robustezza a una valutazione orientata alle condizioni operative del triage
 forense rappresenta il principale cambiamento di prospettiva proposto dalla tesi.
 
-In conclusione, l'\gls{ai} può offrire un contributo significativo al supporto
-dell'analisi forense, a condizione che il suo impiego sia accompagnato da una
-consapevolezza metodologica esplicita. Robustezza, tracciabilità,
-interpretabilità, documentazione delle configurazioni, riproducibilità e
-controllo umano non sono requisiti accessori rispetto all'efficienza, ma
-condizioni necessarie affinché l'automazione possa essere considerata affidabile
-e difendibile all'interno di un workflow investigativo.
+In sintesi, i risultati mostrano che nessuno dei sistemi valutati è
+operativamente affidabile in modo incondizionato: ciascuno presenta failure mode
+specifici, dipendenti dalla condizione di input, dalla configurazione e dal task.
+Questa evidenza non invalida l'uso dell'\gls{ai} nel workflow forense, ma ne
+definisce i prerequisiti metodologici: validazione task-specific,
+documentazione della configurazione operativa, gestione esplicita degli input
+anomali e controllo umano sul risultato. Il framework \gls{fairlab} propone una
+struttura sperimentale per rendere tali prerequisiti verificabili, auditabili e
+riproducibili.
