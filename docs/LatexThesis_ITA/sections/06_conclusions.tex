@@ -28,9 +28,9 @@ clean, campioni \gls{ood}, trasformazioni anti-forensi, perturbazioni
 adversariali e output prodotti da strumenti commerciali black-box.
 
 Il percorso sperimentale si è articolato in tre fasi principali. La prima fase ha
-riguardato la costruzione di una base dati frozen, composta da 1500 immagini
+riguardato la costruzione di una base dati frozen, composta da 1\,500 immagini
 bilanciate nelle classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}, e
-la definizione di un subset binario ufficiale da 1000 immagini per la valutazione
+la definizione di un subset binario ufficiale da 1\,000 immagini per la valutazione
 controllata. La seconda fase ha riguardato la valutazione dei modelli proxy
 EfficientNet-B0, ResNet18 e \gls{clip} in condizioni clean, \gls{ood},
 anti-forensi e adversariali. La terza fase ha riguardato la costruzione del
@@ -72,9 +72,9 @@ risiede nella proposta di un nuovo classificatore, ma nella formalizzazione di u
 pipeline auditabile per testare sistemi esistenti in condizioni non ideali.
 
 \textbf{Contributo sperimentale.} Il secondo contributo riguarda la costruzione
-di una base sperimentale congelata. Il dataset finale comprende 1500 immagini
+di una base sperimentale congelata. Il dataset finale comprende 1\,500 immagini
 bilanciate nelle classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood},
-mentre il subset binario ufficiale comprende 1000 immagini destinate alla
+mentre il subset binario ufficiale comprende 1\,000 immagini destinate alla
 generazione e alla valutazione delle perturbazioni. Su questa base sono state
 prodotte cinque famiglie di perturbazioni adversariali, ossia \gls{fgsm},
 \gls{superdeepfool}, \gls{sigmazero}, \gls{onepixel} e \gls{colorshift}, e
@@ -118,7 +118,7 @@ emerse dall'analisi in forma interpretativa.
 \centering
 \caption{Sintesi interpretativa delle principali evidenze sperimentali.}
 \label{tab:conclusions-main-findings}
-\small
+\footnotesize
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{@{}p{0.18\textwidth} X X@{}}
 \toprule
@@ -171,9 +171,9 @@ come elemento probatorio autonomo. La predizione del sistema deve essere trattat
 come indicazione tecnica da sottoporre a verifica, contestualizzazione e
 documentazione da parte dell'analista.
 
-In termini forensi, l'output di un sistema \gls{ai}-based deve essere inteso come
-un'indicazione investigativa e non come una determinazione probatoria autonoma.
-La sua utilità dipende dalla possibilità di ricostruire il contesto di
+Dal punto di vista forense, l'output di un sistema \gls{ai}-based deve essere
+inteso come indicazione investigativa, non come determinazione probatoria
+autonoma. La sua utilità dipende dalla possibilità di ricostruire il contesto di
 generazione, la configurazione del tool, il dataset di riferimento, le soglie
 operative e il successivo controllo umano. Questo è particolarmente rilevante per
 i tool black-box, nei quali l'osservabilità è limitata agli output esportati e
@@ -212,10 +212,11 @@ forense dell'\gls{ai} metodologicamente difendibile.
 
 Infine, i risultati rafforzano la necessità del paradigma
 \textit{human-in-the-loop}. Nessuna delle condizioni sperimentali considerate
-giustifica l'affidamento acritico all'automazione. Il risultato del classificatore
-deve essere trattato come supporto alla decisione, non come decisione autonoma.
-Ciò vale in modo particolare per contenuti ad alta rilevanza investigativa, input
-fuori distribuzione, immagini manipolate e output prodotti da tool black-box.
+consente un affidamento automatico e non verificato. Il risultato del
+classificatore deve essere trattato come supporto alla decisione, non come
+decisione autonoma. Ciò vale in modo particolare per contenuti ad alta rilevanza
+investigativa, input fuori distribuzione, immagini manipolate e output prodotti
+da tool black-box.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Limitations}
@@ -230,7 +231,7 @@ affinché le conclusioni siano interpretate in modo corretto.
 
 Il dataset costruito è finalizzato a un task investigativo specifico:
 classificazione binaria tra \texttt{weapon} e \texttt{non\_weapon}, con gestione
-separata di campioni \gls{ood}. La sua dimensione, pari a 1500 immagini totali,
+separata di campioni \gls{ood}. La sua dimensione, pari a 1\,500 immagini totali,
 consente una valutazione controllata ma non copre l'intera variabilità dei
 contenuti visivi che possono emergere nelle indagini reali. I risultati non
 possono quindi essere generalizzati direttamente a task multi-classe, domini
@@ -256,10 +257,10 @@ interamente automatica.
 Le perturbazioni adversariali e le trasformazioni anti-forensi selezionate non
 coprono l'intero spazio delle manipolazioni possibili. La scelta è stata guidata
 dalla rappresentatività operativa e dalla coerenza con la finalità forense della
-tesi, non dall'esaustività. Inoltre, gli attacchi model-dependent sono generati
-rispetto a EfficientNet-B0 e devono essere interpretati alla luce dello scenario
-white-box considerato. La trasferibilità verso altri modelli e tool commerciali
-è valutata empiricamente, ma non assunta come proprietà generale.
+tesi, non dall'esaustività. Inoltre, gli attacchi dipendenti dal modello sono
+generati rispetto a EfficientNet-B0 e devono essere interpretati alla luce dello
+scenario white-box considerato. La trasferibilità verso altri modelli e tool
+commerciali è valutata empiricamente, ma non assunta come proprietà generale.
 
 \subsection{Proxy Models and Commercial Black-Box Tools}
 \label{subsec:conclusions-limitations-models}
@@ -325,7 +326,7 @@ operative e delle funzionalità esportabili.
 \subsection{Dataset Extension and Shared Benchmarks}
 \label{subsec:conclusions-future-dataset}
 
-Un'estensione significativa del lavoro consisterebbe nell'ampliamento del dataset
+Un'estensione significativa del lavoro consisterebbe nell'ampliare il dataset
 verso task multi-classe, domini visivi differenti e immagini acquisite in
 condizioni operative più eterogenee, inclusi export da dispositivi reali,
 contenuti provenienti da piattaforme social o app di messaggistica e immagini
