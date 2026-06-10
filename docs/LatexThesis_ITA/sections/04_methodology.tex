@@ -2159,12 +2159,24 @@ e gestione visuale delle immagini; esso non viene quindi presentato come prodott
 sviluppato esclusivamente per finalità forensi, ma come componente black-box di
 image retrieval e classificazione operativa.
 
-\gls{cellebriteinseyets} è considerato come piattaforma commerciale di analisi
-assistita dei contenuti multimediali, valutata attraverso gli output osservabili
-esportati nell'ambiente \texttt{Cellebrite Physical Analyzer 10.9.0.3029}. In
-questo contesto, \gls{ufed} non viene trattato come classificatore immagini, ma
-solo come eventuale componente dell'ecosistema Cellebrite di acquisizione e
-gestione dei dati.
+\gls{cellebriteinseyets} è considerato nel presente lavoro come piattaforma
+commerciale black-box per l'analisi assistita dei contenuti multimediali. La
+valutazione è condotta esclusivamente sugli output osservabili esportati
+dall'ambiente \texttt{Cellebrite Physical Analyzer 10.9.0.3029}, senza assumere
+accesso al modello interno, ai dati di addestramento o alle soglie decisionali
+impiegate dal produttore.
+
+In questo contesto, \gls{ufed} non viene trattato come classificatore immagini,
+ma come eventuale componente dell'ecosistema Cellebrite dedicato
+all'acquisizione e alla gestione dei dati. L'analisi sperimentale riguarda
+quindi le funzionalità di classificazione automatica dei media rese disponibili
+nell'ambiente Physical Analyzer/Inseyets. Secondo la documentazione del
+produttore, il motore di image classification di Cellebrite Physical Analyzer
+impiega tecniche di \gls{ai} e \gls{ml} per riconoscere attributi visivi,
+assegnare categorie e associare a ciascun risultato uno score di confidenza
+compreso tra 0 e 1 \cite{cellebrite_media_classification}. Nel protocollo
+\gls{fairlab}, tali output sono ricodificati come risultati black-box e normalizzati
+rispetto al manifest sperimentale.
 
 
 
