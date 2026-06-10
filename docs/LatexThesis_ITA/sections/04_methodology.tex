@@ -1071,9 +1071,11 @@ trasparenti e riproducibili per rappresentare il comportamento di classificatori
 anti-forensi. Tali modelli non devono essere interpretati come strumenti forensi valutati
 nella fase black-box del protocollo, né come sostituti dei software commerciali
 analizzati. Essi costituiscono invece componenti sperimentali controllate,
-necessarie per definire un riferimento algoritmico ispezionabile, generare
-perturbazioni model-dependent e studiare la possibile trasferibilità degli
-effetti osservati verso altri sistemi di classificazione.
+Essi costituiscono invece componenti sperimentali controllate, necessarie per
+definire un riferimento algoritmico ispezionabile, generare le perturbazioni che
+richiedono accesso al modello target e studiare la possibile trasferibilità
+degli effetti osservati verso altri sistemi di classificazione.
+
 
 Il paradigma di classificazione adottato dai proxy model è binario. Le etichette
 operative sono \texttt{non\_weapon} e \texttt{weapon}, rispettivamente codificate
@@ -1136,10 +1138,12 @@ fold target, il modello viene addestrato sui quattro fold rimanenti e salvato
 come checkpoint specifico del fold escluso. Ad esempio, il checkpoint associato
 a \texttt{fold\_1} viene addestrato utilizzando \texttt{fold\_2},
 \texttt{fold\_3}, \texttt{fold\_4} e \texttt{fold\_5}. Lo stesso schema viene
-ripetuto per tutti i cinque fold. Questo protocollo riduce il rischio di leakage
-tra immagini usate per l'addestramento del proxy model e immagini successivamente
-attaccate o valutate nello stesso fold, preservando una separazione metodologica
-tra training e holdout sperimentale.
+ripetuto per tutti i cinque fold. Questo protocollo riduce il rischio di leakage tra immagini usate per
+l'addestramento del proxy model e immagini mantenute come holdout del fold
+target, preservando una separazione metodologica tra training, generazione delle
+perturbazioni e valutazione sperimentale.
+
+
 
 \begin{table}[H]
 \centering
@@ -1286,6 +1290,14 @@ EfficientNet-B0 rappresenti il modello più robusto o più accurato in senso ass
 l'analisi comparativa della tesi. Indica invece il modello controllato rispetto al quale vengono costruite,
 in questa fase della pipeline, le perturbazioni che richiedono accesso al gradiente, al classificatore
 o al comportamento decisionale del target.
+
+Le trasformazioni anti-forensi e le perturbazioni non dipendenti dal gradiente
+non sono invece generate come ottimizzazioni specifiche contro EfficientNet-B0,
+ma come manipolazioni controllate dell'artefatto immagine o del suo contenuto
+visivo. Questa distinzione consente di separare gli scenari white-box o
+model-dependent dagli stressor model-agnostic e dalle trasformazioni
+anti-forensi realistiche.
+
 
 Tale impostazione consente di mantenere il protocollo adversarial
 controllato e confrontabile tra famiglie di perturbazione, evitando di moltiplicare il
