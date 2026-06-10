@@ -27,11 +27,12 @@ evaluation/
     ├── tool_version_log.csv
     ├── normalization_summary.json
     ├── magnet_axiom_normalized_predictions.csv
-    ├── xways_excire_normalized_predictions.csv
-    └── cellebrite_inseyets_normalized_predictions.csv
+    ├── excire_foto_2025_d20_normalized_predictions.csv
+    ├── excire_foto_2025_d50_normalized_predictions.csv
+    ├── excire_foto_2025_d80_normalized_predictions.csv
+    ├── cellebrite_inseyets_normalized_predictions.csv
+    └── griffeye_normalized_predictions.csv
 ```
-
-`cellebrite_inseyets_normalized_predictions.csv` is a target filename only if comparable Cellebrite Inseyets exports become available and can be mapped to the forensic evaluation bundle.
 
 ---
 
@@ -51,15 +52,6 @@ resnet18
 clip
 ```
 
-Evaluation inputs:
-
-```text
-datasets/splits/clean/
-datasets/splits/ood/
-attacks/adversarial/
-attacks/anti_forensic/
-```
-
 Main outputs:
 
 ```text
@@ -70,13 +62,13 @@ results/metrics/proxy_model_comparative_metrics.csv
 results/metrics/proxy_model_evaluation_summary.json
 ```
 
-The proxy evaluation is considered consolidated for the thesis reporting phase. It provides the reproducible baseline against which black-box forensic-tool behavior can be compared.
+The proxy evaluation is consolidated for thesis reporting and provides the reproducible baseline against which black-box forensic-tool behavior can be compared.
 
 ---
 
 ## Commercial Forensic Tool Evaluation
 
-Commercial forensic tools must be evaluated as black boxes.
+Commercial forensic tools are evaluated as black boxes.
 
 Input to tools:
 
@@ -98,19 +90,16 @@ Final tool perimeter:
 ```text
 Completed and normalized:
 - Magnet AXIOM / Magnet.AI, version 10.1.0.48673
-
-Completed / analyzed:
-- X-Ways Forensics / Excire Foto 2025, version 4.1.5
-
-Pending / to be consolidated:
+- Excire Foto 2025, version 4.1.5
 - Cellebrite Inseyets, version 10.9
+- Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
 
 Excluded:
 - Oxygen Forensic Detective
 - Autopsy
 ```
 
-Excire Foto 2025 is evaluated as a standalone AI-assisted semantic retrieval tool. Its results must be interpreted as controlled semantic retrieval behavior, not as native forensic binary classification.
+Excire Foto 2025 is evaluated as a standalone AI-assisted semantic retrieval tool. Cellebrite Inseyets is evaluated through observable image classifications exported by the Cellebrite Physical Analyzer report. Magnet Griffeye is evaluated through automatic T3K CORE semantic bookmarks.
 
 ---
 
@@ -126,16 +115,16 @@ Purpose:
 
 - ingest commercial tool exports;
 - map exported items back to `bundle_manifest.csv` using filename, path, SHA256, MD5, or exported metadata;
-- normalize tool labels into a common schema;
+- normalize tool labels, bookmarks, and search outputs into a common schema;
 - compute tool-level metrics;
 - generate thesis-ready metrics and audit tables.
 
 Implemented / consolidated behavior:
 
 - Magnet AXIOM / Magnet.AI normalization from `Pictures.csv`;
-- mapping of `Possible weapons` to `weapon_detected=true`;
-- mapping of empty Magnet tags to `weapon_detected=false`;
-- generic parsing for CSV, TSV, JSON, JSONL and TXT exports;
+- Excire Foto 2025 prompt-hit normalization for `D20`, `D50`, and `D80` configurations;
+- Cellebrite Inseyets normalization from the report sheet `Immagini` and the observable `Classifications` column;
+- Griffeye / T3K CORE normalization from automatic semantic `Bookmarks`;
 - deduplication to one prediction per `tool_name` + `bundle_id`;
 - export audit and tool version log generation.
 
@@ -146,7 +135,49 @@ evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
 ```
 
-Cellebrite Inseyets outputs should be normalized only if the export structure supports reproducible mapping to the bundle manifest and the exported labels/categories can be operationally related to the thesis ground truth.
+Current normalization summary:
+
+```text
+bundle_rows                         = 11500
+tools_requested                     = magnet_axiom, excire_foto_2025, cellebrite_inseyets, griffeye
+normalized_rows_after_deduplication = 69000
+matched_rows_after_deduplication    = 69000
+unmatched_rows_after_deduplication  = 0
+interpretable_rows_after_dedup      = 69000
+unknown_predictions                 = 0
+metric_outputs_consistent           = true
+```
+
+---
+
+## Commercial Tool Global Binary Metrics
+
+The following values are computed on the 11,000 binary bundle items. OOD behavior is reported separately as `OOD flag rate` over the 500 OOD samples.
+
+| Tool / configuration | Accuracy | Recall | FNR | FPR | OOD flag rate |
+|---|---:|---:|---:|---:|---:|
+| Magnet Griffeye / T3K CORE | 0.971727 | 0.950727 | 0.049273 | 0.007273 | 0.260000 |
+| Cellebrite Inseyets 10.9 | 0.958091 | 0.957818 | 0.042182 | 0.041636 | 0.292000 |
+| Magnet AXIOM / Magnet.AI | 0.933364 | 0.901455 | 0.098545 | 0.034727 | 0.360000 |
+| Excire Foto 2025 D20 | 0.910727 | 0.857091 | 0.142909 | 0.035636 | 0.238000 |
+| Excire Foto 2025 D50 | 0.924545 | 0.948545 | 0.051455 | 0.099455 | 0.340000 |
+| Excire Foto 2025 D80 | 0.887091 | 0.981273 | 0.018727 | 0.207091 | 0.522000 |
+
+---
+
+## Griffeye / T3K CORE Normalization Details
+
+Griffeye is evaluated as a commercial black-box forensic media-triage tool through automatic semantic bookmarks.
+
+```text
+Tool           = Magnet Griffeye x64
+Version        = 26.2.108
+AI module      = T3K CORE
+Module version = 1.18.0
+Run folder     = forensic_tools/griffeye/raw_exports/FAIRLAB_GRIFFEYE_T3_RUN_01
+```
+
+The primary mapping is firearm-oriented and relies only on the corresponding T3K CORE bookmark. Other related T3K CORE categories are retained in the raw label field as secondary semantic indicators, but they are not used as primary positives.
 
 ---
 
