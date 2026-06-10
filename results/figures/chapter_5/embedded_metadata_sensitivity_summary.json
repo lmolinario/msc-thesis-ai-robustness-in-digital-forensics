@@ -1,0 +1,30 @@
+{
+  "script": "results/scripts/21_generate_embedded_metadata_sensitivity_check.py",
+  "created_at": "2026-06-10T18:32:37+00:00",
+  "inputs": {
+    "metadata_audit_csv": "datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv",
+    "normalized_predictions_csv": "evaluation/forensic_tools/normalized_predictions.csv"
+  },
+  "outputs": {
+    "output_dir": "results/figures/chapter_5",
+    "detail_csv": "results/figures/chapter_5/tab_embedded_metadata_sensitive_hits_detail.csv",
+    "tool_summary_csv": "results/figures/chapter_5/tab_embedded_metadata_tool_summary.csv",
+    "delta_csv": "results/figures/chapter_5/tab_embedded_metadata_sensitivity_delta.csv",
+    "summary_json": "results/figures/chapter_5/embedded_metadata_sensitivity_summary.json"
+  },
+  "tools": [
+    "magnet_axiom",
+    "excire_foto_2025_d20",
+    "excire_foto_2025_d50",
+    "excire_foto_2025_d80",
+    "cellebrite_inseyets",
+    "griffeye"
+  ],
+  "counts": {
+    "sensitive_metadata_hit_bundles": 15,
+    "sensitive_metadata_hit_rows": 15,
+    "prediction_rows": 69000,
+    "detail_rows": 90
+  },
+  "methodological_note": "This script joins metadata-audit hits with already normalized commercial-tool predictions and computes leave-out sensitivity deltas. It does not infer causal influence of embedded metadata on black-box tool decisions."
+}

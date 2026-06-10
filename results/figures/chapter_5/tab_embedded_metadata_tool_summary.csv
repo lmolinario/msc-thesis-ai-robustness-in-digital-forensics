@@ -1,0 +1,7 @@
+tool_name,tool_display,sensitive_hit_rows,clean_sensitive_cases,clean_sensitive_correct,clean_sensitive_false_negatives,clean_sensitive_false_positives,ood_sensitive_cases,ood_sensitive_weapon_flags,clean_accuracy_original,clean_accuracy_without_sensitive_hits,clean_accuracy_delta,ood_weapon_flag_rate_original,ood_weapon_flag_rate_without_sensitive_hits,ood_weapon_flag_rate_delta
+magnet_axiom,Magnet AXIOM / Magnet.AI,15,11,9,2,0,4,4,0.95,0.9514661274014156,0.0014661274014156067,0.36,0.3548387096774194,-0.005161290322580614
+excire_foto_2025_d20,Excire Foto 2025 D20,15,11,9,2,0,4,1,0.927,0.9282103134479271,0.0012103134479271027,0.238,0.23790322580645162,-9.67741935483657e-05
+excire_foto_2025_d50,Excire Foto 2025 D50,15,11,9,2,0,4,4,0.944,0.9453993933265925,0.0013993933265925573,0.34,0.3346774193548387,-0.0053225806451613344
+excire_foto_2025_d80,Excire Foto 2025 D80,15,11,11,0,0,4,4,0.915,0.9140546006066734,-0.0009453993933266069,0.522,0.5181451612903226,-0.0038548387096773995
+cellebrite_inseyets,Cellebrite Inseyets,15,11,11,0,0,4,3,0.964,0.9635995955510617,-0.0004004044489382963,0.292,0.28830645161290325,-0.0036935483870967345
+griffeye,Magnet Griffeye / T3K CORE,15,11,10,1,0,4,1,0.978,0.9787664307381193,0.000766430738119328,0.26,0.2600806451612903,8.064516129030475e-05

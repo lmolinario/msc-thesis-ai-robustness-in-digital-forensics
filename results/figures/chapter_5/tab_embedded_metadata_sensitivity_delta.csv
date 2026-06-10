@@ -1,0 +1,13 @@
+tool_name,tool_display,metric,original,without_sensitive_hits,delta,excluded_cases,original_n,without_sensitive_hits_n
+magnet_axiom,Magnet AXIOM / Magnet.AI,clean_accuracy,0.95,0.9514661274014156,0.0014661274014156067,11,1000,989
+magnet_axiom,Magnet AXIOM / Magnet.AI,ood_weapon_flag_rate,0.36,0.3548387096774194,-0.005161290322580614,4,500,496
+excire_foto_2025_d20,Excire Foto 2025 D20,clean_accuracy,0.927,0.9282103134479271,0.0012103134479271027,11,1000,989
+excire_foto_2025_d20,Excire Foto 2025 D20,ood_weapon_flag_rate,0.238,0.23790322580645162,-9.67741935483657e-05,4,500,496
+excire_foto_2025_d50,Excire Foto 2025 D50,clean_accuracy,0.944,0.9453993933265925,0.0013993933265925573,11,1000,989
+excire_foto_2025_d50,Excire Foto 2025 D50,ood_weapon_flag_rate,0.34,0.3346774193548387,-0.0053225806451613344,4,500,496
+excire_foto_2025_d80,Excire Foto 2025 D80,clean_accuracy,0.915,0.9140546006066734,-0.0009453993933266069,11,1000,989
+excire_foto_2025_d80,Excire Foto 2025 D80,ood_weapon_flag_rate,0.522,0.5181451612903226,-0.0038548387096773995,4,500,496
+cellebrite_inseyets,Cellebrite Inseyets,clean_accuracy,0.964,0.9635995955510617,-0.0004004044489382963,11,1000,989
+cellebrite_inseyets,Cellebrite Inseyets,ood_weapon_flag_rate,0.292,0.28830645161290325,-0.0036935483870967345,4,500,496
+griffeye,Magnet Griffeye / T3K CORE,clean_accuracy,0.978,0.9787664307381193,0.000766430738119328,11,1000,989
+griffeye,Magnet Griffeye / T3K CORE,ood_weapon_flag_rate,0.26,0.2600806451612903,8.064516129030475e-05,4,500,496
