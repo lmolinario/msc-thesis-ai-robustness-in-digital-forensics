@@ -1161,8 +1161,8 @@ tra i fold, in modo da rendere confrontabili le prestazioni ottenute nelle
 diverse partizioni del dataset. La Tabella~\ref{tab:methodology-training-hyperparameters}
 riporta i principali hyperparameter utilizzati per l'addestramento e la
 valutazione dei modelli proxy. I valori sono ricavati dalla configurazione
-riproducibile dello script di training \codepath{models/scripts/12\_train\_proxy\_models.py}
-e dal registro dei modelli \codepath{models/model\_registry.json}.
+riproducibile dello script di training \codepath{models/scripts/12_train_proxy_models.py}
+e dal registro dei modelli \codepath{models/model_registry.json}.
 
 \begin{table}[H]
 \centering
@@ -1269,11 +1269,11 @@ dimensione di input, la normalizzazione utilizzata e l'hash \gls{sha256} del fil
 prodotto. La registrazione dell'hash del checkpoint è metodologicamente rilevante
 perché consente di verificare che le fasi successive della pipeline, incluse la
 generazione degli attacchi model-dependent e le valutazioni di robustezza, siano
-riconducibili a una versione specifica e immutata del modello. I parametri di addestramento,
-tra cui ottimizzatore, learning rate, batch size, numero di epoche e configurazioni specifiche
-dei singoli modelli, sono documentati nello script di training e, ove applicabile, nei
-metadati registrati in \codepath{models/model_registry.json}, così da mantenere separata la
-descrizione metodologica del protocollo dalla riproduzione dettagliata della configurazione implementativa.
+riconducibili a una versione specifica e immutata del modello. I parametri di addestramento principali sono riportati nella
+Tabella~\ref{tab:methodology-training-hyperparameters}; la configurazione
+completa è registrata nello script di training e nel registro
+\codepath{models/model_registry.json}, garantendo la riproducibilità
+dell'addestramento indipendentemente dall'ambiente di esecuzione.
 
 Nel protocollo sperimentale, EfficientNet-B0 assume il ruolo di \textit{primary proxy target}, ossia di
 modello controllato principale rispetto al quale vengono generate le
@@ -1630,16 +1630,12 @@ comportamento decisionale del classificatore.
 Gli attacchi model-dependent utilizzati nel protocollo sperimentale finale sono
 \gls{fgsm}, One Pixel Attack, Sigma Zero Attack e SuperDeepFool. Essi vengono
 generati rispetto a \texttt{efficientnet\_b0}, assunto come primary proxy
-target. La scelta di \texttt{efficientnet\_b0} riflette il suo ruolo di modello
-convoluzionale compatto ma espressivo, adatto a rappresentare un target
-realistico per la generazione di perturbazioni adversariali su immagini. Questa
-scelta non implica che gli altri proxy model siano secondari nella valutazione
-complessiva, ma consente di mantenere controllata, riproducibile e
-computazionalmente sostenibile la generazione degli attacchi model-dependent.
+target per le ragioni metodologiche discusse nella
+Sezione~\ref{sec:methodology-models-classification}.
 
 Per ogni immagine appartenente a un determinato fold, lo script carica il
 checkpoint corrispondente da
-\codepath{models/checkpoints/<target\_model>/<fold>.pt}. Questa scelta mantiene
+\codepath{models/checkpoints/<target_model>/<fold>.pt}. Questa scelta mantiene
 la coerenza con il protocollo fold-aware: l'immagine di un fold viene perturbata
 usando il modello addestrato secondo la separazione definita nella fase di
 training dei proxy model. La procedura evita quindi di trattare il dataset come
@@ -2328,6 +2324,9 @@ Piattaforma commerciale di analisi assistita dei contenuti multimediali, valutat
 \end{tabularx}
 \end{table}
 
+Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
+
+
 Per \gls{excirefoto2025}, la valutazione è stata condotta mediante un insieme
 predefinito di prompt semantici orientati alla ricerca di contenuti
 weapon-related. Poiché il software opera come motore di semantic retrieval e non
@@ -2352,14 +2351,14 @@ Tabella~\ref{tab:methodology-excire-prompts}.
 \toprule
 \textbf{ID} & \textbf{Prompt semantico} & \textbf{File di export} \\
 \midrule
-P1 & \texttt{firearm} & \codepath{excire\_firearm\_distance50.csv} \\
-P2 & \texttt{gun} & \codepath{excire\_gun\_distance50.csv} \\
-P3 & \texttt{pistol} & \codepath{excire\_pistol\_distance50.csv} \\
-P4 & \texttt{handgun} & \codepath{excire\_handgun\_distance50.csv} \\
-P5 & \texttt{revolver} & \codepath{excire\_revolver\_distance50.csv} \\
-P6 & \texttt{rifle} & \codepath{excire\_rifle\_distance50.csv} \\
-P7 & \texttt{shotgun} & \codepath{excire\_shotgun\_distance50.csv} \\
-P8 & \texttt{assault rifle} & \codepath{excire\_assault\_rifle\_distance50.csv} \\
+P1 & \texttt{firearm} & \codepath{excire_firearm_distance50.csv} \\
+P2 & \texttt{gun} & \codepath{excire_gun_distance50.csv} \\
+P3 & \texttt{pistol} & \codepath{excire_pistol_distance50.csv} \\
+P4 & \texttt{handgun} & \codepath{excire_handgun_distance50.csv} \\
+P5 & \texttt{revolver} & \codepath{excire_revolver_distance50.csv} \\
+P6 & \texttt{rifle} & \codepath{excire_rifle_distance50.csv} \\
+P7 & \texttt{shotgun} & \codepath{excire_shotgun_distance50.csv} \\
+P8 & \texttt{assault rifle} & \codepath{excire_assault_rifle_distance50.csv} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -2414,11 +2413,21 @@ una categoria weapon-related non viene trattata come prova semantica di assenza
 di armi nell'immagine, ma come mancato rilevamento della categoria di interesse
 da parte dello strumento nelle condizioni del protocollo.
 
-Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
+
+
+
+
 
 La normalizzazione degli output è necessaria perché le categorie interne dei tool non coincidono direttamente con le classi sperimentali \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo motivo, la pipeline applica un mapping esplicito e documentato delle label proprietarie verso una rappresentazione binaria operativa, basata sul campo \texttt{weapon\_detected}. Tale campo non deve essere interpretato come una dichiarazione semantica assoluta sull'immagine, ma come il risultato osservabile della capacità del tool di segnalare o meno la presenza di contenuti riconducibili alla categoria weapon nel contesto del protocollo sperimentale.
 
-Nel caso di \gls{magnetaxiomtool}, gli output esportati da \gls{magnetai} vengono normalizzati interpretando il tag \texttt{Possible weapons} come rilevamento positivo della categoria weapon. Le immagini prive di tale tag vengono considerate come non segnalate dal tool rispetto alla categoria di interesse. Nel caso di \gls{excirefoto2025}, la valutazione si basa su esportazioni generate mediante un insieme controllato di prompt semantici firearm-oriented; un'immagine recuperata da almeno uno dei prompt viene ricodificata come rilevamento positivo, mentre le immagini non recuperate da alcun prompt vengono considerate come non segnalate. Nel caso di \gls{cellebriteinseyets}, la normalizzazione utilizza la colonna osservabile \texttt{Classifications} del report esportato, ricodificando come rilevamento positivo le classificazioni riconducibili a categorie quali \texttt{Armi}, \texttt{Pistola} o \texttt{Fucile}. Questa ricodifica è operativa e non implica accesso o inferenza diretta sulle logiche interne del modello proprietario.
+Nel caso di \gls{magnetaxiomtool}, gli output esportati da \gls{magnetai}
+vengono normalizzati interpretando il tag \texttt{Possible weapons} come
+rilevamento positivo della categoria weapon; le immagini prive di tale tag
+vengono considerate come non segnalate rispetto alla categoria di interesse.
+Per \gls{excirefoto2025} e \gls{cellebriteinseyets}, i criteri di ricodifica
+sono rispettivamente documentati nella
+Tabella~\ref{tab:methodology-excire-prompts} e nella
+Tabella~\ref{tab:methodology-cellebrite-mapping}.
 
 La distinzione tra mancato rilevamento, classificazione negativa e stato non interpretabile è mantenuta durante la fase di normalizzazione. Nei casi in cui l'output del tool non sia riconducibile in modo affidabile al task binario considerato, la predizione viene marcata come \texttt{unknown} o trattata separatamente nell'audit di esportazione. Questa scelta evita di trasformare automaticamente output ambigui o non strutturati in falsi negativi o veri negativi, preservando la tracciabilità del processo di interpretazione.
 
@@ -2615,12 +2624,12 @@ anti-forensi, applicando il protocollo ai tre proxy model ufficiali:
 \texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}. Gli artefatti
 prodotti comprendono il file
 \codepath{evaluation/proxy_models/proxy_model_predictions.csv} e i file metrici
-in \codepath{results/metrics/}: \codepath{proxy\_model\_clean\_metrics.csv},
-\codepath{proxy\_model\_adversarial\_metrics.csv},
-\codepath{proxy\_model\_anti\_forensic\_metrics.csv},
-\codepath{proxy\_model\_ood\_metrics.csv},
-\codepath{proxy\_model\_comparative\_metrics.csv} e
-\codepath{proxy\_model\_evaluation\_summary.json}.
+in \codepath{results/metrics/}: \codepath{proxy_model_clean_metrics.csv},
+\codepath{proxy_model_adversarial_metrics.csv},
+\codepath{proxy_model_anti_forensic_metrics.csv},
+\codepath{proxy_model_ood_metrics.csv},
+\codepath{proxy_model_comparative_metrics.csv} e
+\codepath{proxy_model_evaluation_summary.json}.
 
 Lo stesso script produce inoltre file metrici finali orientati alla sintesi sperimentale,
 tra cui \codepath{final_core_metrics.csv}, \codepath{final_robustness_metrics.csv},
