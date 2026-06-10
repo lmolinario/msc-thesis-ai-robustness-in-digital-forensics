@@ -18,11 +18,12 @@ results/
     ├── proxy_model_evaluation_summary.json
     ├── forensic_tools_metrics.csv
     ├── magnet_axiom_metrics.csv
-    ├── xways_excire_metrics.csv
-    └── cellebrite_inseyets_metrics.csv
+    ├── excire_foto_2025_d20_metrics.csv
+    ├── excire_foto_2025_d50_metrics.csv
+    ├── excire_foto_2025_d80_metrics.csv
+    ├── cellebrite_inseyets_metrics.csv
+    └── griffeye_metrics.csv
 ```
-
-`cellebrite_inseyets_metrics.csv` is a target artifact only if Cellebrite Inseyets 10.9 exports become available and can be normalized against the forensic evaluation bundle. Oxygen Forensic Detective and Autopsy are excluded from the final experimental perimeter.
 
 ---
 
@@ -74,17 +75,14 @@ results/metrics/forensic_tools_metrics.csv
 results/metrics/<tool_name>_metrics.csv
 ```
 
-Consolidated / analyzed commercial-tool status:
+Consolidated commercial-tool status:
 
 ```text
 Completed and normalized:
 - Magnet AXIOM / Magnet.AI, version 10.1.0.48673
-
-Completed / analyzed:
-- X-Ways Forensics / Excire Foto 2025, version 4.1.5
-
-Pending / to be consolidated:
+- Excire Foto 2025, version 4.1.5
 - Cellebrite Inseyets, version 10.9
+- Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
 
 Excluded:
 - Oxygen Forensic Detective
@@ -92,6 +90,57 @@ Excluded:
 ```
 
 Commercial tool metrics should not be manually merged with proxy metrics before the bundle mapping has been verified.
+
+---
+
+## Commercial Tool Global Binary Metrics
+
+The following values are computed on the 11,000 binary bundle items. OOD behavior is reported separately as `OOD flag rate` over the 500 OOD samples.
+
+| Tool / configuration | Accuracy | Recall | FNR | FPR | OOD flag rate |
+|---|---:|---:|---:|---:|---:|
+| Magnet Griffeye / T3K CORE | 0.971727 | 0.950727 | 0.049273 | 0.007273 | 0.260000 |
+| Cellebrite Inseyets 10.9 | 0.958091 | 0.957818 | 0.042182 | 0.041636 | 0.292000 |
+| Magnet AXIOM / Magnet.AI | 0.933364 | 0.901455 | 0.098545 | 0.034727 | 0.360000 |
+| Excire Foto 2025 D20 | 0.910727 | 0.857091 | 0.142909 | 0.035636 | 0.238000 |
+| Excire Foto 2025 D50 | 0.924545 | 0.948545 | 0.051455 | 0.099455 | 0.340000 |
+| Excire Foto 2025 D80 | 0.887091 | 0.981273 | 0.018727 | 0.207091 | 0.522000 |
+
+Operational interpretation: commercial-tool robustness is tool-dependent. Griffeye achieves the highest global accuracy and the lowest false-positive rate under the primary firearm-only semantic-bookmark mapping. Cellebrite provides slightly higher weapon recall. Excire D80 maximizes recall but at the cost of many more false positives. Magnet AXIOM / Magnet.AI remains operationally useful but produces more false negatives on the weapon class.
+
+---
+
+## Griffeye Metric Reference
+
+Official Griffeye metric file:
+
+```text
+results/metrics/griffeye_metrics.csv
+```
+
+Global binary values:
+
+```text
+rows_total              = 11500
+binary_rows             = 11000
+ood_rows                = 500
+TP                      = 5229
+TN                      = 5460
+FP                      = 40
+FN                      = 271
+accuracy                = 0.971727
+balanced_accuracy       = 0.971727
+precision               = 0.992408
+recall                  = 0.950727
+specificity             = 0.992727
+F1                      = 0.971121
+FNR                     = 0.049273
+FPR                     = 0.007273
+OOD firearm flags       = 130 / 500
+OOD firearm flag rate   = 0.260000
+```
+
+The Griffeye result is derived from automatic T3K CORE semantic bookmarks and uses a primary firearm-only mapping. Other weapon-related or military-equipment bookmarks are not used as primary positives.
 
 ---
 
@@ -109,7 +158,7 @@ xai_case_0010 = anti-forensic false negative under histogram modification
 xai_case_0015 = high-confidence adversarial false positive under sigma_zero
 ```
 
-These cases are used to interpret representative proxy-model behavior. They are not claimed as explanations of Magnet AXIOM / Magnet.AI, Excire Foto 2025, or Cellebrite Inseyets, which remain black-box or operationally opaque tools.
+These cases are used to interpret representative proxy-model behavior. They are not claimed as explanations of Magnet AXIOM / Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, or Griffeye, which remain black-box or operationally opaque tools.
 
 ---
 
@@ -150,4 +199,5 @@ When results are moved into LaTeX tables:
 - preserve exact dataset sizes and sample counts;
 - document any manual mapping or export-normalization decisions;
 - do not report Oxygen or Autopsy as final experimental tools;
-- refer to Cellebrite as Cellebrite Inseyets 10.9 when discussing the remaining Cellebrite evaluation perimeter.
+- refer to Cellebrite as Cellebrite Inseyets 10.9;
+- refer to Griffeye as Magnet Griffeye x64 26.2.108 with T3K CORE v1.18.0.
