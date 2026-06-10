@@ -1,22 +1,22 @@
 <p align="center">
-  <img src="docs/assets/repository_header.png" alt="Evaluating the Robustness of AI-based Forensics Tools" width="100%">
+  <img src="docs/assets/repository_header.png" alt="Evaluating the Robustness of AI-based Forensic Tools" width="100%">
 </p>
 
 # MSc Thesis – AI Robustness in Digital Forensics
 
-## Evaluating the Robustness of AI-based Forensics Tools under Adversarial and Anti-Forensics Attacks
+## Evaluating the Robustness of AI-based Forensic Tools under Adversarial and Anti-Forensic Attacks
 
 This repository contains the working research pipeline for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
 
-The thesis evaluates the **operational robustness of AI-based image classification systems in digital forensic scenarios**. The workflow compares transparent local proxy models and commercial forensic AI tools under clean inputs, out-of-distribution samples, adversarial perturbations, and anti-forensic image transformations.
+The thesis evaluates the **operational robustness of AI-based image classification and media-triage systems in digital forensic scenarios**. The workflow compares transparent local proxy models and commercial black-box forensic / AI-assisted tools under clean inputs, out-of-distribution samples, adversarial perturbations, and anti-forensic image transformations.
 
-The focus of the project is **Digital/Computer Forensics**, not Adversarial Machine Learning as an isolated optimization problem. Adversarial and anti-forensic manipulations are used as experimental stressors to assess reliability, traceability, robustness, and operational risk in AI-assisted forensic triage.
+The focus of the project is **Digital/Computer Forensics**, not Adversarial Machine Learning as an isolated optimization problem. Adversarial and anti-forensic manipulations are used as controlled experimental stressors to assess reliability, traceability, robustness, and operational risk in AI-assisted forensic triage.
 
 ---
 
 ## Current Operational Status
 
-The repository is currently aligned with the following state.
+The repository is aligned with the following consolidated state.
 
 | Stage | Status | Main artifacts |
 |---|---|---|
@@ -31,9 +31,7 @@ The repository is currently aligned with the following state.
 | Anti-forensic transformation generation | Completed | `jpeg_recompression`, `resample_resize`, `gaussian_blur`, `histogram_modification`, `contrast_stretching` |
 | Proxy model evaluation | Completed | `evaluation/proxy_models/proxy_model_predictions.csv`, `results/metrics/` |
 | Forensic evaluation bundle | Generated and validated | `datasets/forensic_evaluation_bundle/` |
-| Magnet AXIOM / Magnet.AI evaluation | Completed and normalized | `evaluation/forensic_tools/`, `results/metrics/forensic_tools_metrics.csv` |
-| Excire Foto 2025 evaluation | Completed / analyzed | Semantic retrieval evaluation with `D20`, `D50`, `D80` configurations |
-| Cellebrite Inseyets evaluation | Pending / to be consolidated | Version 10.9; final Cellebrite tool in the experimental perimeter |
+| Commercial forensic-tool evaluation | Completed and normalized | Magnet AXIOM / Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, Magnet Griffeye / T3K CORE |
 | Explainability / XAI | Completed and integrated in Chapter 5 | Five representative Integrated Gradients case studies selected and included in the thesis text |
 | Thesis reporting | In progress | `docs/LatexThesis_ITA/` |
 
@@ -56,17 +54,17 @@ anti_forensic  = 5000
 total          = 11500
 ```
 
-Magnet AXIOM / Magnet.AI normalization summary:
+Commercial forensic-tool normalization summary:
 
 ```text
-bundle_rows                 = 11500
-raw_rows_parsed             = 11500
-matched_rows_after_dedup    = 11500
-unmatched_rows_after_dedup  = 0
-interpretable_rows          = 11500
-weapon_detected=true        = 5329
-weapon_detected=false       = 6171
-weapon_detected=unknown     = 0
+bundle_rows                         = 11500
+tools_requested                     = magnet_axiom, excire_foto_2025, cellebrite_inseyets, griffeye
+normalized_rows_after_deduplication = 69000
+matched_rows_after_deduplication    = 69000
+unmatched_rows_after_deduplication  = 0
+interpretable_rows_after_dedup      = 69000
+weapon_detected=unknown             = 0
+metric_outputs_consistent           = true
 ```
 
 Bundle validation checks are positive:
@@ -83,14 +81,15 @@ metadata_separated_from_tool_input       = true
 
 ## Immediate Operational Focus
 
-The reproducible proxy-model layer, the Magnet AXIOM / Magnet.AI black-box commercial-tool layer, the Excire Foto 2025 semantic retrieval evaluation, and the Chapter 5 Integrated Gradients case studies are consolidated.
+The reproducible proxy-model layer, the commercial black-box tool layer, the forensic evaluation bundle, and the Integrated Gradients/XAI case studies are consolidated.
 
 The remaining operational focus is:
 
 ```text
-consolidate Cellebrite Inseyets 10.9 if exportable and mappable
-finalize Chapter 5 / Chapter 6 reporting
-perform final thesis-wide revision
+revise Chapter 4 to include Griffeye / T3K CORE in the commercial-tool methodology
+revise Chapter 5 to include Griffeye in the commercial-tool results and comparison
+revise Chapter 6 / final discussion around tool-dependent operational robustness
+perform final thesis-wide consistency review
 prepare the future English version
 ```
 
@@ -114,14 +113,13 @@ The consolidated commercial / black-box evaluation perimeter is:
 ```text
 Completed and normalized:
 - Magnet AXIOM / Magnet.AI, version 10.1.0.48673
-
-Completed / analyzed:
 - Excire Foto 2025, version 4.1.5
-
-Pending / to be consolidated:
 - Cellebrite Inseyets, version 10.9
+- Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
 
-
+Excluded from the final experimental perimeter:
+- Oxygen Forensic Detective
+- Autopsy
 ```
 
 Official forensic-tool prediction normalization entry point:
@@ -211,8 +209,11 @@ datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
     ↓
 datasets/forensic_evaluation_bundle/
     ↓
-Magnet AXIOM / Magnet.AI
-X-Ways Forensics / Excire Foto 2025
+Commercial black-box tools:
+- Magnet AXIOM / Magnet.AI
+- Excire Foto 2025
+- Cellebrite Inseyets
+- Magnet Griffeye / T3K CORE
     ↓
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
     ↓
@@ -263,7 +264,11 @@ msc-thesis-ai-robustness-in-digital-forensics/
 │   ├── logs/
 │   └── outputs/
 ├── forensic_tools/
-│   └── README.md
+│   ├── README.md
+│   ├── magnet_axiom/
+│   ├── excire_foto_2025/
+│   ├── cellebrite_inseyets/
+│   └── griffeye/
 ├── results/
 │   ├── README.md
 │   └── metrics/
@@ -366,14 +371,77 @@ The proxy evaluation covers:
 - comparative clean-vs-perturbed metrics;
 - thesis-ready metric tables for proxy models.
 
-The Magnet AXIOM / Magnet.AI black-box evaluation is consolidated through normalized outputs in:
+Commercial tool evaluation is consolidated through normalized outputs in:
 
 ```text
 evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
 ```
 
-Excire Foto 2025 is treated as a standalone AI-assisted semantic retrieval tool evaluated in a controlled forensic context. Cellebrite Inseyets 10.9 remains pending unless comparable, normalized exports become available.
+The commercial / black-box tools are evaluated as observable operational systems. The normalization layer does not assume access to internal models, proprietary training data, undocumented thresholds, or calibrated confidence scores.
+
+### Commercial tool global binary comparison
+
+The following table reports the global binary `weapon` / `non_weapon` metrics on the 11,000 binary bundle items. OOD behavior is reported separately as `OOD flag rate` over the 500 OOD samples.
+
+| Tool / configuration | Accuracy | Recall weapon | FNR | FPR | OOD flag rate |
+|---|---:|---:|---:|---:|---:|
+| Magnet Griffeye / T3K CORE | 0.971727 | 0.950727 | 0.049273 | 0.007273 | 0.260000 |
+| Cellebrite Inseyets 10.9 | 0.958091 | 0.957818 | 0.042182 | 0.041636 | 0.292000 |
+| Magnet AXIOM / Magnet.AI | 0.933364 | 0.901455 | 0.098545 | 0.034727 | 0.360000 |
+| Excire Foto 2025 D20 | 0.910727 | 0.857091 | 0.142909 | 0.035636 | 0.238000 |
+| Excire Foto 2025 D50 | 0.924545 | 0.948545 | 0.051455 | 0.099455 | 0.340000 |
+| Excire Foto 2025 D80 | 0.887091 | 0.981273 | 0.018727 | 0.207091 | 0.522000 |
+
+Operational interpretation: commercial-tool robustness is **tool-dependent**. Griffeye achieves the highest global accuracy and the lowest false-positive rate under the primary firearm-only mapping, while Cellebrite provides slightly higher weapon recall. Excire D80 maximizes recall but at the cost of many more false positives. Magnet AXIOM / Magnet.AI remains operationally useful but produces more false negatives on the weapon class.
+
+---
+
+## Griffeye / T3K CORE Normalization
+
+Magnet Griffeye is evaluated as a commercial black-box forensic media-triage tool through automatic semantic bookmarks generated by T3K CORE.
+
+```text
+Tool          = Magnet Griffeye x64
+Version       = 26.2.108
+AI module     = T3K CORE
+Module version= 1.18.0
+Run folder    = forensic_tools/griffeye/raw_exports/FAIRLAB_GRIFFEYE_T3_RUN_01
+```
+
+The primary thesis mapping is firearm-oriented:
+
+```text
+weapon_detected = true  if Bookmarks contains CORE/Violence/Firearm
+weapon_detected = false otherwise
+```
+
+The following bookmarks are intentionally excluded from the primary metric and retained only as secondary semantic indicators:
+
+```text
+CORE/Violence/Explosive Weapon
+CORE/Violence/Bladed Weapon
+CORE/Violence/Archery Weapon
+CORE/Military/Military Equipment
+```
+
+Official Griffeye outputs:
+
+```text
+evaluation/forensic_tools/griffeye_normalized_predictions.csv
+results/metrics/griffeye_metrics.csv
+```
+
+Griffeye normalization checks:
+
+```text
+rows in normalized prediction file = 11501 (1 header + 11500 predictions)
+matched_rows                       = 11500
+unmatched_rows                     = 0
+unknown_rows                       = 0
+positive firearm bookmarks         = 5399
+negative / no-firearm rows         = 6101
+```
 
 ---
 
@@ -455,7 +523,7 @@ The hash-based mapping is especially important because forensic tools may rename
 
 This repository is currently maintained as a working research repository. During development, data and generated outputs may be versioned to allow continuation across multiple machines.
 
-For a future public release, raw images and sensitive generated artifacts may be removed or replaced with manifests, hashes, sample images where permissible, documentation, reproducible scripts, and aggregated metrics.
+For a future public release, raw images, proprietary exports, installer files, license files, sensitive generated artifacts, and heavy tool outputs may be removed or replaced with manifests, hashes, sample images where permissible, documentation, reproducible scripts, and aggregated metrics.
 
 ---
 
@@ -473,14 +541,14 @@ and is aligned with research areas including Digital Forensics, AI-based forensi
 
 This repository contains the experimental artifacts developed for the following forthcoming Master's thesis:
 
-> Molinario, L. (2026). *Evaluating the Robustness of AI-based Forensics Tools under Adversarial and Anti-Forensics Attacks*. Master's thesis, University of Cagliari, Department of Engineering, Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence. Academic Year 2025/2026. Thesis in preparation.
+> Molinario, L. (2026). *Evaluating the Robustness of AI-based Forensic Tools under Adversarial and Anti-Forensic Attacks*. Master's thesis, University of Cagliari, Department of Engineering, Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence. Academic Year 2025/2026. Thesis in preparation.
 
 ### BibTeX
 
 ```bibtex
 @mastersthesis{molinario2026robustnessforensictools,
   author  = {Molinario, Lello},
-  title   = {Evaluating the Robustness of {AI}-based Forensics Tools under Adversarial and Anti-Forensics Attacks},
+  title   = {Evaluating the Robustness of {AI}-based Forensic Tools under Adversarial and Anti-Forensic Attacks},
   school  = {University of Cagliari, Department of Engineering},
   type    = {Master's thesis},
   address = {Cagliari, Italy},
