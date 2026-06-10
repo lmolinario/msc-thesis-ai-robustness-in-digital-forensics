@@ -32,12 +32,12 @@ Complessivamente, questa linea di ricerca ha prodotto tre acquisizioni consolida
 % ─────────────────────────────────────────────────────────────────────────────
 L'integrazione di funzionalità basate su \gls{ai} in software impiegati per l'analisi di evidenze digitali rappresenta una delle principali evoluzioni operative della \gls{df}. Nel caso dei contenuti visivi, tali funzionalità possono supportare attività di triage, ricerca semantica, categorizzazione automatica e prioritizzazione delle immagini da sottoporre alla revisione dell'analista. Tuttavia, la disponibilità di una funzione automatizzata non implica, di per sé, che il relativo comportamento sia sufficientemente robusto in presenza di input degradati, ambigui o intenzionalmente manipolati. Questo problema risulta particolarmente rilevante quando i componenti AI sono proprietari e il software è osservabile soltanto attraverso gli output prodotti, senza accesso ai modelli interni, ai dataset di addestramento o alle soglie decisionali adottate \cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
 
-La letteratura specificamente dedicata alla robustezza operativa di software AI-based utilizzabili in contesti forensi è ancora limitata. Sanna et al. hanno condotto una prima analisi su \textit{Magnet.AI}, integrato in \textit{Magnet AXIOM}, ed \textit{Excire Photo AI}, esaminando il comportamento di funzionalità automatiche rispetto a contenuti anomali o manipolati \cite{sanna2024preliminary}. Un successivo studio ha approfondito la risposta degli stessi software rispetto a deepfake facciali e immagini ottenute mediante morphing, rilevando criticità nella robustezza delle funzionalità AI-enhanced analizzate e sottolineando la particolare rilevanza forense dei falsi negativi, poiché contenuti potenzialmente rilevanti possono non essere sottoposti all'attenzione dell'analista \cite{sanna2025pixelperfect}. Tali lavori costituiscono il riferimento più vicino alla presente tesi, pur differendo dal problema qui considerato, che riguarda il task operativo \texttt{weapon}/\texttt{non\_weapon}, orientato all'individuazione di immagini contenenti armi, e l'analisi separata del comportamento dei sistemi in presenza di contenuti \texttt{ood}.
+La letteratura specificamente dedicata alla robustezza operativa di software AI-based utilizzabili in contesti forensi è ancora limitata. Sanna et al. hanno condotto una prima analisi su \textit{Magnet.AI}, integrato in \textit{Magnet AXIOM}, ed \textit{Excire Photo AI}, esaminando il comportamento di funzionalità automatiche rispetto a contenuti anomali o manipolati \cite{sanna2024preliminary}. Un successivo studio ha approfondito la risposta degli stessi software rispetto a deepfake facciali e immagini ottenute mediante morphing, rilevando criticità nella robustezza delle funzionalità AI-enhanced analizzate e sottolineando la particolare rilevanza forense dei falsi negativi, poiché contenuti potenzialmente rilevanti possono non essere sottoposti all'attenzione dell'analista \cite{sanna2025pixelperfect}. Tali lavori costituiscono il riferimento più vicino alla presente tesi, pur differendo dal problema qui considerato, che riguarda il task operativo \texttt{weapon}/\texttt{non\_weapon}, orientato all'individuazione di immagini contenenti armi da fuoco o contenuti firearm-oriented, e l'analisi separata del comportamento dei sistemi in presenza di contenuti \texttt{ood}.
 
 \subsection{Magnet AXIOM e Magnet.AI}
 \label{subsec:sota_magnet_ai}
 
-\textit{Magnet AXIOM} è un software commerciale destinato all'elaborazione e all'analisi di evidenze provenienti da fonti digitali eterogenee. Nell'ambito delle funzionalità rilevanti per l'analisi automatizzata di immagini, il componente \textit{Magnet.AI} consente di categorizzare contenuti multimediali potenzialmente pertinenti all'indagine, includendo categorie riconducibili ad armi, sostanze stupefacenti, nudità e ulteriori contenuti sensibili \cite{magnetai_official,sanna2024preliminary}. Tale funzione è direttamente pertinente al task affrontato nella presente tesi, poiché consente di osservare se immagini contenenti armi vengano segnalate o meno all'interno di un workflow di analisi forense.
+\textit{Magnet AXIOM} è un software commerciale destinato all'elaborazione e all'analisi di evidenze provenienti da fonti digitali eterogenee. Nell'ambito delle funzionalità rilevanti per l'analisi automatizzata di immagini, il componente \textit{Magnet.AI} consente di categorizzare contenuti multimediali potenzialmente pertinenti all'indagine, includendo categorie riconducibili ad armi, sostanze stupefacenti, nudità e ulteriori contenuti sensibili \cite{magnetai_official,sanna2024preliminary}. Tale funzione è direttamente pertinente al task affrontato nella presente tesi, poiché consente di osservare se immagini contenenti armi da fuoco o contenuti firearm-oriented vengano segnalate o meno all'interno di un workflow di analisi forense.
 
 Gli studi precedenti hanno evidenziato che \textit{Magnet.AI} può essere sottoposto a valutazione operativa in modalità \textit{black-box}, osservando le categorie restituite dal software senza assumere conoscenza del modello sottostante. In particolare, Sanna et al. hanno esaminato il comportamento del software rispetto a contenuti manipolati e, successivamente, rispetto a immagini facciali ottenute mediante deepfake e morphing, rilevando limiti nella robustezza di alcune funzionalità automatiche \cite{sanna2024preliminary,sanna2025pixelperfect}. Il limite metodologico principale rimane l'opacità del componente proprietario: il ricercatore può misurare il comportamento degli output disponibili all'analista, ma non può ricostruire con certezza architettura, dati di addestramento, pre-processing o logica decisionale interna.
 
@@ -61,13 +61,51 @@ Nel contesto della presente tesi, \textit{Cellebrite Inseyets} è quindi rilevan
 
 Come per gli altri strumenti commerciali considerati nello stato dell'arte, l'integrazione di funzionalità automatiche non elimina tuttavia la necessità di valutarne affidabilità, limiti e comportamento in presenza di input degradati, manipolati o non pienamente rappresentativi delle condizioni ideali di funzionamento. Per questo motivo, Cellebrite Inseyets viene richiamato come ulteriore caso significativo di software commerciale black-box rispetto al problema generale della robustezza operativa dei sistemi AI-assisted in ambito forense.
 
+\subsection{Magnet Griffeye e T3K CORE}
+\label{subsec:sota_griffeye_t3k}
+
+\textit{Magnet Griffeye} è una piattaforma commerciale utilizzata per il triage,
+la revisione e l'organizzazione di grandi quantità di contenuti multimediali in
+contesti investigativi e forensi. Nell'ambito della presente tesi, lo strumento
+è rilevante non come classificatore accademico controllabile, ma come software
+commerciale black-box capace di produrre output semantici osservabili
+sull'immagine mediante moduli automatici di analisi.
+
+Il componente \textit{T3K CORE} consente di generare bookmark semantici
+automatici associati ai contenuti multimediali analizzati. Tali bookmark possono
+essere utilizzati dall'analista per filtrare, prioritizzare o rivedere immagini
+potenzialmente rilevanti. Dal punto di vista metodologico, questo tipo di output
+è diverso sia dalle categorie restituite da \textit{Magnet.AI}, sia dai risultati
+di recupero semantico prodotti da \textit{Excire Foto 2025}, sia dalle
+classificazioni esportate nel workflow Cellebrite. Tuttavia, esso rientra nella
+stessa famiglia di segnali operativi osservabili che possono essere normalizzati
+rispetto a una ground truth sperimentale.
+
+La rilevanza di \textit{Magnet Griffeye} per questa tesi risiede quindi nella
+possibilità di estendere la valutazione black-box a un ulteriore paradigma di
+output: non una probabilità di classe o una decisione supervisionata esplicita,
+ma un insieme di bookmark semantici generati automaticamente. Questa
+caratteristica rafforza il problema metodologico generale affrontato nella
+tesi: strumenti commerciali differenti possono esporre output eterogenei, ma
+devono essere ricondotti a una rappresentazione comune solo attraverso regole di
+normalizzazione esplicite, documentate e coerenti con il task sperimentale.
 
 
 
 \subsection{Limiti comuni della valutazione black-box}
 \label{subsec:sota_black_box_limits}
 
-I software considerati presentano caratteristiche funzionali differenti e non devono essere interpretati come sistemi direttamente equivalenti. \textit{Magnet.AI} espone categorie operative applicabili al contenuto delle immagini; \textit{Excire Foto 2025} è considerato come sistema di ricerca e recupero semantico di contenuti visivi; l'ecosistema Cellebrite richiede l'identificazione del componente concretamente utilizzato per la categorizzazione dei media. Pertanto, una comparazione operativa tra tali software non può presupporre identità di task, modelli interni o modalità di output.
+I software considerati presentano caratteristiche funzionali differenti e non
+devono essere interpretati come sistemi direttamente equivalenti.
+\textit{Magnet.AI} espone categorie operative applicabili al contenuto delle
+immagini; \textit{Excire Foto 2025} è considerato come sistema di ricerca e
+recupero semantico di contenuti visivi; \textit{Cellebrite Inseyets} richiede
+l'identificazione del componente concretamente utilizzato per la
+categorizzazione dei media; \textit{Magnet Griffeye}, attraverso
+\textit{T3K CORE}, produce bookmark semantici automatici. Pertanto, una
+comparazione operativa tra tali software non può presupporre identità di task,
+modelli interni, soglie decisionali o modalità di output.
+
 
 Un limite comune riguarda la natura proprietaria o comunque non osservabile dei componenti AI impiegati. In una valutazione \textit{black-box}, non è possibile controllare direttamente architettura del modello, dataset di addestramento, procedure di aggiornamento, pre-processing, calibrazione della confidenza o criteri di decisione. La validazione deve quindi fondarsi su elementi esterni e verificabili: ground truth indipendente, dataset documentato, condizioni sperimentali comuni, input manipolati riproducibili, output esportabili e procedure di matching basate su identificativi o hash.
 
@@ -92,7 +130,7 @@ Alla luce di tali limiti, il contributo della presente tesi non consiste nel car
         \addlinespace
         Excire Foto 2025 &
         Ricerca e recupero semantico AI-assisted di immagini &
-        Consente di valutare il recupero di immagini coerenti con il concetto di arma mediante un software standalone valutato in un contesto forense controllato &
+        Consente di valutare il recupero di immagini coerenti con il concetto firearm-oriented mediante un software standalone valutato in un contesto forense controllato &
         Non è un classificatore forense nativo; il comportamento dipende da query e configurazioni operative \\
         \addlinespace
 
@@ -101,6 +139,15 @@ Alla luce di tali limiti, il contributo della presente tesi non consiste nel car
         Consente di verificare l'applicabilità del bundle a un workflow di analisi mobile, sulla base degli output concretamente esportabili dal software &
         Tool commerciale black-box; la confrontabilità dipende dal formato degli output esportabili e dalla ricodifica operativa delle classificazioni  \\
         \addlinespace
+
+        Magnet Griffeye / T3K CORE &
+        Generazione automatica di bookmark semantici su contenuti multimediali &
+        Consente di valutare un ulteriore paradigma di output black-box, basato
+        su bookmark semantici normalizzabili rispetto al task sperimentale &
+        Tool commerciale black-box; la confrontabilità dipende dal mapping
+        operativo tra bookmark esportati e classe sperimentale \texttt{weapon} \\
+        \addlinespace
+
 
         \bottomrule
     \end{tabularx}
@@ -118,9 +165,9 @@ La classificazione automatica di immagini costituisce uno dei principali punti d
 
 I primi contributi in questa direzione hanno applicato modelli di \gls{ml} e \gls{dl} a compiti di classificazione semantica, object recognition e multimedia triage, con particolare attenzione a categorie di interesse investigativo quali volti, oggetti, scene, contenuti illeciti o elementi potenzialmente associati a condotte criminali. Costantini et al.~\cite{costantini2019digital} collocano tali funzionalità all'interno di un workflow più ampio di evidence analysis, nel quale la classificazione automatica non sostituisce l'interpretazione forense, ma contribuisce a organizzare e filtrare il materiale acquisito. Questa impostazione è rilevante perché chiarisce che la classificazione visuale, in ambito forense, ha una funzione primariamente operativa: orientare l'attenzione dell'analista verso porzioni di evidenza che meritano una revisione più approfondita.
 
-Nel dominio specifico del riconoscimento di armi, Hao et al.~\cite{Hao2018DeepFirearm} hanno proposto DeepFirearm, un approccio basato su rappresentazioni profonde per il riconoscimento fine-grained di armi da fuoco. Il contributo mostra che la classificazione di immagini contenenti armi non può essere ridotta a un problema visivo banale: la variabilità di pose, prospettive, occlusioni, qualità dell'immagine e similarità morfologica tra modelli differenti richiede rappresentazioni discriminative capaci di catturare dettagli visivi rilevanti. Tuttavia, lavori di questo tipo sono prevalentemente orientati al riconoscimento o al retrieval in condizioni sperimentali controllate, e non affrontano in modo sistematico il comportamento dei modelli quando le immagini sono degradate, manipolate o provenienti da fonti eterogenee tipiche di un'indagine digitale.
+Nel dominio specifico del riconoscimento di armi, Hao et al.~\cite{Hao2018DeepFirearm} hanno proposto DeepFirearm, un approccio basato su rappresentazioni profonde per il riconoscimento fine-grained di armi da fuoco. Il contributo mostra che la classificazione di immagini contenenti armi da fuoco o contenuti firearm-oriented non può essere ridotta a un problema visivo banale: la variabilità di pose, prospettive, occlusioni, qualità dell'immagine e similarità morfologica tra modelli differenti richiede rappresentazioni discriminative capaci di catturare dettagli visivi rilevanti. Tuttavia, lavori di questo tipo sono prevalentemente orientati al riconoscimento o al retrieval in condizioni sperimentali controllate, e non affrontano in modo sistematico il comportamento dei modelli quando le immagini sono degradate, manipolate o provenienti da fonti eterogenee tipiche di un'indagine digitale.
 
-La disponibilità di dataset pubblici per il weapon detection, come il \textit{Weapon Detection Dataset}~\cite{Sanyal2023KaggleWeapon}, ha favorito lo sviluppo di modelli capaci di riconoscere armi in immagini statiche. Tali risorse hanno un valore sperimentale importante, ma presentano limiti quando vengono trasferite a scenari forensi realistici. I dataset pubblici sono spesso costruiti per il riconoscimento visivo o per applicazioni di sorveglianza, non per la validazione operativa di modelli e software AI-based utilizzabili in contesti forensi. Di conseguenza, possono non rappresentare adeguatamente casi borderline, immagini degradate, contenuti fuori distribuzione, screenshot, immagini sintetiche o materiali provenienti da piattaforme sociali e applicazioni di messaggistica. Questa distanza tra dataset di benchmark e materiale investigativo reale costituisce una delle criticità più rilevanti nella valutazione di sistemi \gls{ai}-based applicati alla \gls{df}.
+La disponibilità di dataset pubblici per il weapon detection, come il \textit{Weapon Detection Dataset}~\cite{Sanyal2023KaggleWeapon}, ha favorito lo sviluppo di modelli capaci di riconoscere armi da fuoco o contenuti firearm-oriented in immagini statiche. Tali risorse hanno un valore sperimentale importante, ma presentano limiti quando vengono trasferite a scenari forensi realistici. I dataset pubblici sono spesso costruiti per il riconoscimento visivo o per applicazioni di sorveglianza, non per la validazione operativa di modelli e software AI-based utilizzabili in contesti forensi. Di conseguenza, possono non rappresentare adeguatamente casi borderline, immagini degradate, contenuti fuori distribuzione, screenshot, immagini sintetiche o materiali provenienti da piattaforme sociali e applicazioni di messaggistica. Questa distanza tra dataset di benchmark e materiale investigativo reale costituisce una delle criticità più rilevanti nella valutazione di sistemi \gls{ai}-based applicati alla \gls{df}.
 
 Dal punto di vista architetturale, la letteratura di computer vision ha mostrato l'efficacia delle \gls{cnn} profonde per la classificazione di immagini. Architetture come ResNet~\cite{he2016deep} ed EfficientNet~\cite{tan2019efficientnet} hanno fornito basi solide per molti sistemi di classificazione visuale, grazie alla capacità di apprendere rappresentazioni gerarchiche del contenuto dell'immagine. Più recentemente, modelli vision-language come \gls{clip}~\cite{radford2021learning} e \gls{blip}~\cite{li2022blip}, insieme ai \gls{vit}~\cite{dosovitskiy2020image}, hanno ampliato il perimetro della classificazione automatica, consentendo forme di classificazione guidata da testo, zero-shot o basata su descrizioni semantiche. In ambito forense, questa evoluzione è potenzialmente rilevante perché le categorie investigative possono non coincidere perfettamente con le classi dei dataset tradizionali; tuttavia, la letteratura non ha ancora chiarito in modo sufficiente quanto tali modelli siano stabili in presenza di immagini degradate, ambigue o manipolate.
 
@@ -158,54 +205,124 @@ Nel complesso, la letteratura sui benchmark di robustezza fornisce tre indicazio
 \label{sec:sota-adversarial-ml}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La letteratura sull'\gls{advml} ha mostrato che i classificatori di immagini basati su \gls{ml} e \gls{dl} possono essere vulnerabili a input costruiti intenzionalmente per alterarne la predizione. Nel Capitolo~\ref{chap:background} sono stati introdotti i concetti fondamentali di adversarial example, threat model e perturbazione dell'input; in questa sezione l'attenzione è invece rivolta ai principali risultati della letteratura e alla loro rilevanza per i classificatori visuali impiegabili in scenari forensi.
+La letteratura sull'\gls{advml} ha mostrato che i classificatori di immagini
+basati su \gls{ml} e \gls{dl} possono essere vulnerabili a input costruiti
+intenzionalmente per alterarne la predizione. Nel
+Capitolo~\ref{chap:background} sono stati introdotti i concetti fondamentali di
+adversarial example, threat model e perturbazione dell'input; in questa sezione
+l'attenzione è invece rivolta ai principali risultati della letteratura e alla
+loro rilevanza per i classificatori visuali impiegabili in scenari forensi.
 
-I lavori seminali di Szegedy et al.~\cite{szegedy2014intriguing} e Goodfellow et al.~\cite{goodfellow2015explaining} hanno stabilito che classificatori profondi ad alta accuratezza possono produrre decisioni errate in presenza di perturbazioni intenzionalmente costruite, anche quando tali alterazioni risultano limitate sul piano percettivo. Per la \gls{df}, questo risultato è rilevante perché mostra che un sistema automatico impiegato nel triage visuale può essere indotto a sottostimare o ignorare contenuti investigativamente rilevanti qualora l'input sia stato manipolato prima dell'acquisizione o dell'analisi.
+I lavori seminali di Szegedy et al.~\cite{szegedy2014intriguing} e Goodfellow
+et al.~\cite{goodfellow2015explaining} hanno stabilito che classificatori
+profondi ad alta accuratezza possono produrre decisioni errate in presenza di
+perturbazioni intenzionalmente costruite, anche quando tali alterazioni risultano
+limitate sul piano percettivo. Per la \gls{df}, questo risultato è rilevante
+perché mostra che un sistema automatico impiegato nel triage visuale può essere
+indotto a sottostimare o ignorare contenuti investigativamente rilevanti qualora
+l'input sia stato manipolato prima dell'acquisizione o dell'analisi.
 
-Un secondo filone della letteratura ha approfondito la costruzione di attacchi più precisi, iterativi o ottimizzati rispetto alla minima perturbazione necessaria per modificare la decisione del modello. DeepFool~\cite{moosavi2016deepfool} ha mostrato che è possibile stimare perturbazioni di piccola ampiezza capaci di spostare l'immagine oltre il confine decisionale del classificatore, contribuendo a rendere più sistematica la valutazione della distanza tra input pulito e input adversariale. SuperDeepFool~\cite{zhang2024superdeepfool} si colloca nello stesso filone, proponendo un'evoluzione orientata a generare perturbazioni efficaci rispetto a modelli profondi con un processo di ottimizzazione più mirato. Questi lavori non sono nati specificamente per la \gls{df}, ma sono rilevanti perché forniscono una base metodologica per misurare quanto un classificatore visuale possa essere instabile rispetto a variazioni non casuali dell'immagine.
+Un secondo filone della letteratura ha approfondito la costruzione di attacchi
+più precisi, iterativi o ottimizzati rispetto alla minima perturbazione
+necessaria per modificare la decisione del modello. DeepFool
+\cite{moosavi2016deepfool} ha mostrato che è possibile stimare perturbazioni di
+piccola ampiezza capaci di spostare l'immagine oltre il confine decisionale del
+classificatore, contribuendo a rendere più sistematica la valutazione della
+distanza tra input pulito e input adversariale. \gls{superdeepfool}
+\cite{zhang2024superdeepfool} si colloca nello stesso filone, proponendo
+un'evoluzione orientata a generare perturbazioni efficaci rispetto a modelli
+profondi con un processo di ottimizzazione più mirato. Questi lavori non sono
+nati specificamente per la \gls{df}, ma sono rilevanti perché forniscono una
+base metodologica per misurare quanto un classificatore visuale possa essere
+instabile rispetto a variazioni non casuali dell'immagine.
 
-La letteratura ha inoltre mostrato che la vulnerabilità adversariale non riguarda soltanto perturbazioni distribuite su molti pixel. Su et al.~\cite{su2019onepixel} hanno introdotto il One Pixel Attack, dimostrando che, in alcuni casi, la modifica di un numero estremamente limitato di pixel può essere sufficiente a indurre una classificazione errata. Più recentemente, approcci basati su vincoli sparsi, come Sigma-Zero~\cite{zhao2024sigmazero}, hanno ulteriormente esplorato la possibilità di costruire attacchi con alterazioni localizzate e ridotto impatto percettivo. Questa linea di ricerca è particolarmente significativa per il contesto forense, perché mostra che la manipolazione efficace di un'immagine non richiede necessariamente trasformazioni estese o visivamente evidenti: anche modifiche localizzate possono interferire con il comportamento di modelli automatici.
+La letteratura ha inoltre mostrato che la vulnerabilità adversariale non
+riguarda soltanto perturbazioni distribuite su molti pixel. Su et
+al.~\cite{su2019onepixel} hanno introdotto il \gls{onepixel}, dimostrando che,
+in alcuni casi, la modifica di un numero estremamente limitato di pixel può
+essere sufficiente a indurre una classificazione errata. Più recentemente,
+approcci basati su vincoli sparsi, come \gls{sigmazero}
+\cite{zhao2024sigmazero}, hanno ulteriormente esplorato la possibilità di
+costruire attacchi con alterazioni localizzate e ridotto impatto percettivo.
+Questa linea di ricerca è particolarmente significativa per il contesto forense,
+perché mostra che la manipolazione efficace di un'immagine non richiede
+necessariamente trasformazioni estese o visivamente evidenti: anche modifiche
+localizzate possono interferire con il comportamento di modelli automatici.
 
-Un'ulteriore linea di ricerca ha mostrato che la perturbazione adversariale può assumere anche forme localizzate e visivamente più esplicite, come nel caso degli adversarial patch. Brown et al.~\cite{brown2017patch} hanno dimostrato che una regione artificiale applicata all'immagine può indurre errori di classificazione anche senza modificare l'intero contenuto visivo. Per la presente tesi, tale risultato è rilevante soprattutto sul piano concettuale: mostra che la vulnerabilità dei classificatori non riguarda soltanto perturbazioni distribuite e quasi impercettibili, ma anche alterazioni localizzate che possono interferire con il processo decisionale del modello.
-
-Un aspetto cruciale per gli scenari operativi è la distinzione tra attacchi white-box, black-box e transfer-based. Papernot et al.~\cite{papernot2016limitations} hanno mostrato che la vulnerabilità dei modelli può trasferirsi tra classificatori differenti, mentre la letteratura successiva sugli attacchi black-box ha sistematizzato scenari nei quali l'attaccante dispone soltanto di accesso limitato agli output del modello o utilizza modelli surrogati per generare perturbazioni trasferibili \cite{bhambri2020survey}. Carlini e Wagner~\cite{carlini2017towards} hanno contribuito a rafforzare la valutazione della sicurezza dei classificatori mostrando i limiti di diverse difese proposte contro gli attacchi adversariali. Le survey di Akhtar e Mian~\cite{akhtar2018threat} e Yuan et al.~\cite{yuan2019adversarial} confermano che la trasferibilità degli adversarial examples costituisce uno dei problemi più rilevanti per l'impiego di modelli \gls{ai}-based in ambienti non completamente controllati. Nel caso dei software commerciali valutati in contesto forense, questa osservazione assume particolare importanza: anche quando il modello integrato nel software è proprietario e non ispezionabile, un attaccante potrebbe generare perturbazioni su modelli accessibili e verificarne l'efficacia per trasferimento.
-
-% ─────────────────────────────────────────────────────────────────────────────
-\section{Adversarial Machine Learning applicato a classificatori di immagini}
-\label{sec:sota-adversarial-ml}
-% ─────────────────────────────────────────────────────────────────────────────
-
-La letteratura sull'\gls{advml} ha mostrato che i classificatori di immagini basati su \gls{ml} e \gls{dl} possono essere vulnerabili a input costruiti intenzionalmente per alterarne la predizione. Nel Capitolo~\ref{chap:background} sono stati introdotti i concetti fondamentali di adversarial example, threat model e perturbazione dell'input; in questa sezione l'attenzione è invece rivolta ai principali risultati della letteratura e alla loro rilevanza per i classificatori visuali impiegabili in scenari forensi.
-
-I lavori seminali di Szegedy et al.~\cite{szegedy2014intriguing} e Goodfellow et al.~\cite{goodfellow2015explaining} hanno stabilito che classificatori profondi ad alta accuratezza possono produrre decisioni errate in presenza di perturbazioni intenzionalmente costruite, anche quando tali alterazioni risultano limitate sul piano percettivo. Per la \gls{df}, questo risultato è rilevante perché mostra che un sistema automatico impiegato nel triage visuale può essere indotto a sottostimare o ignorare contenuti investigativamente rilevanti qualora l'input sia stato manipolato prima dell'acquisizione o dell'analisi.
-
-Un secondo filone della letteratura ha approfondito la costruzione di attacchi più precisi, iterativi o ottimizzati rispetto alla minima perturbazione necessaria per modificare la decisione del modello. DeepFool~\cite{moosavi2016deepfool} ha mostrato che è possibile stimare perturbazioni di piccola ampiezza capaci di spostare l'immagine oltre il confine decisionale del classificatore, contribuendo a rendere più sistematica la valutazione della distanza tra input pulito e input adversariale. SuperDeepFool~\cite{zhang2024superdeepfool} si colloca nello stesso filone, proponendo un'evoluzione orientata a generare perturbazioni efficaci rispetto a modelli profondi con un processo di ottimizzazione più mirato. Questi lavori non sono nati specificamente per la \gls{df}, ma sono rilevanti perché forniscono una base metodologica per misurare quanto un classificatore visuale possa essere instabile rispetto a variazioni non casuali dell'immagine.
-
-La letteratura ha inoltre mostrato che la vulnerabilità adversariale non riguarda soltanto perturbazioni distribuite su molti pixel. Su et al.~\cite{su2019onepixel} hanno introdotto il One Pixel Attack, dimostrando che, in alcuni casi, la modifica di un numero estremamente limitato di pixel può essere sufficiente a indurre una classificazione errata. Più recentemente, approcci basati su vincoli sparsi, come Sigma-Zero~\cite{zhao2024sigmazero}, hanno ulteriormente esplorato la possibilità di costruire attacchi con alterazioni localizzate e ridotto impatto percettivo. Questa linea di ricerca è particolarmente significativa per il contesto forense, perché mostra che la manipolazione efficace di un'immagine non richiede necessariamente trasformazioni estese o visivamente evidenti: anche modifiche localizzate possono interferire con il comportamento di modelli automatici.
-
-Un'ulteriore linea di ricerca ha mostrato che la perturbazione adversariale può assumere anche forme localizzate e visivamente più esplicite, come nel caso degli adversarial patch. Brown et al.~\cite{brown2017patch} hanno dimostrato che una regione artificiale applicata all'immagine può indurre errori di classificazione anche senza modificare l'intero contenuto visivo. Per la presente tesi, tale risultato è rilevante soprattutto sul piano concettuale: mostra che la vulnerabilità dei classificatori non riguarda soltanto perturbazioni distribuite e quasi impercettibili, ma anche alterazioni localizzate che possono interferire con il processo decisionale del modello.
+Un'ulteriore linea di ricerca ha mostrato che la perturbazione adversariale può
+assumere anche forme localizzate e visivamente più esplicite, come nel caso
+degli adversarial patch. Brown et al.~\cite{brown2017patch} hanno dimostrato
+che una regione artificiale applicata all'immagine può indurre errori di
+classificazione anche senza modificare l'intero contenuto visivo. Per la
+presente tesi, tale risultato è rilevante soprattutto sul piano concettuale:
+mostra che la vulnerabilità dei classificatori non riguarda soltanto
+perturbazioni distribuite e quasi impercettibili, ma anche alterazioni
+localizzate che possono interferire con il processo decisionale del modello.
 
 La letteratura comprende inoltre attacchi generativi, nei quali reti generative
 vengono addestrate per produrre perturbazioni adversariali trasferibili. Un
-esempio rappresentativo è AdvGAN, che impiega un generatore per costruire
-esempi adversariali in modo efficiente e con capacità di trasferimento tra
-modelli \cite{xia2018advgan}. Questa famiglia di attacchi non è inclusa nel
-protocollo sperimentale della presente tesi, poiché il lavoro privilegia
-perturbazioni più direttamente interpretabili nel contesto operativo della
-\gls{df}.
+esempio rappresentativo è AdvGAN, che impiega un generatore per costruire esempi
+adversariali in modo efficiente e con capacità di trasferimento tra modelli
+\cite{xia2018advgan}. Questa famiglia di attacchi non è inclusa nel protocollo
+sperimentale della presente tesi, poiché il lavoro privilegia perturbazioni più
+direttamente interpretabili nel contesto operativo della \gls{df}.
 
+Un aspetto cruciale per gli scenari operativi è la distinzione tra attacchi
+white-box, black-box e transfer-based. Papernot et
+al.~\cite{papernot2016limitations} hanno mostrato che la vulnerabilità dei
+modelli può trasferirsi tra classificatori differenti, mentre la letteratura
+successiva sugli attacchi black-box ha sistematizzato scenari nei quali
+l'attaccante dispone soltanto di accesso limitato agli output del modello o
+utilizza modelli surrogati per generare perturbazioni trasferibili
+\cite{bhambri2020survey}. Carlini e Wagner~\cite{carlini2017towards} hanno
+contribuito a rafforzare la valutazione della sicurezza dei classificatori
+mostrando i limiti di diverse difese proposte contro gli attacchi
+adversariali. Le survey di Akhtar e Mian~\cite{akhtar2018threat} e Yuan et
+al.~\cite{yuan2019adversarial} confermano che la trasferibilità degli
+adversarial examples costituisce uno dei problemi più rilevanti per l'impiego di
+modelli \gls{ai}-based in ambienti non completamente controllati. Nel caso dei
+software commerciali valutati in contesto forense, questa osservazione assume
+particolare importanza: anche quando il modello integrato nel software è
+proprietario e non ispezionabile, un attaccante potrebbe generare perturbazioni
+su modelli accessibili e verificarne l'efficacia per trasferimento.
 
-Un aspetto cruciale per gli scenari operativi è la distinzione tra attacchi white-box, black-box e transfer-based. Papernot et al.~\cite{papernot2016limitations} hanno mostrato che la vulnerabilità dei modelli può trasferirsi tra classificatori differenti, mentre la letteratura successiva sugli attacchi black-box ha sistematizzato scenari nei quali l'attaccante dispone soltanto di accesso limitato agli output del modello o utilizza modelli surrogati per generare perturbazioni trasferibili \cite{bhambri2020survey}. Carlini e Wagner~\cite{carlini2017towards} hanno contribuito a rafforzare la valutazione della sicurezza dei classificatori mostrando i limiti di diverse difese proposte contro gli attacchi adversariali. Le survey di Akhtar e Mian~\cite{akhtar2018threat} e Yuan et al.~\cite{yuan2019adversarial} confermano che la trasferibilità degli adversarial examples costituisce uno dei problemi più rilevanti per l'impiego di modelli \gls{ai}-based in ambienti non completamente controllati. Nel caso dei software commerciali valutati in contesto forense, questa osservazione assume particolare importanza: anche quando il modello integrato nel software è proprietario e non ispezionabile, un attaccante potrebbe generare perturbazioni su modelli accessibili e verificarne l'efficacia per trasferimento.
+Biggio e Roli~\cite{biggio2018wild} hanno inquadrato queste vulnerabilità
+all'interno del paradigma dell'\textit{adversary-aware security}, sostenendo che
+la valutazione di un sistema basato su apprendimento automatico deve considerare
+esplicitamente la presenza di un avversario strategico. Questo principio è
+centrale per la presente tesi: un sistema di classificazione forense non opera
+necessariamente in un ambiente neutro, ma può essere esposto a dati preparati o
+modificati da soggetti interessati a ostacolare l'analisi. La robustezza
+adversariale, quindi, non è soltanto una proprietà tecnica del modello, ma una
+componente della sua affidabilità operativa.
 
-Biggio e Roli~\cite{biggio2018wild} hanno inquadrato queste vulnerabilità all'interno del paradigma dell'\textit{adversary-aware security}, sostenendo che la valutazione di un sistema basato su apprendimento automatico deve considerare esplicitamente la presenza di un avversario strategico. Questo principio è centrale per la presente tesi: un sistema di classificazione forense non opera necessariamente in un ambiente neutro, ma può essere esposto a dati preparati o modificati da soggetti interessati a ostacolare l'analisi. La robustezza adversariale, quindi, non è soltanto una proprietà tecnica del modello, ma una componente della sua affidabilità operativa.
+Nel dominio più vicino all'image forensics, Barni et al.~\cite{barni2018cf}
+hanno mostrato che modelli basati su reti neurali per la rilevazione di
+manipolazioni digitali possono essere vulnerabili ad attacchi adversariali.
+Nowroozi~\cite{nowroozi2020phd} ha ulteriormente approfondito il problema delle
+tecniche di \gls{ml} per l'image forensics in scenari adversariali,
+evidenziando come modelli progettati per analisi forensi possano essere
+degradati da perturbazioni mirate. Questi contributi sono particolarmente
+importanti perché spostano il problema dagli esempi generici di computer vision
+ai sistemi utilizzati per compiti più vicini al dominio forense. Il risultato
+che emerge è che la vulnerabilità adversariale non riguarda soltanto
+classificatori generici addestrati su dataset standard, ma anche modelli
+sviluppati per riconoscere manipolazioni o caratteristiche rilevanti in immagini
+digitali.
 
-Nel dominio più vicino all'image forensics, Barni et al.~\cite{barni2018cf} hanno mostrato che modelli basati su reti neurali per la rilevazione di manipolazioni digitali possono essere vulnerabili ad attacchi adversariali. Nowroozi~\cite{nowroozi2020phd} ha ulteriormente approfondito il problema delle tecniche di \gls{ml} per l'image forensics in scenari adversariali, evidenziando come modelli progettati per analisi forensi possano essere degradati da perturbazioni mirate. Questi contributi sono particolarmente importanti perché spostano il problema dagli esempi generici di computer vision ai sistemi utilizzati per compiti più vicini al dominio forense. Il risultato che emerge è che la vulnerabilità adversariale non riguarda soltanto classificatori generici addestrati su dataset standard, ma anche modelli sviluppati per riconoscere manipolazioni o caratteristiche rilevanti in immagini digitali.
-
-Il collegamento con i software AI-based utilizzabili in contesti forensi è stato rafforzato dai lavori più recenti sulla robustezza operativa. Nowroozi et al.~\cite{nowroozi2024verifying} hanno mostrato, in un diverso contesto di sicurezza, che la verifica della robustezza rispetto a perturbazioni adversariali deve essere parte integrante della valutazione dei sistemi automatici. Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} hanno portato questa prospettiva più direttamente nel dominio dell'analisi forense, evidenziando che funzionalità AI-based integrate in software operativi possono mostrare fragilità quando esposte a contenuti manipolati. Sebbene tali studi non esauriscano l'intero spettro degli attacchi adversariali su immagini, indicano con chiarezza che la validazione dei software AI-based utilizzabili in contesti forensi non può limitarsi alla loro efficacia su input ordinari.
-
-Nel complesso, la letteratura sull'\gls{advml} applicato alle immagini fornisce tre indicazioni rilevanti per questa tesi. In primo luogo, i classificatori visuali possono essere vulnerabili a perturbazioni intenzionali anche quando presentano prestazioni elevate su dati puliti. In secondo luogo, tale vulnerabilità può manifestarsi in scenari diversi per conoscenza dell'attaccante, ampiezza della perturbazione e trasferibilità tra modelli. In terzo luogo, i lavori specifici sull'image forensics mostrano che anche i sistemi progettati per compiti forensi non sono immuni da queste fragilità. Resta tuttavia aperta una lacuna importante: la maggior parte degli studi considera modelli accademici o benchmark controllati, mentre sono ancora limitate le valutazioni integrate che combinano classificatori visuali, software AI-based osservati in modalità \textit{black-box}, dataset realistici e attacchi adversariali nello stesso protocollo sperimentale.
-
-Questa lacuna prepara il passaggio alla sezione successiva. Gli attacchi adversariali rappresentano manipolazioni progettate rispetto al comportamento del modello; in ambito forense, tuttavia, le immagini possono essere alterate anche mediante trasformazioni più ordinarie o anti-forensi, come ricompressione, ridimensionamento, sfocatura e modifiche tonali. Tali trasformazioni non richiedono necessariamente conoscenza del classificatore, ma possono comunque incidere sulla stabilità dell'analisi automatica.
+Il collegamento con i software \gls{ai}-based utilizzabili in contesti forensi è
+stato rafforzato dai lavori più recenti sulla robustezza operativa. Nowroozi et
+al.~\cite{nowroozi2024verifying} hanno mostrato, in un diverso contesto di
+sicurezza, che la verifica della robustezza rispetto a perturbazioni
+adversariali deve essere parte integrante della valutazione dei sistemi
+automatici. Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect}
+hanno portato questa prospettiva più direttamente nel dominio dell'analisi
+forense, evidenziando che funzionalità \gls{ai}-based integrate in software
+operativi possono mostrare fragilità quando esposte a contenuti manipolati.
+Sebbene tali studi non esauriscano l'intero spettro degli attacchi adversariali
+su immagini, indicano con chiarezza che la validazione dei software
+\gls{ai}-based utilizzabili in contesti forensi non può limitarsi alla loro
+efficacia su input ordinari.
 
 Un ulteriore filone della letteratura ha analizzato l'uso di trasformazioni
 sull'input come possibile difesa rispetto agli esempi adversariali. Tecniche
@@ -218,17 +335,27 @@ forense, un significato diverso: non sono impiegate per proteggere il modello,
 ma per simulare condizioni di stress anti-forense realistiche e valutare la
 stabilità operativa dei classificatori e degli strumenti commerciali.
 
+Nel complesso, la letteratura sull'\gls{advml} applicato alle immagini fornisce
+tre indicazioni rilevanti per questa tesi. In primo luogo, i classificatori
+visuali possono essere vulnerabili a perturbazioni intenzionali anche quando
+presentano prestazioni elevate su dati puliti. In secondo luogo, tale
+vulnerabilità può manifestarsi in scenari diversi per conoscenza
+dell'attaccante, ampiezza della perturbazione e trasferibilità tra modelli. In
+terzo luogo, i lavori specifici sull'image forensics mostrano che anche i
+sistemi progettati per compiti forensi non sono immuni da queste fragilità.
+Resta tuttavia aperta una lacuna importante: la maggior parte degli studi
+considera modelli accademici o benchmark controllati, mentre sono ancora
+limitate le valutazioni integrate che combinano classificatori visuali, software
+\gls{ai}-based osservati in modalità \textit{black-box}, dataset realistici e
+attacchi adversariali nello stesso protocollo sperimentale.
 
-Biggio e Roli~\cite{biggio2018wild} hanno inquadrato queste vulnerabilità all'interno del paradigma dell'\textit{adversary-aware security}, sostenendo che la valutazione di un sistema basato su apprendimento automatico deve considerare esplicitamente la presenza di un avversario strategico. Questo principio è centrale per la presente tesi: un sistema di classificazione forense non opera necessariamente in un ambiente neutro, ma può essere esposto a dati preparati o modificati da soggetti interessati a ostacolare l'analisi. La robustezza adversariale, quindi, non è soltanto una proprietà tecnica del modello, ma una componente della sua affidabilità operativa.
-
-Nel dominio più vicino all'image forensics, Barni et al.~\cite{barni2018cf} hanno mostrato che modelli basati su reti neurali per la rilevazione di manipolazioni digitali possono essere vulnerabili ad attacchi adversariali. Nowroozi~\cite{nowroozi2020phd} ha ulteriormente approfondito il problema delle tecniche di \gls{ml} per l'image forensics in scenari adversariali, evidenziando come modelli progettati per analisi forensi possano essere degradati da perturbazioni mirate. Questi contributi sono particolarmente importanti perché spostano il problema dagli esempi generici di computer vision ai sistemi utilizzati per compiti più vicini al dominio forense. Il risultato che emerge è che la vulnerabilità adversariale non riguarda soltanto classificatori generici addestrati su dataset standard, ma anche modelli sviluppati per riconoscere manipolazioni o caratteristiche rilevanti in immagini digitali.
-
-Il collegamento con i software AI-based utilizzabili in contesti forensi è stato rafforzato dai lavori più recenti sulla robustezza operativa. Nowroozi et al.~\cite{nowroozi2024verifying} hanno mostrato, in un diverso contesto di sicurezza, che la verifica della robustezza rispetto a perturbazioni adversariali deve essere parte integrante della valutazione dei sistemi automatici. Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} hanno portato questa prospettiva più direttamente nel dominio dell'analisi forense, evidenziando che funzionalità AI-based integrate in software operativi possono mostrare fragilità quando esposte a contenuti manipolati. Sebbene tali studi non esauriscano l'intero spettro degli attacchi adversariali su immagini, indicano con chiarezza che la validazione dei software AI-based utilizzabili in contesti forensi non può limitarsi alla loro efficacia su input ordinari.
-
-Nel complesso, la letteratura sull'\gls{advml} applicato alle immagini fornisce tre indicazioni rilevanti per questa tesi. In primo luogo, i classificatori visuali possono essere vulnerabili a perturbazioni intenzionali anche quando presentano prestazioni elevate su dati puliti. In secondo luogo, tale vulnerabilità può manifestarsi in scenari diversi per conoscenza dell'attaccante, ampiezza della perturbazione e trasferibilità tra modelli. In terzo luogo, i lavori specifici sull'image forensics mostrano che anche i sistemi progettati per compiti forensi non sono immuni da queste fragilità. Resta tuttavia aperta una lacuna importante: la maggior parte degli studi considera modelli accademici o benchmark controllati, mentre sono ancora limitate le valutazioni integrate che combinano classificatori visuali, software AI-based osservati in modalità \textit{black-box}, dataset realistici e attacchi adversariali nello stesso protocollo sperimentale.
-
-Questa lacuna prepara il passaggio alla sezione successiva. Gli attacchi adversariali rappresentano manipolazioni progettate rispetto al comportamento del modello; in ambito forense, tuttavia, le immagini possono essere alterate anche mediante trasformazioni più ordinarie o anti-forensi, come ricompressione, ridimensionamento, sfocatura e modifiche tonali. Tali trasformazioni non richiedono necessariamente conoscenza del classificatore, ma possono comunque incidere sulla stabilità dell'analisi automatica.
-
+Questa lacuna prepara il passaggio alla sezione successiva. Gli attacchi
+adversariali rappresentano manipolazioni progettate rispetto al comportamento
+del modello; in ambito forense, tuttavia, le immagini possono essere alterate
+anche mediante trasformazioni più ordinarie o anti-forensi, come ricompressione,
+ridimensionamento, sfocatura e modifiche tonali. Tali trasformazioni non
+richiedono necessariamente conoscenza del classificatore, ma possono comunque
+incidere sulla stabilità dell'analisi automatica.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-forensics e trasformazioni realistiche: impatto sulla classificazione automatica}
@@ -304,8 +431,12 @@ La Tabella~\ref{tab:sota-representative-works} sintetizza i lavori maggiormente 
 
 Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} &
 Valutano la robustezza di software AI-based utilizzabili in contesti forensi, con attenzione a valutazioni \textit{black-box} e contenuti multimediali manipolati. &
-Rappresentano il riferimento più vicino alla presente tesi, ma restano orientati a scenari preliminari o a domini visivi differenti. Non integrano nello stesso protocollo un dataset con classi \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}, perturbazioni adversariali, trasformazioni anti-forensi e un bundle unitario per la valutazione forense. \\
-
+Rappresentano il riferimento più vicino alla presente tesi, ma restano orientati a scenari preliminari o a domini visivi differenti. Non integrano nello stesso protocollo un dataset con classi
+\texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}, perturbazioni
+adversariali, trasformazioni anti-forensi e un bundle unitario per la
+valutazione forense. Rimane inoltre poco esplorata la normalizzazione
+comparativa di output black-box eterogenei, quali categorie, classificazioni,
+risultati di retrieval e bookmark semantici.
 \midrule
 
 

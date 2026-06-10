@@ -1,7 +1,7 @@
 % ─────────────────────────────────────────────────────────────────────────────
 \chapter{Technical Background Concepts}\label{chap:background}
 % ─────────────────────────────────────────────────────────────────────────────
-Questo capitolo introduce i concetti teorici necessari per comprendere la valutazione della robustezza operativa di modelli proxy e software AI-based impiegati, nel contesto della \gls{df}, per la classificazione automatizzata o il recupero semantico di immagini. Il quadro teorico è costruito a partire dai fondamenti della \gls{df} e della prova digitale, per poi esaminare il ruolo dell'\gls{ai} nei workflow forensi, la rilevanza delle immagini come evidenze digitali, i principi di \gls{ml} e \gls{dl} applicati alla computer vision, l'\textbf{\gls{advml}}, le tecniche anti-forensi applicate a contenuti visivi e il ruolo dell'\gls{xai} nella valutazione dell'affidabilità dei modelli. Nel presente capitolo tali tecniche sono inquadrate sul piano concettuale; la motivazione della selezione, le configurazioni adottate e le procedure di applicazione nel protocollo sperimentale sono discusse nel capitolo metodologico.
+Questo capitolo introduce i concetti teorici necessari per comprendere la valutazione della robustezza operativa di modelli proxy e software \gls{ai}-based impiegati, nel contesto della \gls{df}, per la classificazione automatizzata o il recupero semantico di immagini. Il quadro teorico è costruito a partire dai fondamenti della \gls{df} e della prova digitale, per poi esaminare il ruolo dell'\gls{ai} nei workflow forensi, la rilevanza delle immagini come evidenze digitali, i principi di \gls{ml} e \gls{dl} applicati alla computer vision, l'\textbf{\gls{advml}}, le tecniche anti-forensi applicate a contenuti visivi e il ruolo dell'\gls{xai} nella valutazione dell'affidabilità dei modelli. Nel presente capitolo tali tecniche sono inquadrate sul piano concettuale; la motivazione della selezione, le configurazioni adottate e le procedure di applicazione nel protocollo sperimentale sono discusse nel capitolo metodologico.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Digital Forensics e prova digitale}
@@ -176,7 +176,27 @@ Pertanto, la classificazione automatica di immagini in ambito forense deve esser
 % ─────────────────────────────────────────────────────────────────────────────
 La computer vision comprende l'insieme di metodi computazionali finalizzati all'analisi automatica di immagini e video, con l'obiettivo di estrarre informazioni strutturate da contenuti visivi. In questo ambito, le tecniche di \gls{ml} e \gls{dl} hanno progressivamente sostituito o affiancato approcci basati su feature progettate manualmente, consentendo ai modelli di apprendere rappresentazioni visive direttamente dai dati. Nel caso della classificazione di immagini, il problema consiste nell'associare a un'immagine una o più etichette semantiche sulla base delle caratteristiche osservabili nel contenuto visivo \cite{bishop2006pattern,gonzalez2018digital}.
 
-Nel dominio della computer vision è utile distinguere tra compiti correlati ma non equivalenti. L'\textit{image classification} assegna una o più etichette semantiche all'intera immagine; l'\textit{object recognition} riguarda il riconoscimento della presenza o della categoria di un oggetto rappresentato nel contenuto visivo; l'\textit{object detection} aggiunge a tale riconoscimento la localizzazione spaziale dell'oggetto, tipicamente mediante regioni o \textit{bounding box}; la \textit{semantic search}, infine, consente di recuperare immagini coerenti con una descrizione o un concetto testuale. Nella presente tesi il task sperimentale principale è formulato come classificazione semantica binaria dell'immagine, basata sulla presenza o assenza di un oggetto investigativamente rilevante: un'arma individuale realistica chiaramente visibile. Pertanto, la classe \texttt{weapon} non richiede la localizzazione geometrica dell'oggetto nell'immagine, ma la corretta identificazione del contenuto come pertinente al task di triage forense. Tale impostazione è coerente con studi che hanno applicato sistemi AI-based alla classificazione di immagini estratte da evidenze criminali, includendo categorie operative quali armi da fuoco e munizioni \cite{silva2021microservices}.
+Nel dominio della computer vision è utile distinguere tra compiti correlati ma
+non equivalenti. L'\textit{image classification} assegna una o più etichette
+semantiche all'intera immagine; l'\textit{object recognition} riguarda il
+riconoscimento della presenza o della categoria di un oggetto rappresentato nel
+contenuto visivo; l'\textit{object detection} aggiunge a tale riconoscimento la
+localizzazione spaziale dell'oggetto, tipicamente mediante regioni o
+\textit{bounding box}; la \textit{semantic search}, infine, consente di
+recuperare immagini coerenti con una descrizione o un concetto testuale.
+Nella presente tesi il task sperimentale principale è formulato come
+classificazione semantica binaria dell'immagine, basata sulla presenza o assenza
+di contenuti visivi investigativamente rilevanti di tipo firearm-oriented, quali
+armi da fuoco individuali realistiche chiaramente riconoscibili. Pertanto, la
+classe \texttt{weapon} non richiede la localizzazione geometrica dell'oggetto
+nell'immagine, ma la corretta identificazione del contenuto come pertinente al
+task di triage forense.
+ Pertanto, la classe \texttt{weapon} non richiede la localizzazione geometrica dell'oggetto
+nell'immagine, ma la corretta identificazione del contenuto come pertinente al
+task di triage forense. Tale impostazione è coerente con studi che hanno
+applicato sistemi AI-based alla classificazione di immagini estratte da evidenze
+criminali, includendo categorie operative quali armi da fuoco e munizioni
+\cite{silva2021microservices}.
 
 Nel paradigma supervisionato, un modello viene addestrato su un insieme di esempi annotati, ciascuno costituito da un input e da una corrispondente etichetta di classe. Durante l'addestramento, il modello apprende una funzione decisionale capace di associare nuovi input a una delle classi previste dal task. L'obiettivo non è memorizzare gli esempi osservati, ma generalizzare correttamente su dati non visti. Questa distinzione è centrale in ambito forense, poiché un classificatore utilizzato su evidenze reali può incontrare immagini diverse da quelle presenti nei dati di addestramento, per qualità, provenienza, risoluzione, compressione, contesto visivo o distribuzione semantica.
 
@@ -190,7 +210,19 @@ Accanto alle architetture convoluzionali, negli ultimi anni si sono affermati mo
 
 Accanto a \gls{clip}, anche modelli vision-language generativi come \gls{blip} consentono di associare immagini a descrizioni testuali, introducendo una prospettiva complementare rispetto alla classificazione chiusa basata su etichette predefinite \cite{li2022blip}. Nel contesto forense, tali modelli possono supportare forme di descrizione automatica del contenuto visivo e contribuire alla prioritizzazione preliminare degli artefatti multimediali. Tuttavia, il loro impiego richiede particolare cautela, poiché la descrizione generata può essere sensibile alla qualità dell'immagine, alla distribuzione dei dati, alla formulazione del prompt e alla presenza di contenuti ambigui o fuori distribuzione.
 
-Nel protocollo sperimentale della presente tesi, \gls{blip} non viene impiegato come proxy model principale. La sua introduzione nel background ha funzione contestuale, poiché consente di inquadrare l'evoluzione dei modelli vision-language e il loro possibile impiego in scenari di analisi automatizzata di immagini. La valutazione sperimentale si concentra invece su modelli proxy più direttamente confrontabili nel task binario \texttt{weapon}/\texttt{non\_weapon} e su software AI-based selezionati per la valutazione operativa in contesto forense. Per questi ultimi, analizzati in modalità black-box, la tesi non assume una specifica architettura interna di riconoscimento o localizzazione degli oggetti, ma valuta il comportamento osservabile degli output disponibili all'analista rispetto alle condizioni sperimentali considerate.
+Nel protocollo sperimentale della presente tesi, \gls{blip} non viene impiegato
+come proxy model principale. La sua introduzione nel background ha funzione
+contestuale, poiché consente di inquadrare l'evoluzione dei modelli
+vision-language e il loro possibile impiego in scenari di analisi automatizzata
+di immagini. La valutazione sperimentale si concentra invece su modelli proxy
+più direttamente confrontabili nel task binario
+\texttt{weapon}/\texttt{non\_weapon} e su software \gls{ai}-based selezionati per la
+valutazione operativa in contesto forense. Per questi ultimi, analizzati in
+modalità black-box, la tesi non assume una specifica architettura interna di
+riconoscimento, retrieval, tagging o localizzazione degli oggetti, ma valuta il
+comportamento osservabile degli output disponibili all'analista, quali
+classificazioni, tag, bookmark semantici o risultati di recupero
+visuale/semantico, rispetto alle condizioni sperimentali considerate.
 
 Dal punto di vista forense, la scelta del modello non può essere valutata esclusivamente in funzione dell'accuratezza media. Un sistema di classificazione automatica deve essere considerato anche rispetto al comportamento che mostra su dati eterogenei, degradati o esterni al dominio operativo del task. La presenza di immagini fuori distribuzione, casi borderline o contenuti visivamente ambigui può infatti produrre classificazioni errate o associate a livelli di confidenza non adeguatamente cauti. In questo senso, la valutazione del comportamento su input \gls{ood} è strettamente collegata alla robustezza operativa, poiché consente di osservare se immagini esterne o ambigue rispetto al task vengano ricondotte con eccessiva sicurezza alle categorie previste dal classificatore \cite{hendrycks2017baseline,fort2021exploring}.
 
@@ -446,7 +478,7 @@ Nel caso della classificazione automatica di immagini, le tecniche anti-forensi 
 
 Dal punto di vista forense, questa ambiguità richiede una valutazione prudente. Non ogni immagine compressa, ridimensionata o degradata può essere considerata il risultato di una condotta anti-forense; al contrario, molte trasformazioni sono conseguenze ordinarie dell'uso di dispositivi mobili, social network, applicazioni di messaggistica e sistemi di archiviazione. Tuttavia, quando l'obiettivo è valutare l'affidabilità di strumenti automatici, è necessario includere tali trasformazioni nello spazio degli scenari realistici. La robustezza di un classificatore forense non dipende soltanto dalla sua accuratezza su immagini pulite, ma anche dalla capacità di mantenere un comportamento stabile in presenza di degradazioni plausibili, intenzionali o accidentali.
 
-In questa prospettiva, le tecniche anti-forensi su immagini digitali costituiscono un ponte tra l'image forensics tradizionale e la valutazione della robustezza dei modelli di computer vision. Esse evidenziano che l'immagine non è un input statico e neutro, ma un artefatto digitale soggetto a trasformazioni tecniche che possono incidere sia sulla sua interpretabilità umana sia sulla sua elaborazione automatica. Per tale ragione, la valutazione di modelli e software AI-based impiegati nel contesto della \gls{df} deve considerare non solo attacchi adversariali formalmente definiti, ma anche manipolazioni e degradazioni compatibili con scenari operativi realistici.
+In questa prospettiva, le tecniche anti-forensi su immagini digitali costituiscono un ponte tra l'image forensics tradizionale e la valutazione della robustezza dei modelli di computer vision. Esse evidenziano che l'immagine non è un input statico e neutro, ma un artefatto digitale soggetto a trasformazioni tecniche che possono incidere sia sulla sua interpretabilità umana sia sulla sua elaborazione automatica. Per tale ragione, la valutazione di modelli e software \gls{ai}-based impiegati nel contesto della \gls{df} deve considerare non solo attacchi adversariali formalmente definiti, ma anche manipolazioni e degradazioni compatibili con scenari operativi realistici.
 
 \subsection{Trasformazioni anti-forensi considerate nel protocollo sperimentale}
 \label{subsec:background_antiforensic_transformations}
@@ -597,30 +629,134 @@ La Tabella~\ref{tab:adv_vs_antiforensics} sintetizza la distinzione concettuale 
     \label{tab:adv_vs_antiforensics}
 \end{table}
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability, robustezza e affidabilità dei modelli}
 \label{sec:background_xai_robustness}
 % ─────────────────────────────────────────────────────────────────────────────
-La valutazione di un modello \gls{ai}-based non può essere ricondotta esclusivamente alla misurazione della sua accuratezza media. In un contesto forense, infatti, l'utilità di un sistema automatico dipende anche dalla stabilità delle sue predizioni, dalla capacità di gestire input degradati o fuori distribuzione, dalla trasparenza delle informazioni fornite all'analista e dalla possibilità di documentare in modo verificabile il ruolo svolto dal modello nel workflow investigativo. Accuratezza, robustezza, interpretabilità e affidabilità sono quindi dimensioni complementari, che devono essere considerate congiuntamente quando un sistema di classificazione automatica viene impiegato a supporto dell'analisi di evidenze digitali \cite{Adadi2018,Doshi-Velez2017}.
 
-La robustezza può essere definita, in termini generali, come la capacità di un modello di mantenere un comportamento stabile e coerente in presenza di variazioni dell'input. Tali variazioni possono essere accidentali, come rumore, compressione, bassa risoluzione o condizioni di acquisizione non ideali, oppure intenzionali, come perturbazioni adversariali e trasformazioni anti-forensi. Nel dominio della computer vision, la robustezza non riguarda soltanto la resistenza a piccole perturbazioni numeriche, ma anche la capacità del classificatore di gestire cambiamenti realistici nelle proprietà visive dell'immagine, nella distribuzione dei dati e nella qualità del contenuto analizzato \cite{hendrycks2019benchmarking,ford2019adversarial}.
+La valutazione di un modello \gls{ai}-based non può essere ricondotta
+esclusivamente alla misurazione della sua accuratezza media. In un contesto
+forense, infatti, l'utilità di un sistema automatico dipende anche dalla
+stabilità delle sue predizioni, dalla capacità di gestire input degradati o
+fuori distribuzione, dalla trasparenza delle informazioni fornite all'analista e
+dalla possibilità di documentare in modo verificabile il ruolo svolto dal
+modello nel workflow investigativo. Accuratezza, robustezza, interpretabilità e
+affidabilità sono quindi dimensioni complementari, che devono essere considerate
+congiuntamente quando un sistema di classificazione automatica viene impiegato a
+supporto dell'analisi di evidenze digitali
+\cite{Adadi2018,Doshi-Velez2017}.
 
-L'affidabilità rappresenta un concetto più ampio della robustezza. Un modello può essere robusto rispetto a una determinata famiglia di perturbazioni, ma non necessariamente affidabile in senso forense. L'affidabilità richiede che il sistema produca risultati sufficientemente stabili, documentabili e interpretabili rispetto al contesto d'uso. In particolare, un classificatore impiegato in un workflow di \gls{df} deve essere valutato rispetto alla sua capacità di supportare l'analista senza sostituirne il giudizio, di segnalare incertezze o casi ambigui, di non sovrastimare la propria confidenza e di mantenere prestazioni coerenti anche su dati diversi da quelli osservati durante l'addestramento. Questa distinzione è essenziale perché un output formalmente corretto in media può comunque risultare poco affidabile se non è stabile, verificabile o adeguatamente contestualizzato.
+La robustezza può essere definita, in termini generali, come la capacità di un
+modello di mantenere un comportamento stabile e coerente in presenza di
+variazioni dell'input. Tali variazioni possono essere accidentali, come rumore,
+compressione, bassa risoluzione o condizioni di acquisizione non ideali, oppure
+intenzionali, come perturbazioni adversariali e trasformazioni anti-forensi. Nel
+dominio della computer vision, la robustezza non riguarda soltanto la resistenza
+a piccole perturbazioni numeriche, ma anche la capacità del classificatore di
+gestire cambiamenti realistici nelle proprietà visive dell'immagine, nella
+distribuzione dei dati e nella qualità del contenuto analizzato
+\cite{hendrycks2019benchmarking,ford2019adversarial}.
 
-In questo quadro si colloca il ruolo dell'\gls{xai}. Le tecniche di explainability mirano a fornire strumenti per rendere più comprensibile il comportamento dei modelli, soprattutto quando essi operano come sistemi complessi o parzialmente opachi. In computer vision, tali tecniche possono includere mappe di salienza, metodi di attribuzione, visualizzazioni delle regioni dell'immagine maggiormente influenti sulla predizione e spiegazioni locali del comportamento del classificatore. Esempi noti includono approcci model-agnostic, come LIME e SHAP, e tecniche di attribuzione o localizzazione visiva, come Integrated Gradients e class activation mapping \cite{Ribeiro2016,Lundberg2017,Sundararajan2017,Zhou2016}.
+L'affidabilità rappresenta un concetto più ampio della robustezza. Un modello
+può essere robusto rispetto a una determinata famiglia di perturbazioni, ma non
+necessariamente affidabile in senso forense. L'affidabilità richiede che il
+sistema produca risultati sufficientemente stabili, documentabili e
+interpretabili rispetto al contesto d'uso. In particolare, un classificatore
+impiegato in un workflow di \gls{df} deve essere valutato rispetto alla sua
+capacità di supportare l'analista senza sostituirne il giudizio, di segnalare
+incertezze o casi ambigui, di non sovrastimare la propria confidenza e di
+mantenere prestazioni coerenti anche su dati diversi da quelli osservati durante
+l'addestramento. Questa distinzione è essenziale perché un output formalmente
+corretto in media può comunque risultare poco affidabile se non è stabile,
+verificabile o adeguatamente contestualizzato.
 
-Tali approcci non sono metodologicamente equivalenti. Tecniche gradient-based, come \textit{Integrated Gradients}, richiedono accesso al modello e al gradiente della predizione rispetto all'input e risultano pertanto applicabili ai modelli proxy controllabili considerati nella presente tesi. Approcci model-agnostic, quali LIME o alcune formulazioni di SHAP, possono invece operare mediante interrogazioni input-output, ma la loro applicazione a software commerciali valutati in modalità \textit{black-box} dipende dalla disponibilità di output adeguati, interfacce interrogabili e condizioni sperimentali riproducibili. Per tale ragione, la scelta operativa della tecnica di explainability impiegata nel protocollo è descritta nel Capitolo~\ref{chap:methodology}.
+In questo quadro si colloca il ruolo dell'\gls{xai}. Le tecniche di
+explainability mirano a fornire strumenti per rendere più comprensibile il
+comportamento dei modelli, soprattutto quando essi operano come sistemi
+complessi o parzialmente opachi. In computer vision, tali tecniche possono
+includere mappe di salienza, metodi di attribuzione, visualizzazioni delle
+regioni dell'immagine maggiormente influenti sulla predizione e spiegazioni
+locali del comportamento del classificatore. Esempi noti includono approcci
+model-agnostic, come LIME e SHAP, e tecniche di attribuzione o localizzazione
+visiva, come \gls{ig} e class activation mapping
+\cite{Ribeiro2016,Lundberg2017,Sundararajan2017,Zhou2016}.
 
-L'impiego dell'\gls{xai} in ambito forense deve tuttavia essere interpretato con cautela. Una spiegazione visuale non costituisce una prova autonoma della correttezza del modello, né garantisce che il classificatore abbia appreso concetti semanticamente coerenti con il ragionamento umano. Le mappe di salienza, ad esempio, possono indicare regioni dell'immagine rilevanti per la predizione, ma non dimostrano necessariamente che il modello abbia riconosciuto l'oggetto di interesse nel modo atteso. Inoltre, spiegazioni generate da metodi differenti possono divergere tra loro, e la loro stabilità può essere influenzata da perturbazioni dell'input o da variazioni del modello \cite{Adadi2018,Carvalho2019}.
+Tali approcci non sono metodologicamente equivalenti. Tecniche gradient-based,
+come \gls{ig}, richiedono accesso al modello e al gradiente della predizione
+rispetto all'input e risultano pertanto applicabili ai modelli proxy
+controllabili considerati nella presente tesi. Approcci model-agnostic, quali
+LIME o alcune formulazioni di SHAP, possono invece operare mediante
+interrogazioni input-output, ma la loro applicazione a software commerciali
+valutati in modalità \textit{black-box} dipende dalla disponibilità di output
+adeguati, interfacce interrogabili e condizioni sperimentali riproducibili. Per
+tale ragione, la scelta operativa della tecnica di explainability impiegata nel
+protocollo è descritta nel Capitolo~\ref{chap:methodology}.
 
-Nonostante tali limiti, l'\gls{xai} può fornire un supporto utile nella valutazione della robustezza operativa. Confrontare le spiegazioni prodotte su immagini pulite e manipolate può aiutare a individuare variazioni nel comportamento del modello, spostamenti delle attribuzioni verso regioni non pertinenti o dipendenza da artefatti visivi non rilevanti. In questo senso, l'explainability non deve essere intesa come uno strumento conclusivo di validazione, ma come una componente ausiliaria dell'analisi, utile a formulare ipotesi sul comportamento del classificatore e a documentare eventuali anomalie nella risposta del sistema.
+Nel caso dei software commerciali black-box, output quali tag, classificazioni,
+risultati di retrieval o bookmark semantici devono quindi essere interpretati
+come segnali operativi osservabili e non come spiegazioni locali del processo
+decisionale interno. Essi possono essere normalizzati e valutati rispetto alla
+ground truth sperimentale, ma non consentono di inferire direttamente quali
+feature, regioni dell'immagine o rappresentazioni interne abbiano determinato la
+decisione del sistema.
 
-La relazione tra robustezza ed explainability è particolarmente importante nei casi in cui un modello mantiene la stessa etichetta ma modifica il razionale apparente della predizione, oppure produce una classificazione errata concentrandosi su regioni visive non pertinenti. Tali situazioni evidenziano che la sola accuratezza non è sufficiente per comprendere il comportamento del sistema. In un contesto forense, la possibilità di osservare come il modello reagisce a degradazioni, trasformazioni anti-forensi o perturbazioni adversariali può contribuire a una valutazione più completa della sua affidabilità, soprattutto quando l'output automatico viene utilizzato per filtrare o prioritizzare grandi quantità di immagini.
+L'impiego dell'\gls{xai} in ambito forense deve tuttavia essere interpretato con
+cautela. Una spiegazione visuale non costituisce una prova autonoma della
+correttezza del modello, né garantisce che il classificatore abbia appreso
+concetti semanticamente coerenti con il ragionamento umano. Le mappe di
+salienza, ad esempio, possono indicare regioni dell'immagine rilevanti per la
+predizione, ma non dimostrano necessariamente che il modello abbia riconosciuto
+l'oggetto di interesse nel modo atteso. Inoltre, spiegazioni generate da metodi
+differenti possono divergere tra loro, e la loro stabilità può essere
+influenzata da perturbazioni dell'input o da variazioni del modello
+\cite{Adadi2018,Carvalho2019}.
 
-Un ulteriore elemento riguarda la calibrazione della confidenza. I modelli \gls{dl} possono produrre predizioni con score elevati anche in presenza di input ambigui, degradati o fuori distribuzione. Questo fenomeno è problematico nei workflow assistiti da \gls{ai}, perché un'elevata confidenza apparente può indurre l'utente a sovrastimare l'affidabilità dell'output. La robustezza operativa richiede quindi non solo che il modello mantenga buone prestazioni su dati manipolati, ma anche che l'incertezza venga trattata in modo coerente e non fuorviante, soprattutto nei casi in cui l'immagine non appartenga chiaramente alle classi previste dal sistema \cite{hendrycks2017baseline,fort2021exploring}.
+Nonostante tali limiti, l'\gls{xai} può fornire un supporto utile nella
+valutazione della robustezza operativa. Confrontare le spiegazioni prodotte su
+immagini pulite e manipolate può aiutare a individuare variazioni nel
+comportamento del modello, spostamenti delle attribuzioni verso regioni non
+pertinenti o dipendenza da artefatti visivi non rilevanti. In questo senso,
+l'explainability non deve essere intesa come uno strumento conclusivo di
+validazione, ma come una componente ausiliaria dell'analisi, utile a formulare
+ipotesi sul comportamento del classificatore e a documentare eventuali anomalie
+nella risposta del sistema.
 
-Nel quadro della presente tesi, explainability, robustezza e affidabilità sono considerate dimensioni complementari nella valutazione dei modelli proxy e nell'interpretazione, per quanto osservabile, degli output dei software AI-based impiegati nel contesto forense. La robustezza permette di misurare la stabilità delle predizioni rispetto a perturbazioni adversariali e trasformazioni anti-forensi; l'\gls{xai}, applicata ai modelli proxy, consente di osservare, con le dovute cautele, attribuzioni locali associate alle predizioni; l'affidabilità integra questi elementi nel contesto operativo, considerando il ruolo dell'analista, la documentabilità del processo e le possibili conseguenze di errori automatici nella selezione delle evidenze. Questa impostazione consente di superare una valutazione puramente prestazionale e di collocare il comportamento dei modelli all'interno delle esigenze di verificabilità proprie della \gls{df}.
+La relazione tra robustezza ed explainability è particolarmente importante nei
+casi in cui un modello mantiene la stessa etichetta ma modifica il razionale
+apparente della predizione, oppure produce una classificazione errata
+concentrandosi su regioni visive non pertinenti. Tali situazioni evidenziano che
+la sola accuratezza non è sufficiente per comprendere il comportamento del
+sistema. In un contesto forense, la possibilità di osservare come il modello
+reagisce a degradazioni, trasformazioni anti-forensi o perturbazioni
+adversariali può contribuire a una valutazione più completa della sua
+affidabilità, soprattutto quando l'output automatico viene utilizzato per
+filtrare o prioritizzare grandi quantità di immagini.
 
+Un ulteriore elemento riguarda la calibrazione della confidenza. I modelli
+\gls{dl} possono produrre predizioni con score elevati anche in presenza di
+input ambigui, degradati o fuori distribuzione. Questo fenomeno è problematico
+nei workflow assistiti da \gls{ai}, perché un'elevata confidenza apparente può
+indurre l'utente a sovrastimare l'affidabilità dell'output. La robustezza
+operativa richiede quindi non solo che il modello mantenga buone prestazioni su
+dati manipolati, ma anche che l'incertezza venga trattata in modo coerente e non
+fuorviante, soprattutto nei casi in cui l'immagine non appartenga chiaramente
+alle classi previste dal sistema
+\cite{hendrycks2017baseline,fort2021exploring}.
+
+Nel quadro della presente tesi, explainability, robustezza e affidabilità sono
+considerate dimensioni complementari nella valutazione dei modelli proxy e
+nell'interpretazione, per quanto osservabile, degli output dei software
+\gls{ai}-based impiegati nel contesto forense. La robustezza permette di
+misurare la stabilità delle predizioni rispetto a perturbazioni adversariali e
+trasformazioni anti-forensi; l'\gls{xai}, applicata ai modelli proxy, consente
+di osservare, con le dovute cautele, attribuzioni locali associate alle
+predizioni; l'affidabilità integra questi elementi nel contesto operativo,
+considerando il ruolo dell'analista, la documentabilità del processo e le
+possibili conseguenze di errori automatici nella selezione delle evidenze.
+Questa impostazione consente di superare una valutazione puramente prestazionale
+e di collocare il comportamento dei modelli all'interno delle esigenze di
+verificabilità proprie della \gls{df}.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
