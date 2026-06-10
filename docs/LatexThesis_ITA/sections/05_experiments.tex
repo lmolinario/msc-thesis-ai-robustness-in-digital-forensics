@@ -215,11 +215,13 @@ le confusion matrix da
 \codepath{results/metrics/final_confusion_matrices.csv}, il comportamento
 \gls{ood} da \codepath{results/metrics/final_ood_metrics.csv} e le metriche di
 robustezza, inclusi accuracy drop, induced errors e confidence shift, da
-\codepath{results/metrics/final_robustness_metrics.csv}. Per gli strumenti
-commerciali, le metriche sono derivate da
-\codepath{results/metrics/forensic_tools_metrics.csv} e, per
-\gls{magnetaxiomtool}, anche da
-\codepath{results/metrics/magnet_axiom_metrics.csv}.
+\codepath{results/metrics/final_robustness_metrics.csv}. Per gli strumenti commerciali,
+le metriche aggregate sono derivate da \codepath{results/metrics/forensic_tools_metrics.csv},
+mentre le predizioni normalizzate e i controlli di audit sono ricavati dai corrispondenti export
+normalizzati in \codepath{evaluation/forensic_tools/}. Gli output dei tool
+black-box vengono quindi analizzati attraverso una rappresentazione comune,
+indipendente dal formato nativo di esportazione.
+
 
 Nel seguito del capitolo viene adottata una convenzione unica per il calcolo del
 drop prestazionale:
@@ -984,7 +986,8 @@ pipeline sperimentale. A differenza dei modelli proxy analizzati nelle sezioni
 precedenti, per tali strumenti non sono disponibili architettura del modello,
 dataset di addestramento, soglie decisionali, preprocessing interno o logica
 completa di classificazione. La valutazione si basa quindi esclusivamente sugli
-output osservabili prodotti dai tool, sui tag assegnati, sulle categorie esportate
+output osservabili prodotti dai tool, sui tag assegnati, sulle categorie
+esportate, sui risultati di retrieval e sui bookmark semantici
 e sul matching tra i file del forensic evaluation bundle e la ground truth
 sperimentale.
 
@@ -1083,14 +1086,6 @@ separatamente.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.90\textwidth]{images/fig_forensic_tools_ood_weapon_flag_rate.pdf}
-\caption{Weapon flag rate dei tool commerciali black-box sui campioni \gls{ood}.}
-\label{fig:results-forensic-tools-ood-weapon-flag-rate}
-\end{figure}
-
-
-\begin{figure}[H]
-\centering
 \includegraphics[width=0.95\textwidth]{images/fig_forensic_tools_global_metrics_comparison.pdf}
 \caption{Confronto globale delle metriche aggregate dei tool commerciali black-box.}
 \label{fig:results-forensic-tools-global-comparison}
@@ -1110,13 +1105,27 @@ positivi e le segnalazioni \texttt{weapon} sui campioni \gls{ood}.
 confronto operativo con \gls{magnetai}, \gls{cellebriteinseyets} e
 \gls{griffeye}/\gls{t3kcore}.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.90\textwidth]{images/fig_forensic_tools_ood_weapon_flag_rate.pdf}
+\caption{Weapon flag rate dei tool commerciali black-box sui campioni \gls{ood}.}
+\label{fig:results-forensic-tools-ood-weapon-flag-rate}
+\end{figure}
+
+La Figura~\ref{fig:results-forensic-tools-ood-weapon-flag-rate} evidenzia che
+anche gli strumenti commerciali con buone prestazioni sul task binario
+presentano un tasso non nullo di assorbimento dei campioni \gls{ood} nella
+classe operativa \texttt{weapon}. Tale comportamento è particolarmente rilevante
+per il triage forense, poiché può aumentare il carico di revisione umana e
+attribuire priorità investigativa a contenuti semanticamente ambigui o esterni
+al task principale.
+
 Nel complesso, questa sezione introduce il livello black-box della valutazione.
 Le sottosezioni successive analizzano separatamente i risultati di
-\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025} e
-\gls{cellebriteinseyets}, distinguendo prestazioni clean, comportamento sugli
-input perturbati, rischio di falsi negativi sulla classe \texttt{weapon} e weapon
-flag rate sui campioni \gls{ood}.
-
+\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
+\gls{cellebriteinseyets} e \gls{griffeye}/\gls{t3kcore}, distinguendo
+prestazioni clean, comportamento sugli input perturbati, rischio di falsi
+negativi sulla classe \texttt{weapon} e weapon flag rate sui campioni \gls{ood}.
 
 
 
@@ -2154,6 +2163,124 @@ standard non sono applicabili. \\
 \end{tabularx}
 \end{table}
 
+Il comportamento sui campioni \gls{ood} è rilevante perché evidenzia la tendenza
+del sistema a ricondurre contenuti fuori distribuzione o semanticamente
+weapon-adjacent alla classe operativa \texttt{weapon}. Nel caso di
+\gls{griffeye}/\gls{t3kcore}, 130 immagini \gls{ood} su 500 sono state
+segnalate come \texttt{weapon}, con un weapon flag rate pari a 0.260. Tale
+valore non rappresenta un errore binario in senso stretto, poiché i campioni
+\gls{ood} non appartengono alla ground truth \texttt{weapon}/\texttt{non\_weapon};
+descrive piuttosto il grado di assorbimento operativo degli input fuori
+distribuzione nel task binario di triage. Il valore osservato è inferiore a
+quello di \gls{magnetai}, \gls{excirefoto2025} in configurazione \texttt{D50} e
+\gls{cellebriteinseyets}, ma conferma che anche un sistema con basso
+\gls{fpr} sul task binario può produrre segnalazioni operative su contenuti
+esterni al dominio principale.
+
+La Tabella~\ref{tab:results-griffeye-attack-metrics} riporta il comportamento di
+\gls{griffeye}/\gls{t3kcore} rispetto a tutte le perturbazioni considerate nel
+forensic evaluation bundle. Tra gli attacchi adversariali, \gls{sigmazero}
+costituisce la condizione più critica, con accuracy pari a 0.959, recall sulla
+classe \texttt{weapon} pari a 0.926 e \gls{fnr} pari a 0.074. \gls{fgsm}
+produce un comportamento molto vicino, con accuracy pari a 0.960 e \gls{fnr}
+pari a 0.072. Tra le trasformazioni anti-forensi, Histogram Modification produce
+il valore di \gls{fnr} più elevato, pari a 0.068, mentre Contrast Stretching
+produce il valore di \gls{fpr} più elevato, pari a 0.010.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{4pt}
+\caption{Prestazioni di \gls{griffeye}/\gls{t3kcore} nelle condizioni adversariali e anti-forensi.}
+\label{tab:results-griffeye-attack-metrics}
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+\textbf{Famiglia} &
+\textbf{Condizione} &
+\textbf{Accuracy} &
+\textbf{Recall} &
+\textbf{\gls{fnr}} &
+\textbf{\gls{fpr}} &
+\textbf{FN} &
+\textbf{FP} \\
+\midrule
+
+Adversarial &
+Color Shift &
+0.977 & 0.960 & 0.040 & 0.006 & 20 & 3 \\
+
+Adversarial &
+\gls{fgsm} &
+0.960 & 0.928 & 0.072 & 0.008 & 36 & 4 \\
+
+Adversarial &
+One Pixel Attack &
+0.978 & 0.964 & 0.036 & 0.008 & 18 & 4 \\
+
+Adversarial &
+Sigma Zero Attack &
+0.959 & 0.926 & 0.074 & 0.008 & 37 & 4 \\
+
+Adversarial &
+SuperDeepFool &
+0.969 & 0.948 & 0.052 & 0.010 & 26 & 5 \\
+
+\midrule
+
+Anti-forensic &
+Contrast Stretching &
+0.977 & 0.964 & 0.036 & 0.010 & 18 & 5 \\
+
+Anti-forensic &
+Gaussian Blur &
+0.972 & 0.948 & 0.052 & 0.004 & 26 & 2 \\
+
+Anti-forensic &
+Histogram Modification &
+0.963 & 0.932 & 0.068 & 0.006 & 34 & 3 \\
+
+Anti-forensic &
+JPEG recompression &
+0.976 & 0.960 & 0.040 & 0.008 & 20 & 4 \\
+
+Anti-forensic &
+Resample + Resize &
+0.980 & 0.964 & 0.036 & 0.004 & 18 & 2 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+Il profilo osservato differisce sia da quello dei modelli proxy sia da quello
+degli altri tool commerciali. \gls{griffeye}/\gls{t3kcore} non mostra una
+degradazione estrema sotto \gls{sigmazero}, a differenza di quanto osservato per
+EfficientNet-B0. In tale condizione, tuttavia, si registra il valore più elevato
+di falsi negativi per il tool, pari a 37, e il recall sulla classe
+\texttt{weapon} scende a 0.926. Questo risultato suggerisce una sensibilità
+residua a perturbazioni sparse o localizzate, pur in assenza di un collasso
+prestazionale comparabile a quello osservato in alcuni modelli proxy.
+
+Nel complesso, \gls{griffeye}/\gls{t3kcore} mostra il miglior profilo
+commerciale aggregato in termini di accuracy, balanced accuracy e contenimento
+dei falsi positivi. Il \gls{fpr} complessivo pari a 0.007 è sensibilmente
+inferiore rispetto agli altri strumenti commerciali valutati, mentre il recall
+sulla classe \texttt{weapon}, pari a 0.951, rimane elevato ma non massimo.
+\gls{cellebriteinseyets}, infatti, mantiene un recall leggermente superiore sulla
+classe \texttt{weapon}, mentre \gls{griffeye}/\gls{t3kcore} presenta un profilo
+più selettivo e meno incline alla generazione di falsi positivi.
+
+Questi valori non devono essere interpretati come certificazione di robustezza
+generale, ma come comportamento osservato nel protocollo sperimentale definito.
+Anche in questo caso, il tool rimane black-box: non è possibile stabilire se il
+profilo osservato dipenda dall'architettura interna del modulo, dal
+preprocessing, dalle soglie proprietarie, dai criteri di generazione dei
+bookmark o dalle caratteristiche specifiche dell'export valutato. Gli output
+automatici devono quindi essere trattati come supporto al triage e non come
+decisione conclusiva, soprattutto in presenza di input perturbati, fuori
+distribuzione o semanticamente ambigui.
+
+
 Nel complesso, \gls{griffeye}/\gls{t3kcore} mostra il miglior profilo commerciale
 aggregato in termini di accuracy, balanced accuracy e contenimento dei falsi
 positivi. Il \gls{fpr} pari a 0.007 è sensibilmente inferiore rispetto agli altri
@@ -2488,14 +2615,13 @@ documentare, ma non un fattore capace di alterare l'interpretazione complessiva
 dei risultati sperimentali.
 
 L'eventuale esclusione dei 15 file non altera l'interpretazione complessiva delle
-metriche aggregate dei tool commerciali. Pertanto, i casi individuati vengono
-mantenuti nel benchmark e discussi come controllo di sensitività e limite
-operativo documentato della cecità del bundle, piuttosto che come fattore
-invalidante dei risultati sperimentali. In termini metodologici, questo controllo
-rafforza la tracciabilità dell'esperimento: il bundle rimane utilizzabile per la
-valutazione black-box, ma la presenza residuale di metadati embedded
-potenzialmente informativi viene esplicitata e trattata come limite controllato.
-
+metriche aggregate dei tool commerciali. Pertanto, i casi individuati vengono mantenuti nel benchmark e discussi come
+controllo di sensitività e limite operativo documentato della cecità del bundle,
+piuttosto che come fattore invalidante dei risultati sperimentali. In termini
+metodologici, questo controllo rafforza la tracciabilità dell'esperimento: il
+bundle rimane utilizzabile per la valutazione black-box, ma la presenza
+residuale di metadati embedded potenzialmente informativi viene esplicitata e
+trattata come limite controllato.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Comparative Robustness Discussion}
@@ -2516,8 +2642,8 @@ proxy dalla valutazione operativa black-box dei sistemi commerciali.
 Il confronto non deve quindi essere interpretato come un ranking diretto tra
 modelli proxy e prodotti commerciali. I modelli proxy operano su un task binario
 controllato, con etichette esplicite, score di confidenza e predizioni
-riproducibili. I tool commerciali, invece, espongono categorie proprietarie,
-risultati di semantic retrieval o output di media analysis che devono essere
+riproducibili. I tool commerciali, invece, espongono categorie proprietarie, risultati di semantic retrieval,
+output di media analysis o bookmark semantici automatici che devono essere
 normalizzati nelle etichette operative \texttt{weapon}, \texttt{non\_weapon} e,
 dove necessario, in categorie non informative o non mappabili. Il valore del
 confronto è quindi metodologico e operativo: esso permette di comprendere quali
@@ -2600,8 +2726,9 @@ Commerciale black-box &
 0.964 &
 0.032 &
 0.292 &
-Buon equilibrio nel clean set, con OOD weapon flag rate più
-contenuto rispetto agli altri tool black-box valutati. \\
+Buon equilibrio nel clean set, con recall elevato sulla classe
+\texttt{weapon} e OOD weapon flag rate inferiore rispetto a
+\gls{magnetai} ed \gls{excirefoto2025} in configurazione \texttt{D50}. \\
 
 Magnet Griffeye / T3K CORE &
 Commerciale black-box &
@@ -2681,7 +2808,7 @@ Profilo stabile in media, ma più sensibile alle alterazioni tonali, con errori
 in entrambe le direzioni operative. \\
 
 CLIP &
-0.928 / -0.001&
+0.928 / -0.001 &
 Histogram modification; 13 induced errors &
 Numero limitato di errori indotti &
 Elevata stabilità rispetto alle trasformazioni considerate; la criticità
@@ -2771,7 +2898,7 @@ pari a 0.974, seguito da \gls{cellebriteinseyets},
 l'interpretazione operativa varia da tool a tool. \gls{griffeye}/\gls{t3kcore}
 mantiene un \gls{fpr} molto contenuto, ma mostra falsi negativi residui sotto
 Histogram modification. \gls{cellebriteinseyets} mantiene un recall elevato, ma
-con un \gls{fpr} superiore rispetto a Griffeye. \gls{magnetai} risulta più
+con un \gls{fpr} superiore rispetto a \gls{griffeye}/\gls{t3kcore}. \gls{magnetai} risulta più
 esposto ai falsi negativi sotto Gaussian blur, mentre \gls{excirefoto2025}
 mostra una criticità più legata all'aumento dei falsi positivi sotto Histogram
 modification.
@@ -3030,9 +3157,12 @@ sostenuto la classificazione sbagliata.
 
 Le mappe prodotte non devono essere interpretate come spiegazioni dirette del
 comportamento di \gls{magnetaxiomtool}/\gls{magnetai},
-\gls{excirefoto2025} o \gls{cellebriteinseyets}, che rimangono sistemi
-black-box nel contesto della presente valutazione. Esse forniscono invece un
-riferimento diagnostico controllato, limitato al modello proxy white-box, utile
+\gls{excirefoto2025}, \gls{cellebriteinseyets} o
+\gls{griffeye}/\gls{t3kcore}, che rimangono sistemi black-box nel contesto della
+presente valutazione. Esse forniscono invece un riferimento diagnostico
+controllato, limitato al modello proxy white-box, utile per discutere in modo
+più concreto alcuni rischi operativi osservabili in un contesto \gls{df}.
+Esse forniscono invece un riferimento diagnostico controllato, limitato al modello proxy white-box, utile
 per discutere in modo più concreto alcuni rischi operativi osservabili in un
 contesto \gls{df} human-in-the-loop.
 
@@ -3347,10 +3477,10 @@ La valutazione presenta inoltre limiti sperimentali. I tool commerciali sono
 analizzati come sistemi black-box o quasi black-box: non sono disponibili
 architettura, training set, soglie decisionali, preprocessing interno,
 meccanismi di retrieval, logica di categorizzazione o criteri interni di
-generazione dei bookmark. La comparazione tra
-\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
-\gls{cellebriteinseyets} e \gls{griffeye}/\gls{t3kcore} deve quindi essere interpretata come confronto operativo
-di triage, non come confronto tra classificatori omogenei e pienamente
+generazione dei bookmark. La comparazione tra \gls{magnetaxiomtool}/\gls{magnetai},
+\gls{excirefoto2025}, \gls{cellebriteinseyets} e
+\gls{griffeye}/\gls{t3kcore} deve quindi essere interpretata come confronto
+operativo di triage, non come confronto tra classificatori omogenei e pienamente
 ispezionabili. Per la stessa ragione, metriche come AUROC non sono state assunte
 come metriche centrali del confronto commerciale.
 
@@ -3375,14 +3505,10 @@ più generali per l'uso dell'\gls{ai} nei workflow forensi, incluse le esigenze 
 tracciabilità, validazione indipendente e controllo human-in-the-loop, sono
 riprese nel Capitolo~\ref{chap:conclusions}.
 
-I risultati mostrano che la robustezza operativa degli strumenti
-\gls{ai}-based in ambito forense non può essere ridotta alla sola accuracy clean
-né alla presenza di un singolo attacco critico. I tool commerciali black-box
-mostrano profili differenziati: \gls{griffeye}/\gls{t3kcore} riduce in modo
-marcato i falsi positivi e ottiene la migliore accuracy aggregata,
-\gls{cellebriteinseyets} mantiene un recall elevato sulla classe
-\texttt{weapon}, \gls{excirefoto2025} dipende sensibilmente dalla soglia di
-retrieval e \gls{magnetai} presenta un profilo più conservativo ma più esposto a
-falsi negativi in alcune condizioni. Questa eterogeneità conferma la necessità
-di validazione sperimentale, normalizzazione esplicita degli output e revisione
-human-in-the-loop.
+In sintesi, il Capitolo~\ref{chap:results} mostra che la robustezza operativa
+degli strumenti \gls{ai}-based in ambito forense è una proprietà
+multidimensionale. Essa dipende dalla prestazione clean, dalla direzione degli
+errori, dal comportamento \gls{ood}, dal tipo di perturbazione, dalla
+configurazione del tool e dal mapping degli output black-box. Questa evidenza
+motiva la discussione conclusiva sulle implicazioni operative, metodologiche e
+giuridiche dell'uso di strumenti \gls{ai}-assisted nei workflow forensi.
