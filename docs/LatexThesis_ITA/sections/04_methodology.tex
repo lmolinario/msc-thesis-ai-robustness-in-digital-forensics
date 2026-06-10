@@ -2099,8 +2099,10 @@ informazioni semantiche che possano influenzare l'analisi. Per questa ragione,
 dopo la generazione degli split puliti, delle immagini adversariali e delle
 trasformazioni anti-forensi, viene costruito un \textit{forensic evaluation
 bundle}, cioè un corpus organizzato e tracciabile destinato alla valutazione
-operativa mediante strumenti commerciali, professionali o general-purpose
-selezionati. Tale bundle non modifica la ground truth sperimentale, ma la separa
+operativa mediante strumenti commerciali selezionati, includendo sia piattaforme forensi
+professionali sia software general-purpose dotati di funzionalità
+\gls{ai}-based rilevanti per il retrieval e il triage visuale.
+Tale bundle non modifica la ground truth sperimentale, ma la separa
 dagli input effettivamente sottoposti agli strumenti, preservandola nei metadati
 di controllo.
 
@@ -2144,16 +2146,24 @@ con identificativi neutri, ad esempio \texttt{bundle\_000001.jpg} o
 \texttt{bundle\_000002.png}. \\
 \codepath{structured_audit_view/clean/}
 &
-Vista interna degli artefatti puliti del subset binario. \\
+Vista interna degli artefatti puliti del subset binario, destinata soltanto ad
+audit e verifica sperimentale, non all'importazione nei tool. \\
+
 \codepath{structured_audit_view/ood/}
 &
-Vista interna del set \gls{ood}. \\
+Vista interna del set \gls{ood}, destinata soltanto ad audit e verifica
+sperimentale, non all'importazione nei tool. \\
+
 \codepath{structured_audit_view/adversarial/}
 &
-Vista interna delle immagini generate mediante attacchi adversariali. \\
+Vista interna delle immagini generate mediante attacchi adversariali, destinata
+soltanto ad audit e verifica sperimentale, non all'importazione nei tool. \\
+
 \codepath{structured_audit_view/anti_forensic/}
 &
-Vista interna delle immagini generate mediante trasformazioni anti-forensi. \\
+Vista interna delle immagini generate mediante trasformazioni anti-forensi,
+destinata soltanto ad audit e verifica sperimentale, non all'importazione nei
+tool. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -2177,7 +2187,9 @@ file nella vista strutturata. La composizione è riportata nella
 Tabella~\ref{tab:methodology-forensic-bundle-counts}. I conteggi descrivono la
 copertura metodologica del bundle e non costituiscono risultati sperimentali:
 essi attestano che tutte le famiglie di input previste dal protocollo sono state
-incluse in modo tracciabile e bilanciato rispetto al disegno sperimentale.
+incluse in modo tracciabile e bilanciato rispetto al disegno sperimentale. La
+tabella distingue tre piani descrittivi del bundle: il tipo di campione, la
+famiglia sperimentale e la classe operativa di riferimento.
 
 \begin{table}[H]
 \centering
@@ -2189,7 +2201,7 @@ incluse in modo tracciabile e bilanciato rispetto al disegno sperimentale.
 \midrule
 \texttt{clean} & 1000 \\
 \texttt{ood} & 500 \\
-\texttt{perturbed} & 10\,000 \\
+\texttt{perturbed} adversarial + anti-forensic & 10\,000 \\
 \midrule
 \texttt{attack\_family = none} & 1500 \\
 \texttt{attack\_family = adversarial} & 5000 \\
@@ -2205,19 +2217,22 @@ incluse in modo tracciabile e bilanciato rispetto al disegno sperimentale.
 \end{table}
 
 La componente metadata del bundle comprende due manifest principali e un file
-di sintesi. Il file \texttt{bundle\_manifest.csv} contiene 11\,500 righe e 27
-colonne, e rappresenta il riferimento principale per ricondurre ogni
+di sintesi. Il file \texttt{bundle\_manifest.csv} contiene una riga per ciascun
+artefatto del bundle e rappresenta il riferimento principale per ricondurre ogni
 \texttt{bundle\_id} alla relativa immagine originaria, alla classe, alla famiglia
 sperimentale, al tipo di attacco o trasformazione, al fold e alla sorgente. Il
-file \texttt{bundle\_hashes\_sha256.csv} contiene 11\,500 righe e 13 colonne, e
-fornisce una vista focalizzata sugli hash e sui percorsi. Il file
-\texttt{bundle\_summary.json} riassume i conteggi e i controlli di integrità,
-tra cui unicità dei \texttt{bundle\_id}, unicità degli \gls{sha256} effettivi,
-corrispondenza degli hash quando presenti nei manifest sorgente, assenza di
-blind path mancanti, pulizia semantica dei percorsi ciechi e separazione dei
-metadata dagli input dei tool.
-
-
+file \texttt{bundle\_hashes\_sha256.csv} fornisce una vista focalizzata sugli
+hash e sui percorsi, utile per verificare l'identità dei file e per facilitare
+il raccordo con gli export dei tool. Il file \texttt{bundle\_summary.json}
+riassume i conteggi e i controlli di integrità, tra cui unicità dei
+\texttt{bundle\_id}, unicità degli \gls{sha256} effettivi, corrispondenza degli hash con quelli riportati nei manifest sorgente, quando
+disponibili, assenza di blind path mancanti,
+pulizia semantica dei percorsi ciechi e separazione dei metadati dagli input
+dei tool.
+Sebbene lo \gls{sha256} costituisca l'identificatore crittografico principale,
+il bundle conserva anche valori \gls{md5} quando disponibili, poiché alcuni
+strumenti forensi espongono o utilizzano tale hash nei propri report e nei
+propri meccanismi di correlazione.
 
 La cecità del bundle riguarda principalmente i nomi dei file, i percorsi e la
 struttura delle directory. Poiché i metadati embedded possono contenere
@@ -2243,19 +2258,27 @@ sensitivity check e come limite operativo controllato della cecità del bundle;
 la loro quantificazione e interpretazione vengono demandate al capitolo dei
 risultati, in relazione alle predizioni dei proxy model e agli output
 normalizzati degli strumenti black-box.
+Di conseguenza, la cecità del bundle deve essere intesa come controllo
+metodologico sui canali informativi direttamente controllabili dalla pipeline,
+non come garanzia assoluta di assenza di qualunque informazione latente o
+embedded nel file immagine.
 
 La successiva valutazione operativa con strumenti forensi utilizza il bundle
 come input controllato e separa la fase di importazione dei file dalla
 fase di normalizzazione degli output. Gli strumenti che integrano moduli proprietari o non pienamente ispezionabili
-vengono trattati come sistemi black-box o quasi black-box: la pipeline non assume accesso ai modelli interni,
-alle soglie decisionali o alle logiche proprietarie di classificazione, ma
-analizza gli output esportabili e li normalizza rispetto a
+vengono trattati come sistemi black-box o quasi black-box. La pipeline non
+assume accesso ai modelli interni, alle soglie decisionali o alle logiche
+proprietarie di classificazione, ma analizza gli output esportabili e li
+normalizza rispetto a
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}.
 Questa impostazione è coerente con l'esigenza di valutare l'affidabilità
 operativa di strumenti professionali in condizioni controllate, senza confondere
 la validazione sperimentale con una certificazione generale del prodotto
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
-
+In questo senso, il forensic evaluation bundle rappresenta il punto di
+contatto controllato tra la pipeline riproducibile della tesi e gli ambienti
+software esterni, preservando al tempo stesso cecità operativa, tracciabilità
+forense e comparabilità metrica.
 
 
 
