@@ -985,11 +985,10 @@ La valutazione degli strumenti commerciali rappresenta il livello black-box dell
 pipeline sperimentale. A differenza dei modelli proxy analizzati nelle sezioni
 precedenti, per tali strumenti non sono disponibili architettura del modello,
 dataset di addestramento, soglie decisionali, preprocessing interno o logica
-completa di classificazione. La valutazione si basa quindi esclusivamente sugli
-output osservabili prodotti dai tool, sui tag assegnati, sulle categorie
-esportate, sui risultati di retrieval e sui bookmark semantici
-e sul matching tra i file del forensic evaluation bundle e la ground truth
-sperimentale.
+completa di classificazione. La valutazione si basa quindi esclusivamente sugli output osservabili prodotti
+dai tool, quali tag assegnati, categorie esportate, risultati di retrieval e
+bookmark semantici, nonché sul matching tra i file del forensic evaluation
+bundle e la ground truth sperimentale.
 
 Il confronto commerciale include quattro strumenti finali:
 \gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
@@ -2141,7 +2140,7 @@ Adversarial &
 0.945 &
 0.055 &
 0.008 &
-Prestazione aggregata sulle cinque famiglie adversariali considerate. \\
+Prestazione aggregata sulle cinque perturbazioni adversariali considerate. \\
 
 Anti-forensic &
 0.974 &
@@ -2281,17 +2280,6 @@ decisione conclusiva, soprattutto in presenza di input perturbati, fuori
 distribuzione o semanticamente ambigui.
 
 
-Nel complesso, \gls{griffeye}/\gls{t3kcore} mostra il miglior profilo commerciale
-aggregato in termini di accuracy, balanced accuracy e contenimento dei falsi
-positivi. Il \gls{fpr} pari a 0.007 è sensibilmente inferiore rispetto agli altri
-strumenti commerciali valutati, mentre il recall sulla classe \texttt{weapon}
-rimane elevato ma non massimo. Questo risultato evidenzia un profilo operativo
-selettivo: il tool riduce il rumore prodotto da falsi positivi, ma conserva una
-quota residua di falsi negativi sulla classe investigativamente rilevante. Il
-weapon flag rate sugli input \gls{ood}, pari a 0.260, conferma inoltre che anche
-un sistema con basso \gls{fpr} sul task binario può assorbire una parte non
-trascurabile di contenuti fuori distribuzione nella classe operativa
-\texttt{weapon}.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -2609,19 +2597,16 @@ accuracy rimangono comprese tra -0.0009 e +0.0015, mentre le variazioni del
 weapon flag rate sui campioni \gls{ood} rimangono inferiori a 0.006 in valore
 assoluto. Inoltre, poiché nessuno dei 15 casi appartiene agli artefatti
 adversariali o anti-forensi, le metriche di robustezza sotto perturbazioni non
-sono interessate da questo limite residuale. Il sensitivity check conferma quindi
-che i metadati embedded individuati costituiscono un limite operativo da
-documentare, ma non un fattore capace di alterare l'interpretazione complessiva
-dei risultati sperimentali.
+sono interessate da questo limite residuale.
 
-L'eventuale esclusione dei 15 file non altera l'interpretazione complessiva delle
-metriche aggregate dei tool commerciali. Pertanto, i casi individuati vengono mantenuti nel benchmark e discussi come
+Pertanto, i casi individuati vengono mantenuti nel benchmark e discussi come
 controllo di sensitività e limite operativo documentato della cecità del bundle,
 piuttosto che come fattore invalidante dei risultati sperimentali. In termini
 metodologici, questo controllo rafforza la tracciabilità dell'esperimento: il
 bundle rimane utilizzabile per la valutazione black-box, ma la presenza
 residuale di metadati embedded potenzialmente informativi viene esplicitata e
 trattata come limite controllato.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Comparative Robustness Discussion}
@@ -3161,10 +3146,9 @@ comportamento di \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{griffeye}/\gls{t3kcore}, che rimangono sistemi black-box nel contesto della
 presente valutazione. Esse forniscono invece un riferimento diagnostico
 controllato, limitato al modello proxy white-box, utile per discutere in modo
-più concreto alcuni rischi operativi osservabili in un contesto \gls{df}.
-Esse forniscono invece un riferimento diagnostico controllato, limitato al modello proxy white-box, utile
-per discutere in modo più concreto alcuni rischi operativi osservabili in un
-contesto \gls{df} human-in-the-loop.
+più concreto alcuni rischi operativi osservabili in un contesto \gls{df}
+human-in-the-loop.
+
 
 La Tabella~\ref{tab:results-xai-cases} riassume i cinque casi selezionati per
 l'analisi qualitativa. La selezione copre un caso corretto su input pulito, un
