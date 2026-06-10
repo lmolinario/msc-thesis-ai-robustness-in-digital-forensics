@@ -4,7 +4,7 @@ This directory is reserved for documentation, export organization, normalization
 
 Commercial forensic tools are treated as **operational black boxes**. The goal is not to reproduce, inspect, or infer their internal AI models, but to evaluate how their observable AI-assisted image-analysis behavior changes when the same forensic corpus contains clean, out-of-distribution (OOD), adversarial, and anti-forensic inputs.
 
-The evaluation follows the thesis methodology and uses the official forensic evaluation bundle as the common input corpus.
+The evaluation follows the thesis methodology and uses the official forensic evaluation bundle as the common blind input corpus.
 
 ---
 
@@ -13,41 +13,41 @@ The evaluation follows the thesis methodology and uses the official forensic eva
 | Tool | Version | Status | Notes |
 |---|---:|---|---|
 | Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Completed and normalized | The forensic evaluation bundle has been processed and the `Pictures.csv` export has been normalized against the bundle manifest. |
-| Excire Foto 2025 | 4.1.5 | Completed / analyzed | Evaluated as a standalone general-purpose AI-assisted image retrieval tool in a controlled forensic context. Results are interpreted as semantic retrieval behavior, not as native forensic classification. |
-| Cellebrite Inseyets | 10.9 | Pending / to be consolidated | Included in the final experimental perimeter. Requires documentation of the media-analysis workflow, export format, observable AI labels/categories, and comparability with the bundle ground truth. |
+| Excire Foto 2025 | 4.1.5 | Completed and normalized | Evaluated as a standalone general-purpose AI-assisted image retrieval tool in a controlled forensic context with `D20`, `D50`, and `D80` semantic-distance configurations. |
+| Cellebrite Inseyets | 10.9 | Completed and normalized | Evaluated through the Cellebrite Physical Analyzer report export. Observable image classifications are normalized as black-box operational signals. |
+| Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108 / T3K CORE v1.18.0 | Completed and normalized | Evaluated through automatically generated T3K CORE semantic bookmarks. Primary mapping uses `CORE/Violence/Firearm` only. |
 | Oxygen Forensic Detective | -- | Excluded | Not included in the final experimental perimeter. |
 | Autopsy | -- | Excluded | Not included in the final experimental perimeter. |
 
 ---
 
-## Target Tools
+## Final Commercial-Tool Perimeter
 
-The commercial-tool evaluation phase covers the following tools:
+The final commercial-tool evaluation phase covers the following tools:
 
 ```text
-Consolidated / analyzed:
+Completed and normalized:
 - Magnet AXIOM / Magnet.AI, version 10.1.0.48673
 - Excire Foto 2025, version 4.1.5
-
-Pending / to be consolidated:
 - Cellebrite Inseyets, version 10.9
+- Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
 
 Excluded from final experimental perimeter:
 - Oxygen Forensic Detective
 - Autopsy
 ```
 
-Each included tool must be documented separately, including:
+Each included tool is documented and normalized according to:
 
 * import procedure;
 * software version;
 * analysis configuration;
 * export format;
-* observable AI labels, categories, tags, or search outputs;
+* observable AI labels, categories, tags, bookmarks, or search outputs;
 * mapping strategy to the forensic evaluation bundle;
 * operational limitations observed during analysis.
 
-The evaluation does not assume access to internal AI model logic, proprietary training data, internal thresholds, or undocumented decision rules.
+The evaluation does not assume access to internal AI model logic, proprietary training data, internal thresholds, calibrated confidence scores, or undocumented decision rules.
 
 ---
 
@@ -81,12 +81,15 @@ forensic_tools/
 ├── excire_foto_2025/
 │   ├── notes.md
 │   └── raw_exports/
-└── cellebrite_inseyets/
+├── cellebrite_inseyets/
+│   ├── notes.md
+│   └── raw_exports/
+└── griffeye/
     ├── notes.md
     └── raw_exports/
 ```
 
-Large proprietary case files, installer files, licensed databases, and heavy exports should not be committed unless strictly necessary and legally/ethically appropriate.
+Large proprietary case files, installer files, licensed databases, license files, and heavy exports should not be committed unless strictly necessary and legally/ethically appropriate.
 
 Prefer:
 
@@ -94,7 +97,8 @@ Prefer:
 * methodological notes;
 * audit logs;
 * export summaries;
-* reproducible mapping artifacts.
+* reproducible mapping artifacts;
+* aggregated metric files.
 
 ---
 
@@ -138,49 +142,114 @@ This is an operational recoding of observable tool output, not access to Magnet.
 
 Excire Foto 2025 is evaluated as a standalone AI-assisted image retrieval tool, not as a native forensic software package and not as a binary weapon classifier.
 
-The evaluation is based on observable semantic retrieval behavior under controlled configurations. Any mapping from Excire outputs to the binary `weapon` / `non_weapon` task must therefore be documented as an operational evaluation choice.
-
-The documentation for Excire Foto 2025 should include:
+The evaluation is based on observable semantic retrieval behavior under controlled configurations:
 
 ```text
-forensic_tools/excire_foto_2025/notes.md
-forensic_tools/excire_foto_2025/raw_exports/
+forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D20_FIREARM_PROMPTS
+forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D50_FIREARM_PROMPTS
+forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D80_FIREARM_PROMPTS
 ```
 
-The notes should specify:
+The normalization script treats each distance configuration as a separate operational setting:
 
-* software version: `Excire Foto 2025, version 4.1.5`;
-* query or search configuration used;
-* distance or similarity thresholds, if applicable;
-* exported fields;
-* mapping rule to the forensic evaluation bundle;
-* operational limitations of treating semantic retrieval outputs as forensic triage signals.
+```text
+excire_foto_2025_d20
+excire_foto_2025_d50
+excire_foto_2025_d80
+```
+
+An image retrieved by at least one fixed firearm-oriented prompt is mapped to `weapon_detected=true`; all remaining bundle images are completed as `weapon_detected=false` for that configuration.
 
 ---
 
 ## Cellebrite Inseyets Evaluation
 
-Cellebrite Inseyets is included in the final experimental perimeter as the Cellebrite tool to be evaluated.
+Cellebrite Inseyets is included in the final experimental perimeter as the Cellebrite commercial black-box tool.
 
-The documentation should specify:
+Run/export folder:
 
 ```text
-forensic_tools/cellebrite_inseyets/notes.md
-forensic_tools/cellebrite_inseyets/raw_exports/
+forensic_tools/cellebrite_inseyets/raw_exports/FAIRLAB_CELLEBRITE_INSEYETS_RUN_01
 ```
 
-The notes should include:
+Documented environment:
 
-* software version: `Cellebrite Inseyets, version 10.9`;
-* import procedure for the forensic evaluation bundle;
-* media-analysis or AI-assisted categorization workflow used;
-* exported fields and export format;
-* observable labels, categories, tags, or detections;
-* mapping strategy to the bundle manifest;
-* whether the output supports quantitative comparison with Magnet AXIOM / Magnet.AI and Excire Foto 2025;
-* limitations caused by proprietary processing, export granularity, or unavailable internal model information.
+```text
+Cellebrite Inseyets version 10.9
+Physical Analyzer 10.9.0.3029 / UFED 10.9.0.284
+```
 
-The thesis should avoid attributing generic AI-based image-classification behavior to Cellebrite unless the specific Inseyets component and export used in the experiment support that claim.
+The normalized output is:
+
+```text
+evaluation/forensic_tools/cellebrite_inseyets_normalized_predictions.csv
+results/metrics/cellebrite_inseyets_metrics.csv
+```
+
+The mapping is based on the observable `Classifications` column exported from the Cellebrite report. The extended operational mapping treats an image as `weapon_detected=true` when `Classifications` contains at least one among:
+
+```text
+Armi
+Pistola
+Fucile
+```
+
+This is an operational recoding of exported tool output and does not imply access to Cellebrite internal AI model logic.
+
+---
+
+## Magnet Griffeye / T3K CORE Evaluation
+
+Magnet Griffeye is included as a fourth commercial black-box forensic media-triage tool.
+
+Run/export folder:
+
+```text
+forensic_tools/griffeye/raw_exports/FAIRLAB_GRIFFEYE_T3_RUN_01
+```
+
+Documented environment:
+
+```text
+Magnet Griffeye x64 26.2.108
+T3K CORE v1.18.0
+```
+
+The normalized output is:
+
+```text
+evaluation/forensic_tools/griffeye_normalized_predictions.csv
+results/metrics/griffeye_metrics.csv
+```
+
+The evaluation relies exclusively on automatically generated T3K CORE semantic bookmarks. No manual bookmark addition, removal, or correction is used for quantitative metrics.
+
+The primary thesis mapping is firearm-oriented:
+
+```text
+weapon_detected = true  if Bookmarks contains CORE/Violence/Firearm
+weapon_detected = false otherwise
+```
+
+The following bookmarks are intentionally excluded from the primary metric and retained only as secondary semantic indicators:
+
+```text
+CORE/Violence/Explosive Weapon
+CORE/Violence/Bladed Weapon
+CORE/Violence/Archery Weapon
+CORE/Military/Military Equipment
+```
+
+Griffeye normalization checks:
+
+```text
+rows in normalized prediction file = 11501 (1 header + 11500 predictions)
+matched_rows                       = 11500
+unmatched_rows                     = 0
+unknown_rows                       = 0
+positive firearm bookmarks         = 5399
+negative / no-firearm rows         = 6101
+```
 
 ---
 
@@ -199,12 +268,12 @@ evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
 ```
 
-The normalization process may support:
+The normalization process supports:
 
 * Magnet AXIOM / Magnet.AI exports through `Pictures.csv`;
-* Excire Foto 2025 semantic retrieval exports;
-* Cellebrite Inseyets media-analysis exports, if exportable and mappable;
-* generic CSV, TSV, JSON, JSONL, and TXT forensic AI exports;
+* Excire Foto 2025 semantic retrieval prompt exports;
+* Cellebrite Inseyets / Physical Analyzer report exports;
+* Griffeye / T3K CORE CSV exports with automatic semantic `Bookmarks`;
 * matching through filename, SHA256, and MD5;
 * deduplication to one prediction per tool and bundle item;
 * export audit and tool-version logging.
@@ -213,7 +282,7 @@ The normalization process may support:
 
 ## Mapping Strategy
 
-Tool outputs must be mapped back to the forensic evaluation bundle through:
+Tool outputs are mapped back to the forensic evaluation bundle through:
 
 ```text
 datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
@@ -227,7 +296,7 @@ Preferred matching keys, in order:
 4. exported path and file size;
 5. manual audit only when automatic matching fails.
 
-Manual matching decisions must be logged.
+Manual matching decisions must be logged. Manual correction of model/tool predictions is not used for quantitative performance evaluation.
 
 ---
 
@@ -241,9 +310,10 @@ The thesis must distinguish:
 * black-box commercial-tool behavior;
 * Magnet AXIOM / Magnet.AI as a consolidated commercial-tool result;
 * Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool evaluated in a controlled forensic context;
-* Cellebrite Inseyets 10.9 as the Cellebrite tool included in the final experimental perimeter;
+* Cellebrite Inseyets 10.9 as a commercial black-box AI-assisted media-analysis tool;
+* Magnet Griffeye / T3K CORE as a commercial black-box semantic-bookmark media-triage tool;
 * Oxygen Forensic Detective and Autopsy as excluded tools;
 * operational implications for AI-assisted triage;
-* limitations caused by proprietary labels, export formats, unavailable confidence scores, and unknown internal model behavior.
+* limitations caused by proprietary labels, export formats, unavailable confidence scores, semantic mappings, and unknown internal model behavior.
 
 Commercial-tool outputs are interpreted as observable operational signals, not as direct evidence of internal AI model performance.
