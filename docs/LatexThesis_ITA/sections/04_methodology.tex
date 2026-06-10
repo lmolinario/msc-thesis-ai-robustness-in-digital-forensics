@@ -2340,6 +2340,37 @@ Tabella~\ref{tab:methodology-excire-prompts}.
 
 
 
+
+
+\begin{table}[H]
+\centering
+\caption{Prompt semantici utilizzati per la valutazione di \gls{excirefoto2025}.}
+\label{tab:methodology-excire-prompts}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{0.90\textwidth}{@{}p{0.10\textwidth}p{0.28\textwidth}X@{}}
+\toprule
+\textbf{ID} & \textbf{Prompt semantico} & \textbf{File di export} \\
+\midrule
+P1 & \texttt{firearm} & \codepath{excire\_firearm\_distance50.csv} \\
+P2 & \texttt{gun} & \codepath{excire\_gun\_distance50.csv} \\
+P3 & \texttt{pistol} & \codepath{excire\_pistol\_distance50.csv} \\
+P4 & \texttt{handgun} & \codepath{excire\_handgun\_distance50.csv} \\
+P5 & \texttt{revolver} & \codepath{excire\_revolver\_distance50.csv} \\
+P6 & \texttt{rifle} & \codepath{excire\_rifle\_distance50.csv} \\
+P7 & \texttt{shotgun} & \codepath{excire\_shotgun\_distance50.csv} \\
+P8 & \texttt{assault rifle} & \codepath{excire\_assault\_rifle\_distance50.csv} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+I prompt sono stati definiti prima dell'esecuzione della valutazione e non sono
+stati modificati iterativamente in funzione degli output osservati. In questo
+modo, il retrieval semantico di \gls{excirefoto2025} viene trattato come
+procedura black-box riproducibile e non come ricerca manuale adattata ai
+risultati.
+
+
 Per \gls{cellebriteinseyets}, la normalizzazione degli output si basa sulle
 categorie esportate nell'ambiente \texttt{Cellebrite Physical Analyzer
 10.9.0.3029}. Poiché il tool non restituisce direttamente le classi sperimentali
@@ -2382,37 +2413,6 @@ come ricodifica operativa degli output osservabili. In particolare, l'assenza di
 una categoria weapon-related non viene trattata come prova semantica di assenza
 di armi nell'immagine, ma come mancato rilevamento della categoria di interesse
 da parte dello strumento nelle condizioni del protocollo.
-
-
-
-\begin{table}[H]
-\centering
-\caption{Prompt semantici utilizzati per la valutazione di \gls{excirefoto2025}.}
-\label{tab:methodology-excire-prompts}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{0.90\textwidth}{@{}p{0.10\textwidth}p{0.28\textwidth}X@{}}
-\toprule
-\textbf{ID} & \textbf{Prompt semantico} & \textbf{File di export} \\
-\midrule
-P1 & \texttt{firearm} & \codepath{excire\_firearm\_distance50.csv} \\
-P2 & \texttt{gun} & \codepath{excire\_gun\_distance50.csv} \\
-P3 & \texttt{pistol} & \codepath{excire\_pistol\_distance50.csv} \\
-P4 & \texttt{handgun} & \codepath{excire\_handgun\_distance50.csv} \\
-P5 & \texttt{revolver} & \codepath{excire\_revolver\_distance50.csv} \\
-P6 & \texttt{rifle} & \codepath{excire\_rifle\_distance50.csv} \\
-P7 & \texttt{shotgun} & \codepath{excire\_shotgun\_distance50.csv} \\
-P8 & \texttt{assault rifle} & \codepath{excire\_assault\_rifle\_distance50.csv} \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-I prompt sono stati definiti prima dell'esecuzione della valutazione e non sono
-stati modificati iterativamente in funzione degli output osservati. In questo
-modo, il retrieval semantico di \gls{excirefoto2025} viene trattato come
-procedura black-box riproducibile e non come ricerca manuale adattata ai
-risultati.
-
 
 Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
 
