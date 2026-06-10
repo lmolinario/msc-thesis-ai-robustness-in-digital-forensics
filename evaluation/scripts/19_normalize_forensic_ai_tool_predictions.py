@@ -26,6 +26,13 @@ Implemented normalization logic
   - completes all bundle rows not retrieved by any prompt as predicted non_weapon;
   - preserves per-prompt hit flags for auditability.
 
+- Griffeye / T3K CORE:
+  - reads CSV exports containing automatically generated semantic Bookmarks;
+  - retains only blind bundle rows matching the bundle_XXXXXX naming scheme and
+    excludes evidence-workflow artefacts such as unallocated-space entries;
+  - maps the firearm-oriented bookmark CORE/Violence/Firearm to predicted
+    weapon and all other bundle rows to predicted non_weapon.
+
 - Generic forensic AI tool exports:
   - supports CSV, TSV, JSON, JSONL and TXT exports;
   - attempts to infer filename/hash, label/category and confidence columns;
@@ -114,6 +121,7 @@ KNOWN_TOOL_NAMES = [
     "magnet_axiom",
     "excire_foto_2025",
     "cellebrite_inseyets",
+    "griffeye",
 ]
 SUPPORTED_GENERIC_EXPORT_EXTENSIONS = {
     ".csv",
@@ -186,6 +194,8 @@ LABEL_COLUMNS = {
     "categories",
     "tag",
     "tags",
+    "bookmarks",
+    "bookmark",
     "classification",
     "Classifications",
     "Classification",
@@ -197,6 +207,20 @@ LABEL_COLUMNS = {
     "detected_category",
     "result",
     "description",
+}
+
+GRIFFEYE_BOOKMARK_COLUMNS = {
+    "bookmarks",
+    "bookmark",
+}
+
+GRIFFEYE_PRIMARY_FIREARM_BOOKMARK = "core/violence/firearm"
+
+GRIFFEYE_SECONDARY_BOOKMARKS = {
+    "core/violence/explosive weapon",
+    "core/violence/bladed weapon",
+    "core/violence/archery weapon",
+    "core/military/military equipment",
 }
 
 CONFIDENCE_COLUMNS = {
@@ -361,6 +385,26 @@ def basename_from_path(value: Any) -> str:
     if not text:
         return ""
     return text.rstrip("/").split("/")[-1]
+
+
+def bundle_id_from_text(value: Any) -> str:
+    """Extract a bundle_XXXXXX identifier from a filename/path/text field."""
+    match = re.search(r"\bbundle_\d{6}\b", safe_str(value), flags=re.IGNORECASE)
+    return match.group(0).lower() if match else ""
+
+
+def text_contains_unallocated_or_system_entry(value: Any) -> bool:
+    """Return True for common evidence-workflow artefacts outside the blind input."""
+    text = safe_str(value).replace("\\", "/").lower()
+    return any(
+        marker in text
+        for marker in (
+            "unallocated space",
+            "system volume information",
+            "wpsettings.dat",
+            "$recycle.bin",
+        )
+    )
 
 
 def repo_relative_string(path: Path | str) -> str:
@@ -758,6 +802,14 @@ def discover_prediction_export_files_in_roots(tool_name: str, roots: list[Path])
                 for path in root.rglob("*")
                 if path.is_file() and is_excire_prompt_export_file(path)
             )
+        elif tool_name == "griffeye":
+            files.extend(
+                path
+                for path in root.rglob("*")
+                if path.is_file()
+                and path.suffix.lower() in SUPPORTED_GENERIC_EXPORT_EXTENSIONS
+                and is_griffeye_bookmark_export_file(path)
+            )
         else:
             files.extend(
                 path
@@ -869,6 +921,57 @@ def read_export_records(path: Path) -> list[dict[str, Any]]:
     return []
 
 
+def export_file_has_column(path: Path, candidate_columns: set[str], sample_rows: int = 1) -> bool:
+    """Lightweight check used to avoid treating metadata-only exports as predictions."""
+    try:
+        suffix = path.suffix.lower()
+        if suffix in {".csv", ".tsv"}:
+            sep = "\t" if suffix == ".tsv" else ","
+            for encoding in ["utf-8-sig", "utf-8", "cp1252", "latin1"]:
+                try:
+                    df = pd.read_csv(path, sep=sep, dtype=str, keep_default_na=False, encoding=encoding, nrows=sample_rows)
+                    columns = {normalize_column_name(col) for col in df.columns}
+                    return bool(columns.intersection({normalize_column_name(col) for col in candidate_columns}))
+                except UnicodeDecodeError:
+                    continue
+        if suffix in {".xlsx", ".xls"}:
+            # Griffeye exports are expected as CSV. Excel is kept as a defensive
+            # fallback, but it is not used for official thesis metrics unless it
+            # exposes the Bookmarks column.
+            df = pd.read_excel(path, dtype=str, nrows=sample_rows)
+            columns = {normalize_column_name(col) for col in df.columns}
+            return bool(columns.intersection({normalize_column_name(col) for col in candidate_columns}))
+    except Exception:
+        return False
+    return False
+
+
+def is_griffeye_bookmark_export_file(path: Path) -> bool:
+    """Return True only for Griffeye exports exposing semantic bookmark outputs."""
+    return export_file_has_column(path, GRIFFEYE_BOOKMARK_COLUMNS)
+
+
+def extract_griffeye_bookmarks(record: dict[str, Any]) -> str:
+    """Extract only Griffeye/T3 semantic bookmarks, not manual category fields."""
+    return collect_text_fields(record, GRIFFEYE_BOOKMARK_COLUMNS)
+
+
+def is_griffeye_blind_bundle_row(record: dict[str, Any]) -> bool:
+    """Keep only true blind-bundle rows from a Griffeye export.
+
+    Griffeye evidence exports may include additional entries such as unallocated
+    space or system files. Some of those entries can share hashes with bundle
+    images, so they must be excluded before hash-based matching to avoid
+    contaminating the one-prediction-per-bundle-item table.
+    """
+    candidate_text = " | ".join(safe_str(value) for value in record.values() if safe_str(value))
+    if not bundle_id_from_text(candidate_text):
+        return False
+    if text_contains_unallocated_or_system_entry(candidate_text):
+        return False
+    return True
+
+
 def extract_raw_row(tool_name: str, export_file: Path, row_number: int, record: dict[str, Any]) -> RawToolRow:
     sha256 = normalize_hash(first_non_empty(record, SHA256_COLUMNS))
     md5 = normalize_hash(first_non_empty(record, MD5_COLUMNS))
@@ -877,6 +980,8 @@ def extract_raw_row(tool_name: str, export_file: Path, row_number: int, record: 
 
     if tool_name == "magnet_axiom":
         raw_label = first_non_empty(record, {"tags"})
+    elif tool_name == "griffeye":
+        raw_label = extract_griffeye_bookmarks(record)
     else:
         raw_label = collect_text_fields(record, LABEL_COLUMNS)
         if not raw_label:
@@ -919,8 +1024,25 @@ def parse_tool_exports(
             error = f"{type(exc).__name__}: {exc}"
             logging.warning("Could not parse %s: %s", export_file, error)
 
+        skipped_non_bundle_rows = 0
+        griffeye_bookmark_rows = ""
+        if tool_name == "griffeye" and is_prediction_file:
+            bookmark_count = sum(1 for record in records if extract_griffeye_bookmarks(record))
+            griffeye_bookmark_rows = str(bookmark_count)
+            if records and bookmark_count == 0:
+                status = "parse_error"
+                error = (
+                    "Griffeye Bookmarks column was found, but all values are empty. "
+                    "This export is treated as audit-only because it does not expose "
+                    "automatic T3 semantic bookmarks."
+                )
+                is_prediction_file = False
+
         if is_prediction_file:
             for idx, record in enumerate(records, start=1):
+                if tool_name == "griffeye" and not is_griffeye_blind_bundle_row(record):
+                    skipped_non_bundle_rows += 1
+                    continue
                 raw_rows.append(extract_raw_row(tool_name, export_file, idx, record))
 
         audit_rows.append(
@@ -932,6 +1054,8 @@ def parse_tool_exports(
                 "is_prediction_file": str(is_prediction_file).lower(),
                 "status": status,
                 "parsed_rows": len(records),
+                "skipped_non_bundle_rows": skipped_non_bundle_rows,
+                "griffeye_bookmark_rows": griffeye_bookmark_rows,
                 "error": error,
             }
         )
@@ -1026,6 +1150,17 @@ def build_tool_version_row(
             "tool output and does not imply access to Cellebrite internal AI model logic."
         )
 
+    elif tool_name == "griffeye":
+        notes = (
+            "Magnet Griffeye x64 / T3K CORE automatic semantic-bookmark export. "
+            "Predictions are derived exclusively from the observable Bookmarks column. "
+            "The primary thesis mapping treats an image as weapon_detected=true only "
+            "when Bookmarks contains 'CORE/Violence/Firearm'. Explosive, bladed, "
+            "archery and military-equipment bookmarks are intentionally excluded from "
+            "the primary firearm-oriented metric and retained only as secondary semantic "
+            "indicators in the raw label field."
+        )
+
     else:
         notes = "Unsupported or non-final tool. Fill manually only if intentionally used."
 
@@ -1036,6 +1171,14 @@ def build_tool_version_row(
         extracted.setdefault("export_status", "completed")
         extracted.setdefault("export_timestamp", "2026-06-05 13:04:59")
         extracted.setdefault("ai_modules_enabled", "media classifications / image classifications")
+
+    if tool_name == "griffeye":
+        extracted.setdefault("tool_version", "Magnet Griffeye x64 26.2.108")
+        extracted.setdefault("tool_build", "T3K CORE v1.18.0")
+        extracted.setdefault("case_name", "FAIRLAB_GRIFFEYE_T3_RUN_01")
+        extracted.setdefault("export_status", "completed")
+        extracted.setdefault("export_timestamp", "2026-06-10")
+        extracted.setdefault("ai_modules_enabled", "T3K CORE automatic semantic bookmarks")
 
     return {
         "tool_name": row_tool_name or tool_name,
@@ -1081,6 +1224,14 @@ def interpret_weapon_detection(tool_name: str, raw_label: str) -> tuple[str, str
             return "true", "cellebrite_extended_armi_pistola_fucile"
 
         return "false", "cellebrite_extended_armi_pistola_fucile"
+
+    if tool_name == "griffeye":
+        # Primary thesis mapping: firearm-oriented operational definition.
+        # Other weapon-like semantic bookmarks are retained in tool_raw_label but
+        # intentionally excluded from the primary binary metric.
+        if GRIFFEYE_PRIMARY_FIREARM_BOOKMARK in text_clean:
+            return "true", "griffeye_t3_core_firearm_bookmark"
+        return "false", "griffeye_t3_no_core_firearm_bookmark"
 
     if not text_clean:
         return "unknown", "empty_label"
