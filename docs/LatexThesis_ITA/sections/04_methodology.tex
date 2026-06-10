@@ -2711,16 +2711,20 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
 \label{sec:methodology-evaluation-metrics}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Il protocollo metrico di \gls{fairlab} è progettato per valutare due livelli
-distinti: i proxy model controllati, per i quali sono disponibili predizioni,
-confidenze, checkpoint e mapping delle classi, e gli strumenti commerciali
-black-box, per i quali l'analisi si basa esclusivamente sugli output esportati
-dal tool. In entrambi i casi, l'obiettivo non è misurare soltanto l'accuratezza
-aggregata, ma qualificare il comportamento operativo dei sistemi rispetto a
-input puliti, manipolati e fuori distribuzione. In ambito forense, infatti, un
-falso negativo su un contenuto rilevante può avere implicazioni operative più
-critiche di un falso positivo, poiché può ridurre la priorità assegnata a un
-artefatto che meriterebbe ulteriore analisi.
+Il protocollo metrico di \gls{fairlab} è progettato per valutare tre
+prospettive complementari della robustezza operativa: i proxy model
+controllati, per i quali sono disponibili predizioni, confidenze, checkpoint e
+mapping delle classi; il comportamento su input \gls{ood}, analizzato come
+rischio operativo separato dalla classificazione supervisionata; e gli strumenti
+commerciali black-box, per i quali l'analisi si basa esclusivamente sugli
+output esportati dal tool. In tutti i casi, l'obiettivo non è misurare soltanto
+l'accuratezza aggregata, ma qualificare il comportamento operativo dei sistemi
+rispetto a input puliti, manipolati e fuori distribuzione. In ambito forense,
+infatti, un falso negativo su un contenuto rilevante può avere implicazioni
+operative più critiche di un falso positivo, poiché può ridurre la priorità
+assegnata a un artefatto che meriterebbe ulteriore analisi.
+
+
 
 La valutazione non assume \gls{auroc} come metrica centrale, pur essendo essa
 ampiamente utilizzata in contesti di \gls{ml} supervisionato, poiché l'obiettivo
@@ -2754,35 +2758,31 @@ Lo stesso script produce inoltre file metrici finali orientati alla sintesi sper
 tra cui \codepath{final_core_metrics.csv}, \codepath{final_robustness_metrics.csv},
 \codepath{final_confusion_matrices.csv} e \codepath{final_ood_metrics.csv}.
 
-Il run di valutazione dei proxy model comprende 11\,500 campioni in input e
-40\,500 righe di predizione. Tali conteggi descrivono la copertura del run e la
-completezza degli artefatti prodotti, non una misura di performance del sistema.
+Ai fini della tracciabilità metodologica, la pipeline registra anche la
+copertura del run di valutazione. Il run dei proxy model comprende 11,500
+campioni in input e 40,500 righe di predizione. Tali conteggi documentano la
+completezza degli artefatti prodotti e non rappresentano misure di performance.
 La distribuzione delle predizioni include 3000 righe relative a campioni puliti,
-7500 righe relative al set \gls{ood} e 30\,000 righe relative a campioni
+7500 righe relative al set \gls{ood} e 30,000 righe relative a campioni
 perturbati.
 
 Nel caso della valutazione \gls{ood}, le 7500 righe di predizione derivano
 dalla valutazione delle 500 immagini fuori distribuzione rispetto ai cinque
 checkpoint fold-aware dei tre proxy model, secondo lo schema
-500~$\times$~5~$\times$~3~$=$~7\,500. Tale conteggio non deve essere
-interpretato come una moltiplicazione artificiale dei campioni disponibili:
-le 500 immagini \gls{ood} rimangono il riferimento semantico effettivo, mentre
-le predizioni ottenute sui cinque checkpoint consentono di osservare se la
-tendenza a classificare campioni fuori distribuzione come \texttt{weapon} o
-\texttt{non\_weapon} sia stabile, variabile o dipendente da uno specifico
+500~$\times$~5~$\times$~3~=~7,500. Tale conteggio non deve essere interpretato
+come una moltiplicazione artificiale dei campioni disponibili: le 500 immagini
+\gls{ood} rimangono il riferimento semantico effettivo, mentre le predizioni
+ottenute sui cinque checkpoint consentono di osservare se la tendenza a
+classificare campioni fuori distribuzione come \texttt{weapon} o
+\texttt{non_weapon} sia stabile, variabile o dipendente da uno specifico
 addestramento.
 
-In questo modo, la valutazione \gls{ood} consente di verificare se l'incertezza
-o l'errore del modello rispetto a input non appartenenti alla distribuzione
-target sia stabile oppure dipenda sensibilmente dal fold utilizzato per
-l'addestramento, mantenendo al contempo la coerenza con il protocollo dei proxy
-model.
+Analogamente, la distinzione tra righe con \texttt{attack_family = none},
+righe adversariali e righe anti-forensi descrive la copertura della valutazione
+e non anticipa l'analisi quantitativa delle prestazioni, che rimane demandata al
+Capitolo~\ref{chap:results}.
 
-In termini di famiglia di attacco, il summary distingue
-10\,500 righe con \texttt{attack\_family = none}, 15\,000 righe adversariali
-e 15\,000 righe anti-forensi. Questi valori descrivono la copertura della
-valutazione metodologica e non devono essere interpretati come risultati di
-performance.
+
 
 \begin{table}[H]
 \centering
@@ -2885,14 +2885,16 @@ Transizioni \texttt{weapon}~$\rightarrow$~\texttt{non\_weapon} e
 ai falsi negativi su contenuti rilevanti. \\
 Comportamento \gls{ood}
 &
-\gls{ood} predicted as \texttt{weapon}, \gls{ood} predicted as
-\texttt{non\_weapon}, mean confidence on \gls{ood} e \gls{ood}
-high-confidence rate. \\
+\gls{ood} weapon flag rate, \gls{ood} predicted as \texttt{weapon},
+\gls{ood} predicted as \texttt{non\_weapon}, mean confidence on \gls{ood} e
+\gls{ood} high-confidence rate. \\
 Strumenti forensi
 &
 True positive, false negative, false positive, true negative, matching rate,
-unknown rate, unmapped rate, not detected, uncategorized, weapon recall,
-weapon false negative rate, false positive rate e balanced accuracy dove applicabile. \\
+unknown/unmapped output rate, not detected, uncategorized, weapon recall,
+weapon false negative rate, false positive rate e balanced accuracy dove
+applicabile. Gli stati non interpretabili vengono mantenuti separati quando non
+possono essere ricondotti in modo affidabile al task binario.\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -2979,7 +2981,7 @@ dagli strumenti commerciali black-box.
 \node[metric] (ood) at (4.4,-2.7)
 {\shortstack{
     \textbf{OOD behavior metrics}\\[1mm]
-    \scriptsize OOD predicted as weapon/non-weapon\\
+    \scriptsize OOD weapon flag rate and predictions\\
     \scriptsize mean confidence and high-confidence rate
 }};
 
@@ -3015,7 +3017,14 @@ dagli strumenti commerciali black-box.
 
 \end{tikzpicture}%
 }
-\caption[Metric layers used in the evaluation protocol]{Metric layers used in the evaluation protocol. Proxy models are evaluated with standard classification, robustness and confidence-based metrics. The \gls{ood} set is evaluated separately to measure whether out-of-distribution samples are forced into operational classes. Commercial tools are evaluated through normalized black-box outputs, including detection, error and unknown/unmapped states.}
+\caption[Metric layers used in the evaluation protocol]{Metric layers used in
+the evaluation protocol. Proxy models are evaluated with standard
+classification, robustness and confidence-based metrics. The \gls{ood} set is
+evaluated separately to measure whether out-of-distribution samples are forced
+into operational classes. Commercial tools are evaluated through normalized
+black-box outputs, including detection, error and unknown/unmapped states. The
+three metric layers are analytically distinct and are integrated only in the
+final robustness interpretation.}
 \label{fig:methodology-metric-layers}
 \end{figure}
 
@@ -3041,6 +3050,12 @@ diversa rispetto alla mancata emersione di un contenuto potenzialmente rilevante
 Questa distinzione riflette la natura della valutazione: l'obiettivo non è
 ottimizzare una metrica astratta, ma stimare l'affidabilità operativa del
 supporto automatico in un contesto di triage e prioritizzazione forense.
+Per questa ragione, l'interpretazione delle metriche privilegia il rischio di
+mancata emersione del contenuto rilevante rispetto alla sola massimizzazione
+dell'accuratezza aggregata. Nel contesto del protocollo, le metriche non
+sostituiscono la revisione umana, ma servono a qualificare quando e in quali
+condizioni il supporto automatico può ridurre, alterare o aumentare la priorità
+assegnata agli artefatti da sottoporre all'analista.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
