@@ -3218,63 +3218,8 @@ Falso positivo adversarial ad alta confidenza, rappresentativo dell'inaffidabili
 \label{tab:results-xai-cases}
 \end{table}
 
-% ─────────────────────────────────────────────────────────────────────────────
-% XAI representative case figure.
-% Arguments:
-% #1 = figure label
-% #2 = interpretive caption
-% #3 = input image path
-% #4 = IG heatmap path
-% #5 = IG overlay path
-% #6 = top-attribution mask path
-% #7 = case metadata
-% ─────────────────────────────────────────────────────────────────────────────
-\providecommand{\XAIcaseFigureMask}[7]{%
-\begin{figure}[H]
-\centering
 
-\begin{minipage}[t]{0.235\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,height=3.25cm,keepaspectratio]{#3}
-    \vspace{1mm}
-
-    \textbf{Input image}\\
-    \footnotesize Original sample.
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.235\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,height=3.25cm,keepaspectratio]{#4}
-    \vspace{1mm}
-
-    \textbf{IG heatmap}\\
-    \footnotesize Normalized attribution map.
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.235\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,height=3.25cm,keepaspectratio]{#5}
-    \vspace{1mm}
-
-    \textbf{IG overlay}\\
-    \footnotesize Attribution over input image.
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.235\textwidth}
-    \centering
-    \includegraphics[width=\textwidth,height=3.25cm,keepaspectratio]{#6}
-    \vspace{1mm}
-
-    \textbf{Top-attribution mask}\\
-    \footnotesize Highest-attribution regions.
-\end{minipage}
-
-\caption{#2 \textit{Case metadata:} #7.}
-\label{#1}
-\end{figure}
-}
-
-\XAIcaseFigureMask
+\XAIcaseFigureMaskGrid
 {fig:xai-case1-clean-correct}
 {Caso corretto su input pulito \texttt{xai\_case\_0001}. Il modello proxy
 EfficientNet-B0 classifica correttamente un'immagine \texttt{clean} con etichetta
@@ -3299,7 +3244,7 @@ elementi marginali, sfondo o artefatti di acquisizione. Tale esempio non dimostr
 da solo, l'affidabilità generale del modello, ma costituisce un caso di
 riferimento rispetto al quale confrontare i fallimenti successivi.
 
-\XAIcaseFigureMask
+\XAIcaseFigureMaskGrid
 {fig:xai-case2-clean-false-negative}
 {Falso negativo su input pulito \texttt{xai\_case\_0006}. Un'immagine
 \texttt{clean} con etichetta manuale \texttt{weapon} viene classificata come
@@ -3330,7 +3275,7 @@ Questo caso mostra che anche una buona performance aggregata su dati
 quando il risultato automatico viene utilizzato per filtrare o ordinare grandi
 volumi di immagini in un contesto investigativo.
 
-\XAIcaseFigureMask
+\XAIcaseFigureMaskGrid
 {fig:xai-case3-ood-as-weapon}
 {Caso \gls{ood} \texttt{xai\_case\_0009}. Un campione fuori distribuzione viene
 classificato come \texttt{weapon} con elevata confidenza.}
@@ -3361,7 +3306,7 @@ nella costruzione del dataset e nella valutazione della robustezza operativa,
 anziché ricondurre tutti gli input non appartenenti alla classe \texttt{weapon}
 alla sola classe \texttt{non\_weapon}.
 
-\XAIcaseFigureMask
+\XAIcaseFigureMaskGrid
 {fig:xai-case4-antiforensic-failure}
 {Falso negativo anti-forense \texttt{xai\_case\_0010}. Un'immagine
 \texttt{weapon} sottoposta a \gls{histogrammodification} viene classificata come
@@ -3394,7 +3339,7 @@ pipeline forense, ciò rafforza la necessità di non trattare il risultato del
 classificatore come evidenza autonoma, ma come supporto da verificare
 criticamente.
 
-\XAIcaseFigureMask
+\XAIcaseFigureMaskGrid
 {fig:xai-case5-adversarial-high-confidence-failure}
 {Falso positivo adversarial ad alta confidenza \texttt{xai\_case\_0015}. Un'immagine
 \texttt{non\_weapon} perturbata mediante \gls{sigmazero} viene classificata come

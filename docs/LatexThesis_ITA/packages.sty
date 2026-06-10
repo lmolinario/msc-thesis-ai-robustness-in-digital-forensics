@@ -280,3 +280,72 @@ verificabilita
     \renewcommand{\footrulewidth}{0.4pt}
     \fancyfoot[C]{\thepage}
 }
+
+
+%----------------------------------------------------------------------------------------
+%   XAI FIGURE MACROS
+%----------------------------------------------------------------------------------------
+
+% XAI representative case figure -- balanced 2x2 grid.
+%
+% Arguments:
+% #1 = figure label
+% #2 = interpretive caption
+% #3 = input image path
+% #4 = IG heatmap path
+% #5 = IG overlay path
+% #6 = top-attribution mask path
+% #7 = case metadata
+%
+\providecommand{\XAIcaseFigureMaskGrid}[7]{%
+\begin{figure}[H]
+\centering
+
+\begin{minipage}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.1cm,keepaspectratio]{#3}
+    \vspace{1mm}
+
+    \textbf{Input image}\\
+    \footnotesize Original sample.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.1cm,keepaspectratio]{#5}
+    \vspace{1mm}
+
+    \textbf{IG overlay}\\
+    \footnotesize Attribution over input image.
+\end{minipage}
+
+\vspace{2.5mm}
+
+\begin{minipage}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.1cm,keepaspectratio]{#4}
+    \vspace{1mm}
+
+    \textbf{IG heatmap}\\
+    \footnotesize Normalized attribution map.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.47\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=4.1cm,keepaspectratio]{#6}
+    \vspace{1mm}
+
+    \textbf{Top-attribution mask}\\
+    \footnotesize Highest-attribution regions.
+\end{minipage}
+
+\vspace{1.5mm}
+
+{\footnotesize
+\textit{Case metadata:} #7
+}
+
+\caption{#2}
+\label{#1}
+\end{figure}
+}
