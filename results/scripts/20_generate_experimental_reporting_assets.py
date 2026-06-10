@@ -108,6 +108,7 @@ FORENSIC_TOOL_ORDER = (
     "excire_foto_2025_d50",
     "excire_foto_2025_d80",
     "cellebrite_inseyets",
+    "griffeye",
 )
 
 FORENSIC_TOOL_DISPLAY = {
@@ -117,10 +118,7 @@ FORENSIC_TOOL_DISPLAY = {
     "excire_foto_2025_d50": "Excire D50",
     "excire_foto_2025_d80": "Excire D80",
     "cellebrite_inseyets": "Cellebrite Inseyets",
-    # Backward-compatible display names for historical outputs only.
-    "xways_excire_d20": "Excire D20",
-    "xways_excire_d50": "Excire D50",
-    "xways_excire_d80": "Excire D80",
+    "griffeye": "Magnet Griffeye / T3K CORE",
 }
 
 FORENSIC_FAMILY_DISPLAY = {
@@ -905,6 +903,145 @@ def prepare_forensic_metric_table(df: pd.DataFrame, include_attack_name: bool = 
     return out
 
 
+def get_forensic_global_metrics(forensic_df: pd.DataFrame) -> pd.DataFrame:
+    """Return one overall row per commercial tool/configuration.
+
+    Script 19 emits the global summary with scope/sample/attack fields set to
+    ``all``. Keeping this helper explicit avoids mixing global metrics with
+    clean, OOD, family-level or attack-level rows.
+    """
+    return forensic_df[
+        (forensic_df["scope"].astype(str) == "all")
+        & (forensic_df["sample_type"].astype(str) == "all")
+        & (forensic_df["attack_family"].astype(str) == "all")
+        & (forensic_df["attack_name"].astype(str) == "all")
+    ].copy()
+
+
+def prepare_forensic_global_comparison_table(forensic_df: pd.DataFrame) -> pd.DataFrame:
+    """Return the thesis-ready commercial-tool global comparison table."""
+    global_df = get_forensic_global_metrics(forensic_df)
+    if global_df.empty:
+        return pd.DataFrame()
+
+    metric_columns = [
+        "rows_total",
+        "matched_rows",
+        "binary_rows",
+        "binary_interpretable_rows",
+        "unknown_rows",
+        "accuracy",
+        "balanced_accuracy",
+        "precision_weapon",
+        "recall_weapon",
+        "specificity_non_weapon",
+        "f1_weapon",
+        "false_negative_rate",
+        "false_positive_rate",
+        "tp",
+        "fp",
+        "tn",
+        "fn",
+        "ood_rows",
+        "ood_weapon_flags",
+        "ood_non_weapon_flags",
+        "ood_unknown",
+        "ood_weapon_flag_rate",
+    ]
+    available_columns = [column for column in metric_columns if column in global_df.columns]
+
+    tools = ordered_forensic_tools(set(global_df["tool_name"].astype(str)))
+    out = global_df.set_index("tool_name").loc[tools].reset_index()
+    out = out[["tool_name"] + available_columns].copy()
+    out.insert(1, "tool_display", out["tool_name"].map(display_forensic_tool))
+
+    # Add compact ranks for the metrics most often discussed in Chapter 5.
+    # Lower is better for error rates; higher is better for accuracy/recall.
+    ranking_specs = {
+        "accuracy_rank_desc": ("accuracy", False),
+        "recall_weapon_rank_desc": ("recall_weapon", False),
+        "false_negative_rate_rank_asc": ("false_negative_rate", True),
+        "false_positive_rate_rank_asc": ("false_positive_rate", True),
+        "ood_weapon_flag_rate_rank_asc": ("ood_weapon_flag_rate", True),
+    }
+    for rank_column, (metric_column, ascending) in ranking_specs.items():
+        if metric_column in out.columns:
+            out[rank_column] = out[metric_column].rank(method="min", ascending=ascending).astype("Int64")
+
+    return out
+
+
+def prepare_forensic_worst_case_table(forensic_df: pd.DataFrame) -> pd.DataFrame:
+    """Return worst-case attack/transformation rows for each tool and family.
+
+    The table is designed for Chapter 5 prose: for each commercial
+    tool/configuration and perturbation family, it reports the attack with the
+    lowest accuracy, the attack with the highest false-negative rate, and the
+    attack with the highest false-positive rate.
+    """
+    attack_df = forensic_df[
+        (forensic_df["scope"].astype(str) == "attack_name")
+        & (forensic_df["attack_family"].astype(str).isin(["adversarial", "anti_forensic"]))
+    ].copy()
+    if attack_df.empty:
+        return pd.DataFrame()
+
+    numeric_columns = ["accuracy", "false_negative_rate", "false_positive_rate", "fn", "fp", "tp", "tn"]
+    attack_df = to_numeric_columns(attack_df, numeric_columns)
+
+    rows: list[dict[str, Any]] = []
+    tools = ordered_forensic_tools(set(attack_df["tool_name"].astype(str)))
+    for tool in tools:
+        for family in ["adversarial", "anti_forensic"]:
+            subset = attack_df[
+                (attack_df["tool_name"].astype(str) == tool)
+                & (attack_df["attack_family"].astype(str) == family)
+            ].copy()
+            if subset.empty:
+                continue
+
+            min_accuracy_row = subset.loc[subset["accuracy"].idxmin()] if "accuracy" in subset.columns else None
+            max_fnr_row = (
+                subset.loc[subset["false_negative_rate"].idxmax()]
+                if "false_negative_rate" in subset.columns
+                else None
+            )
+            max_fpr_row = (
+                subset.loc[subset["false_positive_rate"].idxmax()]
+                if "false_positive_rate" in subset.columns
+                else None
+            )
+
+            def value(row: pd.Series | None, column: str) -> Any:
+                if row is None or column not in row.index:
+                    return ""
+                return row[column]
+
+            rows.append(
+                {
+                    "tool_name": tool,
+                    "tool_display": display_forensic_tool(tool),
+                    "attack_family": family,
+                    "attack_family_display": FORENSIC_FAMILY_DISPLAY.get(family, family),
+                    "worst_accuracy_attack": value(min_accuracy_row, "attack_name"),
+                    "worst_accuracy_attack_display": display_attack(value(min_accuracy_row, "attack_name")),
+                    "worst_accuracy": value(min_accuracy_row, "accuracy"),
+                    "worst_accuracy_fn": value(min_accuracy_row, "fn"),
+                    "worst_accuracy_fp": value(min_accuracy_row, "fp"),
+                    "max_fnr_attack": value(max_fnr_row, "attack_name"),
+                    "max_fnr_attack_display": display_attack(value(max_fnr_row, "attack_name")),
+                    "max_fnr": value(max_fnr_row, "false_negative_rate"),
+                    "max_fnr_fn": value(max_fnr_row, "fn"),
+                    "max_fpr_attack": value(max_fpr_row, "attack_name"),
+                    "max_fpr_attack_display": display_attack(value(max_fpr_row, "attack_name")),
+                    "max_fpr": value(max_fpr_row, "false_positive_rate"),
+                    "max_fpr_fp": value(max_fpr_row, "fp"),
+                }
+            )
+
+    return pd.DataFrame(rows)
+
+
 def generate_forensic_tables(
     forensic_df: pd.DataFrame,
     source_csv: Path,
@@ -929,6 +1066,7 @@ def generate_forensic_tables(
         "forensic_tools_metrics.csv",
     )
 
+    global_df = get_forensic_global_metrics(forensic_df)
     clean_df = filter_forensic_metrics(forensic_df, "sample_type", sample_type="clean")
     ood_df = filter_forensic_metrics(forensic_df, "sample_type", sample_type="ood")
     family_df = forensic_df[
@@ -939,6 +1077,30 @@ def generate_forensic_tables(
         (forensic_df["scope"].astype(str) == "attack_name")
         & (forensic_df["attack_family"].astype(str).isin(["adversarial", "anti_forensic"]))
     ].copy()
+
+    global_comparison_df = prepare_forensic_global_comparison_table(forensic_df)
+    if not global_comparison_df.empty:
+        save_table_csv(
+            global_comparison_df,
+            output_dir,
+            "tab_forensic_tools_global_metrics",
+            source_csv,
+            manifest_rows,
+        )
+    else:
+        logging.warning("Skipped tab_forensic_tools_global_metrics: no global rows available.")
+
+    worst_case_df = prepare_forensic_worst_case_table(forensic_df)
+    if not worst_case_df.empty:
+        save_table_csv(
+            worst_case_df,
+            output_dir,
+            "tab_forensic_tools_worst_cases",
+            source_csv,
+            manifest_rows,
+        )
+    else:
+        logging.warning("Skipped tab_forensic_tools_worst_cases: no attack-level rows available.")
 
     for name, table_df, include_attack in [
         ("tab_forensic_tools_clean_metrics", clean_df, False),
@@ -1001,6 +1163,64 @@ def generate_forensic_tables(
         output_dir,
         "tab_forensic_tools_sensitivity_summary",
         source_csv,
+        manifest_rows,
+    )
+
+
+def generate_forensic_global_comparison_figure(
+    forensic_df: pd.DataFrame,
+    source_csv: Path,
+    output_dir: Path,
+    formats: list[str],
+    dpi: int,
+    manifest_rows: list[dict[str, Any]],
+) -> None:
+    """Generate an overall comparison figure for commercial black-box tools."""
+    global_df = get_forensic_global_metrics(forensic_df)
+    if global_df.empty:
+        raise ValueError("No global rows found in forensic_tools_metrics.csv.")
+
+    metrics = ["accuracy", "recall_weapon", "false_negative_rate", "false_positive_rate"]
+    global_df = to_numeric_columns(global_df, metrics)
+
+    tools = ordered_forensic_tools(set(global_df["tool_name"].astype(str)))
+    plot_df = global_df.set_index("tool_name").loc[tools]
+    x = np.arange(len(tools))
+    width = 0.19
+
+    fig, ax = plt.subplots(figsize=(11.2, 5.2))
+    for idx, metric in enumerate(metrics):
+        values = plot_df[metric].astype(float).to_numpy()
+        bars = ax.bar(x + (idx - 1.5) * width, values, width=width, label=FORENSIC_METRIC_DISPLAY[metric])
+        for bar, value in zip(bars, values):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() + 0.012,
+                f"{value:.3f}",
+                ha="center",
+                va="bottom",
+                fontsize=7,
+                rotation=90,
+            )
+
+    ax.set_xticks(x)
+    ax.set_xticklabels([display_forensic_tool(tool) for tool in tools], rotation=20, ha="right")
+    ax.set_ylim(0, 1.08)
+    set_axis_percent(ax)
+    ax.set_ylabel("Metric value")
+    ax.set_title("Overall comparison of black-box forensic AI tools")
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=4, frameon=False)
+    ax.grid(axis="y", linestyle="--", linewidth=0.5, alpha=0.6)
+    fig.tight_layout()
+
+    save_figure(
+        fig,
+        output_dir,
+        "fig_forensic_tools_global_metrics_comparison",
+        "forensic_tools_global_metrics_comparison",
+        source_csv,
+        formats,
+        dpi,
         manifest_rows,
     )
 
@@ -1312,6 +1532,7 @@ def generate_forensic_reporting_assets(
     forensic_df = to_numeric_columns(forensic_df, numeric_columns)
 
     generate_forensic_tables(forensic_df, source_csv, output_dir, manifest_rows)
+    generate_forensic_global_comparison_figure(forensic_df, source_csv, output_dir, formats, dpi, manifest_rows)
     generate_forensic_clean_comparison_figure(forensic_df, source_csv, output_dir, formats, dpi, manifest_rows)
     generate_forensic_ood_weapon_flag_figure(forensic_df, source_csv, output_dir, formats, dpi, manifest_rows)
 
@@ -1336,6 +1557,17 @@ def generate_forensic_reporting_assets(
         metric="recall_weapon",
         figure_id="fig_forensic_tools_attack_family_recall_weapon",
         title="Forensic-tool weapon recall under perturbation families",
+    )
+    generate_forensic_attack_family_comparison_figure(
+        forensic_df,
+        source_csv,
+        output_dir,
+        formats,
+        dpi,
+        manifest_rows,
+        metric="false_negative_rate",
+        figure_id="fig_forensic_tools_attack_family_fnr",
+        title="Forensic-tool false negative rate under perturbation families",
     )
     generate_forensic_attack_family_comparison_figure(
         forensic_df,

@@ -1,0 +1,13 @@
+tool_name,tool_display,attack_family,attack_family_display,worst_accuracy_attack,worst_accuracy_attack_display,worst_accuracy,worst_accuracy_fn,worst_accuracy_fp,max_fnr_attack,max_fnr_attack_display,max_fnr,max_fnr_fn,max_fpr_attack,max_fpr_attack_display,max_fpr,max_fpr_fp
+magnet_axiom,Magnet AXIOM / Magnet.AI,adversarial,Adversarial,fgsm,FGSM,0.867,96,37,fgsm,FGSM,0.192,96,fgsm,FGSM,0.074,37
+magnet_axiom,Magnet AXIOM / Magnet.AI,anti_forensic,Anti-forensic,gaussian_blur,Gaussian blur,0.927,60,13,gaussian_blur,Gaussian blur,0.12,60,histogram_modification,Histogram modification,0.048,24
+excire_foto_2025_d20,Excire D20,adversarial,Adversarial,sigma_zero,Sigma Zero,0.815,90,95,fgsm,FGSM,0.242,121,sigma_zero,Sigma Zero,0.19,95
+excire_foto_2025_d20,Excire D20,anti_forensic,Anti-forensic,histogram_modification,Histogram modification,0.92,66,14,histogram_modification,Histogram modification,0.132,66,gaussian_blur,Gaussian blur,0.028,14
+excire_foto_2025_d50,Excire D50,adversarial,Adversarial,sigma_zero,Sigma Zero,0.742,37,221,fgsm,FGSM,0.11,55,sigma_zero,Sigma Zero,0.442,221
+excire_foto_2025_d50,Excire D50,anti_forensic,Anti-forensic,histogram_modification,Histogram modification,0.932,24,44,contrast_stretching,Contrast stretching,0.048,24,histogram_modification,Histogram modification,0.088,44
+excire_foto_2025_d80,Excire D80,adversarial,Adversarial,sigma_zero,Sigma Zero,0.657,12,331,fgsm,FGSM,0.046,23,sigma_zero,Sigma Zero,0.662,331
+excire_foto_2025_d80,Excire D80,anti_forensic,Anti-forensic,histogram_modification,Histogram modification,0.878,8,114,gaussian_blur,Gaussian blur,0.016,8,histogram_modification,Histogram modification,0.228,114
+cellebrite_inseyets,Cellebrite Inseyets,adversarial,Adversarial,fgsm,FGSM,0.918,53,29,fgsm,FGSM,0.106,53,fgsm,FGSM,0.058,29
+cellebrite_inseyets,Cellebrite Inseyets,anti_forensic,Anti-forensic,histogram_modification,Histogram modification,0.949,30,21,histogram_modification,Histogram modification,0.06,30,gaussian_blur,Gaussian blur,0.056,28
+griffeye,Magnet Griffeye / T3K CORE,adversarial,Adversarial,sigma_zero,Sigma Zero,0.959,37,4,sigma_zero,Sigma Zero,0.074,37,superdeepfool,SuperDeepFool,0.01,5
+griffeye,Magnet Griffeye / T3K CORE,anti_forensic,Anti-forensic,histogram_modification,Histogram modification,0.963,34,3,histogram_modification,Histogram modification,0.068,34,contrast_stretching,Contrast stretching,0.01,5

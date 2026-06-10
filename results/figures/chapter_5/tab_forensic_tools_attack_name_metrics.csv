@@ -39,6 +39,16 @@ excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,gaussian_blur,0.90
 excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,histogram_modification,0.878,0.878,0.811881,0.984,0.016,0.228,492,114,386,8,0,0,,Histogram modification
 excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,jpeg_recompression,0.914,0.914,0.863158,0.984,0.016,0.156,492,78,422,8,0,0,,JPEG recompression
 excire_foto_2025_d80,Excire D80,attack_name,all,anti_forensic,resample_resize,0.917,0.917,0.867725,0.984,0.016,0.15,492,75,425,8,0,0,,Resample + resize
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,adversarial,color_shift,0.977,0.977,0.993789,0.96,0.04,0.006,480,3,497,20,0,0,,Color Shift
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,adversarial,fgsm,0.96,0.96,0.991453,0.928,0.072,0.008,464,4,496,36,0,0,,FGSM
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,adversarial,one_pixel,0.978,0.978,0.99177,0.964,0.036,0.008,482,4,496,18,0,0,,One Pixel
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,adversarial,sigma_zero,0.959,0.959,0.991435,0.926,0.074,0.008,463,4,496,37,0,0,,Sigma Zero
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,adversarial,superdeepfool,0.969,0.969,0.989562,0.948,0.052,0.01,474,5,495,26,0,0,,SuperDeepFool
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,anti_forensic,contrast_stretching,0.977,0.977,0.989733,0.964,0.036,0.01,482,5,495,18,0,0,,Contrast stretching
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,anti_forensic,gaussian_blur,0.972,0.972,0.995798,0.948,0.052,0.004,474,2,498,26,0,0,,Gaussian blur
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,anti_forensic,histogram_modification,0.963,0.963,0.993603,0.932,0.068,0.006,466,3,497,34,0,0,,Histogram modification
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,anti_forensic,jpeg_recompression,0.976,0.976,0.991736,0.96,0.04,0.008,480,4,496,20,0,0,,JPEG recompression
+griffeye,Magnet Griffeye / T3K CORE,attack_name,all,anti_forensic,resample_resize,0.98,0.98,0.995868,0.964,0.036,0.004,482,2,498,18,0,0,,Resample + resize
 magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,adversarial,color_shift,0.951,0.951,0.966874,0.934,0.066,0.032,467,16,484,33,0,0,,Color Shift
 magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,adversarial,fgsm,0.867,0.867,0.9161,0.808,0.192,0.074,404,37,463,96,0,0,,FGSM
 magnet_axiom,Magnet AXIOM / Magnet.AI,attack_name,all,adversarial,one_pixel,0.95,0.95,0.96875,0.93,0.07,0.03,465,15,485,35,0,0,,One Pixel

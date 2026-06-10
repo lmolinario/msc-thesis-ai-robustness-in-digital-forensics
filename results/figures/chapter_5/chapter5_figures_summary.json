@@ -1,6 +1,6 @@
 {
   "script": "evaluation/scripts/20_generate_experimental_reporting_assets.py",
-  "created_at": "2026-06-07T06:41:48+00:00",
+  "created_at": "2026-06-10T18:04:26+00:00",
   "inputs": {
     "core_metrics_csv": "results/metrics/final_core_metrics.csv",
     "robustness_metrics_csv": "results/metrics/final_robustness_metrics.csv",
@@ -20,8 +20,8 @@
   ],
   "dpi": 300,
   "console_metrics_printed": true,
-  "figure_count_unique": 20,
-  "file_count": 35,
+  "figure_count_unique": 24,
+  "file_count": 41,
   "figure_ids": [
     "fig_adversarial_accuracy_drop_heatmap",
     "fig_anti_forensic_accuracy_drop_heatmap",
@@ -31,9 +31,11 @@
     "fig_forensic_tools_adversarial_accuracy_drop_heatmap",
     "fig_forensic_tools_anti_forensic_accuracy_drop_heatmap",
     "fig_forensic_tools_attack_family_accuracy",
+    "fig_forensic_tools_attack_family_fnr",
     "fig_forensic_tools_attack_family_fpr",
     "fig_forensic_tools_attack_family_recall_weapon",
     "fig_forensic_tools_clean_metrics_comparison",
+    "fig_forensic_tools_global_metrics_comparison",
     "fig_forensic_tools_ood_weapon_flag_rate",
     "fig_max_accuracy_drop_by_model",
     "fig_ood_confidence_distribution",
@@ -41,8 +43,10 @@
     "tab_forensic_tools_attack_family_metrics",
     "tab_forensic_tools_attack_name_metrics",
     "tab_forensic_tools_clean_metrics",
+    "tab_forensic_tools_global_metrics",
     "tab_forensic_tools_ood_metrics",
-    "tab_forensic_tools_sensitivity_summary"
+    "tab_forensic_tools_sensitivity_summary",
+    "tab_forensic_tools_worst_cases"
   ],
   "warnings": [],
   "methodological_note": "This script only generates thesis figures from consolidated metric outputs. It does not regenerate datasets, perturbations, model predictions, or metrics."
