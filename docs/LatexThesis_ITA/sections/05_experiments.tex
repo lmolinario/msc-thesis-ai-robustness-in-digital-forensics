@@ -3118,6 +3118,7 @@ congelati, manifest tracciabili, riproducibilità basata su hash, famiglie di
 perturbazioni controllate, normalizzazione degli output black-box e auditabilità
 manuale dell'interpretazione finale.
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability Analysis and Representative Failure Cases}
 \label{sec:results-xai}
@@ -3151,6 +3152,16 @@ controllato, limitato al modello proxy white-box, utile per discutere in modo
 più concreto alcuni rischi operativi osservabili in un contesto \gls{df}
 human-in-the-loop.
 
+Le figure XAI riportate in questa sezione seguono la struttura introdotta nel
+Capitolo~\ref{chap:methodology}: immagine di input, heatmap di
+\gls{ig}, overlay dell'attribuzione sull'immagine originale e maschera delle
+regioni con attribuzione più elevata. A differenza dell'esempio metodologico,
+qui le visualizzazioni sono utilizzate per discutere casi rappresentativi della
+valutazione sperimentale. La maschera di attribuzione non deve essere
+interpretata come una segmentazione semantica o come ground truth dell'oggetto,
+ma come una sintesi visuale delle aree che hanno maggiormente contribuito alla
+predizione del modello proxy. Analogamente, la confidence riportata è lo score
+del modello proxy e non una probabilità calibrata.
 
 La Tabella~\ref{tab:results-xai-cases} riassume i cinque casi selezionati per
 l'analisi qualitativa. La selezione copre un caso corretto su input pulito, un
@@ -3207,62 +3218,75 @@ Falso positivo adversarial ad alta confidenza, rappresentativo dell'inaffidabili
 \label{tab:results-xai-cases}
 \end{table}
 
-\providecommand{\XAIcaseFigure}[9]{%
-\begin{figure}[htbp]
+% ─────────────────────────────────────────────────────────────────────────────
+% XAI representative case figure.
+% Arguments:
+% #1 = figure label
+% #2 = interpretive caption
+% #3 = input image path
+% #4 = IG heatmap path
+% #5 = IG overlay path
+% #6 = top-attribution mask path
+% #7 = case metadata
+% ─────────────────────────────────────────────────────────────────────────────
+\providecommand{\XAIcaseFigureMask}[7]{%
+\begin{figure}[H]
 \centering
-\begin{minipage}{0.44\textwidth}
-\centering
-\includegraphics[width=\linewidth]{#3}
-\vspace{0.5mm}
 
-{\footnotesize Immagine di input}
+\begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.25cm,keepaspectratio]{#3}
+    \vspace{1mm}
+
+    \textbf{Input image}\\
+    \footnotesize Original sample.
 \end{minipage}
 \hfill
-\begin{minipage}{0.44\textwidth}
-\centering
-\includegraphics[width=\linewidth]{#4}
-\vspace{0.5mm}
+\begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.25cm,keepaspectratio]{#4}
+    \vspace{1mm}
 
-{\footnotesize Heatmap \gls{ig}}
+    \textbf{IG heatmap}\\
+    \footnotesize Normalized attribution map.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.25cm,keepaspectratio]{#5}
+    \vspace{1mm}
+
+    \textbf{IG overlay}\\
+    \footnotesize Attribution over input image.
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.235\textwidth}
+    \centering
+    \includegraphics[width=\textwidth,height=3.25cm,keepaspectratio]{#6}
+    \vspace{1mm}
+
+    \textbf{Top-attribution mask}\\
+    \footnotesize Highest-attribution regions.
 \end{minipage}
 
-\vspace{2mm}
-
-{\small
-\textit{scenario}: \texttt{#6}
-\quad
-$\rightarrow$
-\quad
-\textit{predizione}: \texttt{#8}
-\quad
-(\textit{etichetta manuale}: \texttt{#7}; \textit{confidenza}: #9)
-}
-
-\vspace{2mm}
-
-\begin{minipage}{0.62\textwidth}
-\centering
-\includegraphics[width=\linewidth]{#5}
-\vspace{0.5mm}
-
-{\footnotesize Overlay basato su \gls{ig}}
-\end{minipage}
-
-\caption{#2}
+\caption{#2 \textit{Case metadata:} #7.}
 \label{#1}
 \end{figure}
 }
 
-\XAIcaseFigure
+\XAIcaseFigureMask
 {fig:xai-case1-clean-correct}
-{Caso corretto su input pulito \texttt{xai\_case\_0001}. Il modello proxy EfficientNet-B0 classifica correttamente un'immagine \texttt{clean} con etichetta manuale \texttt{weapon} come \texttt{weapon}.}
+{Caso corretto su input pulito \texttt{xai\_case\_0001}. Il modello proxy
+EfficientNet-B0 classifica correttamente un'immagine \texttt{clean} con etichetta
+manuale \texttt{weapon} come \texttt{weapon}.}
 {images/fig_xai_case1_clean_correct_input.png}
 {images/fig_xai_case1_clean_correct_heatmap.png}
 {images/fig_xai_case1_clean_correct_overlay.png}
-{clean}
-{weapon}
-{weapon}
-{0.9999998808}
+{images/fig_xai_case1_clean_correct_top10_mask.png}
+{\textbf{scenario}: \texttt{clean};
+ \textbf{etichetta manuale}: \texttt{weapon};
+ \textbf{predizione}: \texttt{weapon};
+ \textbf{confidence}: 1.000}
 
 Il primo caso, mostrato in Figura~\ref{fig:xai-case1-clean-correct}, fornisce
 un riferimento qualitativo in cui la predizione del modello è coerente con
@@ -3275,16 +3299,19 @@ elementi marginali, sfondo o artefatti di acquisizione. Tale esempio non dimostr
 da solo, l'affidabilità generale del modello, ma costituisce un caso di
 riferimento rispetto al quale confrontare i fallimenti successivi.
 
-\XAIcaseFigure
+\XAIcaseFigureMask
 {fig:xai-case2-clean-false-negative}
-{Falso negativo su input pulito \texttt{xai\_case\_0006}. Un'immagine \texttt{clean} con etichetta manuale \texttt{weapon} viene classificata come \texttt{non\_weapon}.}
+{Falso negativo su input pulito \texttt{xai\_case\_0006}. Un'immagine
+\texttt{clean} con etichetta manuale \texttt{weapon} viene classificata come
+\texttt{non\_weapon}.}
 {images/fig_xai_case2_clean_false_negative_input.png}
 {images/fig_xai_case2_clean_false_negative_heatmap.png}
 {images/fig_xai_case2_clean_false_negative_overlay.png}
-{clean}
-{weapon}
-{non\_weapon}
-{0.6920745373}
+{images/fig_xai_case2_clean_false_negative_top10_mask.png}
+{\textbf{scenario}: \texttt{clean};
+ \textbf{etichetta manuale}: \texttt{weapon};
+ \textbf{predizione}: \texttt{non\_weapon};
+ \textbf{confidence}: 0.692}
 
 Il secondo caso, riportato in Figura~\ref{fig:xai-case2-clean-false-negative},
 è rilevante perché l'errore avviene su un input pulito, senza perturbazioni
@@ -3303,16 +3330,18 @@ Questo caso mostra che anche una buona performance aggregata su dati
 quando il risultato automatico viene utilizzato per filtrare o ordinare grandi
 volumi di immagini in un contesto investigativo.
 
-\XAIcaseFigure
+\XAIcaseFigureMask
 {fig:xai-case3-ood-as-weapon}
-{Caso \gls{ood} \texttt{xai\_case\_0009}. Un campione fuori distribuzione viene classificato come \texttt{weapon} con elevata confidenza.}
+{Caso \gls{ood} \texttt{xai\_case\_0009}. Un campione fuori distribuzione viene
+classificato come \texttt{weapon} con elevata confidenza.}
 {images/fig_xai_case3_ood_as_weapon_input.png}
 {images/fig_xai_case3_ood_as_weapon_heatmap.png}
 {images/fig_xai_case3_ood_as_weapon_overlay.png}
-{ood}
-{ood}
-{weapon}
-{0.9990302324}
+{images/fig_xai_case3_ood_as_weapon_top10_mask.png}
+{\textbf{scenario}: \texttt{ood};
+ \textbf{etichetta manuale}: \texttt{ood};
+ \textbf{predizione}: \texttt{weapon};
+ \textbf{confidence}: 0.999}
 
 Il terzo caso, mostrato in Figura~\ref{fig:xai-case3-ood-as-weapon}, illustra
 un rischio differente rispetto al falso positivo ordinario. Il campione è
@@ -3332,16 +3361,19 @@ nella costruzione del dataset e nella valutazione della robustezza operativa,
 anziché ricondurre tutti gli input non appartenenti alla classe \texttt{weapon}
 alla sola classe \texttt{non\_weapon}.
 
-\XAIcaseFigure
+\XAIcaseFigureMask
 {fig:xai-case4-antiforensic-failure}
-{Falso negativo anti-forense \texttt{xai\_case\_0010}. Un'immagine \texttt{weapon} sottoposta a \gls{histogrammodification} viene classificata come \texttt{non\_weapon}.}
+{Falso negativo anti-forense \texttt{xai\_case\_0010}. Un'immagine
+\texttt{weapon} sottoposta a \gls{histogrammodification} viene classificata come
+\texttt{non\_weapon}.}
 {images/fig_xai_case4_antiforensic_failure_input.png}
 {images/fig_xai_case4_antiforensic_failure_heatmap.png}
 {images/fig_xai_case4_antiforensic_failure_overlay.png}
-{histogram\_modification}
-{weapon}
-{non\_weapon}
-{0.870108}
+{images/fig_xai_case4_antiforensic_failure_top10_mask.png}
+{\textbf{scenario}: \gls{histogrammodification};
+ \textbf{etichetta manuale}: \texttt{weapon};
+ \textbf{predizione}: \texttt{non\_weapon};
+ \textbf{confidence}: 0.870}
 
 Il quarto caso, riportato in Figura~\ref{fig:xai-case4-antiforensic-failure},
 riguarda una trasformazione anti-forense basata su
@@ -3362,22 +3394,25 @@ pipeline forense, ciò rafforza la necessità di non trattare il risultato del
 classificatore come evidenza autonoma, ma come supporto da verificare
 criticamente.
 
-\XAIcaseFigure
+\XAIcaseFigureMask
 {fig:xai-case5-adversarial-high-confidence-failure}
-{Falso positivo adversarial ad alta confidenza \texttt{xai\_case\_0015}. Un'immagine \texttt{non\_weapon} perturbata mediante \gls{sigmazero} viene classificata come \texttt{weapon}.}
+{Falso positivo adversarial ad alta confidenza \texttt{xai\_case\_0015}. Un'immagine
+\texttt{non\_weapon} perturbata mediante \gls{sigmazero} viene classificata come
+\texttt{weapon}.}
 {images/fig_xai_case5_adversarial_high_conf_failure_input.png}
 {images/fig_xai_case5_adversarial_high_conf_failure_heatmap.png}
 {images/fig_xai_case5_adversarial_high_conf_failure_overlay.png}
-{sigma\_zero}
-{non\_weapon}
-{weapon}
-{1.000000}
+{images/fig_xai_case5_adversarial_high_conf_failure_top10_mask.png}
+{\textbf{scenario}: \gls{sigmazero};
+ \textbf{etichetta manuale}: \texttt{non\_weapon};
+ \textbf{predizione}: \texttt{weapon};
+ \textbf{confidence}: 1.000}
 
 Il quinto caso, mostrato in
 Figura~\ref{fig:xai-case5-adversarial-high-confidence-failure}, rappresenta un
 falso positivo adversarial ad alta confidenza. L'immagine ha etichetta manuale
 \texttt{non\_weapon}, ma, dopo la perturbazione \gls{sigmazero}, viene
-classificata come \texttt{weapon} con confidenza pari a 1.000000. Ai fini della
+classificata come \texttt{weapon} con confidenza pari a 1.000. Ai fini della
 tesi, questo caso è particolarmente significativo perché separa due concetti che
 in un workflow operativo possono essere erroneamente sovrapposti: confidenza del
 modello e affidabilità forense della predizione.
@@ -3412,6 +3447,9 @@ le proprie conclusioni ai tool commerciali black-box. In una pipeline di
 come strumenti di supporto alla revisione, alla valutazione e alla discussione
 critica dei risultati, mantenendo centrale il ruolo dell'analista umano nella
 valutazione finale.
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
