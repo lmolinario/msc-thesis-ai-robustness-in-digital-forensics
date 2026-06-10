@@ -221,7 +221,8 @@ La Figura~\ref{fig:methodology-fairlab-overview} sintetizza la struttura comples
 {\shortstack{
     \textbf{Black-box tool evaluation}\\[1mm]
     \scriptsize blind bundle input and output normalization\\
-    \scriptsize Magnet.AI, Excire Foto 2025 and Cellebrite Inseyets
+    \scriptsize Magnet.AI, Excire Foto 2025, Cellebrite Inseyets\\
+    \scriptsize and Griffeye/T3K CORE
 }};
 
 % -------------------------------------------------------------------------
@@ -2350,12 +2351,62 @@ al forensic evaluation bundle. \\
 Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
 
 
+\begin{table}[H]
+\centering
+\caption{Sintesi delle regole di normalizzazione degli output dei tool commerciali.}
+\label{tab:methodology-tool-normalization-summary}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}L{3.4cm}L{4.2cm}X@{}}
+\toprule
+\textbf{Tool / configurazione} &
+\textbf{Output osservabile} &
+\textbf{Regola operativa di normalizzazione} \
+\midrule
+\gls{magnetaxiomtool} / \gls{magnetai}
+&
+Tag di categorizzazione immagine
+&
+Il tag \texttt{Possible weapons} viene ricodificato come
+\texttt{weapon_detected}; l'assenza del tag viene trattata come mancato
+rilevamento della categoria di interesse. \
+\gls{excirefoto2025}
+&
+Risultati di semantic retrieval per prompt firearm-oriented
+&
+L'unione dei risultati restituiti dai prompt selezionati viene ricodificata
+come \texttt{weapon_detected}; i file non recuperati da alcun prompt vengono
+trattati come non segnalati rispetto alla categoria weapon. \
+\gls{cellebriteinseyets}
+&
+Classificazioni esportate da \texttt{Cellebrite Physical Analyzer}
+&
+Le categorie weapon-related, quali \texttt{Armi}, \texttt{Pistola} e
+\texttt{Fucile}, vengono ricondotte a \texttt{weapon_detected}; output
+assenti, ambigui o non interpretabili sono mantenuti separati nell'audit. \
+\gls{griffeye} / \gls{t3kcore}
+&
+Bookmark semantici automatici
+&
+Il bookmark \texttt{CORE/Violence/Firearm} viene ricodificato come
+\texttt{weapon_detected}; altri bookmark collegati ad armi non da fuoco,
+violenza o contesto militare sono conservati solo come indicatori secondari. \
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
 Per \gls{excirefoto2025}, la valutazione è stata condotta mediante un insieme
 predefinito di prompt semantici orientati alla ricerca di contenuti
 firearm-oriented. Poiché il software opera come motore di semantic retrieval e
 non come classificatore binario nativo, ciascun prompt produce un insieme di
 risultati che deve essere successivamente ricondotto al task
 \texttt{weapon}/\texttt{non\_weapon}.
+
+Nel presente protocollo, \gls{excirefoto2025} viene valutato come applicazione
+standalone e non come modulo integrato in \texttt{X-Ways Forensics}; quest'ultimo
+non rientra nel perimetro sperimentale finale.
 
 Nel protocollo sperimentale è stata assunta come configurazione di riferimento
 la soglia intermedia \texttt{Distance limit = 50}, in quanto rappresenta un punto
@@ -2377,27 +2428,29 @@ falsi negativi e falsi positivi.
 \label{tab:methodology-excire-prompts}
 \footnotesize
 \renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{0.90\textwidth}{@{}p{0.10\textwidth}p{0.28\textwidth}X@{}}
+\begin{tabularx}{0.92\textwidth}{@{}p{0.10\textwidth}p{0.28\textwidth}X@{}}
 \toprule
-\textbf{ID} & \textbf{Prompt semantico} & \textbf{File di export} \\
+\textbf{ID} & \textbf{Prompt semantico} & \textbf{Export considerati nel protocollo} \
 \midrule
-P1 & \texttt{firearm} & \codepath{excire_firearm_distance50.csv} \\
-P2 & \texttt{gun} & \codepath{excire_gun_distance50.csv} \\
-P3 & \texttt{pistol} & \codepath{excire_pistol_distance50.csv} \\
-P4 & \texttt{handgun} & \codepath{excire_handgun_distance50.csv} \\
-P5 & \texttt{revolver} & \codepath{excire_revolver_distance50.csv} \\
-P6 & \texttt{rifle} & \codepath{excire_rifle_distance50.csv} \\
-P7 & \texttt{shotgun} & \codepath{excire_shotgun_distance50.csv} \\
-P8 & \texttt{assault rifle} & \codepath{excire_assault_rifle_distance50.csv} \\
+P1 & \texttt{firearm} & \codepath{excire_firearm_distance{20,50,80}.csv} \
+P2 & \texttt{gun} & \codepath{excire_gun_distance{20,50,80}.csv} \
+P3 & \texttt{pistol} & \codepath{excire_pistol_distance{20,50,80}.csv} \
+P4 & \texttt{handgun} & \codepath{excire_handgun_distance{20,50,80}.csv} \
+P5 & \texttt{revolver} & \codepath{excire_revolver_distance{20,50,80}.csv} \
+P6 & \texttt{rifle} & \codepath{excire_rifle_distance{20,50,80}.csv} \
+P7 & \texttt{shotgun} & \codepath{excire_shotgun_distance{20,50,80}.csv} \
+P8 & \texttt{assault rifle} & \codepath{excire_assault_rifle_distance{20,50,80}.csv} \
 \bottomrule
 \end{tabularx}
 \end{table}
 
-I prompt sono stati definiti prima dell'esecuzione della valutazione e non sono
-stati modificati iterativamente in funzione degli output osservati. In questo
-modo, il retrieval semantico di \gls{excirefoto2025} viene trattato come
-procedura black-box riproducibile e non come ricerca manuale adattata ai
-risultati.
+Gli stessi prompt sono stati applicati alle tre configurazioni operative
+\texttt{Distance limit = 20}, \texttt{Distance limit = 50} e
+\texttt{Distance limit = 80}. In questo modo, la differenza tra le tre
+configurazioni dipende dal parametro di retrieval e non da una variazione del
+vocabolario semantico utilizzato per interrogare il software.
+
+
 
 
 Per \gls{cellebriteinseyets}, la normalizzazione degli output si basa sulle
@@ -2482,7 +2535,7 @@ Output non esportato, ambiguo o non interpretabile
 
 
 
-La normalizzazione degli output è necessaria perché le categorie interne dei tool non coincidono direttamente con le classi sperimentali \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo motivo, la pipeline applica un mapping esplicito e documentato delle label proprietarie verso una rappresentazione binaria operativa, basata sul campo \texttt{weapon\_detected}. Tale campo non deve essere interpretato come una dichiarazione semantica assoluta sull'immagine, ma come il risultato osservabile della capacità del tool di segnalare o meno la presenza di contenuti riconducibili alla categoria weapon nel contesto del protocollo sperimentale.
+La normalizzazione degli output è necessaria perché le categorie interne dei tool non coincidono direttamente con le classi sperimentali \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo motivo, la pipeline applica un mapping esplicito e documentato delle label proprietarie verso una rappresentazione binaria operativa, basata sul campo \texttt{weapon\_detected}. Tale campo non deve essere interpretato come una dichiarazione semantica assoluta sull'immagine, né in senso positivo né in senso negativo: esso indica soltanto se, nelle condizioni del protocollo, lo strumento ha prodotto un output osservabile riconducibile alla categoria firearm-oriented considerata.
 
 Nel caso di \gls{magnetaxiomtool}, gli output esportati da \gls{magnetai}
 vengono normalizzati interpretando il tag \texttt{Possible weapons} come
@@ -2600,8 +2653,8 @@ La Figura~\ref{fig:methodology-forensic-tool-workflow} sintetizza il workflow me
 {\shortstack{
     \textbf{Metric computation}\\
     \textbf{and comparison}\\[1mm]
-    \scriptsize TP, FP, FN, TN, unknown outputs,\\
-    \scriptsize recall, FNR and FPR
+    \scriptsize TP, FP, FN, TN, matching rate,\\
+    \scriptsize unknown outputs, recall, FNR and FPR
 }};
 
 % -------------------------------------------------------------------------
