@@ -186,8 +186,9 @@ Adversarial
 &
 5000
 &
-Cinque famiglie di perturbazioni applicate al subset binario di 1000 immagini,
-con 1000 file per ciascuna famiglia. \\
+Cinque perturbazioni adversariali applicate al subset binario di 1000 immagini,
+con 1000 file per ciascuna perturbazione. \\
+
 
 Anti-forensic
 &
@@ -719,8 +720,8 @@ dipendenti dalla distribuzione dei campioni e dalla specifica trasferibilità
 delle perturbazioni generate contro il modello target.
 
 La Tabella~\ref{tab:results-adversarial-robustness} riporta, per ciascuna
-famiglia di perturbazioni, l'accuracy perturbata e l'accuracy drop rispetto alla
-baseline clean.
+perturbazione adversariale, l'accuracy perturbata e l'accuracy drop rispetto
+alla baseline clean.
 
 \begin{table}[H]
 \centering
@@ -1255,7 +1256,7 @@ Adversarial &
 0.884 &
 0.116 &
 0.038 &
-Prestazione aggregata sulle 5 famiglie adversariali considerate. \\
+Prestazione aggregata sulle 5 perturbazioni adversariali considerate. \\
 
 Anti-forensic &
 0.940 &
@@ -1866,7 +1867,7 @@ Adversarial &
 0.950 &
 0.050 &
 0.040 &
-Prestazione aggregata sulle 5 famiglie adversariali considerate. \\
+Prestazione aggregata sulle 5 perturbazioni adversariali considerate. \\
 Anti-forensic &
 0.960 &
 0.963 &
@@ -2140,14 +2141,14 @@ Adversarial &
 0.945 &
 0.055 &
 0.008 &
-Prestazione aggregata sulle cinque perturbazioni adversariali considerate. \\
+Prestazione aggregata sulle 5 perturbazioni adversariali considerate. \\
 
 Anti-forensic &
 0.974 &
 0.954 &
 0.046 &
 0.006 &
-Prestazione aggregata sulle cinque trasformazioni anti-forensi considerate. \\
+Prestazione aggregata sulle 5 trasformazioni anti-forensi considerate. \\
 
 \gls{ood} &
 -- &
@@ -3049,8 +3050,8 @@ ruolo dell'analista nel workflow.
 
 I risultati di \gls{excirefoto2025} richiedono una lettura separata, perché il
 sistema è stato valutato come motore di semantic retrieval e non come
-classificatore forense nativo. Il parametro Distance limit definisce il grado di
-restrittività operativa del recupero semantico. La configurazione \texttt{D20} è
+classificatore forense nativo. Il parametro \texttt{Distance limit} definisce il grado di restrittività
+operativa del recupero semantico. La configurazione \texttt{D20} è
 restrittiva: riduce i falsi positivi e i weapon flag sugli input \gls{ood}, ma
 aumenta il rischio di mancata segnalazione di immagini \texttt{weapon}. La
 configurazione \texttt{D80} è permissiva: massimizza il recall, ma aumenta i
@@ -3072,12 +3073,13 @@ negativi e falsi positivi.
 La natura black-box dei tool commerciali limita inoltre il tipo di conclusioni
 che possono essere formulate. A differenza dei proxy, questi sistemi non
 espongono confini decisionali, score calibrati, architetture, dati di training o
-logiche interne di soglia. I loro output possono quindi essere valutati solo a
-livello operativo, attraverso categorie osservabili, tag esportati, risultati di retrieval, bookmark
+logiche interne di soglia. I loro output possono quindi essere valutati solo a livello operativo, attraverso
+categorie osservabili, tag esportati, risultati di retrieval, bookmark
 semantici, matching rate, output non mappabili, falsi negativi, falsi positivi e
-comportamento sugli input \gls{ood}. Questa limitazione non rappresenta una debolezza del protocollo
-di valutazione; al contrario, riflette la reale condizione in cui gli analisti
-forensi interagiscono con strumenti commerciali \gls{ai}-assisted.
+comportamento sugli input \gls{ood}. Questa limitazione non rappresenta una
+debolezza del protocollo di valutazione; al contrario, riflette la reale
+condizione in cui gli analisti forensi interagiscono con strumenti commerciali
+\gls{ai}-assisted.
 
 \paragraph{Interpretazione operativa complessiva.}
 
@@ -3482,12 +3484,6 @@ finalità forense della tesi. In particolare, gli attacchi model-dependent sono
 generati rispetto a EfficientNet-B0 e devono essere interpretati alla luce dello
 scenario white-box considerato; la loro trasferibilità verso altri modelli e tool
 commerciali viene valutata empiricamente, ma non assunta come proprietà generale.
-
-Nel complesso, questa sezione chiude l'analisi dei risultati evidenziando i
-principali limiti sperimentali e i profili di rischio osservati. Le implicazioni
-più generali per l'uso dell'\gls{ai} nei workflow forensi, incluse le esigenze di
-tracciabilità, validazione indipendente e controllo human-in-the-loop, sono
-riprese nel Capitolo~\ref{chap:conclusions}.
 
 In sintesi, il Capitolo~\ref{chap:results} mostra che la robustezza operativa
 degli strumenti \gls{ai}-based in ambito forense è una proprietà
