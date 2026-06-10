@@ -1156,6 +1156,107 @@ tra training e holdout sperimentale.
 
 
 
+La configurazione di addestramento dei proxy model è stata mantenuta costante
+tra i fold, in modo da rendere confrontabili le prestazioni ottenute nelle
+diverse partizioni del dataset. La Tabella~\ref{tab:methodology-training-hyperparameters}
+riporta i principali hyperparameter utilizzati per l'addestramento e la
+valutazione dei modelli proxy. I valori sono ricavati dalla configurazione
+riproducibile dello script di training \codepath{models/scripts/12\_train\_proxy\_models.py}
+e dal registro dei modelli \codepath{models/model\_registry.json}.
+
+\begin{table}[H]
+\centering
+\caption{Principali hyperparameter di addestramento dei proxy model.}
+\label{tab:methodology-training-hyperparameters}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}p{0.26\textwidth}XXX@{}}
+\toprule
+\textbf{Hyperparameter} &
+\textbf{\texttt{resnet18}} &
+\textbf{\texttt{efficientnet\_b0}} &
+\textbf{\texttt{clip}} \\
+\midrule
+Architecture
+& \texttt{torchvision.resnet18}
+& \texttt{torchvision.efficientnet\_b0}
+& \texttt{open\_clip.ViT-B-32} \\
+
+Pre-trained weights
+& \texttt{IMAGENET1K\_V1}
+& \texttt{IMAGENET1K\_V1}
+& \texttt{openai} \\
+
+Classifier
+& Linear binary head
+& Linear binary head
+& Frozen visual encoder + binary head \\
+
+Fine-tuning strategy
+& Full fine-tuning
+& Full fine-tuning
+& Frozen visual encoder, trained binary head \\
+
+Optimizer
+& \texttt{AdamW}
+& \texttt{AdamW}
+& \texttt{AdamW} \\
+
+Loss function
+& Cross-entropy
+& Cross-entropy
+& Cross-entropy \\
+
+Learning rate
+& \(1 \times 10^{-4}\)
+& \(1 \times 10^{-4}\)
+& \(1 \times 10^{-4}\) \\
+
+Weight decay
+& \(1 \times 10^{-4}\)
+& \(1 \times 10^{-4}\)
+& \(1 \times 10^{-4}\) \\
+
+Batch size
+& 16
+& 16
+& 32 \\
+
+Maximum epochs
+& 10
+& 10
+& 10 \\
+
+Validation ratio
+& 0.15
+& 0.15
+& 0.15 \\
+
+Input size
+& \(224 \times 224\)
+& \(224 \times 224\)
+& \(224 \times 224\) \\
+
+Normalization
+& ImageNet mean/std
+& ImageNet mean/std
+& CLIP mean/std \\
+
+Training augmentation
+& Random horizontal flip \(p=0.5\)
+& Random horizontal flip \(p=0.5\)
+& Random horizontal flip \(p=0.5\) \\
+
+Random seed
+& 42
+& 42
+& 42 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+
 Lo script ufficiale per l'addestramento dei proxy model è
 \codepath{models/scripts/12_train_proxy_models.py}. Esso utilizza come input
 il manifest \codepath{datasets/splits/manifests/clean_folds_manifest.csv},
@@ -1511,10 +1612,9 @@ versioni manipolate delle immagini appartenenti al subset binario
 campione perturbato e la corrispondente immagine pulita. La generazione degli
 attacchi utilizza come input il manifest
 \codepath{datasets/splits/manifests/clean_folds_manifest.csv}, composto da
-1000 immagini distribuite in cinque fold bilanciati. I campioni \texttt{ood}
-non vengono utilizzati in questa fase, poiché la loro funzione metodologica è
-distinta: essi servono a valutare il comportamento fuori distribuzione e non a
-produrre perturbazioni adversariali rispetto a classi binarie note.
+1000 immagini distribuite in cinque fold bilanciati. I campioni \texttt{ood} restano esclusi da questa fase, in coerenza con la
+separazione metodologica definita nella
+Sezione~\ref{sec:methodology-split-generation}.
 
 Lo script ufficiale per questa fase è
 \codepath{datasets/scripts/attacks/14_generate_adversarial_attacks.py}. Esso
@@ -1529,25 +1629,42 @@ comportamento decisionale del classificatore.
 
 Gli attacchi model-dependent utilizzati nel protocollo sperimentale finale sono
 \gls{fgsm}, One Pixel Attack, Sigma Zero Attack e SuperDeepFool. Essi vengono
-generati rispetto a EfficientNet-B0, assunto come primary proxy target. Per ogni
-immagine appartenente a un determinato fold, lo script carica il checkpoint
-corrispondente da \codepath{models/checkpoints/<target_model>/<fold>.pt}.
-Questa scelta mantiene la coerenza con il protocollo fold-aware: l'immagine di
-un fold viene perturbata usando il modello addestrato secondo la separazione
-definita nella fase di training dei proxy model. La procedura evita quindi di
-trattare il dataset come un insieme indistinto e preserva il legame tra split,
-checkpoint e artefatto generato.
+generati rispetto a \texttt{efficientnet\_b0}, assunto come primary proxy
+target. La scelta di \texttt{efficientnet\_b0} riflette il suo ruolo di modello
+convoluzionale compatto ma espressivo, adatto a rappresentare un target
+realistico per la generazione di perturbazioni adversariali su immagini. Questa
+scelta non implica che gli altri proxy model siano secondari nella valutazione
+complessiva, ma consente di mantenere controllata, riproducibile e
+computazionalmente sostenibile la generazione degli attacchi model-dependent.
 
-La trasformazione \gls{colorshift}  viene invece trattata come perturbazione \textit{adversarial-style}
-model-agnostic. Essa modifica globalmente le componenti cromatiche dell'immagine,
-senza interrogare il modello e senza utilizzare informazioni di gradiente.
-Questa distinzione è metodologicamente rilevante perché consente di separare le perturbazioni
-costruite rispetto a un classificatore specifico da alterazioni visive più generali.
+Per ogni immagine appartenente a un determinato fold, lo script carica il
+checkpoint corrispondente da
+\codepath{models/checkpoints/<target\_model>/<fold>.pt}. Questa scelta mantiene
+la coerenza con il protocollo fold-aware: l'immagine di un fold viene perturbata
+usando il modello addestrato secondo la separazione definita nella fase di
+training dei proxy model. La procedura evita quindi di trattare il dataset come
+un insieme indistinto e preserva il legame tra split, checkpoint e artefatto
+generato.
 
-All'interno del protocollo sperimentale, \gls{colorshift} viene comunque incluso nel gruppo adversarial
-perché la sua finalità sperimentale non è simulare un ordinario intervento di post-processing forense,
-ma verificare se una variazione cromatica semanticamente conservativa possa alterare il comportamento
-dei classificatori automatici.
+
+La trasformazione \gls{colorshift} viene invece trattata come perturbazione
+\textit{adversarial-style} model-agnostic. Essa modifica globalmente le
+componenti cromatiche dell'immagine, senza interrogare il modello e senza
+utilizzare informazioni di gradiente. Questa distinzione è metodologicamente
+rilevante perché consente di separare le perturbazioni costruite rispetto a un
+classificatore specifico da alterazioni visive più generali.
+
+All'interno del protocollo sperimentale, \gls{colorshift} viene comunque incluso
+nel gruppo adversarial perché la sua finalità sperimentale non è simulare un
+ordinario intervento di post-processing forense, ma verificare se una variazione
+cromatica semanticamente conservativa possa alterare il comportamento dei
+classificatori automatici. L'output viene salvato in formato \gls{jpeg} con
+qualità 95: questa scelta preserva la plausibilità pratica della trasformazione
+e mantiene una compressione limitata. L'eventuale contributo residuo della
+ricompressione è tracciato come parte dell'artefatto generato e non altera la
+distinzione metodologica tra perturbazioni adversariali e trasformazioni
+anti-forensi.
+
 
 Il protocollo non mira a costruire un benchmark esaustivo di robustezza
 adversariale nel senso stretto dell'Adversarial Machine Learning, come avverrebbe
@@ -1700,6 +1817,8 @@ con qualità 95. \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
 
 I parametri riportati nella Tabella~\ref{tab:methodology-adversarial-parameters}
 rappresentano la configurazione principale utilizzata per generare gli artefatti
@@ -2112,16 +2231,18 @@ Tale controllo non modifica gli artefatti, ma verifica la presenza di termini
 potenzialmente riconducibili alle classi sperimentali, ai fold, alle famiglie di
 perturbazione, ai modelli proxy o a descrittori semantici del contenuto visuale.
 
-Nel run consolidato, l'audit ha controllato 11\,500 file della directory
-\codepath{blind_tool_input/files/}, rilevando 7\,640 file con metadati
-embedded e 15 file contenenti termini potenzialmente sensibili. L'esito del
-controllo è stato salvato nei file
+Nel run consolidato, l'audit ha verificato l'intero contenuto della directory
+\codepath{blind_tool_input/files/}, controllando la presenza di metadati
+embedded e di termini potenzialmente riconducibili alle classi sperimentali, ai
+fold, alle famiglie di perturbazione, ai modelli proxy o a descrittori semantici
+del contenuto visuale. L'esito del controllo è stato salvato nei file
 \codepath{metadata/embedded_metadata_audit.csv} e
-\codepath{metadata/embedded_metadata_audit_summary.json}. I casi individuati
-non vengono trattati come variabile sperimentale primaria, ma come sensitivity
-check e come limite operativo controllato della cecità del bundle, da analizzare
-separatamente nel capitolo dei risultati rispetto alle predizioni dei proxy
-model e agli output normalizzati degli strumenti black-box.
+\codepath{metadata/embedded_metadata_audit_summary.json}. I casi eventualmente
+individuati non vengono trattati come variabile sperimentale primaria, ma come
+sensitivity check e come limite operativo controllato della cecità del bundle;
+la loro quantificazione e interpretazione vengono demandate al capitolo dei
+risultati, in relazione alle predizioni dei proxy model e agli output
+normalizzati degli strumenti black-box.
 
 La successiva valutazione operativa con strumenti forensi utilizza il bundle
 come input controllato e separa la fase di importazione dei file dalla
@@ -2206,6 +2327,92 @@ Piattaforma commerciale di analisi assistita dei contenuti multimediali, valutat
 \bottomrule
 \end{tabularx}
 \end{table}
+
+Per \gls{excirefoto2025}, la valutazione è stata condotta mediante un insieme
+predefinito di prompt semantici orientati alla ricerca di contenuti
+weapon-related. Poiché il software opera come motore di semantic retrieval e non
+come classificatore binario nativo, ciascun prompt produce un export separato,
+successivamente normalizzato rispetto al task \texttt{weapon}/\texttt{non\_weapon}.
+Nel run finale è stata utilizzata la configurazione intermedia
+\texttt{Distance limit = 50}, indicata nei file di export come
+\texttt{distance50}. I prompt utilizzati sono riportati nella
+Tabella~\ref{tab:methodology-excire-prompts}.
+
+
+
+Per \gls{cellebriteinseyets}, la normalizzazione degli output si basa sulle
+categorie esportate nell'ambiente \texttt{Cellebrite Physical Analyzer
+10.9.0.3029}. Poiché il tool non restituisce direttamente le classi sperimentali
+\texttt{weapon} e \texttt{non\_weapon}, le categorie weapon-related vengono
+ricodificate in stati operativi confrontabili con il task binario. La
+Tabella~\ref{tab:methodology-cellebrite-mapping} riporta il mapping utilizzato
+nel protocollo sperimentale.
+
+\begin{table}[H]
+\centering
+\caption{Mapping operativo delle categorie Cellebrite verso il task binario.}
+\label{tab:methodology-cellebrite-mapping}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{0.90\textwidth}{@{}p{0.35\textwidth}X@{}}
+\toprule
+\textbf{Output Cellebrite / Physical Analyzer} &
+\textbf{Mapping operativo nel protocollo FAIR-Lab} \\
+\midrule
+\texttt{Armi}
+& \texttt{weapon\_detected} \\
+
+\texttt{Pistola}
+& \texttt{weapon\_detected} \\
+
+\texttt{Fucile}
+& \texttt{weapon\_detected} \\
+
+Categoria weapon-related assente
+& \texttt{no\_weapon\_detected} \\
+
+Output non esportato, ambiguo o non interpretabile
+& \texttt{unmapped} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Il mapping non viene interpretato come accesso alla logica interna del tool, ma
+come ricodifica operativa degli output osservabili. In particolare, l'assenza di
+una categoria weapon-related non viene trattata come prova semantica di assenza
+di armi nell'immagine, ma come mancato rilevamento della categoria di interesse
+da parte dello strumento nelle condizioni del protocollo.
+
+
+
+\begin{table}[H]
+\centering
+\caption{Prompt semantici utilizzati per la valutazione di \gls{excirefoto2025}.}
+\label{tab:methodology-excire-prompts}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{0.90\textwidth}{@{}p{0.10\textwidth}p{0.28\textwidth}X@{}}
+\toprule
+\textbf{ID} & \textbf{Prompt semantico} & \textbf{File di export} \\
+\midrule
+P1 & \texttt{firearm} & \codepath{excire\_firearm\_distance50.csv} \\
+P2 & \texttt{gun} & \codepath{excire\_gun\_distance50.csv} \\
+P3 & \texttt{pistol} & \codepath{excire\_pistol\_distance50.csv} \\
+P4 & \texttt{handgun} & \codepath{excire\_handgun\_distance50.csv} \\
+P5 & \texttt{revolver} & \codepath{excire\_revolver\_distance50.csv} \\
+P6 & \texttt{rifle} & \codepath{excire\_rifle\_distance50.csv} \\
+P7 & \texttt{shotgun} & \codepath{excire\_shotgun\_distance50.csv} \\
+P8 & \texttt{assault rifle} & \codepath{excire\_assault\_rifle\_distance50.csv} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+I prompt sono stati definiti prima dell'esecuzione della valutazione e non sono
+stati modificati iterativamente in funzione degli output osservati. In questo
+modo, il retrieval semantico di \gls{excirefoto2025} viene trattato come
+procedura black-box riproducibile e non come ricerca manuale adattata ai
+risultati.
+
 
 Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
 
@@ -2685,12 +2892,6 @@ dagli strumenti commerciali black-box.
 \end{figure}
 
 
-
-Metriche threshold-independent come AUROC non vengono considerate come output principale
-del protocollo corrente, poiché la valutazione deve rimanere confrontabile anche con
-strumenti forensi che possono esportare solo etichette categoriali, stati non standardizzati
-o risultati privi di score probabilistici omogenei.
-
 Per gli strumenti forensi, il protocollo metrico deve essere
 adattato alla natura degli output disponibili. I tool possono produrre categorie
 non perfettamente sovrapponibili al task binario, punteggi di confidenza non
@@ -3104,11 +3305,12 @@ configurazione. La generazione degli split utilizza seed 42, mentre i proxy
 model sono addestrati secondo un protocollo fold-aware. Per ogni modello e fold,
 il file \codepath{models/model_registry.json} registra il checkpoint, la
 normalizzazione, la dimensione di input e l'hash \gls{sha256} del file
-\texttt{.pt}. Gli attacchi model-dependent utilizzano checkpoint specifici del
-fold, riducendo il rischio di leakage tra immagini usate per l'addestramento e
-immagini perturbate o valutate. Tale controllo anti-leakage è centrale perché
-la robustezza non deve essere misurata su campioni che il proxy model ha già
-visto durante il training.
+\texttt{.pt}. Gli attacchi model-dependent utilizzano il checkpoint addestrato escludendo il
+fold di appartenenza dell'immagine target, in coerenza con il protocollo
+fold-aware definito nella Sezione~\ref{sec:methodology-models-classification}.
+In questo modo, il proxy model non ha visto in training l'immagine che viene
+perturbata o valutata, riducendo il rischio di leakage e di sovrastima della
+robustezza.
 
 Un ulteriore controllo riguarda il rischio di bias nella valutazione con
 strumenti forensi. Il forensic evaluation bundle separa in modo esplicito la directory
