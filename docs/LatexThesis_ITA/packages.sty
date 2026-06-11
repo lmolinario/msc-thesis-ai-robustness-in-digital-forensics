@@ -34,14 +34,73 @@
     \renewcommand{\thesubsection}{\Alph{subsection}}
 }
 
-% --- Acronyms ---
+% --- Acronyms and glossary ---
 \usepackage[acronym,toc,nonumberlist,nopostdot]{glossaries}
 \makeglossaries
-% Print glossary/acronym occurrences in bold in the text.
-%\renewcommand*{\glstextformat}[1]{\textbf{#1}}
+
+% Standard acronym format:
+% first use: long form (short form)
+% later uses: short form only
+\setacronymstyle{long-short}
+
+% Bold only the first occurrence of acronym entries.
+% This patch is compatible with the standard glossaries package.
+\let\oldgls\gls
+\let\oldGls\Gls
+\let\oldglspl\glspl
+\let\oldGlspl\Glspl
+
+\RenewDocumentCommand{\gls}{m}{%
+  \ifglsused{#1}{%
+    \oldgls{#1}%
+  }{%
+    \ifglshaslong{#1}{%
+      \textbf{\oldgls{#1}}%
+    }{%
+      \oldgls{#1}%
+    }%
+  }%
+}
+
+\RenewDocumentCommand{\Gls}{m}{%
+  \ifglsused{#1}{%
+    \oldGls{#1}%
+  }{%
+    \ifglshaslong{#1}{%
+      \textbf{\oldGls{#1}}%
+    }{%
+      \oldGls{#1}%
+    }%
+  }%
+}
+
+\RenewDocumentCommand{\glspl}{m}{%
+  \ifglsused{#1}{%
+    \oldglspl{#1}%
+  }{%
+    \ifglshaslong{#1}{%
+      \textbf{\oldglspl{#1}}%
+    }{%
+      \oldglspl{#1}%
+    }%
+  }%
+}
+
+\RenewDocumentCommand{\Glspl}{m}{%
+  \ifglsused{#1}{%
+    \oldGlspl{#1}%
+  }{%
+    \ifglshaslong{#1}{%
+      \textbf{\oldGlspl{#1}}%
+    }{%
+      \oldGlspl{#1}%
+    }%
+  }%
+}
 
 
 % --- Bibliography & References ---
+\usepackage{csquotes}
 \usepackage[
 backend=biber,
 style=numeric,
@@ -49,7 +108,7 @@ sorting=none,
 sortcites=true
 ]{biblatex}
 \addbibresource{tesi.bib}
-\usepackage{csquotes}
+
 \usepackage[nottoc]{tocbibind}
 \usepackage{caption}
 \usepackage{subcaption}
@@ -103,6 +162,7 @@ sortcites=true
     \renewcommand{\listfigurename}{List of Figures}
     \renewcommand{\listtablename}{List of Tables}
     \renewcommand{\bibname}{References}
+    \renewcommand{\refname}{References}
 }
 
 \addto\extrasitalian{
@@ -182,14 +242,14 @@ verificabilita
 \usepackage{tabularx}
 \usepackage{booktabs}
 \usepackage{array}
-
+\usepackage{ragged2e}
 % Ragged-right column types to avoid ugly word hyphenation in tables.
 \newcolumntype{L}[1]{>{\RaggedRight\arraybackslash}p{#1}}
 \newcolumntype{Y}{>{\RaggedRight\arraybackslash}X}
 
 % --- Chapter title format ---
 \usepackage{titlesec}
-\usepackage{ragged2e}
+
 
 \titleformat{\section}
   {\normalfont\Large\bfseries\RaggedRight}
