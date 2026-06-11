@@ -2819,50 +2819,37 @@ e non anticipa l'analisi quantitativa delle prestazioni, che rimane demandata al
 Capitolo~\ref{chap:results}.
 
 
+
 \begin{table}[H]
 \centering
-\caption{Artefatti prodotti dalla valutazione dei proxy model.}
+\caption{Categorie funzionali degli artefatti prodotti dalla valutazione dei proxy model.}
 \label{tab:methodology-proxy-evaluation-artifacts}
-\begin{tabularx}{\textwidth}{@{}lX@{}}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}L{3.8cm}X@{}}
 \toprule
-\textbf{Artefatto} & \textbf{Funzione metodologica} \\
+\textbf{Categoria di artefatto} & \textbf{Ruolo metodologico} \\
 \midrule
-\texttt{proxy\_model\_predictions.csv}
+Predizioni dei modelli proxy
 &
-Raccoglie le predizioni dei proxy model sui campioni clean, \gls{ood},
-adversariali e anti-forensi. \\
-\texttt{proxy\_model\_clean\_metrics.csv}
+Raccolgono le predizioni file-level prodotte dai modelli proxy sui campioni
+clean, \gls{ood}, adversariali e anti-forensi. Consentono il collegamento tra
+input, output del modello, ground truth e condizione sperimentale. \\
+Metriche aggregate per famiglia sperimentale
 &
-Contiene le metriche sui clean folds. \\
-\texttt{proxy\_model\_adversarial\_metrics.csv}
+Riassumono le prestazioni per condizione di valutazione, distinguendo baseline
+clean, trasformazioni anti-forensi, perturbazioni adversariali e comportamento
+\gls{ood}. \\
+Metriche finali e comparative
 &
-Contiene le metriche relative agli input adversariali. \\
-\texttt{proxy\_model\_anti\_forensic\_metrics.csv}
+Aggregano accuracy, balanced accuracy, precision, recall, F1-score, confusion
+matrix, statistiche di confidenza, accuracy drop e induced error rate, rendendo
+confrontabili modelli e condizioni sperimentali. \\
+Summary di run e controlli di completezza
 &
-Contiene le metriche relative alle trasformazioni anti-forensi. \\
-\texttt{proxy\_model\_ood\_metrics.csv}
-&
-Contiene le metriche specifiche per il comportamento fuori distribuzione. \\
-\texttt{proxy\_model\_comparative\_metrics.csv}
-&
-Integra il confronto tra condizioni clean, perturbate e \gls{ood}. \\
-\texttt{proxy\_model\_evaluation\_summary.json}
-&
-Riassume copertura del run, modelli valutati, conteggi e controlli di completezza. \\
-\texttt{final\_core\_metrics.csv}
-&
-Sintetizza le metriche principali dei proxy model nelle condizioni sperimentali
-centrali. \\
-\texttt{final\_robustness\_metrics.csv}
-&
-Raccoglie le metriche comparative orientate alla robustezza rispetto a input
-puliti e manipolati. \\
-\texttt{final\_confusion\_matrices.csv}
-&
-Documenta le matrici di confusione aggregate e per condizione sperimentale. \\
-\texttt{final\_ood\_metrics.csv}
-&
-Riporta le metriche finali relative al comportamento fuori distribuzione. \\
+Documentano il numero complessivo di file processati, la copertura del bundle,
+eventuali output mancanti e la coerenza tra manifest, predizioni e risultati
+metrici. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -3513,11 +3500,6 @@ valutati sono trattati come sistemi
 black-box o quasi black-box, e le loro categorie interne
 potrebbero non essere perfettamente equivalenti al task binario
 \texttt{weapon}/\texttt{non\_weapon}.
-
-Rendere espliciti questi limiti non
-indebolisce il protocollo; al contrario, chiarisce il perimetro entro cui la
-valutazione può essere considerata verificabile, riproducibile e metodologicamente
-difendibile.
 
 Le versioni software, i moduli abilitati, le impostazioni di importazione e le
 modalità di esportazione dei tool forensi sono documentati nelle sezioni
