@@ -34,8 +34,6 @@ modelli e strumenti e le interpretazioni sperimentali vengono demandati al
 capitolo dedicato ai risultati.
 
 
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Overview of the FAIR-Lab methodology}
 \label{sec:methodology-fairlab-overview}
@@ -78,10 +76,6 @@ valutazione baseline, il set \gls{ood} separato e gli artefatti manipolati da
 sottoporre ai modelli e agli strumenti forensi. Tali componenti costituiscono
 la base stabile del protocollo sperimentale e consentono di separare la
 costruzione degli artefatti dalla successiva analisi quantitativa dei risultati.
-Il presente capitolo descrive quindi il disegno sperimentale, gli artefatti
-prodotti e i controlli di tracciabilità, mentre l'interpretazione delle
-prestazioni, dei degradi e delle differenze tra modelli o strumenti viene
-demandata al Capitolo~\ref{chap:results}.
 Questa distinzione è essenziale per evitare che modifiche future ai dati, ai
 modelli o ai file manipolati alterino retroattivamente il perimetro della
 valutazione.
@@ -465,8 +459,6 @@ il risultato finale della selezione, ma anche le regole operative che hanno
 guidato la costruzione del dataset congelato.
 
 
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Dataset construction and source consolidation}
 \label{sec:methodology-dataset-construction}
@@ -487,7 +479,6 @@ ottenute mediante scraping controllato, contenuti acquisiti secondo una logica
 costruire un benchmark visivamente omogeneo, ma un pool iniziale sufficientemente
 vario da rappresentare alcune delle condizioni di eterogeneità che caratterizzano
 le indagini digitali contemporanee.
-
 
 
 \begin{table}[H]
@@ -833,7 +824,6 @@ costituisce una parte documentata, auditabile e coerente con la natura
 interpretativa della classificazione forense.
 
 
-
 A partire dal dataset frozen viene inoltre generato il subset binario ufficiale
 per gli esperimenti adversariali e anti-forensi, memorizzato in
 \codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}.
@@ -943,12 +933,6 @@ che non dovrebbero essere trattati come esempi ordinari di \texttt{weapon} o
 \texttt{non\_weapon}. La separazione del set \gls{ood} consente quindi di
 distinguere la robustezza sul task binario dalla gestione di input borderline,
 anomali o semanticamente esterni al dominio operativo.
-Il set \gls{ood} rimane quindi pulito lungo l'intero protocollo sperimentale:
-esso non è utilizzato per addestrare i proxy model, non è impiegato come target
-per gli attacchi adversariali e non viene sottoposto alle trasformazioni
-anti-forensi. La sua funzione è valutare il comportamento dei sistemi rispetto
-a input semanticamente esterni o borderline, non misurare la robustezza
-perturbativa su una terza classe.
 
 Gli output principali della fase di split generation sono tre artefatti:
 \texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv} e
@@ -963,13 +947,8 @@ l'unicità degli hash e la corrispondenza tra i conteggi attesi e quelli
 effettivamente prodotti.
 
 Questa organizzazione consente di disporre di unità sperimentali stabili per
-le successive valutazioni baseline, per la generazione degli input adversariali
-e delle trasformazioni anti-forensi e per il confronto con gli output prodotti
-dagli strumenti forensi. La separazione tra clean folds e set \gls{ood} evita
-inoltre di aggregare in una sola metrica problemi metodologicamente distinti:
-da un lato, la stabilità della classificazione su classi note; dall'altro, la
-capacità del sistema di gestire input che non appartengono alla distribuzione
-operativa del task binario.
+le successive valutazioni baseline, per la generazione degli input manipolati e
+per il confronto con gli output prodotti dagli strumenti forensi.
 
 
 La Figura~\ref{fig:methodology-split-to-proxy-training} colloca la fase di
@@ -1117,8 +1096,7 @@ trasparenti e riproducibili per rappresentare il comportamento di classificatori
 \gls{ai}-based sottoposti a dati puliti, input adversariali e trasformazioni
 anti-forensi. Tali modelli non devono essere interpretati come strumenti forensi valutati
 nella fase black-box del protocollo, né come sostituti dei software commerciali
-analizzati. Essi costituiscono invece componenti sperimentali controllate,
-Essi costituiscono invece componenti sperimentali controllate, necessarie per
+analizzati. Essi costituiscono invece componenti sperimentali controllate, necessarie per
 definire un riferimento algoritmico ispezionabile, generare le perturbazioni che
 richiedono accesso al modello target e studiare la possibile trasferibilità
 degli effetti osservati verso altri sistemi di classificazione.
@@ -1191,7 +1169,6 @@ target, preservando una separazione metodologica tra training, generazione delle
 perturbazioni e valutazione sperimentale.
 
 
-
 \begin{table}[H]
 \centering
 \caption{Protocollo fold-aware per l'addestramento dei proxy model.}
@@ -1208,7 +1185,6 @@ perturbazioni e valutazione sperimentale.
 \bottomrule
 \end{tabularx}
 \end{table}
-
 
 
 La configurazione di addestramento dei proxy model è stata mantenuta costante
@@ -1309,7 +1285,6 @@ Random seed
 \bottomrule
 \end{tabularx}
 \end{table}
-
 
 
 Lo script ufficiale per l'addestramento dei proxy model è
@@ -1623,7 +1598,6 @@ successiva integrazione nel forensic evaluation bundle.
 }};
 
 
-
 % Outputs per branch
 \node[output] (advout) at (-4.2,-7.0)
 {\shortstack{
@@ -1725,8 +1699,6 @@ L'eventuale contributo residuo della ricompressione è tracciato come parte
 dell'artefatto generato e non altera la distinzione metodologica tra
 perturbazioni adversariali, trasformazioni adversarial-style model-agnostic e
 trasformazioni anti-forensi.
-
-
 
 
 Il protocollo non mira a costruire un benchmark esaustivo di robustezza
@@ -1880,7 +1852,6 @@ con qualità 95. \\
 \end{table}
 
 
-
 I parametri riportati nella Tabella~\ref{tab:methodology-adversarial-parameters}
 rappresentano la configurazione principale utilizzata per generare gli artefatti
 adversariali. La configurazione completa di ciascun run è conservata nei summary
@@ -1921,9 +1892,6 @@ e \texttt{md5\_perturbed}. Per gli attacchi model-dependent, il manifest
 registra inoltre il modello target, il checkpoint utilizzato e l'hash \gls{sha256} del
 checkpoint, così da rendere verificabile la relazione tra immagine perturbata e
 versione specifica del proxy model.
-
-
-
 
 
 È importante precisare che la presente sezione descrive la selezione e la
@@ -2043,7 +2011,6 @@ Cinque trasformazioni applicate alle 1000 immagini del subset binario.
 \end{table}
 
 
-
 \begin{table}[H]
 \centering
 \small
@@ -2108,8 +2075,6 @@ visive, statistiche o di compressione rilevanti per sistemi automatici di
 classificazione e triage.
 
 
-
-
 Nel run consolidato della pipeline, ciascuna trasformazione è stata applicata
 alle 1000 immagini del subset binario, mantenendo la distribuzione dei cinque
 fold e il bilanciamento tra le classi \texttt{weapon} e \texttt{non\_weapon}.
@@ -2119,7 +2084,6 @@ degli artefatti anti-forensi generati è pari a 5000 immagini. Questa scelta
 consente di confrontare in modo simmetrico le risposte dei modelli e, nelle fasi
 successive, degli strumenti forensi, rispetto a un insieme bilanciato di
 manipolazioni non ottimizzate sul classificatore.
-
 
 
 I setting principali delle trasformazioni sono sintetizzati nella
@@ -2350,7 +2314,6 @@ software esterni, preservando al tempo stesso cecità operativa, tracciabilità
 forense e comparabilità metrica.
 
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic tools evaluation protocol}
 \label{sec:methodology-forensic-tools}
@@ -2400,16 +2363,20 @@ osservabili, analogamente alle categorie, ai tag, alle classificazioni o ai
 risultati di retrieval prodotti dagli altri strumenti, e non come spiegazioni
 locali del processo decisionale interno. La valutazione non assume accesso alla
 logica interna del modulo, ma ricodifica in modo esplicito e documentato i
-bookmark esportati rispetto al task sperimentale.
-
-
+bookmark esportati rispetto al task sperimentale. Ai fini del protocollo, il
+meccanismo di assegnazione automatica dei bookmark da parte di \gls{t3kcore} è
+quindi considerato equivalente agli altri output black-box osservabili: in tutti
+i casi, la valutazione riguarda il risultato esportato dal tool e non il processo
+interno che lo ha generato.
 
 
 \begin{table}[H]
 \centering
 \caption{Strumenti commerciali inclusi nella valutazione operativo-forense finale.}
 \label{tab:methodology-forensic-tools}
-\begin{tabularx}{\textwidth}{@{}L{3.7cm}L{3.2cm}X@{}}
+\footnotesize
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}L{3.5cm}L{3.4cm}X@{}}
 \toprule
 \textbf{Strumento} & \textbf{Versione / ambiente} & \textbf{Ruolo metodologico nel protocollo} \\
 \midrule
@@ -2485,7 +2452,6 @@ violenza o contesto militare sono conservati solo come indicatori secondari. \\
 \end{table}
 
 
-
 Per \gls{excirefoto2025}, la valutazione è stata condotta mediante un insieme
 predefinito di prompt semantici orientati alla ricerca di contenuti
 firearm-oriented. Poiché il software opera come motore di semantic retrieval e
@@ -2506,9 +2472,6 @@ state inoltre considerate due configurazioni aggiuntive,
 non rappresentano tool differenti, ma tre impostazioni operative dello stesso
 software, utilizzate per osservare il trade-off tra copertura del retrieval,
 falsi negativi e falsi positivi.
-
-
-
 
 
 \begin{table}[H]
@@ -2538,8 +2501,6 @@ Gli stessi prompt sono stati applicati alle tre configurazioni operative
 \texttt{Distance limit = 80}. In questo modo, la differenza tra le tre
 configurazioni dipende dal parametro di retrieval e non da una variazione del
 vocabolario semantico utilizzato per interrogare il software.
-
-
 
 
 Per \gls{cellebriteinseyets}, la normalizzazione degli output si basa sulle
@@ -2608,20 +2569,16 @@ firearm-oriented della classe positiva.
 \midrule
 \texttt{CORE/Violence/Firearm}
 & \texttt{weapon\_detected} \\
-
 Bookmark assente oppure bookmark diverso da \texttt{CORE/Violence/Firearm}
 & \texttt{no\_weapon\_detected} \\
-
 Bookmark semanticamente collegati ma non firearm-oriented, ad esempio categorie
 relative ad armi non da fuoco o contesto militare
 & conservati come indicatori secondari, ma non usati come positivi primari \\
-
 Output non esportato, ambiguo o non interpretabile
 & \texttt{unmapped} \\
 \bottomrule
 \end{tabularx}
 \end{table}
-
 
 
 La normalizzazione degli output è necessaria perché le categorie interne dei tool non coincidono direttamente con le classi sperimentali \texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}. Per questo motivo, la pipeline applica un mapping esplicito e documentato delle label proprietarie verso una rappresentazione binaria operativa, basata sul campo \texttt{weapon\_detected}. Tale campo non deve essere interpretato come una dichiarazione semantica assoluta sull'immagine, né in senso positivo né in senso negativo: esso indica soltanto se, nelle condizioni del protocollo, lo strumento ha prodotto un output osservabile riconducibile alla categoria firearm-oriented considerata.
@@ -2814,7 +2771,6 @@ operative più critiche di un falso positivo, poiché può ridurre la priorità
 assegnata a un artefatto che meriterebbe ulteriore analisi.
 
 
-
 La valutazione non assume \gls{auroc} come metrica centrale, pur essendo essa
 ampiamente utilizzata in contesti di \gls{ml} supervisionato, poiché l'obiettivo
 del lavoro non è ottimizzare o confrontare classificatori sulla base di score
@@ -2833,32 +2789,23 @@ La valutazione consolidata dei proxy model viene eseguita mediante lo script
 \codepath{evaluation/scripts/15_evaluate_proxy_models.py}. Lo script considera
 i clean folds, il set \gls{ood}, le immagini adversariali e le immagini
 anti-forensi, applicando il protocollo ai tre proxy model ufficiali:
-\texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}. Gli artefatti
-prodotti comprendono il file
-\codepath{evaluation/proxy_models/proxy_model_predictions.csv} e i file metrici
-in \codepath{results/metrics/}: \codepath{proxy_model_clean_metrics.csv},
-\codepath{proxy_model_adversarial_metrics.csv},
-\codepath{proxy_model_anti_forensic_metrics.csv},
-\codepath{proxy_model_ood_metrics.csv},
-\codepath{proxy_model_comparative_metrics.csv} e
-\codepath{proxy_model_evaluation_summary.json}.
-
-Lo stesso script produce inoltre file metrici finali orientati alla sintesi sperimentale,
-tra cui \codepath{final_core_metrics.csv}, \codepath{final_robustness_metrics.csv},
-\codepath{final_confusion_matrices.csv} e \codepath{final_ood_metrics.csv}.
+\texttt{efficientnet\_b0}, \texttt{resnet18} e \texttt{clip}. Gli output
+prodotti includono il file consolidato delle predizioni, i file metrici per
+ciascuna famiglia sperimentale e gli artefatti finali di sintesi, come riportato
+nella Tabella~\ref{tab:methodology-proxy-evaluation-artifacts}.
 
 Ai fini della tracciabilità metodologica, la pipeline registra anche la
-copertura del run di valutazione. Il run dei proxy model comprende 11,500
-campioni in input e 40,500 righe di predizione. Tali conteggi documentano la
+copertura del run di valutazione. Il run dei proxy model comprende 11\,500
+campioni in input e 40\,500 righe di predizione. Tali conteggi documentano la
 completezza degli artefatti prodotti e non rappresentano misure di performance.
-La distribuzione delle predizioni include 3000 righe relative a campioni puliti,
-7500 righe relative al set \gls{ood} e 30,000 righe relative a campioni
+La distribuzione delle predizioni include 3\,000 righe relative a campioni puliti,
+7\,500 righe relative al set \gls{ood} e 30\,000 righe relative a campioni
 perturbati.
 
-Nel caso della valutazione \gls{ood}, le 7500 righe di predizione derivano
+Nel caso della valutazione \gls{ood}, le 7\,500 righe di predizione derivano
 dalla valutazione delle 500 immagini fuori distribuzione rispetto ai cinque
 checkpoint fold-aware dei tre proxy model, secondo lo schema
-500~$\times$~5~$\times$~3~=~7,500. Tale conteggio non deve essere interpretato
+500~$\times$~5~$\times$~3~=~7\,500. Tale conteggio non deve essere interpretato
 come una moltiplicazione artificiale dei campioni disponibili: le 500 immagini
 \gls{ood} rimangono il riferimento semantico effettivo, mentre le predizioni
 ottenute sui cinque checkpoint consentono di osservare se la tendenza a
@@ -2870,7 +2817,6 @@ Analogamente, la distinzione tra righe con \texttt{attack\_family = none},
 righe adversariali e righe anti-forensi descrive la copertura della valutazione
 e non anticipa l'analisi quantitativa delle prestazioni, che rimane demandata al
 Capitolo~\ref{chap:results}.
-
 
 
 \begin{table}[H]
@@ -3529,7 +3475,6 @@ metrico finale.
 \caption[Traceability chain across the FAIR-Lab protocol]{Traceability chain across the FAIR-Lab protocol. Each experimental stage preserves or generates identifiers, paths, cryptographic hashes and manifests, enabling reconstruction from the original prepared image to derived artifacts, bundle entries, model or tool outputs, metrics and explainability case studies.}
 \label{fig:methodology-traceability-chain}
 \end{figure}
-
 
 
 La riproducibilità è rafforzata da controlli deterministici e da registri di
