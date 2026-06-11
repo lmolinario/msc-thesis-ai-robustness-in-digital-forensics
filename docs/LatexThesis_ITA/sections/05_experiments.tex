@@ -223,6 +223,14 @@ normalizzati in \codepath{evaluation/forensic_tools/}. Gli output dei tool
 black-box vengono quindi analizzati attraverso una rappresentazione comune,
 indipendente dal formato nativo di esportazione.
 
+Un'ulteriore cautela riguarda l'interpretazione della confidenza. I valori di
+confidence riportati per i modelli proxy sono utilizzati come indicatori
+intra-modello e non come probabilità calibrate direttamente comparabili tra
+architetture diverse. Questa cautela è ancora più rilevante nel confronto con i
+tool commerciali black-box, che non espongono necessariamente score numerici,
+soglie decisionali o misure di incertezza omogenee. Per tale ragione, nel
+capitolo la confidenza viene usata come elemento diagnostico ausiliario, non come
+misura probatoria autonoma.
 
 Nel seguito del capitolo viene adottata una convenzione unica per il calcolo del
 drop prestazionale:
@@ -555,18 +563,11 @@ normalizzazione del contrasto
 \cite{stamm2010anti,yaacoub2021digital,hendrycks2019benchmarking}.
 
 In coerenza con la convenzione definita nella
-Sezione~\ref{sec:results-scope}, il drop prestazionale è calcolato come
-\[
-\text{accuracy drop} =
-\text{accuracy}_{clean} - \text{accuracy}_{perturbed}.
-\]
-
-Valori positivi indicano quindi una riduzione della prestazione rispetto alla
-baseline clean; valori pari a zero indicano stabilità; valori negativi indicano
-un lieve incremento dell'accuracy nella condizione trasformata. Tali incrementi
-non devono essere interpretati come prova di robustezza generale, ma come
-oscillazioni compatibili con la specifica distribuzione dei campioni trasformati
-e con la sensibilità del modello alla trasformazione applicata.
+Sezione~\ref{sec:results-scope}, il drop prestazionale è interpretato come
+variazione rispetto alla baseline clean. I valori positivi indicano una
+riduzione della prestazione, mentre valori pari a zero o negativi sono trattati
+come stabilità o oscillazioni specifiche della distribuzione valutata, non come
+prova di robustezza generale.
 
 La Tabella~\ref{tab:results-antiforensic-robustness} riporta, per ciascuna
 trasformazione, l'accuracy perturbata e l'accuracy drop rispetto alla baseline
@@ -707,17 +708,11 @@ quindi valutata empiricamente, anziché assunta a priori
 trattato come perturbazione model-agnostic di stile adversarial.
 
 In coerenza con la convenzione definita nella
-Sezione~\ref{sec:results-scope}, il drop prestazionale è calcolato come
-\[
-\text{accuracy drop} =
-\text{accuracy}_{clean} - \text{accuracy}_{perturbed}.
-\]
-Valori positivi indicano quindi una degradazione della prestazione rispetto alla
-baseline clean; valori pari a zero indicano stabilità; valori negativi indicano
-un lieve incremento dell'accuracy nella condizione perturbata. Tali incrementi
-non vengono interpretati come prova di robustezza generale, ma come oscillazioni
-dipendenti dalla distribuzione dei campioni e dalla specifica trasferibilità
-delle perturbazioni generate contro il modello target.
+Sezione~\ref{sec:results-scope}, il drop prestazionale è interpretato come
+variazione rispetto alla baseline clean. In questa sezione, eventuali valori
+negativi o nulli non sono letti come prova di robustezza adversarial generale,
+ma come effetti specifici della trasferibilità delle perturbazioni generate
+contro il modello target e della distribuzione dei campioni valutati.
 
 La Tabella~\ref{tab:results-adversarial-robustness} riporta, per ciascuna
 perturbazione adversariale, l'accuracy perturbata e l'accuracy drop rispetto
@@ -1010,6 +1005,16 @@ semantici automatici. La comparazione è quindi operativa e black-box: ogni outp
 viene ricondotto al task \texttt{weapon}/\texttt{non\_weapon} mediante regole di
 normalizzazione esplicite e documentate.
 
+Le perturbazioni adversariali incluse nel bundle non devono essere interpretate
+come attacchi white-box ottimizzati contro i tool commerciali proprietari. Esse
+sono artefatti generati nel protocollo controllato dei modelli proxy e sono qui
+utilizzate per osservare, in modalità black-box, la sensibilità operativa degli
+strumenti commerciali a input manipolati. Inoltre, le metriche aggregate sui
+tool commerciali sono metriche \emph{bundle-weighted}: descrivono il
+comportamento nel forensic evaluation bundle, la cui composizione è
+intenzionalmente orientata alla robustezza, e non una stima assoluta della
+qualità generale del prodotto.
+
 Per evitare che gli strumenti potessero utilizzare informazioni semantiche
 derivate dai nomi dei file, dai path o dalla struttura delle cartelle, la
 valutazione è stata condotta utilizzando la vista cieca del forensic evaluation
@@ -1023,8 +1028,8 @@ immagini correttamente segnalate, immagini non segnalate, falsi negativi sulla
 classe \texttt{weapon}, falsi positivi sulla classe \texttt{non\_weapon}, output
 non interpretabili e comportamento sui campioni \gls{ood}.
 
-La Tabella~\ref{tab:results-commercial-overview} riporta una sintesi comparativa
-delle metriche aggregate dei sistemi commerciali e delle configurazioni
+La Tabella~\ref{tab:results-commercial-overview} riporta una sintesi bundle-weighted
+delle metriche dei sistemi commerciali e delle configurazioni
 operative considerate. Per \gls{excirefoto2025}, le tre righe corrispondono alle
 configurazioni \texttt{D20}, \texttt{D50} e \texttt{D80} del parametro
 \texttt{Distance limit}. La configurazione \texttt{D50} viene utilizzata come
@@ -1037,7 +1042,7 @@ permissiva.
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{3.4pt}
-\caption{Sintesi aggregata della valutazione black-box dei sistemi commerciali.}
+\caption{Sintesi bundle-weighted della valutazione black-box dei sistemi commerciali.}
 \label{tab:results-commercial-overview}
 \begin{tabular}{@{}l r r r r r r r@{}}
 \toprule
@@ -1081,7 +1086,9 @@ indicano rispettivamente false negative rate e false positive rate; \textit{OOD
 W-rate} indica la quota di campioni \gls{ood} ricondotti operativamente alla
 classe \texttt{weapon}. Le metriche binarie sono calcolate sui campioni
 \texttt{weapon}/\texttt{non\_weapon}; i campioni \gls{ood} sono analizzati
-separatamente.
+separatamente. I valori sono bundle-weighted e riflettono la composizione
+sperimentale del bundle, non una valutazione assoluta o certificativa dei
+prodotti.
 \end{table}
 
 \begin{figure}[H]
@@ -2040,8 +2047,8 @@ clean è pari a 0.032 e il weapon flag rate sui campioni \gls{ood} è pari a
 robustezza generale, ma come comportamento osservato nel protocollo sperimentale
 definito. Rispetto agli altri strumenti commerciali, \gls{cellebriteinseyets}
 mantiene un recall elevato sulla classe \texttt{weapon}; tuttavia,
-\gls{griffeye}/\gls{t3kcore} ottiene la migliore accuracy commerciale aggregata
-e il più basso false positive rate. Il confronto tra tool commerciali deve
+\gls{griffeye}/\gls{t3kcore} presenta il valore più alto di accuracy commerciale aggregata
+e il più basso false positive rate nel protocollo considerato. Il confronto tra tool commerciali deve
 quindi essere interpretato come un trade-off tra recall, falsi negativi, falsi
 positivi e comportamento sugli input \gls{ood}, non come individuazione di un
 sistema universalmente superiore.
@@ -2261,8 +2268,8 @@ di falsi negativi per il tool, pari a 37, e il recall sulla classe
 residua a perturbazioni sparse o localizzate, pur in assenza di un collasso
 prestazionale comparabile a quello osservato in alcuni modelli proxy.
 
-Nel complesso, \gls{griffeye}/\gls{t3kcore} mostra il miglior profilo
-commerciale aggregato in termini di accuracy, balanced accuracy e contenimento
+Nel complesso, \gls{griffeye}/\gls{t3kcore} presenta il profilo commerciale più selettivo nel protocollo
+considerato in termini di accuracy, balanced accuracy e contenimento
 dei falsi positivi. Il \gls{fpr} complessivo pari a 0.007 è sensibilmente
 inferiore rispetto agli altri strumenti commerciali valutati, mentre il recall
 sulla classe \texttt{weapon}, pari a 0.951, rimane elevato ma non massimo.
@@ -2293,84 +2300,36 @@ di sensitività sui metadati embedded residui presenti nella vista cieca del
 forensic evaluation bundle. La cecità del bundle è stata progettata
 principalmente a livello di nomi dei file, percorsi e struttura delle directory;
 tuttavia, alcuni strumenti black-box possono indicizzare anche metadati embedded
-nei file immagine. Per questa ragione, i casi individuati dall'audit sono stati
-analizzati dopo il matching con ground truth, predizioni dei modelli proxy e
-output normalizzati dei tool commerciali.
+nei file immagine. Per questa ragione, il controllo è stato mantenuto nel
+Capitolo~\ref{chap:results} come audit metodologico, ma non come risultato
+primario di robustezza.
 
 L'audit ha controllato 11\,500 file della directory cieca
-\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files},
-rilevando 7\,640 file con metadati embedded e 15 file contenenti termini
-semanticamente o sperimentalmente sensibili. L'audit non modifica gli artefatti,
-ma registra i casi potenzialmente rilevanti nel file
-\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv}
-e nel summary
-\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit_summary.json}.
-I 15 casi con sensitive hits non interessano gli artefatti adversariali o
-anti-forensi, ma soltanto 11 immagini clean e 4 immagini \gls{ood}. Di
-conseguenza, il fenomeno non incide direttamente sul confronto principale
-relativo alla robustezza sotto perturbazioni adversariali e trasformazioni
-anti-forensi, ma rappresenta un limite operativo residuale della cecità del
-bundle.
+\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files}, rilevando
+7\,640 file con metadati embedded e 15 file contenenti termini semanticamente o
+sperimentalmente sensibili. Tali 15 casi non interessano gli artefatti
+adversariali o anti-forensi, ma soltanto 11 immagini clean e 4 immagini
+\gls{ood}. Di conseguenza, il fenomeno non incide direttamente sul confronto
+principale relativo alla robustezza sotto perturbazioni adversariali e
+trasformazioni anti-forensi, ma rappresenta un limite operativo residuale della
+cecità del bundle.
 
-Per valutare l'eventuale impatto di tali metadati sugli output osservati, i
-relativi \texttt{bundle\_id} sono stati incrociati con la ground truth, con le
-predizioni dei modelli proxy e con gli output normalizzati degli strumenti
-commerciali black-box. Sui campioni clean, EfficientNet-B0 e ResNet18 risultano
-corretti in tutti gli 11 casi, mentre \gls{clip} produce un falso positivo su
-un'immagine \texttt{non\_weapon}. Per gli strumenti commerciali, il comportamento
-varia a seconda del tool e della configurazione: \gls{magnetaxiomtool}/\gls{magnetai}
-classifica correttamente 9 casi clean su 11; \gls{excirefoto2025} classifica
-correttamente 9 casi su 11 nelle configurazioni \texttt{D20} e \texttt{D50}, e
-11 casi su 11 nella configurazione \texttt{D80}; \gls{cellebriteinseyets}
-classifica correttamente tutti gli 11 casi clean; \gls{griffeye}/\gls{t3kcore}
-classifica correttamente 10 casi clean su 11.
-
-Due casi risultano particolarmente rilevanti dal punto di vista interpretativo:
-\texttt{bundle\_000320} e \texttt{bundle\_000948}. Entrambi sono immagini
-\texttt{weapon} e contengono metadati esplicitamente weapon-related, ma vengono
-comunque classificati come \texttt{non\_weapon} da
-\gls{magnetaxiomtool}/\gls{magnetai} e da \gls{excirefoto2025} nelle
-configurazioni più restrittive o intermedie. Questo risultato suggerisce che la
-presenza di termini descrittivi nei metadati embedded non determina
-automaticamente una classificazione positiva da parte degli strumenti black-box.
-Nel caso di \gls{griffeye}/\gls{t3kcore}, \texttt{bundle\_000320} viene
-ricodificato come \texttt{non\_weapon} perché l'export contiene bookmark
-militari, ma non il bookmark primario \texttt{CORE/Violence/Firearm} richiesto
-dal mapping operativo definito nel protocollo.
-
-Nei 4 casi \gls{ood}, il comportamento dei tool commerciali riflette il più
-generale rischio di assorbimento di contenuti fuori distribuzione nella classe
-operativa \texttt{weapon}. \gls{magnetaxiomtool}/\gls{magnetai},
-\gls{excirefoto2025} in configurazione \texttt{D50} e
-\gls{excirefoto2025} in configurazione \texttt{D80} producono 4 flag
-\texttt{weapon} su 4; \gls{cellebriteinseyets} produce 3 flag \texttt{weapon} su
-4; \gls{excirefoto2025} in configurazione \texttt{D20} e
-\gls{griffeye}/\gls{t3kcore} producono invece 1 flag \texttt{weapon} su 4. Tali
-risultati non consentono di stabilire, sulla base dei soli output osservabili,
-se la classificazione derivi dal contenuto visuale, dai metadati embedded o da
-una combinazione dei due fattori. Essi vengono quindi interpretati come parte
-del più generale rischio operativo associato a input \gls{ood} e
-semanticamente weapon-adjacent.
-
-Per quantificare l'impatto potenziale dei casi individuati sulle metriche
-aggregate, è stata inoltre calcolata una verifica di esclusione
-(\emph{leave-out sensitivity check}) limitata ai 15 file con sensitive hits. Tale
-verifica non consente di stabilire un nesso causale tra metadati embedded e
-classificazione, poiché gli strumenti commerciali rimangono black-box; consente
-però di misurare quanto le metriche aggregate cambierebbero qualora tali file
-fossero esclusi dal computo. Le tabelle di controllo sono state generate dallo
-script
-\codepath{results/scripts/21_generate_embedded_metadata_sensitivity_check.py},
-che produce i file
-\codepath{results/figures/chapter_5/tab_embedded_metadata_tool_summary.csv} e
-\codepath{results/figures/chapter_5/tab_embedded_metadata_sensitivity_delta.csv}.
+Due aspetti sono metodologicamente rilevanti. In primo luogo, la presenza di
+termini descrittivi nei metadati non determina automaticamente una classificazione
+positiva da parte degli strumenti black-box: alcuni campioni \texttt{weapon} con
+metadati weapon-related risultano comunque non segnalati da almeno una parte dei
+tool valutati. In secondo luogo, sui quattro casi \gls{ood} con sensitive hits,
+non è possibile stabilire dai soli output osservabili se il flag \texttt{weapon}
+derivi dal contenuto visuale, dai metadati embedded o da una combinazione dei due
+fattori. Tali casi sono quindi interpretati come parte del più generale rischio
+operativo associato a input \gls{ood} e semanticamente weapon-adjacent.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{4pt}
-\caption{Impatto quantitativo dei sensitive metadata hits sulle metriche aggregate.}
+\caption{Sintesi del controllo di sensitività sui metadati embedded residui.}
 \label{tab:results-embedded-metadata-impact}
 \begin{tabularx}{\textwidth}{@{}p{0.23\textwidth} r r r X@{}}
 \toprule
@@ -2385,228 +2344,54 @@ Bundle completo &
 15 &
 11\,500 &
 0.130\% &
-I casi con sensitive hits rappresentano una quota molto limitata del forensic
-evaluation bundle. \\
+Quota molto limitata del forensic evaluation bundle. \\
 
 Metriche binarie complessive &
 11 &
 11\,000 &
 0.100\% &
-L'impatto massimo sulle metriche binarie aggregate è trascurabile, poiché i casi
-coinvolti appartengono solo alla componente clean del task
-\texttt{weapon}/\texttt{non\_weapon}. \\
+Impatto quantitativo trascurabile sulle metriche binarie aggregate. \\
 
 Clean baseline &
 11 &
 1\,000 &
 1.100\% &
-L'impatto è limitato alla baseline clean; la variazione osservata
-dell'accuracy, dopo esclusione dei casi, rimane nell'ordine di pochi millesimi. \\
+Impatto limitato alla baseline clean; le variazioni osservate dell'accuracy
+rimangono nell'ordine di pochi millesimi. \\
 
 Adversarial robustness &
 0 &
 5\,000 &
 0.000\% &
-Nessun caso con sensitive hits appartiene agli artefatti adversariali; le
-metriche adversariali non sono quindi influenzate da questo controllo. \\
+Nessun caso con sensitive hits appartiene agli artefatti adversariali. \\
 
 Anti-forensic robustness &
 0 &
 5\,000 &
 0.000\% &
-Nessun caso con sensitive hits appartiene agli artefatti anti-forensi; le
-metriche anti-forensi non sono quindi influenzate da questo controllo. \\
+Nessun caso con sensitive hits appartiene agli artefatti anti-forensi. \\
 
 OOD weapon flag rate &
 4 &
 500 &
 0.800\% &
-L'impatto è limitato al weapon flag rate sui campioni \gls{ood}; la variazione
-rimane contenuta e non modifica l'interpretazione qualitativa dei risultati. \\
+Impatto limitato al weapon flag rate sui campioni \gls{ood}; la variazione non
+modifica l'interpretazione qualitativa dei risultati. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-La Tabella~\ref{tab:results-embedded-metadata-tool-summary} riporta il
-comportamento dei tool commerciali sui soli file con sensitive metadata hits.
-Il valore riportato per \gls{excirefoto2025} è distinto per configurazione,
-poiché le soglie \texttt{D20}, \texttt{D50} e \texttt{D80} producono profili di
-retrieval differenti.
-
-\begin{table}[H]
-\centering
-\scriptsize
-\renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{4pt}
-\caption{Comportamento dei tool commerciali sui file con sensitive metadata hits.}
-\label{tab:results-embedded-metadata-tool-summary}
-\begin{tabularx}{\textwidth}{@{}p{0.27\textwidth} r r r r r X@{}}
-\toprule
-\textbf{Sistema} &
-\textbf{Clean} &
-\textbf{Correct} &
-\textbf{FN} &
-\textbf{FP} &
-\textbf{OOD weapon flags} &
-\textbf{Interpretazione} \\
-\midrule
-
-\gls{magnetaxiomtool}/\gls{magnetai} &
-11 & 9 & 2 & 0 & 4/4 &
-Due falsi negativi clean e assorbimento completo dei quattro casi \gls{ood}
-nella classe operativa \texttt{weapon}. \\
-
-\gls{excirefoto2025} \texttt{D20} &
-11 & 9 & 2 & 0 & 1/4 &
-Configurazione più restrittiva: riduce i flag \gls{ood}, ma mantiene due falsi
-negativi sui casi clean sensibili. \\
-
-\gls{excirefoto2025} \texttt{D50} &
-11 & 9 & 2 & 0 & 4/4 &
-Configurazione intermedia: comportamento clean analogo a \texttt{D20}, ma con
-maggiore assorbimento dei casi \gls{ood}. \\
-
-\gls{excirefoto2025} \texttt{D80} &
-11 & 11 & 0 & 0 & 4/4 &
-Configurazione più permissiva: nessun errore sui casi clean sensibili, ma
-assorbimento completo dei casi \gls{ood}. \\
-
-\gls{cellebriteinseyets} &
-11 & 11 & 0 & 0 & 3/4 &
-Nessun errore sui casi clean sensibili, ma tre casi \gls{ood} su quattro vengono
-ricondotti alla classe operativa \texttt{weapon}. \\
-
-\gls{griffeye}/\gls{t3kcore} &
-11 & 10 & 1 & 0 & 1/4 &
-Un falso negativo clean dovuto all'assenza del bookmark primario
-\texttt{CORE/Violence/Firearm}; basso assorbimento dei casi \gls{ood}. \\
-
-\bottomrule
-\end{tabularx}
-\end{table}
-
-La Tabella~\ref{tab:results-embedded-metadata-tool-delta} riporta la variazione
-delle metriche commerciali più direttamente interessate, confrontando il valore
-originale con il valore ottenuto escludendo i file con sensitive hits.
-
-\begin{table}[H]
-\centering
-\scriptsize
-\renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{4pt}
-\caption{Variazione delle metriche commerciali dopo esclusione dei sensitive metadata hits.}
-\label{tab:results-embedded-metadata-tool-delta}
-\begin{tabular}{@{}l l r r r@{}}
-\toprule
-\textbf{Sistema} &
-\textbf{Metrica} &
-\textbf{Originale} &
-\textbf{Senza sensitive hits} &
-\textbf{\(\Delta\)} \\
-\midrule
-
-\gls{magnetaxiomtool}/\gls{magnetai} &
-Clean accuracy &
-0.9500 &
-0.9515 &
-+0.0015 \\
-
-\gls{excirefoto2025} \texttt{D20} &
-Clean accuracy &
-0.9270 &
-0.9282 &
-+0.0012 \\
-
-\gls{excirefoto2025} \texttt{D50} &
-Clean accuracy &
-0.9440 &
-0.9454 &
-+0.0014 \\
-
-\gls{excirefoto2025} \texttt{D80} &
-Clean accuracy &
-0.9150 &
-0.9141 &
--0.0009 \\
-
-\gls{cellebriteinseyets} &
-Clean accuracy &
-0.9640 &
-0.9636 &
--0.0004 \\
-
-\gls{griffeye}/\gls{t3kcore} &
-Clean accuracy &
-0.9780 &
-0.9788 &
-+0.0008 \\
-
-\midrule
-
-\gls{magnetaxiomtool}/\gls{magnetai} &
-OOD weapon flag rate &
-0.3600 &
-0.3548 &
--0.0052 \\
-
-\gls{excirefoto2025} \texttt{D20} &
-OOD weapon flag rate &
-0.2380 &
-0.2379 &
--0.0001 \\
-
-\gls{excirefoto2025} \texttt{D50} &
-OOD weapon flag rate &
-0.3400 &
-0.3347 &
--0.0053 \\
-
-\gls{excirefoto2025} \texttt{D80} &
-OOD weapon flag rate &
-0.5220 &
-0.5181 &
--0.0039 \\
-
-\gls{cellebriteinseyets} &
-OOD weapon flag rate &
-0.2920 &
-0.2883 &
--0.0037 \\
-
-\gls{griffeye}/\gls{t3kcore} &
-OOD weapon flag rate &
-0.2600 &
-0.2601 &
-+0.0001 \\
-
-\bottomrule
-\end{tabular}
-
-\vspace{0.4em}
-\footnotesize
-\textit{Nota.} I valori ``senza sensitive hits'' sono ottenuti escludendo gli
-11 casi clean e i 4 casi \gls{ood} individuati dall'audit dei metadati embedded.
-Le variazioni riportate misurano l'impatto quantitativo dell'esclusione sulle
-metriche aggregate, ma non stabiliscono un nesso causale tra metadati embedded e
-decisione del tool.
-\end{table}
-
-I risultati del controllo mostrano che l'esclusione dei file con sensitive hits
-non modifica in modo sostanziale le metriche aggregate. Le variazioni di clean
-accuracy rimangono comprese tra -0.0009 e +0.0015, mentre le variazioni del
-weapon flag rate sui campioni \gls{ood} rimangono inferiori a 0.006 in valore
-assoluto. Inoltre, poiché nessuno dei 15 casi appartiene agli artefatti
-adversariali o anti-forensi, le metriche di robustezza sotto perturbazioni non
-sono interessate da questo limite residuale.
-
-Pertanto, i casi individuati vengono mantenuti nel benchmark e discussi come
-controllo di sensitività e limite operativo documentato della cecità del bundle,
-piuttosto che come fattore invalidante dei risultati sperimentali. In termini
-metodologici, questo controllo rafforza la tracciabilità dell'esperimento: il
-bundle rimane utilizzabile per la valutazione black-box, ma la presenza
-residuale di metadati embedded potenzialmente informativi viene esplicitata e
-trattata come limite controllato.
+Il leave-out sensitivity check, calcolato escludendo i 15 file con sensitive
+hits, conferma che le metriche aggregate non cambiano in modo sostanziale: le
+variazioni di clean accuracy rimangono comprese tra -0.0009 e +0.0015, mentre le
+variazioni del weapon flag rate sui campioni \gls{ood} rimangono inferiori a
+0.006 in valore assoluto. Pertanto, i casi individuati vengono mantenuti nel
+benchmark e discussi come limite operativo documentato della cecità del bundle,
+non come fattore invalidante dei risultati sperimentali. La presenza residuale di
+metadati embedded suggerisce tuttavia che, in studi successivi o in validazioni
+operative, la neutralizzazione dei metadati dovrebbe essere inclusa come controllo
+preventivo nella fase di costruzione del bundle cieco.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -2669,7 +2454,7 @@ Proxy &
 0.978 &
 0.016 &
 0.370 &
-Migliore baseline clean tra i proxy, con basso tasso di falsi negativi sulla
+Valore di clean accuracy più elevato tra i proxy, con basso tasso di falsi negativi sulla
 classe \texttt{weapon}; tuttavia, una quota non trascurabile di input OOD viene
 ricondotta alla classe \texttt{weapon}. \\
 
@@ -2721,7 +2506,7 @@ Commerciale black-box &
 0.978 &
 0.036 &
 0.260 &
-Migliore accuracy clean tra i tool commerciali e più basso assorbimento OOD tra
+Valore di clean accuracy più elevato tra i tool commerciali e più basso assorbimento OOD tra
 le configurazioni commerciali principali considerate, pur con una quota residua
 di falsi negativi sulla classe \texttt{weapon}. \\
 
@@ -2825,7 +2610,7 @@ Magnet Griffeye / T3K CORE &
 0.974 / 0.004 &
 Histogram modification; acc. 0.963; FNR 0.068 &
 34 FN &
-Migliore profilo commerciale aggregato sotto trasformazioni anti-forensi, con
+Profilo commerciale più selettivo sotto trasformazioni anti-forensi, con
 \gls{fpr} molto contenuto ma falsi negativi residui sotto modifiche tonali. \\
 
 \bottomrule
@@ -2878,7 +2663,7 @@ anti-forense, ma la tendenza ad assorbire input \gls{ood} nella classe
 \texttt{weapon}.
 
 Anche i tool commerciali mostrano una degradazione aggregata limitata.
-\gls{griffeye}/\gls{t3kcore} ottiene la migliore accuracy anti-forense aggregata,
+\gls{griffeye}/\gls{t3kcore} presenta il valore più elevato di accuracy anti-forense aggregata,
 pari a 0.974, seguito da \gls{cellebriteinseyets},
 \gls{excirefoto2025} in configurazione \texttt{D50} e \gls{magnetai}. Tuttavia,
 l'interpretazione operativa varia da tool a tool. \gls{griffeye}/\gls{t3kcore}
@@ -2919,7 +2704,7 @@ EfficientNet-B0 &
 0.695 / 0.283 &
 Sigma Zero; acc. 0.015; drop 0.963 &
 963 induced errors; 489 W$\rightarrow$NW e 474 NW$\rightarrow$W &
-Massima vulnerabilità proxy nello scenario white-box; l'elevata clean accuracy
+Vulnerabilità proxy più marcata nello scenario white-box; l'elevata clean accuracy
 non garantisce robustezza adversarial. \\
 
 ResNet18 &
@@ -2961,7 +2746,7 @@ Magnet Griffeye / T3K CORE &
 0.969 / 0.009 &
 Sigma Zero; acc. 0.959; FNR 0.074 &
 37 FN &
-Migliore accuracy commerciale aggregata nello scenario adversarial, con basso
+Valore più elevato di accuracy commerciale aggregata nello scenario adversarial, con basso
 \gls{fpr} ma sensibilità residua a perturbazioni sparse. \\
 
 \bottomrule
@@ -3030,7 +2815,7 @@ a 0.442, generando over-triggering semantico piuttosto che occultamento
 sistematico della classe \texttt{weapon}. \gls{cellebriteinseyets} mostra un
 recall elevato e una degradazione contenuta, ma mantiene un tasso di falsi
 positivi superiore rispetto a \gls{griffeye}/\gls{t3kcore}.
-\gls{griffeye}/\gls{t3kcore} ottiene la migliore accuracy commerciale aggregata
+\gls{griffeye}/\gls{t3kcore} presenta il valore più elevato di accuracy commerciale aggregata
 nello scenario adversarial e il false positive rate più basso, pur conservando
 falsi negativi residui sulla classe \texttt{weapon}.
 
@@ -3402,76 +3187,59 @@ valutazione finale.
 \label{sec:results-implications}
 % ─────────────────────────────────────────────────────────────────────────────
 
-I risultati del Capitolo~\ref{chap:results} confermano che la robustezza
-operativa dei sistemi \gls{ai}-based per il triage forense di immagini non può
-essere dedotta dalla sola accuracy clean. L'interpretazione dei risultati deve
-considerare congiuntamente la direzione degli errori, il comportamento sugli
-input \gls{ood}, la sensibilità alle perturbazioni, la configurazione operativa
-dei tool e i limiti derivanti dalla valutazione black-box.
+I risultati del Capitolo~\ref{chap:results} mostrano che la robustezza operativa
+di sistemi \gls{ai}-based per il triage forense di immagini non può essere
+dedotta dalla sola accuracy clean. L'interpretazione deve considerare
+congiuntamente la direzione degli errori, il comportamento sugli input \gls{ood},
+la sensibilità alle perturbazioni, la configurazione operativa dei tool, la
+normalizzazione degli output black-box e la disponibilità di revisione umana.
 
-Il primo elemento critico riguarda i falsi negativi sulla classe
-\texttt{weapon}. In un workflow di triage, una mancata segnalazione può ridurre
-la probabilità che un contenuto investigativamente rilevante venga sottoposto a
-revisione umana. Questo rischio è evidente nei modelli proxy, in particolare nel
-caso di EfficientNet-B0 sotto \gls{sigmazero}, dove l'accuracy scende a 0.015 e
-vengono introdotte 489 transizioni
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}. Anche \gls{fgsm} produce un
-effetto rilevante sullo stesso modello, con accuracy pari a 0.575 e 321
-transizioni \texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}. Questi risultati
-mostrano che un'elevata baseline clean non garantisce affidabilità in presenza di
-input manipolati.
+Il risultato più rilevante in prospettiva forense riguarda i falsi negativi sulla
+classe \texttt{weapon}. Nel subset clean, tali errori sono già presenti, ma il
+rischio aumenta in modo marcato in alcune condizioni perturbate. Il caso più
+estremo è EfficientNet-B0 sotto \gls{sigmazero}, in cui l'accuracy scende a
+0.015 e vengono introdotte 489 transizioni
+\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}; anche \gls{fgsm} sullo stesso
+modello produce 321 transizioni nella medesima direzione. In un workflow di
+triage, questo tipo di errore è più critico di una riduzione aggregata di
+accuracy, perché può ridurre la probabilità che contenuti investigativamente
+rilevanti vengano sottoposti a revisione.
 
-Il secondo elemento riguarda il comportamento sugli input \gls{ood}. I campioni
-fuori distribuzione non sono trattati come una terza classe supervisionata, ma
-come rischio operativo autonomo. EfficientNet-B0 riconduce alla classe
-\texttt{weapon} il 36.96\% delle predizioni \gls{ood}, ResNet18 il 43.76\% e
-\gls{clip} l'83.56\%. Anche i tool commerciali mostrano weapon flag rate non
-nulli sui campioni \gls{ood}: 36.00\% per \gls{magnetai}, 34.00\% per
-\gls{excirefoto2025} in configurazione \texttt{D50}, 29.20\% per
-\gls{cellebriteinseyets} e 26.00\% per
-\gls{griffeye}/\gls{t3kcore}. Tali valori non rappresentano errori binari in senso
-stretto, ma descrivono il rischio di assorbimento operativo di contenuti fuori
-distribuzione entro una classe investigativamente sensibile.
+Il comportamento \gls{ood} rappresenta un secondo elemento autonomo di rischio.
+I campioni fuori distribuzione non sono trattati come una terza classe
+supervisionata, ma come verifica della tendenza dei sistemi ad assorbire input
+anomali o semanticamente ambigui nella classe operativa \texttt{weapon}. I
+modelli proxy e i tool commerciali mostrano tutti weapon flag rate non nulli sui
+campioni \gls{ood}; tali valori non rappresentano errori binari in senso stretto,
+ma descrivono il rischio di priorità investigativa impropria o di aumento del
+carico di revisione umana.
 
-Il terzo elemento riguarda la configurazione operativa dei sistemi di semantic
-retrieval. Nel caso di \gls{excirefoto2025}, il parametro
-\texttt{Distance limit} modifica direttamente il profilo di rischio: la
-configurazione \texttt{D20} riduce falsi positivi e weapon flag \gls{ood}, ma
-aumenta il rischio di falsi negativi; \texttt{D80} massimizza il recall, ma
-accresce il rumore operativo; \texttt{D50} rappresenta un compromesso intermedio
-nel protocollo sperimentale. La configurazione del tool deve quindi essere
-documentata come parte integrante della valutazione.
+La valutazione dei tool commerciali deve essere interpretata con particolare
+prudenza. \gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
+\gls{cellebriteinseyets} e \gls{griffeye}/\gls{t3kcore} sono valutati come
+sistemi black-box o quasi black-box: non sono disponibili architettura, training
+set, preprocessing interno, soglie decisionali, meccanismi di retrieval o logica
+proprietaria di generazione delle categorie e dei bookmark. Il confronto è quindi
+un confronto operativo di triage sul forensic evaluation bundle, non un confronto
+tra classificatori omogenei né una certificazione generale dei prodotti. Per la
+stessa ragione, metriche come AUROC non sono state assunte come metriche centrali
+del confronto commerciale.
 
-La valutazione presenta inoltre limiti sperimentali. I tool commerciali sono
-analizzati come sistemi black-box o quasi black-box: non sono disponibili
-architettura, training set, soglie decisionali, preprocessing interno,
-meccanismi di retrieval, logica di categorizzazione o criteri interni di
-generazione dei bookmark. La comparazione tra \gls{magnetaxiomtool}/\gls{magnetai},
-\gls{excirefoto2025}, \gls{cellebriteinseyets} e
-\gls{griffeye}/\gls{t3kcore} deve quindi essere interpretata come confronto
-operativo di triage, non come confronto tra classificatori omogenei e pienamente
-ispezionabili. Per la stessa ragione, metriche come AUROC non sono state assunte
-come metriche centrali del confronto commerciale.
+I limiti sperimentali principali sono quattro. Primo, gli attacchi
+model-dependent sono generati rispetto a EfficientNet-B0 e devono essere letti
+alla luce dello scenario white-box considerato; la loro trasferibilità verso
+altri modelli e tool commerciali viene osservata empiricamente, ma non assunta
+come proprietà generale. Secondo, le trasformazioni anti-forensi considerate non
+esauriscono l'intero spazio delle manipolazioni realistiche possibili. Terzo, le
+metriche aggregate sui tool commerciali sono bundle-weighted e dipendono dalla
+composizione deliberatamente stressante del bundle. Quarto, l'audit sui metadati
+embedded ha individuato un limite residuale della cecità del bundle, quantitativamente
+contenuto ma metodologicamente rilevante per future validazioni.
 
-Un limite controllato riguarda la possibile presenza residuale di metadati
-embedded nei file immagine. L'audit ha rilevato 15 file con sensitive hits su
-11\,500 file complessivi. Tali casi sono stati analizzati separatamente nella
-Sezione~\ref{subsec:results-embedded-metadata-sensitivity} e non modificano in
-modo sostanziale l'interpretazione delle metriche aggregate. Essi costituiscono
-tuttavia un limite operativo documentato della cecità del bundle.
-
-Infine, la selezione delle perturbazioni non copre in modo esaustivo l'intero
-spazio dell'\gls{advml}. Gli attacchi adversariali e le trasformazioni
-anti-forensi sono stati selezionati come stressor sperimentali coerenti con la
-finalità forense della tesi. In particolare, gli attacchi model-dependent sono
-generati rispetto a EfficientNet-B0 e devono essere interpretati alla luce dello
-scenario white-box considerato; la loro trasferibilità verso altri modelli e tool
-commerciali viene valutata empiricamente, ma non assunta come proprietà generale.
-
-In sintesi, il Capitolo~\ref{chap:results} mostra che la robustezza operativa
-degli strumenti \gls{ai}-based in ambito forense è una proprietà
-multidimensionale. Essa dipende dalla prestazione clean, dalla direzione degli
-errori, dal comportamento \gls{ood}, dal tipo di perturbazione, dalla
-configurazione del tool e dal mapping degli output black-box. Questa evidenza
-motiva la discussione conclusiva sulle implicazioni operative, metodologiche e
-giuridiche dell'uso di strumenti \gls{ai}-assisted nei workflow forensi.
+In sintesi, il capitolo mostra che la robustezza operativa in ambito forense è
+una proprietà multidimensionale: dipende non solo dalla prestazione nominale, ma
+anche dal tipo di errore, dalla condizione dell'input, dal comportamento fuori
+distribuzione, dalla configurazione del tool, dalla tracciabilità del bundle e
+dal ruolo dell'analista umano. Il Capitolo successivo riprende queste evidenze
+per discuterne le implicazioni metodologiche, operative e giuridiche nel contesto
+dell'uso di strumenti \gls{ai}-assisted nei workflow di \gls{df}.
