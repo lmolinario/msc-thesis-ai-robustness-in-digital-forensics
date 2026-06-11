@@ -3,38 +3,14 @@
 
 Il presente capitolo espone i risultati sperimentali della pipeline di valutazione
 \textsc{FAIR-Lab}, con particolare attenzione alla robustezza operativa di sistemi
-di classificazione automatizzata di immagini basati su \gls{ai} in uno scenario di
-triage forense digitale. L'obiettivo dell'analisi non è ordinare i modelli
-esclusivamente in base alla loro accuratezza nominale, bensì valutare se gli
-output prodotti rimangano affidabili in presenza di input puliti, campioni
-out-of-distribution, trasformazioni anti-forensi e perturbazioni adversariali. In
-questa prospettiva, assumono particolare rilievo i falsi negativi relativi alla
-classe \texttt{weapon}, le predizioni ad alta confidenza su campioni fuori
-distribuzione e i requisiti di tracciabilità necessari per confrontare modelli
-proxy trasparenti con strumenti forensi commerciali operanti come sistemi
-black-box \cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
-
-Nel corso del capitolo viene mantenuta una distinzione metodologica esplicita
-tra i modelli proxy trasparenti, per i quali risultano disponibili architetture,
-checkpoint, rappresentazioni intermedie e output predittivi, e gli strumenti
-forensi commerciali, che operano come sistemi black-box o quasi black-box, poiché
-la loro logica interna di classificazione è proprietaria e non direttamente
-ispezionabile. Tale distinzione non è soltanto tecnica, ma incide direttamente
-sulla tracciabilità, sull'auditabilità e sull'interpretazione probatoria degli
-output assistiti da \gls{ai} all'interno di workflow forensi
-\cite{iso27041,iso27042,swgde2014validation}.
-
-L'organizzazione del capitolo segue la sequenza operativa attesa delle diverse
-condizioni sperimentali in un contesto investigativo. Le prestazioni su input
-puliti definiscono la baseline di riferimento; il comportamento su campioni
-out-of-distribution e su trasformazioni anti-forensi rappresenta condizioni
-realistiche che possono emergere nel corso di indagini digitali; le perturbazioni
-adversariali descrivono invece tentativi deliberati di evasione e costituiscono
-la condizione di stress più severa considerata in questa valutazione
-\cite{hendrycks2017baseline,hendrycks2019benchmarking,biggio2018wild}. La
-valutazione degli strumenti forensi commerciali è trattata come livello
-black-box distinto, introdotto dopo la presentazione dei risultati controllati dei
-modelli proxy e dopo la definizione del forensic evaluation bundle.
+\gls{ai}-based per la classificazione e il triage di immagini in ambito forense.
+L'analisi non mira a costruire un ranking assoluto basato sulla sola accuracy,
+ma a valutare come modelli proxy e strumenti commerciali black-box reagiscano a
+input clean, campioni \gls{ood}, trasformazioni anti-forensi e perturbazioni
+adversariali. La lettura dei risultati mantiene quindi un focus esplicitamente
+forense: falsi negativi sulla classe \texttt{weapon}, assorbimento operativo degli
+input fuori distribuzione, tracciabilità del bundle, normalizzazione degli output
+black-box e necessità di revisione umana \cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -328,14 +304,17 @@ sensibilmente superiore, pari a 0.134. Inoltre, la confidenza media di \gls{clip
 è pari a 0.559, molto inferiore rispetto a quella osservata per EfficientNet-B0
 e ResNet18.
 
-Questo comportamento è coerente con la natura zero-shot di \gls{clip}: il
-modello non è addestrato direttamente sul task binario
-\texttt{weapon}/\texttt{non\_weapon} e la tendenza osservata a produrre un recall
-elevato sulla classe \texttt{weapon}, al costo di un maggiore \gls{fpr}, riflette
-il meccanismo di matching semantico adottato dal modello più che una scelta
-progettuale esplicita orientata alla sensibilità. La minore confidenza media
-suggerisce inoltre che la maggiore propensione a segnalare immagini come
-\texttt{weapon} non coincide necessariamente con predizioni ad alta sicurezza.
+Questo comportamento non deve essere interpretato come effetto di una
+classificazione zero-shot. Nel protocollo sperimentale adottato, \gls{clip} è
+utilizzato come visual encoder pre-addestrato e congelato, adattato al task
+\texttt{weapon}/\texttt{non\_weapon} mediante una testa binaria supervisionata.
+La tendenza osservata a produrre un recall elevato sulla classe \texttt{weapon},
+al costo di un maggiore \gls{fpr}, è quindi più correttamente letta come effetto
+della rappresentazione visuale pre-addestrata e della calibrazione della testa
+binaria rispetto al task specifico, non come risultato di un meccanismo zero-shot.
+La minore confidenza media suggerisce inoltre che la maggiore propensione a
+segnalare immagini come \texttt{weapon} non coincide necessariamente con predizioni
+ad alta sicurezza.
 
 La Tabella~\ref{tab:results-clean-confusion-matrices} riporta le confusion
 matrix aggregate per modello, utilizzando il layout
@@ -597,10 +576,9 @@ clean.
 
 \vspace{0.4em}
 \footnotesize
-\textit{Nota.} Il drop è definito come
-\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). Valori positivi indicano
-una degradazione della prestazione; valori negativi indicano un lieve incremento
-rispetto alla baseline clean.
+\textit{Nota.} Il drop è definito nella Sezione~\ref{sec:results-scope};
+valori positivi indicano degradazione rispetto alla baseline clean, mentre valori
+negativi indicano un lieve incremento nella specifica distribuzione valutata.
 \end{table}
 
 La Figura~\ref{fig:results-antiforensic-accuracy-drop-heatmap} visualizza la
@@ -610,7 +588,7 @@ tra modelli e trasformazioni.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.88\textwidth]{images/fig_anti_forensic_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop sotto trasformazioni anti-forensi. Il drop è definito come \(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\): valori positivi indicano una degradazione della prestazione, mentre valori negativi indicano un lieve incremento rispetto alla baseline clean.}
+\caption{Accuracy drop sotto trasformazioni anti-forensi. Il drop è definito nella Sezione~\ref{sec:results-scope}; valori positivi indicano degradazione rispetto alla baseline clean.}
 \label{fig:results-antiforensic-accuracy-drop-heatmap}
 \end{figure}
 
@@ -742,10 +720,9 @@ alla baseline clean.
 
 \vspace{0.4em}
 \footnotesize
-\textit{Nota.} Il drop è definito come
-\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). Valori positivi indicano
-una degradazione della prestazione; valori negativi indicano un lieve incremento
-rispetto alla baseline clean.
+\textit{Nota.} Il drop è definito nella Sezione~\ref{sec:results-scope};
+valori positivi indicano degradazione rispetto alla baseline clean, mentre valori
+negativi indicano un lieve incremento nella specifica distribuzione valutata.
 \end{table}
 
 La Figura~\ref{fig:results-adversarial-accuracy-drop-heatmap} visualizza la
@@ -756,7 +733,7 @@ sono stati generati contro tale modello.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.88\textwidth]{images/fig_adversarial_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop sotto perturbazioni adversariali. Il drop è definito come \(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). La degradazione più marcata riguarda EfficientNet-B0 sotto \gls{sigmazero}, evidenziando la vulnerabilità del modello nello scenario white-box considerato.}
+\caption{Accuracy drop sotto perturbazioni adversariali. Il drop è definito nella Sezione~\ref{sec:results-scope}. La degradazione più marcata riguarda EfficientNet-B0 sotto \gls{sigmazero}, nello scenario white-box considerato.}
 \label{fig:results-adversarial-accuracy-drop-heatmap}
 \end{figure}
 
@@ -1030,24 +1007,27 @@ non interpretabili e comportamento sui campioni \gls{ood}.
 
 La Tabella~\ref{tab:results-commercial-overview} riporta una sintesi bundle-weighted
 delle metriche dei sistemi commerciali e delle configurazioni
-operative considerate. Per \gls{excirefoto2025}, le tre righe corrispondono alle
-configurazioni \texttt{D20}, \texttt{D50} e \texttt{D80} del parametro
-\texttt{Distance limit}. La configurazione \texttt{D50} viene utilizzata come
-riferimento principale nelle discussioni comparative, poiché rappresenta il
-compromesso intermedio tra configurazione restrittiva e configurazione
-permissiva.
+operative considerate. Per tutti i profili commerciali, la normalizzazione ha
+prodotto matching completo rispetto al forensic evaluation bundle
+(11\,500/11\,500 file), senza righe non mappate o output non interpretabili. Per
+\gls{excirefoto2025}, le tre righe corrispondono alle configurazioni
+\texttt{D20}, \texttt{D50} e \texttt{D80} del parametro \texttt{Distance limit}.
+La configurazione \texttt{D50} viene utilizzata come riferimento principale nelle
+discussioni comparative, poiché rappresenta il compromesso intermedio tra
+configurazione restrittiva e configurazione permissiva.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{3.4pt}
+\setlength{\tabcolsep}{2.6pt}
 \caption{Sintesi bundle-weighted della valutazione black-box dei sistemi commerciali.}
 \label{tab:results-commercial-overview}
-\begin{tabular}{@{}l r r r r r r r@{}}
+\begin{tabular}{@{}l r r r r r r r r@{}}
 \toprule
 \textbf{Sistema} &
 \textbf{Matched} &
+\textbf{Clean FNR} &
 \textbf{Acc.} &
 \textbf{Bal.} &
 \textbf{R\textsubscript{w}} &
@@ -1056,22 +1036,22 @@ permissiva.
 \textbf{OOD W-rate} \\
 \midrule
 \gls{magnetaxiomtool}/\gls{magnetai}
-& 11\,500 & 0.933 & 0.933 & 0.901 & 0.099 & 0.035 & 0.360 \\
+& 11\,500 & 0.070 & 0.933 & 0.933 & 0.901 & 0.099 & 0.035 & 0.360 \\
 
 \gls{excirefoto2025} \texttt{D20}
-& 11\,500 & 0.911 & 0.911 & 0.857 & 0.143 & 0.036 & 0.238 \\
+& 11\,500 & 0.120 & 0.911 & 0.911 & 0.857 & 0.143 & 0.036 & 0.238 \\
 
 \gls{excirefoto2025} \texttt{D50}
-& 11\,500 & 0.925 & 0.925 & 0.949 & 0.051 & 0.099 & 0.340 \\
+& 11\,500 & 0.042 & 0.925 & 0.925 & 0.949 & 0.051 & 0.099 & 0.340 \\
 
 \gls{excirefoto2025} \texttt{D80}
-& 11\,500 & 0.887 & 0.887 & 0.981 & 0.019 & 0.207 & 0.522 \\
+& 11\,500 & 0.014 & 0.887 & 0.887 & 0.981 & 0.019 & 0.207 & 0.522 \\
 
 \gls{cellebriteinseyets}
-& 11\,500 & 0.958 & 0.958 & 0.958 & 0.042 & 0.042 & 0.292 \\
+& 11\,500 & 0.032 & 0.958 & 0.958 & 0.958 & 0.042 & 0.042 & 0.292 \\
 
 \gls{griffeye}/\gls{t3kcore}
-& 11\,500 & 0.972 & 0.972 & 0.951 & 0.049 & 0.007 & 0.260 \\
+& 11\,500 & 0.036 & 0.972 & 0.972 & 0.951 & 0.049 & 0.007 & 0.260 \\
 
 \bottomrule
 \end{tabular}
@@ -1079,22 +1059,23 @@ permissiva.
 \vspace{0.4em}
 \footnotesize
 \textit{Nota.} \textit{Matched} indica il numero di file del forensic evaluation
-bundle ricondotti a un output normalizzato. \textit{Acc.} indica l'accuracy sul
-task binario interpretabile; \textit{Bal.} indica la balanced accuracy;
-\(R_w\) indica il recall per la classe \texttt{weapon}; \gls{fnr} e \gls{fpr}
-indicano rispettivamente false negative rate e false positive rate; \textit{OOD
-W-rate} indica la quota di campioni \gls{ood} ricondotti operativamente alla
-classe \texttt{weapon}. Le metriche binarie sono calcolate sui campioni
-\texttt{weapon}/\texttt{non\_weapon}; i campioni \gls{ood} sono analizzati
-separatamente. I valori sono bundle-weighted e riflettono la composizione
-sperimentale del bundle, non una valutazione assoluta o certificativa dei
-prodotti.
+bundle ricondotti a un output normalizzato. \textit{Clean FNR} indica il false
+negative rate osservato sulla baseline non perturbata. \textit{Acc.} indica
+l'accuracy sul task binario interpretabile; \textit{Bal.} indica la balanced
+accuracy; \(R_w\) indica il recall per la classe \texttt{weapon}; \gls{fnr} e
+\gls{fpr} indicano rispettivamente false negative rate e false positive rate sul
+bundle binario complessivo; \textit{OOD W-rate} indica la quota di campioni
+\gls{ood} ricondotti operativamente alla classe \texttt{weapon}. Le metriche
+binarie sono calcolate sui campioni \texttt{weapon}/\texttt{non\_weapon}; i
+campioni \gls{ood} sono analizzati separatamente. I valori sono bundle-weighted e
+riflettono la composizione sperimentale del bundle, non una valutazione assoluta
+o certificativa dei prodotti.
 \end{table}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{images/fig_forensic_tools_global_metrics_comparison.pdf}
-\caption{Confronto globale delle metriche aggregate dei tool commerciali black-box.}
+\caption{Confronto globale delle metriche aggregate dei tool commerciali black-box sul forensic evaluation bundle. Il grafico confronta accuracy, balanced accuracy, recall \texttt{weapon}, FNR, FPR e OOD weapon flag rate dopo la normalizzazione degli output.}
 \label{fig:results-forensic-tools-global-comparison}
 \end{figure}
 
@@ -1159,27 +1140,6 @@ identificativo del bundle e nessuna riga è rimasta non mappata. Le metriche
 binarie sono calcolate sulle 11\,000 immagini appartenenti alle classi operative
 \texttt{weapon} e \texttt{non\_weapon}; le 500 immagini \gls{ood} sono invece
 analizzate separatamente mediante il weapon flag rate.
-
-\begin{table}[H]
-\centering
-\caption{Sintesi della normalizzazione dell'export \gls{magnetaxiomtool}/\gls{magnetai}.}
-\label{tab:results-magnet-normalization-summary}
-\small
-\begin{tabular}{lr}
-\toprule
-\textbf{Elemento} & \textbf{Valore} \\
-\midrule
-Immagini nel forensic evaluation bundle & 11\,500 \\
-Righe matched & 11\,500 \\
-Righe unmatched & 0 \\
-Righe binarie interpretabili & 11\,000 \\
-Campioni \gls{ood} analizzati separatamente & 500 \\
-Output non interpretabili / unknown & 0 \\
-Predizioni operative positive sul bundle completo & 5\,329 \\
-Predizioni operative negative sul bundle completo & 6\,171 \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 La Tabella~\ref{tab:results-magnet-global-metrics} riporta le metriche
 complessive di \gls{magnetai} sul task binario
@@ -1311,9 +1271,9 @@ dell'output.
 
 La Tabella~\ref{tab:results-magnet-attack-metrics} riporta il comportamento di
 \gls{magnetai} rispetto a tutte le perturbazioni considerate nel forensic
-evaluation bundle. Tra gli attacchi adversariali, \gls{fgsm} costituisce la
-condizione più critica per il tool, con accuracy pari a 0.867, recall sulla
-classe \texttt{weapon} pari a 0.808 e \gls{fnr} pari a 0.192. Tra le
+evaluation bundle. Il dettaglio per condizione mostra un incremento dei falsi negativi soprattutto
+sotto \gls{fgsm}, con accuracy pari a 0.867, recall sulla classe
+\texttt{weapon} pari a 0.808 e \gls{fnr} pari a 0.192. Tra le
 trasformazioni anti-forensi, \gls{gaussianblur} produce il valore di \gls{fnr}
 più elevato, pari a 0.120.
 
@@ -1771,27 +1731,6 @@ binarie sono calcolate sulle 11\,000 immagini appartenenti alle classi operative
 \texttt{weapon} e \texttt{non\_weapon}; le 500 immagini \gls{ood} sono invece
 analizzate separatamente mediante il weapon flag rate.
 
-\begin{table}[H]
-\centering
-\caption{Sintesi della normalizzazione dell'export di \gls{cellebriteinseyets}.}
-\label{tab:results-cellebrite-normalization-summary}
-\small
-\begin{tabular}{lr}
-\toprule
-\textbf{Elemento} & \textbf{Valore} \\
-\midrule
-Immagini nel forensic evaluation bundle & 11\,500 \\
-Righe matched & 11\,500 \\
-Righe unmatched & 0 \\
-Righe binarie interpretabili & 11\,000 \\
-Campioni \gls{ood} analizzati separatamente & 500 \\
-Output non interpretabili / unknown & 0 \\
-Predizioni operative positive sul bundle completo & 5\,497 \\
-Predizioni operative negative sul bundle completo & 6\,003 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
 La Tabella~\ref{tab:results-cellebrite-global-metrics} riporta le metriche
 complessive di \gls{cellebriteinseyets} sul task binario
 \texttt{weapon}/\texttt{non\_weapon}. Il tool raggiunge un'accuracy pari a
@@ -1907,9 +1846,9 @@ di triage.
 
 La Tabella~\ref{tab:results-cellebrite-attack-metrics} riporta il comportamento
 di \gls{cellebriteinseyets} rispetto a tutte le perturbazioni considerate nel
-forensic evaluation bundle. Tra gli attacchi adversariali, \gls{fgsm} costituisce
-la condizione più critica, con accuracy pari a 0.918, recall sulla classe
-\texttt{weapon} pari a 0.894 e \gls{fnr} pari a 0.106. Tra le trasformazioni
+forensic evaluation bundle. Nel dettaglio per condizione, \gls{fgsm} produce il maggiore incremento dei
+falsi negativi tra le perturbazioni adversariali, con accuracy pari a 0.918,
+recall sulla classe \texttt{weapon} pari a 0.894 e \gls{fnr} pari a 0.106. Tra le trasformazioni
 anti-forensi, \gls{histogrammodification} produce il valore di \gls{fnr} più
 elevato, pari a 0.060, mentre \gls{gaussianblur} produce il valore di \gls{fpr}
 più elevato, pari a 0.056.
@@ -2081,7 +2020,12 @@ analizzate separatamente mediante il weapon flag rate. Il mapping operativo
 considera positivo soltanto il bookmark \texttt{CORE/Violence/Firearm}, mentre
 gli altri bookmark semanticamente collegati ad armi, violenza o contesto
 militare sono conservati come informazione raw ma non sono utilizzati come
-positivi primari.
+positivi primari. Questa scelta rende il mapping volutamente conservativo: il
+basso \gls{fpr} osservato per \gls{griffeye}/\gls{t3kcore} deve quindi essere
+letto anche come effetto della regola di normalizzazione adottata, non come prova
+autonoma di superiorità intrinseca del tool. Una mappatura più permissiva,
+includendo bookmark weapon-adjacent come positivi secondari, avrebbe potuto
+aumentare il recall ma anche il numero di falsi positivi.
 
 \begin{table}[H]
 \centering
@@ -2110,7 +2054,9 @@ False negatives & 271 \\
 \footnotesize
 \textit{Nota.} Le metriche sono calcolate sulle 11\,000 immagini appartenenti al
 task binario \texttt{weapon}/\texttt{non\_weapon}. Le 500 immagini \gls{ood} non
-sono incluse nel calcolo dell'accuracy e sono analizzate separatamente.
+sono incluse nel calcolo dell'accuracy e sono analizzate separatamente. Il basso
+\gls{fpr} riflette anche il mapping conservativo basato sul solo bookmark
+\texttt{CORE/Violence/Firearm} come positivo primario.
 \end{table}
 
 \begin{table}[H]
@@ -2186,13 +2132,14 @@ esterni al dominio principale.
 
 La Tabella~\ref{tab:results-griffeye-attack-metrics} riporta il comportamento di
 \gls{griffeye}/\gls{t3kcore} rispetto a tutte le perturbazioni considerate nel
-forensic evaluation bundle. Tra gli attacchi adversariali, \gls{sigmazero}
-costituisce la condizione più critica, con accuracy pari a 0.959, recall sulla
-classe \texttt{weapon} pari a 0.926 e \gls{fnr} pari a 0.074. \gls{fgsm}
+forensic evaluation bundle. Nel dettaglio per condizione, \gls{sigmazero} produce il valore di \gls{fnr}
+più elevato tra le perturbazioni adversariali, con accuracy pari a 0.959,
+recall sulla classe \texttt{weapon} pari a 0.926 e \gls{fnr} pari a 0.074. \gls{fgsm}
 produce un comportamento molto vicino, con accuracy pari a 0.960 e \gls{fnr}
-pari a 0.072. Tra le trasformazioni anti-forensi, Histogram Modification produce
-il valore di \gls{fnr} più elevato, pari a 0.068, mentre Contrast Stretching
-produce il valore di \gls{fpr} più elevato, pari a 0.010.
+pari a 0.072. Tra le trasformazioni anti-forensi, \gls{histogrammodification} produce il
+valore di \gls{fnr} più elevato, pari a 0.068, mentre
+\gls{contraststretching} produce il valore di \gls{fpr} più elevato, pari a
+0.010.
 
 \begin{table}[H]
 \centering
@@ -2506,9 +2453,9 @@ Commerciale black-box &
 0.978 &
 0.036 &
 0.260 &
-Valore di clean accuracy più elevato tra i tool commerciali e più basso assorbimento OOD tra
-le configurazioni commerciali principali considerate, pur con una quota residua
-di falsi negativi sulla classe \texttt{weapon}. \\
+Clean accuracy più elevata tra i tool commerciali nel mapping conservativo adottato; basso
+assorbimento OOD, ma con una quota residua di falsi negativi sulla classe
+\texttt{weapon}. \\
 
 \bottomrule
 \end{tabularx}
@@ -2518,8 +2465,10 @@ Il confronto sui dati clean mostra che la prestazione nominale non è sufficient
 per descrivere la robustezza operativa di un sistema. EfficientNet-B0 raggiunge
 la clean accuracy più elevata tra i proxy, mentre
 \gls{griffeye}/\gls{t3kcore} ottiene la clean accuracy più elevata tra i tool
-commerciali considerati. \gls{cellebriteinseyets} mantiene tuttavia un recall
-\texttt{weapon} leggermente superiore a livello aggregato. Il comportamento sugli
+commerciali considerati, ma tale risultato va letto alla luce del mapping
+conservativo adottato per il bookmark \texttt{CORE/Violence/Firearm}.
+\gls{cellebriteinseyets} mantiene tuttavia un recall \texttt{weapon} leggermente
+superiore a livello aggregato. Il comportamento sugli
 input \gls{ood} evidenzia una dimensione ulteriore del rischio: anche gli
 strumenti commerciali con buona accuracy clean presentano weapon flag rate non
 nulli su contenuti esterni al task.
@@ -2531,12 +2480,13 @@ di prioritizzazione. I tool commerciali presentano valori più contenuti:
 \gls{magnetai} raggiunge un OOD weapon flag rate pari a 0.360,
 \gls{excirefoto2025} in configurazione \texttt{D50} pari a 0.340,
 \gls{cellebriteinseyets} pari a 0.292 e
-\gls{griffeye}/\gls{t3kcore} pari a 0.260. Questi risultati suggeriscono una risposta
-operativa più conservativa agli input fuori distribuzione. Tuttavia, poiché i
+\gls{griffeye}/\gls{t3kcore} pari a 0.260. Questi risultati mostrano una minore
+propensione operativa dei tool commerciali, nel protocollo adottato, ad assorbire
+i campioni fuori distribuzione nella classe \texttt{weapon}. Tuttavia, poiché i
 meccanismi interni, le soglie e la calibrazione dei tool commerciali non sono
 accessibili, tali valori non devono essere interpretati come prova di effettiva
-capacità di riconoscimento OOD, ma come comportamento osservabile nel protocollo
-sperimentale adottato.
+capacità di riconoscimento OOD, ma come comportamento osservabile dopo la
+normalizzazione black-box e rispetto alle regole di mapping adottate.
 
 \paragraph{Robustezza rispetto alle trasformazioni anti-forensi.}
 
@@ -2621,8 +2571,7 @@ Profilo commerciale più selettivo sotto trasformazioni anti-forensi, con
 \textit{Nota.} Per i modelli proxy, i valori aggregati sono calcolati sulle
 cinque trasformazioni anti-forensi considerate. Per i sistemi commerciali, i
 valori derivano dagli output normalizzati sul forensic evaluation bundle. Il drop
-è definito come
-\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). W$\rightarrow$NW indica
+è definito nella Sezione~\ref{sec:results-scope}. W$\rightarrow$NW indica
 transizioni da \texttt{weapon} a \texttt{non\_weapon}; FN indica falsi negativi;
 FNR indica false negative rate; FPR indica false positive rate.
 \end{table}
@@ -2739,15 +2688,16 @@ Cellebrite Inseyets &
 0.955 / 0.009 &
 FGSM; acc. 0.918; FNR 0.106 &
 53 FN &
-Buona stabilità commerciale aggregata anche nello scenario adversarial, ma
-FGSM resta la condizione più critica. \\
+Buona stabilità commerciale aggregata anche nello scenario adversarial, con
+incremento dei falsi negativi soprattutto sotto FGSM. \\
 
 Magnet Griffeye / T3K CORE &
 0.969 / 0.009 &
 Sigma Zero; acc. 0.959; FNR 0.074 &
 37 FN &
-Valore più elevato di accuracy commerciale aggregata nello scenario adversarial, con basso
-\gls{fpr} ma sensibilità residua a perturbazioni sparse. \\
+Accuracy commerciale aggregata più elevata nello scenario adversarial; il basso
+\gls{fpr} riflette anche il mapping conservativo, mentre resta una sensibilità
+residua a perturbazioni sparse. \\
 
 \bottomrule
 \end{tabularx}
@@ -2757,8 +2707,7 @@ Valore più elevato di accuracy commerciale aggregata nello scenario adversarial
 \textit{Nota.} Per i modelli proxy, i valori aggregati sono calcolati sulle
 cinque perturbazioni adversariali considerate. Per i sistemi commerciali, i
 valori derivano dagli output normalizzati sul forensic evaluation bundle. Il drop
-è definito come
-\(\text{accuracy}_{clean}-\text{accuracy}_{perturbed}\). W$\rightarrow$NW indica
+è definito nella Sezione~\ref{sec:results-scope}. W$\rightarrow$NW indica
 transizioni da \texttt{weapon} a \texttt{non\_weapon}; FN indica falsi negativi;
 FNR indica false negative rate; FPR indica false positive rate.
 \end{table}
@@ -3179,9 +3128,6 @@ critica dei risultati, mantenendo centrale il ruolo dell'analista umano nella
 valutazione finale.
 
 
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Operational Interpretation and Experimental Limitations}
 \label{sec:results-implications}
@@ -3194,52 +3140,25 @@ congiuntamente la direzione degli errori, il comportamento sugli input \gls{ood}
 la sensibilità alle perturbazioni, la configurazione operativa dei tool, la
 normalizzazione degli output black-box e la disponibilità di revisione umana.
 
-Il risultato più rilevante in prospettiva forense riguarda i falsi negativi sulla
-classe \texttt{weapon}. Nel subset clean, tali errori sono già presenti, ma il
-rischio aumenta in modo marcato in alcune condizioni perturbate. Il caso più
-estremo è EfficientNet-B0 sotto \gls{sigmazero}, in cui l'accuracy scende a
-0.015 e vengono introdotte 489 transizioni
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}; anche \gls{fgsm} sullo stesso
-modello produce 321 transizioni nella medesima direzione. In un workflow di
-triage, questo tipo di errore è più critico di una riduzione aggregata di
-accuracy, perché può ridurre la probabilità che contenuti investigativamente
-rilevanti vengano sottoposti a revisione.
+In prospettiva forense, il punto più rilevante è che la degradazione prestazionale
+non ha sempre lo stesso significato operativo. Un falso negativo sulla classe
+\texttt{weapon} può impedire che un contenuto investigativamente rilevante venga
+sottoposto a revisione; un falso positivo o un weapon flag su contenuti \gls{ood}
+può invece aumentare il carico di triage e generare priorità improprie. Per
+questo motivo, le evidenze più significative del capitolo riguardano i failure
+mode osservati, più che il solo valore aggregato di accuracy.
 
-Il comportamento \gls{ood} rappresenta un secondo elemento autonomo di rischio.
-I campioni fuori distribuzione non sono trattati come una terza classe
-supervisionata, ma come verifica della tendenza dei sistemi ad assorbire input
-anomali o semanticamente ambigui nella classe operativa \texttt{weapon}. I
-modelli proxy e i tool commerciali mostrano tutti weapon flag rate non nulli sui
-campioni \gls{ood}; tali valori non rappresentano errori binari in senso stretto,
-ma descrivono il rischio di priorità investigativa impropria o di aumento del
-carico di revisione umana.
+La valutazione dei tool commerciali deve essere letta con particolare prudenza:
+\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
+\gls{cellebriteinseyets} e \gls{griffeye}/\gls{t3kcore} sono valutati attraverso
+output osservabili e regole di mapping documentate, non tramite accesso a
+modelli, soglie o logiche proprietarie interne. Il confronto commerciale è quindi
+un confronto operativo sul forensic evaluation bundle, non una certificazione
+generale dei prodotti né un confronto tra classificatori omogenei.
 
-La valutazione dei tool commerciali deve essere interpretata con particolare
-prudenza. \gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
-\gls{cellebriteinseyets} e \gls{griffeye}/\gls{t3kcore} sono valutati come
-sistemi black-box o quasi black-box: non sono disponibili architettura, training
-set, preprocessing interno, soglie decisionali, meccanismi di retrieval o logica
-proprietaria di generazione delle categorie e dei bookmark. Il confronto è quindi
-un confronto operativo di triage sul forensic evaluation bundle, non un confronto
-tra classificatori omogenei né una certificazione generale dei prodotti. Per la
-stessa ragione, metriche come AUROC non sono state assunte come metriche centrali
-del confronto commerciale.
-
-I limiti sperimentali principali sono quattro. Primo, gli attacchi
-model-dependent sono generati rispetto a EfficientNet-B0 e devono essere letti
-alla luce dello scenario white-box considerato; la loro trasferibilità verso
-altri modelli e tool commerciali viene osservata empiricamente, ma non assunta
-come proprietà generale. Secondo, le trasformazioni anti-forensi considerate non
-esauriscono l'intero spazio delle manipolazioni realistiche possibili. Terzo, le
-metriche aggregate sui tool commerciali sono bundle-weighted e dipendono dalla
-composizione deliberatamente stressante del bundle. Quarto, l'audit sui metadati
-embedded ha individuato un limite residuale della cecità del bundle, quantitativamente
-contenuto ma metodologicamente rilevante per future validazioni.
-
-In sintesi, il capitolo mostra che la robustezza operativa in ambito forense è
-una proprietà multidimensionale: dipende non solo dalla prestazione nominale, ma
-anche dal tipo di errore, dalla condizione dell'input, dal comportamento fuori
-distribuzione, dalla configurazione del tool, dalla tracciabilità del bundle e
-dal ruolo dell'analista umano. Il Capitolo successivo riprende queste evidenze
-per discuterne le implicazioni metodologiche, operative e giuridiche nel contesto
-dell'uso di strumenti \gls{ai}-assisted nei workflow di \gls{df}.
+I principali limiti metodologici --- attacchi model-dependent generati rispetto a
+EfficientNet-B0, spazio non esaustivo delle trasformazioni anti-forensi, metriche
+commerciali bundle-weighted e residua sensibilità ai metadati embedded --- sono
+ripresi in modo organico nel Capitolo~\ref{chap:conclusions}, insieme alle
+implicazioni metodologiche, operative e giuridiche dell'impiego di strumenti
+\gls{ai}-assisted nei workflow di \gls{df}.
