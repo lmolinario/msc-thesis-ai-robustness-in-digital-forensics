@@ -24,8 +24,9 @@ non sono stati trattati come fine autonomo di \gls{advml}, ma come stressor
 sperimentali utili a valutare il comportamento di modelli e tool in condizioni
 non ideali. L'obiettivo principale è stato quindi verificare se l'automazione
 \gls{ai}-based mantenga un comportamento coerente quando viene esposta a input
-clean, campioni \gls{ood}, trasformazioni anti-forensi, perturbazioni
-adversariali e output prodotti da strumenti commerciali black-box.
+clean, campioni \gls{ood}, trasformazioni anti-forensi e perturbazioni
+adversariali, includendo anche l'osservazione e la normalizzazione degli output
+prodotti da strumenti commerciali black-box.
 
 Il percorso sperimentale ha compreso la costruzione di un dataset frozen da
 1\,500 immagini, la valutazione dei modelli proxy EfficientNet-B0, ResNet18 e
@@ -138,7 +139,7 @@ Clean baseline
   l'affidabilità in un workflow forense. \\
 
 OOD
-& \gls{clip} presenta il weapon flag rate più alto sui campioni \gls{ood}
+& \gls{clip} presenta il tasso più alto di predizioni \texttt{weapon} sui campioni \gls{ood}
   (0.8356); i modelli discriminativi mostrano invece livelli elevati di
   confidenza anche in assenza di contenuto pertinente al task.
 & Gli input fuori distribuzione possono essere assorbiti nella classe
