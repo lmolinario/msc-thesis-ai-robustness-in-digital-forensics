@@ -463,7 +463,7 @@ La fase iniziale ha previsto l'organizzazione di cinque sorgenti eterogenee
 all'interno della directory \codepath{datasets/raw/}. Le sorgenti comprendono
 dataset pubblici, materiale derivato da repository specializzate, raccolte
 ottenute mediante scraping controllato, contenuti acquisiti secondo una logica
-\gls{osint} e dati provenienti da fonti deep web-oriented. L'obiettivo non era
+\gls{osint} e dati raccolti tramite procedure deep web-oriented. L'obiettivo non era
 costruire un benchmark visivamente omogeneo, ma un pool iniziale sufficientemente
 vario da rappresentare alcune delle condizioni di eterogeneità che caratterizzano
 le indagini digitali contemporanee.
@@ -519,8 +519,9 @@ documentano invece le esclusioni tecniche e i duplicati rimossi.
 
 Questa fase ha una funzione esclusivamente tecnica. La pipeline evita
 deliberatamente di inferire la classe finale di un'immagine dalla cartella
-sorgente, dal nome del file o da eventuali pre-label automatici. Tale scelta
-riduce il rischio di propagare bias o errori delle sorgenti originarie nella
+sorgente, dal nome del file o da eventuali pre-label automatici. In questo modo,
+la sorgente viene mantenuta come variabile descrittiva e di  audit, ma non come criterio di ground truth.
+Tale scelta riduce il rischio di propagare bias o errori delle sorgenti originarie nella
 selezione finale, mantenendo la distinzione tra provenienza del campione e
 assegnazione semantica verificata.
 
@@ -685,8 +686,8 @@ semantico esplicito formulato durante la revisione \textit{human-in-the-loop}.
 In questo modo, il manifest diventa l'artefatto centrale per documentare il
 passaggio da pool tecnico a dataset semanticamente validato.
 
-La scelta di introdurre i campi di revisione in un file separato rispetto al
-metadata tecnico consente di preservare la distinzione tra due livelli della
+La scelta di introdurre i campi di revisione in un file separato rispetto ai
+metadati tecnici consente di preservare la distinzione tra due livelli della
 pipeline. Il primo livello riguarda l'esistenza, la leggibilità e l'unicità
 tecnica dei file. Il secondo riguarda invece la loro pertinenza rispetto al task
 forense. Questa separazione è particolarmente importante perché un'immagine
@@ -710,21 +711,29 @@ pool preparato, assegnando una delle etichette finali previste: \texttt{weapon},
 revisore vengono salvate in un database operativo e registrate in log dedicati,
 in modo da rendere documentabile il processo di selezione.
 
-I criteri semantici adottati sono stati definiti in modo restrittivo.
-La classe \texttt{weapon} include soltanto contenuti visivi firearm-oriented,
-quali armi da fuoco individuali realistiche, chiaramente visibili e coerenti
-con il task di classificazione; la valutazione
-si basa sull'apparenza visiva dell'oggetto nell'immagine e non sulla possibilità
-di accertarne la natura materiale, salvo i casi in cui elementi visivi evidenti
-ne suggeriscano la natura di replica, giocattolo, modello airsoft o contenuto
-sintetico, che vengono ricondotti alla classe \texttt{ood}. La classe
+I criteri semantici adottati sono stati definiti in modo restrittivo. La classe
+\texttt{weapon} include soltanto contenuti visivi firearm-oriented, quali armi
+da fuoco individuali realistiche, chiaramente visibili e coerenti con il task di
+classificazione. La valutazione si basa sull'apparenza visiva dell'oggetto
+nell'immagine e non sulla possibilità di accertarne la natura materiale.
+
+I casi nei quali elementi visivi evidenti suggeriscono repliche, giocattoli,
+modelli airsoft o contenuti sintetici non vengono inclusi nella classe
+\texttt{weapon}, ma ricondotti alla classe \texttt{ood}. La classe
 \texttt{non\_weapon} comprende immagini realistiche prive di armi, ma plausibili
-come esempi negativi nel dominio investigativo considerato. La classe \texttt{ood}
-raccoglie invece contenuti borderline o fuori distribuzione, come coltelli,
-spade, repliche, airsoft, immagini sintetiche, videogiochi, mezzi militari
-pesanti, esplosioni, scene di guerra, immagini fortemente degradate o contenuti
-anomali rispetto al dominio di interesse. La classe \texttt{exclude} è riservata
-a file non utilizzabili o non coerenti con il dataset finale.
+come esempi negativi nel dominio investigativo considerato. La classe
+\texttt{ood} raccoglie invece contenuti borderline o fuori distribuzione, come
+coltelli, spade, repliche, airsoft, immagini sintetiche, videogiochi, mezzi
+militari pesanti, esplosioni, scene di guerra, immagini fortemente degradate o
+contenuti anomali rispetto al dominio di interesse. La classe \texttt{exclude}
+è riservata a file non utilizzabili o non coerenti con il dataset finale.
+
+Le etichette finali devono quindi essere interpretate come classi operative del
+protocollo sperimentale, non come accertamenti assoluti sulla natura giuridica,
+materiale o probatoria dell'oggetto rappresentato. Questa distinzione è
+particolarmente rilevante nei casi borderline, nei quali la decisione di
+includere un campione nel set \gls{ood} riflette la volontà di non forzare
+contenuti ambigui dentro il task binario principale.
 
 Il risultato della revisione è il dataset frozen ufficiale, registrato nel
 manifest \codepath{datasets/final/manifests/manual_selection_final_1500.csv}.
@@ -787,13 +796,18 @@ Di conseguenza, le conclusioni relative alla classe \texttt{non\_weapon}
 devono essere interpretate rispetto alla composizione effettiva del dataset
 congelato e non come stima generale della distribuzione dei negativi realistici
 in scenari forensi eterogenei.
-
+Tale limite non invalida il bilanciamento del task binario, ma richiede cautela
+nell'interpretare la classe negativa come rappresentazione esaustiva di tutti i
+possibili negativi forensi.
 
 Il protocollo di selezione è stato condotto da un singolo revisore, secondo
 criteri espliciti e documentati. Questa scelta rappresenta un limite rispetto a
 protocolli multi-revisore con misura formale di accordo inter-annotatore, ma
 consente di mantenere piena tracciabilità delle decisioni, coerenza applicativa
 dei criteri e riproducibilità documentale del processo di freezing del dataset.
+Per questa ragione, il protocollo privilegia la tracciabilità della decisione e
+la coerenza applicativa dei criteri rispetto alla misurazione statistica
+dell'accordo tra annotatori.
 
 A partire dal dataset frozen viene inoltre generato il subset binario ufficiale
 per gli esperimenti adversariali e anti-forensi, memorizzato in
@@ -865,10 +879,12 @@ delle perturbazioni e analisi dei risultati. Dall'altro lato, permette di
 mantenere una separazione controllata tra i campioni utilizzati per
 l'addestramento dei proxy model e quelli impiegati come holdout
 sperimentale, riducendo il rischio di leakage nella successiva valutazione
-di robustezza. I fold non sono quindi introdotti per stimare una
-prestazione media tramite cross-validation tradizionale, ma per garantire
-una struttura sperimentale riproducibile, bilanciata e coerente con la
-generazione fold-aware dei checkpoint e degli artefatti perturbati.
+di robustezza. I fold non sono quindi introdotti come procedura di model selection o come
+stima generale della performance tramite cross-validation tradizionale. Essi
+definiscono invece unità sperimentali fold-aware: per ciascun target fold, i
+proxy model sono addestrati sui fold rimanenti e valutati sul fold mantenuto in
+holdout, così da preservare una separazione controllata tra training,
+generazione delle perturbazioni e valutazione di robustezza.
 
 \begin{table}[H]
 \centering
@@ -902,6 +918,12 @@ che non dovrebbero essere trattati come esempi ordinari di \texttt{weapon} o
 \texttt{non\_weapon}. La separazione del set \gls{ood} consente quindi di
 distinguere la robustezza sul task binario dalla gestione di input borderline,
 anomali o semanticamente esterni al dominio operativo.
+Il set \gls{ood} rimane quindi pulito lungo l'intero protocollo sperimentale:
+esso non è utilizzato per addestrare i proxy model, non è impiegato come target
+per gli attacchi adversariali e non viene sottoposto alle trasformazioni
+anti-forensi. La sua funzione è valutare il comportamento dei sistemi rispetto
+a input semanticamente esterni o borderline, non misurare la robustezza
+perturbativa su una terza classe.
 
 Gli output principali della fase di split generation sono tre artefatti:
 \texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv} e
@@ -1344,8 +1366,7 @@ forense.
 Gli attacchi adversariali model-dependent, al contrario, richiedono
 l'interazione con un modello target e, in alcuni casi, procedure iterative o di
 ottimizzazione. \gls{fgsm} rappresenta una baseline efficiente, poiché richiede
-una singola stima del gradiente per immagine. Attacchi come
- \gls{onepixel},  \gls{sigmazero} e \gls{superdeepfool} sono invece
+una singola stima del gradiente per immagine. Attacchi come \gls{onepixel}, \gls{sigmazero} e \gls{superdeepfool} sono invece
 più onerosi e vengono inclusi non perché rappresentino necessariamente lo
 scenario operativo più probabile, ma perché consentono di stressare il
 comportamento dei classificatori in condizioni controllate. La perturbazione
@@ -1566,16 +1587,18 @@ successiva integrazione nel forensic evaluation bundle.
 \node[branch] (advbranch) at (-4.2,-4.8)
 {\shortstack{
     \textbf{Adversarial branch}\\[1mm]
-    \scriptsize gradient-based or model-guided\\
+    \scriptsize model-dependent and adversarial-style\\
     \scriptsize perturbation generation
 }};
 
 \node[branch] (afbranch) at (4.2,-4.8)
 {\shortstack{
     \textbf{Anti-forensic branch}\\[1mm]
-    \scriptsize realistic file/content transformations\\
-    \scriptsize without supervised OOD generation
+    \scriptsize model-agnostic file/content transformations\\
+    \scriptsize not optimized against a target classifier
 }};
+
+
 
 % Outputs per branch
 \node[output] (advout) at (-4.2,-7.0)
@@ -1667,15 +1690,19 @@ rilevante perché consente di separare le perturbazioni costruite rispetto a un
 classificatore specifico da alterazioni visive più generali.
 
 All'interno del protocollo sperimentale, \gls{colorshift} viene comunque incluso
-nel gruppo adversarial perché la sua finalità sperimentale non è simulare un
-ordinario intervento di post-processing forense, ma verificare se una variazione
-cromatica semanticamente conservativa possa alterare il comportamento dei
-classificatori automatici. L'output viene salvato in formato \gls{jpeg} con
-qualità 95: questa scelta preserva la plausibilità pratica della trasformazione
-e mantiene una compressione limitata. L'eventuale contributo residuo della
-ricompressione è tracciato come parte dell'artefatto generato e non altera la
-distinzione metodologica tra perturbazioni adversariali e trasformazioni
-anti-forensi.
+nel gruppo adversarial in senso operativo e non come attacco adversariale
+white-box in senso stretto. La sua finalità non è simulare un ordinario
+intervento di post-processing forense, ma verificare se una variazione cromatica
+globale, semanticamente conservativa e non ottimizzata rispetto al modello,
+possa alterare il comportamento dei classificatori automatici. L'output viene
+salvato in formato \gls{jpeg} con qualità 95: questa scelta preserva la
+plausibilità pratica della trasformazione e mantiene una compressione limitata.
+L'eventuale contributo residuo della ricompressione è tracciato come parte
+dell'artefatto generato e non altera la distinzione metodologica tra
+perturbazioni adversariali, trasformazioni adversarial-style model-agnostic e
+trasformazioni anti-forensi.
+
+
 
 
 Il protocollo non mira a costruire un benchmark esaustivo di robustezza
@@ -1904,6 +1931,12 @@ metodologica è valutare la stabilità della classificazione in presenza di
 modifiche realistiche che possono alterare caratteristiche visive o statistiche
 dell'immagine senza necessariamente renderla semanticamente irriconoscibile.
 
+
+L'aggettivo anti-forense viene quindi utilizzato in senso sperimentale e
+operativo: non implica necessariamente l'intenzione soggettiva dell'autore della
+manipolazione, ma indica trasformazioni che possono ridurre, alterare o rendere
+meno stabile l'analisi automatizzata dell'immagine.
+
 Lo script ufficiale per questa fase è
 \codepath{datasets/scripts/attacks/13_generate_anti_forensic_attacks.py}.
 Esso utilizza come input il manifest
@@ -2048,9 +2081,13 @@ Autocontrast con cutoff percentuale pari a 1.0; output in formato
 
 Tali trasformazioni non vengono intese come catalogo esaustivo delle tecniche
 anti-forensi applicabili alle immagini digitali, né come semplici operazioni di
-data augmentation, ma come manipolazioni controllate dell'artefatto immagine
-utili a valutare la stabilità operativa della classificazione in presenza di
-degradazioni realistiche.
+data augmentation. Nel protocollo \gls{fairlab}, esse assumono una funzione
+operativa specifica: simulare manipolazioni realistiche e riproducibili
+dell'artefatto immagine, potenzialmente capaci di modificare caratteristiche
+visive, statistiche o di compressione rilevanti per sistemi automatici di
+classificazione e triage.
+
+
 
 
 Nel run consolidato della pipeline, ciascuna trasformazione è stata applicata
