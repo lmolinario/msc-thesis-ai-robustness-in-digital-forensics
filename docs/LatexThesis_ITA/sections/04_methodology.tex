@@ -1502,7 +1502,6 @@ Anti-forensic
 Basso
 &
 Plausibile come post-processing semplice con possibile impatto sui classificatori. \\
-
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1806,7 +1805,6 @@ model-agnostic
 \glsentryshort{jpeg}
 &
 1000 \\
-
 \midrule
 \textbf{Totale}
 &
@@ -1877,7 +1875,6 @@ Model-agnostic, color-space perturbation
 \texttt{blue\_shift = -12}; \texttt{saturation\_factor = 1.1};
 \texttt{contrast\_factor = 1.0}; output in formato \glsentryshort{jpeg}
 con qualità 95. \\
-
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -2035,7 +2032,6 @@ Equalizzazione dell'istogramma dell'immagine.
 Autocontrast con cutoff percentuale controllato.
 &
 1000 \\
-
 \midrule
 \textbf{Totale}
 &
@@ -2098,7 +2094,6 @@ Normalizzazione del contrasto
 &
 Autocontrast con cutoff percentuale pari a 1.0; output in formato
 \glsentryshort{jpeg} con qualità pari a 95. \\
-
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -2414,37 +2409,36 @@ bookmark esportati rispetto al task sperimentale.
 \centering
 \caption{Strumenti commerciali inclusi nella valutazione operativo-forense finale.}
 \label{tab:methodology-forensic-tools}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-\begin{tabularx}{\textwidth}{@{}L{3.5cm}L{3.4cm}X@{}}
+\begin{tabularx}{\textwidth}{@{}L{3.7cm}L{3.2cm}X@{}}
 \toprule
-\textbf{Strumento} & \textbf{Versione / ambiente} & \textbf{Ruolo metodologico nel protocollo} \
+\textbf{Strumento} & \textbf{Versione / ambiente} & \textbf{Ruolo metodologico nel protocollo} \\
 \midrule
 \gls{magnetaxiomtool} / \gls{magnetai}
 &
 \texttt{Magnet AXIOM 10.1.0.48673}
 &
-Piattaforma forense commerciale valutata attraverso gli output prodotti dal modulo \gls{magnetai} per la categorizzazione automatizzata di contenuti immagine, con particolare riferimento alla rilevazione di contenuti firearm-oriented o weapon-related. \
+Piattaforma forense commerciale valutata attraverso gli output prodotti dal modulo \gls{magnetai} per la categorizzazione automatizzata di contenuti immagine, con particolare riferimento alla rilevazione di contenuti firearm-oriented o weapon-related. \\
 \gls{excirefoto2025}
 &
 \texttt{Excire Foto 2025 4.1.5}
 &
-Software standalone general-purpose con funzionalità \gls{ai}-based di ricerca semantica e gestione visuale delle immagini, valutato come black-box image retrieval tool mediante prompt testuali orientati alla classe weapon. \
+Software standalone general-purpose con funzionalità \gls{ai}-based di ricerca semantica e gestione visuale delle immagini, valutato come black-box image retrieval tool mediante prompt testuali orientati alla classe weapon. \\
 \gls{cellebriteinseyets}
 &
 \texttt{Inseyets 10.9} / \texttt{Physical Analyzer 10.9.0.3029}
 &
-Piattaforma commerciale di analisi assistita dei contenuti multimediali, valutata attraverso le classificazioni esportate dal report di \texttt{Cellebrite Physical Analyzer} e normalizzate rispetto al forensic evaluation bundle. \
+Piattaforma commerciale di analisi assistita dei contenuti multimediali, valutata attraverso le classificazioni esportate dal report di \texttt{Cellebrite Physical Analyzer} e normalizzate rispetto al forensic evaluation bundle. \\
 \gls{griffeye} / \gls{t3kcore}
 &
 \texttt{Magnet Griffeye x64 26.2.108} / \texttt{T3K CORE 1.18.0}
 &
-Piattaforma commerciale di media triage e revisione forense, valutata attraverso i bookmark semantici automatici generati da \gls{t3kcore} e normalizzati rispetto al forensic evaluation bundle. \
+Piattaforma commerciale di media triage e revisione forense, valutata attraverso i bookmark semantici automatici generati da \gls{t3kcore} e normalizzati rispetto al forensic evaluation bundle. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle_manifest.csv} mediante \texttt{bundle_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
+Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo, viene importata o indicizzata esclusivamente la vista cieca del bundle. In secondo luogo, vengono esportati gli output osservabili prodotti dallo strumento, includendo, ove disponibili, nome del file, hash, categoria assegnata, tag, classificazioni, punteggi di confidenza e metadati di esportazione. In terzo luogo, gli output vengono ricondotti al file \texttt{bundle\_manifest.csv} mediante \texttt{bundle\_id}, hash crittografici o nome del file cieco, così da confrontare le categorie prodotte dal tool con la ground truth sperimentale.
+
 
 \begin{table}[H]
 \centering
@@ -2456,33 +2450,39 @@ Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo,
 \toprule
 \textbf{Tool / configurazione} &
 \textbf{Output osservabile} &
-\textbf{Regola operativa di normalizzazione} \
+\textbf{Regola operativa di normalizzazione} \\
 \midrule
 \gls{magnetaxiomtool} / \gls{magnetai}
 &
 Tag di categorizzazione immagine
 &
-Il tag \texttt{Possible weapons} viene ricodificato come \texttt{weapon_detected}; l'assenza del tag viene trattata come mancato rilevamento della categoria di interesse. \
+Il tag \texttt{Possible weapons} viene ricodificato come
+\texttt{weapon_detected}; l'assenza del tag viene trattata come mancato
+rilevamento della categoria di interesse. \\
 \gls{excirefoto2025}
 &
 Risultati di semantic retrieval per prompt firearm-oriented
 &
-L'unione dei risultati restituiti dai prompt selezionati viene ricodificata come \texttt{weapon_detected}; i file non recuperati da alcun prompt vengono trattati come non segnalati rispetto alla categoria weapon. \
+L'unione dei risultati restituiti dai prompt selezionati viene ricodificata
+come \texttt{weapon_detected}; i file non recuperati da alcun prompt vengono
+trattati come non segnalati rispetto alla categoria weapon. \\
 \gls{cellebriteinseyets}
 &
 Classificazioni esportate da \texttt{Cellebrite Physical Analyzer}
 &
-Le categorie weapon-related, quali \texttt{Armi}, \texttt{Pistola} e \texttt{Fucile}, vengono ricondotte a \texttt{weapon_detected}; output assenti, ambigui o non interpretabili sono mantenuti separati nell'audit. \
+Le categorie weapon-related, quali \texttt{Armi}, \texttt{Pistola} e
+\texttt{Fucile}, vengono ricondotte a \texttt{weapon_detected}; output
+assenti, ambigui o non interpretabili sono mantenuti separati nell'audit. \\
 \gls{griffeye} / \gls{t3kcore}
 &
 Bookmark semantici automatici
 &
-Il bookmark \texttt{CORE/Violence/Firearm} viene ricodificato come \texttt{weapon_detected}; altri bookmark collegati ad armi non da fuoco, violenza o contesto militare sono conservati solo come indicatori secondari. \
+Il bookmark \texttt{CORE/Violence/Firearm} viene ricodificato come
+\texttt{weapon_detected}; altri bookmark collegati ad armi non da fuoco,
+violenza o contesto militare sono conservati solo come indicatori secondari. \\
 \bottomrule
 \end{tabularx}
 \end{table}
-
-
 
 
 
@@ -2858,15 +2858,15 @@ perturbati.
 Nel caso della valutazione \gls{ood}, le 7500 righe di predizione derivano
 dalla valutazione delle 500 immagini fuori distribuzione rispetto ai cinque
 checkpoint fold-aware dei tre proxy model, secondo lo schema
-500~$\times$~5~$\times$~3~=~7\,500. Tale conteggio non deve essere interpretato
+500~$\times$~5~$\times$~3~=~7,500. Tale conteggio non deve essere interpretato
 come una moltiplicazione artificiale dei campioni disponibili: le 500 immagini
 \gls{ood} rimangono il riferimento semantico effettivo, mentre le predizioni
 ottenute sui cinque checkpoint consentono di osservare se la tendenza a
 classificare campioni fuori distribuzione come \texttt{weapon} o
-\texttt{non\_weapon} sia stabile, variabile o dipendente da uno specifico
+\texttt{non_weapon} sia stabile, variabile o dipendente da uno specifico
 addestramento.
 
-Analogamente, la distinzione tra righe con \texttt{attack\_family = none},
+Analogamente, la distinzione tra righe con \texttt{attack_family = none},
 righe adversariali e righe anti-forensi descrive la copertura della valutazione
 e non anticipa l'analisi quantitativa delle prestazioni, che rimane demandata al
 Capitolo~\ref{chap:results}.
@@ -3556,7 +3556,7 @@ presenti nel path o nel nome del file.
 I controlli automatici registrati nei summary JSON verificano la corrispondenza
 tra conteggi attesi e prodotti, l'unicità degli identificativi generati,
 l'unicità degli hash \gls{sha256}, la corretta scrittura dei manifest e, nel caso del
-bundle, la separazione dei metadati dagli input ciechi. Tali controlli non sostituiscono l'analisi critica dei risultati, ma consentono
+bundle, la separazione dei metadata dagli input ciechi. Tali controlli non sostituiscono l'analisi critica dei risultati, ma consentono
 di documentare la coerenza tra gli artefatti sperimentali prodotti e il
 protocollo definito.
 
