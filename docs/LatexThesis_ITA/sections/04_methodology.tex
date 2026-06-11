@@ -3328,7 +3328,7 @@ preserva l'utilità operativa nel raccordo con tool e formati eterogenei.
 La pipeline utilizza manifest progressivi. Il passaggio da
 \texttt{metadata.csv} a \texttt{review\_manifest\_full.csv}, poi a
 \texttt{manual\_selection\_final\_1500.csv},
-\texttt{manual\_selection\_adversarial\_subset.csv},
+\codepath{manual_selection_adversarial_subset.csv},
 \texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv},
 manifest degli attacchi, manifest anti-forense, \texttt{bundle\_manifest.csv},
 predizioni dei proxy model e manifest \gls{xai}, consente di ricostruire il
@@ -3556,13 +3556,15 @@ presenti nel path o nel nome del file.
 I controlli automatici registrati nei summary JSON verificano la corrispondenza
 tra conteggi attesi e prodotti, l'unicità degli identificativi generati,
 l'unicità degli hash \gls{sha256}, la corretta scrittura dei manifest e, nel caso del
-bundle, la separazione dei metadata dagli input ciechi. Tali controlli non sostituiscono l'analisi critica dei risultati, ma consentono
+bundle, la separazione dei metadati dagli input ciechi. Tali controlli non sostituiscono
+l'analisi critica dei risultati, ma consentono
 di documentare la coerenza tra gli artefatti sperimentali prodotti e il
 protocollo definito.
 
 La metodologia presenta infine alcuni limiti espliciti. La revisione semantica
 del dataset è stata condotta da un singolo revisore, quindi non include una
-misura formale di accordo inter-annotatore. Gli strumenti proprietari o professionali valutati sono trattati come sistemi
+misura formale di accordo inter-annotatore. Gli strumenti proprietari o professionali
+valutati sono trattati come sistemi
 black-box o quasi black-box, e le loro categorie interne
 potrebbero non essere perfettamente equivalenti al task binario
 \texttt{weapon}/\texttt{non\_weapon}.
