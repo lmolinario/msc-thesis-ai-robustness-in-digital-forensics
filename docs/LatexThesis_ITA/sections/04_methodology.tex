@@ -53,14 +53,17 @@ soltanto come proprietà tecnica del classificatore, ma come requisito
 metodologico per l'impiego prudente dell'automazione in un contesto
 investigativo.
 
-Il protocollo integra due livelli complementari. Il primo riguarda la
+Il protocollo integra due livelli valutativi complementari. Il primo riguarda la
 valutazione controllata dei modelli proxy, nella quale dataset, modelli,
 perturbazioni, metriche e approcci di \gls{xai} vengono definiti in modo
 riproducibile e comparabile. Il secondo riguarda la valutazione operativa
 black-box dei software selezionati, nella quale gli artefatti prodotti dal
 protocollo sperimentale vengono predisposti per essere analizzati da strumenti
-professionali o general-purpose dotati di funzionalità \gls{ai}-based. Questa
-distinzione consente di mantenere separati il controllo sperimentale proprio dei
+professionali o general-purpose dotati di funzionalità \gls{ai}-based. A questi
+due livelli si affianca un ramo \gls{ood} separato, non concepito come terza
+classe supervisionata, ma come asse di stress test operativo per osservare se
+input esterni, borderline o anomali vengano forzati nelle classi operative del
+task binario. Questa distinzione consente di mantenere separati il controllo sperimentale proprio dei
 modelli ispezionabili e la valutazione black-box richiesta dall'analisi di
 strumenti proprietari, spesso caratterizzati da moduli non pienamente
 accessibili \cite{sanna2024preliminary,sanna2025pixelperfect}.
@@ -75,6 +78,10 @@ valutazione baseline, il set \gls{ood} separato e gli artefatti manipolati da
 sottoporre ai modelli e agli strumenti forensi. Tali componenti costituiscono
 la base stabile del protocollo sperimentale e consentono di separare la
 costruzione degli artefatti dalla successiva analisi quantitativa dei risultati.
+Il presente capitolo descrive quindi il disegno sperimentale, gli artefatti
+prodotti e i controlli di tracciabilità, mentre l'interpretazione delle
+prestazioni, dei degradi e delle differenze tra modelli o strumenti viene
+demandata al Capitolo~\ref{chap:results}.
 Questa distinzione è essenziale per evitare che modifiche future ai dati, ai
 modelli o ai file manipolati alterino retroattivamente il perimetro della
 valutazione.
@@ -281,16 +288,29 @@ giuridiche del contenuto, né come classi semantiche generali valide in ogni
 contesto, ma come etichette operative definite per il protocollo sperimentale
 della tesi.
 
+Di conseguenza, il task non mira a coprire l'intero dominio della weapon
+detection, ma a costruire un caso di studio controllato, firearm-oriented e
+sufficientemente realistico per valutare la robustezza operativa di sistemi
+automatici di triage visuale.
+
 Nel task binario principale, la classe \texttt{weapon} rappresenta la classe
 positiva, cioè l'insieme delle immagini nelle quali è visibile un oggetto
-riconducibile alla categoria investigativamente rilevante considerata dal
-protocollo. La classe \texttt{non\_weapon} rappresenta invece la classe negativa
+oggetto riconducibile alla categoria firearm-oriented investigativamente
+rilevante considerata dal protocollo.
+La classe \texttt{non\_weapon} rappresenta invece la classe negativa
 in-domain: essa include immagini realistiche e interpretabili prive dell'oggetto
 di interesse, ma comunque compatibili con il dominio visuale della raccolta
-sperimentale. La classe \texttt{ood} costituisce un ramo separato della
+sperimentale.
+La classe \texttt{ood} costituisce un ramo separato della
 valutazione e raccoglie immagini che non devono essere forzate nella dicotomia
 \texttt{weapon}/\texttt{non\_weapon}, poiché ambigue, anomale, sintetiche,
 degradate, borderline o appartenenti a distribuzioni visive differenti.
+
+Nel contesto del triage forense, il falso negativo sulla classe
+\texttt{weapon} è considerato particolarmente critico perché può ridurre la
+probabilità che un artefatto rilevante venga sottoposto a revisione umana
+approfondita.
+
 
 I criteri di assegnazione delle classi sono stati formalizzati anche nello
 strumento di revisione manuale utilizzato per la costruzione del dataset finale.
@@ -807,7 +827,12 @@ consente di mantenere piena tracciabilità delle decisioni, coerenza applicativa
 dei criteri e riproducibilità documentale del processo di freezing del dataset.
 Per questa ragione, il protocollo privilegia la tracciabilità della decisione e
 la coerenza applicativa dei criteri rispetto alla misurazione statistica
-dell'accordo tra annotatori.
+dell'accordo tra annotatori. In questo senso, la componente
+\textit{human-in-the-loop} non riduce la riproducibilità del protocollo, ma ne
+costituisce una parte documentata, auditabile e coerente con la natura
+interpretativa della classificazione forense.
+
+
 
 A partire dal dataset frozen viene inoltre generato il subset binario ufficiale
 per gli esperimenti adversariali e anti-forensi, memorizzato in
