@@ -31,7 +31,8 @@ Il percorso sperimentale ha compreso la costruzione di un dataset frozen da
 1\,500 immagini, la valutazione dei modelli proxy EfficientNet-B0, ResNet18 e
 \gls{clip} in condizioni clean, \gls{ood}, anti-forensi e adversariali, e la
 produzione del forensic evaluation bundle da 11\,500 file per la valutazione
-black-box di Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets.
+black-box di \gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
+\gls{cellebriteinseyets} e \gls{griffeye}/\gls{t3kcore}.
 
 Il protocollo sperimentale adottato è denominato \gls{fairlab}. Esso non
 rappresenta un nuovo tool software né una nuova architettura generale, ma una procedura
@@ -91,14 +92,16 @@ identificativo e risultato metrico.
 
 \textbf{Contributo valutativo e interpretativo.} Il quarto contributo riguarda
 la valutazione comparativa di tre modelli proxy, EfficientNet-B0, ResNet18 e
-\gls{clip}, e di tre sistemi commerciali inclusi nella valutazione finale: Magnet AXIOM/Magnet.AI, Excire
-Foto 2025---valutato come software general-purpose con funzionalità
-\gls{ai}-based di semantic retrieval, non come prodotto esclusivamente
-forense---e Cellebrite Inseyets, considerato come commercial black-box
-\gls{ai}-assisted media analysis tool. I tool commerciali sono stati valutati
-mediante output osservabili, export normalizzati e ricodifica operativa rispetto
-al task \texttt{weapon}/\texttt{non\_weapon}, mantenendo separata la valutazione
-dei campioni \gls{ood}. L'analisi qualitativa tramite \gls{ig} su casi
+\gls{clip}, e di quattro sistemi commerciali inclusi nella valutazione finale:
+\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025}---valutato come
+software general-purpose con funzionalità \gls{ai}-based di semantic retrieval,
+non come prodotto esclusivamente forense---, \gls{cellebriteinseyets},
+considerato come commercial black-box \gls{ai}-assisted media analysis tool, e
+\gls{griffeye}/\gls{t3kcore}, valutato attraverso i bookmark semantici automatici
+generati da \gls{t3kcore}. I tool commerciali sono stati valutati mediante
+output osservabili, export normalizzati e ricodifica operativa rispetto al task
+\texttt{weapon}/\texttt{non\_weapon}, mantenendo separata la valutazione dei
+campioni \gls{ood}. L'analisi qualitativa tramite \gls{ig} su casi
 rappresentativi di EfficientNet-B0 completa il contributo interpretativo,
 supportando la lettura critica dei failure mode senza sostituire le metriche
 quantitative.
@@ -127,8 +130,10 @@ riassume le principali evidenze emerse dall'analisi in forma interpretativa.
 \midrule
 Clean baseline
 & EfficientNet-B0 mostra la prestazione clean più elevata tra i proxy
-  (0.978); Cellebrite Inseyets presenta la baseline commerciale più solida
-  (0.964).
+  (0.978); tra i tool commerciali, \gls{griffeye}/\gls{t3kcore} ottiene la
+  clean accuracy più elevata nel mapping conservativo adottato, mentre
+  \gls{cellebriteinseyets} presenta un profilo bilanciato con recall
+  \texttt{weapon} elevata.
 & La prestazione nominale è necessaria ma non sufficiente per valutare
   l'affidabilità in un workflow forense. \\
 
@@ -148,17 +153,19 @@ Anti-forensic
 
 Adversarial
 & EfficientNet-B0 mostra il collasso più marcato sotto \gls{sigmazero}
-  (accuracy 0.015); \gls{fgsm} produce degradazioni rilevanti anche nei tool
-  commerciali.
+  (accuracy 0.015); nei tool commerciali black-box gli effetti delle
+  perturbazioni risultano eterogenei e dipendono da sistema, configurazione e
+  mapping operativo.
 & Un'elevata accuracy clean non garantisce robustezza sotto input
   deliberatamente manipolati. \\
 
 Black-box tools
-& Cellebrite Inseyets mostra il profilo commerciale aggregato più stabile;
-  Magnet.AI ed Excire Foto 2025, quest'ultimo inteso come software
-  general-purpose di semantic retrieval, evidenziano failure mode differenti.
+& I tool commerciali mostrano profili operativi differenziati:
+  \gls{griffeye}/\gls{t3kcore} risulta più selettivo nel mapping conservativo
+  adottato, \gls{cellebriteinseyets} mantiene un profilo bilanciato,
+  \gls{magnetai} e \gls{excirefoto2025} evidenziano failure mode specifici.
 & I tool commerciali devono essere interpretati attraverso output osservabili,
-  soglie operative e normalizzazione black-box. \\
+  soglie operative, mapping e normalizzazione black-box. \\
 
 XAI
 & Le mappe \gls{ig} rendono ispezionabili casi rappresentativi, ma non costituiscono prova autonoma di robustezza.
@@ -181,19 +188,14 @@ non è equivalente alla validazione in condizioni operative.
 
 Le evidenze sperimentali hanno implicazioni dirette per l'uso responsabile dei
 sistemi \gls{ai}-based nei workflow forensi. La prima implicazione riguarda il
-ruolo dell'\gls{ai} nel triage. I sistemi automatici possono supportare la
-prioritizzazione delle evidenze, ma il loro output non deve essere interpretato
-come elemento probatorio autonomo. La predizione del sistema deve essere trattata
-come indicazione tecnica da sottoporre a verifica, contestualizzazione e
-documentazione da parte dell'analista.
-
-Dal punto di vista forense, l'output di un sistema \gls{ai}-based deve essere
-inteso come indicazione investigativa, non come determinazione probatoria
-autonoma. La sua utilità dipende dalla possibilità di ricostruire il contesto di
-generazione, la configurazione del tool, il dataset di riferimento, le soglie
-operative e il successivo controllo umano. Questo è particolarmente rilevante per
-i tool black-box, nei quali l'osservabilità è limitata agli output esportati e
-alla loro normalizzazione sperimentale.
+ruolo dell'\gls{ai} nel triage: i sistemi automatici possono supportare la
+prioritizzazione delle evidenze, ma il loro output deve essere trattato come
+indicazione investigativa da verificare, contestualizzare e documentare, non come
+determinazione probatoria autonoma. La sua utilità dipende dalla possibilità di
+ricostruire il contesto di generazione, la configurazione del tool, il dataset di
+riferimento, le soglie operative e il successivo controllo umano. Questo è
+particolarmente rilevante per i tool black-box, nei quali l'osservabilità è
+limitata agli output esportati e alla loro normalizzazione sperimentale.
 
 La seconda implicazione riguarda i falsi negativi. In un workflow di triage
 forense, un falso negativo sulla classe \texttt{weapon} può essere più critico di
@@ -242,9 +244,9 @@ distribuzione, immagini manipolate e output prodotti da tool black-box.
 \label{sec:conclusions-limitations}
 % ─────────────────────────────────────────────────────────────────────────────
 Il presente lavoro presenta alcuni limiti che devono essere dichiarati esplicitamente,
-affinché le conclusioni siano interpretate in modo corretto. Tali limiti non
-invalidano il protocollo sperimentale, ma ne delimitano il perimetro di validità e
-chiariscono in quali condizioni i risultati possono essere generalizzati.
+affinché le conclusioni siano interpretate in modo corretto. Tali limiti delimitano
+il perimetro interpretativo dei risultati e chiariscono le condizioni entro cui le
+conclusioni possono essere considerate valide.
 
 Un primo limite riguarda il dataset e il task sperimentale. Il dataset costruito è
 finalizzato a un problema investigativo specifico: la classificazione binaria tra
@@ -286,7 +288,10 @@ di triage, non come valutazione di classificatori omogenei su label identiche. A
 la ricodifica delle categorie commerciali verso le classi \texttt{weapon} e
 \texttt{non\_weapon} introduce una componente di incertezza interpretativa: tale
 mapping è controllato e documentato, ma non può eliminare completamente i limiti
-derivanti dall'opacità dei sistemi black-box.
+derivanti dall'opacità dei sistemi black-box. Questo aspetto è particolarmente
+rilevante per \gls{griffeye}/\gls{t3kcore}, dove il basso \gls{fpr} osservato
+riflette anche la scelta conservativa del bookmark positivo primario e non può
+essere interpretato come prova autonoma di superiorità intrinseca del tool.
 
 Un quarto limite riguarda l'interpretazione forense degli output automatici. La
 verifica sui metadata sensibili ha mostrato che una parte degli output commerciali
@@ -317,15 +322,20 @@ dell'incertezza e rafforzamento della riproducibilità.
 
 La prima direzione riguarda l'estensione del protocollo sperimentale a ulteriori
 versioni, configurazioni e categorie operative dei tool commerciali analizzati. Poiché
-Magnet AXIOM/Magnet.AI, Excire Foto 2025 e Cellebrite Inseyets sono sistemi
-black-box, i risultati ottenuti su una versione specifica non devono essere assunti
-come validi per release future, impostazioni differenti o funzionalità non esportate
-nel presente studio. Una validazione più ampia dovrebbe quindi ripetere il protocollo
-al variare delle versioni software, delle configurazioni operative e delle categorie
-semantiche disponibili. In parallelo, sarebbe utile estendere il dataset verso task
-multi-classe, domini visivi differenti e immagini acquisite in condizioni operative più
-eterogenee, includendo export da dispositivi reali, contenuti provenienti da piattaforme
-social o app di messaggistica e immagini degradate da pipeline di acquisizione forense.
+\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
+\gls{cellebriteinseyets} e \gls{griffeye}/\gls{t3kcore} sono sistemi black-box o
+quasi black-box, i risultati ottenuti su una versione specifica non devono essere
+assunti come validi per release future, impostazioni differenti o funzionalità non
+esportate nel presente studio. Una validazione più ampia dovrebbe quindi ripetere
+il protocollo al variare delle versioni software, delle configurazioni operative e
+delle categorie semantiche disponibili. In parallelo, sarebbe utile estendere il
+dataset verso task multi-classe, domini visivi differenti e immagini acquisite in
+condizioni operative più eterogenee, includendo export da dispositivi reali,
+contenuti provenienti da piattaforme social o app di messaggistica e immagini
+degradate da pipeline di acquisizione forense. Un'ulteriore estensione potrebbe
+includere procedure di revisione multi-annotatore o misure di agreement sulla
+selezione semantica dei campioni, così da quantificare la componente soggettiva
+introdotta dalla validazione \textit{human-in-the-loop}.
 
 La seconda direzione riguarda la gestione dell'incertezza e degli input fuori
 distribuzione. I risultati sui campioni \gls{ood} mostrano che i sistemi valutati
