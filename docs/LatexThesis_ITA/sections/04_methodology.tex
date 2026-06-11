@@ -2457,28 +2457,28 @@ Per ciascun tool, il protocollo prevede tre passaggi principali. In primo luogo,
 Tag di categorizzazione immagine
 &
 Il tag \texttt{Possible weapons} viene ricodificato come
-\texttt{weapon_detected}; l'assenza del tag viene trattata come mancato
+\texttt{weapon\_detected}; l'assenza del tag viene trattata come mancato
 rilevamento della categoria di interesse. \\
 \gls{excirefoto2025}
 &
 Risultati di semantic retrieval per prompt firearm-oriented
 &
 L'unione dei risultati restituiti dai prompt selezionati viene ricodificata
-come \texttt{weapon_detected}; i file non recuperati da alcun prompt vengono
+come \texttt{weapon\_detected}; i file non recuperati da alcun prompt vengono
 trattati come non segnalati rispetto alla categoria weapon. \\
 \gls{cellebriteinseyets}
 &
 Classificazioni esportate da \texttt{Cellebrite Physical Analyzer}
 &
 Le categorie weapon-related, quali \texttt{Armi}, \texttt{Pistola} e
-\texttt{Fucile}, vengono ricondotte a \texttt{weapon_detected}; output
+\texttt{Fucile}, vengono ricondotte a \texttt{weapon\_detected}; output
 assenti, ambigui o non interpretabili sono mantenuti separati nell'audit. \\
 \gls{griffeye} / \gls{t3kcore}
 &
 Bookmark semantici automatici
 &
 Il bookmark \texttt{CORE/Violence/Firearm} viene ricodificato come
-\texttt{weapon_detected}; altri bookmark collegati ad armi non da fuoco,
+\texttt{weapon\_detected}; altri bookmark collegati ad armi non da fuoco,
 violenza o contesto militare sono conservati solo come indicatori secondari. \\
 \bottomrule
 \end{tabularx}
@@ -2863,10 +2863,10 @@ come una moltiplicazione artificiale dei campioni disponibili: le 500 immagini
 \gls{ood} rimangono il riferimento semantico effettivo, mentre le predizioni
 ottenute sui cinque checkpoint consentono di osservare se la tendenza a
 classificare campioni fuori distribuzione come \texttt{weapon} o
-\texttt{non_weapon} sia stabile, variabile o dipendente da uno specifico
+\texttt{non\_weapon} sia stabile, variabile o dipendente da uno specifico
 addestramento.
 
-Analogamente, la distinzione tra righe con \texttt{attack_family = none},
+Analogamente, la distinzione tra righe con \texttt{attack\_family = none},
 righe adversariali e righe anti-forensi descrive la copertura della valutazione
 e non anticipa l'analisi quantitativa delle prestazioni, che rimane demandata al
 Capitolo~\ref{chap:results}.
