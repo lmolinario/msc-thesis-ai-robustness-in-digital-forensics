@@ -1134,12 +1134,12 @@ osservabile del tool con la ground truth sperimentale del forensic evaluation
 bundle, senza assumere accesso alla logica decisionale interna del modulo
 proprietario.
 
-La normalizzazione ha prodotto un matching completo tra export del tool e
-forensic evaluation bundle: tutte le 11\,500 immagini sono state ricondotte a un
-identificativo del bundle e nessuna riga è rimasta non mappata. Le metriche
-binarie sono calcolate sulle 11\,000 immagini appartenenti alle classi operative
-\texttt{weapon} e \texttt{non\_weapon}; le 500 immagini \gls{ood} sono invece
-analizzate separatamente mediante il weapon flag rate.
+Come indicato nella Sezione~\ref{sec:results-commercial}, il matching tra
+export commerciale e forensic evaluation bundle è completo per tutti i profili
+valutati. Per \gls{magnetai}, le metriche binarie sono quindi calcolate sulle
+11\,000 immagini appartenenti alle classi operative \texttt{weapon} e
+\texttt{non\_weapon}; le 500 immagini \gls{ood} sono analizzate separatamente
+mediante il weapon flag rate.
 
 La Tabella~\ref{tab:results-magnet-global-metrics} riporta le metriche
 complessive di \gls{magnetai} sul task binario
@@ -1724,12 +1724,12 @@ metodologia definita nel Capitolo~\ref{chap:methodology}, \gls{ufed} non viene
 trattato come classificatore immagini, ma solo come eventuale componente
 dell'ecosistema Cellebrite di acquisizione e gestione dei dati.
 
-La normalizzazione ha prodotto un matching completo tra export e forensic
-evaluation bundle: tutte le 11\,500 immagini sono state ricondotte a un
-identificativo del bundle e nessuna riga è rimasta non mappata. Le metriche
-binarie sono calcolate sulle 11\,000 immagini appartenenti alle classi operative
-\texttt{weapon} e \texttt{non\_weapon}; le 500 immagini \gls{ood} sono invece
-analizzate separatamente mediante il weapon flag rate.
+Come indicato nella Sezione~\ref{sec:results-commercial}, il matching tra
+export commerciale e forensic evaluation bundle è completo per tutti i profili
+valutati. Per \gls{cellebriteinseyets}, le metriche binarie sono quindi calcolate
+sulle 11\,000 immagini appartenenti alle classi operative \texttt{weapon} e
+\texttt{non\_weapon}; le 500 immagini \gls{ood} sono analizzate separatamente
+mediante il weapon flag rate.
 
 La Tabella~\ref{tab:results-cellebrite-global-metrics} riporta le metriche
 complessive di \gls{cellebriteinseyets} sul task binario
@@ -2011,11 +2011,11 @@ Capitolo~\ref{chap:methodology}, tali bookmark sono trattati come output
 operativi osservabili e non come spiegazioni locali del processo decisionale
 interno.
 
-La normalizzazione ha prodotto un matching completo tra export e forensic
-evaluation bundle: tutte le 11\,500 immagini sono state ricondotte a un
-identificativo del bundle e nessuna riga è rimasta non mappata. Le metriche
-binarie sono calcolate sulle 11\,000 immagini appartenenti alle classi operative
-\texttt{weapon} e \texttt{non\_weapon}; le 500 immagini \gls{ood} sono invece
+Come indicato nella Sezione~\ref{sec:results-commercial}, il matching tra
+export commerciale e forensic evaluation bundle è completo per tutti i profili
+valutati. Per \gls{griffeye}/\gls{t3kcore}, le metriche binarie sono quindi
+calcolate sulle 11\,000 immagini appartenenti alle classi operative
+\texttt{weapon} e \texttt{non\_weapon}; le 500 immagini \gls{ood} sono
 analizzate separatamente mediante il weapon flag rate. Il mapping operativo
 considera positivo soltanto il bookmark \texttt{CORE/Violence/Firearm}, mentre
 gli altri bookmark semanticamente collegati ad armi, violenza o contesto
