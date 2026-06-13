@@ -8,6 +8,8 @@ Controlled-access bootstrap script.
 
 No public URL is stored in this repository. Set the environment variable
 FAIRLAB_RAW_DATASET_BUNDLE_URL on the local machine before running the script.
+If access to the raw dataset bundle is needed, contact the thesis author or the
+repository maintainer to request the controlled-access link.
 """
 
 from __future__ import annotations
@@ -21,6 +23,10 @@ import gdown
 from datasets.scripts.utils.paths import RAW_DATASETS_DIR, repo_relative_path
 
 ENV_NAME = "FAIRLAB_RAW_DATASET_BUNDLE_URL"
+ACCESS_REQUEST_NOTE = (
+    "If you need access to the raw dataset bundle, contact the thesis author "
+    "or the repository maintainer to request the controlled-access link."
+)
 ARCHIVE_DIR = RAW_DATASETS_DIR / "downloaded_raw_archives"
 ARCHIVE_PATH = ARCHIVE_DIR / "00_raw_datasets_bundle.zip"
 EXTRACT_DIR = ARCHIVE_DIR / "extracted_bundle"
@@ -43,7 +49,8 @@ def main() -> None:
     file_url = os.getenv(ENV_NAME, "").strip()
     if not file_url:
         raise RuntimeError(
-            f"Missing {ENV_NAME}. Set it locally to the controlled-access bundle URL."
+            f"Missing {ENV_NAME}. Set it locally to the controlled-access bundle URL. "
+            f"{ACCESS_REQUEST_NOTE}"
         )
 
     archive_dir = repo_relative_path(ARCHIVE_DIR)
