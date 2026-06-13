@@ -1119,14 +1119,20 @@ I proxy model ufficiali considerati in questa fase sono ResNet18,
 EfficientNet-B0 e \gls{clip}. ResNet18 rappresenta una baseline convoluzionale
 consolidata e relativamente compatta, utile per disporre di un riferimento
 \gls{cnn} standard nel task binario \cite{he2016deep}. EfficientNet-B0 viene
-utilizzato come modello convoluzionale più efficiente e costituisce il primary
-proxy target per la generazione degli attacchi adversariali model-dependent
-nel protocollo sperimentale corrente \cite{tan2019efficientnet}. \gls{clip}, invece, viene
-impiegato nella forma di visual encoder congelato con una testa binaria addestrata
-sul task \texttt{non\_weapon}/\texttt{weapon}, così da includere nel protocollo
-un modello vision-language pre-addestrato e successivamente adattato alla
-classificazione binaria \cite{radford2021learning}. La Tabella~\ref{tab:methodology-proxy-models}
+utilizzato come modello convoluzionale più efficiente e costituisce il proxy
+target principale per la generazione degli attacchi adversariali
+model-dependent nel protocollo sperimentale corrente \cite{tan2019efficientnet}.
+\gls{clip}, invece, viene impiegato come modello vision-language pre-addestrato
+utilizzato per estrarre rappresentazioni visive dalle immagini. In questo caso,
+i pesi del visual encoder non vengono aggiornati durante l'addestramento,
+mentre viene addestrato un classificatore binario supervisionato per il task
+\texttt{non\_weapon}/\texttt{weapon}. Questa configurazione consente di includere
+nel protocollo un modello pre-addestrato su larga scala, adattato al task
+forense considerato senza riaddestrarne l'intero backbone visivo
+\cite{radford2021learning}. La Tabella~\ref{tab:methodology-proxy-models}
 riassume il ruolo metodologico dei tre modelli.
+
+
 
 \begin{table}[H]
 \centering
@@ -1136,27 +1142,37 @@ riassume il ruolo metodologico dei tre modelli.
 \toprule
 \textbf{Modello} & \textbf{Paradigma} & \textbf{Ruolo metodologico} \\
 \midrule
+
 \texttt{resnet18}
 &
 \gls{cnn} supervisionata
 &
-Baseline convoluzionale compatta per la classificazione binaria
-\texttt{non\_weapon}/\texttt{weapon}. \\
+Modello convoluzionale compatto utilizzato come baseline per la classificazione
+binaria \texttt{non\_weapon}/\texttt{weapon}. \\
+
 \texttt{efficientnet\_b0}
 &
 \gls{cnn} supervisionata
 &
-Proxy target principale per la generazione degli attacchi adversariali
-model-dependent. \\
+Proxy model principale del protocollo sperimentale, utilizzato sia per la
+valutazione controllata sia come modello target per la generazione degli attacchi
+adversariali model-dependent. \\
+
 \texttt{clip}
 &
-Visual encoder congelato con testa binaria
+Estrattore di feature visive pre-addestrato
 &
-Modello vision-language pre-addestrato adattato al task binario mediante
-classificatore supervisionato. \\
+Modello vision-language pre-addestrato utilizzato per estrarre rappresentazioni
+visive dalle immagini. I pesi del visual encoder sono mantenuti fissi, mentre
+viene addestrato un classificatore binario supervisionato per il task
+\texttt{non\_weapon}/\texttt{weapon}. \\
+
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
+
 
 L'addestramento dei proxy model segue un protocollo fold-aware. Per ciascun
 fold target, il modello viene addestrato sui quattro fold rimanenti e salvato
@@ -1209,9 +1225,9 @@ e dal registro dei modelli \codepath{models/model_registry.json}.
 \textbf{\texttt{clip}} \\
 \midrule
 Architecture
-& \texttt{torchvision.resnet18}
-& \texttt{torchvision.efficientnet\_b0}
-& \texttt{open\_clip.ViT-B-32} \\
+& \texttt{resnet18}
+& \texttt{efficientnet\_b0}
+& \texttt{ViT-B-32} \\
 
 Pre-trained weights
 & \texttt{IMAGENET1K\_V1}
@@ -1480,6 +1496,20 @@ Plausibile come post-processing semplice con possibile impatto sui classificator
 \bottomrule
 \end{tabularx}
 \end{table}
+
+Il costo computazionale riportato nella
+Tabella~\ref{tab:methodology-attack-cost-operational-relevance}
+non rappresenta una misura temporale sperimentale, ma una valutazione
+qualitativa utilizzata come criterio metodologico. Tale scelta deriva dal fatto
+che il tempo effettivo di esecuzione dipende da fattori implementativi e
+ambientali, quali hardware, librerie, parallelizzazione, dimensione delle immagini
+e configurazione di esecuzione. Nel presente lavoro, quindi, il costo viene
+interpretato in termini relativi e operativi, sulla base della natura algoritmica
+delle perturbazioni: trasformazioni dirette applicabili in batch, attacchi
+gradient-based a singolo passo e procedure iterative o di ottimizzazione più
+onerose. Questa distinzione consente di discutere la riproducibilità
+dell'esperimento e la plausibilità operativa delle manipolazioni senza introdurre
+metriche temporali non misurate sistematicamente.
 
 
 La Figura~\ref{fig:methodology-perturbation-workflow} sintetizza il workflow di
