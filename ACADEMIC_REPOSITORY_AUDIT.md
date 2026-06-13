@@ -35,7 +35,7 @@ The repository is assessed against the following academic and research-artifact 
 
 ## 2. Current strengths
 
-The repository already satisfies several important research-artifact requirements:
+The repository satisfies several important research-artifact requirements:
 
 - clear thesis scope and methodological framing in the root README;
 - structured numbered pipeline scripts;
@@ -49,64 +49,58 @@ The repository already satisfies several important research-artifact requirement
 - metrics exported as CSV/JSON artifacts;
 - LaTeX thesis source included;
 - MIT license included;
-- local secret and proprietary artifact ignores hardened in `.gitignore`.
+- local secret and proprietary artifact ignores hardened in `.gitignore`;
+- controlled raw data access documented in `DATA_ACCESS.md`;
+- citation metadata provided in `CITATION.cff`;
+- security handling described in `SECURITY.md`;
+- safe environment-variable template provided in `.env.example`.
 
 ---
 
-## 3. Changes already applied during this review
+## 3. Changes applied during this review
 
-The following repository-level improvements were applied:
-
-| Area | Change |
-|---|---|
-| Citation | Added `CITATION.cff` for formal repository citation metadata. |
-| Data governance | Added `DATA_ACCESS.md` describing controlled raw dataset access. |
-| Security | Added `SECURITY.md` for secret/data exposure handling. |
-| Environment | Added `.env.example` documenting required environment variables without secrets. |
-| Raw bundle access | Replaced hardcoded dataset URL with local `FAIRLAB_RAW_DATASET_BUNDLE_URL`. |
-| Secret prevention | Hardened `.gitignore` against `.env`, session files, tokens, keys, credential JSON files, and proprietary forensic artifacts. |
+| Area | Change | Status |
+|---|---|---|
+| Citation | Added `CITATION.cff` for formal repository citation metadata. | Completed |
+| Data governance | Added `DATA_ACCESS.md` describing controlled raw dataset access. | Completed |
+| Security | Added `SECURITY.md` for secret/data exposure handling. | Completed |
+| Environment | Added `.env.example` documenting required environment variables without secrets. | Completed |
+| Raw bundle access | Replaced hardcoded dataset URL with local `FAIRLAB_RAW_DATASET_BUNDLE_URL`. | Completed |
+| Secret prevention | Hardened `.gitignore` against `.env`, session files, tokens, keys, credential JSON files, and proprietary forensic artifacts. | Completed |
+| Root README | Rewritten as a concise academic research-artifact overview aligned with the final thesis perimeter. | Completed |
+| Reproducibility guide | Rewritten to remove historical tool names and document the final experimental perimeter. | Completed |
+| Dataset README | Rewritten to align dataset documentation with the final frozen dataset, bundle, and commercial-tool perimeter. | Completed |
 
 ---
 
-## 4. Remaining consistency issues
+## 4. Final commercial-tool perimeter
 
-The following issues should be resolved before considering the repository fully thesis-final or archival-ready.
+The public documentation is now aligned to the following final commercial / black-box evaluation perimeter:
 
-### 4.1 Reproducibility documentation still contains historical tool names
+| Tool | Version / module | Final status |
+|---|---|---|
+| Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Included |
+| Excire Foto 2025 | 4.1.5 | Included as standalone AI-assisted semantic retrieval |
+| Cellebrite Inseyets | 10.9 | Included |
+| Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE 1.18.0 | Included |
 
-`REPRODUCIBILITY.md` contains an older commercial-tool perimeter mentioning historical or excluded tools such as:
+Excluded from the final experimental perimeter:
 
 ```text
-X-Ways Forensics / Excire
-Cellebrite UFED
 Oxygen Forensic Detective
+Autopsy
+X-Ways Forensics
 ```
 
-This should be updated to the final perimeter:
+These tools should appear only as historical, preliminary, or non-final references where contextually necessary.
 
-```text
-Magnet AXIOM / Magnet.AI, version 10.1.0.48673
-Excire Foto 2025, version 4.1.5
-Cellebrite Inseyets, version 10.9
-Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
-```
+---
 
-Oxygen, Autopsy, and X-Ways should be excluded from the final experimental perimeter, except where mentioned historically or as non-final candidates.
+## 5. Remaining consistency issues
 
-### 4.2 Dataset README contains older commercial-tool status
+The remaining issues are limited and do not require architectural redesign.
 
-`datasets/README.md` still includes a historical commercial-tool section indicating that Cellebrite is pending and referring to X-Ways / Excire.
-
-This should be aligned with the current finalized state:
-
-- Magnet AXIOM / Magnet.AI completed and normalized;
-- Excire Foto 2025 completed as standalone AI-assisted semantic retrieval;
-- Cellebrite Inseyets 10.9 completed and normalized;
-- Magnet Griffeye / T3K CORE completed and normalized;
-- Oxygen and Autopsy excluded;
-- X-Ways not part of the final experimental perimeter.
-
-### 4.3 Dependency reproducibility can be strengthened
+### 5.1 Dependency reproducibility can be strengthened
 
 `requirements.txt` contains a mixture of pinned and unpinned dependencies. This is acceptable for a working thesis repository but not ideal for archival reproducibility.
 
@@ -117,25 +111,31 @@ requirements.txt       = human-maintained main dependency list
 requirements-lock.txt  = fully pinned frozen environment generated from the working environment
 ```
 
-### 4.4 README should eventually link the new policy files
+### 5.2 Final LaTeX consistency check remains external to this audit
 
-The root README should include a short `Research Artifact Governance` or `Repository Policies` section linking:
+The repository documentation has been aligned, but the final thesis source should still be compiled and checked for:
+
+- unresolved references;
+- undefined citations;
+- glossary/acronym issues;
+- missing figures;
+- stale textual references to excluded tools.
+
+### 5.3 Final release/tag is still pending
+
+After thesis freeze, create a final archival commit or release tag, for example:
 
 ```text
-CITATION.cff
-DATA_ACCESS.md
-SECURITY.md
-REPRODUCIBILITY.md
-.env.example
+v1.0-thesis-submission
 ```
 
-This is not functionally necessary, but it improves readability and reviewer navigation.
+Do this only after the thesis text, metrics, figures, and repository documentation are frozen.
 
 ---
 
-## 5. Recommended final academic structure
+## 6. Recommended final academic structure
 
-The repository should converge toward this public-facing structure:
+The repository now follows this public-facing research-artifact structure:
 
 ```text
 README.md                         Main overview and current status
@@ -161,25 +161,28 @@ progress/                         Logs, notes, and milestones
 
 ---
 
-## 6. Archival readiness checklist
+## 7. Archival readiness checklist
 
 Before final thesis submission or public archival release, verify:
 
-- [ ] root README reflects the final thesis status;
-- [ ] `REPRODUCIBILITY.md` reflects the final tool perimeter;
-- [ ] `datasets/README.md` reflects the final tool perimeter;
-- [ ] no hardcoded raw dataset links remain;
-- [ ] no `.env`, session, token, or credential files are tracked;
-- [ ] no proprietary forensic case files are tracked;
-- [ ] final metrics are generated from scripts rather than manual transcription;
-- [ ] LaTeX thesis compiles without unresolved references or undefined citations;
-- [ ] all figures and tables referenced in the thesis exist;
-- [ ] final commit or release tag is created after thesis freeze.
+- [x] root README reflects the final thesis status;
+- [x] `REPRODUCIBILITY.md` reflects the final tool perimeter;
+- [x] `datasets/README.md` reflects the final tool perimeter;
+- [x] no hardcoded raw dataset links remain in the public bootstrap script;
+- [x] no `.env`, session, token, or credential files are intentionally tracked;
+- [x] no proprietary forensic case files should be tracked under the public artifact policy;
+- [x] citation metadata are available through `CITATION.cff`;
+- [x] controlled data access is documented through `DATA_ACCESS.md`;
+- [x] security/data exposure handling is documented through `SECURITY.md`;
+- [ ] final metrics should be regenerated or revalidated after the last script change;
+- [ ] LaTeX thesis should compile without unresolved references or undefined citations;
+- [ ] all figures and tables referenced in the thesis should exist;
+- [ ] final commit or release tag should be created after thesis freeze.
 
 ---
 
-## 7. Review conclusion
+## 8. Review conclusion
 
-The repository is already substantially stronger than a typical MSc code dump because it includes a documented end-to-end workflow, hash-based traceability, frozen manifests, normalized commercial-tool outputs, and thesis source integration.
+The repository is now substantially aligned with the expectations of an academic MSc research artifact and approaches the standard of a controlled, research-grade experimental repository.
 
-The main remaining work is not architectural redesign. It is final consistency hardening: update stale historical documentation, freeze dependencies more precisely, and ensure that all public-facing files describe the same final experimental perimeter.
+The main remaining work is final validation rather than redesign: freeze the environment more precisely if needed, compile the thesis, revalidate metrics after final edits, and create an archival tag after the thesis submission state is reached.
