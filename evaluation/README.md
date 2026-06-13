@@ -93,10 +93,6 @@ Completed and normalized:
 - Excire Foto 2025, version 4.1.5
 - Cellebrite Inseyets, version 10.9
 - Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
-
-Excluded:
-- Oxygen Forensic Detective
-- Autopsy
 ```
 
 Excire Foto 2025 is evaluated as a standalone AI-assisted semantic retrieval tool. Cellebrite Inseyets is evaluated through observable image classifications exported by the Cellebrite Physical Analyzer report. Magnet Griffeye is evaluated through automatic T3K CORE semantic bookmarks.
