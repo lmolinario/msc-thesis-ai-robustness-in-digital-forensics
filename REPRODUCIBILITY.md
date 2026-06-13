@@ -2,46 +2,45 @@
 
 This document describes how to reproduce, audit, and extend the experimental pipeline used in this repository.
 
-The repository supports an MSc thesis on the operational robustness of AI-based image classification systems in Digital/Computer Forensics. The goal is not to provide a fully automatic end-to-end benchmark, but to document a traceable forensic AI evaluation workflow that includes deterministic processing stages, human-in-the-loop semantic selection, proxy-model evaluation, adversarial and anti-forensic stress testing, commercial forensic-tool processing, and post-export normalization.
+The repository supports the MSc thesis:
+
+```text
+Evaluating the Robustness of AI-based Forensic Tools under Adversarial and Anti-Forensic Attacks
+```
+
+The project evaluates the operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics. The objective is not to provide an unrestricted raw-image benchmark, but to document a traceable and controlled forensic AI evaluation workflow.
 
 ---
 
 ## 1. Repository scope
 
-Repository:
+The repository includes:
 
-```text
-msc-thesis-ai-robustness-in-digital-forensics
-```
+- acquisition and dataset-preparation scripts;
+- frozen manifests and audit metadata;
+- human-in-the-loop final selection records;
+- proxy-model training and evaluation scripts;
+- adversarial and anti-forensic perturbation scripts;
+- blind forensic evaluation bundle construction;
+- commercial black-box tool normalization scripts;
+- metric outputs and thesis-ready result tables;
+- Integrated Gradients explainability workflow;
+- LaTeX thesis source files and documentation.
 
-Main research goal:
-
-```text
-Evaluate the operational robustness of AI-based forensic image-classification tools under clean, out-of-distribution, adversarial, and anti-forensic input conditions.
-```
-
-Primary experimental levels:
-
-1. transparent local proxy models;
-2. generated adversarial and anti-forensic artifacts;
-3. blind forensic evaluation bundle;
-4. commercial forensic AI tool outputs;
-5. normalized metrics and thesis-ready results.
-
-The pipeline is designed to preserve traceability through manifests, hashes, fold identifiers, source metadata, normalized predictions, and audit logs.
+The repository does not publicly redistribute the full raw dataset bundle. Raw data access is governed by `DATA_ACCESS.md`.
 
 ---
 
 ## 2. Environment setup
 
-### 2.1 Clone repository
+Clone the repository:
 
 ```bash
 git clone https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics.git
 cd msc-thesis-ai-robustness-in-digital-forensics
 ```
 
-### 2.2 Create virtual environment
+Create and activate a Python virtual environment.
 
 Linux/macOS:
 
@@ -59,29 +58,51 @@ python -m venv .venv
 python -m pip install --upgrade pip setuptools wheel
 ```
 
-### 2.3 Install dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-For CUDA-enabled environments, install `torch` and `torchvision` according to the official PyTorch selector when needed, then install the remaining dependencies.
-
-### 2.4 Expected environment notes
-
-The pipeline has been developed across Linux/Kali and Windows environments. Some stages, especially commercial forensic-tool evaluation, depend on Windows-based proprietary applications and cannot be reproduced only with Python scripts.
+For CUDA-enabled systems, install `torch` and `torchvision` according to the official PyTorch selector before running GPU-dependent stages.
 
 ---
 
-## 3. Dataset acquisition
+## 3. Controlled raw data access
 
-Dataset acquisition scripts are located in:
+The raw dataset bundle is restored through:
 
 ```text
-datasets/scripts/acquisition/
+datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
 ```
 
-Official acquisition entry points:
+The script does not contain a hardcoded download URL. After controlled access has been granted, configure the URL locally through:
+
+```text
+FAIRLAB_RAW_DATASET_BUNDLE_URL
+```
+
+Windows PowerShell:
+
+```powershell
+$env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+```
+
+Linux/macOS:
+
+```bash
+export FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+```
+
+Do not commit private URLs, `.env` files, API keys, or session files.
+
+---
+
+## 4. Official pipeline sequence
+
+The repository follows a numbered research pipeline:
 
 ```text
 00_download_raw_datasets_bundle.py
@@ -92,95 +113,38 @@ Official acquisition entry points:
 05_scrape_telegram.py
 06_scrape_youtube.py
 07_scrape_deepweb.py
+08_build_prepared_dataset.py
+09_generate_review_manifest_full.py
+10_manual_selection_protocol_reviewer.py
+11_generate_clean_and_ood_splits.py
+12_train_proxy_models.py
+13_generate_anti_forensic_attacks.py
+14_generate_adversarial_attacks.py
+15_evaluate_proxy_models.py
+16_build_forensic_evaluation_bundle.py
+17_generate_integrated_gradients_case_studies.py
+18_xai_interactive_launcher.py
+19_normalize_forensic_ai_tool_predictions.py
 ```
-
-The expected raw data root is:
-
-```text
-datasets/raw/
-```
-
-Source groups:
-
-```text
-01_kaggle_weapon
-02_deepfirearm
-03_google_scraped
-04_telegram_youtube
-05_deepweb
-```
-
-Important note: raw datasets and scraped images may be subject to third-party terms, source-specific limitations, legal constraints, or ethical restrictions. For this reason, a public release may include scripts, manifests, hashes, and aggregate metrics without redistributing all raw images.
 
 ---
 
-## 4. Prepared dataset construction
+## 5. Final dataset and evaluation bundle
 
-Prepared dataset construction is performed by:
-
-```bash
-python datasets/scripts/prepared/08_build_prepared_dataset.py
-```
-
-Main output area:
-
-```text
-datasets/prepared/final_pool/
-```
-
-Main metadata output:
-
-```text
-datasets/prepared/final_pool/metadata.csv
-```
-
-The preparation stage performs technical operations such as:
-
-- image discovery;
-- image validation;
-- minimum-size filtering;
-- SHA256 computation;
-- exact-duplicate removal;
-- copy into the prepared image pool;
-- invalid-image and duplicate-discard reporting.
-
-This stage creates a technical candidate pool. It does not define the final semantic dataset.
-
----
-
-## 5. Review manifest generation
-
-The full review manifest is generated by:
-
-```bash
-python datasets/scripts/prepared/09_generate_review_manifest_full.py
-```
-
-Main output:
-
-```text
-datasets/prepared/manifests/review_manifest_full.csv
-```
-
-The review manifest bridges the technical preparation stage and the human-in-the-loop semantic selection stage.
-
----
-
-## 6. Human-in-the-loop final selection
-
-Final dataset construction is performed using the manual reviewer:
-
-```bash
-python datasets/scripts/final/10_manual_selection_protocol_reviewer.py
-```
-
-The final dataset is intentionally human-in-the-loop. This is a methodological feature, because semantic relevance in a forensic image-triage task cannot be reduced to purely automatic file validation.
-
-Official final manifest:
+Official frozen dataset:
 
 ```text
 datasets/final/manifests/manual_selection_final_1500.csv
 ```
+
+Distribution:
+
+| Group | Count |
+|---|---:|
+| `weapon` | 500 |
+| `non_weapon` | 500 |
+| `ood` | 500 |
+| **Total** | **1500** |
 
 Official binary subset:
 
@@ -188,78 +152,58 @@ Official binary subset:
 datasets/final/manifests/manual_selection_adversarial_subset.csv
 ```
 
-Final frozen distribution:
+Distribution:
 
-| Class | Count |
-|---|---:|
-| `weapon` | 500 |
-| `non_weapon` | 500 |
-| `ood` | 500 |
-| **Total** | **1500** |
-
-Binary subset distribution:
-
-| Class | Count |
+| Group | Count |
 |---|---:|
 | `weapon` | 500 |
 | `non_weapon` | 500 |
 | **Total** | **1000** |
 
-Supporting review artifacts:
+Forensic evaluation bundle:
 
 ```text
-datasets/final/manifests/manual_selection_protocol_db.csv
-datasets/final/manifests/manual_selection_removed.csv
-datasets/final/reports/manual_selection_log.csv
-datasets/final/reports/manual_selection_state.json
-datasets/final/reports/manual_selection_summary.json
+datasets/forensic_evaluation_bundle/
 ```
 
----
+Bundle composition:
 
-## 7. Clean and OOD split generation
-
-Clean binary folds and the OOD evaluation set are generated by:
-
-```bash
-python datasets/scripts/splits/11_generate_clean_and_ood_splits.py
-```
-
-Main outputs:
-
-```text
-datasets/splits/clean/
-datasets/splits/ood/
-datasets/splits/manifests/clean_folds_manifest.csv
-datasets/splits/manifests/ood_eval_manifest.csv
-datasets/splits/manifests/split_generation_summary.json
-```
-
-Clean folds:
-
-```text
-fold_1
-fold_2
-fold_3
-fold_4
-fold_5
-```
-
-Each fold contains:
-
-| Class | Count |
+| Condition | Files |
 |---|---:|
-| `weapon` | 100 |
-| `non_weapon` | 100 |
-| **Total** | **200** |
+| Clean | 1000 |
+| OOD | 500 |
+| Adversarial | 5000 |
+| Anti-forensic | 5000 |
+| **Total** | **11500** |
 
-OOD samples are stored separately and are not used for proxy-model training or adversarial attack generation.
+For commercial tool processing, import only:
+
+```text
+datasets/forensic_evaluation_bundle/blind_tool_input/files/
+```
+
+Do not import:
+
+```text
+datasets/forensic_evaluation_bundle/metadata/
+datasets/forensic_evaluation_bundle/structured_audit_view/
+```
+
+These directories contain ground-truth labels, source metadata, perturbation metadata, and hash mappings.
 
 ---
 
-## 8. Proxy model training
+## 6. Proxy models
 
-Proxy model training is performed by:
+Transparent proxy models used in the thesis:
+
+```text
+efficientnet_b0
+resnet18
+clip
+```
+
+Training entry point:
 
 ```bash
 python models/scripts/12_train_proxy_models.py \
@@ -273,45 +217,39 @@ python models/scripts/12_train_proxy_models.py \
   --seed 42 \
   --device auto \
   --input-size 224 \
-  --num-workers 2 \
-  --force
+  --num-workers 2
 ```
 
-Supported proxy models:
+Evaluation entry point:
+
+```bash
+python evaluation/scripts/15_evaluate_proxy_models.py \
+  --model efficientnet_b0 resnet18 clip \
+  --device auto
+```
+
+Main outputs:
 
 ```text
-resnet18
-efficientnet_b0
-clip
+evaluation/proxy_models/
+results/metrics/
 ```
-
-Checkpoint root:
-
-```text
-models/checkpoints/
-```
-
-Model registry:
-
-```text
-models/model_registry.json
-```
-
-The training protocol is fold-aware. For a target fold, the model is trained on the other four folds. This avoids training a checkpoint on the same fold that is later attacked or evaluated as held-out data.
 
 ---
 
-## 9. Attack and transformation generation
+## 7. Perturbation generation
 
-### 9.1 Anti-forensic transformations
+Adversarial attacks:
 
-Anti-forensic transformations are generated by:
-
-```bash
-python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py --force
+```text
+fgsm
+superdeepfool
+sigma_zero
+one_pixel
+color_shift
 ```
 
-Generated transformations:
+Anti-forensic transformations:
 
 ```text
 jpeg_recompression
@@ -321,58 +259,11 @@ histogram_modification
 contrast_stretching
 ```
 
-### 9.2 Model-agnostic color shift
+Entry points:
 
 ```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack color_shift \
-  --force
-```
-
-### 9.3 Model-dependent adversarial attacks
-
-FGSM:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack fgsm \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --force
-```
-
-SuperDeepFool:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack superdeepfool \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --force
-```
-
-Sigma Zero:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack sigma_zero \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --force
-```
-
-One Pixel:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack one_pixel \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --force
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py
 ```
 
 Attack outputs are stored under:
@@ -383,365 +274,92 @@ attacks/anti_forensic/
 attacks/manifests/
 ```
 
-Smoke tests can be performed with `--limit 10` before full generation.
-
 ---
 
-## 10. Proxy model evaluation
+## 8. Final commercial black-box tool perimeter
 
-Proxy model evaluation is performed by:
+The final experimental perimeter is restricted to the following tools:
 
-```bash
-python evaluation/scripts/15_evaluate_proxy_models.py \
-  --model efficientnet_b0 resnet18 clip \
-  --device auto \
-  --force
-```
+| Tool | Version / module | Role in the thesis |
+|---|---|---|
+| Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Commercial forensic AI categorization |
+| Excire Foto 2025 | 4.1.5 | Standalone AI-assisted semantic image retrieval |
+| Cellebrite Inseyets | 10.9 | Commercial black-box AI-assisted media analysis |
+| Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE 1.18.0 | Commercial forensic media triage and semantic bookmarking |
 
-Main outputs:
-
-```text
-evaluation/proxy_models/proxy_model_predictions.csv
-results/metrics/proxy_model_clean_metrics.csv
-results/metrics/proxy_model_adversarial_metrics.csv
-results/metrics/proxy_model_anti_forensic_metrics.csv
-results/metrics/proxy_model_ood_metrics.csv
-results/metrics/proxy_model_comparative_metrics.csv
-results/metrics/final_core_metrics.csv
-results/metrics/final_robustness_metrics.csv
-results/metrics/final_confusion_matrices.csv
-results/metrics/final_ood_metrics.csv
-results/metrics/proxy_model_evaluation_summary.json
-```
-
-Reported proxy evaluation summary:
+Excluded from the final experimental perimeter:
 
 ```text
-models          = efficientnet_b0, resnet18, clip
-input_samples   = 11500
-prediction_rows = 40500
-errors          = 0
-```
-
----
-
-## 11. Forensic evaluation bundle construction
-
-The forensic evaluation bundle is generated by:
-
-```bash
-python datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py --force
-```
-
-Bundle root:
-
-```text
-datasets/forensic_evaluation_bundle/
-```
-
-Main structure:
-
-```text
-datasets/forensic_evaluation_bundle/
-├── metadata/
-│   ├── bundle_manifest.csv
-│   ├── bundle_hashes_sha256.csv
-│   └── bundle_summary.json
-├── blind_tool_input/
-│   └── files/
-└── structured_audit_view/
-```
-
-Bundle composition:
-
-| Condition | Files |
-|---|---:|
-| Clean | 1000 |
-| OOD | 500 |
-| Adversarial | 5000 |
-| Anti-forensic | 5000 |
-| **Total** | **11500** |
-
-For black-box forensic-tool evaluation, import only:
-
-```text
-datasets/forensic_evaluation_bundle/blind_tool_input/files/
-```
-
-Do not import:
-
-```text
-datasets/forensic_evaluation_bundle/metadata/
-datasets/forensic_evaluation_bundle/structured_audit_view/
-```
-
-The excluded directories contain ground truth, labels, attack names, source information, and hash mappings.
-
----
-
-## 12. Commercial forensic-tool processing
-
-Commercial forensic tools are processed as black boxes. Their internal models, thresholds, training data, and preprocessing pipelines are not inspected.
-
-Target tools:
-
-```text
-Magnet AXIOM / Magnet.AI
-X-Ways Forensics / Excire
-Cellebrite UFED
 Oxygen Forensic Detective
+Autopsy
+X-Ways Forensics
 ```
 
-Recommended raw export organization:
+X-Ways, Oxygen, Autopsy, and earlier UFED-oriented wording may appear only as historical or non-final references. They must not be described as final evaluated tools.
 
-```text
-forensic_tools/
-├── magnet_axiom/
-│   ├── notes.md
-│   └── raw_exports/
-├── xways_excire/
-│   ├── notes.md
-│   └── raw_exports/
-├── cellebrite_ufed/
-│   ├── notes.md
-│   └── raw_exports/
-└── oxygen_forensic_detective/
-    ├── notes.md
-    └── raw_exports/
-```
-
-Large proprietary case files and heavy raw exports should remain local unless their redistribution status has been verified.
-
-For Magnet AXIOM / Magnet.AI, the normalization workflow expects prediction information from:
-
-```text
-Pictures.csv
-```
-
-where `Tags = Possible weapons` is mapped to `weapon_detected=true` and empty tags are mapped to `weapon_detected=false`.
-
----
-
-## 13. Forensic AI prediction normalization
-
-Commercial forensic-tool predictions are normalized by:
+Commercial-tool outputs are normalized through:
 
 ```bash
 python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
-Interactive mode is enabled by default.
-
-For scripted execution:
-
-```bash
-python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py \
-  --no-interactive \
-  --tools magnet_axiom \
-  --strict
-```
-
-Main inputs:
-
-```text
-datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
-datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
-forensic_tools/<tool_name>/raw_exports/
-```
-
 Main outputs:
 
 ```text
-evaluation/forensic_tools/normalized_predictions.csv
-evaluation/forensic_tools/<tool_name>_normalized_predictions.csv
-evaluation/forensic_tools/tool_export_audit.csv
-evaluation/forensic_tools/tool_version_log.csv
-evaluation/forensic_tools/normalization_summary.json
+evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
-results/metrics/<tool_name>_metrics.csv
 ```
 
-The normalization step maps commercial tool outputs back to the forensic evaluation bundle using filename, SHA256, MD5, or embedded filename information.
-
-Proxy model outputs and commercial forensic-tool outputs must not be merged manually. The valid bridge between black-box tool results and ground truth is:
-
-```text
-datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
-```
+The commercial tools are evaluated as black boxes. The pipeline does not assume access to internal models, proprietary thresholds, training data, or calibrated confidence scores.
 
 ---
 
-## 14. Explainability case studies
+## 9. Explainability workflow
 
-Explainability case studies are generated using Integrated Gradients on transparent proxy models.
+Explainability uses Integrated Gradients on transparent proxy models only.
 
-Official entry points:
+Entry points:
 
 ```text
 explainability/scripts/17_generate_integrated_gradients_case_studies.py
 explainability/scripts/18_xai_interactive_launcher.py
 ```
 
-The XAI layer is qualitative and diagnostic. It is not a primary robustness metric and does not explain commercial black-box forensic tools.
-
-Typical Chapter 5 workflow:
-
-```bash
-python explainability/scripts/18_xai_interactive_launcher.py
-```
-
-Recommended thesis use:
-
-- select a small number of representative cases for the main chapter;
-- keep additional cases in appendix or supplementary material;
-- clearly distinguish input image, heatmap, overlay, mask, and diagnostic comparison;
-- interpret attribution maps as support for analysis, not as standalone proof.
+The XAI layer is qualitative and diagnostic. It is not a primary robustness metric and is not used to explain proprietary black-box commercial forensic tools.
 
 ---
 
-## 15. Thesis tables and figures
+## 10. Traceability and auditability
 
-Thesis tables and figures should be derived from CSV/JSON artifacts whenever possible.
+The pipeline preserves traceability through:
 
-Preferred sources:
+- stable image identifiers;
+- SHA256 hashes;
+- MD5 hashes for forensic-tool compatibility;
+- source metadata;
+- fold identifiers;
+- attack and transformation manifests;
+- bundle manifests;
+- commercial-tool normalization logs;
+- metric CSV/JSON files;
+- thesis table and figure references.
 
-```text
-results/metrics/
-evaluation/proxy_models/
-evaluation/forensic_tools/
-explainability/outputs/integrated_gradients/
-datasets/forensic_evaluation_bundle/metadata/
-```
-
-LaTeX source root:
-
-```text
-docs/LatexThesis_ITA/
-```
-
-Main thesis entry point:
-
-```text
-docs/LatexThesis_ITA/main.tex
-```
-
-Chapter 5 should follow the stabilized order:
-
-```text
-clean baseline
-OOD behavior
-anti-forensic robustness
-adversarial robustness
-forensic evaluation bundle
-commercial forensic tools
-comparative discussion
-XAI case studies
-operational implications and limitations
-```
-
-Do not derive final thesis values from screenshots or tool interfaces when a CSV/JSON export or normalized manifest is available.
+SHA256 is the primary integrity hash used in the thesis pipeline.
 
 ---
 
-## 16. Integrity and audit checks
+## 11. Reproducibility limitations
 
-Recommended checks before reporting results:
+Full reproduction requires access to controlled raw data and, for the black-box evaluation layer, access to proprietary commercial forensic tools. Therefore, the repository supports controlled reproducibility rather than unrestricted end-to-end public reruns.
 
-1. verify final dataset class counts;
-2. verify duplicate SHA256 counts;
-3. verify split distributions;
-4. verify attack manifest row counts;
-5. verify proxy evaluation summary reports zero errors;
-6. verify forensic bundle count is 11500;
-7. verify bundle IDs are unique;
-8. verify blind paths do not leak labels or attack names;
-9. verify commercial-tool exports are matched to bundle IDs;
-10. verify normalized commercial-tool predictions have no unexpected unmatched rows.
-
-Critical forensic bundle checks:
-
-```text
-bundle_id_unique                         = true
-sha256_actual_unique                     = true
-all_sha256_match_when_manifest_present   = true
-blind_paths_semantically_clean           = true
-metadata_separated_from_tool_input       = true
-```
+Where raw images or proprietary tool outputs cannot be redistributed, auditability is preserved through code, manifests, hashes, normalized outputs, metrics, and documentation.
 
 ---
 
-## 17. Known non-reproducible or partially reproducible elements
+## 12. Related policy files
 
-Some stages are intentionally or practically not fully reproducible from code alone.
-
-### 17.1 Human-in-the-loop semantic selection
-
-The final dataset depends on documented manual semantic review. This is not a weakness of the pipeline; it is part of the forensic methodology. The reproducible artifacts are the review protocol, final manifests, review logs, and frozen selections.
-
-### 17.2 External data sources
-
-Web, platform, social, and deep-web sources may change over time. Re-running acquisition scripts may not reproduce the same raw image pool unless a preserved raw archive is available.
-
-### 17.3 Commercial forensic tools
-
-Magnet AXIOM/Magnet.AI, X-Ways/Excire, Cellebrite UFED, and Oxygen Forensic Detective depend on:
-
-- license availability;
-- software version;
-- enabled AI modules;
-- local installation settings;
-- export format;
-- proprietary internal classifiers;
-- tool-specific preprocessing.
-
-Therefore, the commercial-tool processing stage is reproducible as an audit and normalization protocol, but not fully reproducible as an open-source computational pipeline.
-
-### 17.4 Hardware and ML dependencies
-
-Training time, deterministic behavior, GPU compatibility, and numerical outputs may vary depending on:
-
-- CPU/GPU hardware;
-- CUDA version;
-- PyTorch version;
-- operating system;
-- random seed handling;
-- library-level nondeterminism.
-
-### 17.5 Dataset redistribution
-
-Images, generated perturbations, commercial forensic exports, and model checkpoints may require separate verification before redistribution. Public releases may replace heavy or restricted artifacts with scripts, manifests, hashes, sample files, and aggregate metrics.
-
----
-
-## 18. Minimal reproducibility target
-
-A minimal reproducibility package should include:
-
-```text
-README.md
-REPRODUCIBILITY.md
-DATASET_CARD.md
-MODEL_CARD.md
-requirements.txt
-LICENSE
-datasets/scripts/
-models/scripts/
-evaluation/scripts/
-explainability/scripts/
-datasets/final/manifests/
-datasets/splits/manifests/
-attacks/manifests/
-results/metrics/
-evaluation/forensic_tools/*.csv
-evaluation/forensic_tools/*.json
-```
-
-Depending on legal and storage constraints, raw images, generated image corpora, checkpoints, and commercial forensic exports may be excluded or distributed separately.
-
----
-
-## 19. Citation
-
-Citation details will be added upon thesis completion.
-
-Until then, cite the repository and the corresponding MSc thesis when referring to the methodology, dataset, proxy models, forensic bundle, or results.
+- `DATA_ACCESS.md` describes controlled raw dataset access.
+- `SECURITY.md` describes handling of exposed secrets or private data links.
+- `.env.example` lists safe environment variable names without secrets.
+- `CITATION.cff` provides repository citation metadata.
+- `ACADEMIC_REPOSITORY_AUDIT.md` records repository-level academic readiness checks.
