@@ -20,7 +20,7 @@ Implemented normalization logic
   - maps empty Tags to not flagged / predicted non_weapon;
   - deduplicates duplicated export rows to one prediction per tool + bundle_id.
 
-- X-Ways / Excire Photo AI semantic prompt exports:
+- Excire Foto 2025 standalone semantic prompt exports:
   - reads one hit-list CSV per fixed firearm-oriented text prompt;
   - builds the union of all retrieved filenames as predicted weapon;
   - completes all bundle rows not retrieved by any prompt as predicted non_weapon;
@@ -1329,7 +1329,7 @@ def build_base_match_fields(raw_row: RawToolRow, bundle_row: dict[str, Any] | No
 
 
 # =============================================================================
-# X-Ways / Excire Photo AI semantic prompt-hit normalization
+# Excire Foto 2025 semantic prompt-hit normalization
 # =============================================================================
 
 def is_excire_prompt_export_file(path: Path) -> bool:
@@ -1371,7 +1371,7 @@ def read_excire_hit_list(path: Path) -> list[str]:
     return hits
 
 
-def normalize_xways_excire_prompt_exports(
+def normalize_excire_foto_2025_prompt_exports(
     tool_name: str,
     tool_dir: Path,
     selected_run_dirs: list[Path] | None,
@@ -1379,7 +1379,7 @@ def normalize_xways_excire_prompt_exports(
     effective_tool_name: str | None = None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
     """
-    Normalize X-Ways / Excire Photo AI prompt hit-list exports.
+    Normalize Excire Foto 2025 prompt hit-list exports.
 
     The Excire workflow used for this thesis exports only retrieved images for a
     given semantic prompt. Therefore, absence from all fixed prompt hit lists is
@@ -1510,9 +1510,9 @@ def normalize_xways_excire_prompt_exports(
                 "weapon_detected": weapon_detected,
                 "normalized_prediction": normalized_prediction,
                 "mapping_reason": (
-                    f"xways_excire_semantic_prompt_hit:{unique_join(hit_prompts, separator='|')}"
+                    f"excire_foto_2025_semantic_prompt_hit:{unique_join(hit_prompts, separator='|')}"
                     if hit_prompts
-                    else "xways_excire_semantic_prompt_no_hit"
+                    else "excire_foto_2025_semantic_prompt_no_hit"
                 ),
                 "correct": correct,
                 "false_negative": false_negative,
@@ -1807,18 +1807,18 @@ def build_selected_run_dirs_from_cli(selected_run_dirs: list[str]) -> dict[str, 
 def cleanup_legacy_excire_outputs(output_dir: Path, metrics_dir: Path, output_tool_names: list[str]) -> list[str]:
     """Remove stale legacy Excire aggregate files when D20/D50/D80 variants are produced.
 
-    Earlier versions of the pipeline produced xways_excire_metrics.csv and
-    xways_excire_normalized_predictions.csv for a single Excire setting. Once
+    Earlier versions of the pipeline produced excire_foto_2025_metrics.csv and
+    excire_foto_2025_normalized_predictions.csv for a single Excire setting. Once
     the sensitivity-analysis pipeline is used, those files become ambiguous and
     can lead to wrong reporting if left in the repository.
     """
-    has_excire_variants = any(name.startswith("xways_excire_d") for name in output_tool_names)
+    has_excire_variants = any(name.startswith("excire_foto_2025_d") for name in output_tool_names)
     if not has_excire_variants:
         return []
 
     stale_paths = [
-        output_dir / "xways_excire_normalized_predictions.csv",
-        metrics_dir / "xways_excire_metrics.csv",
+        output_dir / "excire_foto_2025_normalized_predictions.csv",
+        metrics_dir / "excire_foto_2025_metrics.csv",
     ]
     removed: list[str] = []
     for stale_path in stale_paths:
@@ -2034,7 +2034,7 @@ def main() -> None:
                         f"Selected run dir: {repo_relative_string(run_dir)}"
                     )
 
-                tool_normalized_rows, tool_audit_rows, raw_hit_rows = normalize_xways_excire_prompt_exports(
+                tool_normalized_rows, tool_audit_rows, raw_hit_rows = normalize_excire_foto_2025_prompt_exports(
                     tool_name=tool_name,
                     tool_dir=tool_dir,
                     selected_run_dirs=[run_dir],
