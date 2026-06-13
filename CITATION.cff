@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it as described below."
+title: "Evaluating the Robustness of AI-based Forensic Tools under Adversarial and Anti-Forensic Attacks"
+type: software
+authors:
+  - family-names: Molinario
+    given-names: Lello
+repository-code: "https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics"
+url: "https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics"
+license: MIT
+abstract: >-
+  Research repository supporting an MSc thesis on the operational robustness of
+  AI-based forensic image-classification and media-triage tools under clean,
+  out-of-distribution, adversarial, and anti-forensic input conditions.
+keywords:
+  - digital forensics
+  - forensic artificial intelligence
+  - adversarial machine learning
+  - anti-forensics
+  - image classification
+  - operational robustness
+  - forensic tool validation
+  - reproducible research
