@@ -4,44 +4,64 @@
 """
 00_download_raw_datasets_bundle.py
 
-Public repository notice
-------------------------
-The archived raw dataset bundle is not distributed through a public URL in this
-repository. Access is available only on request or through controlled sharing,
-subject to legal, ethical, source-specific and institutional constraints.
+Controlled-access bootstrap script.
 
-This placeholder is intentionally kept in the public repository to document the
-bootstrap entry point without exposing a direct download link.
+No public URL is stored in this repository. Set the environment variable
+FAIRLAB_RAW_DATASET_BUNDLE_URL on the local machine before running the script.
 """
 
 from __future__ import annotations
 
 import os
+import zipfile
+from pathlib import Path
 
-RAW_DATASET_BUNDLE_URL_ENV = "FAIRLAB_RAW_DATASET_BUNDLE_URL"
+import gdown
+
+from datasets.scripts.utils.paths import RAW_DATASETS_DIR, repo_relative_path
+
+ENV_NAME = "FAIRLAB_RAW_DATASET_BUNDLE_URL"
+ARCHIVE_DIR = RAW_DATASETS_DIR / "downloaded_raw_archives"
+ARCHIVE_PATH = ARCHIVE_DIR / "00_raw_datasets_bundle.zip"
+EXTRACT_DIR = ARCHIVE_DIR / "extracted_bundle"
+
+
+def extract_archive(archive_path: Path, extract_dir: Path) -> None:
+    """Extract the local ZIP archive when the extraction directory is empty."""
+    if extract_dir.exists() and any(extract_dir.rglob("*")):
+        print(f"[SKIP] Extraction directory already populated: {extract_dir}")
+        return
+
+    extract_dir.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(archive_path, "r") as archive:
+        archive.extractall(extract_dir)
+    print(f"[OK] Archive extracted to: {extract_dir}")
 
 
 def main() -> None:
-    """Explain the controlled-access policy for the raw dataset bundle."""
-    bundle_url = os.getenv(RAW_DATASET_BUNDLE_URL_ENV, "").strip()
-
-    if bundle_url:
-        print(
-            "A controlled-access raw dataset bundle URL was provided through "
-            f"{RAW_DATASET_BUNDLE_URL_ENV}. The public repository does not "
-            "print or persist this URL."
+    """Download and extract the controlled-access archive."""
+    file_url = os.getenv(ENV_NAME, "").strip()
+    if not file_url:
+        raise RuntimeError(
+            f"Missing {ENV_NAME}. Set it locally to the controlled-access bundle URL."
         )
-        print(
-            "Use the private working copy of this script or the documented "
-            "controlled-access procedure to restore the raw dataset locally."
-        )
-        return
 
-    raise RuntimeError(
-        "The raw dataset bundle is not publicly distributed from this repository. "
-        f"Set {RAW_DATASET_BUNDLE_URL_ENV} only when controlled access has been "
-        "explicitly granted."
-    )
+    archive_dir = repo_relative_path(ARCHIVE_DIR)
+    archive_path = repo_relative_path(ARCHIVE_PATH)
+    extract_dir = repo_relative_path(EXTRACT_DIR)
+    archive_dir.mkdir(parents=True, exist_ok=True)
+
+    if archive_path.exists() and archive_path.stat().st_size > 0:
+        print(f"[SKIP] Archive already exists: {archive_path}")
+    else:
+        print(f"[INFO] Reading bundle URL from environment variable: {ENV_NAME}")
+        gdown.download(file_url, str(archive_path), quiet=False, fuzzy=True)
+        if not archive_path.exists() or archive_path.stat().st_size == 0:
+            raise RuntimeError("Download failed: archive file was not created correctly.")
+        print(f"[OK] Download completed: {archive_path}")
+
+    extract_archive(archive_path, extract_dir)
+    print("[DONE] Controlled-access bundle bootstrap completed.")
 
 
 if __name__ == "__main__":
