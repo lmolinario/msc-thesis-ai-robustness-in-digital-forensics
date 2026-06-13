@@ -2734,7 +2734,7 @@ osservabile, dal mapping adottato e dalla configurazione del sistema.
 Il confronto adversarial mostra che la degradazione più severa si verifica nel
 livello proxy, in particolare per EfficientNet-B0 sotto Sigma Zero. Il modello
 passa da una clean accuracy pari a 0.978 a una accuracy pari a 0.015, con 963
-errori indotti. Questo risultato dimostra che un modello può essere molto
+errori indotti. Questo risultato mostra, nel protocollo considerato, che un modello può essere molto
 accurato in condizioni nominali e, allo stesso tempo, estremamente fragile
 rispetto a perturbazioni adversariali ottimizzate. Anche \gls{fgsm} produce una
 degradazione significativa per EfficientNet-B0, con accuracy pari a 0.575 e drop
@@ -2764,8 +2764,8 @@ a 0.442, generando over-triggering semantico piuttosto che occultamento
 sistematico della classe \texttt{weapon}. \gls{cellebriteinseyets} mostra un
 recall elevato e una degradazione contenuta, ma mantiene un tasso di falsi
 positivi superiore rispetto a \gls{griffeye}/\gls{t3kcore}.
-\gls{griffeye}/\gls{t3kcore} presenta il valore più elevato di accuracy commerciale aggregata
-nello scenario adversarial e il false positive rate più basso, pur conservando
+Nel mapping conservativo adottato, \gls{griffeye}/\gls{t3kcore} presenta il valore
+più elevato di accuracy commerciale aggregata e il false positive rate più basso, pur conservando
 falsi negativi residui sulla classe \texttt{weapon}.
 
 Nel complesso, il confronto commerciale non identifica un tool universalmente
