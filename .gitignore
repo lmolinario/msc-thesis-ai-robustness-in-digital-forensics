@@ -205,3 +205,6 @@ forensic_tools/**/temp/
 *.ad1
 *.ufd
 *.ufdr
+
+# IDE files
+.idea/
