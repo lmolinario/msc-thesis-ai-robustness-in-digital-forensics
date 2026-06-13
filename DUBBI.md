@@ -88,3 +88,33 @@ Mi sfugge utilità a6 **(ora rileggendo mi sembra una ripetizione: ho gia'dichia
 
 Comunque se mi mandi link di overleaf divento io proprietario così non c’è limite compilazione e i commenti si mettono direttamente lì senza questi passaggi
 
+
+
+
+
+Ciao Silvia, sto facendo la revisione finale della tesi e volevo chiederti un confronto su due aspetti.
+
+Il primo riguarda i Capitoli 4, 5 e 6. Ho ormai consolidato la metodologia, i risultati sperimentali e le conclusioni: il Capitolo 4 descrive la pipeline FAIR-Lab, il dataset, i modelli proxy, gli attacchi adversariali/anti-forensi, le metriche, la normalizzazione degli output dei tool commerciali e l’analisi XAI; il Capitolo 5 presenta i risultati su baseline clean, OOD, trasformazioni anti-forensi, perturbazioni adversariali, forensic evaluation bundle e tool commerciali black-box; il Capitolo 6 chiude con contributi, implicazioni operative/forensi, limiti e future work.
+
+Se riesci, mi farebbe molto piacere avere una tua revisione critica soprattutto su:
+
+* coerenza generale tra metodologia, risultati e conclusioni;
+* chiarezza del focus forense, evitando che sembri una tesi solo di adversarial machine learning;
+* equilibrio del linguaggio sui tool commerciali black-box, senza dare l’idea di un ranking assoluto;
+* solidità delle limitazioni e delle implicazioni operative;
+* eventuali parti troppo tecniche, ridondanti o poco discorsive.
+
+Il secondo punto riguarda la repository finale della tesi. Sto facendo una revisione cartella per cartella per capire cosa lasciare nella versione pubblica/ufficiale e cosa invece tenere solo come materiale di lavoro o ad accesso controllato.
+
+Il punto principale è il dataset. Nella repository di lavoro ho tutto: immagini raw, dataset preparati, split, immagini perturbate, forensic evaluation bundle, manifest, hash, report e script. Dal punto di vista della riproducibilità è comodo, però per una repository pubblica potrebbe essere problematico lasciare direttamente tutte le immagini, perché alcune provengono da fonti eterogenee come Kaggle, scraping, Telegram/YouTube e altre raccolte sperimentali.
+
+La soluzione che mi sembrerebbe più prudente è questa:
+
+* mantenere pubblici script, README, metodologia, manifest finali, hash, metriche, report e procedure di normalizzazione;
+* mantenere nella repository i file centrali come `manual_selection_final_1500.csv`, `manual_selection_adversarial_subset.csv`, manifest degli split, bundle manifest e hash;
+* non pubblicare direttamente raw dataset, immagini originali, immagini perturbate complete e bundle visuale completo;
+* descrivere invece che i dati immagine completi sono disponibili solo su richiesta o in forma controllata, per motivi di licenza, tracciabilità e corretta gestione delle fonti.
+
+In questo modo la tesi rimarrebbe riproducibile dal punto di vista metodologico e auditabile tramite manifest/hash/script, ma senza esporre direttamente contenuti potenzialmente problematici nella repository pubblica.
+
+Secondo te questa impostazione è corretta per la consegna e per un’eventuale repository pubblica? Oppure preferisci che mantenga anche una parte delle immagini, ad esempio solo il dataset finale o un subset dimostrativo?
