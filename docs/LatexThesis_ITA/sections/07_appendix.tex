@@ -185,7 +185,11 @@ python explainability/scripts/18_xai_interactive_launcher.py
 python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 \end{lstlisting}
 
-Lo script \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py} costituisce il punto di raccordo tra gli export prodotti dagli strumenti forensi commerciali e le metriche comparative finali. Nel protocollo finale, esso supporta esclusivamente gli output riconducibili a \texttt{magnet\_axiom}, \texttt{excire\_foto\_2025} e \texttt{cellebrite\_inseyets}. Il suo ruolo è normalizzare gli export, ricondurre le predizioni ai record del forensic evaluation bundle e produrre risultati confrontabili con il livello proxy mediante mapping basato, in ordine preferenziale, su \texttt{bundle\_id}, hash \texttt{SHA256}, hash \texttt{MD5}, nome file e audit manuale.
+Lo script \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py} costituisce il punto di raccordo tra gli export prodotti dagli strumenti forensi commerciali e le metriche comparative finali.
+Nel protocollo finale, esso supporta esclusivamente gli output riconducibili a
+\texttt{magnet\_axiom}, \texttt{excire\_foto\_2025},
+\texttt{cellebrite\_inseyets} e \texttt{griffeye}.
+Il suo ruolo è normalizzare gli export, ricondurre le predizioni ai record del forensic evaluation bundle e produrre risultati confrontabili con il livello proxy mediante mapping basato, in ordine preferenziale, su \texttt{bundle\_id}, hash \texttt{SHA256}, hash \texttt{MD5}, nome file e audit manuale.
 
 \section{Models, attacks and evaluation outputs}
 \label{app:models-attacks-evaluation-outputs}
@@ -243,7 +247,19 @@ La pipeline è implementata prevalentemente in Python e utilizza librerie per la
 \end{tabularx}
 \end{table}
 
-La valutazione operativo-forense comprende inoltre tre software \gls{ai}-based osservati in modalità \textit{black-box}: \textit{Magnet AXIOM}, versione 10.1.0.48673, con la funzionalità \textit{Magnet.AI}; \textit{Excire Foto 2025}, versione 4.1.5, utilizzato come applicazione standalone general-purpose con funzionalità AI; e \textit{Cellebrite Inseyets}, versione 10.9, con export prodotto nell'ambiente \textit{Cellebrite Physical Analyzer} 10.9.0.3029. Diversamente dagli script Python e dai modelli proxy, tali strumenti introducono una componente non completamente automatizzabile, dovuta a licenze, interfacce grafiche, versioni software, configurazioni operative e formati di esportazione. Per questo motivo, la loro valutazione è documentata mediante bundle cieco, istruzioni operative, export normalizzati e mapping basato su hash.
+La valutazione operativo-forense comprende inoltre quattro software osservati
+in modalità \textit{black-box}: \textit{Magnet AXIOM}, versione
+10.1.0.48673, con la funzionalità \textit{Magnet.AI};
+\textit{Excire Foto 2025}, versione 4.1.5, utilizzato come applicazione
+standalone general-purpose con funzionalità \gls{ai}; \textit{Cellebrite
+Inseyets}, versione 10.9, con export prodotto nell'ambiente \textit{Cellebrite
+Physical Analyzer} 10.9.0.3029; e \textit{Magnet Griffeye x64}, versione
+26.2.108, con modulo \textit{T3K CORE} v1.18.0. Diversamente dagli script
+Python e dai modelli proxy, tali strumenti introducono una componente non
+completamente automatizzabile, dovuta a licenze, interfacce grafiche, versioni
+software, configurazioni operative e formati di esportazione. Per questo motivo,
+la loro valutazione è documentata mediante bundle cieco, istruzioni operative,
+export normalizzati e mapping basato su hash.
 
 \section{Logs, reports and audit outputs}
 \label{app:logs-reports-audit-outputs}
