@@ -1,0 +1,87 @@
+\chapter*{Abstract}
+\label{chap:abstract}
+\thispagestyle{empty}
+
+The use of \gls{ai} systems in \gls{df} is significantly reshaping how digital
+data are analyzed, especially in contexts in which large volumes of images must
+be selected, classified, and brought to the attention of the forensic analyst.
+\gls{ai}-based tools can reduce the investigator's operational workload and
+accelerate the identification of potentially relevant content. However, their
+use in investigative scenarios raises critical issues of reliability,
+verifiability, and robustness, particularly when the analyzed inputs may be
+intentionally manipulated for adversarial or anti-forensic purposes.
+
+This thesis evaluates the operational robustness of \gls{ai}-based tools and
+models for the automated classification of images in forensic contexts. Rather
+than proposing a new classifier, it examines whether, and to what extent,
+systems based on \gls{ml} and \gls{dl} maintain reliable behavior when exposed
+to realistic, heterogeneous, and manipulated data. The study adopts a
+\gls{df} perspective, in which system error is not viewed merely as a decrease
+in performance, but as a potential operational risk affecting the
+identification, selection, and interpretation of relevant digital material.
+
+To this end, a reproducible experimental protocol, named \gls{fairlab}, was
+designed on the basis of a final frozen dataset composed of 1\,500 images,
+balanced across weapon, non-weapon, and \gls{ood} images. From
+this dataset, a binary subset of 1\,000 images was derived and used for the
+controlled generation of adversarial and anti-forensic perturbations. The
+considered manipulations include adversarial attacks such as \gls{fgsm},
+\gls{sigmazero}, \gls{superdeepfool}, \gls{onepixel}, and \gls{colorshift}, as
+well as anti-forensic transformations such as \gls{jpegrecompression},
+\gls{resampleresize}, \gls{gaussianblur}, \gls{histogrammodification}, and
+\gls{contraststretching}. The resulting images were organized into a forensic
+evaluation bundle composed of 11\,500 files, enabling the assessment of both
+proxy models and the observable outputs of commercial black-box tools and \gls{ai}-based software systems.
+
+
+The experimental evaluation includes proxy models based on EfficientNet-B0,
+ResNet18, and \gls{clip}, together with the operational assessment of the tools
+actually integrated into the protocol: Magnet AXIOM/Magnet.AI, Excire Foto
+2025, Cellebrite Inseyets/Physical Analyzer, and Magnet Griffeye/T3K CORE.
+Performance is analyzed by comparing behavior on \texttt{clean} data,
+\gls{ood} images, anti-forensically perturbed images, and adversarial examples.
+The analysis relies on operational metrics such as accuracy, \gls{fpr},
+\gls{fnr}, recall for the \texttt{weapon} class, and the distribution of
+confidence scores, with particular attention to cases in which relevant content
+is omitted, misclassified, or associated with non-negligible confidence levels.
+To support the qualitative interpretation of the results, the thesis also
+incorporates an \gls{xai} analysis based on \gls{ig}, aimed at identifying the
+image regions that contribute most to model decisions.
+
+The results show that the considered perturbations produce differentiated
+effects across the analyzed systems. Anti-forensic transformations lead to
+generally more limited, yet still operationally relevant, degradations,
+whereas some adversarial attacks produce more substantial performance
+reductions, especially in models that depend more heavily on the learned visual
+distribution. The analysis of \gls{ood} images highlights an additional
+forensic risk: systems that appear accurate on \texttt{clean} data may still
+produce incorrect classifications, or classifications associated with high
+confidence levels, when confronted with ambiguous, synthetic, degraded, or
+semantically out-of-distribution content. These findings confirm that accuracy
+on controlled datasets alone is not sufficient to establish the operational
+reliability of an \gls{ai}-based system within an investigative workflow. More
+specifically, the results show that robustness varies significantly across
+architectures, perturbation families, and black-box tools, making a
+bundle-weighted and operational interpretation of commercial outputs necessary.
+
+The thesis concludes that \gls{ai}-based tools for the automated classification
+of images can provide useful support to \gls{df}, but should not be treated as
+autonomous sources of evidentiary assessment. Their use requires specific
+validation procedures, reproducible forensic benchmarks, documentation of error
+conditions, robustness analysis with respect to realistic manipulations, and
+the maintenance of a human-in-the-loop model. The main contribution of this
+work lies in the definition and application of an experimental methodology
+oriented toward operational robustness, providing a transparent basis for
+evaluating the limitations, risks, and conditions of use of
+\gls{ai}-enhanced systems in \gls{df} scenarios.
+
+\vfill
+
+\noindent
+\begin{minipage}{\textwidth}
+\small
+\raggedright
+\textbf{Keywords:} Digital Forensics; Artificial Intelligence; AI-based forensic tools;
+image classification; operational robustness; adversarial attacks; anti-forensics;
+out-of-distribution analysis; explainable AI.
+\end{minipage}

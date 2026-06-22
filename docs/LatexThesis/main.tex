@@ -1,0 +1,112 @@
+\documentclass{report}
+% !TeX root = main.tex
+
+% ----------------- Pacchetti ----------------------
+\usepackage{packages}
+
+% ----------------- Info Tesi ----------------------
+\title{Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks}
+\author{Lello Molinario}
+\date{25/05/2026}
+
+\begin{document}
+
+% ----------------- Front matter numbering ----------------------
+\pagenumbering{roman}
+\pagestyle{frontmatterstyle}
+
+% ----------------- Acronyms and glossary definitions ----------------------
+\input{sections/000_acronyms}
+
+% ----------------- Frontespizio ----------------------
+\import{./}{title}
+
+
+% ----------------- Copyright / License ----------------------
+\clearpage
+\thispagestyle{empty}
+
+\null
+\vfill
+
+\begin{center}
+\small
+\copyright\ 2026 Lello Molinario.
+
+\vspace{1em}
+
+Except where otherwise noted, this work is licensed under the
+Creative Commons Attribution 4.0 International License (CC BY 4.0).
+
+\vspace{1em}
+
+To view a copy of this license, visit:
+
+\href{https://creativecommons.org/licenses/by/4.0/}
+{https://creativecommons.org/licenses/by/4.0/}
+\end{center}
+
+\vspace*{1.5cm}
+
+\clearpage
+
+
+% ----------------- Front matter text ----------------------
+\input{sections/0_acknowledgment}
+
+% Abstract without visible page numbering.
+\clearpage
+\pagestyle{empty}
+\input{sections/00_abstract}
+\clearpage
+\pagestyle{plain}
+
+
+% ----------------- Indice e liste ----------------------
+\tableofcontents
+\clearpage
+
+\listoffigures
+\clearpage
+
+\listoftables
+
+% Print only acronyms actually used in the thesis body.
+% \glsaddall[types=\acronymtype]
+
+\begingroup
+\let\cleardoublepage\clearpage
+\printglossary[type=\acronymtype,title={Acronyms}]
+\endgroup
+
+% Reset acronym usage so first occurrences in the thesis body are expanded.
+\glsresetall
+\clearpage
+
+
+
+% Reset acronym usage again before the thesis body.
+\glsresetall
+
+% ----------------- Main matter ----------------------
+\cleardoublepage
+\pagenumbering{arabic}
+\pagestyle{mainmatterstyle}
+
+
+\input{sections/01_introduction}
+\input{sections/02_background}
+\input{sections/03_StateoftheArt}
+\input{sections/04_methodology}
+\input{sections/05_experiments}
+\input{sections/06_conclusions}
+
+% ----------------- Appendice ----------------------
+\appendix
+\input{sections/07_appendix}
+
+% ----------------- Bibliografia ----------------------
+\cleardoublepage
+\printbibliography[heading=bibintoc, title={References}]
+
+\end{document}

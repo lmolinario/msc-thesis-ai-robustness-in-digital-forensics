@@ -1,0 +1,186 @@
+\documentclass{report}
+% !TeX root = main.tex
+% ----------------- Pacchetti ----------------------
+\usepackage{titlesec}
+\usepackage{packages}        % tuo file con i pacchetti principali
+\usepackage{fancyhdr}        % per intestazioni/piedipagina
+\usepackage{import}          % per importare title e appendix
+\usepackage{afterpage}       % per inserire pagine vuote
+\usepackage{verbatim}        % per inserire commenti
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{fontawesome5} % per le icone
+
+\usepackage{subcaption}  % da inserire nel preambolo
+\usepackage{smartdiagram}
+\usepackage{cfntinst}
+\usesmartdiagramlibrary{additions}
+
+\usetikzlibrary{arrows.meta, positioning}
+\usetikzlibrary{positioning}
+
+% ----------------- Info Tesi ----------------------
+\title{Experimental Evaluation of the Robustness of AI‑Based Forensic Tools for Automated Image Classification Under Adversarial and Anti‑Forensic Attacks}
+\author{Lello Molinario}
+\date{25/05/2025} % data inizio stesura
+
+
+
+\begin{document}
+
+% ----------------- Frontespizio ----------------------
+\pagenumbering{roman}
+
+\import{./}{title}
+
+\afterpage{\null\thispagestyle{empty}\newpage}
+
+% ----------------- Abstract ----------------------
+
+
+
+
+\input{sections/00_abstract}
+\begin{comment}
+Giusto una prova di generazione (é la mia prima volta su overleaf...)
+\end{comment}
+\afterpage{\null\thispagestyle{empty}\newpage}
+
+% ----------------- Acknowledgment ----------------------
+
+\input{sections/0_acknowledgment}
+\afterpage{\null\thispagestyle{empty}\newpage}
+
+
+% ----------------- Indice e liste ----------------------
+\cleardoublepage
+\tableofcontents
+\newpage
+
+\cleardoublepage
+\listoffigures
+\newpage
+
+\cleardoublepage
+
+%\input{sections/000_acronyms}
+%\printglossary[type=\acronymtype]
+%\newpage
+
+\cleardoublepage
+\input{sections/000_acronyms}
+\glsaddall
+\printglossary[type=\acronymtype,title={Acronyms}]
+\newpage
+
+\cleardoublepage
+\listoftables
+\newpage
+
+
+
+
+% ----------------- Corpo Tesi ----------------------
+\pagenumbering{arabic}
+
+
+\input{sections/01_introduction}
+\begin{comment}
+INTRODUCTION
+•	Introduzione alla Digital Forensics e al ruolo dell'AI in questo campo.
+•	Importanza della robustezza degli strumenti forensi basati su AI.
+•	Obiettivi della ricerca: valutare vulnerabilità e impatto degli attacchi adversariali.
+•	Struttura della tesi.
+\end{comment}
+
+
+
+\input{sections/02_background}
+
+\begin{comment}
+TECHNICAL BACKGROUND CONCEPTS
+•	Digital Forensics: principi generali, workflow di un'investigazione digitale.
+•	Machine Learning e AI in Digital Forensics: classificatori, reti neurali, e tecniche utilizzate.
+•	Attacchi Adversariali: definizione, tipologie (es. evasion attack, poisoning attack), esempi reali.
+•	Metodi di Difesa: robustezza dei modelli, tecniche di adversarial training, detection mechanisms.
+\end{comment}
+
+
+\input{sections/03_StateoftheArt}
+
+\begin{comment}
+STATE OF THE ART
+•	Panoramica sugli strumenti forensi AI-based: quali strumenti esistono e come vengono utilizzati.
+•	Studi precedenti sulla vulnerabilità dell’AI in Digital Forensics.
+•	Ricerche sugli attacchi adversariali e contromisure proposte.
+\end{comment}
+
+
+
+
+\input{sections/04_methodology}
+
+\begin{comment}
+METHODOLOGY
+•	Dataset e Strumenti: quali dataset verranno usati (es. immagini, testi, log di rete), descrizione degli strumenti forensi testati.
+•	Tipologie di Attacchi Testati: descrizione delle tecniche di attacco implementate.
+•	Metodologia di Valutazione: metriche di valutazione della robustezza (accuratezza pre e post attacco, FPR, FNR).
+•	Pipeline dell’Esperimento: passi dettagliati del processo sperimentale.
+\end{comment}
+
+
+
+
+
+\input{sections/05_implementation_experiments}
+\begin{comment}
+    scrivere quello che ho fatto io per arrivare ai risultati 
+
+EXPERIMENTAL RESULTS
+•	Analisi dei Risultati: impatto degli attacchi adversariali sugli strumenti AI-based.
+•	Confronto tra diversi attacchi: quali sono più efficaci e perché.
+•	Limitazioni dell’Esperimento: eventuali problematiche riscontrate.
+\end{comment}
+
+
+
+
+\input{sections/06_conclusions}
+
+\begin{comment}
+DISCUSSION AND CONCLUSIONS
+•	Interpretazione dei Risultati: implicazioni per la comunità della Digital Forensics.
+•	Proposte per il Miglioramento: suggerimenti per rendere gli strumenti AI-based più robusti.
+•	Futuri sviluppi della ricerca: possibili estensioni del lavoro.
+•	Conclusioni finali.
+\end{comment}
+
+
+
+% ----------------- Appendice ----------------------
+\input{sections/07_appendix}
+\begin{comment}
+In questa sezione si riporta il codice sorgente usato per la realizzazione degli esperimenti descritti nella tesi. I file sono suddivisi per funzionalità.
+
+Tutti i file completi sono reperibili anche nel repository allegato al progetto.
+\end{comment}
+
+
+
+
+
+% ----------------- Bibliografia ----------------------
+\cleardoublepage
+\printbibliography[heading=bibintoc, title={References}]
+\begin{comment}
+Verificare come vogliamo le citazione: se in ordine di apparizione o in ordine alfabetico
+\end{comment}
+
+
+\end{document}
+
