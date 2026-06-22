@@ -436,292 +436,609 @@ results from the literature on the robustness of computer vision models.
 
 
 
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Robustness Evaluation: Benchmarks and Findings from the Literature}
+\label{sec:sota-robustness-benchmarks}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Recent literature in computer vision has systematically shown that accuracy
+obtained on clean and distributionally homogeneous data is not sufficient to
+estimate the operational reliability of a model. This finding is particularly
+relevant for \gls{df}, because images analyzed in an investigative context
+rarely coincide with the controlled conditions typical of academic benchmarks:
+they may originate from heterogeneous devices, have been compressed by social
+platforms or messaging applications, present low resolution, contain
+occlusions, or have been intentionally altered before acquisition. Within this
+framework, robustness is not an accessory property of the classifier, but a
+necessary condition for automation to be used as reliable support for evidence
+triage and prioritization.
+
+A central contribution in this direction is the work of Hendrycks and
+Dietterich~\cite{hendrycks2019benchmarking}, who introduced a systematic
+benchmark for evaluating the behavior of classification models under common
+corruptions and perturbations. Their work showed that models with high
+performance on clean data may suffer significant degradation when exposed to
+noise, blur, compression, chromatic variations, or other realistic alterations.
+The relevant point for the present thesis is not the specific nature of the
+benchmark, but the empirical result it makes evident: nominal performance does
+not necessarily predict model stability under non-ideal operational
+conditions. This finding weakens the use of accuracy on clean data as the sole
+evaluation criterion for systems intended for real-world environments.
+
+Similar findings have emerged in the object detection domain. Michaelis et
+al.~\cite{michaelis2019winter} showed that models trained and evaluated under
+favorable conditions may lose effectiveness when exposed to environmental
+variations, visual degradations, or scenarios distant from the training
+distribution. Although their application domain is not forensic, the
+contribution is methodologically relevant because it confirms that robustness
+must be evaluated with respect to plausible perturbations of visual data, not
+only with respect to standardized datasets. In forensic contexts, this
+observation becomes even more critical: an apparently ordinary degradation may
+affect the system's ability to recognize investigatively relevant content and,
+consequently, the priority assigned to the evidence.
+
+A second line of literature concerns the detection of out-of-distribution
+inputs. Hendrycks and Gimpel~\cite{hendrycks2017baseline} showed that neural
+classifiers may produce high-confidence predictions even on inputs that do not
+belong to the classes expected by the task. This behavior is problematic in
+operational contexts, because an automatic system may forcibly assign an
+anomalous image to a known class instead of signaling uncertainty. Fort et
+al.~\cite{fort2021exploring} further highlighted the limitations of \gls{ood}
+detection approaches, showing that the ability to recognize anomalous inputs
+strongly depends on the type of distribution considered and on the degree of
+distance from the training data. For \gls{df}, this implies that borderline,
+synthetic, heavily degraded, or task-irrelevant images should not be treated as
+simple classification errors, but as a structural component of reliability
+evaluation.
+
+The literature on robustness benchmarks has also shown that model instability
+may emerge both in the presence of realistic degradations and in the presence
+of intentionally constructed perturbations. Ford et al.~\cite{ford2019adversarial}
+discussed the relationship between error on noisy data and adversarial
+vulnerability, suggesting that model fragility with respect to intentional
+attacks is not completely separable from sensitivity to natural or realistic
+input variations. This relationship is important for the present thesis because
+it justifies an integrated evaluation that considers both anti-forensic
+transformations and adversarial attacks.
+
+A further relevant contribution is RobustBench~\cite{croce2020robustbench},
+which provided a standardized reference for comparing models and defenses with
+respect to adversarial attacks. Although this benchmark belongs to the general
+computer vision domain and is not designed for forensic scenarios, it shows the
+importance of shared protocols, comparable metrics, and controlled
+experimental conditions. The absence of an equally consolidated reference
+specifically oriented toward \gls{df} constitutes a relevant gap: models and
+tools used in investigative contexts are often evaluated according to
+non-uniform criteria, on datasets that are difficult to compare, and without a
+systematic verification of their robustness with respect to realistic or
+hostile manipulations.
+
+AutoAttack belongs to the same research direction, proposing an automated and
+more standardized evaluation procedure for estimating the adversarial
+robustness of classifiers, reducing the risk of overestimating defenses through
+attack configurations that are not sufficiently strong or not comparable
+\cite{croce2020autoattack}. In this case as well, the contribution does not
+directly concern \gls{df}, but reinforces the methodological need to use
+explicit, reproducible, and sufficiently stringent evaluation protocols.
+
+The need to extend robustness evaluation beyond general benchmarks also emerges
+from studies applied to automatic systems used in security contexts. Nowroozi
+et al.~\cite{nowroozi2024verifying}, although in a domain different from
+forensic image analysis, show that adversarial perturbations can substantially
+degrade the performance of systems that appear reliable under ordinary
+conditions. More directly in the context of forensic analysis of visual
+content, Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} show
+that AI-based software usable in forensic workflows may exhibit fragility when
+exposed to manipulated inputs. These findings confirm that the robustness
+problem concerns both experimentally evaluated models and the operational
+outputs of software observed in a \textit{black-box} setting.
+
+Overall, the literature on robustness benchmarks provides three fundamental
+indications. First, accuracy on clean data is not sufficient to evaluate the
+reliability of a classifier intended for real-world scenarios. Second, the
+presence of degraded, manipulated, or out-of-distribution inputs must be
+considered an integral part of the evaluation protocol, not a marginal
+condition. Third, the forensic domain requires specific benchmarks and
+experimental protocols capable of connecting algorithmic robustness to the
+operational impact on triage and evidence selection. This need naturally leads
+to the literature on \gls{advml} applied to images, where degradation of model
+behavior is no longer caused by realistic or accidental variations, but by
+perturbations intentionally constructed to induce classification errors.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Adversarial Machine Learning applicato a classificatori di immagini}
+\section{Adversarial Machine Learning Applied to Image Classifiers}
 \label{sec:sota-adversarial-ml}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La letteratura sull'\gls{advml} ha mostrato che i classificatori di immagini
-basati su \gls{ml} e \gls{dl} possono essere vulnerabili a input costruiti
-intenzionalmente per alterarne la predizione. Nel
-Capitolo~\ref{chap:background} sono stati introdotti i concetti fondamentali di
-adversarial example, threat model e perturbazione dell'input; in questa sezione
-l'attenzione è invece rivolta ai principali risultati della letteratura e alla
-loro rilevanza per i classificatori visuali impiegabili in scenari forensi.
+The literature on \gls{advml} has shown that image classifiers based on
+\gls{ml} and \gls{dl} may be vulnerable to inputs intentionally constructed to
+alter their predictions. Chapter~\ref{chap:background} introduced the
+fundamental concepts of adversarial example, threat model, and input
+perturbation; in this section, the focus shifts to the main findings of the
+literature and to their relevance for visual classifiers that may be employed
+in forensic scenarios.
 
-I lavori seminali di Szegedy et al.~\cite{szegedy2014intriguing} e Goodfellow
-et al.~\cite{goodfellow2015explaining} hanno stabilito che classificatori
-profondi ad alta accuratezza possono produrre decisioni errate in presenza di
-perturbazioni intenzionalmente costruite, anche quando tali alterazioni risultano
-limitate sul piano percettivo. Per la \gls{df}, questo risultato è rilevante
-perché mostra che un sistema automatico impiegato nel triage visuale può essere
-indotto a sottostimare o ignorare contenuti investigativamente rilevanti qualora
-l'input sia stato manipolato prima dell'acquisizione o dell'analisi.
+The seminal works by Szegedy et al.~\cite{szegedy2014intriguing} and Goodfellow
+et al.~\cite{goodfellow2015explaining} established that high-accuracy deep
+classifiers can produce incorrect decisions in the presence of intentionally
+constructed perturbations, even when such alterations are perceptually limited.
+For \gls{df}, this finding is relevant because it shows that an automatic
+system used in visual triage can be induced to underestimate or ignore
+investigatively relevant content if the input has been manipulated before
+acquisition or analysis.
 
-Un secondo filone della letteratura ha approfondito la costruzione di attacchi
-più precisi, iterativi o ottimizzati rispetto alla minima perturbazione
-necessaria per modificare la decisione del modello. DeepFool
-\cite{moosavi2016deepfool} ha mostrato che è possibile stimare perturbazioni di
-piccola ampiezza capaci di spostare l'immagine oltre il confine decisionale del
-classificatore, contribuendo a rendere più sistematica la valutazione della
-distanza tra input pulito e input adversariale. \gls{superdeepfool}
-\cite{zhang2024superdeepfool} si colloca nello stesso filone, proponendo
-un'evoluzione orientata a generare perturbazioni efficaci rispetto a modelli
-profondi con un processo di ottimizzazione più mirato. Questi lavori non sono
-nati specificamente per la \gls{df}, ma sono rilevanti perché forniscono una
-base metodologica per misurare quanto un classificatore visuale possa essere
-instabile rispetto a variazioni non casuali dell'immagine.
+A second line of literature has investigated the construction of attacks that
+are more precise, iterative, or optimized with respect to the minimum
+perturbation required to modify the model decision. DeepFool
+\cite{moosavi2016deepfool} showed that it is possible to estimate
+small-magnitude perturbations capable of moving an image across the
+classifier's decision boundary, thereby contributing to a more systematic
+evaluation of the distance between a clean input and an adversarial input.
+\gls{superdeepfool} \cite{zhang2024superdeepfool} belongs to the same research
+direction, proposing an evolution oriented toward generating effective
+perturbations against deep models through a more targeted optimization process.
+These works were not developed specifically for \gls{df}, but they are relevant
+because they provide a methodological basis for measuring how unstable a visual
+classifier may be with respect to non-random image variations.
 
-La letteratura ha inoltre mostrato che la vulnerabilità adversariale non
-riguarda soltanto perturbazioni distribuite su molti pixel. Su et
-al.~\cite{su2019onepixel} hanno introdotto il \gls{onepixel}, dimostrando che,
-in alcuni casi, la modifica di un numero estremamente limitato di pixel può
-essere sufficiente a indurre una classificazione errata. Più recentemente,
-approcci basati su vincoli sparsi, come \gls{sigmazero}
-\cite{zhao2024sigmazero}, hanno ulteriormente esplorato la possibilità di
-costruire attacchi con alterazioni localizzate e ridotto impatto percettivo.
-Questa linea di ricerca è particolarmente significativa per il contesto forense,
-perché mostra che la manipolazione efficace di un'immagine non richiede
-necessariamente trasformazioni estese o visivamente evidenti: anche modifiche
-localizzate possono interferire con il comportamento di modelli automatici.
+The literature has also shown that adversarial vulnerability does not concern
+only perturbations distributed across many pixels. Su et al.~\cite{su2019onepixel}
+introduced the \gls{onepixel}, demonstrating that, in some cases, modifying an
+extremely limited number of pixels may be sufficient to induce an incorrect
+classification. More recently, approaches based on sparse constraints, such as
+\gls{sigmazero} \cite{zhao2024sigmazero}, have further explored the possibility
+of constructing attacks with localized alterations and limited perceptual
+impact. This line of research is particularly significant for forensic
+contexts, because it shows that effective image manipulation does not
+necessarily require extensive or visually evident transformations: even
+localized modifications can interfere with the behavior of automatic models.
 
-Un'ulteriore linea di ricerca ha mostrato che la perturbazione adversariale può
-assumere anche forme localizzate e visivamente più esplicite, come nel caso
-degli adversarial patch. Brown et al.~\cite{brown2017patch} hanno dimostrato
-che una regione artificiale applicata all'immagine può indurre errori di
-classificazione anche senza modificare l'intero contenuto visivo. Per la
-presente tesi, tale risultato è rilevante soprattutto sul piano concettuale:
-mostra che la vulnerabilità dei classificatori non riguarda soltanto
-perturbazioni distribuite e quasi impercettibili, ma anche alterazioni
-localizzate che possono interferire con il processo decisionale del modello.
+A further line of research has shown that adversarial perturbations may also
+take localized and visually more explicit forms, as in the case of adversarial
+patches. Brown et al.~\cite{brown2017patch} demonstrated that an artificial
+region applied to an image can induce classification errors even without
+modifying the entire visual content. For the present thesis, this result is
+relevant mainly at the conceptual level: it shows that classifier vulnerability
+does not concern only distributed and nearly imperceptible perturbations, but
+also localized alterations that can interfere with the model decision-making
+process.
 
-La letteratura comprende inoltre attacchi generativi, nei quali reti generative
-vengono addestrate per produrre perturbazioni adversariali trasferibili. Un
-esempio rappresentativo è AdvGAN, che impiega un generatore per costruire esempi
-adversariali in modo efficiente e con capacità di trasferimento tra modelli
-\cite{xia2018advgan}. Questa famiglia di attacchi non è inclusa nel protocollo
-sperimentale della presente tesi, poiché il lavoro privilegia perturbazioni più
-direttamente interpretabili nel contesto operativo della \gls{df}.
+The literature also includes generative attacks, in which generative networks
+are trained to produce transferable adversarial perturbations. A representative
+example is AdvGAN, which employs a generator to construct adversarial examples
+efficiently and with transferability across models \cite{xia2018advgan}. This
+family of attacks is not included in the experimental protocol of the present
+thesis, because the work prioritizes perturbations that are more directly
+interpretable in the operational context of \gls{df}.
 
-Un aspetto cruciale per gli scenari operativi è la distinzione tra attacchi
-white-box, black-box e transfer-based. Papernot et
-al.~\cite{papernot2016limitations} hanno mostrato che la vulnerabilità dei
-modelli può trasferirsi tra classificatori differenti, mentre la letteratura
-successiva sugli attacchi black-box ha sistematizzato scenari nei quali
-l'attaccante dispone soltanto di accesso limitato agli output del modello o
-utilizza modelli surrogati per generare perturbazioni trasferibili
-\cite{bhambri2020survey}. Carlini e Wagner~\cite{carlini2017towards} hanno
-contribuito a rafforzare la valutazione della sicurezza dei classificatori
-mostrando i limiti di diverse difese proposte contro gli attacchi
-adversariali. Le survey di Akhtar e Mian~\cite{akhtar2018threat} e Yuan et
-al.~\cite{yuan2019adversarial} confermano che la trasferibilità degli
-adversarial examples costituisce uno dei problemi più rilevanti per l'impiego di
-modelli \gls{ai}-based in ambienti non completamente controllati. Nel caso dei
-software commerciali valutati in contesto forense, questa osservazione assume
-particolare importanza: anche quando il modello integrato nel software è
-proprietario e non ispezionabile, un attaccante potrebbe generare perturbazioni
-su modelli accessibili e verificarne l'efficacia per trasferimento.
+A crucial aspect for operational scenarios is the distinction among white-box,
+black-box, and transfer-based attacks. Papernot et al.~\cite{papernot2016limitations}
+showed that model vulnerability can transfer across different classifiers,
+whereas subsequent literature on black-box attacks has systematized scenarios
+in which the attacker has only limited access to the model outputs or uses
+surrogate models to generate transferable perturbations \cite{bhambri2020survey}.
+Carlini and Wagner~\cite{carlini2017towards} contributed to strengthening the
+security evaluation of classifiers by showing the limitations of several
+defenses proposed against adversarial attacks. The surveys by Akhtar and
+Mian~\cite{akhtar2018threat} and Yuan et al.~\cite{yuan2019adversarial}
+confirm that the transferability of adversarial examples is one of the most
+relevant problems for the use of \gls{ai}-based models in environments that are
+not fully controlled. In the case of commercial software evaluated in forensic
+contexts, this observation is particularly important: even when the model
+integrated into the software is proprietary and not inspectable, an attacker
+could generate perturbations on accessible models and verify their
+effectiveness through transfer.
 
-Biggio e Roli~\cite{biggio2018wild} hanno inquadrato queste vulnerabilità
-all'interno del paradigma dell'\textit{adversary-aware security}, sostenendo che
-la valutazione di un sistema basato su apprendimento automatico deve considerare
-esplicitamente la presenza di un avversario strategico. Questo principio è
-centrale per la presente tesi: un sistema di classificazione forense non opera
-necessariamente in un ambiente neutro, ma può essere esposto a dati preparati o
-modificati da soggetti interessati a ostacolare l'analisi. La robustezza
-adversariale, quindi, non è soltanto una proprietà tecnica del modello, ma una
-componente della sua affidabilità operativa.
+Biggio and Roli~\cite{biggio2018wild} framed these vulnerabilities within the
+paradigm of \textit{adversary-aware security}, arguing that the evaluation of a
+machine-learning-based system must explicitly consider the presence of a
+strategic adversary. This principle is central to the present thesis: a
+forensic classification system does not necessarily operate in a neutral
+environment, but may be exposed to data prepared or modified by actors
+interested in hindering the analysis. Adversarial robustness, therefore, is not
+only a technical property of the model, but a component of its operational
+reliability.
 
-Nel dominio più vicino all'image forensics, Barni et al.~\cite{barni2018cf}
-hanno mostrato che modelli basati su reti neurali per la rilevazione di
-manipolazioni digitali possono essere vulnerabili ad attacchi adversariali.
-Nowroozi~\cite{nowroozi2020phd} ha ulteriormente approfondito il problema delle
-tecniche di \gls{ml} per l'image forensics in scenari adversariali,
-evidenziando come modelli progettati per analisi forensi possano essere
-degradati da perturbazioni mirate. Questi contributi sono particolarmente
-importanti perché spostano il problema dagli esempi generici di computer vision
-ai sistemi utilizzati per compiti più vicini al dominio forense. Il risultato
-che emerge è che la vulnerabilità adversariale non riguarda soltanto
-classificatori generici addestrati su dataset standard, ma anche modelli
-sviluppati per riconoscere manipolazioni o caratteristiche rilevanti in immagini
-digitali.
+In the domain closer to \textit{image forensics}, Barni et
+al.~\cite{barni2018cf} showed that neural-network-based models for detecting
+digital manipulations may be vulnerable to adversarial attacks.
+Nowroozi~\cite{nowroozi2020phd} further investigated the problem of \gls{ml}
+techniques for \textit{image forensics} in adversarial scenarios, highlighting
+how models designed for forensic analysis can be degraded by targeted
+perturbations. These contributions are particularly important because they move
+the problem from generic computer vision examples to systems used for tasks
+closer to the forensic domain. The emerging result is that adversarial
+vulnerability does not concern only generic classifiers trained on standard
+datasets, but also models developed to recognize manipulations or relevant
+characteristics in digital images.
 
-Il collegamento con i software \gls{ai}-based utilizzabili in contesti forensi è
-stato rafforzato dai lavori più recenti sulla robustezza operativa. Nowroozi et
-al.~\cite{nowroozi2024verifying} hanno mostrato, in un diverso contesto di
-sicurezza, che la verifica della robustezza rispetto a perturbazioni
-adversariali deve essere parte integrante della valutazione dei sistemi
-automatici. Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect}
-hanno portato questa prospettiva più direttamente nel dominio dell'analisi
-forense, evidenziando che funzionalità \gls{ai}-based integrate in software
-operativi possono mostrare fragilità quando esposte a contenuti manipolati.
-Sebbene tali studi non esauriscano l'intero spettro degli attacchi adversariali
-su immagini, indicano con chiarezza che la validazione dei software
-\gls{ai}-based utilizzabili in contesti forensi non può limitarsi alla loro
-efficacia su input ordinari.
+The connection with \gls{ai}-based software usable in forensic contexts has
+been reinforced by more recent works on operational robustness. Nowroozi et
+al.~\cite{nowroozi2024verifying} showed, in a different security context, that
+robustness verification with respect to adversarial perturbations must be an
+integral part of the evaluation of automatic systems. Sanna et
+al.~\cite{sanna2024preliminary,sanna2025pixelperfect} brought this perspective
+more directly into the domain of forensic analysis, showing that \gls{ai}-based
+functionalities integrated into operational software may exhibit fragility when
+exposed to manipulated content. Although these studies do not exhaust the full
+spectrum of adversarial attacks on images, they clearly indicate that the
+validation of \gls{ai}-based software usable in forensic contexts cannot be
+limited to its effectiveness on ordinary inputs.
 
-Un ulteriore filone della letteratura ha analizzato l'uso di trasformazioni
-sull'input come possibile difesa rispetto agli esempi adversariali. Tecniche
-quali ricompressione, ridimensionamento o trasformazioni dell'immagine possono
-ridurre l'efficacia di alcune perturbazioni, ma non eliminano il problema della
-valutazione sistematica della robustezza \cite{guo2017countering}. Questo
-aspetto è rilevante per la presente tesi perché alcune trasformazioni considerate
-nella letteratura come meccanismi di difesa possono assumere, in un contesto
-forense, un significato diverso: non sono impiegate per proteggere il modello,
-ma per simulare condizioni di stress anti-forense realistiche e valutare la
-stabilità operativa dei classificatori e degli strumenti commerciali.
+A further line of literature has analyzed the use of input transformations as a
+possible defense against adversarial examples. Techniques such as
+recompression, resizing, or image transformations may reduce the effectiveness
+of some perturbations, but they do not eliminate the problem of systematic
+robustness evaluation \cite{guo2017countering}. This aspect is relevant to the
+present thesis because some transformations considered in the literature as
+defense mechanisms may assume a different meaning in a forensic context: they
+are not employed to protect the model, but to simulate realistic
+anti-forensic stress conditions and evaluate the operational stability of
+classifiers and commercial tools.
 
-Nel complesso, la letteratura sull'\gls{advml} applicato alle immagini fornisce
-tre indicazioni rilevanti per questa tesi. In primo luogo, i classificatori
-visuali possono essere vulnerabili a perturbazioni intenzionali anche quando
-presentano prestazioni elevate su dati puliti. In secondo luogo, tale
-vulnerabilità può manifestarsi in scenari diversi per conoscenza
-dell'attaccante, ampiezza della perturbazione e trasferibilità tra modelli. In
-terzo luogo, i lavori specifici sull'image forensics mostrano che anche i
-sistemi progettati per compiti forensi non sono immuni da queste fragilità.
-Resta tuttavia aperta una lacuna importante: la maggior parte degli studi
-considera modelli accademici o benchmark controllati, mentre sono ancora
-limitate le valutazioni integrate che combinano classificatori visuali, software
-\gls{ai}-based osservati in modalità \textit{black-box}, dataset realistici e
-attacchi adversariali nello stesso protocollo sperimentale.
+Overall, the literature on \gls{advml} applied to images provides three
+indications that are relevant to this thesis. First, visual classifiers may be
+vulnerable to intentional perturbations even when they achieve high performance
+on clean data. Second, this vulnerability may manifest across scenarios that
+differ in attacker knowledge, perturbation magnitude, and transferability
+across models. Third, works specifically addressing \textit{image forensics}
+show that even systems designed for forensic tasks are not immune to these
+fragilities. However, an important gap remains open: most studies consider
+academic models or controlled benchmarks, whereas integrated evaluations that
+combine visual classifiers, \gls{ai}-based software observed in a
+\textit{black-box} setting, realistic datasets, and adversarial attacks within
+the same experimental protocol are still limited.
 
-Questa lacuna prepara il passaggio alla sezione successiva. Gli attacchi
-adversariali rappresentano manipolazioni progettate rispetto al comportamento
-del modello; in ambito forense, tuttavia, le immagini possono essere alterate
-anche mediante trasformazioni più ordinarie o anti-forensi, come ricompressione,
-ridimensionamento, sfocatura e modifiche tonali. Tali trasformazioni non
-richiedono necessariamente conoscenza del classificatore, ma possono comunque
-incidere sulla stabilità dell'analisi automatica.
+This gap prepares the transition to the following section. Adversarial attacks
+represent manipulations designed with respect to model behavior; in forensic
+contexts, however, images may also be altered through more ordinary or
+anti-forensic transformations, such as recompression, resizing, blurring, and
+tonal modifications. These transformations do not necessarily require knowledge
+of the classifier, but they may still affect the stability of automated
+analysis.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Anti-forensics e trasformazioni realistiche: impatto sulla classificazione automatica}
+\section{Anti-Forensics and Realistic Transformations: Impact on Automated Classification}
 \label{sec:sota-antiforensics}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Assunta la distinzione concettuale, introdotta nel Capitolo~\ref{chap:background}, tra perturbazioni adversariali orientate alla decisione del modello e trasformazioni anti-forensi applicate all'artefatto digitale, questa sezione esamina i contributi che hanno studiato l'impatto di manipolazioni realistiche delle immagini sull'analisi forense. Il punto rilevante per la presente tesi è che trasformazioni non ottimizzate rispetto al classificatore possono comunque incidere sulla qualità dell'input e sulla stabilità degli output automatici utilizzati nel triage visuale.
+Starting from the conceptual distinction, introduced in
+Chapter~\ref{chap:background}, between adversarial perturbations oriented toward
+the model decision and anti-forensic transformations applied to the digital
+artifact, this section examines contributions that have studied the impact of
+realistic image manipulations on forensic analysis. The relevant point for the
+present thesis is that transformations not optimized with respect to the
+classifier may nevertheless affect input quality and the stability of the
+automatic outputs used in visual triage.
 
-Yaacoub et al.~\cite{yaacoub2021digital} e la letteratura tassonomica sull'anti-forensics~\cite{hewling2018anti} inquadrano l'anti-digital forensics come l'insieme delle tecniche finalizzate a rendere più difficile l'identificazione, l'acquisizione, la conservazione o l'interpretazione dell'evidenza digitale. Nel dominio delle immagini, tale prospettiva comprende sia manipolazioni orientate a cancellare o mascherare tracce forensi, sia trasformazioni apparentemente ordinarie che possono alterare le caratteristiche del file. Il contributo di questa letteratura è importante perché sposta l'attenzione dalla sola autenticità dell'immagine alla sua affidabilità come input di analisi: un'immagine può rimanere semanticamente comprensibile per un osservatore umano, ma diventare più problematica per un sistema automatico di classificazione.
+Yaacoub et al.~\cite{yaacoub2021digital} and the taxonomic literature on
+anti-forensics~\cite{hewling2018anti} frame anti-digital forensics as the set
+of techniques aimed at making the identification, acquisition, preservation, or
+interpretation of digital evidence more difficult. In the image domain, this
+perspective includes both manipulations aimed at deleting or masking forensic
+traces and apparently ordinary transformations that may alter the
+characteristics of the file. The contribution of this literature is important
+because it shifts attention from the sole authenticity of the image to its
+reliability as an input for analysis: an image may remain semantically
+understandable to a human observer while becoming more problematic for an
+automatic classification system.
 
-Un filone particolarmente rilevante riguarda la ricompressione \gls{jpeg}. Stamm e Liu~\cite{stamm2010anti} hanno mostrato che operazioni di anti-forensics applicate alla compressione possono alterare o mascherare tracce utili all'analisi dell'immagine, riducendo la capacità di individuare precedenti manipolazioni. Più in generale, la letteratura sull'image forensics ha evidenziato che la compressione modifica la struttura statistica e frequenziale dell'immagine, incidendo su dettagli, texture e artefatti che possono essere sfruttati sia dagli analisti forensi sia dai modelli automatici~\cite{farid2016photo,stamm2013information}. Questa osservazione assume rilievo diretto per la classificazione automatica: se un modello apprende feature sensibili alla qualità della compressione, una ricompressione successiva può alterare la stabilità della predizione anche senza modificare in modo evidente il contenuto semantico dell'immagine.
+A particularly relevant line of work concerns \gls{jpeg} recompression. Stamm
+and Liu~\cite{stamm2010anti} showed that anti-forensic operations applied to
+compression can alter or mask traces useful for image analysis, reducing the
+ability to identify previous manipulations. More generally, the literature on
+\textit{image forensics} has shown that compression modifies the statistical
+and frequency structure of the image, affecting details, textures, and
+artifacts that can be exploited both by forensic analysts and by automatic
+models~\cite{farid2016photo,stamm2013information}. This observation is directly
+relevant to automated classification: if a model learns features that are
+sensitive to compression quality, subsequent recompression may alter prediction
+stability even without visibly modifying the semantic content of the image.
 
-Un secondo gruppo di lavori riguarda resizing, resampling e trasformazioni geometriche. Popescu e Farid~\cite{popescu2005exposing} hanno mostrato che il ricampionamento lascia tracce statistiche rilevabili, aprendo una linea di ricerca centrale nell'analisi delle manipolazioni digitali. Dal punto di vista della classificazione automatica, tuttavia, il problema non riguarda soltanto la possibilità di rilevare il resampling, ma anche il suo effetto sulle rappresentazioni apprese dai modelli. Ridimensionamenti successivi, interpolazioni, cropping o cambiamenti di aspect ratio possono modificare proporzioni, bordi e dettagli visivi, con conseguenze particolarmente rilevanti nei task in cui l'oggetto di interesse occupa una porzione limitata dell'immagine. In scenari forensi, tale effetto può incidere sulla capacità del sistema di riconoscere oggetti investigativamente rilevanti, soprattutto quando essi sono parzialmente occlusi, piccoli o inseriti in contesti visivamente complessi.
+A second group of works concerns resizing, resampling, and geometric
+transformations. Popescu and Farid~\cite{popescu2005exposing} showed that
+resampling leaves detectable statistical traces, opening a central research
+direction in the analysis of digital manipulations. From the perspective of
+automated classification, however, the problem does not concern only the
+possibility of detecting resampling, but also its effect on the representations
+learned by models. Successive resizing operations, interpolations, cropping, or
+changes in aspect ratio may modify proportions, edges, and visual details, with
+particularly relevant consequences in tasks where the object of interest
+occupies only a limited portion of the image. In forensic scenarios, this
+effect may influence the system's ability to recognize investigatively relevant
+objects, especially when they are partially occluded, small, or embedded in
+visually complex contexts.
 
-La letteratura sulle trasformazioni realistiche dell'immagine ha inoltre considerato alterazioni quali blur, rumore, variazioni cromatiche, modifiche dell'istogramma e contrast stretching. Tali trasformazioni non sono necessariamente anti-forensi in senso stretto: possono derivare da acquisizioni di bassa qualità, inoltro tramite piattaforme di messaggistica, caricamento su social network, salvataggi ripetuti o normali processi di editing. Tuttavia, la loro rilevanza per la robustezza dei classificatori è stata evidenziata dai benchmark sulle corruzioni comuni, nei quali degradazioni di questo tipo producono riduzioni significative delle prestazioni anche in modelli ad alta accuratezza su dati puliti~\cite{hendrycks2019benchmarking}. In ambito forense, questa evidenza assume un significato operativo: le trasformazioni realistiche non rappresentano casi marginali, ma condizioni frequenti nei materiali digitali effettivamente sottoposti ad analisi.
+The literature on realistic image transformations has also considered
+alterations such as blur, noise, chromatic variations, histogram modifications,
+and contrast stretching. These transformations are not necessarily
+anti-forensic in a strict sense: they may result from low-quality acquisition,
+forwarding through messaging platforms, uploading to social networks, repeated
+saving, or ordinary editing processes. However, their relevance to classifier
+robustness has been highlighted by benchmarks on common corruptions, in which
+degradations of this type produce significant performance reductions even in
+models with high accuracy on clean data~\cite{hendrycks2019benchmarking}. In
+forensic contexts, this evidence has operational significance: realistic
+transformations do not represent marginal cases, but frequent conditions in the
+digital material actually submitted to analysis.
 
-Tecniche di information hiding, come la steganografia, rimangono rilevanti nel dominio forense, ma sono considerate in questa tesi come parte del quadro teorico generale e non come oggetto principale della valutazione sperimentale. Il focus empirico è invece posto su trasformazioni che incidono direttamente sulla classificazione visuale automatizzata, quali ricompressione, ricampionamento, sfocatura e modifiche tonali.
+Information hiding techniques, such as steganography, remain relevant in the
+forensic domain, but are considered in this thesis as part of the general
+theoretical framework and not as the main object of the experimental
+evaluation. The empirical focus is instead placed on transformations that
+directly affect automated visual classification, such as recompression,
+resampling, blurring, and tonal modifications.
 
-I lavori recenti sui software AI-based utilizzabili in contesti forensi confermano che tali trasformazioni devono essere considerate anche nella loro validazione operativa. Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} mostrano che contenuti manipolati o non conformi alle condizioni ordinarie possono ridurre l'affidabilità degli output automatici prodotti dai software analizzati. Il punto critico è che le trasformazioni anti-forensi e realistiche non richiedono necessariamente un attacco sofisticato contro il modello: possono essere applicate con strumenti comuni, introdotte da piattaforme di condivisione o risultare da normali passaggi di elaborazione dell'immagine. Questo le rende particolarmente plausibili negli scenari investigativi reali.
+Recent studies on AI-based software usable in forensic contexts confirm that
+such transformations must also be considered in their operational validation.
+Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} show that
+manipulated content or content that does not conform to ordinary conditions may
+reduce the reliability of the automatic outputs produced by the analyzed
+software. The critical point is that anti-forensic and realistic
+transformations do not necessarily require a sophisticated attack against the
+model: they can be applied with common tools, introduced by sharing platforms,
+or result from ordinary image processing steps. This makes them particularly
+plausible in real investigative scenarios.
 
-Nel complesso, la letteratura anti-forense e quella sulla robustness rispetto a trasformazioni realistiche convergono su un punto: l'immagine digitale non deve essere considerata un input stabile e neutro. Essa può subire alterazioni che modificano le tracce forensi, la qualità percettiva e le feature sfruttate dai classificatori automatici. Tuttavia, la maggior parte dei lavori esistenti analizza separatamente la rilevazione delle manipolazioni, la robustezza dei modelli o la validazione degli strumenti, senza integrare questi aspetti in un protocollo unitario orientato alla \gls{df}. Rimane quindi aperta la necessità di valutare come trasformazioni realistiche e anti-forensi incidano sulla classificazione automatica di contenuti investigativamente rilevanti e, più in generale, sulla qualità del supporto offerto dai sistemi \gls{ai}-based all'analista.
+Overall, the anti-forensic literature and the literature on robustness to
+realistic transformations converge on one point: the digital image should not
+be regarded as a stable and neutral input. It may undergo alterations that
+modify forensic traces, perceptual quality, and the features exploited by
+automatic classifiers. However, most existing works analyze manipulation
+detection, model robustness, or tool validation separately, without integrating
+these aspects into a unified protocol oriented toward \gls{df}. Therefore, the
+need remains open to evaluate how realistic and anti-forensic transformations
+affect the automated classification of investigatively relevant content and,
+more generally, the quality of the support provided by \gls{ai}-based systems
+to the analyst.
 
-Questa esigenza conduce alla sezione successiva, dedicata all'explainability. Se perturbazioni adversariali e trasformazioni anti-forensi possono modificare il comportamento dei modelli, diventa necessario disporre di strumenti che consentano almeno in parte di analizzare quali regioni dell'immagine o quali caratteristiche visuali contribuiscano alla decisione automatica. Le tecniche di \gls{xai} non risolvono il problema della robustezza, ma possono fornire un supporto critico per interpretare e diagnosticare le fragilità dei sistemi \gls{ai}-based.
+This need leads to the following section, devoted to explainability. If
+adversarial perturbations and anti-forensic transformations can modify model
+behavior, it becomes necessary to have tools that make it possible, at least in
+part, to analyze which image regions or visual characteristics contribute to
+the automatic decision. \gls{xai} techniques do not solve the robustness
+problem, but they can provide critical support for interpreting and diagnosing
+the fragilities of \gls{ai}-based systems.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Explainability applicata alla valutazione dell'affidabilità dei sistemi AI-based}
+\section{Explainability Applied to the Reliability Evaluation of AI-based Systems}
 \label{sec:sota-xai}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La crescente adozione di sistemi \gls{ai}-based in domini ad alto impatto ha reso centrale il problema della spiegabilità delle decisioni algoritmiche. Nel contesto della \gls{df}, questa esigenza assume una rilevanza specifica: l'output di un modello automatico può orientare il triage, influenzare la priorità attribuita a determinati contenuti e contribuire alla selezione degli elementi da sottoporre a revisione umana. Per questo motivo, la letteratura sull'\gls{xai} è rilevante non perché renda i modelli automaticamente affidabili, ma perché fornisce strumenti per analizzarne criticamente il comportamento, soprattutto quando le predizioni cambiano in presenza di input degradati, manipolati o fuori distribuzione.
+The growing adoption of \gls{ai}-based systems in high-impact domains has made
+the explainability of algorithmic decisions a central issue. In the context of
+\gls{df}, this need assumes specific relevance: the output of an automatic
+model may guide triage, influence the priority assigned to specific content,
+and contribute to the selection of items to be submitted to human review. For
+this reason, the literature on \gls{xai} is relevant not because it makes
+models automatically reliable, but because it provides tools for critically
+analyzing their behavior, especially when predictions change in the presence of
+degraded, manipulated, or out-of-distribution inputs.
 
-Le rassegne di Adadi e Berrada~\cite{Adadi2018}, Guidotti et al.~\cite{Guidotti2019}, Barredo Arrieta et al.~\cite{Barredo2018} e Doshi-Velez e Kim~\cite{Doshi-Velez2017} hanno contribuito a chiarire che l'interpretabilità dei modelli non è un concetto unitario, ma dipende dal destinatario della spiegazione, dal tipo di modello, dal livello di granularità richiesto e dallo scopo della valutazione. Questa distinzione è particolarmente importante in ambito forense. Una spiegazione destinata a un ricercatore che valuta un classificatore non coincide con una spiegazione destinata a un analista operativo o a un soggetto chiamato a verificare la correttezza tecnica di una procedura. Ne consegue che la \gls{xai}, nel contesto forense, deve essere intesa come supporto alla verifica e alla diagnosi, non come sostituto della validazione sperimentale \cite{Adadi2018,Doshi-Velez2017,sanna2025cybercrime}.
+The surveys by Adadi and Berrada~\cite{Adadi2018}, Guidotti et
+al.~\cite{Guidotti2019}, Barredo Arrieta et al.~\cite{Barredo2018}, and
+Doshi-Velez and Kim~\cite{Doshi-Velez2017} have helped clarify that model
+interpretability is not a unitary concept, but depends on the recipient of the
+explanation, the type of model, the required level of granularity, and the
+purpose of the evaluation. This distinction is particularly important in
+forensic contexts. An explanation intended for a researcher evaluating a
+classifier is not equivalent to an explanation intended for an operational
+analyst or for a subject required to verify the technical correctness of a
+procedure. It follows that, in the forensic context, \gls{xai} should be
+understood as support for verification and diagnosis, not as a substitute for
+experimental validation \cite{Adadi2018,Doshi-Velez2017,sanna2025cybercrime}.
 
-Nel dominio della classificazione di immagini, i lavori fondativi sulle spiegazioni locali e sulle attribuzioni visuali hanno messo a disposizione strumenti metodologicamente differenti: LIME opera mediante approssimazioni locali model-agnostic, Integrated Gradients utilizza il gradiente del modello rispetto all'input, mentre le tecniche di Class Activation Mapping evidenziano regioni associate alla predizione in specifiche architetture visuali \cite{Ribeiro2016,Sundararajan2017,Zhou2016}. Il limite, rispetto al problema affrontato nella presente tesi, è che tali contributi non sono stati concepiti per valutare la robustezza operativa di software AI-based proprietari in contesti forensi né per stabilire se una spiegazione rimanga diagnostica in presenza di input manipolati. Per questa ragione, l'analisi spiegabile prevista nel protocollo sperimentale viene riferita ai modelli proxy controllabili e utilizzata come supporto qualitativo all'interpretazione delle failure cases, non come metrica primaria né come spiegazione equivalente dei software valutati in modalità \textit{black-box}.
+In the domain of image classification, foundational works on local explanations
+and visual attributions have provided methodologically different tools: LIME
+operates through local model-agnostic approximations, Integrated Gradients uses
+the gradient of the model with respect to the input, whereas Class Activation
+Mapping techniques highlight regions associated with the prediction in specific
+visual architectures \cite{Ribeiro2016,Sundararajan2017,Zhou2016}. The
+limitation, with respect to the problem addressed in the present thesis, is
+that these contributions were not designed to evaluate the operational
+robustness of proprietary AI-based software in forensic contexts, nor to
+establish whether an explanation remains diagnostically useful in the presence
+of manipulated inputs. For this reason, the explainability analysis included in
+the experimental protocol is referred to controllable proxy models and is used
+as qualitative support for interpreting failure cases, not as a primary metric
+nor as an equivalent explanation of the software evaluated in a
+\textit{black-box} setting.
 
-Nel caso della classificazione forense di immagini, questo tipo di analisi è utile soprattutto per verificare se, dopo una manipolazione, le attribuzioni locali rimangano associate all'oggetto investigativamente rilevante oppure si spostino verso regioni secondarie, texture, sfondi o artefatti introdotti dalla trasformazione. Tale uso diagnostico non attribuisce valore probatorio autonomo alla spiegazione visuale, ma consente di collegare il degrado quantitativo delle prestazioni a cambiamenti osservabili nel comportamento del classificatore.
+In the case of forensic image classification, this type of analysis is useful
+above all for verifying whether, after a manipulation, local attributions remain
+associated with the investigatively relevant object or instead shift toward
+secondary regions, textures, backgrounds, or artifacts introduced by the
+transformation. This diagnostic use does not assign autonomous evidentiary
+value to the visual explanation, but makes it possible to connect the
+quantitative degradation of performance to observable changes in classifier
+behavior.
 
-La letteratura ha tuttavia evidenziato limiti importanti delle spiegazioni visuali. Carvalho et al.~\cite{Carvalho2019} sottolineano che l'interpretabilità dei modelli dipende fortemente dal metodo utilizzato e che spiegazioni diverse possono produrre risultati non perfettamente sovrapponibili. Inoltre, molte tecniche di attribuzione sono sensibili a parametri, baseline, rumore locale o scelte di preprocessing. Ciò implica che una saliency map apparentemente coerente non costituisce una prova autonoma della correttezza del modello. In ambito forense, questa cautela è essenziale: una spiegazione visuale può supportare l'analista nella comprensione del comportamento del sistema, ma non può sostituire la verifica manuale dell'evidenza né la validazione quantitativa del classificatore.
+The literature has nevertheless highlighted important limitations of visual
+explanations. Carvalho et al.~\cite{Carvalho2019} emphasize that model
+interpretability strongly depends on the method used and that different
+explanations may produce results that are not perfectly overlapping. Moreover,
+many attribution techniques are sensitive to parameters, baselines, local
+noise, or preprocessing choices. This implies that an apparently coherent
+saliency map does not constitute autonomous proof of the model's correctness.
+In forensic contexts, this caution is essential: a visual explanation may
+support the analyst in understanding system behavior, but it cannot replace
+manual verification of the evidence or quantitative validation of the
+classifier.
 
-Un ulteriore limite riguarda l'applicabilità della \gls{xai} ai software commerciali valutati in contesto forense. Molti metodi di attribuzione richiedono accesso al modello, ai gradienti o almeno alla possibilità di interrogare ripetutamente il classificatore. Nei software proprietari, tali condizioni non sono sempre soddisfatte. Di conseguenza, mentre la \gls{xai} può essere applicata in modo relativamente controllato a modelli accademici o open-source, il suo impiego su software commerciali AI-based risulta più complesso e talvolta limitato a forme indirette di analisi. Questo aspetto rafforza il problema già discusso nella Sezione~\ref{sec:sota-ai-tools}: l'opacità dei moduli proprietari ostacola non solo la riproducibilità delle classificazioni, ma anche la loro spiegabilità tecnica.
+A further limitation concerns the applicability of \gls{xai} to commercial
+software evaluated in forensic contexts. Many attribution methods require
+access to the model, to gradients, or at least to the possibility of repeatedly
+querying the classifier. In proprietary software, these conditions are not
+always satisfied. Consequently, while \gls{xai} can be applied in a relatively
+controlled manner to academic or open-source models, its use on commercial
+AI-based software is more complex and sometimes limited to indirect forms of
+analysis. This aspect reinforces the problem already discussed in
+Section~\ref{sec:sota-ai-tools}: the opacity of proprietary modules hinders not
+only the reproducibility of classifications, but also their technical
+explainability.
 
-Nel contesto specifico della \gls{df}, la letteratura che applica sistematicamente tecniche di \gls{xai} alla valutazione della robustezza di classificatori forensi rimane ancora limitata. I lavori su \gls{xai} forniscono strumenti generali per interpretare modelli di \gls{dl}, mentre gli studi su robustezza adversariale e anti-forensics si concentrano prevalentemente su metriche prestazionali. Manca quindi una convergenza pienamente sviluppata tra validazione forense, robustness evaluation ed explainability. Questa lacuna è significativa perché, in uno scenario investigativo, non è sufficiente sapere che un modello sbaglia dopo una manipolazione: è utile anche comprendere se l'errore sia associato a variazioni delle attribuzioni locali verso regioni non pertinenti, ad artefatti introdotti dalla trasformazione o a una fragilità strutturale della rappresentazione appresa.
+In the specific context of \gls{df}, the literature that systematically applies
+\gls{xai} techniques to the robustness evaluation of forensic classifiers
+remains limited. Works on \gls{xai} provide general tools for interpreting
+\gls{dl} models, whereas studies on adversarial robustness and anti-forensics
+mainly focus on performance metrics. A fully developed convergence among
+forensic validation, robustness evaluation, and explainability is therefore
+still lacking. This gap is significant because, in an investigative scenario,
+it is not sufficient to know that a model fails after a manipulation: it is
+also useful to understand whether the error is associated with shifts in local
+attributions toward irrelevant regions, with artifacts introduced by the
+transformation, or with a structural fragility of the learned representation.
 
-In sintesi, la \gls{xai} contribuisce alla valutazione dell'affidabilità dei sistemi \gls{ai}-based in tre modi. In primo luogo, consente di analizzare qualitativamente quali regioni dell'immagine influenzano la predizione. In secondo luogo, permette di confrontare il comportamento del modello su immagini pulite e manipolate, evidenziando eventuali cambiamenti nelle aree considerate rilevanti. In terzo luogo, offre un supporto alla diagnosi delle fragilità del modello, pur senza fornire garanzie autonome di correttezza. Per queste ragioni, l'explainability costituisce un complemento alla valutazione quantitativa della robustezza, non un suo sostituto.
+In summary, \gls{xai} contributes to the reliability evaluation of \gls{ai}-based
+systems in three ways. First, it makes it possible to qualitatively analyze
+which image regions influence the prediction. Second, it allows the behavior of
+the model on clean and manipulated images to be compared, highlighting possible
+changes in the areas considered relevant. Third, it supports the diagnosis of
+model fragilities, while providing no autonomous guarantees of correctness. For
+these reasons, explainability constitutes a complement to the quantitative
+evaluation of robustness, not a substitute for it.
 
-La sezione successiva chiude la revisione dello stato dell'arte evidenziando il gap complessivo che emerge dai filoni analizzati. La letteratura ha sviluppato contributi significativi su automazione forense, software AI-based utilizzabili in contesti forensi, classificazione visuale, robustezza, attacchi adversariali, tecniche anti-forensi e spiegabilità; tuttavia, questi assi sono stati affrontati prevalentemente in modo separato. La presente tesi si colloca precisamente nello spazio lasciato aperto da questa frammentazione.
-
+The following section concludes the state-of-the-art review by highlighting the
+overall gap that emerges from the research directions analyzed. The literature
+has developed significant contributions on forensic automation, AI-based
+software usable in forensic contexts, visual classification, robustness,
+adversarial attacks, anti-forensic techniques, and explainability; however,
+these axes have been addressed predominantly in a separate manner. The present
+thesis is positioned precisely within the space left open by this fragmentation.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Gap della letteratura e posizionamento della tesi}
+\section{Literature Gap and Thesis Positioning}
 \label{sec:sota-gap}
 % ─────────────────────────────────────────────────────────────────────────────
 
-La revisione condotta nelle sezioni precedenti mostra che la letteratura ha prodotto contributi significativi su ciascuno degli assi rilevanti per questa tesi, ma li ha affrontati prevalentemente in modo separato. I lavori sull'automazione nella \gls{df} hanno evidenziato la necessità di strumenti capaci di gestire grandi volumi di dati digitali e di supportare l'analista nelle fasi di triage, esame e analisi~\cite{garfinkel2010digital,costantini2019digital,faqir2023digital}. Gli studi sui software AI-based utilizzabili in contesti forensi hanno iniziato a documentare problemi concreti di opacità, validazione indipendente e fragilità rispetto a contenuti manipolati~\cite{sanna2024preliminary,sanna2025pixelperfect}. La letteratura sulla classificazione automatica di immagini ha mostrato l'efficacia dei modelli di computer vision per il riconoscimento di oggetti e contenuti rilevanti, ma spesso in scenari controllati e non specificamente orientati alla validazione forense~\cite{Hao2018DeepFirearm,he2016deep,tan2019efficientnet,radford2021learning,li2022blip}. Parallelamente, i lavori sulla robustezza hanno dimostrato che l'accuratezza su dati puliti non è sufficiente per stimare l'affidabilità operativa di un classificatore~\cite{hendrycks2019benchmarking,hendrycks2017baseline,fort2021exploring,croce2020robustbench}.
+The review conducted in the previous sections shows that the literature has
+produced significant contributions on each of the axes relevant to this thesis,
+but has addressed them predominantly in a separate manner. Works on automation
+in \gls{df} have highlighted the need for tools capable of managing large
+volumes of digital data and supporting the analyst in the triage, examination,
+and analysis phases~\cite{garfinkel2010digital,costantini2019digital,faqir2023digital}.
+Studies on AI-based software usable in forensic contexts have begun to document
+concrete problems of opacity, independent validation, and fragility with
+respect to manipulated content~\cite{sanna2024preliminary,sanna2025pixelperfect}.
+The literature on automated image classification has shown the effectiveness of
+computer vision models for recognizing objects and relevant content, but often
+in controlled scenarios and not specifically oriented toward forensic
+validation~\cite{Hao2018DeepFirearm,he2016deep,tan2019efficientnet,radford2021learning,li2022blip}.
+In parallel, works on robustness have demonstrated that accuracy on clean data
+is not sufficient to estimate the operational reliability of a
+classifier~\cite{hendrycks2019benchmarking,hendrycks2017baseline,fort2021exploring,croce2020robustbench}.
 
-Un secondo insieme di contributi riguarda le minacce che possono alterare il comportamento dei sistemi automatici. La letteratura sull'\gls{advml} ha mostrato che perturbazioni costruite intenzionalmente possono indurre errori anche in modelli ad alte prestazioni~\cite{szegedy2014intriguing,goodfellow2015explaining,papernot2016limitations,carlini2017towards,biggio2018wild}. I lavori più vicini all'image forensics hanno poi evidenziato che anche modelli progettati per compiti forensi possono essere vulnerabili in scenari adversariali~\cite{barni2018cf,nowroozi2020phd}. In parallelo, la letteratura anti-forense ha studiato trasformazioni applicate direttamente all'artefatto digitale, come ricompressione, ricampionamento, alterazioni statistiche e modifiche della qualità visiva, mostrando che tali operazioni possono incidere sia sulle tracce forensi sia sulla rappresentazione digitale dell'immagine~\cite{stamm2010anti,stamm2013information,farid2016photo,popescu2005exposing}. Infine, la letteratura sull'\gls{xai} ha fornito strumenti utili per analizzare qualitativamente il comportamento dei modelli, ma tali tecniche sono state raramente integrate in protocolli forensi completi di valutazione della robustezza~\cite{Adadi2018,Doshi-Velez2017,Ribeiro2016,Sundararajan2017,Zhou2016}.
+A second set of contributions concerns the threats that may alter the behavior
+of automatic systems. The literature on \gls{advml} has shown that
+intentionally constructed perturbations can induce errors even in high-
+performing models~\cite{szegedy2014intriguing,goodfellow2015explaining,papernot2016limitations,carlini2017towards,biggio2018wild}.
+Works closer to \textit{image forensics} have then highlighted that even models
+designed for forensic tasks may be vulnerable in adversarial
+scenarios~\cite{barni2018cf,nowroozi2020phd}. In parallel, the anti-forensic
+literature has studied transformations applied directly to the digital
+artifact, such as recompression, resampling, statistical alterations, and
+changes in visual quality, showing that these operations may affect both
+forensic traces and the digital representation of the
+image~\cite{stamm2010anti,stamm2013information,farid2016photo,popescu2005exposing}.
+Finally, the literature on \gls{xai} has provided useful tools for qualitatively
+analyzing model behavior, but these techniques have rarely been integrated into
+complete forensic protocols for robustness evaluation~\cite{Adadi2018,Doshi-Velez2017,Ribeiro2016,Sundararajan2017,Zhou2016}.
 
-La Tabella~\ref{tab:sota-representative-works} sintetizza i lavori maggiormente rilevanti per il posizionamento della presente tesi, evidenziandone il contributo principale e il limite residuo rispetto al disegno sperimentale adottato.
+Table~\ref{tab:sota-representative-works} summarizes the works most relevant
+to the positioning of the present thesis, highlighting their main contribution
+and the remaining limitation with respect to the adopted experimental design.
 
 \begin{table}[H]
 \centering
 \small
-\caption{Lavori rappresentativi e posizionamento della presente tesi rispetto alla letteratura.}
+\caption{Representative works and positioning of the present thesis with respect to the literature.}
 \label{tab:sota-representative-works}
 \begin{tabularx}{\textwidth}{@{}p{3.8cm} X X@{}}
 \toprule
-\textbf{Lavori rappresentativi} &
-\textbf{Contributo principale} &
-\textbf{Limite rispetto alla presente tesi} \\
+\textbf{Representative works} &
+\textbf{Main contribution} &
+\textbf{Limitation with respect to the present thesis} \\
 \midrule
-
 
 Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} &
-Valutano la robustezza di software AI-based utilizzabili in contesti forensi, con attenzione a valutazioni \textit{black-box} e contenuti multimediali manipolati. &
-Rappresentano il riferimento più vicino alla presente tesi, ma restano orientati a scenari preliminari o a domini visivi differenti. Non integrano nello stesso protocollo un dataset con classi
-\texttt{weapon}, \texttt{non\_weapon} e \texttt{ood}, perturbazioni  adversariali, trasformazioni anti-forensi e un bundle unitario per la valutazione forense. Rimane inoltre poco esplorata la normalizzazione comparativa di output black-box eterogenei, quali categorie, classificazioni, risultati di retrieval e bookmark semantici.\\
+Evaluate the robustness of AI-based software usable in forensic contexts, with
+attention to \textit{black-box} evaluations and manipulated multimedia content. &
+They represent the closest reference to the present thesis, but remain oriented
+toward preliminary scenarios or different visual domains. They do not integrate
+within the same protocol a dataset with \texttt{weapon}, \texttt{non\_weapon},
+and \texttt{ood} classes, adversarial perturbations, anti-forensic
+transformations, and a unified bundle for forensic evaluation. The comparative
+normalization of heterogeneous black-box outputs, such as categories,
+classifications, retrieval results, and semantic bookmarks, also remains
+underexplored.\\
 \midrule
 
-
-Nowroozi e Barni et al.~\cite{nowroozi2020phd,barni2018cf} &
-Analizzano l'image forensics in scenari adversariali e mostrano che modelli forensi basati su \gls{ml} e \gls{dl} possono essere vulnerabili a perturbazioni mirate. &
-Forniscono la base teorica per adversarial image forensics, ma sono prevalentemente focalizzati su modelli accademici o task controllati, non sulla valutazione operativa di software AI-based osservati in modalità \textit{black-box}. \\
-
-\midrule
-
-
-Biggio e Roli~\cite{biggio2018wild} &
-Formalizzano il paradigma dell'adversarial machine learning e la necessità di valutare i classificatori in presenza di un avversario strategico. &
-Il contributo è fondamentale per il threat model, ma resta generale rispetto alla \gls{df} e non affronta direttamente workflow forensi, software operativi o classificazione di evidenze digitali. \\
-
-\midrule
-
-
-Costantini et al. e Faqir~\cite{costantini2019digital,faqir2023digital} &
-Mostrano il ruolo dell'\gls{ai} come supporto all'analisi, all'organizzazione delle evidenze e alla formulazione di ipotesi investigative. &
-Contestualizzano l'automazione nella \gls{df}, ma non valutano sistematicamente la robustezza di modelli o software AI-based rispetto a input degradati, manipolati o fuori distribuzione. \\
+Nowroozi and Barni et al.~\cite{nowroozi2020phd,barni2018cf} &
+Analyze \textit{image forensics} in adversarial scenarios and show that
+forensic models based on \gls{ml} and \gls{dl} may be vulnerable to targeted
+perturbations. &
+They provide the theoretical basis for adversarial image forensics, but are
+mainly focused on academic models or controlled tasks, rather than on the
+operational evaluation of AI-based software observed in a \textit{black-box}
+setting. \\
 
 \midrule
 
-
-Yaacoub et al., Stamm e Farid~\cite{yaacoub2021digital,stamm2010anti,farid2016photo} &
-Descrivono tecniche anti-forensi e trasformazioni dell'immagine capaci di alterare tracce, metadati, qualità visiva e struttura statistica del file. &
-Sono essenziali per giustificare il piano anti-forense della tesi, ma non collegano in modo sistematico tali trasformazioni alla classificazione automatizzata o al recupero semantico di immagini mediante software AI-based utilizzabili in contesti forensi. \\
-
-\midrule
-
-
-Hendrycks et al., Fort et al., AutoAttack e RobustBench~\cite{hendrycks2019benchmarking,hendrycks2017baseline,fort2021exploring,croce2020autoattack,croce2020robustbench} &
-Dimostrano che accuratezza su dati clean, robustezza a corruzioni, comportamento \gls{ood} e robustezza adversariale devono essere valutati separatamente. &
-Forniscono benchmark e principi metodologici generali, ma non sono progettati per dati, vincoli e workflow propri della \gls{df}. \\
+Biggio and Roli~\cite{biggio2018wild} &
+Formalize the paradigm of adversarial machine learning and the need to evaluate
+classifiers in the presence of a strategic adversary. &
+The contribution is fundamental for the threat model, but remains general with
+respect to \gls{df} and does not directly address forensic workflows,
+operational software, or the classification of digital evidence. \\
 
 \midrule
 
+Costantini et al. and Faqir~\cite{costantini2019digital,faqir2023digital} &
+Show the role of \gls{ai} as support for analysis, evidence organization, and
+the formulation of investigative hypotheses. &
+They contextualize automation in \gls{df}, but do not systematically evaluate
+the robustness of AI-based models or software with respect to degraded,
+manipulated, or out-of-distribution inputs. \\
 
-Ribeiro et al., Sundararajan et al. e Zhou et al.~\cite{Ribeiro2016,Sundararajan2017,Zhou2016} &
-Propongono tecniche di \gls{xai} e attribuzione visuale utili per interpretare il comportamento dei classificatori di immagini. &
-Supportano l'analisi qualitativa delle failure cases, ma non sostituiscono la validazione quantitativa né risolvono il problema dell'opacità dei software commerciali valutati in modalità \textit{black-box}. \\
+\midrule
+
+Yaacoub et al., Stamm, and Farid~\cite{yaacoub2021digital,stamm2010anti,farid2016photo} &
+Describe anti-forensic techniques and image transformations capable of altering
+traces, metadata, visual quality, and the statistical structure of the file. &
+They are essential for justifying the anti-forensic plan of the thesis, but do
+not systematically connect these transformations to automated classification or
+semantic image retrieval through AI-based software usable in forensic contexts. \\
+
+\midrule
+
+Hendrycks et al., Fort et al., AutoAttack, and RobustBench~\cite{hendrycks2019benchmarking,hendrycks2017baseline,fort2021exploring,croce2020autoattack,croce2020robustbench} &
+Demonstrate that accuracy on clean data, robustness to corruptions, \gls{ood}
+behavior, and adversarial robustness must be evaluated separately. &
+They provide general benchmarks and methodological principles, but are not
+designed for the data, constraints, and workflows specific to \gls{df}. \\
+
+\midrule
+
+Ribeiro et al., Sundararajan et al., and Zhou et al.~\cite{Ribeiro2016,Sundararajan2017,Zhou2016} &
+Propose \gls{xai} and visual attribution techniques useful for interpreting the
+behavior of image classifiers. &
+They support the qualitative analysis of failure cases, but do not replace
+quantitative validation nor solve the opacity problem of commercial software
+evaluated in a \textit{black-box} setting. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Il limite principale che emerge da questo quadro non è l'assenza di ricerca
-sui singoli temi, ma la mancanza di una valutazione integrata.
-La Figura~\ref{fig:sota-literature-gap} visualizza sinteticamente questa
-frammentazione: i sette filoni recensiti convergono verso uno spazio
-metodologico che la letteratura non affronta ancora in modo unitario.
-
+The main limitation emerging from this framework is not the absence of research
+on the individual topics, but the lack of an integrated evaluation.
+Figure~\ref{fig:sota-literature-gap} synthetically visualizes this
+fragmentation: the seven reviewed research directions converge toward a
+methodological space that the literature does not yet address in a unified
+manner.
 
 \begin{figure}[H]
 \centering
@@ -751,21 +1068,21 @@ metodologico che la letteratura non affronta ancora in modo unitario.
     arrow/.style={->, thick, >=stealth}
 ]
 
-% Riga superiore
-\node[field]   (ai_df)      at (0,   5.8) {Automazione\\nella \gls{df}};
-\node[central] (advml)      at (4.7, 5.8) {\gls{advml}\\su immagini};
-\node[field]   (robustness) at (9.4, 5.8) {Valutazione\\della robustezza};
+% Upper row
+\node[field]   (ai_df)      at (0,   5.8) {Automation\\in \gls{df}};
+\node[central] (advml)      at (4.7, 5.8) {\gls{advml}\\on images};
+\node[field]   (robustness) at (9.4, 5.8) {Robustness\\evaluation};
 
-% Riga centrale
-\node[field] (tools)         at (0,   3.7) {Software \gls{ai}-based\\in contesti forensi};
-\node[gap]   (gap)           at (4.7, 3.7) {Gap metodologico:\\valutazione integrata\\della robustezza operativa};
-\node[field] (antiforensics) at (9.4, 3.7) {Anti-forensics\\su immagini};
+% Middle row
+\node[field] (tools)         at (0,   3.7) {AI-based software\\in forensic contexts};
+\node[gap]   (gap)           at (4.7, 3.7) {Methodological gap:\\integrated evaluation\\of operational robustness};
+\node[field] (antiforensics) at (9.4, 3.7) {Anti-forensics\\on images};
 
-% Riga inferiore
-\node[field] (classification) at (0,   1.6) {Classificazione\\automatica di immagini};
-\node[field] (xai)            at (9.4, 1.6) {\gls{xai}\\e affidabilità};
+% Lower row
+\node[field] (classification) at (0,   1.6) {Automated\\image classification};
+\node[field] (xai)            at (9.4, 1.6) {\gls{xai}\\and reliability};
 
-% Punti distinti di ingresso sul box gap
+% Distinct entry points on the gap box
 \coordinate (gapNW) at ([yshift=0.45cm]gap.west);
 \coordinate (gapW)  at (gap.west);
 \coordinate (gapSW) at ([yshift=-0.45cm]gap.west);
@@ -774,33 +1091,59 @@ metodologico che la letteratura non affronta ancora in modo unitario.
 \coordinate (gapE)  at (gap.east);
 \coordinate (gapSE) at ([yshift=-0.45cm]gap.east);
 
-
-
-% Frecce da sinistra verso il gap
+% Arrows from the left toward the gap
 \draw[arrow] (ai_df.east)          -- ++(0.25,0) |- (gapNW);
 \draw[arrow] (tools.east)          -- (gapW);
 \draw[arrow] (classification.east) -- ++(0.25,0) |- (gapSW);
 
-% Frecce da destra verso il gap
+% Arrows from the right toward the gap
 \draw[arrow] (robustness.west)     -- ++(-0.25,0) |- (gapNE);
 \draw[arrow] (antiforensics.west)  -- (gapE);
 \draw[arrow] (xai.west)            -- ++(-0.25,0) |- (gapSE);
 
-
-% Freccia centrale
+% Central arrow
 \draw[arrow] (advml.south) -- (gap.north);
 
 \end{tikzpicture}
 
-\caption{Strutturazione dei principali filoni della letteratura rispetto al gap metodologico affrontato dalla presente tesi.}
+\caption{Structuring of the main research directions in the literature with respect to the methodological gap addressed by the present thesis.}
 \label{fig:sota-literature-gap}
 \end{figure}
 
+The specific gap identified by the present thesis therefore concerns the limited
+availability of integrated experimental protocols that combine, within the same
+evaluation design, automated image classification or semantic image retrieval,
+\textit{human-in-the-loop} dataset validation, heterogeneous proxy models,
+AI-based software selected for operational evaluation in a forensic context,
+adversarial perturbations, anti-forensic transformations, quantitative metrics,
+and explainable analysis of model behavior. The relevance of this integration
+derives from the fact that, in a forensic context, the reliability of an
+automatic system cannot be evaluated only as an isolated property of the
+classifier. It also depends on the quality and representativeness of the data,
+the presence of borderline or out-of-distribution cases, the nature of the
+manipulations applied, the transparency of the software used, and the effect
+that possible errors may produce on triage and evidence selection.
 
+The present thesis is positioned precisely within this gap. Its contribution
+consists in conducting an experimental evaluation of the operational robustness
+of proxy models and AI-based software employed, in the context of \gls{df}, for
+the automated classification or semantic retrieval of images of potential
+investigative interest, jointly considering the algorithmic and
+operational-investigative dimensions. The objective is not only to measure
+performance degradation under adverse conditions, but also to understand how
+such degradation may affect the system's ability to support the analyst in the
+selection of relevant content. From this perspective, robustness is treated not
+as an abstract attribute of the model, but as a functional requirement for the
+controlled use of \gls{ai} in \gls{df} workflows.
 
-
-Il gap specifico individuato dalla presente tesi riguarda quindi la limitata disponibilità di protocolli sperimentali integrati che combinino, nello stesso disegno valutativo, classificazione automatizzata o recupero semantico di immagini, validazione \textit{human-in-the-loop} del dataset, modelli proxy eterogenei, software AI-based selezionati per la valutazione operativa in contesto forense, perturbazioni adversariali, trasformazioni anti-forensi, metriche quantitative e analisi spiegabile del comportamento dei modelli. La rilevanza di tale integrazione deriva dal fatto che, in un contesto forense, l'affidabilità di un sistema automatico non può essere valutata soltanto come proprietà isolata del classificatore. Essa dipende anche dalla qualità e dalla rappresentatività dei dati, dalla presenza di casi borderline o fuori distribuzione, dalla natura delle manipolazioni applicate, dalla trasparenza del software impiegato e dall'effetto che eventuali errori possono produrre sul triage e sulla selezione delle evidenze.
-
-La presente tesi si colloca precisamente in questa lacuna. Il suo contributo consiste nel condurre una valutazione sperimentale della robustezza operativa di modelli proxy e software AI-based impiegati, nel contesto della \gls{df}, per la classificazione automatizzata o il recupero semantico di immagini di potenziale interesse investigativo, considerando congiuntamente la dimensione algoritmica e quella operativo-investigativa. L'obiettivo non è soltanto misurare il degrado prestazionale in condizioni avverse, ma comprendere come tale degrado possa incidere sulla capacità del sistema di supportare l'analista nella selezione di contenuti rilevanti. In questa prospettiva, la robustezza viene trattata non come attributo astratto del modello, ma come requisito funzionale per l'uso controllato dell'\gls{ai} nei workflow di \gls{df}.
-
-Il posizionamento della tesi è dunque duplice. Da un lato, essa si collega alla letteratura sull'\gls{advml}, sulla valutazione della robustezza e sull'\gls{xai}, assumendo che i sistemi di classificazione debbano essere valutati anche in presenza di input ostili, degradati o anomali. Dall'altro, si colloca nel dominio della \gls{df}, dove la qualità dell'automazione deve essere giudicata rispetto alla sua utilità operativa, alla verificabilità dei risultati e alla possibilità di mantenere il controllo umano sul processo di analisi. Questa impostazione consente di superare una valutazione puramente prestazionale e di affrontare il problema della robustezza come questione metodologica, tecnica e forense. Tale spazio di ricerca motiva il protocollo sperimentale \gls{fairlab}, adottato nella presente tesi e descritto nel capitolo successivo.
+The positioning of the thesis is therefore twofold. On the one hand, it connects
+to the literature on \gls{advml}, robustness evaluation, and \gls{xai}, assuming
+that classification systems must also be evaluated in the presence of hostile,
+degraded, or anomalous inputs. On the other hand, it is situated within the
+domain of \gls{df}, where the quality of automation must be assessed with
+respect to its operational usefulness, the verifiability of the results, and
+the possibility of maintaining human control over the analysis process. This
+setting makes it possible to move beyond a purely performance-based evaluation
+and to address robustness as a methodological, technical, and forensic issue.
+This research space motivates the \gls{fairlab} experimental protocol adopted
+in the present thesis and described in the following chapter.
