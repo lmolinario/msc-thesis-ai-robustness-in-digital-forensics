@@ -1,16 +1,46 @@
+% ─────────────────────────────────────────────────────────────────────────────
 \chapter{Repository and Reproducibility Artifacts}
 \label{app:repository-reproducibility-artifacts}
+% ─────────────────────────────────────────────────────────────────────────────
 
-Questa appendice documenta gli artefatti tecnici che supportano la riproducibilità, la verificabilità e la tracciabilità del lavoro sperimentale descritto nella tesi. Essa non sostituisce la metodologia illustrata nel Capitolo~\ref{chap:methodology}, né anticipa l'analisi dei risultati, ma fornisce un riferimento operativo per collegare la descrizione accademica della pipeline agli script, ai manifest, agli hash e agli output mantenuti nella repository associata al progetto. Tale impostazione è coerente con i principi generali della \gls{df}, nei quali la conservazione della provenienza, l'integrità degli artefatti e la documentabilità delle operazioni costituiscono requisiti essenziali per rendere verificabile un processo di analisi digitale \cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27037}.
+This appendix documents the technical artifacts that support the reproducibility,
+verifiability, and traceability of the experimental work described in the
+thesis. It does not replace the methodology presented in
+Chapter~\ref{chap:methodology}, nor does it anticipate the analysis of the
+results. Rather, it provides an operational reference for connecting the
+academic description of the pipeline to the scripts, manifests, hashes, and
+outputs maintained in the repository associated with the project. This approach
+is consistent with the general principles of \gls{df}, in which the preservation
+of provenance, artifact integrity, and documentation of operations are essential
+requirements for making a digital analysis process verifiable
+\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27037}.
 
-Il codice sorgente completo non viene riportato integralmente nel documento, poiché la sua duplicazione all'interno della tesi renderebbe il testo ridondante e meno manutenibile. La repository rappresenta invece la sede appropriata per consultare gli script, i manifest e la documentazione operativa. L'appendice descrive pertanto la struttura logica del progetto, gli artefatti ufficiali della pipeline, la sequenza principale di esecuzione, i meccanismi di tracciabilità e i limiti entro cui la riproducibilità deve essere interpretata. In particolare, la riproducibilità riguarda la ricostruzione controllata degli artefatti sperimentali a partire dai manifest e dagli script ufficiali, mentre non implica necessariamente la redistribuzione pubblica di tutte le immagini grezze, che può essere limitata da vincoli legali, etici o dipendenti dalle sorgenti originarie.
+The complete source code is not reported in full within the document, since
+duplicating it in the thesis would make the text redundant and less
+maintainable. The repository instead represents the appropriate location for
+consulting the scripts, manifests, and operational documentation. The appendix
+therefore describes the logical structure of the project, the official artifacts
+of the pipeline, the main execution sequence, the traceability mechanisms, and
+the boundaries within which reproducibility must be interpreted. In particular,
+reproducibility concerns the controlled reconstruction of the experimental
+artifacts starting from the official manifests and scripts, whereas it does not
+necessarily imply the public redistribution of all raw images, which may be
+limited by legal, ethical, or source-dependent constraints.
 
-\section{Repository structure}
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Repository Structure}
 \label{app:repository-structure}
+% ─────────────────────────────────────────────────────────────────────────────
 
-La repository è organizzata secondo una separazione funzionale tra dati grezzi, dati preparati, dataset finale, split sperimentali, perturbazioni, modelli proxy, valutazione, explainability, risultati e documentazione della tesi. Questa organizzazione consente di distinguere le fasi di acquisizione, preparazione, selezione manuale, generazione degli split, produzione degli attacchi, valutazione automatizzata e predisposizione del bundle destinato agli strumenti forensi commerciali.
+The repository is organized according to a functional separation among raw data,
+prepared data, the final dataset, experimental splits, perturbations, proxy
+models, evaluation, explainability, results, and thesis documentation. This
+organization makes it possible to distinguish the phases of acquisition,
+preparation, manual selection, split generation, attack production, automated
+evaluation, and preparation of the bundle intended for commercial forensic
+tools.
 
-\begin{lstlisting}[caption={Struttura semplificata della repository sperimentale.}, label={lst:repository-structure}]
+\begin{lstlisting}[caption={Simplified structure of the experimental repository.}, label={lst:repository-structure}]
 msc-thesis-ai-robustness-in-digital-forensics/
   datasets/
     raw/
@@ -56,30 +86,46 @@ msc-thesis-ai-robustness-in-digital-forensics/
     notes/
 \end{lstlisting}
 
-La directory \codepath{datasets/} contiene la pipeline dati, dalla raccolta iniziale fino al bundle di valutazione forense. La directory \codepath{attacks/} raccoglie gli output delle perturbazioni adversariali e delle trasformazioni anti-forensi, mentre \codepath{models/} contiene gli script e i checkpoint dei modelli proxy. La directory \codepath{evaluation/} raccoglie gli script e gli output della valutazione automatizzata e della normalizzazione degli export dei tool forensi commerciali. La directory \codepath{explainability/} è riservata alla generazione dei casi studio basati su \gls{xai}, mentre \codepath{docs/LatexThesis_ITA/} contiene la versione LaTeX della tesi.
+The \codepath{datasets/} directory contains the data pipeline, from the initial
+collection phase to the forensic evaluation bundle. The \codepath{attacks/}
+directory collects the outputs of adversarial perturbations and anti-forensic
+transformations, whereas \codepath{models/} contains the scripts and checkpoints
+of the proxy models. The \codepath{evaluation/} directory collects the scripts
+and outputs of automated evaluation and normalization of the exports produced by
+commercial forensic tools. The \codepath{explainability/} directory is reserved
+for the generation of \gls{xai}-based case studies, whereas
+\codepath{docs/LatexThesis_ITA/} contains the LaTeX version of the thesis.
 
-\section{Official experimental artifacts}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Official Experimental Artifacts}
 \label{app:official-experimental-artifacts}
+% ─────────────────────────────────────────────────────────────────────────────
 
-La Tabella~\ref{tab:official-experimental-artifacts} riassume gli artefatti principali della pipeline. Tali file non sono semplici output intermedi, ma costituiscono i punti di ancoraggio tra la metodologia descritta nel corpo della tesi e la sua implementazione sperimentale. In particolare, i manifest mantengono il collegamento tra identificativo dell'immagine, sorgente, classe finale, hash, split, eventuale perturbazione e percorso del file generato.
+Table~\ref{tab:official-experimental-artifacts} summarizes the main artifacts
+of the pipeline. These files are not merely intermediate outputs, but constitute
+the anchoring points between the methodology described in the body of the thesis
+and its experimental implementation. In particular, the manifests preserve the
+connection among image identifier, source, final class, hash, split, possible
+perturbation, and path of the generated file.
 
 \begin{longtable}{@{}%
 >{\raggedright\arraybackslash}p{0.43\textwidth}
 >{\raggedright\arraybackslash}p{0.53\textwidth}@{}}
-\caption{Principali artefatti ufficiali della pipeline sperimentale.}
+\caption{Main official artifacts of the experimental pipeline.}
 \label{tab:official-experimental-artifacts} \\
 \toprule
-\textbf{Artefatto} & \textbf{Ruolo nella pipeline} \\
+\textbf{Artifact} & \textbf{Role in the pipeline} \\
 \midrule
 \endfirsthead
 
 \toprule
-\textbf{Artefatto} & \textbf{Ruolo nella pipeline} \\
+\textbf{Artifact} & \textbf{Role in the pipeline} \\
 \midrule
 \endhead
 
 \midrule
-\multicolumn{2}{r}{\footnotesize Continua nella pagina successiva} \\
+\multicolumn{2}{r}{\footnotesize Continued on the next page} \\
 \endfoot
 
 \bottomrule
@@ -87,69 +133,116 @@ La Tabella~\ref{tab:official-experimental-artifacts} riassume gli artefatti prin
 
 \footnotesize\codepath{datasets/prepared/final_pool/metadata.csv}
 &
-Metadati tecnici del pool preparato, generato dopo la validazione delle immagini, il calcolo degli hash e la rimozione dei duplicati esatti. \\
+Technical metadata of the prepared pool, generated after image validation, hash
+computation, and removal of exact duplicates. \\
 
 \footnotesize\codepath{datasets/prepared/manifests/review_manifest_full.csv}
 &
-Manifest completo utilizzato come base per il protocollo di revisione manuale \textit{human-in-the-loop}. \\
+Complete manifest used as the basis for the \textit{human-in-the-loop} manual
+review protocol. \\
 
 \footnotesize\codepath{datasets/final/manifests/manual_selection_protocol_db.csv}
 &
-Database operativo del processo di selezione manuale, comprensivo dello stato di revisione e delle assegnazioni semantiche. \\
+Operational database of the manual selection process, including review status
+and semantic assignments. \\
 
 \footnotesize\codepath{datasets/final/manifests/manual_selection_final_1500.csv}
 &
-Manifest ufficiale del dataset congelato, composto da 1500 immagini bilanciate nelle classi \texttt{weapon}, \texttt{non\_weapon} e \gls{ood}. \\
+Official manifest of the frozen dataset, composed of 1\,500 images balanced
+across the \texttt{weapon}, \texttt{non\_weapon}, and \gls{ood} classes. \\
 
 \footnotesize\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
 &
-Manifest ufficiale del subset binario, composto dalle classi \texttt{weapon} e \texttt{non\_weapon}, utilizzato per split puliti, attacchi adversariali e trasformazioni anti-forensi. \\
+Official manifest of the binary subset, composed of the \texttt{weapon} and
+\texttt{non\_weapon} classes, used for clean splits, adversarial attacks, and
+anti-forensic transformations. \\
 
 \footnotesize\codepath{datasets/final/manifests/manual_selection_removed.csv}
 &
-Manifest dei campioni esclusi durante la selezione finale, utile per audit e controllo delle decisioni di revisione. \\
+Manifest of the samples excluded during the final selection, useful for auditing
+and checking review decisions. \\
 
 \footnotesize\codepath{datasets/splits/manifests/clean_folds_manifest.csv}
 &
-Manifest degli split puliti a cinque fold, con tracciabilità per classe, sorgente, percorso, hash e tipo di campione. \\
+Manifest of the five clean folds, with traceability by class, source, path,
+hash, and sample type. \\
 
 \footnotesize\codepath{datasets/splits/manifests/ood_eval_manifest.csv}
 &
-Manifest del set \gls{ood}, mantenuto separato dal subset binario e utilizzato per la valutazione fuori distribuzione. \\
+Manifest of the \gls{ood} set, kept separate from the binary subset and used for
+out-of-distribution evaluation. \\
 
 \footnotesize\codepath{attacks/manifests/}
 &
-Directory dei manifest prodotti per collegare ogni immagine perturbata al campione pulito, al fold, alla classe reale e al tipo di attacco o trasformazione. \\
+Directory of the manifests produced to connect each perturbed image to the clean
+sample, fold, true class, and type of attack or transformation. \\
 
 \footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
 &
-Manifest globale del bundle destinato alla valutazione con strumenti forensi commerciali. \\
+Global manifest of the bundle intended for evaluation with commercial forensic
+tools. \\
 
 \footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}
 &
-File di controllo contenente gli hash \texttt{SHA256} degli artefatti inclusi nel bundle forense. \\
+Control file containing the \gls{sha256} hashes of the artifacts included in the
+forensic bundle. \\
 
 \footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_summary.json}
 &
-Riepilogo strutturato del bundle, comprensivo di conteggi, controlli di coerenza e istruzioni operative per l'importazione nei tool forensi. \\
+Structured summary of the bundle, including counts, consistency checks, and
+operational instructions for import into forensic tools. \\
 
 \end{longtable}
 
-\section{Dataset traceability and human-in-the-loop selection}
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Dataset Traceability and Human-in-the-Loop Selection}
 \label{app:dataset-traceability-human-in-the-loop}
+% ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline dati è basata su una combinazione di controlli automatici e revisione manuale. Le immagini acquisite dalle sorgenti originarie vengono validate tecnicamente, deduplicate mediante hash e inserite in un pool preparato. Solo successivamente entrano nel manifest di revisione, nel quale la classificazione finale viene assegnata attraverso un protocollo \textit{human-in-the-loop}. Questa scelta metodologica è coerente con la finalità forense del lavoro: il dataset non è trattato come un prodotto puramente automatico, ma come un artefatto sperimentale verificabile, congelato e documentato.
+The data pipeline is based on a combination of automatic checks and manual
+review. Images acquired from the original sources are technically validated,
+deduplicated through hashes, and inserted into a prepared pool. Only afterward
+are they included in the review manifest, in which the final classification is
+assigned through a \textit{human-in-the-loop} protocol. This methodological
+choice is consistent with the forensic purpose of the work: the dataset is not
+treated as a purely automatic product, but as a verifiable, frozen, and
+documented experimental artifact.
 
-Il dataset finale è rappresentato dal manifest \codepath{manual_selection_final_1500.csv} e contiene 1500 immagini distribuite in modo bilanciato tra tre classi: \texttt{weapon}, \texttt{non\_weapon} e \gls{ood}. La classe \texttt{weapon} include soltanto armi individuali realistiche chiaramente visibili; la classe \texttt{non\_weapon} include negativi realistici coerenti con il task; la classe \gls{ood} raccoglie casi borderline o fuori distribuzione, quali coltelli, spade, repliche, airsoft, render sintetici, videogiochi, mezzi militari pesanti, esplosioni, scene di guerra e immagini degradate o anomale. Il subset adversarial ufficiale, memorizzato in \codepath{manual_selection_adversarial_subset.csv}, esclude gli esempi \gls{ood} e mantiene soltanto le due classi operative \texttt{weapon} e \texttt{non\_weapon}, per un totale di 1000 immagini.
+The final dataset is represented by the
+\codepath{manual_selection_final_1500.csv} manifest and contains 1\,500 images
+distributed in a balanced manner across three classes: \texttt{weapon},
+\texttt{non\_weapon}, and \gls{ood}. The \texttt{weapon} class includes only
+realistic individual weapons that are clearly visible; the \texttt{non\_weapon}
+class includes realistic negative samples consistent with the task; and the
+\gls{ood} class collects borderline or out-of-distribution cases, such as
+knives, swords, replicas, airsoft items, synthetic renderings, videogame
+images, heavy military vehicles, explosions, war scenes, and degraded or
+anomalous images. The official adversarial subset, stored in
+\codepath{manual_selection_adversarial_subset.csv}, excludes \gls{ood} examples
+and retains only the two operational classes \texttt{weapon} and
+\texttt{non\_weapon}, for a total of 1\,000 images.
 
-Gli identificativi stabili, gli hash \texttt{SHA256}, i percorsi relativi e i manifest intermedi consentono di ricostruire la derivazione di ciascun campione dal pool preparato fino agli split, alle versioni perturbate e agli output di valutazione. Questo collegamento è particolarmente rilevante nella fase forense, poiché gli strumenti commerciali possono rinominare i file, modificare la struttura degli export o produrre report con formati eterogenei. L'uso degli hash consente quindi di mantenere un criterio indipendente dal nome del file e dal percorso di esportazione.
+Stable identifiers, \gls{sha256} hashes, relative paths, and intermediate
+manifests make it possible to reconstruct the derivation of each sample from
+the prepared pool to the splits, perturbed versions, and evaluation outputs.
+This connection is particularly relevant in the forensic phase, since
+commercial tools may rename files, modify the structure of exports, or produce
+reports in heterogeneous formats. The use of hashes therefore makes it possible
+to maintain a criterion that is independent of the file name and export path.
 
-\section{Official script sequence}
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Official Script Sequence}
 \label{app:official-script-sequence}
+% ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline operativa utilizza script numerati come punti di ingresso ufficiali. Tale numerazione documenta l'ordine logico delle operazioni e riduce l'ambiguità nella ricostruzione del workflow. Il Listato~\ref{lst:official-script-sequence} riporta la sequenza principale allineata allo stato corrente della repository.
+The operational pipeline uses numbered scripts as official entry points. This
+numbering documents the logical order of the operations and reduces ambiguity in
+the reconstruction of the workflow. Listing~\ref{lst:official-script-sequence}
+reports the main sequence aligned with the current state of the repository.
 
-\begin{lstlisting}[caption={Sequenza ufficiale degli script principali della pipeline.}, label={lst:official-script-sequence}]
+\begin{lstlisting}[caption={Official sequence of the main pipeline scripts.}, label={lst:official-script-sequence}]
 # Raw acquisition and source preparation
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
 python datasets/scripts/acquisition/01_download_kaggle.py
@@ -185,27 +278,73 @@ python explainability/scripts/18_xai_interactive_launcher.py
 python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 \end{lstlisting}
 
-Lo script \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py} costituisce il punto di raccordo tra gli export prodotti dagli strumenti forensi commerciali e le metriche comparative finali.
-Nel protocollo finale, esso supporta esclusivamente gli output riconducibili a
-\texttt{magnet\_axiom}, \texttt{excire\_foto\_2025},
-\texttt{cellebrite\_inseyets} e \texttt{griffeye}.
-Il suo ruolo è normalizzare gli export, ricondurre le predizioni ai record del forensic evaluation bundle e produrre risultati confrontabili con il livello proxy mediante mapping basato, in ordine preferenziale, su \texttt{bundle\_id}, hash \texttt{SHA256}, hash \texttt{MD5}, nome file e audit manuale.
+The script
+\codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}
+constitutes the connection point between the exports produced by commercial
+forensic tools and the final comparative metrics. In the final protocol, it
+exclusively supports outputs attributable to \texttt{magnet\_axiom},
+\texttt{excire\_foto\_2025}, \texttt{cellebrite\_inseyets}, and
+\texttt{griffeye}. Its role is to normalize the exports, map predictions back
+to the records of the forensic evaluation bundle, and produce results that are
+comparable with the proxy level through mapping based, in preferential order, on
+\texttt{bundle\_id}, \gls{sha256} hash, \gls{md5} hash, file name, and manual
+audit.
 
-\section{Models, attacks and evaluation outputs}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Models, Attacks and Evaluation Outputs}
 \label{app:models-attacks-evaluation-outputs}
+% ─────────────────────────────────────────────────────────────────────────────
 
-Il protocollo sperimentale consolidato utilizza tre modelli proxy: \texttt{efficientnet\_b0}, \texttt{resnet18} e \gls{clip}. Tali modelli sono impiegati come baseline trasparenti e ispezionabili per osservare in modo controllato il comportamento dei classificatori rispetto a input puliti, perturbati e fuori distribuzione. Eventuali componenti preliminari o baseline esplorative non incluse nella valutazione finale non sono considerate parte del protocollo sperimentale consolidato. L'impiego di modelli proxy colloca l'analisi nel più ampio contesto della robustezza dei sistemi di \gls{ml} e \gls{ai} \cite{bishop2006pattern,biggio2018wild,radford2021learning}.
+The consolidated experimental protocol uses three proxy models:
+\texttt{efficientnet\_b0}, \texttt{resnet18}, and \gls{clip}. These models are
+used as transparent and inspectable baselines to observe, in a controlled
+manner, the behavior of classifiers with respect to clean, perturbed, and
+out-of-distribution inputs. Any preliminary components or exploratory baselines
+not included in the final evaluation are not considered part of the consolidated
+experimental protocol. The use of proxy models places the analysis within the
+broader context of robustness in \gls{ml} and \gls{ai} systems
+\cite{bishop2006pattern,biggio2018wild,radford2021learning}.
 
-Gli attacchi adversariali generati nella pipeline sono \texttt{fgsm}, \texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel} e \texttt{color\_shift}. Le trasformazioni anti-forensi sono \texttt{jpeg\_recompression}, \texttt{resample\_resize}, \texttt{gaussian\_blur}, \texttt{histogram\_modification} e \texttt{contrast\_stretching}. Questa distinzione è metodologicamente importante: gli attacchi adversariali sono utilizzati per valutare la vulnerabilità decisionale dei modelli, mentre le trasformazioni anti-forensi simulano manipolazioni realistiche del contenuto o del file immagine che possono alterare la visibilità, la qualità o le tracce tecniche dell'artefatto \cite{stamm2010anti,nowroozi2021survey,croce2020robustbench}.
+The adversarial attacks generated in the pipeline are \texttt{fgsm},
+\texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel}, and
+\texttt{color\_shift}. The anti-forensic transformations are
+\texttt{jpeg\_recompression}, \texttt{resample\_resize},
+\texttt{gaussian\_blur}, \texttt{histogram\_modification}, and
+\texttt{contrast\_stretching}. This distinction is methodologically important:
+adversarial attacks are used to evaluate the decision vulnerability of the
+models, whereas anti-forensic transformations simulate realistic manipulations
+of the image content or file that may alter the visibility, quality, or
+technical traces of the artifact
+\cite{stamm2010anti,nowroozi2021survey,croce2020robustbench}.
 
-Gli output della valutazione dei modelli proxy sono raccolti nelle directory \codepath{evaluation/proxy_models/} e \codepath{results/metrics/}. Tali output includono predizioni, metriche aggregate, matrici di confusione e confronti tra condizioni pulite, adversariali, anti-forensi e \gls{ood}. La loro funzione non è soltanto quantitativa, ma anche metodologica: essi permettono di confrontare il comportamento controllato dei modelli proxy con quello dei software \gls{ai}-based valutati in modalità \textit{black-box}.
+The outputs of the proxy model evaluation are collected in the
+\codepath{evaluation/proxy_models/} and \codepath{results/metrics/}
+directories. These outputs include predictions, aggregate metrics, confusion
+matrices, and comparisons among clean, adversarial, anti-forensic, and
+\gls{ood} conditions. Their function is not only quantitative, but also
+methodological: they make it possible to compare the controlled behavior of the
+proxy models with that of the \gls{ai}-based software evaluated in
+\textit{black-box} mode.
 
-\section{Forensic evaluation bundle}
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Forensic Evaluation Bundle}
 \label{app:forensic-evaluation-bundle}
+% ─────────────────────────────────────────────────────────────────────────────
 
-Il \textit{forensic evaluation bundle} costituisce l'artefatto operativo utilizzato per sottoporre ai software \gls{ai}-based valutati in modalità \textit{black-box} un insieme comune di immagini senza rivelare preventivamente la relativa ground truth. La sua funzione metodologica è evitare che nomi dei file, struttura delle directory o metadati sperimentali possano influenzare la procedura di analisi o rendere immediatamente riconoscibili la classe reale e la trasformazione applicata. Il bundle è generato dallo script \codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py} e viene salvato nella directory \codepath{datasets/forensic_evaluation_bundle/}; la sua struttura separa rigorosamente gli input ciechi destinati ai software dai metadati necessari alla successiva valutazione mediante mapping basato su hash.
+The \textit{forensic evaluation bundle} constitutes the operational artifact
+used to submit a common set of images to the \gls{ai}-based software evaluated
+in \textit{black-box} mode, without revealing the corresponding ground truth in
+advance. Its methodological function is to prevent file names, directory
+structure, or experimental metadata from influencing the analysis procedure or
+making the true class and applied transformation immediately recognizable. The
+bundle is generated by the script
+\codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py} and is
+saved in the \codepath{datasets/forensic_evaluation_bundle/} directory; its
+structure strictly separates the blind inputs intended for the software from the
+metadata required for the subsequent evaluation through hash-based mapping.
 
-\begin{lstlisting}[caption={Struttura logica del forensic evaluation bundle.}, label={lst:forensic-evaluation-bundle-structure}]
+\begin{lstlisting}[caption={Logical structure of the forensic evaluation bundle.}, label={lst:forensic-evaluation-bundle-structure}]
 datasets/forensic_evaluation_bundle/
   blind_tool_input/
     files/
@@ -216,57 +355,87 @@ datasets/forensic_evaluation_bundle/
   structured_audit_view/
 \end{lstlisting}
 
-Nella valutazione \textit{black-box} devono essere importati nei software considerati esclusivamente i file contenuti in \codepath{blind_tool_input/files/}. Le directory \codepath{metadata/} e \codepath{structured_audit_view/} non devono essere importate, poiché contengono informazioni che rivelerebbero classi reali, sorgenti, attacchi, trasformazioni e mapping sperimentali. Questa separazione riduce il rischio di bias indotto dai nomi dei file, dalla struttura delle directory o dalla conoscenza preventiva della ground truth.
+In the \textit{black-box} evaluation, only the files contained in
+\codepath{blind_tool_input/files/} must be imported into the considered
+software. The \codepath{metadata/} and \codepath{structured_audit_view/}
+directories must not be imported, since they contain information that would
+reveal true classes, sources, attacks, transformations, and experimental
+mapping. This separation reduces the risk of bias induced by file names,
+directory structure, or prior knowledge of the ground truth.
 
-Il bundle corrente comprende immagini pulite, campioni \gls{ood}, perturbazioni adversariali e trasformazioni anti-forensi. Il riepilogo operativo del bundle documenta 11500 file complessivi: 1000 immagini pulite, 500 campioni \gls{ood}, 5000 campioni adversariali e 5000 campioni anti-forensi. I controlli di validazione includono unicità del \texttt{bundle\_id}, unicità degli hash effettivi, corrispondenza degli hash quando presenti nel manifest, pulizia semantica dei percorsi ciechi e separazione dei metadati dagli input destinati ai tool.
+The current bundle includes clean images, \gls{ood} samples, adversarial
+perturbations, and anti-forensic transformations. The operational summary of the
+bundle documents 11\,500 files in total: 1\,000 clean images, 500 \gls{ood}
+samples, 5\,000 adversarial samples, and 5\,000 anti-forensic samples. The
+validation checks include uniqueness of the \texttt{bundle\_id}, uniqueness of
+the effective hashes, correspondence of hashes when present in the manifest,
+semantic cleanliness of the blind paths, and separation of metadata from the
+inputs intended for the tools.
 
-\section{Software environment and dependencies}
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Software Environment and Dependencies}
 \label{app:software-environment}
+% ─────────────────────────────────────────────────────────────────────────────
 
-La pipeline è implementata prevalentemente in Python e utilizza librerie per la gestione tabellare dei manifest, l'elaborazione delle immagini, l'esecuzione dei modelli e la produzione degli output sperimentali. La Tabella~\ref{tab:software-environment} sintetizza le principali componenti software. Le versioni puntuali delle dipendenze devono essere mantenute nei file di ambiente della repository o nei log sperimentali, poiché la riproducibilità computazionale può essere influenzata da variazioni di librerie, backend numerici, driver \gls{gpu} e disponibilità hardware.
+The pipeline is implemented primarily in Python and uses libraries for tabular
+manifest management, image processing, model execution, and production of
+experimental outputs. Table~\ref{tab:software-environment} summarizes the main
+software components. The exact versions of the dependencies should be maintained
+in the repository environment files or in the experimental logs, since
+computational reproducibility may be affected by variations in libraries,
+numerical backends, \gls{gpu} drivers, and hardware availability.
 
 \begin{table}[H]
 \centering
-\caption{Principali componenti software utilizzate nella pipeline consolidata.}
+\caption{Main software components used in the consolidated pipeline.}
 \label{tab:software-environment}
 \begin{tabularx}{\textwidth}{@{}lX@{}}
 \toprule
-\textbf{Componente} & \textbf{Funzione principale} \\
+\textbf{Component} & \textbf{Main function} \\
 \midrule
-\texttt{Python} & Linguaggio principale per orchestrare la pipeline sperimentale. \\
-\texttt{pandas} & Gestione di manifest, metadati, report tabellari e risultati sperimentali. \\
-\texttt{NumPy} & Supporto numerico per array, trasformazioni e operazioni matriciali. \\
-\texttt{SciPy} & Supporto a operazioni numeriche e trasformazioni utilizzate nella pipeline sperimentale. \\
-\texttt{Pillow} & Apertura, validazione, conversione e salvataggio delle immagini. \\
-\texttt{PyTorch} & Addestramento, inferenza e generazione di perturbazioni su modelli neurali. \\
-\texttt{torchvision} & Architetture CNN, preprocessing e supporto alla valutazione dei modelli proxy. \\
-\texttt{open\_clip\_torch} & Implementazione del modello \gls{clip} utilizzato come proxy model. \\
-\texttt{Captum} & Generazione delle attribution map mediante Integrated Gradients. \\
-\texttt{matplotlib} & Produzione di grafici, curve, figure sperimentali e visualizzazioni diagnostiche. \\
+\texttt{Python} & Main language used to orchestrate the experimental pipeline. \\
+\texttt{pandas} & Management of manifests, metadata, tabular reports, and experimental results. \\
+\texttt{NumPy} & Numerical support for arrays, transformations, and matrix operations. \\
+\texttt{SciPy} & Support for numerical operations and transformations used in the experimental pipeline. \\
+\texttt{Pillow} & Image opening, validation, conversion, and saving. \\
+\texttt{PyTorch} & Training, inference, and perturbation generation on neural models. \\
+\texttt{torchvision} & \gls{cnn} architectures, preprocessing, and support for proxy model evaluation. \\
+\texttt{open\_clip\_torch} & Implementation of the \gls{clip} model used as a proxy model. \\
+\texttt{Captum} & Generation of attribution maps through Integrated Gradients. \\
+\texttt{matplotlib} & Production of plots, curves, experimental figures, and diagnostic visualizations. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-La valutazione operativo-forense comprende inoltre quattro software osservati
-in modalità \textit{black-box}: \textit{Magnet AXIOM}, versione
-10.1.0.48673, con la funzionalità \textit{Magnet.AI};
-\textit{Excire Foto 2025}, versione 4.1.5, utilizzato come applicazione
-standalone general-purpose con funzionalità \gls{ai}; \textit{Cellebrite
-Inseyets}, versione 10.9, con export prodotto nell'ambiente \textit{Cellebrite
-Physical Analyzer} 10.9.0.3029; e \textit{Magnet Griffeye x64}, versione
-26.2.108, con modulo \textit{T3K CORE} v1.18.0. Diversamente dagli script
-Python e dai modelli proxy, tali strumenti introducono una componente non
-completamente automatizzabile, dovuta a licenze, interfacce grafiche, versioni
-software, configurazioni operative e formati di esportazione. Per questo motivo,
-la loro valutazione è documentata mediante bundle cieco, istruzioni operative,
-export normalizzati e mapping basato su hash.
+The operational-forensic evaluation also includes four software systems observed
+in \textit{black-box} mode: \textit{Magnet AXIOM}, version 10.1.0.48673, with
+the \textit{Magnet.AI} functionality; \textit{Excire Foto 2025}, version 4.1.5,
+used as a standalone general-purpose application with \gls{ai} functionalities;
+\textit{Cellebrite Inseyets}, version 10.9, with exports produced in the
+\textit{Cellebrite Physical Analyzer} 10.9.0.3029 environment; and
+\textit{Magnet Griffeye x64}, version 26.2.108, with the \textit{T3K CORE}
+v1.18.0 module. Unlike Python scripts and proxy models, these tools introduce a
+component that is not fully automatable, due to licenses, graphical interfaces,
+software versions, operational configurations, and export formats. For this
+reason, their evaluation is documented through the blind bundle, operational
+instructions, normalized exports, and hash-based mapping.
 
-\section{Logs, reports and audit outputs}
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Logs, Reports and Audit Outputs}
 \label{app:logs-reports-audit-outputs}
+% ─────────────────────────────────────────────────────────────────────────────
 
-Oltre ai manifest principali, la repository conserva log, riepiloghi e report intermedi utili per verificare le operazioni effettuate. Questi artefatti non hanno tutti lo stesso ruolo: alcuni descrivono lo stato della selezione manuale, altri riepilogano la generazione degli split, altri ancora documentano la composizione del bundle o la valutazione dei modelli proxy. La loro funzione complessiva è rendere ispezionabile il percorso sperimentale e supportare eventuali controlli successivi.
+In addition to the main manifests, the repository preserves logs, summaries,
+and intermediate reports that are useful for verifying the operations performed.
+These artifacts do not all have the same role: some describe the status of the
+manual selection process, others summarize split generation, and others document
+the composition of the bundle or the evaluation of proxy models. Their overall
+function is to make the experimental path inspectable and to support any
+subsequent checks.
 
-\begin{lstlisting}[caption={Esempio schematico di output della fase di preparazione del dataset.}, label={lst:dataset-preparation-log}]
+\begin{lstlisting}[caption={Schematic example of output from the dataset preparation phase.}, label={lst:dataset-preparation-log}]
 [INFO] Scanning raw dataset sources...
 [INFO] Valid images detected: ...
 [INFO] Invalid images discarded: ...
@@ -276,22 +445,60 @@ Oltre ai manifest principali, la repository conserva log, riepiloghi e report in
 [INFO] Metadata written to datasets/prepared/final_pool/metadata.csv
 \end{lstlisting}
 
-Tra gli artefatti di audit più rilevanti rientrano \codepath{manual_selection_log.csv}, \codepath{manual_selection_state.json}, \codepath{manual_selection_summary.json}, \codepath{split_generation_summary.json}, i manifest degli attacchi e \codepath{bundle_summary.json}. Tali file consentono di ricostruire non soltanto l'output finale, ma anche lo stato e le assunzioni operative delle principali fasi della pipeline.
+The most relevant audit artifacts include
+\codepath{manual_selection_log.csv}, \codepath{manual_selection_state.json},
+\codepath{manual_selection_summary.json},
+\codepath{split_generation_summary.json}, the attack manifests, and
+\codepath{bundle_summary.json}. These files make it possible to reconstruct not
+only the final output, but also the status and operational assumptions of the
+main phases of the pipeline.
 
-\section{Reproducibility boundaries}
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Reproducibility Boundaries}
 \label{app:reproducibility-boundaries}
+% ─────────────────────────────────────────────────────────────────────────────
 
-La riproducibilità della pipeline deve essere interpretata in modo coerente con la natura del caso di studio. Le fasi deterministicamente rieseguibili includono la preparazione tecnica del dataset, la generazione dei manifest, la costruzione degli split, la produzione degli output perturbati e la costruzione del bundle, nei limiti delle dipendenze software e della disponibilità degli input. La selezione finale del dataset, invece, include una componente manuale deliberata, documentata e motivata, che non deve essere occultata come se fosse una procedura completamente automatica. Il valore scientifico di tale componente risiede nella sua tracciabilità, nella definizione esplicita dei criteri e nel congelamento del manifest finale.
+The reproducibility of the pipeline must be interpreted consistently with the
+nature of the case study. The deterministically re-executable phases include the
+technical preparation of the dataset, manifest generation, split construction,
+production of perturbed outputs, and construction of the bundle, within the
+limits imposed by software dependencies and input availability. The final
+selection of the dataset, instead, includes a deliberate, documented, and
+motivated manual component, which must not be concealed as if it were a fully
+automatic procedure. The scientific value of this component lies in its
+traceability, in the explicit definition of the criteria, and in the freezing of
+the final manifest.
 
-Analogamente, la valutazione con strumenti forensi commerciali non è interamente riproducibile tramite riga di comando, poiché dipende da software proprietario, versioni specifiche, impostazioni dell'interfaccia, moduli \gls{ai}-based interni e modalità di esportazione. Per mitigare questa limitazione, la pipeline utilizza un input cieco comune, conserva gli hash dei file, separa la ground truth dagli input dei tool e prevede una fase di normalizzazione degli export. In questo modo, la riproducibilità non viene intesa come replica bit-per-bit di ogni interazione grafica, ma come verificabilità del protocollo, degli input, dei mapping e delle metriche finali.
+Similarly, the evaluation with commercial forensic tools is not entirely
+reproducible through command-line execution, since it depends on proprietary
+software, specific versions, interface settings, internal \gls{ai}-based
+modules, and export procedures. To mitigate this limitation, the pipeline uses a
+common blind input, preserves file hashes, separates the ground truth from the
+inputs submitted to the tools, and includes a normalization phase for the
+exports. In this way, reproducibility is not understood as a bit-for-bit replica
+of every graphical interaction, but as verifiability of the protocol, inputs,
+mappings, and final metrics.
 
-\section{Repository availability}
+% ─────────────────────────────────────────────────────────────────────────────
+\section{Repository Availability}
 \label{app:repository-availability}
+% ─────────────────────────────────────────────────────────────────────────────
 
-La repository associata alla tesi è disponibile al seguente indirizzo:
+The repository associated with the thesis is available at the following address:
 
 \begin{center}
 \url{https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics}
 \end{center}
 
-La repository contiene gli script principali, i manifest ufficiali, la documentazione operativa e gli artefatti necessari a ricostruire il workflow sperimentale. Prima del rilascio pubblico definitivo, la disponibilità di immagini grezze, output generati e materiali sensibili dovrà essere valutata in funzione dei vincoli legali, etici e di licenza delle sorgenti originarie. Il codice sorgente della repository è rilasciato con licenza MIT, come indicato nel file \codepath{LICENSE}. Tale licenza si applica al codice e agli script sperimentali, mentre non implica automaticamente la libera redistribuzione del testo della tesi, delle figure, dei dataset, delle immagini grezze, degli export dei tool forensi, dei checkpoint dei modelli o degli artefatti generati. Tali materiali devono essere considerati separatamente, in funzione dei rispettivi vincoli legali, etici, istituzionali e di licenza delle sorgenti originarie.
+The repository contains the main scripts, official manifests, operational
+documentation, and artifacts required to reconstruct the experimental workflow.
+Before the final public release, the availability of raw images, generated
+outputs, and sensitive materials must be assessed according to the legal,
+ethical, and licensing constraints of the original sources. The source code of
+the repository is released under the MIT license, as indicated in the
+\codepath{LICENSE} file. This license applies to the code and experimental
+scripts, but it does not automatically imply the free redistribution of the
+thesis text, figures, datasets, raw images, forensic tool exports, model
+checkpoints, or generated artifacts. These materials must be considered
+separately, according to their respective legal, ethical, institutional, and
+source-dependent licensing constraints.

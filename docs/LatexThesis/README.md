@@ -7,7 +7,7 @@ This directory contains thesis documentation, LaTeX sources, figures, and reposi
 The current thesis writing base is:
 
 ```text
-docs/LatexThesis_ITA/
+docs/LatexThesis/
 ```
 
 The thesis is written in Italian academic style, but the structure and terminology are kept compatible with a later translation into academic English.
@@ -21,12 +21,11 @@ docs/
 ├── README.md
 ├── assets/
 │   └── repository_header.png
-└── LatexThesis_ITA/
+└── LatexThesis/
     ├── main.tex
     ├── packages.sty
     ├── title.tex
     ├── sections/
-    ├── methodology/
     └── tesi.bib
 ```
 
@@ -57,7 +56,7 @@ adversarial robustness
 forensic evaluation bundle
 commercial forensic tools evaluation
 comparative discussion
-XAI case studies
+xAI case studies
 operational implications and limitations
 ```
 
@@ -81,13 +80,13 @@ When updating thesis text:
 The thesis uses glossary/acronym entries defined in:
 
 ```text
-docs/LatexThesis_ITA/sections/000_acronyms.tex
+docs/LatexThesis/sections/000_acronyms.tex
 ```
 
 Bibliography entries are maintained in:
 
 ```text
-docs/LatexThesis_ITA/tesi.bib
+docs/LatexThesis/tesi.bib
 ```
 
 Use `\texttt{...}` only for technical identifiers such as class names, file names, folders, scripts, or experimental parameters.
