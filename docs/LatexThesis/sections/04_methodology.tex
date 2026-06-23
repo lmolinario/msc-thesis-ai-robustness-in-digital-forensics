@@ -2661,42 +2661,54 @@ methodological workflow adopted for the evaluation of forensic tools: the tools
 receive only the blind view of the bundle, while the experimental ground truth
 remains separate until the output normalization phase.
 
+
+
+
 \begin{figure}[H]
 \centering
-\resizebox{\textwidth}{!}{%
+\resizebox{0.94\textwidth}{!}{%
 \begin{tikzpicture}[
     >=latex,
-    font=\small,
+    font=\normalsize,
     block/.style={
         rectangle,
         rounded corners,
         draw=black!75,
         thick,
         align=center,
-        minimum height=1.35cm,
-        minimum width=3.6cm,
+        minimum height=1.30cm,
+        minimum width=6.8cm,
         fill=gray!10
+    },
+    process/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.30cm,
+        minimum width=6.8cm,
+        fill=blue!8
+    },
+    output/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        minimum height=1.30cm,
+        minimum width=6.8cm,
+        fill=green!10
     },
     note/.style={
         rectangle,
         rounded corners,
-        draw=black!75,
+        draw=black!70,
         dashed,
         thick,
         align=center,
-        minimum height=1.15cm,
-        minimum width=4.2cm,
-        fill=gray!5
-    },
-    wide_note/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        dashed,
-        thick,
-        align=center,
-        minimum height=1.10cm,
-        minimum width=5.4cm,
+        minimum height=1.20cm,
+        minimum width=6.4cm,
         fill=gray!5
     },
     arrow/.style={
@@ -2713,80 +2725,72 @@ remains separate until the output normalization phase.
 ]
 
 % -------------------------------------------------------------------------
-% Row 1 - Main tool-side workflow
+% Main vertical workflow: tool-side processing
 % -------------------------------------------------------------------------
 \node[block] (blind) at (0,0)
 {\shortstack{
     \textbf{Blind bundle input}\\[1mm]
-    \scriptsize \texttt{blind\_tool\_input/files/}\\
-    \scriptsize neutral filenames only
+    \footnotesize \texttt{blind\_tool\_input/files/}\\
+    \footnotesize neutral filenames only
 }};
 
-\node[block] (import) at (4.6,0)
+\node[process] (import) at (0,-2.3)
 {\shortstack{
-    \textbf{Tool import}\\
-    \textbf{and indexing}\\[1mm]
-    \scriptsize ingest, parsing, hashing\\
-    \scriptsize and media indexing
+    \textbf{Tool import and indexing}\\[1mm]
+    \footnotesize ingest, parsing, hashing\\
+    \footnotesize and media indexing
 }};
 
-\node[block] (analysis) at (9.2,0)
+\node[process] (analysis) at (0,-4.6)
 {\shortstack{
-    \textbf{Tool analysis}\\[1mm]
-    \scriptsize AI-based tags, categories,\\
-    \scriptsize bookmarks, retrieval or visual triage
+    \textbf{Tool-side analysis}\\[1mm]
+    \footnotesize AI-based tags, categories, bookmarks,\\
+    \footnotesize retrieval results or visual triage outputs
 }};
 
-\node[block] (export) at (13.8,0)
+\node[output] (export) at (0,-6.9)
 {\shortstack{
-    \textbf{Output export}\\[1mm]
-    \scriptsize CSV, report, tags,\\
-    \scriptsize labels, bookmarks or detected items
+    \textbf{Observable output export}\\[1mm]
+    \footnotesize CSV files, reports, tags, labels,\\
+    \footnotesize bookmarks, classifications or detected items
 }};
 
-% -------------------------------------------------------------------------
-% Row 2 - Blind principle and metrics
-% -------------------------------------------------------------------------
-\node[wide_note] (blindnote) at (0,-2.9)
-{\shortstack{
-    \textbf{Blind evaluation principle}\\[1mm]
-    \scriptsize filenames and paths do not expose\\
-    \scriptsize class, source, fold or attack family
-}};
-
-\node[block] (metrics) at (13.8,-2.9)
-{\shortstack{
-    \textbf{Metric computation}\\
-    \textbf{and comparison}\\[1mm]
-    \scriptsize TP, FP, FN, TN, matching rate,\\
-    \scriptsize unknown outputs, recall, FNR and FPR
-}};
-
-% -------------------------------------------------------------------------
-% Row 3 - Metadata and normalization
-% -------------------------------------------------------------------------
-\node[note] (manifest) at (6.8,-5.5)
-{\shortstack{
-    \textbf{Experimental metadata}\\[1mm]
-    \scriptsize \texttt{bundle\_manifest.csv}\\
-    \scriptsize ground truth, class, attack, fold
-}};
-
-\node[block] (normalization) at (13.8,-5.5)
+\node[process] (normalization) at (0,-9.4)
 {\shortstack{
     \textbf{Output normalization}\\[1mm]
-    \scriptsize exported results are mapped\\
-    \scriptsize to \texttt{bundle\_id}
+    \footnotesize exported results are mapped to \texttt{bundle\_id}\\
+    \footnotesize and recoded into operational prediction states
+}};
+
+\node[output] (metrics) at (0,-11.9)
+{\shortstack{
+    \textbf{Metric computation and comparison}\\[1mm]
+    \footnotesize TP, FP, TN, FN, matching rate, unknown outputs,\\
+    \footnotesize weapon recall, FNR, FPR and balanced accuracy
 }};
 
 % -------------------------------------------------------------------------
-% Row 4 - Separation rule
+% Side methodological controls
 % -------------------------------------------------------------------------
-\node[wide_note] (separation) at (6.8,-8.0)
+\node[note] (blindnote) at (-8.2,0)
+{\shortstack{
+    \textbf{Blind evaluation principle}\\[1mm]
+    \footnotesize filenames and paths do not expose\\
+    \footnotesize class, source, fold or attack family
+}};
+
+\node[note] (separation) at (-8.2,-9.4)
 {\shortstack{
     \textbf{Separation rule}\\[1mm]
-    \scriptsize metadata and structured audit view\\
-    \scriptsize are not imported into the tool
+    \footnotesize metadata and structured audit view\\
+    \footnotesize are not imported into the tool
+}};
+
+\node[note] (manifest) at (8.2,-9.4)
+{\shortstack{
+    \textbf{Experimental metadata}\\[1mm]
+    \footnotesize \texttt{bundle\_manifest.csv}\\
+    \footnotesize ground truth, class, attack, fold and hashes
 }};
 
 % -------------------------------------------------------------------------
@@ -2795,20 +2799,20 @@ remains separate until the output normalization phase.
 \draw[arrow] (blind) -- (import);
 \draw[arrow] (import) -- (analysis);
 \draw[arrow] (analysis) -- (export);
+\draw[arrow] (export) -- (normalization);
+\draw[arrow] (normalization) -- (metrics);
 
-\draw[dashedarrow] (blind) -- (blindnote);
-
-\draw[arrow] (export.south) -- (metrics.north);
-\draw[arrow] (normalization.north) -- (metrics.south);
-
-\draw[dashedarrow] (manifest.east) -- (normalization.west);
-\draw[dashedarrow] (manifest) -- (separation);
+\draw[dashedarrow] (blindnote.east) -- (blind.west);
+\draw[dashedarrow] (separation.east) -- (normalization.west);
+\draw[dashedarrow] (manifest.west) -- (normalization.east);
 
 \end{tikzpicture}%
 }
-\caption[Forensic tool evaluation workflow]{Forensic tool evaluation workflow based on blind bundle import, tool-side indexing and categorization, export of observable outputs, and normalization against the experimental manifest.}
+\caption[Forensic tool evaluation workflow]{Forensic tool evaluation workflow based on blind bundle import, tool-side indexing and categorization, export of observable outputs, and normalization against the experimental manifest. The figure highlights the separation between the blind input submitted to the tools and the experimental metadata used only after export for output normalization and metric computation.}
 \label{fig:methodology-forensic-tool-workflow}
 \end{figure}
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Evaluation metrics}
