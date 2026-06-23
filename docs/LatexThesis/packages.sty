@@ -43,8 +43,14 @@
 % later uses: short form only
 \setacronymstyle{long-short}
 
-% Bold only the first occurrence of acronym entries.
-% This patch is compatible with the standard glossaries package.
+% Bold first occurrences only when explicitly enabled.
+% This keeps the Abstract and front matter unbolded, while allowing the thesis
+% body to restart acronym usage from Chapter 1.
+\newif\ifboldfirstacronyms
+\boldfirstacronymsfalse
+\newcommand{\EnableBoldFirstAcronyms}{\boldfirstacronymstrue}
+\newcommand{\DisableBoldFirstAcronyms}{\boldfirstacronymsfalse}
+
 \let\oldgls\gls
 \let\oldGls\Gls
 \let\oldglspl\glspl
@@ -54,11 +60,15 @@
   \ifglsused{#1}{%
     \oldgls{#1}%
   }{%
-    \ifglshaslong{#1}{%
-      \textbf{\oldgls{#1}}%
-    }{%
+    \ifboldfirstacronyms
+      \ifglshaslong{#1}{%
+        \textbf{\oldgls{#1}}%
+      }{%
+        \oldgls{#1}%
+      }%
+    \else
       \oldgls{#1}%
-    }%
+    \fi
   }%
 }
 
@@ -66,11 +76,15 @@
   \ifglsused{#1}{%
     \oldGls{#1}%
   }{%
-    \ifglshaslong{#1}{%
-      \textbf{\oldGls{#1}}%
-    }{%
+    \ifboldfirstacronyms
+      \ifglshaslong{#1}{%
+        \textbf{\oldGls{#1}}%
+      }{%
+        \oldGls{#1}%
+      }%
+    \else
       \oldGls{#1}%
-    }%
+    \fi
   }%
 }
 
@@ -78,11 +92,15 @@
   \ifglsused{#1}{%
     \oldglspl{#1}%
   }{%
-    \ifglshaslong{#1}{%
-      \textbf{\oldglspl{#1}}%
-    }{%
+    \ifboldfirstacronyms
+      \ifglshaslong{#1}{%
+        \textbf{\oldglspl{#1}}%
+      }{%
+        \oldglspl{#1}%
+      }%
+    \else
       \oldglspl{#1}%
-    }%
+    \fi
   }%
 }
 
@@ -90,11 +108,15 @@
   \ifglsused{#1}{%
     \oldGlspl{#1}%
   }{%
-    \ifglshaslong{#1}{%
-      \textbf{\oldGlspl{#1}}%
-    }{%
+    \ifboldfirstacronyms
+      \ifglshaslong{#1}{%
+        \textbf{\oldGlspl{#1}}%
+      }{%
+        \oldGlspl{#1}%
+      }%
+    \else
       \oldGlspl{#1}%
-    }%
+    \fi
   }%
 }
 
