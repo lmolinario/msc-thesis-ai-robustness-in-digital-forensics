@@ -209,8 +209,9 @@ as calibrated probabilities directly comparable across different architectures.
 This caution is even more relevant in the comparison with commercial black-box
 tools, which do not necessarily expose numerical scores, decision thresholds, or
 homogeneous uncertainty measures. For this reason, confidence is used in this
-chapter as an auxiliary diagnostic element, not as autonomous evidentiary
+chapter as an auxiliary diagnostic element, not as a stand-alone evidentiary
 measure.
+
 
 In the remainder of the chapter, a single convention is adopted for computing
 performance drop:
@@ -1067,8 +1068,8 @@ the overall binary bundle, respectively; \textit{OOD W-rate} indicates the
 proportion of \gls{ood} samples operationally mapped to the \texttt{weapon}
 class. Binary metrics are computed on \texttt{weapon}/\texttt{non\_weapon}
 samples; \gls{ood} samples are analyzed separately. The values are
-bundle-weighted and reflect the experimental composition of the bundle, not an
-absolute or certifying evaluation of the products.
+bundle-weighted and reflect the experimental composition of the bundle, not a
+general product validation.
 \end{table}
 
 \begin{figure}[H]
@@ -2020,8 +2021,8 @@ bookmarks semantically related to weapons, violence, or military context are
 preserved as raw information but are not used as primary positives. This choice
 makes the mapping deliberately conservative: the low \gls{fpr} observed for
 \gls{griffeye}/\gls{t3kcore} must therefore also be interpreted as an effect of
-the adopted normalization rule, not as stand-alone evidence of the intrinsic
-superiority of the tool. A more permissive mapping, including weapon-adjacent
+the adopted normalization rule, not as stand-alone evidence of inherently better
+tool performance. A more permissive mapping, including weapon-adjacent
 bookmarks as secondary positives, could have increased recall but also the
 number of false positives.
 
@@ -2761,8 +2762,8 @@ rate than \gls{griffeye}/\gls{t3kcore}. Under the adopted conservative mapping,
 and the lowest false positive rate, while still retaining residual false
 negatives on the \texttt{weapon} class.
 
-Overall, the commercial comparison does not identify a universally superior
-tool, but highlights different risk profiles. \gls{griffeye}/\gls{t3kcore}
+Overall, the commercial comparison does not identify a single preferable tool
+across all operational criteria, but highlights different risk profiles. \gls{griffeye}/\gls{t3kcore}
 presents the most selective profile and the lowest operational noise in terms
 of false positives; \gls{cellebriteinseyets} maintains slightly higher recall on
 the \texttt{weapon} class; \gls{excirefoto2025} shows behavior strongly
