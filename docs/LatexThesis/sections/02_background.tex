@@ -980,7 +980,7 @@ introduced by resizing operations; histogram or contrast modifications may
 change the distribution of image intensity values
 \cite{popescu2005exposing,farid2016photo,lukas2006prnu}.
 
-In the present thesis, these techniques are recalled to frame the domain of
+In the present thesis, these techniques are discussed to frame the domain of
 \textit{image forensics} and the possible manipulations of visual evidence; the
 experimental evaluation does not concern source attribution through
 \gls{prnu}, but rather the stability of semantic image classification with
@@ -993,7 +993,7 @@ and introduces artifacts depending on the selected quality level. From a
 forensic perspective, such artifacts may be informative, but they may also
 interfere with subsequent analyses. Intentional recompression may attenuate or
 overwrite previous traces, reduce perceptual quality, or modify statistical
-characteristics exploited by automatic tools. For this reason, compression is
+characteristics exploited by automated tools. For this reason, compression is
 not only a normal technical step in image management, but may also become a
 relevant transformation from an anti-forensic standpoint
 \cite{stamm2010anti,stamm2013information}.
@@ -1029,7 +1029,7 @@ statistical properties of the file, and require specialized analyses to
 distinguish between an apparently ordinary image and an image used as a
 concealment vector \cite{stamm2013information,yaacoub2021digital}.
 
-In the present work, steganography is recalled as a broader component of the
+In the present work, steganography is mentioned as a broader component of the
 anti-forensic domain, whereas the experimental evaluation focuses on visual and
 statistical transformations directly relevant to the robustness of automated
 classification.
@@ -1054,8 +1054,8 @@ recompressed, resized, blurred, or contrast-altered image may represent a
 realistic input, compatible with ordinary acquisition, storage, or sharing
 processes. However, the same transformations may be intentionally exploited to
 reduce the likelihood that content will be correctly classified. The difficulty
-therefore lies in distinguishing between ordinary degradations within the digital image life cycle
-and transformations applied with the purpose of
+therefore lies in distinguishing between ordinary degradations within the
+digital image life cycle and transformations applied with the purpose of
 concealment or reduction of analytical effectiveness.
 
 From a forensic perspective, this ambiguity requires cautious evaluation. Not
@@ -1063,7 +1063,7 @@ every compressed, resized, or degraded image can be considered the result of
 anti-forensic conduct; on the contrary, many transformations are ordinary
 consequences of the use of mobile devices, social networks, messaging
 applications, and storage systems. However, when the objective is to evaluate
-the reliability of automatic tools, it is necessary to include such
+the reliability of automated tools, it is necessary to include such
 transformations within the space of realistic scenarios. The robustness of a
 forensic classifier depends not only on its accuracy on clean images, but also
 on its ability to maintain stable behavior in the presence of plausible,
@@ -1074,10 +1074,12 @@ constitute a bridge between traditional \textit{image forensics} and the
 evaluation of the robustness of computer vision models. They highlight that an
 image is not a static and neutral input, but a digital artifact subject to
 technical transformations that may affect both its human interpretability and
-its automatic processing. For this reason, the evaluation of \gls{ai}-based
+its automated processing. For this reason, the evaluation of \gls{ai}-based
 models and software employed in the context of \gls{df} must consider not only
 formally defined adversarial attacks, but also manipulations and degradations
 compatible with realistic operational scenarios.
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Anti-Forensic Transformations Considered in the Experimental Protocol}
@@ -1139,7 +1141,7 @@ x'_i = \left\lfloor (L-1)\cdot \operatorname{CDF}(x_i) \right\rfloor,
 where \(L\) denotes the number of intensity levels and \(\operatorname{CDF}\) is
 the normalized cumulative distribution. This transformation may improve
 perceived contrast, but it may also modify global and local statistics used by
-image forensics tools and automatic classifiers \cite{barni2018cf}.
+image forensics tools and automated classifiers \cite{barni2018cf}.
 
 The \textbf{\gls{contraststretching}} transformation applies a linear
 normalization of the dynamic range. Let \(I_{\min}\) and \(I_{\max}\) denote two
@@ -1154,7 +1156,8 @@ x'_i =
 \end{cases}
 \]
 This operation modifies the global contrast of the image and may alter the
-response of models with respect to dark, overexposed, or regions with low tonal separation.
+response of models with respect to dark regions, overexposed areas, or regions
+with low tonal separation.
 
 Table~\ref{tab:background_antiforensic_transformations} summarizes the
 anti-forensic transformations considered in the experimental protocol.
@@ -1167,19 +1170,19 @@ anti-forensic transformations considered in the experimental protocol.
         \toprule
         \textbf{Transformation} & \textbf{Methodological relevance} \\
         \midrule
-        \gls{jpeg} recompression &
+        \gls{jpegrecompression} &
         Modifies compression artifacts, frequency components, and local image
         details. \\
-        Resample and resize &
+        \gls{resampleresize} &
         Alters the spatial grid, introduces interpolation, and may degrade
         geometric correlations and local patterns. \\
-        Gaussian blur &
+        \gls{gaussianblur} &
         Attenuates high frequencies, edges, and textures, reducing the
         discriminative value of potentially relevant details. \\
-        Histogram modification &
+        \gls{histogrammodification} &
         Remaps the distribution of intensity levels, modifying global and local
         image statistics. \\
-        Contrast stretching &
+        \gls{contraststretching} &
         Normalizes the dynamic range and alters global contrast, with possible
         effects on the features learned by classifiers. \\
         \bottomrule
@@ -1228,7 +1231,7 @@ in the context of automated image classification.
 
 The evaluation of an \gls{ai}-based model cannot be reduced exclusively to the
 measurement of its average accuracy. In a forensic context, the usefulness of an
-automatic system also depends on the stability of its predictions, its ability
+automated system also depends on the stability of its predictions, its ability
 to handle degraded or out-of-distribution inputs, the transparency of the
 information provided to the analyst, and the possibility of documenting, in a
 verifiable manner, the role played by the model within the investigative
@@ -1314,7 +1317,7 @@ while focusing on irrelevant visual regions. Such situations show that accuracy
 alone is not sufficient to understand system behavior. In a forensic context,
 the possibility of observing how the model reacts to degradations,
 anti-forensic transformations, or adversarial perturbations can contribute to a
-more complete assessment of its reliability, especially when the automatic
+more complete assessment of its reliability, especially when the automated
 output is used to filter or prioritize large quantities of images.
 
 A further element concerns confidence calibration. \gls{dl} models may produce
@@ -1337,10 +1340,9 @@ respect to adversarial perturbations and anti-forensic transformations;
 caution, local attributions associated with predictions; reliability integrates
 these elements within the operational context, considering the role of the
 analyst, the documentability of the process, and the possible consequences of
-automatic errors in evidence selection. This setting makes it possible to move
+automated errors in evidence selection. This setting makes it possible to move
 beyond a purely performance-based evaluation and to situate model behavior
 within the verifiability requirements that characterize \gls{df}.
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Legal and Regulatory Profiles of AI in Forensic Contexts}
@@ -1349,7 +1351,7 @@ within the verifiability requirements that characterize \gls{df}.
 The use of \gls{ai} in forensic contexts raises not only technical issues, but
 also affects the assumptions of reliability, verifiability, and control that
 characterize digital evidence. In investigative and judicial proceedings, an
-automatic system may contribute to the selection, classification, or
+automated system may contribute to the selection, classification, or
 prioritization of relevant content, but it cannot replace the assessment of the
 forensic operator or that of the judicial authority. The legal dimension of
 \gls{ai} in \gls{df} must therefore be traced back to the principle that any
@@ -1369,11 +1371,12 @@ loss of context, and attribution difficulties. For this reason, international
 standards and guidelines emphasize the need to preserve integrity,
 authenticity, traceability, and the chain of custody throughout the entire
 evidence management life cycle \cite{iso27037,enfsi2022}. When analysis is
-supported by \gls{ai}-based modules, these requirements do not disappear; rather,
-they also extend to the functioning of the automatic tool. It therefore becomes
-necessary to document not only the origin and handling of the data, but also
-the role played by the model, the conditions of use, the available metrics, the
-known limitations, and any human intervention in the assessment of the result.
+supported by \gls{ai}-based modules, these requirements do not disappear;
+rather, they also extend to the functioning of the automated tool. It therefore
+becomes necessary to document not only the origin and handling of the data, but
+also the role played by the model, the conditions of use, the available
+metrics, the known limitations, and any human intervention in the assessment of
+the result.
 
 From this perspective, case law from the Court of Cassation has progressively
 emphasized the need for seizure and acquisition activities involving computer
@@ -1389,7 +1392,7 @@ Legislative Decree No.~51 of May 18, 2018. This legal framework concerns
 processing carried out for the purposes of the prevention, investigation,
 detection, or prosecution of criminal offenses or the execution of criminal
 penalties, including automated processing of personal data. In this context,
-the use of AI-based systems to support forensic analysis must be assessed with
+the use of \gls{ai}-based systems to support forensic analysis must be assessed with
 respect to the principles of lawfulness, necessity, proportionality, and
 security of processing, as well as the requirements of documentation and
 control of the operations performed. The \gls{gdpr} remains relevant for
@@ -1426,7 +1429,7 @@ evidentiary value of the image. More realistically, the risk concerns the
 indirect influence of automation on the investigative path: a false negative
 may reduce the likelihood that a relevant image will be examined promptly,
 whereas a false positive may direct the analyst's attention toward irrelevant
-content. In both cases, the output of the automatic system may affect evidence
+content. In both cases, the output of the automated system may affect evidence
 selection and prioritization, even though it does not formally constitute a
 judicial decision. This makes it necessary to adopt a cautious approach, in
 which automated classification is regarded as a support tool rather than an
@@ -1435,13 +1438,13 @@ autonomous source of assessment.
 Human oversight therefore represents a central requirement. It should not be
 understood as a merely formal control, but as the actual possibility for the
 operator to understand the role of the system, assess its output, recognize
-conditions of uncertainty, and intervene when the automatic result appears
+conditions of uncertainty, and intervene when the automated result appears
 incoherent or insufficiently reliable. In forensic contexts, oversight also has
 a documentary function: the analyst must be able to explain whether and how the
 model output contributed to evidence selection, which checks were performed,
 and which limitations were considered in the overall assessment.
 
-The opacity of \gls{dl} models introduces further critical issues. If a system
+The opacity of \gls{dl} models introduces further challenges. If a system
 produces a classification without making the technical reasons for the
 prediction understandable, the ability to challenge, replicate, or critically
 evaluate the result may be reduced. \gls{xai} techniques can partially mitigate
@@ -1452,13 +1455,13 @@ They constitute interpretive support tools, useful for documentation and
 review, but they do not replace technical validation or human judgment
 \cite{Adadi2018,Doshi-Velez2017}.
 
-In light of these profiles, the robustness of \gls{ai}-based systems also has
-legal relevance, not only technical relevance. A model vulnerable to
+In light of these considerations, the robustness of \gls{ai}-based systems also
+has legal relevance, not only technical relevance. A model vulnerable to
 adversarial perturbations, realistic degradations, or anti-forensic
 transformations may compromise the quality of the support provided to the
 analyst and reduce the reliability of the investigative workflow. Experimental
 robustness evaluation therefore helps clarify the limits within which an
-automatic system may be used responsibly, the conditions that may generate
+automated system may be used responsibly, the conditions that may generate
 errors, and the safeguards that should accompany its use in forensic scenarios.
 
 In conclusion, the use of \gls{ai} in \gls{df} requires a balance between
