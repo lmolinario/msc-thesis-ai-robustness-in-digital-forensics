@@ -160,7 +160,6 @@ phases.
 \subsection{Acquisition and Preservation of Digital Evidence}
 \label{subsec:background_acquisition_preservation}
 % ─────────────────────────────────────────────────────────────────────────────
-
 The acquisition phase aims to make copies or extractions of digital evidence
 available for examination while preserving, as far as possible, their state,
 integrity, and traceability. The operational procedures depend on the nature of
@@ -180,18 +179,18 @@ remnants of deleted data that may be relevant to the investigation. When
 technically applicable, the use of \textit{write blocking} devices makes it
 possible to prevent accidental write operations on the source medium during
 acquisition. The integrity of the copy is then verified through cryptographic
-hash functions, such as \gls{sha256}, recording the values, tools used,
-operators, date, and conditions of the activity within the chain of custody
-\cite{carrier2005filesystem,iso27037,swgde_guidelines}.
+hash functions, such as \gls{sha256}, with the values obtained, tools used,
+operators, date, and conditions of the activity documented within the chain of
+custody \cite{carrier2005filesystem,iso27037,swgde_guidelines}.
 
 Logical acquisition, by contrast, consists of extracting the data made
 available by the operating system, the application, or the device under
 analysis, without necessarily including the entire physical structure of the
 medium. This mode may be relevant, for example, for acquiring application
 content, multimedia archives, or data accessible from mobile devices and
-digital services. It can make it possible to obtain information of interest
-rapidly, but it has limitations with respect to the completeness of the
-recovered data and the availability of unallocated areas or deleted artifacts.
+digital services. It may allow information of interest to be obtained rapidly,
+but it has limitations with respect to the completeness of the recovered data
+and the availability of unallocated areas or deleted artifacts.
 
 When the system is powered on or contains information that would be lost upon
 shutdown, a \textit{live} acquisition may be necessary. This may include
@@ -207,7 +206,7 @@ images subjected to automated classification must be considered digital
 artifacts whose provenance, integrity, and processing history affect the
 interpretation of the results. Robustness evaluation therefore does not replace
 the procedures for acquiring and preserving evidence, but is situated
-downstream from them, examining the reliability of automatic support applied to
+downstream from them, examining the reliability of automated support applied to
 content that has already been acquired and organized under documented
 conditions.
 
@@ -247,21 +246,22 @@ reliability: a false negative may reduce the likelihood that relevant content
 will be examined promptly, whereas a false positive may unnecessarily increase
 the review burden.
 
-The present thesis is situated precisely at this point in the forensic
+The present thesis is positioned precisely at this point in the forensic
 workflow. It does not evaluate acquisition techniques or propose a method for
 authenticating digital evidence, but analyzes the operational robustness of
 automated classification and semantic image retrieval as forms of support for
-triage and the examination of already acquired visual content. This distinction
-is methodologically essential: proper acquisition ensures preservation of the
-artifact, whereas the evaluation conducted in this work concerns the reliability
-of subsequent automated selection when the image is clean, out-of-distribution,
-degraded, or intentionally manipulated.
+triage and the examination of previously acquired visual content. This
+distinction is methodologically essential: proper acquisition ensures
+preservation of the artifact, whereas the evaluation conducted in this work
+concerns the reliability of subsequent automated selection when the image is
+clean, out-of-distribution, degraded, or intentionally manipulated.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Artificial Intelligence in Digital Forensics}
 \label{sec:background_ai_digital_forensics}
 % ─────────────────────────────────────────────────────────────────────────────
-The integration of \gls{ai} into \gls{df} responds to the increasing
+The integration of \gls{ai} into \gls{df} addresses the increasing
 quantitative and qualitative complexity of digital investigations. The growing
 volume of data acquired from personal devices, cloud infrastructures, mobile
 systems, messaging applications, and multimedia archives makes an exclusively
@@ -269,7 +269,7 @@ manual analysis progressively less sustainable. In this scenario, automation
 techniques, intelligent indexing, and assisted classification can support the
 analyst in the preliminary selection of potentially relevant information,
 reducing the operational workload and accelerating the examination and analysis
-phases of digital evidence \cite{garfinkel2010digital,costantini2019digital}.
+of digital evidence \cite{garfinkel2010digital,costantini2019digital}.
 
 In forensic contexts, \gls{ai} can be employed for heterogeneous tasks,
 including pattern recognition, the grouping of similar content, semantic search,
@@ -299,7 +299,7 @@ evidence. An incorrect classification does not necessarily determine an
 autonomous evidentiary conclusion, but it may affect the priority assigned to
 specific content, the visibility of relevant artifacts, or the overall
 efficiency of the investigative workflow. Consequently, the reliability of an
-automatic module cannot be assessed solely through aggregate accuracy metrics,
+automated module cannot be assessed solely through aggregate accuracy metrics,
 but must also be considered with respect to false positives, false negatives,
 distributional bias, and scenarios involving intentional manipulation.
 
@@ -312,13 +312,13 @@ degraded, manipulated, or out-of-distribution data
 important when the analysis concerns visual content, since images and videos
 can be altered through compression, resizing, blurring, contrast modification,
 or adversarial perturbations. Under such conditions, a system that appears
-accurate on clean data may show a significant reduction in its classification
-capability.
+accurate on clean data may exhibit a significant reduction in its
+classification capability.
 
 For these reasons, the adoption of \gls{ai} in \gls{df} must be accompanied by
 a paradigm based on human supervision, technical documentation, and experimental
 evaluation of robustness. The analyst must be able to understand the role
-played by the automatic system, the limitations of the classification produced,
+played by the automated system, the limitations of the classification produced,
 and the conditions under which the model may generate errors. From this
 perspective, \gls{ai} does not represent a substitute for forensic expertise,
 but rather a support tool whose usefulness depends on the possibility of
@@ -350,14 +350,14 @@ possible traces of subsequent processing. For this reason, forensic image
 analysis requires consideration of both the depicted content and the digital
 properties of the file that represents it \cite{farid2016photo,stamm2013information}.
 
-\textit{Image forensics} deals with the study of digital images with the aim of
+\textit{Image forensics} focuses on the study of digital images with the aim of
 assessing their origin, integrity, authenticity, and possible manipulations.
 Classical techniques in this domain include, among others, metadata analysis,
 the study of compression artifacts, the search for statistical inconsistencies,
 the identification of resampling traces, and the examination of signals
-associated with the image acquisition process. These include traces produced by
-the photographic sensor of the acquisition device, such as the CMOS or CCD
-sensor integrated into a camera or smartphone. In particular, \gls{prnu}
+associated with the image acquisition process. These signals include traces
+produced by the photographic sensor of the acquisition device, such as the CMOS
+or CCD sensor integrated into a camera or smartphone. In particular, \gls{prnu}
 represents a characteristic noise component attributable to non-uniformities in
 sensor response and may be used, in specific forensic analyses, to support the
 attribution of an image to an acquisition device \cite{lukas2006prnu}. Such
@@ -376,7 +376,7 @@ distinction is important: determining whether an image has been manipulated and
 classifying what it represents are two different tasks, although they may
 interact. A manipulation or degradation of the image may not be the primary
 object of the analysis, but it may nevertheless affect the ability of an
-automatic tool to correctly recognize the depicted content.
+automated tool to correctly recognize the depicted content.
 
 Automated image classification consists of assigning an image to one or more
 semantic categories on the basis of its visual content. In forensic contexts,
@@ -396,7 +396,7 @@ reduce the stability of predictions. Some transformations are common in normal
 image production and sharing flows, for example when content is uploaded to
 social platforms, forwarded through messaging applications, or saved multiple
 times in compressed formats. Other transformations may instead be introduced
-deliberately to degrade the image, mask details, or make automatic analysis
+deliberately to degrade the image, mask details, or make automated analysis
 more difficult.
 
 This sensitivity is particularly critical in forensic contexts, because a
@@ -418,12 +418,13 @@ techniques, it is necessary to introduce the principles of \gls{ml} and
 \gls{dl} that enable computer vision systems to learn visual representations
 and produce automated classifications.
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Machine Learning and Deep Learning for Computer Vision}
 \label{sec:background_ml_dl_cv}
 % ─────────────────────────────────────────────────────────────────────────────
 Computer vision encompasses the set of computational methods aimed at the
-automatic analysis of images and videos, with the objective of extracting
+automated analysis of images and videos, with the objective of extracting
 structured information from visual content. In this domain, \gls{ml} and
 \gls{dl} techniques have progressively replaced or complemented approaches
 based on manually designed features, enabling models to learn visual
@@ -441,9 +442,9 @@ localization of the object, typically through regions or \textit{bounding
 boxes}; finally, \textit{semantic search} enables the retrieval of images
 consistent with a textual description or concept. In the present thesis, the
 main experimental task is formulated as binary semantic image classification,
-based on the presence or absence of investigatively relevant firearm-oriented
-visual content, such as clearly recognizable realistic individual firearms.
-Accordingly, the \texttt{weapon} class does not require the geometric
+based on the presence or absence of firearm-related visual content of
+investigative relevance, such as clearly recognizable realistic individual
+firearms. Accordingly, the \texttt{weapon} class does not require the geometric
 localization of the object within the image, but rather the correct
 identification of the content as relevant to the forensic triage task. This
 setting is consistent with studies that have applied AI-based systems to the
@@ -483,17 +484,16 @@ depends strongly on the choice of features and on their ability to represent
 image content in a discriminative manner.
 
 \gls{dl} has profoundly changed this paradigm by introducing models capable of
-automatically learning hierarchical representations of data. In convolutional
-neural networks, commonly referred to as \gls{cnn}, the first layers tend to
-capture simple visual structures, such as edges, textures, and local contrasts,
+automatically learning hierarchical representations of data. In \gls{cnn} architectures,
+the first layers tend to capture simple visual structures, such as edges, textures, and local contrasts,
 whereas deeper layers combine this information into more abstract and
 semantically meaningful representations. Architectures such as ResNet have
 shown the effectiveness of residual connections for training deep networks,
-reducing optimization degradation problems and improving the ability to learn
-complex visual representations \cite{he2016deep}. Later models, such as
-EfficientNet, introduced more balanced scaling strategies across depth, width,
-and image resolution, with the objective of improving the relationship between
-performance and computational cost \cite{tan2019efficientnet}.
+mitigating the degradation problem encountered during optimization and improving
+the ability to learn complex visual representations \cite{he2016deep}. Later
+models, such as EfficientNet, introduced more balanced scaling strategies across
+depth, width, and image resolution, with the objective of improving the
+relationship between performance and computational cost \cite{tan2019efficientnet}.
 
 Alongside convolutional architectures, vision-language models capable of
 learning joint representations of images and text have become increasingly
@@ -505,14 +505,14 @@ representations from large-scale language supervision, opening the way to
 zero-shot or text-guided classification \cite{radford2021learning}. This
 approach is particularly interesting in contexts in which operational
 categories do not perfectly correspond to the classes available in traditional
-datasets, but it also introduces new critical issues related to prompt
-formulation, semantic coverage of the classes, and prediction stability.
+datasets, but it also introduces new challenges related to prompt formulation,
+semantic coverage of the classes, and prediction stability.
 
 Alongside \gls{clip}, generative vision-language models such as \gls{blip} also
 make it possible to associate images with textual descriptions, introducing a
 complementary perspective with respect to closed-set classification based on
 predefined labels \cite{li2022blip}. In forensic contexts, such models may
-support forms of automatic description of visual content and contribute to the
+support forms of automated description of visual content and contribute to the
 preliminary prioritization of multimedia artifacts. However, their use requires
 particular caution, because the generated description may be sensitive to image
 quality, data distribution, prompt formulation, and the presence of ambiguous
@@ -529,7 +529,7 @@ latter, analyzed in a black-box setting, the thesis does not assume any
 specific internal architecture for recognition, retrieval, tagging, or object
 localization, but evaluates the observable behavior of the outputs available to
 the analyst, such as classifications, tags, semantic bookmarks, or
-visual/semantic retrieval results, with respect to the experimental conditions
+visual and semantic retrieval results, with respect to the experimental conditions
 considered.
 
 From a forensic perspective, model choice cannot be assessed exclusively as a
@@ -540,9 +540,9 @@ cases, or visually ambiguous content may in fact produce incorrect
 classifications or classifications associated with confidence levels that are
 not sufficiently cautious. In this sense, evaluating behavior on \gls{ood}
 inputs is closely connected to operational robustness, because it makes it
-possible to observe whether images external or ambiguous with respect to the
-task are mapped with excessive confidence to the categories defined by the
-classifier \cite{hendrycks2017baseline,fort2021exploring}.
+possible to observe whether images that are external to or ambiguous with
+respect to the task are mapped with excessive confidence to the categories
+defined by the classifier \cite{hendrycks2017baseline,fort2021exploring}.
 
 This setting methodologically justifies the introduction of an experimental
 \texttt{ood} class, distinct from the main operational classes. In the context
@@ -558,7 +558,7 @@ but these values do not necessarily correspond to a direct measure of
 evidentiary reliability. High confidence may result from spurious correlations,
 dataset bias, or overfitting to the training distribution. For this reason, the
 use of \gls{ml} and \gls{dl} models in a forensic workflow requires a cautious
-assessment in which automatic predictions are considered analytical support
+assessment in which automated predictions are considered analytical support
 rather than autonomous determinations.
 
 Forensic computer vision must therefore confront a methodological tension: on
@@ -570,8 +570,6 @@ out-of-distribution inputs. This tension justifies the need to study the
 robustness of classifiers not only under clean and controlled conditions, but
 also in realistic scenarios in which visual content may be degraded,
 manipulated, or deliberately altered.
-
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial Machine Learning}
@@ -637,7 +635,7 @@ inputs submitted to an already trained model
 image classification in forensic settings, the main focus is on evasion
 attacks, because the most relevant scenario is one in which images already
 present on a device, in an archive, or within digital evidence are altered to
-reduce the likelihood of being correctly identified by an automatic tool.
+reduce the likelihood of being correctly identified by an automated tool.
 
 A second distinction concerns the level of knowledge available to the attacker.
 In white-box scenarios, the attacker has complete or extensive information
@@ -684,12 +682,11 @@ an investigative process. If an \gls{ai}-based system is used to filter or
 classify large quantities of images, a perturbation capable of altering its
 prediction may reduce the likelihood that relevant content will be promptly
 brought to the analyst's attention. The risk does not necessarily consist in
-the automatic production of an incorrect judicial decision, but rather in the
+the automated production of an incorrect judicial decision, but rather in the
 possibility that automation may modify the path of discovery, prioritization,
 and interpretation of evidence. For this reason, adversarial robustness must be
 considered a component of the broader technical-forensic reliability of the
 system.
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Threat Model and Attacker Assumptions}
@@ -706,7 +703,7 @@ instead excluded from the analysis
 
 In the context of automated image classification in forensic settings, the
 attacker can be modeled as an actor interested in reducing the likelihood that
-specific content will be correctly identified by an automatic tool. The main
+specific content will be correctly identified by an automated tool. The main
 objective is not necessarily to compromise the entire forensic workflow, but to
 alter the classifier's response on specific visual inputs. In operational
 terms, this may translate into the attempt to transform a relevant image into
@@ -761,16 +758,16 @@ attacks, namely perturbations constructed with the objective of altering the
 classifier's response. The anti-forensic transformations discussed in the
 following section instead constitute a conceptually distinct category: they may
 be applied even in the absence of knowledge about the model or about any
-automatic classification system, and they are more generally aimed at
+automated classification system, and they are more generally aimed at
 concealing, degrading, or making digital evidence less informative. In the
 experimental protocol of the present thesis, the two categories are therefore
 evaluated separately: on the one hand, adversarial perturbations oriented toward
 inducing errors in the model decision; on the other hand, realistic
 anti-forensic transformations not optimized with respect to the classifier,
-applied to observe the stability of automatic support in the presence of
+applied to observe the stability of automated support in the presence of
 plausible image manipulations. Their relationship is considered only at the
 level of operational effects, since both may reduce the likelihood that
-investigatively relevant content will be correctly flagged or prioritized for
+content of investigative relevance will be correctly flagged or prioritized for
 subsequent analyst review.
 
 Table~\ref{tab:threat_model} summarizes the main dimensions of the adversarial
@@ -862,7 +859,7 @@ perturbations may be difficult to identify through ordinary visual inspection
 and may not visibly degrade the perceptual quality of the image
 \cite{zhao2024sigmazero}.
 
-\textbf{\gls{superdeepfool}} is considered as an iterative attack inspired by
+\textbf{\gls{superdeepfool}} is regarded as an iterative attack inspired by
 the DeepFool family. The general idea behind DeepFool is to iteratively
 estimate a perturbation capable of crossing the classifier's decision boundary,
 seeking a modification of limited magnitude that is sufficient to change the
@@ -881,7 +878,7 @@ the technique any general ability to overcome every possible defense or form of
 pre-processing \cite{moosavi2016deepfool,zhang2024superdeepfool}. This caution
 is consistent with the literature showing that some defenses may produce only
 apparent robustness, for example through gradient masking or obfuscated
-gradients, without ensuring real resistance to adaptive attacks
+gradients, without ensuring genuine resistance to adaptive attacks
 \cite{athalye2018obfuscated}.
 
 A further attack frequently used in the evaluation of adversarial robustness is
@@ -900,8 +897,8 @@ considers a model-agnostic perturbation based on shifting color channels.
 \textbf{\gls{colorshift}} globally modifies the chromatic representation of the
 image, for example through offsets or multiplicative factors applied to the
 \(R\), \(G\), and \(B\) channels. It represents an intermediate case with
-respect to the classical distinction between model-dependent adversarial
-attacks and anti-forensic transformations. In this thesis, it is treated as a
+respect to the classical distinction between model-dependent adversarial attacks
+and anti-forensic transformations. In this thesis, it is treated as a
 model-agnostic \textit{adversarial-style} perturbation: it does not use
 gradient information and does not directly optimize a model loss function, but
 it is applied with the experimental purpose of evaluating the effect of
@@ -928,29 +925,30 @@ protocol.
         Gradient-based, single-step &
         Efficient white-box baseline for evaluating the model's sensitivity
         to the gradient of the loss function. \\
-        One Pixel Attack &
+        \gls{onepixel} &
         Sparse, black-box &
         Highly localized perturbation, useful for evaluating vulnerability to
         minimal modifications in the pixel domain. \\
-        Sigma Zero &
+        \gls{sigmazero} &
         Sparse, \(L_0\)-oriented &
         Attack oriented toward minimizing the number of modified pixels,
         relevant to scenarios in which the perturbation must remain localized. \\
-        SuperDeepFool &
+        \gls{superdeepfool} &
         Iterative boundary-based &
         Iterative attack inspired by DeepFool, useful for exploring decision
         stability with respect to crossing the decision boundary. \\
-        Color Shift &
+        \gls{colorshift} &
         Adversarial-style, model-agnostic &
         Semantically conservative global chromatic alteration, not optimized
         with respect to the model, included among adversarial perturbations to
-        evaluate the effect of controlled color variations on automatic
+        evaluate the effect of controlled color variations on automated
         outputs. \\
         \bottomrule
     \end{tabularx}
     \caption{Adversarial and adversarial-style perturbations considered in the experimental protocol.}
     \label{tab:background_attack_families}
 \end{table}
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
