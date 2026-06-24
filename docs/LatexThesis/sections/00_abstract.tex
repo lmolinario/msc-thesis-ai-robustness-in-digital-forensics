@@ -24,8 +24,8 @@ To this end, a reproducible experimental protocol, named \gls{fairlab}, was
 designed on the basis of a final frozen dataset composed of 1\,500 images,
 balanced across weapon, non-weapon, and \gls{ood} images. From
 this dataset, a binary subset of 1\,000 images was derived and used for the
-controlled generation of adversarial and anti-forensic perturbations. The
-considered manipulations include adversarial attacks such as \gls{fgsm},
+controlled generation of adversarial perturbations and anti-forensic transformations.
+The manipulations considered include adversarial attacks such as \gls{fgsm},
 \gls{sigmazero}, \gls{superdeepfool}, \gls{onepixel}, and \gls{colorshift}, as
 well as anti-forensic transformations such as \gls{jpegrecompression},
 \gls{resampleresize}, \gls{gaussianblur}, \gls{histogrammodification}, and
@@ -33,13 +33,13 @@ well as anti-forensic transformations such as \gls{jpegrecompression},
 evaluation bundle composed of 11\,500 files, enabling the assessment of both
 proxy models and the observable outputs of commercial black-box tools and \gls{ai}-based software systems.
 
-
 The experimental evaluation includes proxy models based on EfficientNet-B0,
 ResNet18, and \gls{clip}, together with the operational assessment of the tools
-actually integrated into the protocol: Magnet AXIOM/Magnet.AI, Excire Foto
+actually integrated into the experimental protocol: Magnet AXIOM/Magnet.AI, Excire Foto
 2025, Cellebrite Inseyets/Physical Analyzer, and Magnet Griffeye/T3K CORE.
 Performance is analyzed by comparing behavior on \texttt{clean} data,
-\gls{ood} images, anti-forensically perturbed images, and adversarial examples.
+\gls{ood} images, anti-forensically transformed images, and adversarial examples.
+
 The analysis relies on operational metrics such as accuracy, \gls{fpr},
 \gls{fnr}, recall for the \texttt{weapon} class, and the distribution of
 confidence scores, with particular attention to cases in which relevant content
@@ -48,20 +48,20 @@ To support the qualitative interpretation of the results, the thesis also
 incorporates an \gls{xai} analysis based on \gls{ig}, aimed at identifying the
 image regions that contribute most to model decisions.
 
-The results show that the considered perturbations produce differentiated
-effects across the analyzed systems. Anti-forensic transformations lead to
+The results show that the attacks and transformations considered produce
+differential effects across the analyzed systems. Anti-forensic transformations lead to
 generally more limited, yet still operationally relevant, degradations,
 whereas some adversarial attacks produce more substantial performance
 reductions, especially in models that depend more heavily on the learned visual
 distribution. The analysis of \gls{ood} images highlights an additional
 forensic risk: systems that appear accurate on \texttt{clean} data may still
 produce incorrect classifications, or classifications associated with high
-confidence levels, when confronted with ambiguous, synthetic, degraded, or
+confidence levels, when applied to ambiguous, synthetic, degraded, or
 semantically out-of-distribution content. These findings confirm that accuracy
 on controlled datasets alone is not sufficient to establish the operational
-reliability of an \gls{ai}-based system within an investigative workflow. More
-specifically, the results show that robustness varies significantly across
-architectures, perturbation families, and black-box tools, making a
+reliability of an \gls{ai}-based system within an investigative workflow.
+More specifically, the results show that robustness varies significantly across
+architectures, attack and transformation families, and black-box tools, making a
 bundle-weighted and operational interpretation of commercial outputs necessary.
 
 The thesis concludes that \gls{ai}-based tools for the automated classification
