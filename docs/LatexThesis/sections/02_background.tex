@@ -3,15 +3,16 @@
 % ─────────────────────────────────────────────────────────────────────────────
 This chapter introduces the theoretical concepts necessary to understand the
 evaluation of the operational robustness of proxy models and \gls{ai}-based
-software employed in \gls{df} for the automated classification or semantic retrieval of images. The theoretical framework is
-built starting from the foundations of \gls{df} and digital evidence, and then
-examines the role of \gls{ai} in forensic workflows, the relevance of images as
-digital evidence, the principles of \gls{ml} and \gls{dl} applied to computer
-vision, \textbf{\gls{advml}}, anti-forensic techniques applied to visual
-content, and the role of \gls{xai} in assessing model reliability. In this
-chapter, these techniques are framed at a conceptual level; the rationale for
-their selection, the adopted configurations, and the procedures used to apply
-them within the experimental protocol are discussed in the methodology chapter.
+software employed in \gls{df} for the automated classification or semantic
+retrieval of images. The theoretical framework is built upon the foundations
+of \gls{df} and digital evidence. The chapter then examines the role of
+\gls{ai} in forensic workflows, the relevance of images as digital evidence,
+the principles of \gls{ml} and \gls{dl} applied to computer vision,
+\textbf{\gls{advml}}, anti-forensic techniques applied to visual content, and
+the role of \gls{xai} in assessing model reliability. In this chapter, these
+topics are framed at a conceptual level; the rationale for their selection, the
+adopted configurations, and the procedures used to apply them within the
+experimental protocol are discussed in the methodology chapter.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Digital Forensics and Digital Evidence}
@@ -54,7 +55,7 @@ investigative or judicial setting
 \cite{iso27037,enfsi2022,swgde_guidelines,acpo_guidelines}.
 
 From an operational perspective, the literature and technical guidelines
-describe the digital forensic process through a sequence of logically distinct
+describe the digital forensic process as a sequence of logically distinct
 phases: collection, examination, analysis, and reporting. The collection phase
 concerns the identification and acquisition of relevant digital sources, with
 particular attention to preserving the state of the evidence. The examination
@@ -66,6 +67,7 @@ of relevant events or behaviors. Finally, the reporting phase requires clear,
 verifiable, and understandable documentation of the activities performed, the
 tools used, the results obtained, and the limitations encountered
 \cite{reith2002examining,nist2006guide,casey2011digital,carrier2005filesystem}.
+
 
 Figure~\ref{fig:df_workflow} summarizes this general workflow and places the
 present thesis primarily within the \textit{examination} and \textit{analysis}
@@ -153,7 +155,6 @@ phases.
     \caption{Simplified digital forensic workflow.}
     \label{fig:df_workflow}
 \end{figure}
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Acquisition and Preservation of Digital Evidence}
