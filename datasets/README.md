@@ -1,6 +1,6 @@
 # Datasets
 
-This directory contains the dataset artifacts used in the thesis pipeline, from controlled raw acquisition to final split generation, perturbation generation, and forensic evaluation bundle construction.
+This directory contains the dataset artifacts used in the frozen thesis pipeline, from controlled raw acquisition to final split generation, perturbation generation, and forensic evaluation bundle construction.
 
 The dataset workflow follows a **human-in-the-loop** methodology: heterogeneous raw sources are technically validated and deduplicated, then manually reviewed and frozen into the final thesis dataset. This is intentional because semantic suitability for forensic image triage cannot be fully delegated to automatic file validation.
 
@@ -355,9 +355,9 @@ SHA256 is the primary integrity hash for the thesis pipeline.
 
 ---
 
-## Current status
+## Frozen thesis status
 
-Completed stages:
+Completed and frozen stages:
 
 - dataset acquisition structure;
 - prepared dataset construction;
@@ -371,6 +371,7 @@ Completed stages:
 - forensic evaluation bundle construction and validation;
 - proxy model training and evaluation;
 - commercial black-box tool export normalization;
-- Integrated Gradients representative case selection for Chapter 5.
+- Integrated Gradients representative case selection for Chapter 5;
+- thesis reporting and final consistency review.
 
-Remaining work is limited to final thesis-wide consistency review, final proofreading, archival tagging, and future English-version preparation.
+No further methodological or dataset changes are expected after thesis freeze. Future edits should be limited to archival corrections, documentation hygiene, release tagging, or optional future English-version preparation.
