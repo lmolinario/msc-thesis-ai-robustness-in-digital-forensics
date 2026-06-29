@@ -41,6 +41,7 @@ The thesis evaluates the **operational robustness of AI-based image-classificati
 | `ARTIFACT_EVALUATION.md` | Evaluation statement defining what can be audited, reproduced, or only reproduced under controlled access |
 | `DATA_DICTIONARY.md` | Interpretation guide for the main CSV/JSON manifests, predictions, normalized outputs, and metrics |
 | `ENVIRONMENT.md` | Execution-environment notes, dependency expectations, and reproducibility boundaries |
+| `RELEASE_CHECKLIST.md` | Checklist for final GitHub release, release assets, and DOI archival |
 | `CHANGELOG.md` | Repository-level changelog for thesis-artifact release management |
 | `REPRODUCIBILITY.md` | Controlled reproducibility workflow |
 | `DATA_ACCESS.md` | Raw-data and controlled-access policy |
@@ -151,6 +152,7 @@ msc-thesis-ai-robustness-in-digital-forensics/
 ├── ARTIFACT_EVALUATION.md
 ├── DATA_DICTIONARY.md
 ├── ENVIRONMENT.md
+├── RELEASE_CHECKLIST.md
 ├── CHANGELOG.md
 ├── CITATION.cff
 ├── DATA_ACCESS.md
