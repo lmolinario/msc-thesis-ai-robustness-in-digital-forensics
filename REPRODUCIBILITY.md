@@ -5,7 +5,7 @@ This document describes how to reproduce, audit, and extend the experimental pip
 The repository supports the MSc thesis:
 
 ```text
-Evaluating the Robustness of AI-based Forensic Tools under Adversarial and Anti-Forensic Attacks
+Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks
 ```
 
 The project evaluates the operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics. The objective is not to provide an unrestricted raw-image benchmark, but to document a traceable and controlled forensic AI evaluation workflow.
@@ -356,7 +356,19 @@ Where raw images or proprietary tool outputs cannot be redistributed, auditabili
 
 ---
 
-## 12. Related policy files
+## 12. Frozen thesis state
+
+The thesis source is frozen under:
+
+```text
+docs/LatexThesis_ITA/
+```
+
+No further methodological or dataset changes are expected. Future edits should be limited to archival corrections, documentation hygiene, optional dependency locking, or optional release tagging.
+
+---
+
+## 13. Related policy files
 
 - `DATA_ACCESS.md` describes controlled raw dataset access.
 - `SECURITY.md` describes handling of exposed secrets or private data links.
