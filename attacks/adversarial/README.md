@@ -1,6 +1,6 @@
 # Adversarial Attacks
 
-This directory contains adversarial and adversarial-style perturbations generated for the thesis pipeline.
+This directory contains adversarial and adversarial-style perturbations generated for the frozen thesis pipeline.
 
 The official adversarial attack targets are the clean binary folds:
 
@@ -33,7 +33,7 @@ Operational status:
 ```text
 adversarial generation completed
 proxy model evaluation completed
-commercial-tool comparison completed for Magnet AXIOM / Magnet.AI and Excire Foto 2025
+commercial-tool normalization completed for the final black-box tool perimeter
 Chapter 5 XAI case selection completed and integrated
 ```
 
@@ -58,29 +58,14 @@ resnet18
 clip
 ```
 
-Semantic evaluator, if used in the thesis discussion:
-
-```text
-BLIP
-```
-
-BLIP is used only as a semantic/caption-based evaluator. It is not used as a primary adversarial target.
-
 Black-box / operational forensic evaluation perimeter:
 
 ```text
 Completed and normalized:
 - Magnet AXIOM / Magnet.AI, version 10.1.0.48673
-
-Completed / analyzed:
-- X-Ways Forensics / Excire Foto 2025, version 4.1.5
-
-Pending / to be consolidated:
+- Excire Foto 2025, version 4.1.5
 - Cellebrite Inseyets, version 10.9
-
-Excluded from the final experimental perimeter:
-- Oxygen Forensic Detective
-- Autopsy
+- Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
 ```
 
 Commercial forensic tools are treated as operational black boxes. The goal is not to know or reproduce their internal models, but to evaluate whether perturbations generated on transparent local proxy models correspond to observable robustness risks in AI-assisted forensic triage systems.
@@ -264,7 +249,5 @@ Integrated Gradients case studies for Chapter 5 have been completed and integrat
 ---
 
 ## Methodological Note
-
-The preferred methodological reference is a Cagliari-aligned adversarial machine learning workflow, using SecML/SecML-Torch where practical and academically justified. Where specific attacks are not directly available or are easier to reproduce through widely used frameworks, Foolbox or ART may be used as implementation backends, provided that parameters and outputs are normalized into the thesis manifest format.
 
 For this thesis, adversarial machine learning is not the final object of study. It is used as an experimental stressor to evaluate the operational robustness of AI-based image classification systems in a digital forensic workflow.
