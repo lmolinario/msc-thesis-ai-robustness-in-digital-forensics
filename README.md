@@ -6,6 +6,12 @@
 
 ## Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks
 
+![MSc Thesis](https://img.shields.io/badge/MSc%20Thesis-Frozen-blue)
+![Artifact](https://img.shields.io/badge/research%20artifact-final-brightgreen)
+![Data](https://img.shields.io/badge/data-controlled%20access-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Audit](https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics/actions/workflows/repository-audit.yml/badge.svg)
+
 This repository contains the frozen research artifact for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
 
 The thesis evaluates the **operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics**. The workflow compares transparent proxy models and commercial black-box tools under clean inputs, out-of-distribution samples, adversarial perturbations, and anti-forensic transformations.
@@ -23,6 +29,23 @@ The thesis evaluates the **operational robustness of AI-based image-classificati
 | Commercial-tool normalization | Completed | `evaluation/forensic_tools/`, `forensic_tools/` |
 | XAI case studies | Completed | `explainability/` |
 | Thesis source | Completed and frozen | `docs/LatexThesis/` |
+
+---
+
+## Research artifact documentation
+
+| Document | Purpose |
+|---|---|
+| `THESIS_ARTIFACT.md` | Official declaration of the thesis research artifact, its academic context, boundaries, and source-of-truth areas |
+| `REPOSITORY_MAP.md` | Directory-level map linking repository areas to the thesis workflow |
+| `ARTIFACT_EVALUATION.md` | Evaluation statement defining what can be audited, reproduced, or only reproduced under controlled access |
+| `DATA_DICTIONARY.md` | Interpretation guide for the main CSV/JSON manifests, predictions, normalized outputs, and metrics |
+| `ENVIRONMENT.md` | Execution-environment notes, dependency expectations, and reproducibility boundaries |
+| `CHANGELOG.md` | Repository-level changelog for thesis-artifact release management |
+| `REPRODUCIBILITY.md` | Controlled reproducibility workflow |
+| `DATA_ACCESS.md` | Raw-data and controlled-access policy |
+| `SECURITY.md` | Secret, proprietary-data, and exposure-handling policy |
+| `ACADEMIC_REPOSITORY_AUDIT.md` | Academic repository audit record |
 
 ---
 
@@ -122,15 +145,40 @@ msc-thesis-ai-robustness-in-digital-forensics/
 ├── results/
 ├── docs/
 ├── progress/
+├── .github/
+├── THESIS_ARTIFACT.md
+├── REPOSITORY_MAP.md
+├── ARTIFACT_EVALUATION.md
+├── DATA_DICTIONARY.md
+├── ENVIRONMENT.md
+├── CHANGELOG.md
 ├── CITATION.cff
 ├── DATA_ACCESS.md
 ├── SECURITY.md
 ├── REPRODUCIBILITY.md
 ├── ACADEMIC_REPOSITORY_AUDIT.md
+├── tasks.ps1
 ├── .env.example
 ├── requirements.txt
 └── LICENSE
 ```
+
+---
+
+## Local audit helper
+
+A lightweight PowerShell helper is available for non-destructive repository checks:
+
+```powershell
+.\tasks.ps1 status
+.\tasks.ps1 check-json
+.\tasks.ps1 check-python-syntax
+.\tasks.ps1 check-text-guards
+.\tasks.ps1 check-thesis-log
+.\tasks.ps1 audit-all
+```
+
+The GitHub Actions workflow under `.github/workflows/repository-audit.yml` runs lightweight JSON, Python syntax, and stale-pattern checks on push and pull request events.
 
 ---
 
@@ -158,6 +206,8 @@ Citation metadata are provided in:
 ```text
 CITATION.cff
 ```
+
+A DOI badge and release citation should be added after the final GitHub release is archived through Zenodo or another institutional repository.
 
 ---
 
