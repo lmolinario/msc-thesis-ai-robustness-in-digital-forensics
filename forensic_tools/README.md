@@ -29,7 +29,6 @@ Completed and normalized:
 - Excire Foto 2025, version 4.1.5
 - Cellebrite Inseyets, version 10.9
 - Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
-
 ```
 
 Each included tool is documented and normalized according to:
@@ -65,22 +64,18 @@ The excluded directories contain labels, attack names, provenance, hashes, sourc
 
 ---
 
-## Recommended Directory Structure
+## Actual Directory Structure
 
 ```text
 forensic_tools/
 ├── README.md
 ├── magnet_axiom/
-│   ├── notes.md
 │   └── raw_exports/
 ├── excire_foto_2025/
-│   ├── notes.md
 │   └── raw_exports/
 ├── cellebrite_inseyets/
-│   ├── notes.md
 │   └── raw_exports/
 └── griffeye/
-    ├── notes.md
     └── raw_exports/
 ```
 
