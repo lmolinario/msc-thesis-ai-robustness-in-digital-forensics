@@ -16,9 +16,6 @@ The evaluation follows the thesis methodology and uses the official forensic eva
 | Excire Foto 2025 | 4.1.5 | Completed and normalized | Evaluated as a standalone general-purpose AI-assisted image retrieval tool in a controlled forensic context with `D20`, `D50`, and `D80` semantic-distance configurations. |
 | Cellebrite Inseyets | 10.9 | Completed and normalized | Evaluated through the Cellebrite Physical Analyzer report export. Observable image classifications are normalized as black-box operational signals. |
 | Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108 / T3K CORE v1.18.0 | Completed and normalized | Evaluated through automatically generated T3K CORE semantic bookmarks. Primary mapping uses `CORE/Violence/Firearm` only. |
-| Oxygen Forensic Detective | -- | Excluded | Not included in the final experimental perimeter. |
-| Autopsy | -- | Excluded | Not included in the final experimental perimeter. |
-| X-Ways Forensics | -- | Excluded | Not included in the final experimental perimeter. Excire Foto 2025 is evaluated only as a standalone tool. |
 
 ---
 
@@ -33,10 +30,6 @@ Completed and normalized:
 - Cellebrite Inseyets, version 10.9
 - Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
 
-Excluded from final experimental perimeter:
-- Oxygen Forensic Detective
-- Autopsy
-- X-Ways Forensics
 ```
 
 Each included tool is documented and normalized according to:
@@ -314,7 +307,6 @@ The thesis must distinguish:
 - Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool evaluated in a controlled forensic context;
 - Cellebrite Inseyets 10.9 as a commercial black-box AI-assisted media-analysis tool;
 - Magnet Griffeye / T3K CORE as a commercial black-box semantic-bookmark media-triage tool;
-- Oxygen Forensic Detective, Autopsy, and X-Ways Forensics as excluded tools;
 - operational implications for AI-assisted triage;
 - limitations caused by proprietary labels, export formats, unavailable confidence scores, semantic mappings, and unknown internal model behavior.
 
