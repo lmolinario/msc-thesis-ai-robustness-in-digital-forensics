@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="docs/assets/repository_header.png" alt="Evaluating the Robustness of AI-based Forensic Tools" width="100%">
+  <img src="docs/assets/repository_header.png" alt="Evaluating the Robustness of AI-Based Forensic Tools" width="100%">
 </p>
 
 # MSc Thesis – AI Robustness in Digital Forensics
 
-## Evaluating the Robustness of AI-based Forensic Tools under Adversarial and Anti-Forensic Attacks
+## Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks
 
 This repository contains the research pipeline, documentation, manifests, normalized outputs, and LaTeX thesis source for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
 
@@ -33,7 +33,7 @@ This repository is organized as a controlled academic research artifact rather t
 
 ---
 
-## Current operational status
+## Frozen operational status
 
 | Stage | Status | Main artifacts |
 |---|---|---|
@@ -50,7 +50,7 @@ This repository is organized as a controlled academic research artifact rather t
 | Forensic evaluation bundle | Generated and validated | `datasets/forensic_evaluation_bundle/` |
 | Commercial forensic-tool evaluation | Completed and normalized | Magnet AXIOM, Excire Foto 2025, Cellebrite Inseyets, Magnet Griffeye / T3K CORE |
 | Explainability / XAI | Completed | Integrated Gradients case studies for Chapter 5 |
-| Thesis reporting | In progress | `docs/LatexThesis_ITA/` |
+| Thesis reporting | Completed and frozen | `docs/LatexThesis_ITA/` |
 
 ---
 
