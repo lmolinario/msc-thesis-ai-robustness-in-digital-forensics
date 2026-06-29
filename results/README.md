@@ -1,6 +1,6 @@
 # Results
 
-This directory contains thesis-oriented metric outputs and reporting artifacts derived from the experimental pipeline.
+This directory contains thesis-oriented metric outputs and reporting artifacts derived from the frozen experimental pipeline.
 
 Results should be treated as downstream artifacts generated from manifests, predictions, normalized forensic-tool outputs, and explainability case selections.
 
@@ -87,6 +87,7 @@ Completed and normalized:
 Excluded:
 - Oxygen Forensic Detective
 - Autopsy
+- X-Ways Forensics
 ```
 
 Commercial tool metrics should not be manually merged with proxy metrics before the bundle mapping has been verified.
@@ -198,6 +199,7 @@ When results are moved into LaTeX tables:
 - treat XAI as qualitative diagnostic evidence, not as a primary metric;
 - preserve exact dataset sizes and sample counts;
 - document any manual mapping or export-normalization decisions;
-- do not report Oxygen or Autopsy as final experimental tools;
+- do not report Oxygen, Autopsy, or X-Ways Forensics as final experimental tools;
+- refer to Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool;
 - refer to Cellebrite as Cellebrite Inseyets 10.9;
 - refer to Griffeye as Magnet Griffeye x64 26.2.108 with T3K CORE v1.18.0.
