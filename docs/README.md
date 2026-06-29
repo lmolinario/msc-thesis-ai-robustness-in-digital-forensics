@@ -1,16 +1,14 @@
 # Documentation
 
-Overleaf link at `https://www.overleaf.com/project/6a203c229eda2e2462eba7b3`
-
 This directory contains thesis documentation, LaTeX sources, figures, and repository-level supporting material.
 
-The current thesis writing base is:
+The final frozen thesis source is:
 
 ```text
 docs/LatexThesis_ITA/
 ```
 
-The thesis is written in Italian academic style, but the structure and terminology are kept compatible with a later translation into academic English.
+The thesis is written in Italian academic style. The repository documentation remains compatible with a possible later academic-English adaptation, but the submitted thesis source is the Italian frozen version.
 
 ---
 
@@ -34,7 +32,7 @@ docs/
 
 ## Thesis Structure Reference
 
-The working thesis structure is:
+The frozen thesis structure is:
 
 ```text
 Chapter 1 - Introduction
@@ -65,14 +63,14 @@ operational implications and limitations
 
 ## Writing Principles
 
-When updating thesis text:
+When updating thesis text for archival corrections only:
 
 - keep the focus on Digital/Computer Forensics;
 - frame adversarial and anti-forensic attacks as experimental stressors;
 - avoid turning the work into pure Adversarial Machine Learning optimization;
 - keep the human-in-the-loop selection protocol explicit;
 - distinguish methodology, results, and critical discussion;
-- keep terminology compatible with later English translation.
+- preserve terminology used in the frozen thesis.
 
 ---
 
@@ -107,3 +105,9 @@ datasets/forensic_evaluation_bundle/metadata/
 ```
 
 Do not derive final thesis values from screenshots or tool interfaces when a CSV/JSON export or normalized manifest is available.
+
+---
+
+## Public Repository Note
+
+Private editor URLs, temporary collaboration links, local paths, installer links, and controlled-access dataset URLs must not be documented in this public repository. Use `DATA_ACCESS.md` and `.env.example` for controlled access and local restoration conventions.
