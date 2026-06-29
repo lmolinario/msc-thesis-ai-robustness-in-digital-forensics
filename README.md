@@ -82,28 +82,30 @@ evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 
 ## Official script sequence
 
-```text
-00_download_raw_datasets_bundle.py
-01_download_kaggle.py
-02_download_github.py
-03_build_subset_deepfirearm.py
-04_scrape_google.py
-05_scrape_telegram.py
-06_scrape_youtube.py
-07_scrape_deepweb.py
-08_build_prepared_dataset.py
-09_generate_review_manifest_full.py
-10_manual_selection_protocol_reviewer.py
-11_generate_clean_and_ood_splits.py
-12_train_proxy_models.py
-13_generate_anti_forensic_attacks.py
-14_generate_adversarial_attacks.py
-15_evaluate_proxy_models.py
-16_build_forensic_evaluation_bundle.py
-17_generate_integrated_gradients_case_studies.py
-18_xai_interactive_launcher.py
-19_normalize_forensic_ai_tool_predictions.py
-```
+| Step | Script | Path | Purpose |
+|---:|---|---|---|
+| 00 | `00_download_raw_datasets_bundle.py` | `datasets/scripts/acquisition/00_download_raw_datasets_bundle.py` | Controlled restoration of the raw dataset bundle |
+| 01 | `01_download_kaggle.py` | `datasets/scripts/acquisition/01_download_kaggle.py` | Kaggle source acquisition |
+| 02 | `02_download_github.py` | `datasets/scripts/acquisition/02_download_github.py` | GitHub-based source acquisition |
+| 03 | `03_build_subset_deepfirearm.py` | `datasets/scripts/acquisition/03_build_subset_deepfirearm.py` | DeepFirearm subset preparation |
+| 04 | `04_scrape_google.py` | `datasets/scripts/acquisition/04_scrape_google.py` | Controlled Google-derived source collection |
+| 05 | `05_scrape_telegram.py` | `datasets/scripts/acquisition/05_scrape_telegram.py` | Controlled Telegram-derived source collection |
+| 06 | `06_scrape_youtube.py` | `datasets/scripts/acquisition/06_scrape_youtube.py` | Controlled YouTube-derived source collection |
+| 07 | `07_scrape_deepweb.py` | `datasets/scripts/acquisition/07_scrape_deepweb.py` | Deep web-oriented source collection |
+| 08 | `08_build_prepared_dataset.py` | `datasets/scripts/preparation/08_build_prepared_dataset.py` | Technical preparation of the candidate image pool |
+| 09 | `09_generate_review_manifest_full.py` | `datasets/scripts/review/09_generate_review_manifest_full.py` | Full review manifest generation |
+| 10 | `10_manual_selection_protocol_reviewer.py` | `datasets/scripts/review/10_manual_selection_protocol_reviewer.py` | Manual selection and freezing protocol |
+| 11 | `11_generate_clean_and_ood_splits.py` | `datasets/scripts/splits/11_generate_clean_and_ood_splits.py` | Clean binary folds and OOD evaluation split generation |
+| 12 | `12_train_proxy_models.py` | `models/scripts/12_train_proxy_models.py` | Fold-aware proxy model training |
+| 13 | `13_generate_anti_forensic_attacks.py` | `datasets/scripts/attacks/13_generate_anti_forensic_attacks.py` | Anti-forensic transformation generation |
+| 14 | `14_generate_adversarial_attacks.py` | `datasets/scripts/attacks/14_generate_adversarial_attacks.py` | Adversarial perturbation generation |
+| 15 | `15_evaluate_proxy_models.py` | `evaluation/scripts/15_evaluate_proxy_models.py` | Transparent proxy-model evaluation |
+| 16 | `16_build_forensic_evaluation_bundle.py` | `datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py` | Blind forensic evaluation bundle construction |
+| 17 | `17_generate_integrated_gradients_case_studies.py` | `explainability/scripts/17_generate_integrated_gradients_case_studies.py` | Integrated Gradients case-study generation |
+| 18 | `18_xai_interactive_launcher.py` | `explainability/scripts/18_xai_interactive_launcher.py` | Interactive XAI inspection launcher |
+| 19 | `19_normalize_forensic_ai_tool_predictions.py` | `evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py` | Commercial forensic-tool output normalization |
+| 20 | `20_generate_experimental_reporting_assets.py` | `results/scripts/20_generate_experimental_reporting_assets.py` | Thesis-ready experimental reporting assets |
+| 21 | `21_generate_embedded_metadata_sensitivity_check.py` | `results/scripts/21_generate_embedded_metadata_sensitivity_check.py` | Embedded-metadata sensitivity tables for Chapter 5 |
 
 ---
 
