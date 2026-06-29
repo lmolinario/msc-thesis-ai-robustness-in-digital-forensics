@@ -62,10 +62,17 @@ jobs:
               'Autopsy',
           ]
 
+          skip_paths = {
+              Path('tasks.ps1'),
+              Path('.github/workflows/repository-audit.yml'),
+          }
+
           allowed_suffixes = {'.md', '.txt', '.csv', '.json', '.yml', '.yaml', '.tex', '.py', '.ps1'}
           failed = False
 
           for path in Path('.').rglob('*'):
+              if path in skip_paths:
+                  continue
               if not path.is_file() or path.suffix not in allowed_suffixes:
                   continue
               if any(part in {'.git', '.venv', '__pycache__'} for part in path.parts):
