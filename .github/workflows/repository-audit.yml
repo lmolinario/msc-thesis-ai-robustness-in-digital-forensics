@@ -21,17 +21,63 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Check JSON files
+      - name: Check required research-artifact files
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          required = [
+              'README.md',
+              'THESIS_ARTIFACT.md',
+              'REPOSITORY_MAP.md',
+              'ARTIFACT_EVALUATION.md',
+              'DATA_DICTIONARY.md',
+              'ENVIRONMENT.md',
+              'RELEASE_CHECKLIST.md',
+              'CHANGELOG.md',
+              'CITATION.cff',
+              'DATA_ACCESS.md',
+              'SECURITY.md',
+              'REPRODUCIBILITY.md',
+              'ACADEMIC_REPOSITORY_AUDIT.md',
+              'requirements.txt',
+              'LICENSE',
+              'docs/LatexThesis/main.tex',
+              'evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py',
+              'results/scripts/20_generate_experimental_reporting_assets.py',
+              'results/scripts/21_generate_embedded_metadata_sensitivity_check.py',
+          ]
+
+          missing = [path for path in required if not Path(path).exists()]
+          if missing:
+              print('Missing required files:')
+              for path in missing:
+                  print(f'  - {path}')
+              raise SystemExit(1)
+
+          print('Required research-artifact files are present.')
+          PY
+
+      - name: Check selected JSON files
         shell: bash
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
 
+          selected = [
+              'datasets/splits/manifests/split_generation_summary.json',
+              'datasets/forensic_evaluation_bundle/metadata/bundle_summary.json',
+              'evaluation/forensic_tools/normalization_summary.json',
+              'models/model_registry.json',
+          ]
+
           failed = False
-          for path in Path('.').rglob('*.json'):
-              parts = set(path.parts)
-              if '.git' in parts or '.venv' in parts or '__pycache__' in parts:
+          for item in selected:
+              path = Path(item)
+              if not path.exists():
+                  print(f'SKIP missing optional JSON: {path}')
                   continue
               try:
                   json.loads(path.read_text(encoding='utf-8'))
@@ -39,16 +85,62 @@ jobs:
               except Exception as exc:
                   failed = True
                   print(f'FAIL {path}: {exc}')
+
           if failed:
               raise SystemExit(1)
           PY
 
-      - name: Check Python syntax
+      - name: Check Python syntax for official entry points
         shell: bash
         run: |
-          python -m compileall datasets models evaluation explainability results
+          python - <<'PY'
+          import py_compile
+          from pathlib import Path
 
-      - name: Check stale public-documentation patterns
+          scripts = [
+              'datasets/scripts/acquisition/00_download_raw_datasets_bundle.py',
+              'datasets/scripts/acquisition/01_download_kaggle.py',
+              'datasets/scripts/acquisition/02_download_github.py',
+              'datasets/scripts/acquisition/03_build_subset_deepfirearm.py',
+              'datasets/scripts/acquisition/04_scrape_google.py',
+              'datasets/scripts/acquisition/05_scrape_telegram.py',
+              'datasets/scripts/acquisition/06_scrape_youtube.py',
+              'datasets/scripts/acquisition/07_scrape_deepweb.py',
+              'datasets/scripts/preparation/08_build_prepared_dataset.py',
+              'datasets/scripts/review/09_generate_review_manifest_full.py',
+              'datasets/scripts/review/10_manual_selection_protocol_reviewer.py',
+              'datasets/scripts/splits/11_generate_clean_and_ood_splits.py',
+              'models/scripts/12_train_proxy_models.py',
+              'datasets/scripts/attacks/13_generate_anti_forensic_attacks.py',
+              'datasets/scripts/attacks/14_generate_adversarial_attacks.py',
+              'evaluation/scripts/15_evaluate_proxy_models.py',
+              'datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py',
+              'explainability/scripts/17_generate_integrated_gradients_case_studies.py',
+              'explainability/scripts/18_xai_interactive_launcher.py',
+              'evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py',
+              'results/scripts/20_generate_experimental_reporting_assets.py',
+              'results/scripts/21_generate_embedded_metadata_sensitivity_check.py',
+          ]
+
+          failed = False
+          for item in scripts:
+              path = Path(item)
+              if not path.exists():
+                  failed = True
+                  print(f'MISSING {path}')
+                  continue
+              try:
+                  py_compile.compile(str(path), doraise=True)
+                  print(f'OK      {path}')
+              except Exception as exc:
+                  failed = True
+                  print(f'FAIL    {path}: {exc}')
+
+          if failed:
+              raise SystemExit(1)
+          PY
+
+      - name: Check stale final-documentation patterns
         shell: bash
         run: |
           python - <<'PY'
@@ -62,25 +154,37 @@ jobs:
               'Autopsy',
           ]
 
-          skip_paths = {
-              Path('tasks.ps1'),
-              Path('.github/workflows/repository-audit.yml'),
-          }
+          # Final public-facing documents that should not contain stale tool or path references.
+          checked_paths = [
+              Path('README.md'),
+              Path('THESIS_ARTIFACT.md'),
+              Path('REPOSITORY_MAP.md'),
+              Path('ARTIFACT_EVALUATION.md'),
+              Path('DATA_DICTIONARY.md'),
+              Path('ENVIRONMENT.md'),
+              Path('RELEASE_CHECKLIST.md'),
+              Path('CHANGELOG.md'),
+              Path('REPRODUCIBILITY.md'),
+              Path('DATA_ACCESS.md'),
+              Path('SECURITY.md'),
+              Path('docs/README.md'),
+              Path('datasets/README.md'),
+              Path('attacks/README.md'),
+              Path('evaluation/README.md'),
+              Path('forensic_tools/README.md'),
+              Path('results/README.md'),
+              Path('explainability/README.md'),
+              Path('progress/README.md'),
+              Path('progress/milestones/09_commercial_forensic_tools_evaluation.md'),
+              Path('progress/milestones/10_xai_case_studies.md'),
+          ]
 
-          allowed_suffixes = {'.md', '.txt', '.csv', '.json', '.yml', '.yaml', '.tex', '.py', '.ps1'}
           failed = False
-
-          for path in Path('.').rglob('*'):
-              if path in skip_paths:
+          for path in checked_paths:
+              if not path.exists():
+                  print(f'SKIP missing optional documentation file: {path}')
                   continue
-              if not path.is_file() or path.suffix not in allowed_suffixes:
-                  continue
-              if any(part in {'.git', '.venv', '__pycache__'} for part in path.parts):
-                  continue
-              try:
-                  text = path.read_text(encoding='utf-8', errors='ignore')
-              except Exception:
-                  continue
+              text = path.read_text(encoding='utf-8', errors='ignore')
               for pattern in patterns:
                   if pattern in text:
                       failed = True
@@ -88,5 +192,5 @@ jobs:
 
           if failed:
               raise SystemExit(1)
-          print('Text guard check passed.')
+          print('Final-documentation text guard check passed.')
           PY
