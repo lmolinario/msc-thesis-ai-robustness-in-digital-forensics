@@ -2,7 +2,7 @@
 
 This directory contains thesis-oriented metric outputs and reporting artifacts derived from the frozen experimental pipeline.
 
-Results should be treated as downstream artifacts generated from manifests, predictions, normalized forensic-tool outputs, and explainability case selections.
+Results are downstream artifacts generated from manifests, predictions, normalized commercial-tool outputs, and explainability case selections.
 
 ---
 
@@ -44,35 +44,16 @@ results/metrics/proxy_model_comparative_metrics.csv
 results/metrics/proxy_model_evaluation_summary.json
 ```
 
-These outputs support the quantitative analysis of:
-
-- clean baseline behavior;
-- OOD behavior;
-- anti-forensic robustness;
-- adversarial robustness;
-- clean-vs-perturbed degradation.
-
 ---
 
-## Forensic Tool Metrics
+## Commercial Tool Metrics
 
-Commercial forensic-tool metrics are generated after export normalization.
+Commercial-tool metrics are generated after export normalization.
 
 Official normalization entry point:
 
 ```text
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
-```
-
-Expected outputs:
-
-```text
-evaluation/forensic_tools/normalized_predictions.csv
-evaluation/forensic_tools/tool_export_audit.csv
-evaluation/forensic_tools/tool_version_log.csv
-evaluation/forensic_tools/normalization_summary.json
-results/metrics/forensic_tools_metrics.csv
-results/metrics/<tool_name>_metrics.csv
 ```
 
 Consolidated commercial-tool status:
@@ -83,14 +64,9 @@ Completed and normalized:
 - Excire Foto 2025, version 4.1.5
 - Cellebrite Inseyets, version 10.9
 - Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
-
-Excluded:
-- Oxygen Forensic Detective
-- Autopsy
-- X-Ways Forensics
 ```
 
-Commercial tool metrics should not be manually merged with proxy metrics before the bundle mapping has been verified.
+Commercial-tool metrics must not be manually merged with proxy metrics before the bundle mapping has been verified.
 
 ---
 
@@ -106,42 +82,6 @@ The following values are computed on the 11,000 binary bundle items. OOD behavio
 | Excire Foto 2025 D20 | 0.910727 | 0.857091 | 0.142909 | 0.035636 | 0.238000 |
 | Excire Foto 2025 D50 | 0.924545 | 0.948545 | 0.051455 | 0.099455 | 0.340000 |
 | Excire Foto 2025 D80 | 0.887091 | 0.981273 | 0.018727 | 0.207091 | 0.522000 |
-
-Operational interpretation: commercial-tool robustness is tool-dependent. Griffeye achieves the highest global accuracy and the lowest false-positive rate under the primary firearm-only semantic-bookmark mapping. Cellebrite provides slightly higher weapon recall. Excire D80 maximizes recall but at the cost of many more false positives. Magnet AXIOM / Magnet.AI remains operationally useful but produces more false negatives on the weapon class.
-
----
-
-## Griffeye Metric Reference
-
-Official Griffeye metric file:
-
-```text
-results/metrics/griffeye_metrics.csv
-```
-
-Global binary values:
-
-```text
-rows_total              = 11500
-binary_rows             = 11000
-ood_rows                = 500
-TP                      = 5229
-TN                      = 5460
-FP                      = 40
-FN                      = 271
-accuracy                = 0.971727
-balanced_accuracy       = 0.971727
-precision               = 0.992408
-recall                  = 0.950727
-specificity             = 0.992727
-F1                      = 0.971121
-FNR                     = 0.049273
-FPR                     = 0.007273
-OOD firearm flags       = 130 / 500
-OOD firearm flag rate   = 0.260000
-```
-
-The Griffeye result is derived from automatic T3K CORE semantic bookmarks and uses a primary firearm-only mapping. Other weapon-related or military-equipment bookmarks are not used as primary positives.
 
 ---
 
@@ -159,33 +99,7 @@ xai_case_0010 = anti-forensic false negative under histogram modification
 xai_case_0015 = high-confidence adversarial false positive under sigma_zero
 ```
 
-These cases are used to interpret representative proxy-model behavior. They are not claimed as explanations of Magnet AXIOM / Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, or Griffeye, which remain black-box or operationally opaque tools.
-
----
-
-## Chapter 5 Usage
-
-The main thesis chapter supported by this directory is:
-
-```text
-Chapter 5 - Results and Operational Robustness Analysis
-```
-
-Recommended order:
-
-```text
-clean baseline
-OOD behavior
-anti-forensic robustness
-adversarial robustness
-forensic evaluation bundle
-commercial forensic tools
-comparative discussion
-XAI case studies
-operational implications and limitations
-```
-
-OOD behavior should be treated as an autonomous operational risk, not only as a failed classification case.
+These cases are used to interpret representative proxy-model behavior. They are not claimed as explanations of the commercial tools, which remain black-box or operationally opaque.
 
 ---
 
@@ -199,7 +113,6 @@ When results are moved into LaTeX tables:
 - treat XAI as qualitative diagnostic evidence, not as a primary metric;
 - preserve exact dataset sizes and sample counts;
 - document any manual mapping or export-normalization decisions;
-- do not report Oxygen, Autopsy, or X-Ways Forensics as final experimental tools;
 - refer to Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool;
 - refer to Cellebrite as Cellebrite Inseyets 10.9;
 - refer to Griffeye as Magnet Griffeye x64 26.2.108 with T3K CORE v1.18.0.
