@@ -1,8 +1,8 @@
 # Attacks
 
-This directory contains the adversarial and anti-forensic perturbations used in the thesis pipeline.
+This directory contains the adversarial and anti-forensic perturbations used in the frozen thesis pipeline.
 
-The attack stage starts from the official clean binary folds generated from:
+The attack stage starts from the official clean binary subset generated from:
 
 ```text
 datasets/final/manifests/manual_selection_adversarial_subset.csv
@@ -14,7 +14,7 @@ and from the corresponding clean split manifest:
 datasets/splits/manifests/clean_folds_manifest.csv
 ```
 
-Out-of-distribution samples are not used as primary attack targets. They are kept separate and evaluated through:
+Out-of-distribution samples are not used as attack targets. They remain clean and are evaluated separately through:
 
 ```text
 datasets/splits/ood/ood_eval_set/
@@ -49,16 +49,16 @@ attacks/
 
 ## Methodological Role
 
-The attack stage has two complementary goals:
+The attack layer has two complementary goals:
 
-1. generate controlled adversarial perturbations against AI-based image classifiers;
+1. generate controlled adversarial perturbations against transparent proxy image classifiers;
 2. generate realistic anti-forensic image transformations that may affect automated forensic triage.
 
 Each attack family preserves traceability through manifest files, original hashes, generated hashes, fold identifiers, labels, attack parameters, and model/checkpoint metadata where applicable.
 
 ---
 
-## Current Operational Status
+## Frozen Operational Status
 
 Official numbered operational scripts:
 
@@ -71,7 +71,7 @@ datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
-Implemented and generated anti-forensic transformations:
+Generated anti-forensic transformations:
 
 ```text
 jpeg_recompression
@@ -81,7 +81,7 @@ histogram_modification
 contrast_stretching
 ```
 
-Implemented and generated adversarial/adversarial-style attacks:
+Generated adversarial/adversarial-style attacks:
 
 ```text
 fgsm
@@ -91,17 +91,18 @@ one_pixel
 color_shift
 ```
 
-Operational status:
+Final status:
 
 ```text
 attack generation completed
 proxy model evaluation completed
 forensic evaluation bundle generated and validated
 Magnet AXIOM / Magnet.AI evaluation completed and normalized
-Excire Foto 2025 semantic retrieval evaluation completed / analyzed
+Excire Foto 2025 evaluation completed and normalized
+Cellebrite Inseyets 10.9 evaluation completed and normalized
+Magnet Griffeye / T3K CORE evaluation completed and normalized
 Integrated Gradients XAI case studies completed and integrated in Chapter 5
-Cellebrite Inseyets 10.9 pending / to be consolidated
-Oxygen and Autopsy excluded from final experimental perimeter
+Oxygen Forensic Detective, Autopsy, and X-Ways Forensics excluded from final experimental perimeter
 ```
 
 ---
@@ -155,7 +156,7 @@ Generated attacks:
 For every image belonging to fold `F`, model-dependent attacks use the checkpoint:
 
 ```text
-models/checkpoints/<target_model>/F.pt
+models/checkpoints/<target_model>/<fold>.pt
 ```
 
 Example:
@@ -193,14 +194,16 @@ The evaluation compares clean, OOD, adversarial, and anti-forensic samples acros
 
 ## Commercial Forensic-Tool Evaluation Status
 
-The forensic evaluation bundle generated from the clean, OOD, adversarial and anti-forensic artifacts has already been processed with:
+The forensic evaluation bundle generated from clean, OOD, adversarial, and anti-forensic artifacts has been processed and normalized for:
 
 ```text
-Magnet AXIOM / Magnet.AI
-X-Ways Forensics / Excire Foto 2025
+Magnet AXIOM / Magnet.AI 10.1.0.48673
+Excire Foto 2025 4.1.5
+Cellebrite Inseyets 10.9
+Magnet Griffeye x64 26.2.108 with T3K CORE v1.18.0
 ```
 
-The Magnet export has been normalized through:
+Official normalization entry point:
 
 ```text
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
@@ -210,15 +213,13 @@ Consolidated outputs:
 
 ```text
 evaluation/forensic_tools/normalized_predictions.csv
-evaluation/forensic_tools/magnet_axiom_normalized_predictions.csv
+evaluation/forensic_tools/tool_export_audit.csv
+evaluation/forensic_tools/tool_version_log.csv
 evaluation/forensic_tools/normalization_summary.json
 results/metrics/forensic_tools_metrics.csv
-results/metrics/magnet_axiom_metrics.csv
 ```
 
-Excire Foto 2025 is analyzed as a standalone semantic retrieval tool, not as a native forensic binary classifier.
-
-Cellebrite Inseyets 10.9 remains pending / to be consolidated if comparable outputs become available. Oxygen Forensic Detective and Autopsy are excluded from the final experimental perimeter.
+Excire Foto 2025 is analyzed as a standalone semantic retrieval tool, not as a native forensic binary classifier. Cellebrite Inseyets is treated as a commercial black-box AI-assisted media-analysis tool. Griffeye / T3K CORE is evaluated through automatically generated semantic bookmarks.
 
 ---
 
@@ -280,10 +281,8 @@ Smoke tests can be performed with `--limit 10` before full regeneration.
 
 ---
 
-## Current Reporting Step
+## Reporting Status
 
-The attack generation, proxy evaluation, forensic bundle construction, Magnet AXIOM / Magnet.AI normalization, Excire analysis, and Chapter 5 XAI case-study integration are complete. The current operational focus is:
+The attack generation, proxy evaluation, forensic bundle construction, commercial-tool normalization, and Chapter 5 XAI case-study integration are complete and frozen for the thesis.
 
-```text
-consolidate Cellebrite Inseyets if feasible → finalize Chapter 5 / Chapter 6 → thesis-wide revision
-```
+No further methodological changes are expected after thesis freeze. Future edits should be limited to archival corrections, documentation hygiene, or reproducibility notes.
