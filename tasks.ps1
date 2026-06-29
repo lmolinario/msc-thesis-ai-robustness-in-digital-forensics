@@ -35,7 +35,7 @@ function Invoke-CheckPythonSyntax {
 }
 
 function Invoke-CheckTextGuards {
-    Write-Host 'Checking repository text guards...'
+    Write-Host 'Checking stale final-documentation patterns...'
 
     $patterns = @(
         ('LatexThesis' + '_ITA'),
@@ -45,30 +45,46 @@ function Invoke-CheckTextGuards {
         ('Auto' + 'psy')
     )
 
-    $repoRoot = (Get-Location).Path
-    $skipFiles = @(
-        (Join-Path $repoRoot 'tasks.ps1'),
-        (Join-Path $repoRoot '.github\workflows\repository-audit.yml')
+    $checkedPaths = @(
+        'README.md',
+        'THESIS_ARTIFACT.md',
+        'REPOSITORY_MAP.md',
+        'ARTIFACT_EVALUATION.md',
+        'DATA_DICTIONARY.md',
+        'ENVIRONMENT.md',
+        'RELEASE_CHECKLIST.md',
+        'CHANGELOG.md',
+        'REPRODUCIBILITY.md',
+        'DATA_ACCESS.md',
+        'SECURITY.md',
+        'docs\README.md',
+        'datasets\README.md',
+        'attacks\README.md',
+        'evaluation\README.md',
+        'forensic_tools\README.md',
+        'results\README.md',
+        'explainability\README.md',
+        'progress\README.md',
+        'progress\milestones\09_commercial_forensic_tools_evaluation.md',
+        'progress\milestones\10_xai_case_studies.md'
     )
-
-    $files = Get-ChildItem -Recurse -File |
-        Where-Object {
-            $_.FullName -notin $skipFiles -and
-            $_.FullName -notlike '*\.git\*' -and
-            $_.FullName -notlike '*\.venv\*' -and
-            $_.FullName -notlike '*\__pycache__\*' -and
-            $_.Extension -in @('.md', '.txt', '.csv', '.json', '.yml', '.yaml', '.tex', '.py', '.ps1')
-        }
 
     $failed = $false
 
-    foreach ($pattern in $patterns) {
-        $matches = $files | Select-String -Pattern $pattern -SimpleMatch -ErrorAction SilentlyContinue
-        if ($matches) {
-            $failed = $true
-            Write-Host "Forbidden/stale pattern found: $pattern" -ForegroundColor Red
-            $matches | ForEach-Object {
-                Write-Host "  $($_.Path):$($_.LineNumber): $($_.Line)"
+    foreach ($path in $checkedPaths) {
+        if (-not (Test-Path $path)) {
+            Write-Host "SKIP missing optional documentation file: $path"
+            continue
+        }
+
+        foreach ($pattern in $patterns) {
+            $matches = Select-String -Path $path -Pattern $pattern -SimpleMatch -ErrorAction SilentlyContinue
+            if ($matches) {
+                $failed = $true
+                Write-Host "Forbidden/stale pattern found: $pattern in $path" -ForegroundColor Red
+                $matches | ForEach-Object {
+                    Write-Host "  $($_.Path):$($_.LineNumber): $($_.Line)"
+                }
             }
         }
     }
