@@ -116,9 +116,9 @@ evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 | 05 | `05_scrape_telegram.py` | `datasets/scripts/acquisition/05_scrape_telegram.py` | Controlled Telegram-derived source collection |
 | 06 | `06_scrape_youtube.py` | `datasets/scripts/acquisition/06_scrape_youtube.py` | Controlled YouTube-derived source collection |
 | 07 | `07_scrape_deepweb.py` | `datasets/scripts/acquisition/07_scrape_deepweb.py` | Deep web-oriented source collection |
-| 08 | `08_build_prepared_dataset.py` | `datasets/scripts/preparation/08_build_prepared_dataset.py` | Technical preparation of the candidate image pool |
-| 09 | `09_generate_review_manifest_full.py` | `datasets/scripts/review/09_generate_review_manifest_full.py` | Full review manifest generation |
-| 10 | `10_manual_selection_protocol_reviewer.py` | `datasets/scripts/review/10_manual_selection_protocol_reviewer.py` | Manual selection and freezing protocol |
+| 08 | `08_build_prepared_dataset.py` | `datasets/scripts/prepared/08_build_prepared_dataset.py` | Technical preparation of the candidate image pool |
+| 09 | `09_generate_review_manifest_full.py` | `datasets/scripts/prepared/09_generate_review_manifest_full.py` | Full review manifest generation |
+| 10 | `10_manual_selection_protocol_reviewer.py` | `datasets/scripts/final/10_manual_selection_protocol_reviewer.py` | Manual selection and freezing protocol |
 | 11 | `11_generate_clean_and_ood_splits.py` | `datasets/scripts/splits/11_generate_clean_and_ood_splits.py` | Clean binary folds and OOD evaluation split generation |
 | 12 | `12_train_proxy_models.py` | `models/scripts/12_train_proxy_models.py` | Fold-aware proxy model training |
 | 13 | `13_generate_anti_forensic_attacks.py` | `datasets/scripts/attacks/13_generate_anti_forensic_attacks.py` | Anti-forensic transformation generation |
