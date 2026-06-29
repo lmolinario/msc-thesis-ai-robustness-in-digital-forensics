@@ -102,7 +102,6 @@ Excire Foto 2025 evaluation completed and normalized
 Cellebrite Inseyets 10.9 evaluation completed and normalized
 Magnet Griffeye / T3K CORE evaluation completed and normalized
 Integrated Gradients XAI case studies completed and integrated in Chapter 5
-Oxygen Forensic Detective, Autopsy, and X-Ways Forensics excluded from final experimental perimeter
 ```
 
 ---
