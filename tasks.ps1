@@ -14,8 +14,8 @@ function Invoke-CheckJson {
     Write-Host 'Checking JSON files...'
     $jsonFiles = Get-ChildItem -Recurse -File -Include *.json |
         Where-Object {
-            $_.FullName -notmatch '\.venv\' -and
-            $_.FullName -notmatch '\.git\'
+            $_.FullName -notlike '*\.venv\*' -and
+            $_.FullName -notlike '*\.git\*'
         }
 
     foreach ($file in $jsonFiles) {
@@ -38,11 +38,11 @@ function Invoke-CheckTextGuards {
     Write-Host 'Checking repository text guards...'
 
     $patterns = @(
-        'LatexThesis_ITA',
-        '/run/media/lello',
-        'X-Ways',
-        'Oxygen Forensic Detective',
-        'Autopsy'
+        ('LatexThesis' + '_ITA'),
+        ('/run/media/' + 'lello'),
+        ('X' + '-Ways'),
+        ('Oxygen' + ' Forensic Detective'),
+        ('Auto' + 'psy')
     )
 
     $repoRoot = (Get-Location).Path
@@ -54,9 +54,9 @@ function Invoke-CheckTextGuards {
     $files = Get-ChildItem -Recurse -File |
         Where-Object {
             $_.FullName -notin $skipFiles -and
-            $_.FullName -notmatch '\.git\' -and
-            $_.FullName -notmatch '\.venv\' -and
-            $_.FullName -notmatch '\__pycache__\' -and
+            $_.FullName -notlike '*\.git\*' -and
+            $_.FullName -notlike '*\.venv\*' -and
+            $_.FullName -notlike '*\__pycache__\*' -and
             $_.Extension -in @('.md', '.txt', '.csv', '.json', '.yml', '.yaml', '.tex', '.py', '.ps1')
         }
 
