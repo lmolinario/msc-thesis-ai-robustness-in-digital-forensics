@@ -48,7 +48,7 @@ Final frozen MSc thesis research artifact.
 ### Removed / Excluded
 
 - Stale references to excluded tools from final public-facing documentation.
-- Stale `docs/LatexThesis_ITA/` source-of-truth references.
+- Stale references to the previous thesis source directory were removed from final source-of-truth documentation.
 - Public documentation claims implying access to proprietary commercial-tool internals.
 
 ### Notes
