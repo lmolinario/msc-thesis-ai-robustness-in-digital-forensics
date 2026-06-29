@@ -1,0 +1,85 @@
+name: Repository Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  audit:
+    name: Lightweight repository audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check JSON files
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          failed = False
+          for path in Path('.').rglob('*.json'):
+              parts = set(path.parts)
+              if '.git' in parts or '.venv' in parts or '__pycache__' in parts:
+                  continue
+              try:
+                  json.loads(path.read_text(encoding='utf-8'))
+                  print(f'OK  {path}')
+              except Exception as exc:
+                  failed = True
+                  print(f'FAIL {path}: {exc}')
+          if failed:
+              raise SystemExit(1)
+          PY
+
+      - name: Check Python syntax
+        shell: bash
+        run: |
+          python -m compileall datasets models evaluation explainability results
+
+      - name: Check stale public-documentation patterns
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          patterns = [
+              'LatexThesis_ITA',
+              '/run/media/lello',
+              'X-Ways',
+              'Oxygen Forensic Detective',
+              'Autopsy',
+          ]
+
+          allowed_suffixes = {'.md', '.txt', '.csv', '.json', '.yml', '.yaml', '.tex', '.py', '.ps1'}
+          failed = False
+
+          for path in Path('.').rglob('*'):
+              if not path.is_file() or path.suffix not in allowed_suffixes:
+                  continue
+              if any(part in {'.git', '.venv', '__pycache__'} for part in path.parts):
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8', errors='ignore')
+              except Exception:
+                  continue
+              for pattern in patterns:
+                  if pattern in text:
+                      failed = True
+                      print(f'Forbidden or stale pattern {pattern!r} found in {path}')
+
+          if failed:
+              raise SystemExit(1)
+          print('Text guard check passed.')
+          PY
