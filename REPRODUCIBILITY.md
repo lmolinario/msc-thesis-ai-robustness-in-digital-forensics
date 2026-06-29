@@ -137,44 +137,17 @@ Official frozen dataset:
 datasets/final/manifests/manual_selection_final_1500.csv
 ```
 
-Distribution:
-
-| Group | Count |
-|---|---:|
-| `weapon` | 500 |
-| `non_weapon` | 500 |
-| `ood` | 500 |
-| **Total** | **1500** |
-
 Official binary subset:
 
 ```text
 datasets/final/manifests/manual_selection_adversarial_subset.csv
 ```
 
-Distribution:
-
-| Group | Count |
-|---|---:|
-| `weapon` | 500 |
-| `non_weapon` | 500 |
-| **Total** | **1000** |
-
 Forensic evaluation bundle:
 
 ```text
 datasets/forensic_evaluation_bundle/
 ```
-
-Bundle composition:
-
-| Condition | Files |
-|---|---:|
-| Clean | 1000 |
-| OOD | 500 |
-| Adversarial | 5000 |
-| Anti-forensic | 5000 |
-| **Total** | **11500** |
 
 For commercial tool processing, import only:
 
@@ -287,16 +260,6 @@ The final experimental perimeter is restricted to the following tools:
 | Cellebrite Inseyets | 10.9 | Commercial black-box AI-assisted media analysis |
 | Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE 1.18.0 | Commercial forensic media triage and semantic bookmarking |
 
-Excluded from the final experimental perimeter:
-
-```text
-Oxygen Forensic Detective
-Autopsy
-X-Ways Forensics
-```
-
-X-Ways, Oxygen, Autopsy, and earlier UFED-oriented wording may appear only as historical or non-final references. They must not be described as final evaluated tools.
-
 Commercial-tool outputs are normalized through:
 
 ```bash
@@ -361,7 +324,7 @@ Where raw images or proprietary tool outputs cannot be redistributed, auditabili
 The thesis source is frozen under:
 
 ```text
-docs/LatexThesis_ITA/
+docs/LatexThesis/
 ```
 
 No further methodological or dataset changes are expected. Future edits should be limited to archival corrections, documentation hygiene, optional dependency locking, or optional release tagging.
