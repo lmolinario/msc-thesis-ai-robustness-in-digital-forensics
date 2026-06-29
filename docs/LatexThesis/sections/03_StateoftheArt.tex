@@ -12,9 +12,8 @@ background.
 The objective is to identify the specific gap that motivates the experimental
 approach of the thesis: the limited availability, in the existing literature,
 of integrated experimental protocols for evaluating the operational robustness
-of proxy models and commercial \gls{ai}-based forensic tools under realistic
-operational conditions.
-
+of proxy models and commercial \gls{ai}-based software selected for forensic-context evaluation
+under controlled but operationally relevant conditions
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{AI and Automation in Digital Forensics}
@@ -277,8 +276,8 @@ The tools considered exhibit distinct functional characteristics and should not
 be treated as equivalent systems. \textit{Magnet.AI} exposes operational
 categories applicable to image content; \textit{Excire Foto 2025} is considered
 as a system for semantic search and retrieval of visual content;
-\textit{Cellebrite Inseyets} requires identification of the specific component
-used for media categorization; \textit{Magnet Griffeye}, through
+\textit{Cellebrite Inseyets} is evaluated through the specific media-analysis
+workflow and exportable outputs used in the experiment; \textit{Magnet Griffeye}, through
 \textit{T3K CORE}, produces automated semantic bookmarks. Accordingly, any
 operational comparison across these tools cannot assume equivalence of task,
 internal models, decision thresholds, or output modalities.
@@ -923,9 +922,6 @@ is positioned precisely within the space left open by this fragmentation.
 
 
 
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Literature Gap and Thesis Positioning}
 \label{sec:sota-gap}
@@ -933,27 +929,27 @@ is positioned precisely within the space left open by this fragmentation.
 
 The review conducted in the previous sections shows that the literature has
 produced significant contributions on each of the axes relevant to this thesis,
-but has addressed them predominantly in a separate manner. Works on automation
-in \gls{df} have highlighted the need for tools capable of managing large
-volumes of digital data and supporting the analyst in the triage, examination,
-and analysis phases~\cite{garfinkel2010digital,costantini2019digital,faqir2023digital}.
-Studies on AI-based software usable in forensic contexts have begun to document
-concrete problems of opacity, independent validation, and fragility with
-respect to manipulated content~\cite{sanna2024preliminary,sanna2025pixelperfect}.
+but has addressed them largely in isolation. Works on automation in \gls{df}
+have highlighted the need for tools capable of managing large volumes of digital
+data and supporting the analyst in the triage, examination, and analysis
+phases~\cite{garfinkel2010digital,costantini2019digital,faqir2023digital}.
+Studies on AI-based software applicable to forensic contexts have begun to
+document concrete problems of opacity, independent validation, and fragility in
+the presence of manipulated content~\cite{sanna2024preliminary,sanna2025pixelperfect}.
 The literature on automated image classification has shown the effectiveness of
 computer vision models for recognizing objects and relevant content, but often
-in controlled scenarios and not specifically oriented toward forensic
+in controlled scenarios and not specifically designed for forensic
 validation~\cite{Hao2018DeepFirearm,he2016deep,tan2019efficientnet,radford2021learning,li2022blip}.
 In parallel, works on robustness have demonstrated that accuracy on clean data
-is not sufficient to estimate the operational reliability of a
+is not sufficient to assess the operational reliability of a
 classifier~\cite{hendrycks2019benchmarking,hendrycks2017baseline,fort2021exploring,croce2020robustbench}.
 
-A second set of contributions concerns the threats that may alter the behavior
-of automatic systems. The literature on \gls{advml} has shown that
-intentionally constructed perturbations can induce errors even in high-
-performing models~\cite{szegedy2014intriguing,goodfellow2015explaining,papernot2016limitations,carlini2017towards,biggio2018wild}.
-Works closer to \textit{image forensics} have then highlighted that even models
-designed for forensic tasks may be vulnerable in adversarial
+A second body of work addresses the threats that may alter the behavior of
+automated systems. The literature on \gls{advml} has shown that intentionally
+constructed perturbations can induce errors even in high-performance
+models~\cite{szegedy2014intriguing,goodfellow2015explaining,papernot2016limitations,carlini2017towards,biggio2018wild}.
+Works more closely related to \textit{image forensics} have further highlighted
+that even models designed for forensic tasks may be vulnerable in adversarial
 scenarios~\cite{barni2018cf,nowroozi2020phd}. In parallel, the anti-forensic
 literature has studied transformations applied directly to the digital
 artifact, such as recompression, resampling, statistical alterations, and
@@ -966,7 +962,8 @@ complete forensic protocols for robustness evaluation~\cite{Adadi2018,Doshi-Vele
 
 Table~\ref{tab:sota-representative-works} summarizes the works most relevant
 to the positioning of the present thesis, highlighting their main contribution
-and the remaining limitation with respect to the adopted experimental design.
+and the primary limitation with respect to the experimental design adopted in
+this thesis.
 
 \begin{table}[H]
 \centering
@@ -981,11 +978,11 @@ and the remaining limitation with respect to the adopted experimental design.
 \midrule
 
 Sanna et al.~\cite{sanna2024preliminary,sanna2025pixelperfect} &
-Evaluate the robustness of AI-based software usable in forensic contexts, with
-attention to \textit{black-box} evaluations and manipulated multimedia content. &
-They represent the closest reference to the present thesis, but remain oriented
-toward preliminary scenarios or different visual domains. They do not integrate
-within the same protocol a dataset with \texttt{weapon}, \texttt{non\_weapon},
+Evaluate the robustness of AI-based software applicable to forensic contexts,
+with attention to \textit{black-box} evaluations and manipulated multimedia content. &
+They constitute the closest reference to the present thesis, but focus on
+preliminary scenarios or different visual domains. They do not incorporate
+within a single protocol a dataset with \texttt{weapon}, \texttt{non\_weapon},
 and \texttt{ood} classes, adversarial perturbations, anti-forensic
 transformations, and a unified bundle for forensic evaluation. The comparative
 normalization of heterogeneous black-box outputs, such as categories,
@@ -997,18 +994,17 @@ Nowroozi and Barni et al.~\cite{nowroozi2020phd,barni2018cf} &
 Analyze \textit{image forensics} in adversarial scenarios and show that
 forensic models based on \gls{ml} and \gls{dl} may be vulnerable to targeted
 perturbations. &
-They provide the theoretical basis for adversarial image forensics, but are
-mainly focused on academic models or controlled tasks, rather than on the
-operational evaluation of AI-based software observed in a \textit{black-box}
-setting. \\
+They provide the theoretical basis for adversarial image forensics, but focus
+primarily on academic models or controlled tasks, rather than on the operational
+evaluation of AI-based software observed in a \textit{black-box} setting. \\
 
 \midrule
 
 Biggio and Roli~\cite{biggio2018wild} &
 Formalize the paradigm of adversarial machine learning and the need to evaluate
 classifiers in the presence of a strategic adversary. &
-The contribution is fundamental for the threat model, but remains general with
-respect to \gls{df} and does not directly address forensic workflows,
+This contribution is foundational for the threat model, but remains general
+with respect to \gls{df} and does not directly address forensic workflows,
 operational software, or the classification of digital evidence. \\
 
 \midrule
@@ -1025,9 +1021,10 @@ manipulated, or out-of-distribution inputs. \\
 Yaacoub et al., Stamm, and Farid~\cite{yaacoub2021digital,stamm2010anti,farid2016photo} &
 Describe anti-forensic techniques and image transformations capable of altering
 traces, metadata, visual quality, and the statistical structure of the file. &
-They are essential for justifying the anti-forensic plan of the thesis, but do
-not systematically connect these transformations to automated classification or
-semantic image retrieval through AI-based software usable in forensic contexts. \\
+They are essential for motivating the anti-forensic dimension of this thesis,
+but do not systematically connect these transformations to automated
+classification or semantic image retrieval through AI-based software applicable
+to forensic contexts. \\
 
 \midrule
 
@@ -1043,7 +1040,7 @@ Ribeiro et al., Sundararajan et al., and Zhou et al.~\cite{Ribeiro2016,Sundarara
 Propose \gls{xai} and visual attribution techniques useful for interpreting the
 behavior of image classifiers. &
 They support the qualitative analysis of failure cases, but do not replace
-quantitative validation nor solve the opacity problem of commercial software
+quantitative validation or solve the opacity problem of commercial software
 evaluated in a \textit{black-box} setting. \\
 
 \bottomrule
@@ -1052,8 +1049,8 @@ evaluated in a \textit{black-box} setting. \\
 
 The main limitation emerging from this framework is not the absence of research
 on the individual topics, but the lack of an integrated evaluation.
-Figure~\ref{fig:sota-literature-gap} synthetically visualizes this
-fragmentation: the seven reviewed research directions converge toward a
+Figure~\ref{fig:sota-literature-gap} schematically illustrates this
+fragmentation: the seven reviewed research directions converge on a
 methodological space that the literature does not yet address in a unified
 manner.
 
@@ -1133,16 +1130,16 @@ evaluation design, automated image classification or semantic image retrieval,
 \textit{human-in-the-loop} dataset validation, heterogeneous proxy models,
 AI-based software selected for operational evaluation in a forensic context,
 adversarial perturbations, anti-forensic transformations, quantitative metrics,
-and explainable analysis of model behavior. The relevance of this integration
-derives from the fact that, in a forensic context, the reliability of an
-automatic system cannot be evaluated only as an isolated property of the
+and explainability-based analysis of model behavior. The relevance of this
+integration derives from the fact that, in a forensic context, the reliability
+of an automated system cannot be evaluated only as an isolated property of the
 classifier. It also depends on the quality and representativeness of the data,
 the presence of borderline or out-of-distribution cases, the nature of the
-manipulations applied, the transparency of the software used, and the effect
-that possible errors may produce on triage and evidence selection.
+manipulations applied, the transparency of the software used, and the effects
+that potential errors may have on triage and evidence selection.
 
 The present thesis is positioned precisely within this gap. Its contribution
-consists in conducting an experimental evaluation of the operational robustness
+consists of conducting an experimental evaluation of the operational robustness
 of proxy models and AI-based software employed, in the context of \gls{df}, for
 the automated classification or semantic retrieval of images of potential
 investigative interest, jointly considering the algorithmic and
@@ -1154,13 +1151,14 @@ as an abstract attribute of the model, but as a functional requirement for the
 controlled use of \gls{ai} in \gls{df} workflows.
 
 The positioning of the thesis is therefore twofold. On the one hand, it connects
-to the literature on \gls{advml}, robustness evaluation, and \gls{xai}, assuming
-that classification systems must also be evaluated in the presence of hostile,
-degraded, or anomalous inputs. On the other hand, it is situated within the
-domain of \gls{df}, where the quality of automation must be assessed with
+to the literature on \gls{advml}, robustness evaluation, and \gls{xai}, on the
+premise that classification systems must also be evaluated in the presence of
+hostile, degraded, or anomalous inputs. On the other hand, it is situated within
+the domain of \gls{df}, where the quality of automation must be assessed with
 respect to its operational usefulness, the verifiability of the results, and
-the possibility of maintaining human control over the analysis process. This
-setting makes it possible to move beyond a purely performance-based evaluation
-and to address robustness as a methodological, technical, and forensic issue.
+the capacity to maintain human control over the analysis process. This framing
+makes it possible to move beyond a purely performance-based evaluation and to
+address robustness as a methodological, technical, and forensic issue.
 This research space motivates the \gls{fairlab} experimental protocol adopted
 in the present thesis and described in the following chapter.
+
