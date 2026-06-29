@@ -30,8 +30,55 @@ function Invoke-CheckJson {
 }
 
 function Invoke-CheckPythonSyntax {
-    Write-Host 'Checking Python syntax with compileall...'
-    python -m compileall datasets models evaluation explainability results
+    Write-Host 'Checking Python syntax for official entry points...'
+
+    $scripts = @(
+        'datasets\scripts\acquisition\00_download_raw_datasets_bundle.py',
+        'datasets\scripts\acquisition\01_download_kaggle.py',
+        'datasets\scripts\acquisition\02_download_github.py',
+        'datasets\scripts\acquisition\03_build_subset_deepfirearm.py',
+        'datasets\scripts\acquisition\04_scrape_google.py',
+        'datasets\scripts\acquisition\05_scrape_telegram.py',
+        'datasets\scripts\acquisition\06_scrape_youtube.py',
+        'datasets\scripts\acquisition\07_scrape_deepweb.py',
+        'datasets\scripts\prepared\08_build_prepared_dataset.py',
+        'datasets\scripts\prepared\09_generate_review_manifest_full.py',
+        'datasets\scripts\final\10_manual_selection_protocol_reviewer.py',
+        'datasets\scripts\splits\11_generate_clean_and_ood_splits.py',
+        'models\scripts\12_train_proxy_models.py',
+        'datasets\scripts\attacks\13_generate_anti_forensic_attacks.py',
+        'datasets\scripts\attacks\14_generate_adversarial_attacks.py',
+        'evaluation\scripts\15_evaluate_proxy_models.py',
+        'datasets\scripts\bundle\16_build_forensic_evaluation_bundle.py',
+        'explainability\scripts\17_generate_integrated_gradients_case_studies.py',
+        'explainability\scripts\18_xai_interactive_launcher.py',
+        'evaluation\scripts\19_normalize_forensic_ai_tool_predictions.py',
+        'results\scripts\20_generate_experimental_reporting_assets.py',
+        'results\scripts\21_generate_embedded_metadata_sensitivity_check.py'
+    )
+
+    $failed = $false
+
+    foreach ($script in $scripts) {
+        if (-not (Test-Path $script)) {
+            Write-Host "MISSING $script" -ForegroundColor Red
+            $failed = $true
+            continue
+        }
+
+        python -m py_compile $script
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "FAIL    $script" -ForegroundColor Red
+            $failed = $true
+        }
+        else {
+            Write-Host "OK      $script"
+        }
+    }
+
+    if ($failed) {
+        throw 'Python syntax check failed.'
+    }
 }
 
 function Invoke-CheckTextGuards {
