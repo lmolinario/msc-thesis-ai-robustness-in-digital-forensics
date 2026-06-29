@@ -5,10 +5,10 @@ This directory contains thesis documentation, LaTeX sources, figures, and reposi
 The final frozen thesis source is:
 
 ```text
-docs/LatexThesis_ITA/
+docs/LatexThesis/
 ```
 
-The thesis is written in Italian academic style. The repository documentation remains compatible with a possible later academic-English adaptation, but the submitted thesis source is the Italian frozen version.
+The thesis is written in Italian academic style. The repository documentation remains compatible with a possible later academic-English adaptation, but the submitted thesis source is the frozen version under `docs/LatexThesis/`.
 
 ---
 
@@ -19,7 +19,7 @@ docs/
 ├── README.md
 ├── assets/
 │   └── repository_header.png
-└── LatexThesis_ITA/
+└── LatexThesis/
     ├── main.tex
     ├── packages.sty
     ├── title.tex
@@ -79,13 +79,13 @@ When updating thesis text for archival corrections only:
 The thesis uses glossary/acronym entries defined in:
 
 ```text
-docs/LatexThesis_ITA/sections/000_acronyms.tex
+docs/LatexThesis/sections/000_acronyms.tex
 ```
 
 Bibliography entries are maintained in:
 
 ```text
-docs/LatexThesis_ITA/tesi.bib
+docs/LatexThesis/tesi.bib
 ```
 
 Use `\texttt{...}` only for technical identifiers such as class names, file names, folders, scripts, or experimental parameters.
