@@ -310,16 +310,6 @@ The final commercial / black-box tool evaluation perimeter is:
 | Cellebrite Inseyets | 10.9 | Completed and normalized |
 | Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE 1.18.0 | Completed and normalized |
 
-Excluded from the final experimental perimeter:
-
-```text
-Oxygen Forensic Detective
-Autopsy
-X-Ways Forensics
-```
-
-X-Ways is not part of the final experimental perimeter. Excire is evaluated as a standalone general-purpose AI-assisted semantic retrieval tool, not as X-Ways/Excire.
-
 Commercial-tool predictions are normalized by:
 
 ```text
