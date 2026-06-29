@@ -1,38 +1,41 @@
+
 % ─────────────────────────────────────────────────────────────────────────────
 \chapter{Methodology}
 \label{chap:methodology}
 % ─────────────────────────────────────────────────────────────────────────────
 This chapter describes the methodology adopted to construct the experimental
-basis of the thesis and to prepare the evaluation of the operational robustness
-of \gls{ai}-based systems for automated image classification in forensic
-contexts. Consistently with the gap identified in
+foundation of the thesis and to enable the evaluation of the operational
+robustness of \gls{ai}-based systems for automated image classification in
+forensic contexts. Consistent with the gap identified in
 Chapter~\ref{chap:state-of-the-art}, concerning the limited availability of
-reproducible protocols for validating \gls{ai}-based models and tools within
-realistic forensic workflows, the chapter does not merely describe individual
-technical components. Rather, it formalizes an integrated experimental design.
-This design connects datasets, models, adversarial perturbations and
-anti-forensic transformations, forensic tools, metrics, the \gls{xai} approach,
-and traceability controls within the \gls{fairlab} experimental protocol, while
-maintaining a clear distinction between experimental methodology and results
-analysis.
+reproducible protocols for validating \gls{ai}-based models and software under
+controlled but operationally relevant forensic-context conditions, the chapter
+does not merely describe individual technical components. Rather, it formalizes
+an integrated experimental design. This design connects datasets, models,
+adversarial perturbations and anti-forensic transformations, forensic tools,
+metrics, the \gls{xai} approach, and traceability controls within the
+\gls{fairlab} experimental protocol, while maintaining a clear distinction
+between experimental methodology and results analysis.
 
 The chapter is organized into fifteen sections. The first six
 (\S\S\,\ref{sec:methodology-fairlab-overview}--\ref{sec:methodology-split-generation})
-describe the construction of the experimental basis, including the
+describe the construction of the experimental foundation, including the
 methodological design, dataset preparation, generation of the review manifest,
-the \textit{human-in-the-loop} protocol, dataset freezing, and split generation.
-The following nine
+the \textit{human-in-the-loop} protocol, dataset freezing, and split
+generation. The following nine
 (\S\S\,\ref{sec:methodology-models-classification}--\ref{sec:methodology-traceability-controls})
 describe the classification paradigm, the selection and generation of
-adversarial perturbations and anti-forensic transformations, the \textit{forensic evaluation
-bundle}, the evaluation protocol for forensic tools, the metrics, the
-\gls{xai} approach, and the traceability and reproducibility controls.
+adversarial perturbations and anti-forensic transformations, the
+\textit{forensic evaluation bundle}, the evaluation protocol for forensic
+tools, the metrics, the \gls{xai} approach, and the traceability and
+reproducibility controls.
 
 The distinction between methodology and results analysis is maintained
-throughout the chapter: the produced artifacts are described as consolidated
+throughout the chapter: the resulting artifacts are described as consolidated
 methodological components, whereas the quantitative evidence, the comparison
 between models and tools, and the experimental interpretations are deferred to
-the chapter dedicated to the results.
+the results chapter.
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -41,46 +44,46 @@ the chapter dedicated to the results.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The methodology of this thesis is organized around the \gls{fairlab}
-experimental protocol, understood as an operational framework designed to make
+experimental protocol, conceived as an operational framework designed to make
 the construction of the dataset, the generation of perturbations, the evaluation
-of proxy models, and the black-box analysis of the selected software
-reproducible. The protocol stems from the need to move beyond a purely
-algorithmic evaluation of image classification, by connecting model performance
-to its possible operational function within forensic triage and prioritization
-workflows for digital evidence. From this perspective, robustness is not
-considered solely as a technical property of the classifier, but also as a
-methodological requirement for the cautious use of automation in an
-investigative context.
+of proxy models, and the black-box analysis of the selected software traceable
+and reproducible at the level of inputs, outputs, and normalization rules. The
+protocol stems from the need to move beyond a purely algorithmic evaluation of
+image classification, by connecting model performance to its potential
+operational role within forensic triage and prioritization workflows for
+digital evidence. From this perspective, robustness is not considered solely as
+a technical property of the classifier, but also as a methodological
+requirement for the judicious use of automation in an investigative context.
 
 The protocol integrates two complementary evaluation levels. The first concerns
 the controlled evaluation of proxy models, in which datasets, models,
 perturbations, metrics, and \gls{xai} approaches are defined in a reproducible
 and comparable manner. The second concerns the operational black-box evaluation
 of the selected software, in which the artifacts produced by the experimental
-protocol are prepared for analysis by professional or general-purpose tools
-equipped with \gls{ai}-based functionalities. Alongside these two levels, a
+protocol are prepared for analysis by professional or general-purpose software
+equipped with \gls{ai}-based functionality. Alongside these two levels, a
 separate \gls{ood} branch is included. This branch is not conceived as a third
 supervised class, but as an operational stress-testing axis used to observe
 whether external, borderline, or anomalous inputs are forced into the
 operational classes of the binary task. This distinction makes it possible to
 separate the experimental control associated with inspectable models from the
-black-box evaluation required for the analysis of proprietary tools, which are
-often characterized by modules that are not fully accessible
+black-box evaluation required for the analysis of proprietary software, which
+is often characterized by modules that are not fully accessible
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 Within the consolidated experimental protocol, the methodology includes the
 construction of dataset artifacts, the generation of clean splits, the
 production of the main families of adversarial perturbations and anti-forensic
 transformations, and the preparation of the bundle for forensic evaluation. In
-particular, the frozen final dataset, the binary subset intended for
+particular, the final frozen dataset, the binary subset intended for
 adversarial and anti-forensic experiments, the clean splits for baseline
 evaluation, the separate \gls{ood} set, and the manipulated artifacts to be
-submitted to the models and forensic tools were defined and produced. These
-components constitute the stable basis of the experimental protocol and make it
-possible to separate artifact construction from the subsequent quantitative
-analysis of the results. This distinction is essential to prevent future
-changes to the data, models, or manipulated files from retroactively altering
-the scope of the evaluation.
+submitted to the proxy models and selected software were defined and produced.
+These components constitute the stable foundation of the experimental protocol
+and make it possible to separate artifact construction from the subsequent
+quantitative analysis of the results. This distinction is essential to prevent
+future changes to the data, models, or manipulated files from retroactively
+altering the scope of the evaluation.
 
 
 Figure~\ref{fig:methodology-fairlab-overview} summarizes the overall structure
@@ -229,7 +232,7 @@ the proxy models and for the black-box evaluation of the selected software.
 
 \node[eval] (tools) at (4.3,-14.1)
 {\shortstack{
-    \textbf{Black-box tool evaluation}\\[1mm]
+    \textbf{Black-box software evaluation}\\[1mm]
     \scriptsize blind bundle input and output normalization\\
     \scriptsize Magnet.AI, Excire Foto 2025, Cellebrite Inseyets\\
     \scriptsize and Griffeye/T3K CORE
@@ -271,7 +274,7 @@ the proxy models and for the black-box evaluation of the selected software.
 
 \end{tikzpicture}%
 }
-\caption[FAIR-Lab experimental protocol overview]{Overview of the FAIR-Lab experimental protocol. The final frozen dataset is split into a binary subset and a separate clean \gls{ood} set. Adversarial and anti-forensic perturbations are generated only from the binary subset, while the \gls{ood} branch is preserved clean and evaluated separately. Clean binary samples, clean \gls{ood} samples, and perturbed binary samples are then combined into the forensic evaluation bundle, which is used both for the controlled evaluation of proxy models and for the black-box evaluation of the selected software tools.}
+\caption[FAIR-Lab experimental protocol overview]{Overview of the FAIR-Lab experimental protocol. The final frozen dataset is split into a binary subset and a separate clean \gls{ood} set. Adversarial and anti-forensic perturbations are generated only from the binary subset, while the \gls{ood} branch is preserved clean and evaluated separately. Clean binary samples, clean \gls{ood} samples, and perturbed binary samples are then combined into the forensic evaluation bundle, which is used both for the controlled evaluation of proxy models and for the black-box evaluation of the selected software.}
 \label{fig:methodology-fairlab-overview}
 \end{figure}
 
@@ -281,33 +284,33 @@ the proxy models and for the black-box evaluation of the selected software.
 \label{sec:methodology-research-design}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The experimental design assumes, as its reference scenario, a forensic visual
+The experimental design adopts as its reference scenario a forensic visual
 triage activity in which an automated system supports the analyst in the
 preliminary identification of potentially relevant images. The case study
-concerns image classification with respect to three main methodological
-categories: \texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood}. These
-categories must not be interpreted as legal qualifications of the content, nor
-as general semantic classes valid in every context, but rather as operational
-labels defined for the experimental protocol of this thesis.
+involves image classification across three main methodological categories:
+\texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood}. These categories must
+not be interpreted as legal qualifications of the content, nor as general
+semantic classes valid in every context, but rather as operational labels
+defined for the experimental protocol of this thesis.
 
 Consequently, the task does not aim to cover the entire domain of weapon
 detection, but to construct a controlled, firearm-oriented case study that is
-sufficiently realistic to evaluate the operational robustness of automated
-visual triage systems.
+operationally relevant for evaluating the robustness of automated visual triage
+systems.
 
 In the main binary task, the \texttt{weapon} class represents the positive
 class, namely the set of images in which an object belonging to the
-investigatively relevant firearm-oriented category considered by the protocol
+investigatively relevant, firearm-oriented category defined by the protocol
 is visible.
 The \texttt{non\_weapon} class instead represents the in-domain negative class:
 it includes realistic and interpretable images that do not contain the object
 of interest, while remaining compatible with the visual domain of the
 experimental collection.
-The \texttt{ood} class constitutes a separate branch of the evaluation and
-collects images that should not be forced into the
+The \texttt{ood} category constitutes a separate branch of the evaluation and
+comprises images that should not be forced into the
 \texttt{weapon}/\texttt{non\_weapon} dichotomy because they are ambiguous,
-anomalous, synthetic, degraded, borderline, or belong to different visual
-distributions.
+anomalous, synthetic, degraded, or borderline, or because they belong to
+different visual distributions.
 
 In the context of forensic triage, a false negative on the \texttt{weapon}
 class is considered particularly critical because it may reduce the probability
@@ -344,14 +347,14 @@ real firearm are excluded. \\
 &
 In-domain negative class of the binary task
 &
-Realistic, usable, and visually interpretable images in which no real weapon is
-present. The class includes plausible negative examples with respect to the
-visual context of the dataset, such as people, environments, vehicles, objects,
-indoor scenes, outdoor scenes, or ordinary scenes. It does not include
-semantically borderline, synthetic, or anomalous content, nor images containing
-knives, swords, replicas, airsoft weapons, toy weapons, videogame weapons,
-renderings, or visual elements that may introduce ambiguity with respect to the
-task. \\
+Realistic, usable, and visually interpretable images in which no object falling
+within the experimental target is present. The class includes plausible
+negative examples with respect to the visual context of the dataset, such as
+people, environments, vehicles, objects, indoor scenes, outdoor scenes, or
+ordinary scenes. It does not include semantically borderline, synthetic, or
+anomalous content, nor images containing knives, swords, replicas, airsoft
+weapons, toy weapons, videogame weapons, renderings, or visual elements that
+may introduce ambiguity with respect to the task. \\
 
 \texttt{ood}
 &
@@ -381,10 +384,10 @@ nor to the binary subset intended for perturbations. \\
 
 Figure~\ref{fig:methodology-class-examples} shows three representative examples
 of the operational categories used in the manual review protocol. The examples
-serve an exclusively illustrative function and do not exhaust the internal
+are provided for illustrative purposes only and do not exhaust the internal
 variability of the classes.
 
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 
 \begin{minipage}[t]{0.31\textwidth}
@@ -393,7 +396,7 @@ variability of the classes.
     \vspace{1mm}
 
     \textbf{\texttt{weapon}}\\
-    \footnotesize Visually recognizable real weapon consistent with the binary task.
+    \footnotesize Visually recognizable firearm-oriented content consistent with the binary task.
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.31\textwidth}
@@ -402,7 +405,7 @@ variability of the classes.
     \vspace{1mm}
 
     \textbf{\texttt{non\_weapon}}\\
-    \footnotesize Realistic, interpretable negative example with no weapons.
+    \footnotesize Realistic, interpretable negative example with no target weapon content.
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.31\textwidth}
@@ -414,38 +417,39 @@ variability of the classes.
     \footnotesize Borderline or out-of-distribution case not forced into the binary task.
 \end{minipage}
 
-\caption[Representative examples of operational class definitions]{Representative examples of the operational class definitions used during the manual review process. The examples are illustrative and do not provide an exhaustive definition of the internal variability of the \texttt{weapon}, \texttt{non\_weapon} and \texttt{ood} classes.}
+\caption[Representative examples of operational class definitions]{Representative examples of the operational class definitions used during the manual review process. The examples are illustrative and do not provide an exhaustive definition of the internal variability of the \texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood} categories.}
 \label{fig:methodology-class-examples}
 \end{figure}
 
-The presence of the operational label \texttt{exclude} does not modify the
+The presence of the operational label \texttt{exclude} does not alter the
 structure of the final dataset, which remains composed of the three
 methodological categories \texttt{weapon}, \texttt{non\_weapon}, and
 \texttt{ood}. Rather, it serves a quality control function during the review
-process, allowing the removed elements to be documented and separated from the
-samples actually included in the benchmark.
+process, enabling the removed elements to be documented and separated from the
+samples ultimately included in the benchmark.
 
-The choice to include an explicit \gls{ood} class addresses a specific
+The choice to include an explicit \gls{ood} branch addresses a specific
 methodological requirement. In a real operational context, classification
 systems do not receive only clean images that are semantically aligned with the
 expected classes, but also ambiguous, degraded, synthetic, irrelevant, or
 distributionally different content. The literature on \gls{ood} detection has
 shown that classifiers may produce high-confidence predictions even on inputs
-outside the training domain, making it necessary to distinguish errors on known
-classes from the handling of samples that should not be classified as ordinary
-positive or negative instances \cite{hendrycks2017baseline,fort2021exploring}.
+outside the training domain, making it necessary to distinguish
+misclassifications on known classes from errors arising from samples that
+should not be classified as ordinary positive or negative
+instances~\cite{hendrycks2017baseline,fort2021exploring}.
 
-The \texttt{ood} class should therefore not be interpreted as a homogeneous
+The \texttt{ood} category should therefore not be interpreted as a homogeneous
 semantic category, nor as a simple subclass of the \texttt{non\_weapon}
-category. Rather, it represents a methodological set of stress tests aimed at
+category. Rather, it represents a set of methodological stress tests aimed at
 assessing the tendency of automated systems to force anomalous, borderline, or
 out-of-domain content into known operational classes. For this reason,
-\gls{ood} examples are kept separate from the binary subset and are not
+\gls{ood} samples are kept separate from the binary subset and are not
 subjected to the adversarial perturbations or anti-forensic transformations
 generated for the \texttt{weapon}/\texttt{non\_weapon} task.
 
 The methodology further distinguishes among automated classification,
-robustness, and operational validation. Automated classification concerns the
+robustness, and operational evaluation. Automated classification concerns the
 system's ability to assign a class to an image. Robustness concerns the
 stability of this behavior when the input is degraded, altered, or manipulated.
 Operational evaluation instead concerns the impact of the automated output on
@@ -458,12 +462,11 @@ of reliability in investigative scenarios.
 Finally, the protocol adopts a \textit{human-in-the-loop} approach. The manual
 component is not treated as an external or residual element, but as a documented
 part of the methodology. In the forensic domain, dataset construction cannot
-depend exclusively on automatic labels or on the original directories of the
-sources: the semantic criteria for inclusion, exclusion, and class assignment
-must be explicit, traceable, and consistent with the investigative task. This
-approach makes it possible to document not only the final outcome of the
-selection, but also the operational rules that guided the construction of the
-frozen dataset.
+depend exclusively on automated labels or on the original source directories:
+the semantic criteria for inclusion, exclusion, and class assignment must be
+explicit, traceable, and consistent with the investigative task. This approach
+makes it possible to document not only the final outcome of the selection, but
+also the operational rules that guided the construction of the frozen dataset.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -475,17 +478,17 @@ Dataset construction was organized into a sequence of distinct phases, designed
 to separate source collection, technical file preparation, semantic review, and
 freezing of the final artifacts. This separation is methodologically relevant
 because it makes it possible to distinguish what pertains to the technical
-quality of an image from what concerns its semantic interpretation with respect
-to the forensic task.
+validity of an image file from what pertains to its semantic interpretation
+with respect to the forensic task.
 
 The initial phase involved organizing five heterogeneous sources within the
 \codepath{datasets/raw/} directory. The sources include public datasets,
 material derived from specialized repositories, collections obtained through
-controlled scraping, content acquired according to an \gls{osint}-oriented
-logic, and data collected through deep web-oriented procedures. The objective
+controlled web scraping, content acquired through an \gls{osint}-oriented
+approach, and data collected through deep web-oriented procedures. The objective
 was not to build a visually homogeneous benchmark, but rather an initial pool
-sufficiently varied to represent some of the heterogeneity conditions that
-characterize contemporary digital investigations.
+sufficiently varied to represent some of the heterogeneity that characterizes
+contemporary digital investigations.
 
 \begin{table}[H]
 \centering
@@ -516,27 +519,27 @@ characterize contemporary digital investigations.
 Starting from the raw sources, the script
 \codepath{datasets/scripts/prepared/08_build_prepared_dataset.py} builds the
 prepared pool in \codepath{datasets/prepared/final_pool/}. This phase does not
-assign definitive semantic labels, but produces a technically validated basis
-through readability checks, dimensional filtering, hash computation, and removal
-of exact duplicates. In particular, each candidate image is verified as a valid
-image file, subjected to a minimum size threshold, associated with a
-\gls{sha256} value, and copied into the prepared pool only if it passes the
-technical checks.
+assign definitive semantic labels, but produces a technically validated
+foundation through readability checks, dimensional filtering, hash computation,
+and removal of exact duplicates. In particular, each candidate image is
+verified as a valid image file, subjected to a minimum size threshold,
+associated with a \gls{sha256} value, and copied into the prepared pool only
+if it passes the technical checks.
 
 The main output of the preparation phase is the file \texttt{metadata.csv},
-which records, for each sample, information such as \texttt{image\_id}, the name
-of the prepared file, the source of origin, the original relative path, the
-\gls{sha256} hash, dimensions, extension, and file size. The availability of
-these metadata makes it possible to maintain a stable connection between the
+which records, for each sample, information such as \texttt{image\_id}, the
+name of the prepared file, the originating source, the original relative path,
+the \gls{sha256} hash, dimensions, extension, and file size. The availability
+of these metadata makes it possible to maintain a stable connection between the
 original source and the normalized version included in the experimental pool.
 The reporting outputs, including \texttt{invalid\_images.csv},
 \texttt{duplicates\_discarded.csv}, and
-\texttt{prepared\_build\_summary.json}, instead document technical exclusions
+\texttt{prepared\_build\_summary.json}, in turn document technical exclusions
 and removed duplicates.
 
 This phase has an exclusively technical function. The pipeline deliberately
 avoids inferring the final class of an image from the source folder, the file
-name, or any automatic pre-labels. In this way, the source is maintained as a
+name, or any automated pre-labels. In this way, the source is maintained as a
 descriptive and audit variable, but not as a ground truth criterion. This choice
 reduces the risk of propagating biases or errors from the original sources into
 the final selection, while preserving the distinction between sample provenance
@@ -544,14 +547,14 @@ and verified semantic assignment.
 
 The operational review manifest included a total of 15\,321 candidate images.
 The distribution across sources was strongly asymmetric: the
-\texttt{02\_deepfirearm} source alone represented the numerically predominant
+\texttt{02\_deepfirearm} source alone represented the numerically dominant
 component of the pool, whereas the remaining sources contributed significantly
 lower volumes. This asymmetry was treated as a characteristic of the candidate
-pool and not as a final sampling criterion: the \textit{human-in-the-loop} phase
-applied semantic and balancing criteria that were independent of the original
-volume of the individual sources. Consequently, although the
+pool and not as a final sampling criterion: the \textit{human-in-the-loop}
+phase applied semantic and balancing criteria that were independent of the
+original volume of the individual sources. Consequently, although the
 \texttt{02\_deepfirearm} source was dominant in the initial pool, it contributes
-to the frozen dataset with 100 \texttt{weapon} images, corresponding to the same
+100 \texttt{weapon} images to the frozen dataset, corresponding to the same
 positive quota assigned to the other sources. The final distribution by source
 and class is reported in Table~\ref{tab:final-dataset-source-distribution} of
 Section~\ref{sec:methodology-human-review}.
@@ -657,7 +660,7 @@ classes are assigned only through documented manual review.
 
 \node[final] (subset) at (0,-12.0)
 {\shortstack{
-    \textbf{Binary adversarial subset}\\[1mm]
+    \textbf{Binary evaluation subset}\\[1mm]
     \scriptsize 1000 images: 500 \texttt{weapon} + 500 \texttt{non\_weapon}
 }};
 
@@ -673,6 +676,12 @@ classes are assigned only through documented manual review.
 \caption[Dataset source consolidation and final selection process]{Dataset source consolidation and final selection process. The raw sources are first converted into a technically validated candidate pool. Final class assignments are not inherited from source folders or filenames, but are produced through a documented human-in-the-loop review process.}
 \label{fig:methodology-dataset-source-consolidation}
 \end{figure}
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
