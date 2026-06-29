@@ -6,51 +6,23 @@
 
 ## Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks
 
-This repository contains the research pipeline, documentation, manifests, normalized outputs, and LaTeX thesis source for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
+This repository contains the frozen research artifact for an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence**.
 
-The thesis evaluates the **operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics**. The workflow compares transparent local proxy models and commercial black-box forensic / AI-assisted tools under clean inputs, out-of-distribution samples, adversarial perturbations, and anti-forensic image transformations.
-
-The focus is **Digital/Computer Forensics**, not Adversarial Machine Learning as an isolated optimization problem. Adversarial and anti-forensic manipulations are used as controlled experimental stressors to assess reliability, traceability, robustness, and operational risk in AI-assisted forensic triage.
+The thesis evaluates the **operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics**. The workflow compares transparent proxy models and commercial black-box tools under clean inputs, out-of-distribution samples, adversarial perturbations, and anti-forensic transformations.
 
 ---
 
-## Research artifact status
+## Frozen status
 
-This repository is organized as a controlled academic research artifact rather than a generic code dump. It includes:
-
-- numbered execution scripts;
-- frozen dataset manifests;
-- human-in-the-loop selection records;
-- hash-based traceability artifacts;
-- proxy-model evaluation outputs;
-- adversarial and anti-forensic perturbation workflows;
-- blind forensic evaluation bundle construction;
-- commercial black-box tool normalization;
-- final metric tables;
-- Integrated Gradients explainability workflow;
-- LaTeX thesis source files;
-- citation, data-access, security, and reproducibility documentation.
-
----
-
-## Frozen operational status
-
-| Stage | Status | Main artifacts |
+| Area | Status | Main artifacts |
 |---|---|---|
-| Dataset acquisition | Completed | `datasets/scripts/acquisition/` |
-| Prepared dataset construction | Completed | `datasets/prepared/` |
-| Human-in-the-loop final selection | Completed | `datasets/final/manifests/manual_selection_final_1500.csv` |
-| Frozen dataset | Completed | 1500 images: 500 `weapon`, 500 `non_weapon`, 500 `ood` |
-| Binary subset | Completed | `datasets/final/manifests/manual_selection_adversarial_subset.csv` |
-| Clean/OOD split generation | Completed | `datasets/splits/manifests/` |
-| Proxy model training | Completed | `efficientnet_b0`, `resnet18`, `clip` |
-| Adversarial attack generation | Completed | `fgsm`, `superdeepfool`, `sigma_zero`, `one_pixel`, `color_shift` |
-| Anti-forensic transformation generation | Completed | `jpeg_recompression`, `resample_resize`, `gaussian_blur`, `histogram_modification`, `contrast_stretching` |
-| Proxy model evaluation | Completed | `evaluation/proxy_models/`, `results/metrics/` |
+| Dataset construction | Completed | `datasets/` |
+| Proxy model training and evaluation | Completed | `models/`, `evaluation/proxy_models/`, `results/metrics/` |
+| Perturbation generation | Completed | `attacks/` |
 | Forensic evaluation bundle | Generated and validated | `datasets/forensic_evaluation_bundle/` |
-| Commercial forensic-tool evaluation | Completed and normalized | Magnet AXIOM, Excire Foto 2025, Cellebrite Inseyets, Magnet Griffeye / T3K CORE |
-| Explainability / XAI | Completed | Integrated Gradients case studies for Chapter 5 |
-| Thesis reporting | Completed and frozen | `docs/LatexThesis_ITA/` |
+| Commercial-tool normalization | Completed | `evaluation/forensic_tools/`, `forensic_tools/` |
+| XAI case studies | Completed | `explainability/` |
+| Thesis source | Completed and frozen | `docs/LatexThesis/` |
 
 ---
 
@@ -62,40 +34,17 @@ Official frozen dataset:
 datasets/final/manifests/manual_selection_final_1500.csv
 ```
 
-| Group | Count |
-|---|---:|
-| `weapon` | 500 |
-| `non_weapon` | 500 |
-| `ood` | 500 |
-| **Total** | **1500** |
-
 Official binary subset:
 
 ```text
 datasets/final/manifests/manual_selection_adversarial_subset.csv
 ```
 
-| Group | Count |
-|---|---:|
-| `weapon` | 500 |
-| `non_weapon` | 500 |
-| **Total** | **1000** |
-
-OOD samples are not used to train proxy models or generate adversarial attacks. They are evaluated separately as an operational robustness risk.
+Out-of-distribution samples remain separate from proxy training and adversarial generation. They are evaluated as an operational robustness risk.
 
 ---
 
 ## Forensic evaluation bundle
-
-The forensic evaluation bundle contains 11,500 files:
-
-| Condition | Files |
-|---|---:|
-| Clean | 1000 |
-| OOD | 500 |
-| Adversarial | 5000 |
-| Anti-forensic | 5000 |
-| **Total** | **11500** |
 
 For black-box forensic-tool evaluation, import only:
 
@@ -116,8 +65,6 @@ Those directories contain ground-truth labels, perturbation metadata, source inf
 
 ## Final commercial-tool perimeter
 
-The final commercial / black-box evaluation perimeter is:
-
 | Tool | Version / module | Role |
 |---|---|---|
 | Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Commercial forensic AI categorization |
@@ -125,15 +72,7 @@ The final commercial / black-box evaluation perimeter is:
 | Cellebrite Inseyets | 10.9 | Commercial black-box AI-assisted media analysis |
 | Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE 1.18.0 | Commercial forensic media triage and semantic bookmarking |
 
-Excluded from the final experimental perimeter:
-
-```text
-Oxygen Forensic Detective
-Autopsy
-X-Ways Forensics
-```
-
-Official commercial-tool normalization entry point:
+Official normalization entry point:
 
 ```text
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
@@ -195,9 +134,7 @@ msc-thesis-ai-robustness-in-digital-forensics/
 
 ## Data access and reproducibility
 
-The repository does **not** expose public raw dataset download links. Raw data access is controlled because the dataset includes heterogeneous source material that may be subject to legal, ethical, platform, or source-specific restrictions.
-
-Controlled restoration uses:
+The repository does **not** expose public raw dataset download links. Controlled restoration uses:
 
 ```text
 FAIRLAB_RAW_DATASET_BUNDLE_URL
@@ -219,8 +156,6 @@ Citation metadata are provided in:
 ```text
 CITATION.cff
 ```
-
-If this repository is used for academic review, thesis verification, or related research, cite it using the metadata in `CITATION.cff`.
 
 ---
 
