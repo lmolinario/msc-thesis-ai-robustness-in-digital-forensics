@@ -2,25 +2,25 @@
 
 ## Status
 
-Pending.
+Completed and normalized.
 
 ## Purpose
 
-This milestone documents the planned black-box evaluation of commercial and professional forensic AI tools on the validated forensic evaluation bundle.
+This milestone documents the completed black-box evaluation of the final commercial forensic-tool perimeter on the validated forensic evaluation bundle.
 
-The goal is to assess the operational reliability of AI-assisted image classification in realistic Digital/Computer Forensics workflows. The focus is not on optimizing adversarial attacks, but on measuring how forensic tools behave when clean, adversarial, anti-forensic, and out-of-distribution images are processed in a controlled and traceable protocol.
+The goal is to assess the operational reliability of AI-assisted image classification and media-triage behavior in realistic Digital/Computer Forensics workflows. The focus is not on optimizing adversarial attacks, but on measuring how commercial tools behave when clean, adversarial, anti-forensic, and out-of-distribution images are processed in a controlled and traceable protocol.
 
 ---
 
-## Input bundle
+## Input Bundle
 
-Commercial tools must process only the blind input directory:
+Commercial tools processed only the blind input directory:
 
 ```text
 datasets/forensic_evaluation_bundle/blind_tool_input/files/
 ```
 
-Do not import the following directories into the tools:
+The following directories were not imported into the tools:
 
 ```text
 datasets/forensic_evaluation_bundle/metadata/
@@ -31,7 +31,7 @@ These directories contain ground truth, perturbation metadata, source informatio
 
 ---
 
-## Bundle composition
+## Bundle Composition
 
 The validated forensic evaluation bundle contains:
 
@@ -43,7 +43,7 @@ The validated forensic evaluation bundle contains:
 | anti-forensic | 5000 |
 | **total** | **11500** |
 
-The bundle has already passed the required structural and integrity checks:
+The bundle passed the required structural and integrity checks:
 
 ```text
 bundle_id_unique                       = true
@@ -55,121 +55,121 @@ metadata_separated_from_tool_input     = true
 
 ---
 
-## Planned tools
+## Final Tool Perimeter
 
-The planned forensic tools are:
+The final commercial / black-box evaluation perimeter is:
 
-```text
-Magnet AXIOM / Magnet.AI
-X-Ways Forensics / Excire
-Cellebrite UFED
-Oxygen Forensic Detective
-```
+| Tool | Version / module | Status |
+|---|---|---|
+| Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Completed and normalized |
+| Excire Foto 2025 | 4.1.5 | Completed and normalized as standalone AI-assisted semantic retrieval |
+| Cellebrite Inseyets | 10.9 | Completed and normalized |
+| Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE v1.18.0 | Completed and normalized |
 
-The availability of each tool, its exact version, enabled AI modules, export format, and runtime configuration must be documented during execution.
-
----
-
-## Expected raw output structure
-
-Tool exports should be stored under:
-
-```text
-forensic_tools/<tool_name>/raw_exports/
-```
-
-Recommended tool identifiers:
-
-```text
-magnet_axiom
-xways_excire
-cellebrite_ufed
-oxygen_forensic_detective
-```
-
-Expected normalized outputs should later be stored under:
-
-```text
-forensic_tools/<tool_name>/normalized/
-evaluation/forensic_tools/
-```
+Commercial tools are treated as operational black boxes. Their outputs are interpreted as observable operational signals, not as direct evidence of internal model behavior.
 
 ---
 
-## Planned normalization script
+## Raw Export Areas
 
-The planned normalization entry point is:
+Raw commercial-tool exports are stored under:
 
 ```text
-evaluation/scripts/19_normalize_forensic_tool_outputs.py
+forensic_tools/magnet_axiom/raw_exports/
+forensic_tools/excire_foto_2025/raw_exports/
+forensic_tools/cellebrite_inseyets/raw_exports/
+forensic_tools/griffeye/raw_exports/
 ```
 
-The number `19` is reserved for forensic-tool normalization because the number `18` is already used by:
+The final documented runs are:
 
 ```text
-explainability/scripts/18_xai_interactive_launcher.py
+forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02
+forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D20_FIREARM_PROMPTS
+forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D50_FIREARM_PROMPTS
+forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D80_FIREARM_PROMPTS
+forensic_tools/cellebrite_inseyets/raw_exports/FAIRLAB_CELLEBRITE_INSEYETS_RUN_01
+forensic_tools/griffeye/raw_exports/FAIRLAB_GRIFFEYE_T3_RUN_01
 ```
 
 ---
 
-## Expected final metrics
+## Normalization Script
 
-The expected final metric output is:
+The official normalization entry point is:
 
 ```text
-results/metrics/forensic_tools_metrics.csv
+evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
-Additional intermediate outputs may include:
+The normalization process:
+
+- ingests commercial tool exports;
+- maps exported items back to `bundle_manifest.csv` using filename, path, SHA256, MD5, or exported metadata;
+- normalizes labels, bookmarks, categories, and semantic retrieval outputs into a common schema;
+- deduplicates to one prediction per tool/configuration and bundle item;
+- generates audit logs, version logs, normalized predictions, and thesis-ready metrics.
+
+---
+
+## Normalized Outputs
+
+Main normalized outputs:
 
 ```text
 evaluation/forensic_tools/normalized_predictions.csv
 evaluation/forensic_tools/tool_export_audit.csv
 evaluation/forensic_tools/tool_version_log.csv
+evaluation/forensic_tools/normalization_summary.json
+evaluation/forensic_tools/magnet_axiom_normalized_predictions.csv
+evaluation/forensic_tools/excire_foto_2025_d20_normalized_predictions.csv
+evaluation/forensic_tools/excire_foto_2025_d50_normalized_predictions.csv
+evaluation/forensic_tools/excire_foto_2025_d80_normalized_predictions.csv
+evaluation/forensic_tools/cellebrite_inseyets_normalized_predictions.csv
+evaluation/forensic_tools/griffeye_normalized_predictions.csv
+```
+
+Main metric outputs:
+
+```text
+results/metrics/forensic_tools_metrics.csv
+results/metrics/magnet_axiom_metrics.csv
+results/metrics/excire_foto_2025_d20_metrics.csv
+results/metrics/excire_foto_2025_d50_metrics.csv
+results/metrics/excire_foto_2025_d80_metrics.csv
+results/metrics/cellebrite_inseyets_metrics.csv
+results/metrics/griffeye_metrics.csv
 ```
 
 ---
 
-## Methodological requirements
+## Mapping Strategy
 
-For each tool, record:
-
-- tool name;
-- exact version/build;
-- operating system and workstation context;
-- enabled AI modules or classifiers;
-- import path used;
-- export format;
-- export timestamp;
-- any manual filtering or interaction performed;
-- any tool errors, skipped files, unsupported files, or warnings.
-
-The evaluation must preserve the black-box protocol: the tool receives only semantically neutral files and must not receive class labels, perturbation names, source dataset labels, or ground-truth metadata.
-
----
-
-## Post-export matching
-
-Forensic tool outputs should be matched back to the experimental ground truth using:
+Forensic tool outputs are matched back to the experimental ground truth using:
 
 ```text
 datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
-datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
 ```
+
+Preferred matching keys are:
+
+1. exported filename / bundle filename;
+2. SHA256 hash;
+3. MD5 hash;
+4. exported path and file size;
+5. manual audit only when automatic matching fails.
 
 Hash-based matching is preferred whenever possible because forensic tools may rename files, alter paths, or export results using tool-specific identifiers.
 
 ---
 
-## Completion criteria
+## Completion Criteria
 
-This milestone will be complete when:
+This milestone is complete because:
 
-- each available forensic tool has processed the blind input directory;
-- raw exports are stored under `forensic_tools/<tool_name>/raw_exports/`;
-- exports are normalized into a common schema;
-- predictions are matched back to bundle identifiers and ground truth through metadata and hashes;
-- `results/metrics/forensic_tools_metrics.csv` is produced;
-- tool-specific limitations, failures, and configuration details are documented.
-
-Status: **pending**.
+- the final commercial-tool perimeter processed the blind input directory;
+- raw exports are stored under tool-specific `raw_exports/` folders;
+- exports have been normalized into a common schema;
+- predictions have been matched back to bundle identifiers and ground truth through metadata and hashes;
+- consolidated and tool-specific metrics have been produced;
+- tool-specific limitations, mappings, and configuration details are documented in the repository and thesis text.
