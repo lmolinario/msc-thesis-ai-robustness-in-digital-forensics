@@ -3,15 +3,15 @@
   "seed": 42,
   "n_folds": 5,
   "inputs": {
-    "final_manifest": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/final/manifests/manual_selection_final_1500.csv",
-    "adversarial_subset": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/final/manifests/manual_selection_adversarial_subset.csv"
+    "final_manifest": "datasets/final/manifests/manual_selection_final_1500.csv",
+    "adversarial_subset": "datasets/final/manifests/manual_selection_adversarial_subset.csv"
   },
   "outputs": {
-    "clean_splits_dir": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/clean",
-    "ood_splits_dir": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/ood",
-    "clean_folds_manifest": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/manifests/clean_folds_manifest.csv",
-    "ood_eval_manifest": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/manifests/ood_eval_manifest.csv",
-    "summary_json": "/run/media/lello/Dati/msc-thesis-ai-robustness-in-digital-forensics/datasets/splits/manifests/split_generation_summary.json"
+    "clean_splits_dir": "datasets/splits/clean",
+    "ood_splits_dir": "datasets/splits/ood",
+    "clean_folds_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
+    "ood_eval_manifest": "datasets/splits/manifests/ood_eval_manifest.csv",
+    "summary_json": "datasets/splits/manifests/split_generation_summary.json"
   },
   "counts": {
     "clean_total": 1000,
