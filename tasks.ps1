@@ -14,8 +14,8 @@ function Invoke-CheckJson {
     Write-Host 'Checking JSON files...'
     $jsonFiles = Get-ChildItem -Recurse -File -Include *.json |
         Where-Object {
-            $_.FullName -notmatch '\\.venv\\' -and
-            $_.FullName -notmatch '\\.git\\'
+            $_.FullName -notmatch '\.venv\' -and
+            $_.FullName -notmatch '\.git\'
         }
 
     foreach ($file in $jsonFiles) {
@@ -45,11 +45,18 @@ function Invoke-CheckTextGuards {
         'Autopsy'
     )
 
+    $repoRoot = (Get-Location).Path
+    $skipFiles = @(
+        (Join-Path $repoRoot 'tasks.ps1'),
+        (Join-Path $repoRoot '.github\workflows\repository-audit.yml')
+    )
+
     $files = Get-ChildItem -Recurse -File |
         Where-Object {
-            $_.FullName -notmatch '\\.git\\' -and
-            $_.FullName -notmatch '\\.venv\\' -and
-            $_.FullName -notmatch '\\__pycache__\\' -and
+            $_.FullName -notin $skipFiles -and
+            $_.FullName -notmatch '\.git\' -and
+            $_.FullName -notmatch '\.venv\' -and
+            $_.FullName -notmatch '\__pycache__\' -and
             $_.Extension -in @('.md', '.txt', '.csv', '.json', '.yml', '.yaml', '.tex', '.py', '.ps1')
         }
 
