@@ -50,46 +50,42 @@ progress/milestones/10_xai_case_studies.md
 | Proxy model evaluation | Completed |
 | Forensic evaluation bundle | Generated and validated |
 | Magnet AXIOM / Magnet.AI evaluation | Completed and normalized |
-| Excire Foto 2025 evaluation | Completed / analyzed |
-| Cellebrite Inseyets evaluation | Pending / to be consolidated |
-| Oxygen / Autopsy | Excluded from final experimental perimeter |
+| Excire Foto 2025 evaluation | Completed and normalized |
+| Cellebrite Inseyets evaluation | Completed and normalized |
+| Magnet Griffeye / T3K CORE evaluation | Completed and normalized |
 | XAI case studies | Completed and integrated in Chapter 5 |
-| Thesis reporting | In progress |
+| Thesis reporting | Completed and frozen |
 
 ---
 
 ## Commercial Forensic-Tool Status
 
-The consolidated black-box commercial-tool result currently available is:
+The final black-box commercial-tool evaluation perimeter is:
 
 ```text
-Magnet AXIOM / Magnet.AI
+Completed and normalized:
+- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
+- Excire Foto 2025, version 4.1.5
+- Cellebrite Inseyets, version 10.9
+- Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
 ```
 
-The Magnet AXIOM / Magnet.AI export has been normalized and mapped back to the forensic evaluation bundle. The resulting metrics are available in:
+Commercial-tool exports have been normalized and mapped back to the forensic evaluation bundle. The resulting normalized outputs and metrics are available in:
 
 ```text
 evaluation/forensic_tools/
 results/metrics/forensic_tools_metrics.csv
 results/metrics/magnet_axiom_metrics.csv
+results/metrics/excire_foto_2025_d20_metrics.csv
+results/metrics/excire_foto_2025_d50_metrics.csv
+results/metrics/excire_foto_2025_d80_metrics.csv
+results/metrics/cellebrite_inseyets_metrics.csv
+results/metrics/griffeye_metrics.csv
 ```
 
-Excire Foto 2025 has been evaluated as a standalone AI-assisted semantic retrieval tool. It is interpreted as an operational semantic retrieval signal, not as a native forensic binary classifier.
+Excire Foto 2025 is evaluated as a standalone AI-assisted semantic retrieval tool. Cellebrite Inseyets is evaluated through observable image classifications exported by the Cellebrite Physical Analyzer report. Magnet Griffeye / T3K CORE is evaluated through automatically generated semantic bookmarks.
 
-The remaining Cellebrite tool in the final experimental perimeter is:
-
-```text
-Cellebrite Inseyets, version 10.9
-```
-
-It remains pending / to be consolidated unless comparable, normalized exports become available.
-
-Excluded from the final experimental perimeter:
-
-```text
-Oxygen Forensic Detective
-Autopsy
-```
+Commercial tools are treated as operational black boxes. Their outputs are interpreted as observable operational signals, not as direct evidence of internal model behavior.
 
 ---
 
@@ -142,7 +138,7 @@ evaluation/proxy_models/
 results/metrics/
 datasets/forensic_evaluation_bundle/metadata/
 evaluation/forensic_tools/
-docs/LatexThesis_ITA/sections/05_experiments.tex
+docs/LatexThesis/sections/05_experiments.tex
 ```
 
 Progress notes explain why and when decisions were made; manifests, metrics, normalized exports, and thesis text define what was actually produced and reported.
