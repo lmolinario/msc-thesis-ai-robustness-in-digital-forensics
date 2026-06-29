@@ -1,6 +1,6 @@
 # Evaluation
 
-This directory contains the evaluation layer of the thesis pipeline.
+This directory contains the evaluation layer of the frozen thesis pipeline.
 
 The evaluation stage has two distinct purposes:
 
@@ -85,7 +85,7 @@ datasets/forensic_evaluation_bundle/structured_audit_view/
 
 These directories contain ground truth, perturbation metadata, provenance, labels, and hash mappings. They are reserved for post-export normalization.
 
-Final tool perimeter:
+Final included tool perimeter:
 
 ```text
 Completed and normalized:
@@ -93,6 +93,14 @@ Completed and normalized:
 - Excire Foto 2025, version 4.1.5
 - Cellebrite Inseyets, version 10.9
 - Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
+```
+
+Excluded from the final experimental perimeter:
+
+```text
+- Oxygen Forensic Detective
+- Autopsy
+- X-Ways Forensics
 ```
 
 Excire Foto 2025 is evaluated as a standalone AI-assisted semantic retrieval tool. Cellebrite Inseyets is evaluated through observable image classifications exported by the Cellebrite Physical Analyzer report. Magnet Griffeye is evaluated through automatic T3K CORE semantic bookmarks.
