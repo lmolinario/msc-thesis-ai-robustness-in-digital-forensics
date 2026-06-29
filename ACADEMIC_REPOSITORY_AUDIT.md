@@ -68,16 +68,6 @@ The public documentation is aligned to the following final commercial / black-bo
 | Cellebrite Inseyets | 10.9 | Included |
 | Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE 1.18.0 | Included |
 
-Excluded from the final experimental perimeter:
-
-```text
-Oxygen Forensic Detective
-Autopsy
-X-Ways Forensics
-```
-
-These tools should appear only as historical, preliminary, or non-final references where contextually necessary.
-
 ---
 
 ## 4. Documentation changes applied during final alignment
@@ -86,12 +76,12 @@ These tools should appear only as historical, preliminary, or non-final referenc
 |---|---|---|
 | Root README | Marked thesis reporting as completed and frozen; aligned title capitalization and final tool perimeter. | Completed |
 | Citation | Updated `CITATION.cff` to use the final thesis title. | Completed |
-| Documentation README | Removed private editor link and marked `docs/LatexThesis_ITA/` as the final frozen thesis source. | Completed |
+| Documentation README | Removed private editor link and marked `docs/LatexThesis/` as the final frozen thesis source. | Completed |
 | Dataset README | Marked dataset workflow as frozen and removed remaining-progress wording. | Completed |
-| Attacks README | Removed stale Cellebrite-pending and X-Ways/Excire wording; added Griffeye/T3K CORE and final excluded-tool policy. | Completed |
-| Evaluation README | Added final included and excluded tool perimeter. | Completed |
-| Forensic tools README | Added X-Ways Forensics to excluded tools and clarified standalone Excire evaluation. | Completed |
-| Results README | Added X-Ways Forensics to excluded tools and reinforced final reporting rules. | Completed |
+| Attacks README | Removed stale historical wording and retained only the final tool perimeter. | Completed |
+| Evaluation README | Retained only the final included tool perimeter. | Completed |
+| Forensic tools README | Clarified standalone Excire evaluation and retained only the final tool perimeter. | Completed |
+| Results README | Reinforced final reporting rules and retained only final evaluated tools. | Completed |
 
 ---
 
@@ -115,7 +105,7 @@ requirements-lock.txt  = fully pinned frozen environment generated from the work
 The GitHub-level audit confirms documentation consistency, but it does not independently compile the LaTeX project. The submitted thesis source remains under:
 
 ```text
-docs/LatexThesis_ITA/
+docs/LatexThesis/
 ```
 
 ### 5.3 Final release/tag
@@ -164,7 +154,7 @@ Before public archival release, verify:
 - [x] `REPRODUCIBILITY.md` describes the reproducibility workflow;
 - [x] `datasets/README.md` reflects the final dataset, bundle, and tool perimeter;
 - [x] `attacks/README.md` reflects the final perturbation and tool-normalization status;
-- [x] `evaluation/README.md` reflects the final included/excluded tool perimeter;
+- [x] `evaluation/README.md` reflects the final tool perimeter;
 - [x] `forensic_tools/README.md` reflects the final commercial-tool perimeter;
 - [x] `results/README.md` reflects the final metric/reporting perimeter;
 - [x] no hardcoded raw dataset links remain in the public bootstrap script;
