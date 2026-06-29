@@ -1,6 +1,6 @@
 # Forensic Tools
 
-This directory is reserved for documentation, export organization, normalization artifacts, and audit notes related to the commercial forensic-tool evaluation phase of the thesis.
+This directory is reserved for documentation, export organization, normalization artifacts, and audit notes related to the commercial forensic-tool evaluation phase of the frozen thesis.
 
 Commercial forensic tools are treated as **operational black boxes**. The goal is not to reproduce, inspect, or infer their internal AI models, but to evaluate how their observable AI-assisted image-analysis behavior changes when the same forensic corpus contains clean, out-of-distribution (OOD), adversarial, and anti-forensic inputs.
 
@@ -8,7 +8,7 @@ The evaluation follows the thesis methodology and uses the official forensic eva
 
 ---
 
-## Current Tool Status
+## Final Tool Status
 
 | Tool | Version | Status | Notes |
 |---|---:|---|---|
@@ -18,6 +18,7 @@ The evaluation follows the thesis methodology and uses the official forensic eva
 | Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108 / T3K CORE v1.18.0 | Completed and normalized | Evaluated through automatically generated T3K CORE semantic bookmarks. Primary mapping uses `CORE/Violence/Firearm` only. |
 | Oxygen Forensic Detective | -- | Excluded | Not included in the final experimental perimeter. |
 | Autopsy | -- | Excluded | Not included in the final experimental perimeter. |
+| X-Ways Forensics | -- | Excluded | Not included in the final experimental perimeter. Excire Foto 2025 is evaluated only as a standalone tool. |
 
 ---
 
@@ -35,17 +36,18 @@ Completed and normalized:
 Excluded from final experimental perimeter:
 - Oxygen Forensic Detective
 - Autopsy
+- X-Ways Forensics
 ```
 
 Each included tool is documented and normalized according to:
 
-* import procedure;
-* software version;
-* analysis configuration;
-* export format;
-* observable AI labels, categories, tags, bookmarks, or search outputs;
-* mapping strategy to the forensic evaluation bundle;
-* operational limitations observed during analysis.
+- import procedure;
+- software version;
+- analysis configuration;
+- export format;
+- observable AI labels, categories, tags, bookmarks, or search outputs;
+- mapping strategy to the forensic evaluation bundle;
+- operational limitations observed during analysis.
 
 The evaluation does not assume access to internal AI model logic, proprietary training data, internal thresholds, calibrated confidence scores, or undocumented decision rules.
 
@@ -93,12 +95,12 @@ Large proprietary case files, installer files, licensed databases, license files
 
 Prefer:
 
-* normalized CSV/JSON outputs;
-* methodological notes;
-* audit logs;
-* export summaries;
-* reproducible mapping artifacts;
-* aggregated metric files.
+- normalized CSV/JSON outputs;
+- methodological notes;
+- audit logs;
+- export summaries;
+- reproducible mapping artifacts;
+- aggregated metric files.
 
 ---
 
@@ -270,13 +272,13 @@ results/metrics/forensic_tools_metrics.csv
 
 The normalization process supports:
 
-* Magnet AXIOM / Magnet.AI exports through `Pictures.csv`;
-* Excire Foto 2025 semantic retrieval prompt exports;
-* Cellebrite Inseyets / Physical Analyzer report exports;
-* Griffeye / T3K CORE CSV exports with automatic semantic `Bookmarks`;
-* matching through filename, SHA256, and MD5;
-* deduplication to one prediction per tool and bundle item;
-* export audit and tool-version logging.
+- Magnet AXIOM / Magnet.AI exports through `Pictures.csv`;
+- Excire Foto 2025 semantic retrieval prompt exports;
+- Cellebrite Inseyets / Physical Analyzer report exports;
+- Griffeye / T3K CORE CSV exports with automatic semantic `Bookmarks`;
+- matching through filename, SHA256, and MD5;
+- deduplication to one prediction per tool and bundle item;
+- export audit and tool-version logging.
 
 ---
 
@@ -306,14 +308,14 @@ Commercial-tool results should be reported separately from proxy-model results u
 
 The thesis must distinguish:
 
-* transparent proxy-model robustness;
-* black-box commercial-tool behavior;
-* Magnet AXIOM / Magnet.AI as a consolidated commercial-tool result;
-* Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool evaluated in a controlled forensic context;
-* Cellebrite Inseyets 10.9 as a commercial black-box AI-assisted media-analysis tool;
-* Magnet Griffeye / T3K CORE as a commercial black-box semantic-bookmark media-triage tool;
-* Oxygen Forensic Detective and Autopsy as excluded tools;
-* operational implications for AI-assisted triage;
-* limitations caused by proprietary labels, export formats, unavailable confidence scores, semantic mappings, and unknown internal model behavior.
+- transparent proxy-model robustness;
+- black-box commercial-tool behavior;
+- Magnet AXIOM / Magnet.AI as a consolidated commercial-tool result;
+- Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool evaluated in a controlled forensic context;
+- Cellebrite Inseyets 10.9 as a commercial black-box AI-assisted media-analysis tool;
+- Magnet Griffeye / T3K CORE as a commercial black-box semantic-bookmark media-triage tool;
+- Oxygen Forensic Detective, Autopsy, and X-Ways Forensics as excluded tools;
+- operational implications for AI-assisted triage;
+- limitations caused by proprietary labels, export formats, unavailable confidence scores, semantic mappings, and unknown internal model behavior.
 
 Commercial-tool outputs are interpreted as observable operational signals, not as direct evidence of internal AI model performance.
