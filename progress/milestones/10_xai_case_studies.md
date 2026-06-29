@@ -2,19 +2,19 @@
 
 ## Status
 
-Prepared, not yet produced.
+Completed and integrated in Chapter 5.
 
 ## Purpose
 
 This milestone documents the explainability stage of the FAIR-Lab thesis pipeline.
 
-The goal is to generate selected qualitative case studies after the quantitative proxy-model evaluation and, where available, after commercial forensic-tool evaluation. Explainability is used to support forensic interpretation of model behavior, not to replace the quantitative robustness metrics.
+The goal is to provide selected qualitative case studies after quantitative proxy-model evaluation. Explainability is used to support forensic interpretation of model behavior, not to replace the quantitative robustness metrics.
 
 ---
 
-## Current state
+## Current State
 
-The XAI generation script is already present:
+The XAI generation script is present:
 
 ```text
 explainability/scripts/17_generate_integrated_gradients_case_studies.py
@@ -26,11 +26,27 @@ The interactive launcher is also present:
 explainability/scripts/18_xai_interactive_launcher.py
 ```
 
-XAI outputs are not yet part of the completed repository state. They should be generated only after selecting the most relevant cases from the proxy-model results and, later, from forensic-tool outputs.
+Integrated Gradients outputs and thesis-ready visual material have been generated for the final representative cases and integrated into Chapter 5.
 
 ---
 
-## Main input for case selection
+## Selected Representative Cases
+
+The final Chapter 5 XAI cases are:
+
+```text
+xai_case_0001 = clean correct weapon
+xai_case_0006 = clean false negative weapon
+xai_case_0009 = OOD classified as weapon
+xai_case_0010 = anti-forensic false negative under histogram modification
+xai_case_0015 = high-confidence adversarial false positive under sigma_zero
+```
+
+These cases cover clean, OOD, anti-forensic, and adversarial scenarios and are used as qualitative diagnostic support for the quantitative proxy-model robustness analysis.
+
+---
+
+## Main Input for Case Selection
 
 The primary proxy-model prediction file is:
 
@@ -42,70 +58,54 @@ Supporting metric files include:
 
 ```text
 results/metrics/proxy_model_clean_metrics.csv
-results/metrics/proxy_model_adversarial_metrics.csv
-results/metrics/proxy_model_anti_forensic_metrics.csv
 results/metrics/proxy_model_ood_metrics.csv
 results/metrics/proxy_model_comparative_metrics.csv
-results/metrics/final_core_metrics.csv
-results/metrics/final_robustness_metrics.csv
-results/metrics/final_confusion_matrices.csv
-results/metrics/final_ood_metrics.csv
+results/metrics/proxy_model_evaluation_summary.json
 ```
 
 ---
 
-## Recommended case-selection criteria
+## Output Areas
 
-XAI case studies should prioritize examples that are relevant to the forensic objective of the thesis:
-
-- clean-correct images that become misclassified after perturbation;
-- `weapon` images classified as `non_weapon` after adversarial or anti-forensic manipulation;
-- high-confidence wrong predictions;
-- cases where `efficientnet_b0`, `resnet18`, and `clip` disagree;
-- examples from the strongest adversarial degradation conditions, especially `sigma_zero` and `fgsm`;
-- operationally meaningful anti-forensic failures such as blur, histogram modification, or contrast changes;
-- OOD samples incorrectly assigned to binary forensic categories;
-- cases that are also interesting for later comparison with commercial forensic-tool behavior.
-
----
-
-## Expected output areas
-
-Expected XAI outputs should be stored under:
+The XAI workflow is documented through:
 
 ```text
-explainability/case_studies/
 explainability/manifests/
-results/figures/xai/
+explainability/logs/
+explainability/outputs/integrated_gradients/
+docs/LatexThesis/images/fig_xai_case*_input.png
+docs/LatexThesis/images/fig_xai_case*_heatmap.png
+docs/LatexThesis/images/fig_xai_case*_overlay.png
 ```
 
-The exact output structure may be refined when the case-selection manifest is created.
+The final thesis discussion is integrated in:
+
+```text
+docs/LatexThesis/sections/05_experiments.tex
+```
 
 ---
 
-## Methodological role
+## Methodological Role
 
 The XAI stage supports:
 
-- qualitative inspection of model attention/sensitivity;
+- qualitative inspection of model attention and sensitivity;
 - explanation of representative failures;
 - comparison between clean and perturbed image behavior;
 - thesis figures for selected case studies;
 - forensic interpretation of why certain perturbations may be operationally risky.
 
-The XAI stage does not redefine the quantitative metrics. It complements the robustness results by providing interpretable examples.
+The XAI stage does not redefine the quantitative metrics. It complements the robustness results by providing interpretable examples for transparent proxy models only.
 
 ---
 
-## Completion criteria
+## Completion Criteria
 
-This milestone will be complete when:
+This milestone is complete because:
 
-- a case-selection manifest is created;
-- selected clean, adversarial, anti-forensic, and OOD cases are documented;
-- Integrated Gradients outputs are generated;
-- representative visual outputs are stored in a thesis-ready location;
-- the generated cases are referenced in the Results chapter or appendix;
-- the XAI conclusions remain consistent with the quantitative proxy-model and forensic-tool findings.
-
-Status: **prepared, not yet produced**.
+- representative clean, OOD, anti-forensic, and adversarial cases have been selected;
+- Integrated Gradients outputs have been generated;
+- thesis-ready visual outputs have been integrated into the LaTeX thesis source;
+- the generated cases are referenced in Chapter 5;
+- the XAI conclusions remain consistent with the quantitative proxy-model and commercial-tool findings.
