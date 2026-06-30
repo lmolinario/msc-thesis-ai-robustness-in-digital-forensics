@@ -2,19 +2,19 @@
 \chapter{Results and Operational Robustness Analysis}
 \label{chap:results}
 % ─────────────────────────────────────────────────────────────────────────────
-This chapter presents the experimental results of the \textsc{FAIR-Lab}
-evaluation pipeline, with particular attention to the operational robustness of
+
+This chapter presents the experimental results of the \gls{fairlab} evaluation
+pipeline, with particular attention to the operational robustness of
 \gls{ai}-based systems for image classification and triage in forensic
 contexts. The analysis does not aim to construct an absolute ranking based
-solely on accuracy, but rather to evaluate how proxy models and commercial
-black-box tools react to clean inputs, \gls{ood} samples, anti-forensic
-transformations, and adversarial perturbations. The interpretation of the
-results therefore maintains an explicitly forensic focus: false negatives on
-the \texttt{weapon} class, operational absorption of out-of-distribution inputs,
-traceability of the bundle, normalization of black-box outputs, and the need
-for human review
-\cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
-
+solely on accuracy, but rather to evaluate how proxy models and selected
+black-box software systems react to clean inputs, \gls{ood} samples,
+anti-forensic transformations, and adversarial perturbations. The interpretation
+of the results therefore maintains an explicitly forensic focus, considering
+false negatives on the \texttt{weapon} class, the tendency to force \gls{ood}
+inputs into known operational classes, the traceability of the bundle, the
+normalization of black-box outputs, and the continued need for human
+review~\cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -22,25 +22,25 @@ for human review
 \label{sec:results-scope}
 % ─────────────────────────────────────────────────────────────────────────────
 
-This chapter reports the results obtained by applying the \textsc{FAIR-Lab}
+This chapter reports the results obtained by applying the \gls{fairlab}
 protocol described in Chapter~\ref{chap:methodology}. The evaluation is
 organized into two complementary levels. The first level concerns the proxy
 models, for which architectures, checkpoints, predictions, confidence scores,
 confusion matrices, and aggregate metrics are available. The second level
-concerns the commercial black-box tools, for which the evaluation is based
-exclusively on observable outputs, normalized exports, and matching against the
-experimental ground truth.
+concerns the selected black-box software systems, for which the evaluation is
+based exclusively on observable outputs, normalized exports, and matching
+against the experimental ground truth.
 
 The objective of this chapter is not to construct an absolute ranking among
-models and tools, nor to transform the thesis into an \gls{advml} benchmark.
-Rather, the focus is to evaluate the operational robustness of \gls{ai}-based
-systems with respect to conditions that are relevant to \gls{df} workflows:
-clean inputs, \gls{ood} samples, anti-forensic transformations, adversarial
-perturbations, and processing through commercial tools. From this perspective,
-particular importance is assigned to false negatives on the \texttt{weapon}
-class, false positives on \texttt{non\_weapon} content, behavior on
-out-of-distribution samples, and the ability to trace each result back to the
-corresponding experimental artifact.
+proxy models and selected software systems, nor to transform the thesis into an
+\gls{advml} benchmark. Rather, the focus is to evaluate the operational
+robustness of \gls{ai}-based systems with respect to conditions that are
+relevant to \gls{df} workflows: clean inputs, \gls{ood} samples,
+anti-forensic transformations, adversarial perturbations, and processing
+through selected software systems. From this perspective, particular importance
+is assigned to false negatives on the \texttt{weapon} class, false positives on
+\texttt{non\_weapon} content, behavior on out-of-distribution samples, and the
+ability to trace each result back to the corresponding experimental artifact.
 
 Table~\ref{tab:results-evaluation-scope} summarizes the final status of the
 experimental components considered in this chapter.
@@ -95,8 +95,8 @@ Anti-forensic transformations &
 
 Forensic evaluation bundle &
 \textbf{Consolidated} &
-11\,500 files prepared for the evaluation of the proxy models and commercial
-black-box tools. \\
+11\,500 files prepared for the evaluation of the proxy models and selected
+black-box software systems. \\
 
 \gls{magnetaxiomtool} / \gls{magnetai} &
 \textbf{Consolidated} &
@@ -106,15 +106,15 @@ categorization; the \texttt{Possible weapons} tag is recoded as a positive
 
 \gls{excirefoto2025} &
 \textbf{Consolidated} &
-Evaluated as standalone general-purpose semantic retrieval software with
-\gls{ai}-based functionalities, under the operational configurations
-\texttt{D20}, \texttt{D50}, and \texttt{D80}. \\
+Evaluated as a standalone general-purpose semantic retrieval software
+application with \gls{ai}-based functionality, under the operational
+configurations \texttt{D20}, \texttt{D50}, and \texttt{D80}. \\
 
 \gls{cellebriteinseyets} &
 \textbf{Consolidated} &
-Evaluated as a commercial black-box tool for media analysis, through observable
-outputs exported and normalized from the \texttt{Cellebrite Physical Analyzer
-10.9.0.3029} environment. \\
+Evaluated as a commercial black-box software platform for media analysis,
+through observable outputs exported and normalized from the
+\texttt{Cellebrite Physical Analyzer 10.9.0.3029} environment. \\
 
 \gls{griffeye} / \gls{t3kcore} &
 \textbf{Consolidated} &
@@ -135,10 +135,10 @@ not used as a primary metric. \\
 Table~\ref{tab:results-corpus-composition} reports the consolidated composition
 of the experimental corpus used for the quantitative analyses. Clean,
 adversarial, and anti-forensic samples are derived from the binary
-\texttt{weapon}/\texttt{non\_weapon} subset. \gls{ood} samples, instead, are
-kept separate: they are not used to compute supervised accuracy, but to measure
-the tendency of systems to map out-of-distribution content to one of the two
-operational classes.
+\texttt{weapon}/\texttt{non\_weapon} subset. \gls{ood} samples, by contrast,
+are kept separate: they are not used to compute supervised accuracy, but to
+measure the tendency of systems to map out-of-distribution content to one of
+the two operational classes.
 
 \begin{table}[H]
 \centering
@@ -182,42 +182,41 @@ images, with 1000 files for each transformation. \\
 \textbf{11\,500}
 &
 Complete forensic evaluation bundle, used for the controlled evaluation of
-proxy models and for the black-box evaluation of commercial tools. \\
+proxy models and for the black-box evaluation of selected software systems. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
 The metrics reported in the following sections are derived from the files
-produced by the experimental pipeline. For the proxy models, clean and perturbed
-performance is derived from \codepath{results/metrics/final_core_metrics.csv},
-the confusion matrices from
+produced by the experimental pipeline. For the proxy models, clean and
+perturbed performance is derived from
+\codepath{results/metrics/final_core_metrics.csv}, the confusion matrices from
 \codepath{results/metrics/final_confusion_matrices.csv}, \gls{ood} behavior
 from \codepath{results/metrics/final_ood_metrics.csv}, and robustness metrics,
 including accuracy drop, induced errors, and confidence shift, from
-\codepath{results/metrics/final_robustness_metrics.csv}. For commercial tools,
-the aggregate metrics are derived from
+\codepath{results/metrics/final_robustness_metrics.csv}. For the selected
+software systems, the aggregate metrics are derived from
 \codepath{results/metrics/forensic_tools_metrics.csv}, whereas normalized
 predictions and audit checks are obtained from the corresponding normalized
 exports in \codepath{evaluation/forensic_tools/}. The outputs of the black-box
-tools are therefore analyzed through a common representation that is independent
-of the native export format.
+software systems are therefore analyzed through a common representation that is
+independent of the native export format.
 
 An additional caution concerns the interpretation of confidence. The confidence
 values reported for the proxy models are used as intra-model indicators and not
 as calibrated probabilities directly comparable across different architectures.
-This caution is even more relevant in the comparison with commercial black-box
-tools, which do not necessarily expose numerical scores, decision thresholds, or
-homogeneous uncertainty measures. For this reason, confidence is used in this
-chapter as an auxiliary diagnostic element, not as a stand-alone evidentiary
-measure.
-
+This caution is even more relevant in the comparison with selected black-box
+software systems, which do not necessarily expose numerical scores, decision
+thresholds, or homogeneous uncertainty measures. For this reason, confidence is
+used in this chapter as an auxiliary diagnostic element, not as a stand-alone
+evidentiary measure.
 
 In the remainder of the chapter, a single convention is adopted for computing
 performance drop:
 \[
-\text{accuracy drop} =
-\text{accuracy}_{clean} - \text{accuracy}_{perturbed}.
+\text{accuracy}_{\mathrm{drop}} =
+\text{accuracy}_{\mathrm{clean}} - \text{accuracy}_{\mathrm{perturbed}}.
 \]
 
 Positive values therefore indicate performance degradation with respect to the
@@ -228,14 +227,16 @@ but as oscillations dependent on the sample distribution and on the specific
 transformation applied.
 
 The forensic evaluation bundle constitutes the operational connection between
-the controlled experimental level and the commercial black-box level. The blind
-view of the bundle allows the tools to process the files without direct
-exposure to labels, attack names, fold information, or experimental metadata,
-whereas the manifests and \gls{sha256}/\gls{md5} hashes make it possible to map
-each normalized output back to the corresponding artifact. This approach makes
-it possible to distinguish among classification errors, missed detections,
-uncategorized outputs, non-interpretable mappings, and limitations specific to
-the export formats of individual tools.
+the controlled experimental level and the selected black-box software level.
+The blind view of the bundle allows the software systems to process the files
+without direct exposure to labels, attack names, fold information, or
+experimental metadata, whereas the manifests and \gls{sha256}/\gls{md5} hashes
+make it possible to map each normalized output back to the corresponding
+artifact. This approach makes it possible to distinguish among classification
+errors, missed detections, uncategorized outputs, non-interpretable mappings,
+and limitations specific to the export formats of individual software systems.
+
+
 
 
 
