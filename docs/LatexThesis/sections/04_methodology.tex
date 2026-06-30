@@ -12,7 +12,7 @@ reproducible protocols for validating \gls{ai}-based models and software under
 controlled but operationally relevant forensic-context conditions, the chapter
 does not merely describe individual technical components. Rather, it formalizes
 an integrated experimental design. This design connects datasets, models,
-adversarial perturbations and anti-forensic transformations, forensic tools,
+adversarial perturbations and anti-forensic transformations, selected software,
 metrics, the \gls{xai} approach, and traceability controls within the
 \gls{fairlab} experimental protocol, while maintaining a clear distinction
 between experimental methodology and results analysis.
@@ -26,14 +26,14 @@ generation. The following nine
 (\S\S\,\ref{sec:methodology-models-classification}--\ref{sec:methodology-traceability-controls})
 describe the classification paradigm, the selection and generation of
 adversarial perturbations and anti-forensic transformations, the
-\textit{forensic evaluation bundle}, the evaluation protocol for forensic
-tools, the metrics, the \gls{xai} approach, and the traceability and
+\textit{forensic evaluation bundle}, the evaluation protocol for selected software, the metrics,
+the \gls{xai} approach, and the traceability and
 reproducibility controls.
 
 The distinction between methodology and results analysis is maintained
 throughout the chapter: the resulting artifacts are described as consolidated
-methodological components, whereas the quantitative evidence, the comparison
-between models and tools, and the experimental interpretations are deferred to
+methodological components, whereas the quantitative evidence, the comparison between proxy models and selected software,
+and the experimental interpretations are deferred to
 the results chapter.
 
 
@@ -839,7 +839,7 @@ derived from the frozen dataset and stored in
 This subset contains only the \texttt{weapon} and \texttt{non\_weapon} classes,
 for a total of 1000 balanced images. The \gls{ood} samples are not used as
 primary targets for perturbation generation because they address a distinct
-experimental question: evaluating whether automated models and tools tend to
+experimental question: evaluating whether automated models and selected software systems tend to
 improperly assign a known binary class to borderline, anomalous, or content
 that is semantically outside the operational domain of the task.
 
@@ -864,14 +864,8 @@ The presence of a frozen dataset represents a central methodological
 requirement. Once the final manifests have been produced, the subsequent phases
 of the pipeline must refer to these files as the official source, avoiding
 implicit modifications to the experimental corpus. In this way, any variation
-in the results can be attributed to the models, perturbations, tools, or
-metrics, rather than to undocumented changes in the composition of the dataset.
-
-
-
-
-
-
+in the results can be attributed to the models, perturbations, tools, or metrics,
+rather than to undocumented changes in the composition of the dataset.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -879,21 +873,22 @@ metrics, rather than to undocumented changes in the composition of the dataset.
 \label{sec:methodology-split-generation}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The next phase of the dataset pipeline consists of generating the clean splits
-and the \gls{ood} set. This operation is performed through the script
+The next phase of the dataset pipeline consists of generating the clean binary
+splits and the clean \gls{ood} evaluation set. This operation is performed
+using the script
 \codepath{datasets/scripts/splits/11_generate_clean_and_ood_splits.py}, which
-uses as input the two official manifests produced during the freezing phase:
+takes as input the two official manifests produced during the freezing phase:
 \texttt{manual\_selection\_final\_1500.csv} and
 \texttt{manual\_selection\_adversarial\_subset.csv}. The script does not modify
-the final manifests, but produces organized copies of the images and specific
-manifests for the subsequent experimental phases.
+the final manifests, but instead produces organized copies of the images and
+specific manifests for the subsequent experimental phases.
 
-The binary subset composed of the \texttt{weapon} and \texttt{non\_weapon}
-classes is divided into five deterministic folds, named \texttt{fold\_1},
+The binary subset, composed of the \texttt{weapon} and \texttt{non\_weapon}
+classes, is divided into five deterministic folds, named \texttt{fold\_1},
 \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4}, and \texttt{fold\_5}.
 Each fold contains 200 images, evenly distributed between the two operational
 classes of the binary task. The split procedure uses a pseudo-random seed fixed
-at 42, so that the partition can be regenerated reproducibly from the official
+at 42, so that the partition can be reproducibly regenerated from the official
 manifests and the indicated script.
 
 In this phase, the term \texttt{fold} denotes balanced and traceable
@@ -901,17 +896,17 @@ experimental units, not training partitions in the sense of traditional
 cross-validation. The decision to adopt five folds addresses a twofold
 methodological requirement. On the one hand, it makes it possible to divide the
 binary subset into units that are homogeneous in size and class composition,
-facilitating the comparison between baseline evaluation, perturbation
-generation, and results analysis. On the other hand, it allows a controlled
-separation to be maintained between the samples used for training the proxy
-models and those used as experimental holdout data, reducing the risk of
-leakage in the subsequent robustness evaluation. The folds are therefore not
-introduced as a model selection procedure or as a general performance estimate
+facilitating comparison among baseline evaluation, perturbation generation,
+and results analysis. On the other hand, it makes it possible to maintain a
+controlled separation between the samples used for training the proxy models
+and those used as experimental holdout data, reducing the risk of leakage in
+the subsequent robustness evaluation. The folds are therefore not introduced
+as a model selection procedure or as a general performance estimate obtained
 through traditional cross-validation. Instead, they define fold-aware
 experimental units: for each target fold, the proxy models are trained on the
-remaining folds and evaluated on the fold kept in holdout, thereby preserving a
-controlled separation between training, perturbation generation, and robustness
-evaluation.
+remaining folds and evaluated on the held-out fold, thereby preserving a
+controlled separation between training, perturbation generation, and
+robustness evaluation.
 
 \begin{table}[H]
 \centering
@@ -935,14 +930,14 @@ evaluation.
 \end{tabularx}
 \end{table}
 
-The \texttt{ood} class is instead kept separate from the binary subset and
-organized into a single evaluation set, located in
+The \gls{ood} set is instead kept separate from the binary subset and organized
+into a single evaluation set, located in
 \codepath{datasets/splits/ood/ood_eval_set/ood/}. This choice reflects the
 different methodological function of out-of-distribution samples. They are not
 used to generate adversarial perturbations or anti-forensic transformations on
-known classes, but to evaluate system behavior when the input consists of
-content that should not be treated as ordinary examples of \texttt{weapon} or
-\texttt{non\_weapon}. The separation of the \gls{ood} set therefore makes it
+known classes, but rather to evaluate system behavior when the input consists
+of content that should not be treated as an ordinary example of \texttt{weapon}
+or \texttt{non\_weapon}. The separation of the \gls{ood} set therefore makes it
 possible to distinguish robustness on the binary task from the handling of
 borderline, anomalous, or semantically out-of-domain inputs with respect to the
 operational domain.
@@ -950,10 +945,10 @@ operational domain.
 The main outputs of the split generation phase are three artifacts:
 \texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv}, and
 \texttt{split\_generation\_summary.json}. The manifests are not simple file
-lists, but control artifacts that record, for each sample, the image identifier,
-the final class, the fold or set of membership, the source, the path of the
-prepared image, the path within the split, the \gls{sha256} hash, the
-\gls{md5}, and the information related to the sample type. The summary file
+lists, but control artifacts that record, for each sample, the image
+identifier, the final label, the fold or set to which it belongs, the source,
+the path of the prepared image, the path within the split, the \gls{sha256}
+hash, the \gls{md5}, and information about the sample type. The summary file
 documents the consistency checks performed during split generation, including
 the uniqueness of the \texttt{image\_id} values, the uniqueness of the hashes,
 and the correspondence between the expected counts and the counts actually
@@ -961,13 +956,13 @@ produced.
 
 This organization provides stable experimental units for the subsequent
 baseline evaluations, for the generation of manipulated inputs, and for the
-comparison with the outputs produced by the forensic tools.
+comparison with the outputs produced by the selected software.
 
 Figure~\ref{fig:methodology-split-to-proxy-training} places the split
 generation phase within the experimental pipeline. Starting from the frozen
 manifests, the binary subset is organized into five clean folds, while the
-\gls{ood} set is generated as a separate branch, kept clean and used neither for
-training the proxy models nor for perturbation generation.
+\gls{ood} set is generated as a separate branch, kept clean and used neither
+for training the proxy models nor for perturbation generation.
 
 \begin{figure}[H]
 \centering
@@ -1096,51 +1091,52 @@ training the proxy models nor for perturbation generation.
 \label{fig:methodology-split-to-proxy-training}
 \end{figure}
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Models and classification paradigm}
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The controlled evaluation of the proxy models uses a set of transparent and
-reproducible architectures to represent the behavior of \gls{ai}-based
-classifiers exposed to clean data, adversarial inputs, and anti-forensic
-transformations. These models must not be interpreted as forensic tools
-evaluated in the black-box phase of the protocol, nor as substitutes for the
-commercial software analyzed. Rather, they constitute controlled experimental
-components, which are necessary to define an inspectable algorithmic reference,
-generate the perturbations that require access to the target model, and study
-the possible transferability of the observed effects toward other
-classification systems.
+The controlled evaluation of the proxy models relies on a set of transparent
+and reproducibly trained architectures to provide inspectable algorithmic
+references for \gls{ai}-based classifiers exposed to clean data, adversarial
+inputs, and anti-forensic transformations. These models must not be interpreted as the software systems evaluated
+in the black-box phase of the protocol, nor as
+substitutes for the commercial software analyzed. Rather, they constitute
+controlled experimental components, necessary to define an inspectable
+algorithmic reference, to generate the perturbations that require access to the
+target model, and to study the possible transferability of the observed effects
+to other classification systems.
 
 The classification paradigm adopted by the proxy models is binary. The
-operational labels are \texttt{non\_weapon} and \texttt{weapon}, respectively
-encoded as class 0 and class 1 in the model registry. Although the
-\texttt{ood} class is part of the final frozen dataset, it is not used to train
-the proxy models and does not constitute a primary target for the generation of
-adversarial or anti-forensic perturbations. It remains separate for the
-evaluation of out-of-distribution behavior, consistently with the
+operational labels are \texttt{non\_weapon} and \texttt{weapon}, encoded
+respectively as class 0 and class 1 in the model registry. Although the
+\texttt{ood} category is part of the final frozen dataset, it is not used to
+train the proxy models and does not constitute a primary target for the
+generation of adversarial or anti-forensic perturbations. It remains separate
+for the evaluation of out-of-distribution behavior, consistent with the
 methodological distinction introduced in
 Sections~\ref{sec:methodology-research-design} and
-\ref{sec:methodology-split-generation}. This choice avoids transforming the
-\gls{ood} problem into an ordinary third supervised class and makes it possible
+\ref{sec:methodology-split-generation}. This choice avoids treating the
+\gls{ood} problem as an ordinary third supervised class and makes it possible
 to keep the evaluation of binary robustness separate from the handling of
 borderline, anomalous, or semantically external inputs with respect to the
 operational domain.
 
 The official proxy models considered in this phase are ResNet18,
 EfficientNet-B0, and \gls{clip}. ResNet18 represents a well-established and
-relatively compact convolutional baseline, useful for providing a standard
-\gls{cnn} reference in the binary task \cite{he2016deep}. EfficientNet-B0 is
-used as a more efficient convolutional model and constitutes the main proxy
-target for generating model-dependent adversarial attacks in the current
-experimental protocol \cite{tan2019efficientnet}. \gls{clip}, instead, is used
-as a pre-trained vision-language model to extract visual representations from
+relatively compact convolutional baseline, providing a standard \gls{cnn}
+reference for the binary task~\cite{he2016deep}. EfficientNet-B0 is used as a
+more efficient convolutional model and constitutes the main proxy target for
+generating model-dependent adversarial attacks in the current experimental
+protocol~\cite{tan2019efficientnet}. \gls{clip}, instead, is used as a
+pre-trained vision-language model to extract visual representations from
 images. In this case, the weights of the visual encoder are not updated during
 training, while a supervised binary classifier is trained for the
 \texttt{non\_weapon}/\texttt{weapon} task. This configuration makes it possible
 to include in the protocol a large-scale pre-trained model adapted to the
-forensic task under consideration without retraining the entire visual backbone
-\cite{radford2021learning}. Table~\ref{tab:methodology-proxy-models}
+forensic task under consideration, without retraining the entire visual
+backbone~\cite{radford2021learning}. Table~\ref{tab:methodology-proxy-models}
 summarizes the methodological role of the three models.
 
 \begin{table}[H]
@@ -1179,15 +1175,15 @@ binary classifier is trained for the \texttt{non\_weapon}/\texttt{weapon} task. 
 \end{tabularx}
 \end{table}
 
-The training of the proxy models follows a fold-aware protocol. For each target
-fold, the model is trained on the four remaining folds and saved as a checkpoint
-specific to the excluded fold. For example, the checkpoint associated with
-\texttt{fold\_1} is trained using \texttt{fold\_2}, \texttt{fold\_3},
-\texttt{fold\_4}, and \texttt{fold\_5}. The same scheme is repeated for all
-five folds. This protocol reduces the risk of leakage between images used to
-train the proxy model and images retained as holdout data for the target fold,
-preserving a methodological separation between training, perturbation
-generation, and experimental evaluation.
+The training of the proxy models follows a fold-aware protocol. For each
+target fold, the model is trained on the four remaining folds and saved as a
+checkpoint specific to the excluded fold. For example, the checkpoint
+associated with \texttt{fold\_1} is trained using \texttt{fold\_2},
+\texttt{fold\_3}, \texttt{fold\_4}, and \texttt{fold\_5}. The same scheme is
+repeated for all five folds. This protocol reduces the risk of leakage between
+the images used to train the proxy model and the images retained as holdout
+data for the target fold, preserving a methodological separation between
+training, perturbation generation, and experimental evaluation.
 
 \begin{table}[H]
 \centering
@@ -1206,13 +1202,13 @@ generation, and experimental evaluation.
 \end{tabularx}
 \end{table}
 
-The training configuration of the proxy models was kept constant across folds,
-so as to make the performance obtained on the different dataset partitions
-comparable. Table~\ref{tab:methodology-training-hyperparameters} reports the
-main hyperparameters used for training and evaluating the proxy models. The
-values are derived from the reproducible configuration of the training script
-\codepath{models/scripts/12_train_proxy_models.py} and from the model registry
-\codepath{models/model_registry.json}.
+The training configuration of the proxy models was kept constant across
+folds, so that the performance obtained on the different dataset partitions
+would be comparable. Table~\ref{tab:methodology-training-hyperparameters}
+reports the main hyperparameters used for training and evaluating the proxy
+models. The values are derived from the reproducible configuration of the
+training script \codepath{models/scripts/12_train_proxy_models.py} and from
+the model registry \codepath{models/model_registry.json}.
 
 \begin{table}[H]
 \centering
@@ -1306,7 +1302,7 @@ Random seed
 \end{table}
 
 The official script for training the proxy models is
-\codepath{models/scripts/12_train_proxy_models.py}. It uses as input the
+\codepath{models/scripts/12_train_proxy_models.py}. It takes as input the
 manifest \codepath{datasets/splits/manifests/clean_folds_manifest.csv},
 applies the binary mapping \texttt{non\_weapon}~$\rightarrow 0$ and
 \texttt{weapon}~$\rightarrow 1$, generates the checkpoints in
@@ -1320,56 +1316,59 @@ of model-dependent attacks and the robustness evaluations, can be traced back
 to a specific and unchanged version of the model. The main training parameters
 are reported in Table~\ref{tab:methodology-training-hyperparameters}; the full
 configuration is recorded in the training script and in the registry
-\codepath{models/model_registry.json}, ensuring the reproducibility of training
-independently of the execution environment.
+\codepath{models/model_registry.json}, supporting the reproducibility and
+auditability of training across executions.
 
 Within the experimental protocol, EfficientNet-B0 assumes the role of
-\textit{primary proxy target}, namely the main controlled model with respect to
-which model-dependent adversarial perturbations are generated. This choice does
-not imply that EfficientNet-B0 represents the most robust or most accurate model
+\textit{primary proxy target}, namely the main controlled model against which
+model-dependent adversarial perturbations are generated. This choice does not
+imply that EfficientNet-B0 represents the most robust or most accurate model
 in an absolute sense, nor that it exhausts the comparative analysis of the
-thesis. Rather, it identifies the controlled model against which, in this phase
-of the pipeline, the perturbations requiring access to the gradient, the
-classifier, or the decision behavior of the target are constructed.
+thesis. Rather, it identifies the controlled model against which, in this
+phase of the pipeline, the perturbations requiring access to the gradient,
+the classifier, or the decision behavior of the target are constructed.
 
 Anti-forensic transformations and perturbations that do not depend on the
 gradient are instead not generated as specific optimizations against
-EfficientNet-B0, but as controlled manipulations of the image artifact or of its
-visual content. This distinction makes it possible to separate white-box or
-model-dependent scenarios from model-agnostic stressors and realistic
+EfficientNet-B0, but as controlled manipulations of the image artifact or of
+its visual content. This distinction makes it possible to separate white-box
+or model-dependent scenarios from model-agnostic stressors and realistic
 anti-forensic transformations.
 
 This approach keeps the adversarial protocol controlled and comparable across
-families of perturbations, avoiding the multiplication of experimental variants
-as a function of the attacked architecture. The objective is not to optimize the
-attacks separately against each model, but to generate a coherent adversarial
-testbed and then evaluate the transferability of the perturbations toward
-different models, such as ResNet18 and \gls{clip}.
+families of perturbations, avoiding a multiplication of experimental variants
+as a function of the attacked architecture. The objective is not to optimize
+the attacks separately against each model, but to generate a coherent
+adversarial testbed and then evaluate the transferability of the
+perturbations to different models, such as ResNet18 and \gls{clip}.
 
-Finally, it is necessary to distinguish the proxy models from the forensic tools
-evaluated in the black-box phase of the protocol. The proxy models are open,
-configurable, and documented components, for which the architecture,
-checkpoints, class mapping, training protocol, and file hashes are known.
-Forensic tools, by contrast, are treated as black-box or quasi-black-box
-systems: the analysis does not assume access to their internal architecture,
-but focuses on observable outputs, their consistency with the experimental
-manifests, and their behavior in the presence of clean, manipulated, or
-out-of-distribution images. This distinction makes it possible to keep the
-experimental control of the proxy models separate from the operational
-evaluation of the selected software.
+Finally, it is necessary to distinguish the proxy models from the selected
+software evaluated in the black-box phase of the protocol. The proxy models are
+open, configurable, and documented components, for which the architecture,
+checkpoints, class mapping, training protocol, and file hashes are known. The
+selected software systems, by contrast, are treated as black-box or
+quasi-black-box systems: the analysis does not assume access to their internal
+architecture, but instead focuses on observable outputs, their consistency with
+the experimental manifests, and their behavior in the presence of clean,
+manipulated, or out-of-distribution images. This distinction makes it possible
+to keep the experimental control of the proxy models separate from the
+operational evaluation of the selected software.
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Perturbation selection rationale and operational relevance}
 \label{sec:methodology-perturbation-selection-rationale}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The selection of perturbations was not guided exclusively by the theoretical
+The selection of perturbations was guided not exclusively by the theoretical
 strength of the attacks, but also by their computational sustainability and
-their consistency with a realistic operational \gls{df} scenario. In a forensic
-workflow, a visual triage system must be able to process large volumes of data
-within time constraints compatible with investigative needs. Consequently, the
-computational cost of perturbations represents a methodologically relevant
-criterion, both for the reproducibility of the experiment and for the
-interpretation of the operational plausibility of the manipulations considered.
+their consistency with a controlled but operationally relevant \gls{df}
+scenario. In a forensic workflow, a visual triage system must be able to
+process large volumes of data within time constraints compatible with
+investigative needs. Consequently, the computational cost of perturbations
+represents a methodologically relevant criterion, both for the reproducibility
+of the experiment and for the interpretation of the operational plausibility of
+the manipulations considered.
 
 Anti-forensic transformations, such as \gls{jpeg} recompression,
 resample~+~resize, Gaussian blur, histogram modification, and contrast
@@ -1381,22 +1380,22 @@ normalize an image before acquisition or forensic analysis.
 
 Model-dependent adversarial attacks, by contrast, require interaction with a
 target model and, in some cases, iterative or optimization-based procedures.
-\gls{fgsm} represents an efficient baseline, since it requires a single gradient
-estimate per image. Attacks such as \gls{onepixel}, \gls{sigmazero}, and
-\gls{superdeepfool} are instead more computationally demanding and are included
-not because they necessarily represent the most likely operational scenario,
-but because they make it possible to stress the behavior of classifiers under
-controlled conditions. The \gls{colorshift} perturbation, although included in
-the adversarial group for experimental purposes, remains model-agnostic and has
-a low computational cost.
+\gls{fgsm} represents an efficient baseline, since it requires a single
+gradient estimate per image. Attacks such as \gls{onepixel}, \gls{sigmazero},
+and \gls{superdeepfool} are instead more computationally demanding and are
+included not because they necessarily represent the most likely operational
+scenario, but because they make it possible to stress the behavior of
+classifiers under controlled conditions. The \gls{colorshift} perturbation,
+although included in the adversarial group for experimental purposes, remains
+model-agnostic and has a low computational cost.
 
-This approach is consistent with the objective of the thesis: evaluating the
+This approach is consistent with the objective of the thesis: to evaluate the
 operational robustness of \gls{ai}-based systems in a forensic context, rather
-than producing an exhaustive ranking of the strongest adversarial attacks in a
+than to produce an exhaustive ranking of the strongest adversarial attacks in a
 strictly algorithmic sense. For this reason, the protocol prioritizes a
 heterogeneous set of perturbations, balancing experimental severity,
 computational sustainability, reproducibility, and relevance with respect to
-possible real-world anti-forensic scenarios.
+plausible anti-forensic and degradation scenarios.
 
 \begin{table}[H]
 \centering
@@ -1499,11 +1498,11 @@ Plausible as simple post-processing with a possible impact on classifiers. \\
 \end{table}
 
 The computational complexity reported in
-Table~\ref{tab:methodology-attack-cost-operational-relevance}
-does not represent an experimental time measurement, but rather a qualitative
-assessment used as a methodological criterion. This choice derives from the fact
-that the actual execution time depends on implementation and environmental
-factors, such as hardware, libraries, parallelization, image size, and execution
+Table~\ref{tab:methodology-attack-cost-operational-relevance} does not
+represent an experimental time measurement, but rather a qualitative assessment
+used as a methodological criterion. This choice derives from the fact that the
+actual execution time depends on implementation and environmental factors, such
+as hardware, libraries, parallelization, image size, and execution
 configuration. In this work, therefore, cost is interpreted in relative and
 operational terms, based on the algorithmic nature of the perturbations: direct
 transformations applicable in batch mode, single-step gradient-based attacks,
@@ -1517,8 +1516,8 @@ generation workflow adopted in the experimental protocol. Starting from the
 clean binary folds, the pipeline separately generates the adversarial branch and
 the anti-forensic branch. The \gls{ood} set is not included in this phase and
 remains excluded from perturbation generation. The resulting artifacts are then
-documented through dedicated manifests, integrity hashes, and subsequent
-integration into the forensic evaluation bundle.
+documented through dedicated manifests and integrity hashes, and are
+subsequently integrated into the forensic evaluation bundle.
 
 \begin{figure}[H]
 \centering
@@ -1668,6 +1667,7 @@ integration into the forensic evaluation bundle.
 \label{fig:methodology-perturbation-workflow}
 \end{figure}
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial attack selection and generation}
 \label{sec:methodology-adversarial-attacks}
@@ -1676,18 +1676,18 @@ integration into the forensic evaluation bundle.
 The adversarial phase of the \gls{fairlab} protocol is designed to generate
 manipulated versions of the images belonging to the binary
 \texttt{weapon}/\texttt{non\_weapon} subset, while preserving the link between
-each perturbed sample and its corresponding clean image. Attack generation uses
-as input the manifest
+each perturbed sample and its corresponding clean image. Attack generation
+takes as input the manifest
 \codepath{datasets/splits/manifests/clean_folds_manifest.csv}, composed of
 1000 images distributed across five balanced folds. The \texttt{ood} samples
-remain excluded from this phase, consistently with the methodological
-separation defined in Section~\ref{sec:methodology-split-generation}.
+remain excluded from this phase, consistent with the methodological separation
+defined in Section~\ref{sec:methodology-split-generation}.
 
 The official script for this phase is
 \codepath{datasets/scripts/attacks/14_generate_adversarial_attacks.py}. It
 constitutes the fold-aware entry point for generating adversarial attacks and
 supports both an interactive mode, useful for guided execution, and a
-command-line mode, more suitable for experimental reproducibility. Consistently
+command-line mode, more suitable for experimental reproducibility. Consistent
 with the paradigm defined in
 Section~\ref{sec:methodology-models-classification}, the script distinguishes
 between model-dependent attacks, constructed with respect to a specific proxy
@@ -1695,33 +1695,33 @@ model, and model-agnostic transformations, applied without access to the
 gradient or to the decision behavior of the classifier.
 
 The model-dependent attacks used in the final experimental protocol are
-\gls{fgsm}, One Pixel Attack, Sigma Zero Attack, and SuperDeepFool. They are
-generated with respect to \texttt{efficientnet\_b0}, which is assumed as the
+\gls{fgsm}, \gls{onepixel}, \gls{sigmazero}, and \gls{superdeepfool}. They are
+generated with respect to \texttt{efficientnet\_b0}, which is used as the
 primary proxy target for the methodological reasons discussed in
 Section~\ref{sec:methodology-models-classification}.
 
 For each image belonging to a given fold, the script loads the corresponding
 checkpoint from \codepath{models/checkpoints/<target_model>/<fold>.pt}. This
-choice preserves consistency with the fold-aware protocol: an image from a fold
-is perturbed using the model trained according to the separation defined during
-proxy model training. The procedure therefore avoids treating the dataset as an
-undifferentiated collection and preserves the relationship among split,
-checkpoint, and generated artifact.
+choice preserves consistency with the fold-aware protocol: an image from a
+fold is perturbed using the model trained according to the separation defined
+during proxy model training. The procedure therefore avoids treating the
+dataset as an undifferentiated collection and preserves the relationship
+among split, checkpoint, and generated artifact.
 
 The \gls{colorshift} transformation is instead treated as a model-agnostic
 \textit{adversarial-style} perturbation. It globally modifies the chromatic
 components of the image without querying the model and without using gradient
-information. This distinction is methodologically relevant because it makes it
-possible to separate perturbations constructed with respect to a specific
+information. This distinction is methodologically relevant because it makes
+it possible to separate perturbations constructed with respect to a specific
 classifier from more general visual alterations.
 
 Within the experimental protocol, \gls{colorshift} is nevertheless included in
-the adversarial group in an operational sense, and not as a strictly white-box
-adversarial attack. Its purpose is not to simulate an ordinary forensic
-post-processing operation, but to assess whether a global chromatic variation,
-which is semantically preserving and not optimized with respect to the model,
-can alter the behavior of automated classifiers. The output is saved in
-\gls{jpeg} format with quality 95: this choice preserves the practical
+the adversarial group in an operational sense, rather than as a strictly
+white-box adversarial attack. Its purpose is not to simulate an ordinary
+forensic post-processing operation, but to assess whether a global chromatic
+variation, semantically preserving and not optimized with respect to the
+model, can alter the behavior of automated classifiers. The output is saved
+in \gls{jpeg} format with quality 95: this choice preserves the practical
 plausibility of the transformation and maintains limited compression. Any
 residual contribution from recompression is traced as part of the generated
 artifact and does not alter the methodological distinction among adversarial
@@ -1729,16 +1729,16 @@ perturbations, model-agnostic adversarial-style transformations, and
 anti-forensic transformations.
 
 The protocol does not aim to construct an exhaustive benchmark of adversarial
-robustness in the strict sense of Adversarial Machine Learning, as would be the
-case with extensive sweeps or standard iterative attacks such as PGD or
-AutoAttack \cite{madry2018towards,croce2020autoattack}. Instead, the selection
+robustness in the strict sense of \gls{advml}, as would be the case with
+extensive sweeps or standard iterative attacks such as PGD or
+AutoAttack~\cite{madry2018towards,croce2020autoattack}. Instead, the selection
 prioritizes a heterogeneous and computationally sustainable set of
 perturbations, consistent with the forensic objective of evaluating the
-operational robustness of the pipeline.
+operational robustness of the evaluated systems and workflow.
 
 \begin{table}[H]
 \centering
-\caption{Adversarial attacks generated on the binary subset.}
+\caption{Adversarial and adversarial-style perturbations generated on the binary subset.}
 \label{tab:methodology-adversarial-attacks}
 \begin{tabularx}{\textwidth}{@{}
     >{\raggedright\arraybackslash}p{0.23\textwidth}
@@ -1748,7 +1748,7 @@ operational robustness of the pipeline.
     >{\raggedleft\arraybackslash}X
 @{}}
 \toprule
-\textbf{Attack} &
+\textbf{Perturbation} &
 \textbf{Dependency} &
 \textbf{Target} &
 \textbf{Format} &
@@ -1808,7 +1808,7 @@ model-agnostic
 \textbf{Total}
 &
 \multicolumn{3}{>{\raggedright\arraybackslash}p{0.55\textwidth}}%
-{Five attacks applied to the 1000 images of the binary subset.}
+{Five perturbations applied to the 1000 images of the binary subset.}
 &
 \textbf{5000} \\
 \bottomrule
@@ -1883,33 +1883,33 @@ represent the main configuration used to generate the adversarial artifacts.
 The complete configuration of each run is preserved in the JSON summaries and
 CSV manifests in \codepath{attacks/manifests/}. The summaries document the
 generation script, the input manifest, the output folder, the expected and
-generated counts, the distribution by fold and class, and the integrity checks.
-The CSV manifests instead preserve the connection between clean image,
-perturbed artifact, target model, fold-aware checkpoint, attack-specific
-parameters, output path, and hashes of the produced artifacts. In this way, the
-essential parameters remain readable in the thesis text, while the complete
-detail remains available in the experimental repository.
+generated counts, the distribution by fold and class, and the integrity
+checks. The CSV manifests, in turn, preserve the connection between the clean
+image, the perturbed artifact, the target model, the fold-aware checkpoint,
+the attack-specific parameters, the output path, and the hashes of the
+produced artifacts. In this way, the essential parameters remain readable in
+the thesis text, while the complete detail remains available in the
+experimental repository.
 
 The attack selection covers different families of manipulation. \gls{fgsm}
 represents a single-step gradient-based attack, useful as an efficient and
-reproducible adversarial baseline \cite{goodfellow2015explaining}. One Pixel
-Attack introduces a sparse perturbation, limited to a minimal number of modified
-pixels, and makes it possible to evaluate classifier sensitivity to localized
-variations \cite{su2019onepixel}. Sigma Zero Attack is included as a
-sparsity-oriented attack, with parameters dedicated to threshold regulation and
-to the differentiable approximation of the \(L_0\) norm
-\cite{zhao2024sigmazero}. SuperDeepFool is adopted as an iterative variant
-based on a decision-boundary crossing logic, recalling the family of methods
-inspired by DeepFool \cite{moosavi2016deepfool}. Finally, Color Shift is not
-treated as an attack optimized with respect to the model, but as a
-model-agnostic adversarial-style transformation, useful for introducing a
-global and controlled chromatic manipulation.
+reproducible adversarial baseline~\cite{goodfellow2015explaining}.
+\gls{onepixel} introduces a sparse perturbation, limited to a minimal number of
+modified pixels, and makes it possible to evaluate classifier sensitivity to
+localized variations~\cite{su2019onepixel}. \gls{sigmazero} is included as a
+sparsity-oriented attack, with parameters dedicated to threshold regulation
+and to the differentiable approximation of the \(L_0\) norm~\cite{zhao2024sigmazero}. \gls{superdeepfool} is adopted as an iterative
+variant based on a decision-boundary crossing logic, recalling the family of
+methods inspired by DeepFool~\cite{moosavi2016deepfool}. Finally,
+\gls{colorshift} is not treated as an attack optimized with respect to the
+model, but as a model-agnostic adversarial-style transformation, useful for
+introducing a global and controlled chromatic manipulation.
 
-For each generation run, the pipeline produces a dedicated CSV manifest and JSON
-summary. The manifests are located in \codepath{attacks/manifests/} and follow a
-naming scheme that combines the adversarial family, the attack name, and, where
-present, the target model. Each row preserves the link with the original clean
-sample through fields such as \texttt{generated\_image\_id},
+For each generation run, the pipeline produces a dedicated CSV manifest and
+JSON summary. The manifests are located in \codepath{attacks/manifests/} and
+follow a naming scheme that combines the adversarial family, the attack name,
+and, where present, the target model. Each row preserves the link with the
+original clean sample through fields such as \texttt{generated\_image\_id},
 \texttt{original\_image\_id}, \texttt{fold}, \texttt{final\_label},
 \texttt{clean\_relative\_path}, \texttt{perturbed\_relative\_path},
 \texttt{sha256\_original}, \texttt{sha256\_perturbed},
@@ -1920,13 +1920,14 @@ between the perturbed image and the specific version of the proxy model
 verifiable.
 
 It is important to clarify that this section describes the selection and
-generation of adversarial artifacts, not the robustness results. Fields related
-to attack success, when present in the summaries, are treated at this stage as
-technical metadata of the generation process and not as conclusive evidence on
-model behavior. The quantitative analysis of the effects of the attacks,
-including the variation of metrics with respect to clean inputs, is deferred to
-the section dedicated to the evaluation protocol and, subsequently, to the
-chapter on experimental results.
+generation of adversarial artifacts, not the robustness results. Fields
+related to attack success, when present in the summaries, are treated at this
+stage as technical metadata of the generation process and not as conclusive
+evidence of model behavior. The quantitative analysis of the effects of the
+attacks, including the variation of metrics with respect to clean inputs, is
+deferred to the section dedicated to the evaluation protocol and,
+subsequently, to the chapter on experimental results.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-forensic transformation selection and generation}
@@ -1934,30 +1935,31 @@ chapter on experimental results.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The anti-forensic phase of the \gls{fairlab} protocol introduces a set of
-realistic transformations of the image artifact, applied to the binary
-\texttt{weapon}/\texttt{non\_weapon} subset. Unlike the model-dependent
-adversarial attacks described in
+controlled and operationally plausible transformations of the image artifact,
+applied to the binary \texttt{weapon}/\texttt{non\_weapon} subset. Unlike the
+model-dependent adversarial attacks described in
 Section~\ref{sec:methodology-adversarial-attacks}, these transformations are
 not optimized with respect to the gradient, the loss function, or the decision
 boundary of a specific classifier. Rather, they represent plausible image file
 manipulations, attributable to recompression, resizing, blurring, histogram
 modification, and contrast alteration. In this sense, their methodological
-function is to evaluate classification stability in the presence of realistic
-modifications that may alter visual or statistical characteristics of the image
-without necessarily making it semantically unrecognizable.
+function is to evaluate classification stability in the presence of
+operationally plausible modifications that may alter the visual or statistical
+characteristics of the image without necessarily making it semantically
+unrecognizable.
 
-The adjective anti-forensic is therefore used in an experimental and operational
-sense: it does not necessarily imply the subjective intent of the author of the
-manipulation, but denotes transformations that may reduce, alter, or make the
-automated analysis of the image less stable.
+The adjective anti-forensic is therefore used in an experimental and
+operational sense: it does not necessarily imply subjective intent on the part
+of the author of the manipulation, but denotes transformations that may reduce,
+alter, or destabilize the automated analysis of the image.
 
 The official script for this phase is
 \codepath{datasets/scripts/attacks/13_generate_anti_forensic_attacks.py}.
-It uses as input the manifest
-\codepath{datasets/splits/manifests/clean_folds_manifest.csv} and generates the
-transformed artifacts in the directory \codepath{attacks/anti_forensic/}. The
-output structure preserves the separation by transformation, fold, and class,
-according to the pattern
+It takes as input the manifest
+\codepath{datasets/splits/manifests/clean_folds_manifest.csv} and generates
+the transformed artifacts in the directory
+\codepath{attacks/anti_forensic/}. The output structure preserves the
+separation by transformation, fold, and class, according to the pattern
 \codepath{attacks/anti_forensic/<attack>/<fold>/<label>/<image_id>__<attack>.jpg}.
 This organization makes it possible to preserve the link between each
 transformed image, its fold membership, the original class, and the
@@ -1968,16 +1970,16 @@ recompression, resample~+~resize, Gaussian blur, histogram modification, and
 contrast stretching. \gls{jpeg} recompression applies a new lossy encoding of
 the image, introducing artifacts compatible with ordinary scenarios of file
 saving, forwarding, or conversion. The resample~+~resize transformation
-temporarily reduces the image resolution and restores it to the original size
-through interpolation, simulating degradations due to repeated resizing or
-transitions across platforms. Gaussian blur introduces controlled blurring,
-which is useful for evaluating the classifier's dependence on local details and
+temporarily reduces the image resolution and then restores it to the original
+size through interpolation, simulating degradations due to repeated resizing
+or transitions across platforms. Gaussian blur introduces controlled blurring,
+useful for evaluating the classifier's dependence on local details and
 high-frequency edges. Histogram modification alters the tonal distribution
 through histogram equalization, whereas contrast stretching applies contrast
 normalization through autocontrast with a controlled cutoff. These
 transformations are consistent with an anti-forensic perspective because they
 operate on the image artifact without intentionally introducing a perturbation
-constructed on the model.
+constructed against the model.
 
 \begin{table}[H]
 \centering
@@ -2090,54 +2092,57 @@ Autocontrast with percentage cutoff equal to 1.0; output in
 These transformations are not intended as an exhaustive catalog of
 anti-forensic techniques applicable to digital images, nor as simple data
 augmentation operations. Within the \gls{fairlab} protocol, they assume a
-specific operational function: simulating realistic and reproducible
-manipulations of the image artifact, potentially capable of modifying visual,
-statistical, or compression-related characteristics that are relevant to
-automated classification and triage systems.
+specific operational function: simulating controlled, reproducible, and
+operationally plausible manipulations of the image artifact, potentially
+capable of modifying the visual, statistical, or compression-related
+characteristics that are relevant to automated classification and triage
+systems.
 
-In the consolidated run of the pipeline, each transformation was applied to the
-1000 images of the binary subset, preserving the distribution of the five folds
-and the balance between the \texttt{weapon} and \texttt{non\_weapon} classes.
-For each transformation, 200 images per fold were therefore produced,
+In the consolidated run of the pipeline, each transformation was applied to
+the 1000 images of the binary subset, preserving the distribution of the five
+folds and the balance between the \texttt{weapon} and \texttt{non\_weapon}
+classes. For each transformation, 200 images per fold were therefore produced,
 corresponding to 500 \texttt{weapon} images and 500 \texttt{non\_weapon}
 images. The total number of generated anti-forensic artifacts is 5000 images.
-This choice makes it possible to compare symmetrically the responses of the
-models and, in the subsequent phases, of the forensic tools with respect to a
-balanced set of manipulations not optimized against the classifier.
+This choice makes it possible to compare the responses of the models, and, in
+the subsequent phases, of the selected software, symmetrically with respect to
+a balanced set of manipulations not optimized against the classifier.
 
 The main settings of the transformations are summarized in
 Table~\ref{tab:methodology-anti-forensic-parameters}. The complete run
 configuration is recorded in the summary
-\codepath{attacks/manifests/anti_forensic_generation_summary.json}, whereas the
-manifest \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}
-preserves the link between clean image, applied transformation, parameters,
-output path, and hash of the generated artifact. The adopted parameters are not
-presented as an optimal configuration, but as controlled and reproducible
-settings for introducing moderate and comparable degradations across the entire
-experimental subset.
+\codepath{attacks/manifests/anti_forensic_generation_summary.json}, whereas
+the manifest \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}
+preserves the link between the clean image, the applied transformation, the
+parameters, the output path, and the hash of the generated artifact. The
+adopted parameters are not presented as an optimal configuration, but as
+controlled and reproducible settings for introducing moderate and comparable
+degradations across the entire experimental subset.
 
 The pipeline produces the manifest
 \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}, in which each
-row describes a transformed image and preserves the link with the original clean
-sample. The manifest records fields such as
+row describes a transformed image and preserves the link with the original
+clean sample. The manifest records fields such as
 \texttt{generated\_image\_id}, \texttt{original\_image\_id}, \texttt{fold},
 \texttt{final\_label}, \texttt{source\_dataset}, \texttt{clean\_relative\_path},
 \texttt{perturbed\_relative\_path}, \texttt{attack\_family},
 \texttt{attack\_name}, \texttt{attack\_parameters}, \texttt{sha256\_original},
 \texttt{md5\_original}, \texttt{sha256\_perturbed}, and
 \texttt{md5\_perturbed}. Recording the hashes makes it possible to verify both
-the identity of the clean file and that of the transformed artifact, preserving
-traceability between input, applied transformation, and generated output.
+the identity of the clean file and that of the transformed artifact,
+preserving traceability between input, applied transformation, and generated
+output.
 
-The summary file also documents the consistency checks of the generation phase:
-correspondence between expected images and actually produced images, uniqueness
-of generated identifiers, uniqueness of the \gls{sha256} hashes of the
-transformed images, and correct writing of the manifest. These checks do not
-constitute an evaluation of robustness results, but attest to the technical
-coherence of anti-forensic artifact generation. The analysis of the impact of
-these transformations on model performance and, subsequently, on forensic tools
-is deferred to the sections dedicated to the metric protocol and to the results
-chapter.
+The summary file also documents the consistency checks of the generation
+phase: correspondence between expected images and actually produced images,
+uniqueness of generated identifiers, uniqueness of the \gls{sha256} hashes of
+the transformed images, and correct writing of the manifest. These checks do
+not constitute an evaluation of robustness results, but attest to the
+technical coherence of anti-forensic artifact generation. The analysis of the
+impact of these transformations on model performance and, subsequently, on the
+selected software is deferred to the sections dedicated to the evaluation
+metrics and to the results chapter.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic evaluation bundle}
@@ -2145,34 +2150,35 @@ chapter.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The operational black-box evaluation of the selected software requires the
-artifacts produced by the experimental protocol to be transferred to the tools
-under evaluation without exposing, during import, semantic information that
-could influence the analysis. For this reason, after the generation of the clean
-splits, adversarial images, and anti-forensic transformations, a
+artifacts produced by the experimental protocol to be transferred to the
+systems under evaluation without exposing, during import, semantic information
+that could influence the analysis. For this reason, after the generation of
+the clean splits, adversarial images, and anti-forensic transformations, a
 \textit{forensic evaluation bundle} is constructed, namely an organized and
 traceable corpus intended for operational evaluation through selected
-commercial tools, including both professional forensic platforms and
-general-purpose software equipped with \gls{ai}-based functionalities relevant
+commercial software, including both professional forensic platforms and
+general-purpose software equipped with \gls{ai}-based functionality relevant
 to visual retrieval and triage. This bundle does not modify the experimental
-ground truth, but separates it from the inputs actually submitted to the tools,
-preserving it in the control metadata.
+ground truth, but separates it from the inputs actually submitted to the
+software, preserving it in the control metadata.
 
 The official script for this phase is
 \codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py}.
-The bundle is generated from the already consolidated artifacts of the pipeline:
-clean images from the binary subset, the \gls{ood} set, adversarial images, and
-anti-forensic images. The objective is not merely to collect the files in a
-common directory, but to produce a structure that supports two complementary
-access modes: a blind and flat view for import into forensic tools, and a
-structured view for internal audit and experimental verification.
+The bundle is generated from the already consolidated artifacts of the
+pipeline: clean images from the binary subset, the \gls{ood} set, adversarial
+images, and anti-forensic images. The objective is not merely to collect the
+files in a common directory, but to produce a structure that supports two
+complementary access modes: a blind and flat view for import into the selected
+software, and a structured view for internal audit and experimental
+verification.
 
 In the consolidated run, the bundle was generated with the \texttt{both}
 layout. The main directory \codepath{datasets/forensic_evaluation_bundle/}
 contains three components: the \codepath{metadata/} directory, which preserves
 manifests and summaries; the \codepath{blind_tool_input/files/} directory,
-which contains only the files to be imported into the forensic tools; and the
-\codepath{structured_audit_view/} directory, which maintains a view organized by
-experimental family. The structure is summarized in
+which contains only the files to be imported into the selected software; and
+the \codepath{structured_audit_view/} directory, which maintains a view
+organized by experimental family. The structure is summarized in
 Table~\ref{tab:methodology-forensic-bundle-layout}.
 
 \begin{table}[H]
@@ -2192,34 +2198,35 @@ provenance, classes, attack family, folds, hashes, control paths, and the audit
 of embedded metadata. \\
 \codepath{blind_tool_input/files/}
 &
-Contains the blind view to be imported into the evaluated forensic tools. Files
-are renamed with neutral identifiers, for example \texttt{bundle\_000001.jpg}
-or \texttt{bundle\_000002.png}. \\
+Contains the blind view to be imported into the evaluated software. Files are
+renamed with neutral identifiers, for example \texttt{bundle\_000001.jpg} or
+\texttt{bundle\_000002.png}. \\
 \codepath{structured_audit_view/clean/}
 &
 Internal view of the clean artifacts from the binary subset, intended only for
-audit and experimental verification, not for import into the tools. \\
+audit and experimental verification, not for import into the selected software. \\
 
 \codepath{structured_audit_view/ood/}
 &
 Internal view of the \gls{ood} set, intended only for audit and experimental
-verification, not for import into the tools. \\
+verification, not for import into the selected software. \\
 
 \codepath{structured_audit_view/adversarial/}
 &
 Internal view of the images generated through adversarial attacks, intended only
-for audit and experimental verification, not for import into the tools. \\
+for audit and experimental verification, not for import into the selected
+software. \\
 
 \codepath{structured_audit_view/anti_forensic/}
 &
 Internal view of the images generated through anti-forensic transformations,
 intended only for audit and experimental verification, not for import into the
-tools. \\
+selected software. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-For evaluation with forensic tools, only the directory
+For evaluation with the selected software, only the directory
 \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/} must be
 imported. The \codepath{metadata/} and \codepath{structured_audit_view/}
 directories must not be imported. This rule is essential to reduce the risk of
@@ -2228,12 +2235,12 @@ names containing information such as \texttt{weapon}, \texttt{non\_weapon},
 \texttt{ood}, \texttt{fgsm}, \texttt{sigma\_zero}, \texttt{gaussian\_blur},
 \texttt{efficientnet\_b0}, or \texttt{fold\_1} could reveal the nature of the
 sample before automated or manual analysis. The blind view prevents such
-information from being exposed to the tool or to the analyst during the import
-phase, while the metadata preserve the ground truth required for subsequent
-result normalization.
+information from being exposed to the software or to the analyst during the
+import phase, while the metadata preserve the ground truth required for
+subsequent result normalization.
 
-The bundle contains a total of 11\,500 files in the blind view and 11\,500 files
-in the structured view. Its composition is reported in
+The bundle contains a total of 11\,500 files in the blind view and 11\,500
+files in the structured view. Its composition is reported in
 Table~\ref{tab:methodology-forensic-bundle-counts}. The counts describe the
 methodological coverage of the bundle and do not constitute experimental
 results: they attest that all input families expected by the protocol were
@@ -2272,107 +2279,107 @@ artifact in the bundle and represents the main reference for linking each
 \texttt{bundle\_id} to the corresponding original image, class, experimental
 family, attack or transformation type, fold, and source. The file
 \texttt{bundle\_hashes\_sha256.csv} provides a view focused on hashes and
-paths, useful for verifying file identity and facilitating alignment with tool
-exports. The file \texttt{bundle\_summary.json} summarizes the counts and
-integrity checks, including uniqueness of \texttt{bundle\_id} values,
+paths, useful for verifying file identity and facilitating alignment with
+software exports. The file \texttt{bundle\_summary.json} summarizes the counts
+and integrity checks, including uniqueness of \texttt{bundle\_id} values,
 uniqueness of the effective \gls{sha256} hashes, correspondence between hashes
 and those reported in the source manifests when available, absence of missing
 blind paths, semantic cleanliness of blind paths, and separation of metadata
-from tool inputs. Although \gls{sha256} constitutes the primary cryptographic
-identifier, the bundle also preserves \gls{md5} values when available, since
-some forensic tools expose or use this hash in their reports and correlation
-mechanisms.
+from software inputs. Although \gls{sha256} constitutes the primary
+cryptographic identifier, the bundle also preserves \gls{md5} values when
+available, since some software systems expose or use this hash in their reports
+and correlation mechanisms.
 
 The blindness of the bundle mainly concerns file names, paths, and directory
 structure. Since embedded metadata may contain information related to the
 acquisition device, processing software, provenance, or semantic descriptors of
 the content, and since such information may be used in forensic analysis of
-multimedia content, bundle construction was accompanied by an automatic audit of
-the metadata present in the blind view
-\cite{xiang2021forensicmetadata,lee2023forensicmethodology,zheng2023exif}.
+multimedia content, bundle construction was accompanied by an automatic audit
+of the metadata present in the blind view~\cite{xiang2021forensicmetadata,lee2023forensicmethodology,zheng2023exif}.
 This control does not modify the artifacts, but verifies the presence of terms
 potentially attributable to the experimental classes, folds, perturbation
 families, proxy models, or semantic descriptors of the visual content.
 
 In the consolidated run, the audit verified the entire content of the
-\codepath{blind_tool_input/files/} directory, checking for embedded metadata and
-terms potentially attributable to the experimental classes, folds, perturbation
-families, proxy models, or semantic descriptors of the visual content. The
-outcome of the control was saved in the files
+\codepath{blind_tool_input/files/} directory, checking for embedded metadata
+and terms potentially attributable to the experimental classes, folds,
+perturbation families, proxy models, or semantic descriptors of the visual
+content. The outcome of the control was saved in the files
 \codepath{metadata/embedded_metadata_audit.csv} and
 \codepath{metadata/embedded_metadata_audit_summary.json}. Any identified cases
 are not treated as a primary experimental variable, but as a sensitivity check
 and as a controlled operational limitation of the bundle's blindness; their
 quantification and interpretation are deferred to the results chapter, in
 relation to the predictions of the proxy models and the normalized outputs of
-the black-box tools. Consequently, the blindness of the bundle must be
+the selected software. Consequently, the blindness of the bundle must be
 understood as a methodological control over the information channels directly
-controlled by the pipeline, not as an absolute guarantee of the absence of any
-latent or embedded information in the image file.
+controlled by the pipeline, not as an absolute guarantee that the image file
+contains no latent or embedded information.
 
-The subsequent operational evaluation with forensic tools uses the bundle as a
-controlled input and separates the file import phase from the output
-normalization phase. Tools that integrate proprietary or not fully inspectable
-modules are treated as black-box or quasi-black-box systems. The pipeline does
-not assume access to their internal models, decision thresholds, or proprietary
-classification logic, but analyzes the exportable outputs and normalizes them
-with respect to
+The subsequent operational evaluation with the selected software uses the
+bundle as a controlled input and separates the file import phase from the output
+normalization phase. Software systems that integrate proprietary or not fully
+inspectable modules are treated as black-box or quasi-black-box systems. The
+pipeline does not assume access to their internal models, decision thresholds,
+or proprietary classification logic, but instead analyzes the exportable outputs
+and normalizes them with respect to
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}.
-This approach is consistent with the need to evaluate the operational
-reliability of professional tools under controlled conditions, without
-confusing experimental validation with a general certification of the product
-\cite{sanna2024preliminary,sanna2025pixelperfect}. In this sense, the forensic
-evaluation bundle represents the controlled point of contact between the
-reproducible pipeline of the thesis and external software environments, while
-preserving operational blindness, forensic traceability, and metric
-comparability.
+This approach is consistent with the need to evaluate operational reliability
+under controlled conditions, without confusing experimental validation with a
+general certification of the product~\cite{sanna2024preliminary,sanna2025pixelperfect}.
+In this sense, the forensic evaluation bundle represents the controlled point
+of contact between the reproducible pipeline of the thesis and external
+software environments, while preserving operational blindness, forensic
+traceability, and metric comparability.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Forensic tools evaluation protocol}
+\section{Selected software evaluation protocol}
 \label{sec:methodology-forensic-tools}
 % ─────────────────────────────────────────────────────────────────────────────
 
 The forensic-operational pipeline of \gls{fairlab} includes the evaluation of
-commercial tools equipped with automated or \gls{ai}-assisted analysis
-functionalities for multimedia content. Unlike the proxy models described in
-Section~\ref{sec:methodology-models-classification}, these tools are treated as
-black-box systems: the analysis does not assume access to the internal
-architecture, training data, decision thresholds, or weights of any integrated
-models, but considers only the observable outputs produced during a controlled
-experimental workflow.
+selected commercial software systems equipped with automated or
+\gls{ai}-assisted analysis functionality for multimedia content. Unlike the
+proxy models described in
+Section~\ref{sec:methodology-models-classification}, these systems are treated
+as black-box or quasi-black-box components: the analysis does not assume access
+to the internal architecture, training data, decision thresholds, or weights of
+any integrated models, but considers only the observable outputs produced
+during a controlled experimental workflow.
 
 The objective of this phase is not to certify the reliability of the considered
 products in general terms, nor to compare heterogeneous commercial platforms in
 an absolute sense. Rather, the purpose is to evaluate, under reproducible
-conditions, the operational behavior of \gls{ai}-based tools when exposed to
-clean images, out-of-distribution images, and images manipulated through
-adversarial perturbations or anti-forensic transformations. In this way, the
-evaluation of commercial tools complements the evaluation of proxy models, while
-keeping the two levels of analysis distinct: on the one hand, fully inspectable
-and reproducible academic models; on the other hand, professional tools
-characterized by internal logic that is not fully accessible and by proprietary
-output categories.
+conditions, the operational behavior of \gls{ai}-based software systems when
+exposed to clean images, out-of-distribution images, and images manipulated
+through adversarial perturbations or anti-forensic transformations. In this
+way, the evaluation of selected software complements the evaluation of proxy
+models, while keeping the two levels of analysis distinct: on the one hand,
+fully inspectable and reproducible academic models; on the other hand,
+commercial software systems characterized by internal logic that is not fully
+accessible and by proprietary output categories.
 
-The evaluation uses as its exclusive input the blind directory of the bundle,
+The evaluation takes as its exclusive input the blind directory of the bundle,
 namely \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}.
-This directory contains files renamed with neutral identifiers, without semantic
-information about the class, source, fold, attack family, or target model. The
-experimental ground truth is preserved separately in the file
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv} and
-is not exposed to the tools during import. This separation reduces the risk of
-bias induced by file names or paths and makes it possible to normalize outputs
-only at a subsequent stage.
+This directory contains files renamed with neutral identifiers, without
+semantic information about the class, source, fold, attack family, or target
+model. The experimental ground truth is preserved separately in the file
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
+and is not exposed to the software during import. This separation reduces the
+risk of bias induced by file names or paths and makes it possible to normalize
+outputs only at a subsequent stage.
 
-The tools included in the final evaluation are \gls{magnetaxiomtool} with the
-\gls{magnetai} module, \gls{excirefoto2025}, \gls{cellebriteinseyets}, and
-\gls{griffeye} with the \gls{t3kcore} module. \gls{magnetaxiomtool} is
-considered as a commercial forensic platform equipped with automated multimedia
-content categorization functionalities through \gls{magnetai}.
-\gls{excirefoto2025} is instead considered as a standalone general-purpose
-software application with \gls{ai}-based functionalities for semantic search
-and visual image management; it is therefore not presented as a product
-developed exclusively for forensic purposes, but as a black-box component for
-image retrieval and operational classification.
+The software systems included in the final evaluation are
+\gls{magnetaxiomtool} with the \gls{magnetai} module, \gls{excirefoto2025},
+\gls{cellebriteinseyets}, and \gls{griffeye} with the \gls{t3kcore} module.
+\gls{magnetaxiomtool} is considered as a commercial forensic platform equipped
+with automated multimedia content categorization functionality through
+\gls{magnetai}. \gls{excirefoto2025} is instead considered as a standalone
+general-purpose software application with \gls{ai}-based functionality for
+semantic search and visual image management; it is therefore not presented as a
+product developed exclusively for forensic purposes, but as a black-box
+component for image retrieval and operational classification.
 
 \gls{cellebriteinseyets} is considered in this work as a commercial black-box
 platform for assisted multimedia content analysis. The evaluation is conducted
@@ -2382,39 +2389,40 @@ access to the internal model, training data, or decision thresholds employed by
 the vendor.
 
 In this context, \gls{ufed} is not treated as an image classifier, but as a
-possible component of the Cellebrite ecosystem dedicated to data acquisition and
-management. The experimental analysis therefore concerns the automatic media
-classification functionalities made available within the Physical
+possible component of the Cellebrite ecosystem dedicated to data acquisition
+and management. The experimental analysis therefore concerns the automatic
+media classification functionality made available within the Physical
 Analyzer/Inseyets environment. According to the vendor documentation, the image
 classification engine of Cellebrite Physical Analyzer uses \gls{ai} and
 \gls{ml} techniques to recognize visual attributes, assign categories, and
-associate each result with a confidence score between 0 and 1
-\cite{cellebrite_media_classification}. Within the \gls{fairlab} protocol,
+associate each result with a confidence score between 0 and
+1~\cite{cellebrite_media_classification}. Within the \gls{fairlab} protocol,
 these outputs are recoded as black-box results and normalized with respect to
 the experimental manifest.
 
 \gls{griffeye} is considered as a commercial media triage and forensic review
 platform evaluated in black-box mode. In the experimental protocol, the tool is
 analyzed through the automatic semantic bookmarks generated by \gls{t3kcore}.
-These bookmarks are treated as observable operational outputs, similarly to the
-categories, tags, classifications, or retrieval results produced by the other
-tools, and not as local explanations of the internal decision-making process.
-The evaluation does not assume access to the internal logic of the module, but
-explicitly and documentably recodes the exported bookmarks with respect to the
-experimental task. For the purposes of the protocol, the automatic bookmark
-assignment mechanism of \gls{t3kcore} is therefore considered equivalent to the
-other observable black-box outputs: in all cases, the evaluation concerns the
-result exported by the tool and not the internal process that generated it.
+These bookmarks are treated as observable operational outputs, in the same way
+as the categories, tags, classifications, or retrieval results produced by the
+other software systems, and not as local explanations of the internal
+decision-making process. The evaluation does not assume access to the internal
+logic of the module, but explicitly and traceably recodes the exported
+bookmarks with respect to the experimental task. For the purposes of the
+protocol, the automatic bookmark assignment mechanism of \gls{t3kcore} is
+therefore considered equivalent to the other observable black-box outputs: in
+all cases, the evaluation concerns the result exported by the software and not
+the internal process that generated it.
 
 \begin{table}[H]
 \centering
-\caption{Commercial tools included in the final forensic-operational evaluation.}
+\caption{Commercial software systems included in the final forensic-operational evaluation.}
 \label{tab:methodology-forensic-tools}
 \footnotesize
 \renewcommand{\arraystretch}{1.15}
 \begin{tabularx}{\textwidth}{@{}L{3.5cm}L{3.4cm}X@{}}
 \toprule
-\textbf{Tool} & \textbf{Version / environment} & \textbf{Methodological role in the protocol} \\
+\textbf{Software / module} & \textbf{Version / environment} & \textbf{Methodological role in the protocol} \\
 \midrule
 \gls{magnetaxiomtool} / \gls{magnetai}
 &
@@ -2428,9 +2436,9 @@ content. \\
 &
 \texttt{Excire Foto 2025 4.1.5}
 &
-Standalone general-purpose software with \gls{ai}-based functionalities for
+Standalone general-purpose software with \gls{ai}-based functionality for
 semantic search and visual image management, evaluated as a black-box image
-retrieval tool through textual prompts oriented toward the weapon class. \\
+retrieval system through textual prompts oriented toward the weapon class. \\
 \gls{cellebriteinseyets}
 &
 \texttt{Inseyets 10.9} / \texttt{Physical Analyzer 10.9.0.3029}
@@ -2449,24 +2457,24 @@ respect to the forensic evaluation bundle. \\
 \end{tabularx}
 \end{table}
 
-For each tool, the protocol includes three main steps. First, only the blind
-view of the bundle is imported or indexed. Second, the observable outputs
-produced by the tool are exported, including, where available, file name, hash,
-assigned category, tags, classifications, confidence scores, and export
-metadata. Third, the outputs are mapped back to \texttt{bundle\_manifest.csv}
-through \texttt{bundle\_id}, cryptographic hashes, or the blind file name, so as
-to compare the categories produced by the tool with the experimental ground
-truth.
+For each software system, the protocol includes three main steps. First, only
+the blind view of the bundle is imported or indexed. Second, the observable
+outputs produced by the software are exported, including, where available, file
+name, hash, assigned category, tags, classifications, confidence scores, and
+export metadata. Third, the outputs are mapped back to
+\texttt{bundle\_manifest.csv} through \texttt{bundle\_id}, cryptographic
+hashes, or the blind file name, so as to compare the categories produced by the
+software with the experimental ground truth.
 
 \begin{table}[H]
 \centering
-\caption{Summary of normalization rules for commercial tool outputs.}
+\caption{Summary of normalization rules for commercial software outputs.}
 \label{tab:methodology-tool-normalization-summary}
 \footnotesize
 \renewcommand{\arraystretch}{1.15}
 \begin{tabularx}{\textwidth}{@{}L{3.4cm}L{4.2cm}X@{}}
 \toprule
-\textbf{Tool / configuration} &
+\textbf{Software / configuration} &
 \textbf{Observable output} &
 \textbf{Operational normalization rule} \\
 \midrule
@@ -2510,7 +2518,7 @@ subsequently be mapped back to the \texttt{weapon}/\texttt{non\_weapon} task.
 
 In the present protocol, \gls{excirefoto2025} is evaluated as a standalone
 application and not as an integrated module in \texttt{X-Ways Forensics}; the
-latter is outside the scope of the final experimental perimeter.
+latter falls outside the scope of the final experimental protocol.
 
 In the experimental protocol, the intermediate threshold
 \texttt{Distance limit = 50} was adopted as the reference configuration, since
@@ -2552,9 +2560,9 @@ semantic vocabulary used to query the software.
 
 For \gls{cellebriteinseyets}, output normalization is based on the categories
 exported from the \texttt{Cellebrite Physical Analyzer 10.9.0.3029}
-environment. Since the tool does not directly return the experimental classes
-\texttt{weapon} and \texttt{non\_weapon}, weapon-related categories are recoded
-into operational states comparable with the binary task.
+environment. Since the software does not directly return the experimental
+classes \texttt{weapon} and \texttt{non\_weapon}, weapon-related categories are
+recoded into operational states comparable with the binary task.
 Table~\ref{tab:methodology-cellebrite-mapping} reports the mapping used in the
 experimental protocol.
 
@@ -2587,11 +2595,11 @@ Output not exported, ambiguous, or non-interpretable
 \end{tabularx}
 \end{table}
 
-The mapping is not interpreted as access to the internal logic of the tool, but
-as an operational recoding of observable outputs. In particular, the absence of
-a weapon-related category is not treated as semantic evidence that no weapon is
-present in the image, but as a failure by the tool to detect the category of
-interest under the conditions of the protocol.
+The mapping is not interpreted as access to the internal logic of the software,
+but as an operational recoding of observable outputs. In particular, the
+absence of a weapon-related category is not treated as semantic evidence that
+no weapon is present in the image, but as a failure by the software to detect
+the category of interest under the conditions of the protocol.
 
 For \gls{griffeye}, output normalization is based on the automatic semantic
 bookmarks exported from the run \texttt{FAIRLAB\_GRIFFEYE\_T3\_RUN\_01}. The
@@ -2626,15 +2634,16 @@ Output not exported, ambiguous, or non-interpretable
 \end{tabularx}
 \end{table}
 
-Output normalization is necessary because the internal categories of the tools
-do not directly coincide with the experimental classes \texttt{weapon},
-\texttt{non\_weapon}, and \texttt{ood}. For this reason, the pipeline applies an
-explicit and documented mapping of proprietary labels toward an operational
-binary representation based on the \texttt{weapon\_detected} field. This field
-must not be interpreted as an absolute semantic statement about the image,
-either in a positive or in a negative sense: it only indicates whether, under
-the conditions of the protocol, the tool produced an observable output
-attributable to the firearm-oriented category considered.
+Output normalization is necessary because the internal categories of the
+software systems do not directly coincide with the experimental classes
+\texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood}. For this reason, the
+pipeline applies an explicit and documented mapping of proprietary labels onto
+an operational binary representation based on the
+\texttt{weapon\_detected} field. This field must not be interpreted as an
+absolute semantic statement about the image, either in a positive or in a
+negative sense: it only indicates whether, under the conditions of the
+protocol, the software produced an observable output attributable to the
+firearm-oriented category considered.
 
 In the case of \gls{magnetaxiomtool}, the outputs exported by \gls{magnetai}
 are normalized by interpreting the \texttt{Possible weapons} tag as a positive
@@ -2647,32 +2656,33 @@ Table~\ref{tab:methodology-griffeye-mapping}.
 
 The distinction among failed detection, negative classification, and
 non-interpretable state is preserved during normalization. In cases where the
-tool output cannot be reliably mapped to the binary task considered, the
+software output cannot be reliably mapped to the binary task considered, the
 prediction is marked as \texttt{unknown} or treated separately in the export
 audit. This choice avoids automatically transforming ambiguous or unstructured
 outputs into false negatives or true negatives, preserving the traceability of
 the interpretation process.
 
-Normalized outputs are produced through the script
+Normalized outputs are produced using the script
 \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py},
-which generates comparable CSV files for the tools and configurations included
-in the final evaluation. In addition to the normalized predictions, the script
-produces an export audit, a tool version log, a normalization summary, and
-aggregated metric files. This separation among raw export, normalization, and
-metric computation preserves a traceability chain among the original artifact,
-the tool output, the applied mapping rule, and the final quantitative result.
+which generates comparable CSV files for the software systems and
+configurations included in the final evaluation. In addition to the normalized
+predictions, the script produces an export audit, a software version log, a
+normalization summary, and aggregated metric files. This separation among raw
+export, normalization, and metric computation preserves a traceability chain
+among the original artifact, the software output, the applied mapping rule, and
+the final quantitative result.
 
 This approach makes it possible to evaluate the operational robustness of
-commercial tools without attributing to them internal properties that cannot be
-verified. The evaluation therefore remains anchored to observable outputs and
-to their consistency with the experimental manifest, while keeping the
-methodological level, quantitative measurement, and subsequent interpretation
-of the results separate.
+commercial software systems without attributing to them internal properties
+that cannot be verified. The evaluation therefore remains anchored to
+observable outputs and to their consistency with the experimental manifest,
+while keeping the methodological level, quantitative measurement, and
+subsequent interpretation of the results separate.
 
 Figure~\ref{fig:methodology-forensic-tool-workflow} summarizes the
-methodological workflow adopted for the evaluation of forensic tools: the tools
-receive only the blind view of the bundle, while the experimental ground truth
-remains separate until the output normalization phase.
+methodological workflow adopted for the evaluation of the selected software:
+the software systems receive only the blind view of the bundle, while the
+experimental ground truth remains separate until the output normalization phase.
 
 
 
@@ -2821,7 +2831,7 @@ remains separate until the output normalization phase.
 
 \end{tikzpicture}%
 }
-\caption[Forensic tool evaluation workflow]{Forensic tool evaluation workflow based on blind bundle import, tool-side indexing and categorization, export of observable outputs, and normalization against the experimental manifest. The figure highlights the separation between the blind input submitted to the tools and the experimental metadata used only after export for output normalization and metric computation.}
+\caption[Selected software evaluation workflow]{Selected software evaluation workflow based on blind bundle import, software-side indexing and categorization, export of observable outputs, and normalization against the experimental manifest. The figure highlights the separation between the blind input submitted to the software systems and the experimental metadata used only after export for output normalization and metric computation.}
 \label{fig:methodology-forensic-tool-workflow}
 \end{figure}
 
@@ -2836,9 +2846,9 @@ The metric protocol of \gls{fairlab} is designed to evaluate three
 complementary perspectives of operational robustness: the controlled proxy
 models, for which predictions, confidence scores, checkpoints, and class
 mappings are available; the behavior on \gls{ood} inputs, analyzed as an
-operational risk separate from supervised classification; and the commercial
-black-box tools, for which the analysis is based exclusively on the outputs
-exported by the tool. In all cases, the objective is not merely to measure
+operational risk separate from supervised classification; and the selected
+software systems, for which the analysis is based exclusively on the outputs
+exported by the software. In all cases, the objective is not merely to measure
 aggregate accuracy, but to qualify the operational behavior of the systems with
 respect to clean, manipulated, and out-of-distribution inputs. In the forensic
 domain, a false negative on relevant content may have more critical operational
@@ -2850,8 +2860,8 @@ widely used in supervised \gls{ml} contexts, because the objective of this work
 is not to optimize or compare classifiers on the basis of fully available and
 homogeneous continuous scores. Instead, the protocol aims to preserve
 comparability between inspectable proxy models and commercial black-box or
-quasi-black-box forensic tools, which may export only categorical labels, tags,
-assigned classes, or results that are not always accompanied by calibrated
+quasi-black-box software systems, which may export only categorical labels,
+tags, assigned classes, or results that are not always accompanied by calibrated
 scores. For this reason, the main metrics are based on counts, accuracy, error
 rates, prediction distributions, variations with respect to the clean baseline,
 and analysis of the behavior on \gls{ood}, adversarial, and anti-forensic
@@ -2859,7 +2869,7 @@ inputs. This choice does not reflect a theoretical limitation of score-based
 metrics, but a methodological decision oriented toward operational
 comparability among heterogeneous systems.
 
-The consolidated evaluation of the proxy models is performed through the script
+The consolidated evaluation of the proxy models is performed using the script
 \codepath{evaluation/scripts/15_evaluate_proxy_models.py}. The script considers
 the clean folds, the \gls{ood} set, the adversarial images, and the
 anti-forensic images, applying the protocol to the three official proxy models:
@@ -2929,8 +2939,7 @@ precision, recall, F1-score, confusion matrix, and mean confidence.
 The computational implementation of standard classification metrics and
 confusion matrices is based on consolidated functions from the Python machine
 learning ecosystem, in particular Scikit-learn, which is used to support the
-reproducible computation of aggregate and per-class metrics
-\cite{pedregosa2011scikit}.
+reproducible computation of aggregate and per-class metrics~\cite{pedregosa2011scikit}.
 
 Robustness evaluation also requires comparative metrics between clean and
 manipulated inputs, such as clean accuracy, perturbed accuracy, accuracy drop,
@@ -2949,8 +2958,8 @@ classification. For \texttt{ood} samples, the protocol records whether they are
 classified as \texttt{weapon} or \texttt{non\_weapon}, measures the mean
 confidence associated with the predictions, and computes the possible rate of
 high-confidence predictions. This approach avoids treating the \texttt{ood}
-class as an ordinary third supervised class: the methodological point is not to
-estimate multiclass accuracy, but to verify whether a system tends to force
+category as an ordinary third supervised class: the methodological point is not
+to estimate multiclass accuracy, but to verify whether a system tends to force
 anomalous or borderline inputs into one of the two operational classes of the
 task.
 
@@ -2980,7 +2989,7 @@ assigned to false negatives on relevant content. \\
 \gls{ood} weapon flag rate, \gls{ood} predicted as \texttt{weapon},
 \gls{ood} predicted as \texttt{non\_weapon}, mean confidence on \gls{ood}, and
 \gls{ood} high-confidence rate. \\
-Forensic tools
+Selected software
 &
 True positive, false negative, false positive, true negative, matching rate,
 unknown/unmapped output rate, not detected, uncategorized, weapon recall,
@@ -2994,7 +3003,7 @@ reliably mapped to the binary task.\\
 Figure~\ref{fig:methodology-metric-layers} summarizes the three metric layers
 used in the evaluation protocol: classification and robustness of the proxy
 models, out-of-distribution behavior, and normalization of the outputs produced
-by commercial black-box tools.
+by selected black-box software systems.
 
 \begin{figure}[H]
 \centering
@@ -3078,7 +3087,7 @@ by commercial black-box tools.
 
 \node[metric] (tools) at (0,-5.4)
 {\shortstack{
-    \textbf{Commercial tool metrics}\\[1mm]
+    \textbf{Selected software metrics}\\[1mm]
     \scriptsize TP, FP, TN, FN, weapon recall, FNR, FPR\\
     \scriptsize unknown, unmapped and matching rates
 }};
@@ -3087,14 +3096,14 @@ by commercial black-box tools.
 {\shortstack{
     \textbf{Operational comparability rule}\\[1mm]
     \scriptsize AUROC is not used as a central metric because\\
-    \scriptsize black-box tools may not expose calibrated scores
+    \scriptsize black-box software may not expose calibrated scores
 }};
 
 \node[output] (summary) at (0,-10.0)
 {\shortstack{
     \textbf{Final robustness interpretation}\\[1mm]
     \scriptsize clean baseline, degradation under perturbation, OOD risk\\
-    \scriptsize and black-box tool reliability
+    \scriptsize and black-box software reliability
 }};
 
 \draw[arrow] (inputs.south west) -- (proxy.north);
@@ -3112,17 +3121,17 @@ by commercial black-box tools.
 the evaluation protocol. Proxy models are evaluated with standard
 classification, robustness and confidence-based metrics. The \gls{ood} set is
 evaluated separately to measure whether out-of-distribution samples are forced
-into operational classes. Commercial tools are evaluated through normalized
-black-box outputs, including detection, error and unknown/unmapped states. The
-three metric layers are analytically distinct and are integrated only in the
-final robustness interpretation.}
+into operational classes. Selected software systems are evaluated through
+normalized black-box outputs, including detection, error and unknown/unmapped
+states. The three metric layers are analytically distinct and are integrated
+only in the final robustness interpretation.}
 \label{fig:methodology-metric-layers}
 \end{figure}
 
-For forensic tools, the metric protocol must be adapted to the nature of the
-available outputs. The tools may produce categories that do not perfectly
-overlap with the binary task, non-standardized confidence scores, proprietary
-labels, or intermediate states such as \texttt{unknown},
+For selected software systems, the metric protocol must be adapted to the
+nature of the available outputs. The software may produce categories that do
+not perfectly overlap with the binary task, non-standardized confidence scores,
+proprietary labels, or intermediate states such as \texttt{unknown},
 \texttt{not\_detected}, or \texttt{uncategorized}. For this reason, the outputs
 are normalized with respect to the bundle manifest and mapped, where possible,
 to the operational categories \texttt{weapon}, \texttt{non\_weapon},
@@ -3131,13 +3140,13 @@ automatically forced into \texttt{non\_weapon}: it is kept as a separate
 category because, in a forensic workflow, absence of detection and negative
 classification are not equivalent.
 
-In the case of the evaluated forensic tools, a false negative on
+In the case of the evaluated software systems, a false negative on
 \texttt{weapon}, including the case in which a relevant artifact is returned as
 \texttt{unknown}, \texttt{not\_detected}, or uncategorized, is considered a
 critical operational error. A false positive on \texttt{non\_weapon} is also
-relevant, since it may increase the review workload, but it has a different
-criticality from the failure to surface potentially relevant content. This
-distinction reflects the nature of the evaluation: the objective is not to
+relevant, since it may increase the review workload, but it carries a different
+degree of criticality than the failure to surface potentially relevant content.
+This distinction reflects the nature of the evaluation: the objective is not to
 optimize an abstract metric, but to estimate the operational reliability of
 automated support in a forensic triage and prioritization context. For this
 reason, the interpretation of the metrics prioritizes the risk of failing to
@@ -3145,6 +3154,7 @@ surface relevant content over the sole maximization of aggregate accuracy.
 Within the protocol, the metrics do not replace human review, but serve to
 qualify when and under which conditions automated support may reduce, alter, or
 increase the priority assigned to artifacts submitted to the analyst.
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -3163,18 +3173,18 @@ out-of-distribution cases.
 
 The official script used for this phase is
 \codepath{explainability/scripts/17_generate_integrated_gradients_case_studies.py}.
-The technique considered is Integrated Gradients, which is applicable only to
-transparent proxy models for which the architecture, weights, and preprocessing
-pipeline are available \cite{Sundararajan2017}. Integrated Gradients requires
-access to the differentiable model, the gradients, and the input transformation
-adopted during evaluation.
+The technique considered is \gls{ig}, which is applicable only to transparent
+proxy models for which the architecture, weights, and preprocessing pipeline
+are available~\cite{Sundararajan2017}. \gls{ig} requires access to the
+differentiable model, the gradients, and the input transformation adopted
+during evaluation.
 
-The technique is not internally applicable to proprietary black-box or
-quasi-black-box tools, since the underlying model, gradients, decision
-thresholds, and proprietary scoring functions are not available for such
-systems. Any comparison with proprietary or professional tools can therefore
-only be performed at the level of observable outputs, not at the level of
-internal attribution.
+The technique is not applicable internally to proprietary black-box or
+quasi-black-box software systems, since the underlying model, gradients,
+decision thresholds, and proprietary scoring functions are not available for
+such systems. Any comparison with proprietary or professional software can
+therefore only be performed at the level of observable outputs, not at the
+level of internal attribution.
 
 The main input of the \gls{xai} phase is
 \codepath{evaluation/proxy_models/proxy_model_predictions.csv}. Starting from
@@ -3184,9 +3194,9 @@ misclassified in their perturbed version, critical
 \texttt{weapon}~$\rightarrow$~\texttt{non\_weapon} transitions,
 high-confidence \gls{ood} samples classified into one of the two binary
 classes, divergences among proxy models, and, in subsequent phases, possible
-divergences between proxy models and forensic tools. Case selection is not
-intended to estimate an aggregate metric, but to construct a controlled set of
-examples useful for the qualitative discussion of robustness.
+divergences between proxy models and selected software systems. Case selection
+is not intended to estimate an aggregate metric, but to construct a controlled
+set of examples useful for the qualitative discussion of robustness.
 
 \begin{table}[H]
 \centering
@@ -3212,20 +3222,20 @@ Divergences among proxy models
 &
 Compare the behavior of different architectures with respect to the same
 artifact. \\
-Proxy/tool divergences, where available
+Proxy/software divergences, where available
 &
 Prepare cases for qualitative comparison with the observable outputs of the
-evaluated forensic tools, when such outputs are available and normalized. \\
+selected software systems, when such outputs are available and normalized. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 Figure~\ref{fig:methodology-integrated-gradients-example} shows a
 representative example of the structure of the outputs produced by the
-Integrated Gradients analysis. The example has a methodological function and
-illustrates the type of artifacts used for qualitative analysis: input image,
-attribution map, overlay on the original image, and mask of the regions with
-highest attribution.
+\gls{ig} analysis. The example has a methodological function and illustrates
+the type of artifacts used for qualitative analysis: input image, attribution
+map, overlay on the original image, and mask of the regions with highest
+attribution.
 
 \begin{figure}[H]
 \centering
@@ -3289,17 +3299,20 @@ qualitative evidence, while maintaining the distinction among technical
 explainability, experimental evaluation, and forensic use of the information
 produced.
 
-The choice of Integrated Gradients prioritizes an attribution technique that can
-be applied consistently to the differentiable proxy models of the pipeline,
-without introducing additional levels of approximation associated with
-surrogate methods. Alternative techniques, such as Grad-CAM, SHAP, or LIME,
-remain compatible with future extensions of the protocol, but they do not
-constitute the focus of the current evaluation.
+The choice of \gls{ig} prioritizes an attribution technique that can be applied
+consistently to the differentiable proxy models of the pipeline, without
+introducing additional levels of approximation associated with surrogate
+methods. Alternative techniques, such as Grad-CAM, SHAP, or LIME, remain
+compatible with future extensions of the protocol, but they do not constitute
+the focus of the current evaluation.
 
 The \gls{xai} analysis is not used to assign autonomous evidentiary validity to
 the automated decision, but as diagnostic support for interpreting selected
 cases and for qualitatively discussing possible variations in model behavior in
 the presence of manipulated or out-of-distribution inputs.
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Traceability and reproducibility controls}
@@ -3311,25 +3324,26 @@ protocol. It does not concern only dataset construction, but extends across all
 phases of the experimental workflow: technical preparation,
 \textit{human-in-the-loop} review, freezing, split generation, proxy model
 training, adversarial generation, anti-forensic transformations, bundle
-construction, metric evaluation, and the \gls{xai} approach. Consistently with
+construction, metric evaluation, and the \gls{xai} approach. Consistent with
 the principles of \gls{df}, every transformation of the digital artifact must
 be documented so as to enable reconstruction of the path between the original
 file, the derived artifact, the experimental output, and the verification
-metadata \cite{casey2011digital,nist2006guide,iso27037}.
+metadata~\cite{casey2011digital,nist2006guide,iso27037}.
 
 The \gls{sha256} value is the primary cryptographic identifier of the pipeline.
 It is computed on the prepared files, propagated through subsequent manifests,
 and recomputed on the generated artifacts, including adversarial images,
 anti-forensic images, and bundle files. The \gls{md5} value is recorded as an
-auxiliary hash, especially to facilitate comparison with forensic tools that may
-expose this value in their reports or hash sets. This dual recording does not
-assign \gls{md5} the role of primary identifier, but preserves its operational
-utility for alignment with heterogeneous tools and formats.
+auxiliary hash, especially to facilitate comparison with selected software
+systems that may expose this value in their reports or hash sets. This dual
+recording does not assign \gls{md5} the role of primary identifier, but
+preserves its operational utility for alignment with heterogeneous software
+systems and formats.
 
 The pipeline uses progressive manifests. The transition from
 \texttt{metadata.csv} to \texttt{review\_manifest\_full.csv}, then to
 \texttt{manual\_selection\_final\_1500.csv},
-\codepath{manual_selection_adversarial_subset.csv},
+\texttt{manual\_selection\_adversarial\_subset.csv},
 \texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv}, attack
 manifests, the anti-forensic manifest, \texttt{bundle\_manifest.csv}, proxy
 model predictions, and \gls{xai} manifests makes it possible to reconstruct the
@@ -3390,7 +3404,7 @@ Documents the cases selected for qualitative analysis through \gls{xai}. \\
 Figure~\ref{fig:methodology-traceability-chain} summarizes the traceability
 chain adopted in the experimental protocol. Each phase preserves or generates
 identifiers, paths, hashes, and manifests that make it possible to reconstruct
-the link among the original file, the derived artifact, the model or tool
+the link among the original file, the derived artifact, the model or software
 output, and the final metric result.
 
 \begin{figure}[H]
@@ -3489,8 +3503,8 @@ output, and the final metric result.
 
 \node[output] (outputs) at (0,-10.5)
 {\shortstack{
-    \textbf{Model and tool outputs}\\[1mm]
-    \scriptsize proxy predictions, tool exports and normalized outputs
+    \textbf{Model and software outputs}\\[1mm]
+    \scriptsize proxy predictions, software exports and normalized outputs
 }};
 
 \node[output] (results) at (0,-12.6)
@@ -3526,7 +3540,7 @@ output, and the final metric result.
 
 \end{tikzpicture}%
 }
-\caption[Traceability chain across the FAIR-Lab protocol]{Traceability chain across the FAIR-Lab protocol. Each experimental stage preserves or generates identifiers, paths, cryptographic hashes and manifests, enabling reconstruction from the original prepared image to derived artifacts, bundle entries, model or tool outputs, metrics and explainability case studies.}
+\caption[Traceability chain across the FAIR-Lab protocol]{Traceability chain across the FAIR-Lab protocol. Each experimental stage preserves or generates identifiers, paths, cryptographic hashes and manifests, enabling reconstruction from the original prepared image to derived artifacts, bundle entries, model or software outputs, metrics and explainability case studies.}
 \label{fig:methodology-traceability-chain}
 \end{figure}
 
@@ -3536,37 +3550,44 @@ according to a fold-aware protocol. For each model and fold, the file
 \codepath{models/model_registry.json} records the checkpoint, normalization,
 input size, and \gls{sha256} hash of the \texttt{.pt} file. Model-dependent
 attacks use the checkpoint trained by excluding the fold to which the target
-image belongs, consistently with the fold-aware protocol defined in
+image belongs, consistent with the fold-aware protocol defined in
 Section~\ref{sec:methodology-models-classification}. In this way, the proxy
-model has not seen during training the image that is perturbed or evaluated,
-reducing the risk of leakage and overestimation of robustness.
+model has not seen the perturbed or evaluated image during training, reducing
+the risk of leakage and overestimation of robustness.
 
-An additional control concerns the risk of bias in the evaluation with forensic
-tools. The forensic evaluation bundle explicitly separates the blind directory
-to be imported into the tools from the metadata directory and the structured
-audit view. The file names in the blind view do not expose class, attack family,
-fold, source, or target model. In this way, the evaluation can be linked back to
-the manifests only after the tool outputs have been exported, reducing the risk
-that the analysis is influenced by cues present in the path or file name.
+An additional control concerns the risk of bias in the evaluation with the
+selected software systems. The forensic evaluation bundle explicitly separates
+the blind directory to be imported into the software from the metadata
+directory and the structured audit view. The file names in the blind view do
+not expose class, attack family, fold, source, or target model. In this way,
+the evaluation can be linked back to the manifests only after the software
+outputs have been exported, reducing the risk that the analysis is influenced
+by cues present in the path or file name.
 
 The automatic controls recorded in the JSON summaries verify the correspondence
 between expected and produced counts, the uniqueness of generated identifiers,
-the uniqueness of \gls{sha256} hashes, the correct writing of manifests, and, in
-the case of the bundle, the separation of metadata from blind inputs. These
+the uniqueness of \gls{sha256} hashes, the correct writing of manifests, and,
+in the case of the bundle, the separation of metadata from blind inputs. These
 controls do not replace the critical analysis of the results, but make it
 possible to document the coherence between the produced experimental artifacts
 and the defined protocol.
 
-Finally, the methodology presents some explicit limitations. The semantic review
-of the dataset was conducted by a single reviewer and therefore does not include
-a formal measure of inter-annotator agreement. The proprietary or professional
-tools evaluated are treated as black-box or quasi-black-box systems, and their
-internal categories may not be perfectly equivalent to the binary
-\texttt{weapon}/\texttt{non\_weapon} task.
+Finally, the methodology presents some explicit limitations. The semantic
+review of the dataset was conducted by a single reviewer and therefore does
+not include a formal measure of inter-annotator agreement. The proprietary or
+professional software systems evaluated are treated as black-box or
+quasi-black-box systems, and their internal categories may not be perfectly
+equivalent to the binary \texttt{weapon}/\texttt{non\_weapon} task.
 
-The software versions, enabled modules, import settings, and export modes of the
-forensic tools are documented in the dedicated methodological sections and will
-be recalled, where necessary, in the results chapter and in the appendices. In
-this way, the description of the protocol remains separate from the discussion
-of the experimental outcomes, while preserving the connection with the
-configurations actually used in the runs.
+The software versions, enabled modules, import settings, and export modes of
+the selected software systems are documented in the dedicated methodological
+sections and will be recalled, where necessary, in the results chapter and in
+the appendices. In this way, the description of the protocol remains separate
+from the discussion of the experimental outcomes, while preserving the
+connection with the configurations actually used in the runs.
+
+
+
+
+
+
