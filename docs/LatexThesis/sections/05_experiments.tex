@@ -237,31 +237,28 @@ errors, missed detections, uncategorized outputs, non-interpretable mappings,
 and limitations specific to the export formats of individual software systems.
 
 
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Clean Baseline Performance}
 \label{sec:results-clean-baseline}
 % ─────────────────────────────────────────────────────────────────────────────
 
 Evaluation on clean inputs constitutes the experimental baseline against which
-the behavior of the models under the subsequent conditions must be interpreted,
+the behavior of the models under subsequent conditions must be interpreted,
 namely \gls{ood} samples, anti-forensic transformations, and adversarial
 perturbations. In this phase, the proxy models are evaluated on the official
 binary subset composed of 1000 images, balanced between 500 \texttt{weapon}
 samples and 500 \texttt{non\_weapon} samples. The positive class is defined as
 \texttt{weapon}, whereas the negative class is defined as
-\texttt{non\_weapon}; consequently, false negatives indicate images containing
-weapons classified as non-relevant, while false positives indicate images not
-containing weapons classified as \texttt{weapon}.
+\texttt{non\_weapon}; consequently, false negatives indicate
+\texttt{weapon} samples classified as \texttt{non\_weapon}, while false
+positives indicate \texttt{non\_weapon} samples classified as \texttt{weapon}.
 
 Table~\ref{tab:results-clean-baseline-metrics} reports the main performance
 metrics of the three proxy models on the clean binary subset. In addition to
 accuracy, balanced accuracy, and macro-averaged metrics, the table also reports
 the mean confidence associated with the predictions, which is useful for
-distinguishing nominal performance from the level of certainty expressed by the
-model.
+distinguishing nominal performance from the level of confidence expressed by
+the model.
 
 \begin{table}[H]
 \centering
@@ -302,13 +299,13 @@ the mean confidence of the predictions.
 
 EfficientNet-B0 achieves the highest nominal performance, with an accuracy of
 0.978, a macro-F1 of 0.978, and a mean confidence of 0.979. ResNet18 shows
-slightly lower but still high performance, with an accuracy of 0.964, a macro-F1
-of 0.964, and a mean confidence of 0.974. \gls{clip} achieves an accuracy of
-0.927 and a macro-F1 of 0.927, but exhibits a different operational profile from
-the two supervised models: recall on the \texttt{weapon} class is very high,
-equal to 0.988, whereas the \gls{fpr} is substantially higher, equal to 0.134.
-Moreover, the mean confidence of \gls{clip} is 0.559, much lower than that
-observed for EfficientNet-B0 and ResNet18.
+slightly lower but still high performance, with an accuracy of 0.964, a
+macro-F1 of 0.964, and a mean confidence of 0.974. \gls{clip} achieves an
+accuracy of 0.927 and a macro-F1 of 0.927, but exhibits a different
+operational profile from the two supervised models: recall on the
+\texttt{weapon} class is very high, at 0.988, whereas the \gls{fpr} is
+substantially higher, at 0.134. Moreover, the mean confidence of \gls{clip} is
+0.559, much lower than that observed for EfficientNet-B0 and ResNet18.
 
 This behavior should not be interpreted as the effect of zero-shot
 classification. In the adopted experimental protocol, \gls{clip} is used as a
@@ -317,10 +314,10 @@ pre-trained and frozen visual encoder, adapted to the
 observed tendency to produce high recall on the \texttt{weapon} class, at the
 cost of a higher \gls{fpr}, is therefore more appropriately interpreted as an
 effect of the pre-trained visual representation and of the calibration of the
-binary head with respect to the specific task, not as the result of a zero-shot
-mechanism. The lower mean confidence also suggests that the greater tendency to
-flag images as \texttt{weapon} does not necessarily correspond to high-certainty
-predictions.
+binary head with respect to the specific task, rather than as the result of a
+zero-shot mechanism. The lower mean confidence also suggests that the greater
+tendency to flag images as \texttt{weapon} does not necessarily correspond to
+high-confidence predictions.
 
 Table~\ref{tab:results-clean-confusion-matrices} reports the aggregate
 confusion matrices for each model, using the layout
@@ -343,10 +340,10 @@ ResNet18 & 479 & 21 & 15 & 485 \\
 
 The same error distribution is visualized in
 Figure~\ref{fig:results-clean-confusion-matrices}, which highlights the
-different operational profile of the three models: EfficientNet-B0 minimizes the
-total number of errors, ResNet18 maintains an intermediate behavior, whereas
-\gls{clip} reduces false negatives on the \texttt{weapon} class at the cost of a
-higher number of false positives.
+different operational profiles of the three models: EfficientNet-B0 minimizes
+the total number of errors, ResNet18 maintains an intermediate behavior,
+whereas \gls{clip} reduces false negatives on the \texttt{weapon} class at the
+cost of a higher number of false positives.
 
 \begin{figure}[htbp]
 \centering
@@ -381,27 +378,25 @@ higher number of false positives.
 \label{fig:results-clean-confusion-matrices}
 \end{figure}
 
-From a forensic perspective, the most critical datum is represented by false
+From a forensic perspective, the most critical figure is the number of false
 negatives on the \texttt{weapon} class. EfficientNet-B0 produces 8 false
 negatives, ResNet18 produces 15, whereas \gls{clip} produces 6. However,
 \gls{clip} also produces 67 false positives, a substantially higher value than
 the 14 produced by EfficientNet-B0 and the 21 produced by ResNet18.
 Consequently, the clean comparison cannot be interpreted only in terms of
-overall accuracy, but must also consider the different balance among sensitivity
-to the investigatively relevant class, risk of improper flags, and level of
-confidence associated with the predictions.
+overall accuracy, but must also consider the different balance among
+sensitivity to the investigatively relevant class, risk of improper flags, and
+level of confidence associated with the predictions.
 
 Overall, the clean baseline shows that the proxy models achieve high
-performance under nominal conditions. However, the difference among accuracy,
-\gls{fpr}, \gls{fnr}, and mean confidence already highlights, even in the
-absence of perturbations, an aspect that is relevant for forensic triage: models
-with similar accuracy may produce different operational risk profiles,
+performance under nominal conditions. However, the differences among accuracy,
+\gls{fpr}, \gls{fnr}, and mean confidence already highlight, even in the
+absence of perturbations, an aspect that is relevant for forensic triage:
+models with similar accuracy may produce different operational risk profiles,
 especially when the error concerns the failure to flag \texttt{weapon} content,
 the improper classification of \texttt{non\_weapon} content as potentially
 relevant, or the production of highly confident predictions on cases that still
 require human verification.
-
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Out-of-Distribution Behavior and False Positive Risk}
@@ -412,7 +407,7 @@ The \gls{ood} evaluation analyzes the behavior of the proxy models on images
 that do not belong to the nominal binary
 \texttt{weapon}/\texttt{non\_weapon} task. These samples include borderline or
 out-of-distribution content, such as knives, swords, replicas, airsoft items,
-synthetic renderings, videogame images, war scenes, military vehicles,
+synthetic renderings, video game images, war scenes, military vehicles,
 explosions, and degraded or anomalous images. Unlike adversarial perturbations
 and anti-forensic transformations, the \gls{ood} condition does not represent an
 attack, but a realistic operational risk: in an investigative workflow,
@@ -427,8 +422,8 @@ binary subset, while maintaining the conceptual separation between \gls{ood}
 samples and the \texttt{weapon}/\texttt{non\_weapon} task. The
 \emph{weapon rate} indicates the proportion of \gls{ood} samples classified as
 \texttt{weapon}; the \emph{high-confidence rate} indicates the proportion of
-predictions with confidence at least equal to 0.9. In this section, these values
-must not be interpreted as accuracy or supervised error on a third class, but as
+predictions with confidence of at least 0.9. In this section, these values must
+not be interpreted as accuracy or supervised error on a third class, but as
 indicators of the risk that out-of-distribution samples are operationally
 absorbed into one of the two classes of the binary task.
 
@@ -462,7 +457,7 @@ ResNet18 & 2\,500 & 1\,094 & 1\,406 & 0.4376 & 0.8896 & 1\,617 & 0.6468 \\
 \textit{Pred. nw} indicates \texttt{non\_weapon} predictions;
 \textit{W-rate} indicates the proportion of \gls{ood} samples classified as
 \texttt{weapon}; \textit{Conf.} indicates mean confidence; \textit{HC-count}
-indicates the number of predictions with confidence at least equal to 0.9;
+indicates the number of predictions with confidence of at least 0.9;
 \textit{HC-rate} indicates the corresponding proportion over the total
 \gls{ood} predictions. The total of 2\,500 predictions per model is obtained by
 evaluating the 500 \gls{ood} images through each of the five fold-aware
@@ -489,16 +484,14 @@ predictive confidence on \gls{ood} samples.
 \label{fig:results-ood-weapon-rate-confidence}
 \end{figure}
 
-The results show three distinct profiles. \gls{clip} classifies a very high
-proportion of \gls{ood} samples as \texttt{weapon}, equal to 0.8356, but does so
-with a moderate mean confidence, equal to 0.5358, and with no predictions above
-the high-confidence threshold. The null high-confidence rate for \gls{clip}
-therefore indicates that no \gls{ood} prediction exceeds the confidence
-threshold of 0.9. EfficientNet-B0 and ResNet18, by contrast, classify a lower
-proportion of \gls{ood} samples as \texttt{weapon}, equal to 0.3696 and 0.4376,
+The results show three distinct operational profiles. \gls{clip} classifies a
+very high proportion of \gls{ood} samples as \texttt{weapon}, at 0.8356, but
+does so with moderate mean confidence, at 0.5358, and with no predictions above
+the high-confidence threshold. EfficientNet-B0 and ResNet18 classify lower
+proportions of \gls{ood} samples as \texttt{weapon}, at 0.3696 and 0.4376,
 respectively, but with much higher mean confidence values. In particular,
-ResNet18 has a high-confidence rate of 0.6468, whereas EfficientNet-B0 reaches
-0.5008.
+ResNet18 reaches the highest high-confidence rate, at 0.6468, whereas
+EfficientNet-B0 reaches 0.5008.
 
 \begin{figure}[H]
 \centering
@@ -510,7 +503,7 @@ ResNet18 has a high-confidence rate of 0.6468, whereas EfficientNet-B0 reaches
 Figure~\ref{fig:results-ood-confidence-distribution} shows that the confidence
 distribution of \gls{clip} is more concentrated toward intermediate values,
 whereas EfficientNet-B0 and ResNet18 exhibit distributions that are more
-polarized toward high confidence values. This finding highlights a different
+polarized toward high-confidence values. This finding highlights a different
 operational risk profile: what matters is not only how frequently an \gls{ood}
 sample is mapped to the \texttt{weapon} class, but also the confidence level
 with which that assignment is produced.
@@ -521,13 +514,12 @@ on an out-of-distribution sample may generate an investigative flag that is not
 fully grounded or, conversely, may unduly strengthen the perceived relevance of
 ambiguous content. The case of ResNet18 and EfficientNet-B0 shows that a model
 may produce fewer \texttt{weapon} classifications on \gls{ood} samples, while
-assigning high confidence to those predictions. The case of \gls{clip}, instead,
-shows the opposite behavior: a greater tendency to classify samples as
-\texttt{weapon}, but with lower confidence. This distinction is essential in a
-forensic context, where system confidence must not be interpreted as
-stand-alone evidence, but as auxiliary information subject to human verification
-\cite{guo2017calibration,nist2023airmf}.
-
+assigning high confidence to those predictions. The case of \gls{clip}, by
+contrast, shows the opposite behavior: a greater tendency to classify samples
+as \texttt{weapon}, but with lower confidence. This distinction is essential in
+a forensic context, where system confidence must not be interpreted as
+stand-alone evidence, but as auxiliary information subject to human
+verification~\cite{guo2017calibration,nist2023airmf}.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-Forensic Robustness}
@@ -535,20 +527,19 @@ stand-alone evidence, but as auxiliary information subject to human verification
 % ─────────────────────────────────────────────────────────────────────────────
 
 The anti-forensic evaluation measures the stability of the proxy models with
-respect to model-agnostic transformations that may arise in realistic
-operational scenarios. Unlike adversarial attacks, these transformations do not
+respect to model-agnostic transformations that may arise in operationally
+plausible scenarios. Unlike adversarial attacks, these transformations do not
 require access to the target model and are not necessarily designed to maximize
 classification error. Rather, they simulate common alterations of the visual
 content or of the image file, such as recompression, resizing, blurring,
-modification of the tonal distribution, and contrast normalization
-\cite{stamm2010anti,yaacoub2021digital,hendrycks2019benchmarking}.
+modification of the tonal distribution, and contrast
+normalization~\cite{stamm2010anti,yaacoub2021digital,hendrycks2019benchmarking}.
 
-Consistently with the convention defined in
-Section~\ref{sec:results-scope}, performance drop is interpreted as the
-variation with respect to the clean baseline. Positive values indicate a
-reduction in performance, whereas values equal to zero or negative values are
-treated as stability or distribution-specific oscillations, not as evidence of
-general robustness.
+Consistent with the convention defined in Section~\ref{sec:results-scope},
+performance drop is interpreted as the variation with respect to the clean
+baseline. Positive values indicate a reduction in performance, whereas zero or
+negative values are treated as stability or distribution-specific oscillations,
+not as evidence of general robustness.
 
 Table~\ref{tab:results-antiforensic-robustness} reports, for each
 transformation, the perturbed accuracy and the accuracy drop with respect to the
@@ -600,7 +591,7 @@ effects on the proxy models, especially when compared with the adversarial
 perturbations discussed in Section~\ref{sec:results-adversarial}.
 EfficientNet-B0 maintains high performance under all conditions, but is more
 sensitive to \gls{gaussianblur}, with an accuracy of 0.965 and a drop of 0.013.
-ResNet18 instead shows the greatest degradation under
+ResNet18, by contrast, shows the greatest degradation under
 \gls{histogrammodification}, with an accuracy of 0.934 and a drop of 0.030.
 \gls{clip} remains substantially stable, with very limited drops and, in some
 cases, slight increases in accuracy with respect to the clean baseline.
@@ -657,12 +648,11 @@ baseline, distributed across both error directions.
 From an operational perspective, these results should not be considered
 negligible merely because the drops are lower than those observed under
 adversarial conditions. Anti-forensic transformations are more easily
-attributable to realistic conditions of image circulation, compression,
+attributable to plausible conditions of image circulation, compression,
 modification, and re-sharing. In a \gls{df} workflow, even a limited reduction
 in performance may become relevant when it affects investigatively sensitive
 content or when it combines with other sources of uncertainty, such as low image
 quality, ambiguous context, or the absence of systematic human verification.
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial Robustness}
@@ -670,26 +660,26 @@ quality, ambiguous context, or the absence of systematic human verification.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The adversarial evaluation measures the response of the proxy models to
-perturbations designed to alter classifier behavior
-\cite{szegedy2014intriguing,goodfellow2015explaining,biggio2018wild}. In the
-context of this thesis, these perturbations are not analyzed as an autonomous
-objective of \gls{advml}, but as experimental stressors useful for evaluating
-the operational reliability of \gls{ai}-based systems in forensic scenarios.
-The main interest therefore does not concern only the ability of an attack to
-reduce accuracy, but the risk that images belonging to the \texttt{weapon}
-class are reclassified as \texttt{non\_weapon}, generating potentially critical
-false negatives in an investigative triage process.
+perturbations designed to alter classifier
+behavior~\cite{szegedy2014intriguing,goodfellow2015explaining,biggio2018wild}.
+In the context of this thesis, these perturbations are not analyzed as an
+autonomous objective of \gls{advml}, but as experimental stressors useful for
+evaluating the operational reliability of \gls{ai}-based systems in forensic
+scenarios. The main interest therefore does not concern only the ability of an
+attack to reduce accuracy, but the risk that \texttt{weapon} samples are
+reclassified as \texttt{non\_weapon}, generating potentially critical false
+negatives in an investigative triage process.
 
-The model-dependent attacks are generated against EfficientNet-B0. This choice
+The model-dependent attacks were generated against EfficientNet-B0. This choice
 reflects a white-box scenario in which the adversary has full access to a
-single target model; transferability toward different architectures is
-therefore evaluated empirically, rather than assumed a priori
-\cite{biggio2018wild,nowroozi2021survey,barni2018cf}. \gls{colorshift} is
-instead treated as a model-agnostic adversarial-style perturbation.
+single target model; transferability to different architectures is therefore
+evaluated empirically, rather than assumed a
+priori~\cite{biggio2018wild,nowroozi2021survey,barni2018cf}. \gls{colorshift}
+is instead treated as a model-agnostic adversarial-style perturbation.
 
-Consistently with the convention defined in Section~\ref{sec:results-scope},
+Consistent with the convention defined in Section~\ref{sec:results-scope},
 performance drop is interpreted as the variation with respect to the clean
-baseline. In this section, any negative or null values are not interpreted as
+baseline. In this section, negative or null values are not interpreted as
 evidence of general adversarial robustness, but as effects specific to the
 transferability of the perturbations generated against the target model and to
 the distribution of the evaluated samples.
@@ -747,14 +737,14 @@ capability, although limited to the white-box configuration in which the attack
 is directly optimized against EfficientNet-B0 with full access to its
 parameters. In operational terms, this result corresponds to behavior that is
 incompatible with the unverified use of the model for the automated triage of
-images containing weapons: the highest clean baseline among the proxy models
-does not prevent severe degradation when the model is exposed to perturbations
-optimized against it.
+images containing firearm-oriented target content: the highest clean-baseline
+accuracy among the proxy models does not prevent severe degradation when the
+model is exposed to perturbations optimized against it.
 
 \gls{fgsm}, also generated against EfficientNet-B0, produces a relevant
-degradation, reducing accuracy to 0.575 and producing an accuracy drop of
-0.403. \gls{superdeepfool} instead produces a more limited effect on the same
-model, with an accuracy of 0.931 and a drop of 0.047. \gls{onepixel} and
+degradation, reducing accuracy to 0.575 and yielding an accuracy drop of 0.403.
+\gls{superdeepfool} instead produces a more limited effect on the same model,
+with an accuracy of 0.931 and a drop of 0.047. \gls{onepixel} and
 \gls{colorshift} produce marginal variations on EfficientNet-B0, equal to
 0.002 and 0.001, respectively.
 
@@ -821,7 +811,7 @@ failing to flag content belonging to the investigatively relevant class.
 \gls{fgsm} also produces a significant effect on EfficientNet-B0, with 406
 induced errors and 321 \texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}
 transitions. For ResNet18 and \gls{clip}, the transferred effects are more
-limited, but not null.
+limited, but not absent.
 
 From a forensic perspective, the vulnerability of EfficientNet-B0 to
 perturbations such as \gls{sigmazero} and \gls{fgsm} highlights a significant
@@ -833,7 +823,6 @@ verification, traceability, and evaluation within the overall investigative
 context.
 
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic Evaluation Bundle Composition and Black-Box Readiness}
 \label{sec:results-bundle}
@@ -841,18 +830,20 @@ context.
 
 The forensic evaluation bundle constitutes the connection layer between the
 controlled experimental evaluation of the proxy models and the subsequent
-black-box evaluation of the selected commercial tools and software. The bundle
-is designed to provide the tools with a blind and semantically neutral input,
-while separately preserving the information required for matching, export
-normalization, and result auditing
-\cite{casey2011digital,nist2006guide,iso27041,iso27042,swgde2014validation}.
+black-box evaluation of the selected commercial software systems. The bundle is
+designed to provide the evaluated software with a blind and semantically
+neutral input, while separately preserving the information required for
+matching, export normalization, and result
+auditing~\cite{casey2011digital,nist2006guide,iso27041,iso27042,swgde2014validation}.
 
 Unlike the general composition of the experimental corpus reported in
-Section~\ref{sec:results-scope}, Table~\ref{tab:results-bundle-operational-layout}
-describes the bundle from an operational perspective, distinguishing among the
-content submitted to the tools, blind naming, and the role of metadata in the
-audit phase. The total consists of 11\,500 files, including 1000 clean samples,
-500 \gls{ood} samples, 5000 adversarial samples, and 5000 anti-forensic samples.
+Section~\ref{sec:results-scope},
+Table~\ref{tab:results-bundle-operational-layout} describes the bundle from an
+operational perspective, distinguishing among the content submitted to the
+software systems, blind naming, and the role of metadata in the audit phase.
+The total consists of 11\,500 files, including 1\,000 clean samples,
+500 \gls{ood} samples, 5\,000 adversarial samples, and 5\,000 anti-forensic
+samples.
 
 \begin{table}[H]
 \centering
@@ -870,7 +861,7 @@ audit phase. The total consists of 11\,500 files, including 1000 clean samples,
 \midrule
 
 Clean &
-1000 &
+1\,000 &
 \texttt{bundle\_*.jpg} &
 Preserves the correspondence with the original binary subset and with the
 \texttt{weapon}/\texttt{non\_weapon} label. \\
@@ -882,12 +873,12 @@ Preserves the distinction between out-of-distribution samples and the nominal
 binary task. \\
 
 Adversarial &
-5000 &
+5\,000 &
 \texttt{bundle\_*.jpg} &
 Records the attack family, perturbation name, target model, and source image. \\
 
 Anti-forensic &
-5000 &
+5\,000 &
 \texttt{bundle\_*.jpg} &
 Records the applied transformation, source image, and mapping to the
 corresponding clean sample. \\
@@ -902,52 +893,64 @@ Enables matching, post-export normalization, and hash-based auditing. \\
 \end{table}
 
 The bundle construction follows two complementary views. The first is a blind
-directory intended for the evaluated tools, in which files are renamed with
+directory intended for the evaluated software, in which files are renamed with
 neutral identifiers such as \texttt{bundle\_000001.jpg}. The second is a
 structured audit view, reserved for the researcher, in which the semantic and
 experimental information required for verification is preserved. For black-box
-evaluation, the tools must import only the directory:
+evaluation, the software systems must import only the directory:
 
 \begin{center}
 \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files}
 \end{center}
 
 and must not import either the \codepath{metadata/} directory or the
-\codepath{structured_audit_view/} directory. This separation reduces the risk of
-bias induced by file names, paths, classes, attack names, or split structure.
+\codepath{structured_audit_view/} directory. This separation reduces the risk
+of bias induced by file names, paths, classes, attack names, or split
+structure.
 
 The bundle preserves traceability through separate manifests containing, for
 each file, the bundle identifier, blind name, sample type, perturbation family
 and name, fold, final label, source dataset, original image identifier, source
-path, blind path, structured path, \gls{sha256} hash, \gls{md5} hash, file size,
-and extension. This structure makes it possible to connect each output exported
-by a tool to the corresponding experimental artifact without exposing the
-ground truth to the tool during the import phase.
+path, blind path, structured path, \gls{sha256} hash, \gls{md5} hash, file
+size, and extension. This structure makes it possible to connect each output
+exported by a software system to the corresponding experimental artifact
+without exposing the ground truth to the software during the import phase.
 
 The consistency checks verified that the bundle identifiers are unique, that
-the effective \gls{sha256} hashes are unique, that the computed hashes match
-those reported in the manifest when available, that the blind paths are
-semantically neutral, and that the experimental metadata are separated from the
-operational input of the tools. These checks are essential to make the bundle
-suitable for black-box evaluation, since they make it possible to distinguish
-among classification errors, unprocessed files, uncategorized outputs,
-limitations of the export format, and matching problems
-\cite{iso27041,iso27042,iso27043,swgde2014validation}.
+the actual \gls{sha256} hashes are unique, that the computed hashes match those
+reported in the manifest when available, that the blind paths are semantically
+neutral, and that the experimental metadata are separated from the operational
+input submitted to the software systems. These checks are essential to make the
+bundle suitable for black-box evaluation, since they make it possible to
+distinguish among classification errors, unprocessed files, uncategorized
+outputs, limitations of the export format, and matching
+problems~\cite{iso27041,iso27042,iso27043,swgde2014validation}.
 
 In summary, the forensic evaluation bundle makes it possible to move from a
 fully controlled proxy evaluation to an evaluation closer to the operational
-context of black-box tools. Its function is not merely organizational, but
-methodological: it preserves the reproducibility of the experiment and reduces
-the exposure of the tools to unnecessary semantic information. At the same time,
-it enables post-export normalization based on verifiable identifiers and hashes,
-which is a necessary condition for distinguishing genuine classification errors
-from artifacts of the export process or limitations of the operational mapping.
+context of selected black-box software systems. Its function is not merely
+organizational, but methodological: it preserves the reproducibility of the
+experiment and reduces the exposure of the evaluated software to unnecessary
+semantic information. At the same time, it enables post-export normalization
+based on verifiable identifiers and hashes, which is a necessary condition for
+distinguishing genuine classification errors from artifacts of the export
+process or limitations of the operational mapping.
 
-A specific control on residual embedded metadata in the blind view of the bundle
-is discussed in
+A specific control on residual embedded metadata in the blind view of the
+bundle is discussed in
 Section~\ref{subsec:results-embedded-metadata-sensitivity}, after the
-presentation of the normalized outputs of the commercial tools, since its
-interpretation requires comparison with the observed black-box results.
+presentation of the normalized outputs of the selected software systems, since
+its interpretation requires comparison with the observed black-box results.
+
+
+
+
+
+
+
+
+
+
 
 
 
