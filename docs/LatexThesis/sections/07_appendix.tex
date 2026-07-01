@@ -69,11 +69,13 @@ msc-thesis-ai-robustness-in-digital-forensics/
     scripts/
     proxy_models/
     forensic_tools/
+  forensic_tools/
   explainability/
     scripts/
     outputs/
     manifests/
   results/
+    scripts/
     metrics/
     tables/
     plots/
@@ -85,6 +87,7 @@ msc-thesis-ai-robustness-in-digital-forensics/
     milestones/
     logs/
     notes/
+  .github/
 \end{lstlisting}
 
 The \codepath{datasets/} directory contains the data pipeline, from the initial
@@ -93,9 +96,13 @@ directory collects the outputs of adversarial perturbations and anti-forensic
 transformations, whereas \codepath{models/} contains the scripts and checkpoints
 of the proxy models. The \codepath{evaluation/} directory collects the scripts
 and outputs of automated evaluation and normalization of the exports produced by
-selected black-box software systems. The \codepath{explainability/} directory
-is reserved for the generation of \gls{xai}-based case studies, whereas
-\codepath{docs/LatexThesis/} contains the LaTeX version of the thesis.
+selected black-box software systems. The \codepath{forensic_tools/} directory
+contains the normalized black-box evaluation perimeter and related exported
+artifacts, whereas the \codepath{results/scripts/} directory contains the
+reporting and audit scripts used to generate thesis-ready figures, tables, and
+sensitivity checks. The \codepath{explainability/} directory is reserved for the
+generation of \gls{xai}-based case studies, whereas
+\codepath{docs/LatexThesis/} contains the official LaTeX version of the thesis.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -194,6 +201,26 @@ forensic bundle. \\
 Structured summary of the bundle, including counts, consistency checks, and
 operational instructions for import into selected black-box software systems. \\
 
+\footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv}
+&
+Audit file generated during bundle construction to document residual embedded
+metadata in the blind input view. \\
+
+\footnotesize\codepath{results/figures/chapter_5/chapter5_figures_manifest.csv}
+&
+Manifest of the thesis-ready figures generated from the consolidated metric
+files by the reporting layer. \\
+
+\footnotesize\codepath{results/figures/chapter_5/chapter5_figures_summary.json}
+&
+Structured summary of the experimental reporting assets generated for
+Chapter~\ref{chap:results}. \\
+
+\footnotesize\codepath{results/figures/chapter_5/embedded_metadata_sensitivity_summary.json}
+&
+Structured summary of the embedded-metadata sensitivity check used to support
+the audit discussion in Chapter~\ref{chap:results}. \\
+
 \end{longtable}
 
 
@@ -279,6 +306,10 @@ python explainability/scripts/18_xai_interactive_launcher.py
 
 # Black-box software export normalization
 python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
+
+# Experimental reporting assets and metadata sensitivity
+python results/scripts/20_generate_experimental_reporting_assets.py
+python results/scripts/21_generate_embedded_metadata_sensitivity_check.py
 \end{lstlisting}
 
 The script
@@ -292,6 +323,16 @@ the exports, map predictions back to the records of the forensic evaluation
 bundle, and produce results that are comparable with the proxy level through
 mapping based, in preferential order, on \texttt{bundle\_id}, \gls{sha256}
 hash, \gls{md5} hash, file name, and manual audit.
+
+The final two scripts belong to the reporting and audit layer of the pipeline.
+The script
+\codepath{results/scripts/20_generate_experimental_reporting_assets.py} reads
+the consolidated metric files and produces thesis-ready figures, tables,
+manifest files, and summaries for Chapter~\ref{chap:results}. The script
+\codepath{results/scripts/21_generate_embedded_metadata_sensitivity_check.py}
+connects the embedded-metadata audit generated during bundle construction with
+the normalized black-box predictions, producing the sensitivity tables and
+summary used to document the residual metadata limitation.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -327,7 +368,9 @@ matrices, and comparisons among clean, adversarial, anti-forensic, and
 \gls{ood} conditions. Their function is not only quantitative, but also
 methodological: they make it possible to compare the controlled behavior of the
 proxy models with that of the \gls{ai}-based software evaluated in
-\textit{black-box} mode.
+\textit{black-box} mode. The downstream reporting assets generated under
+\codepath{results/figures/chapter_5/} provide the thesis-ready figures,
+figure manifests, and summary files derived from these consolidated metrics.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -453,10 +496,13 @@ subsequent checks.
 The most relevant audit artifacts include
 \codepath{manual_selection_log.csv}, \codepath{manual_selection_state.json},
 \codepath{manual_selection_summary.json},
-\codepath{split_generation_summary.json}, the attack manifests, and
-\codepath{bundle_summary.json}. These files make it possible to reconstruct not
-only the final output, but also the status and operational assumptions of the
-main phases of the pipeline.
+\codepath{split_generation_summary.json}, the attack manifests,
+\codepath{bundle_summary.json},
+\codepath{results/figures/chapter_5/chapter5_figures_manifest.csv},
+\codepath{results/figures/chapter_5/chapter5_figures_summary.json}, and
+\codepath{results/figures/chapter_5/embedded_metadata_sensitivity_summary.json}.
+These files make it possible to reconstruct not only the final output, but also
+the status and operational assumptions of the main phases of the pipeline.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
