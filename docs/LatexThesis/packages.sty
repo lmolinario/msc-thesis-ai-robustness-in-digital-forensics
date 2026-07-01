@@ -175,19 +175,22 @@ sortcites=true
 % --- Language ---
 \usepackage{siunitx}
 
-% Current thesis version: Italian text with English headings and terminology.
-\usepackage[main=italian,british]{babel}
+% Current thesis version: American English text with Italian front-matter elements.
+\usepackage[main=american,italian]{babel}
 
-% Keep front-matter labels in English while using Italian hyphenation rules.
-\addto\captionsitalian{
+\addto\captionsamerican{
     \renewcommand*\contentsname{Contents}
     \renewcommand{\listfigurename}{List of Figures}
     \renewcommand{\listtablename}{List of Tables}
     \renewcommand{\bibname}{References}
     \renewcommand{\refname}{References}
+    \renewcommand{\chaptername}{Chapter}
+    \renewcommand{\figurename}{Figure}
+    \renewcommand{\tablename}{Table}
+    \renewcommand{\appendixname}{Appendix}
 }
 
-\addto\extrasitalian{
+\addto\extrasamerican{
     \def\equationautorefname{Equation}
     \def\figureautorefname{Figure}
     \def\tableautorefname{Table}

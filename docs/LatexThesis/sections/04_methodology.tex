@@ -3340,16 +3340,15 @@ recording does not assign \gls{md5} the role of primary identifier, but
 preserves its operational utility for alignment with heterogeneous software
 systems and formats.
 
-The pipeline uses progressive manifests. The transition from
-\texttt{metadata.csv} to \texttt{review\_manifest\_full.csv}, then to
-\texttt{manual\_selection\_final\_1500.csv},
-\texttt{manual\_selection\_adversarial\_subset.csv},
-\texttt{clean\_folds\_manifest.csv}, \texttt{ood\_eval\_manifest.csv}, attack
-manifests, the anti-forensic manifest, \texttt{bundle\_manifest.csv}, proxy
-model predictions, and \gls{xai} manifests makes it possible to reconstruct the
-life cycle of the experimental sample. The relationship among
-\texttt{original\_image\_id}, \texttt{generated\_image\_id},
-\texttt{bundle\_id}, hashes, and paths represents the minimum link required to
+The pipeline uses progressive manifests. The first stage connects
+\codepath{metadata.csv} and \codepath{review_manifest_full.csv} to the frozen
+selection manifests. The second stage connects the frozen manifests to
+\codepath{clean_folds_manifest.csv}, \codepath{ood_eval_manifest.csv}, the
+attack manifests, the anti-forensic manifest, \codepath{bundle_manifest.csv},
+proxy model predictions, and \gls{xai} manifests. This progressive structure
+makes it possible to reconstruct the life cycle of the experimental sample. The
+relationship among \codepath{original_image_id}, \codepath{generated_image_id},
+\codepath{bundle_id}, hashes, and paths represents the minimum link required to
 verify that a result refers to the correct file.
 
 \begin{table}[H]
