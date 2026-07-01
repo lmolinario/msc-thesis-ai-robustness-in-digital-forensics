@@ -2828,29 +2828,6 @@ need by combining frozen datasets, traceable manifests, hash-based
 reproducibility, controlled perturbation families, black-box output
 normalization, and manual auditability of the final interpretation.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability Analysis and Representative Failure Cases}
 \label{sec:results-xai}
@@ -2861,13 +2838,13 @@ the aggregate metrics discussed in the previous sections to a restricted set of
 representative cases. It does not constitute a primary robustness metric and
 does not replace quantitative measures of accuracy, confidence, false positives,
 and false negatives. Its role is instead to support the operational
-interpretation of selected behaviors observed in the proxy model, by highlighting
-which image regions contributed to the classifier decision in specific success
-or failure scenarios.
+interpretation of selected behaviors observed in the proxy model, by
+highlighting which image regions contributed to the classifier decision in
+specific success or failure scenarios.
 
-The attribution maps were generated using \gls{ig} on the white-box
-EfficientNet-B0 proxy model, using the model-predicted class as the attribution
-target, indicated in the experimental files as \texttt{predicted\_label}. This
+The attribution maps were generated using \gls{ig} applied to the white-box
+EfficientNet-B0 proxy model, with the model-predicted class as the attribution
+target, indicated in the experimental files as \texttt{predicted_label}. This
 choice makes it possible to analyze not what the model should have recognized
 according to the manual label, but what actually guided the decision it
 produced. Consequently, in erroneous cases, the visualization is oriented toward
@@ -2878,12 +2855,12 @@ behavior of \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{excirefoto2025}, \gls{cellebriteinseyets}, or
 \gls{griffeye}/\gls{t3kcore}, which remain black-box systems in the context of
 this evaluation. Rather, they provide a controlled diagnostic reference, limited
-to the white-box proxy model, that is useful for discussing in more concrete
-terms selected operational risks observable in a \gls{df}
+to the white-box proxy model, that is useful for discussing, in more concrete
+terms, selected operational risks observable in a \gls{df}
 \textit{human-in-the-loop} context.
 
-The XAI figures reported in this section follow the structure introduced in
-Chapter~\ref{chap:methodology}: input image, \gls{ig} heatmap, attribution
+The \gls{xai} figures reported in this section follow the structure introduced
+in Chapter~\ref{chap:methodology}: input image, \gls{ig} heatmap, attribution
 overlay on the original image, and mask of the regions with the highest
 attribution. Unlike the methodological example, the visualizations are used here
 to discuss representative cases from the experimental evaluation. The
@@ -2908,43 +2885,43 @@ and one high-confidence adversarial false positive.
 \textbf{Scenario} &
 \textbf{Manual label} &
 \textbf{Prediction} &
-\textbf{Operational role} \\
+\textbf{Operational role} \
 \midrule
 
-\texttt{xai\_case\_0001} &
+\texttt{xai_case_0001} &
 \texttt{clean} &
 \texttt{weapon} &
 \texttt{weapon} &
 Correct case on a clean input, used as a reference for observing coherent
-attribution behavior. \\
+attribution behavior. \
 
-\texttt{xai\_case\_0006} &
+\texttt{xai_case_0006} &
 \texttt{clean} &
 \texttt{weapon} &
-\texttt{non\_weapon} &
+\texttt{non_weapon} &
 False negative on a clean input, representative of missed detection in the
-absence of perturbations. \\
+absence of perturbations. \
 
-\texttt{xai\_case\_0009} &
+\texttt{xai_case_0009} &
 \texttt{ood} &
 \texttt{ood} &
 \texttt{weapon} &
 \gls{ood} sample classified as \texttt{weapon}, representative of the risk of
-improper semantic inclusion. \\
+improper semantic inclusion. \
 
-\texttt{xai\_case\_0010} &
+\texttt{xai_case_0010} &
 \gls{histogrammodification} &
 \texttt{weapon} &
-\texttt{non\_weapon} &
+\texttt{non_weapon} &
 Anti-forensic false negative, representative of the effects of low-level visual
-manipulations. \\
+manipulations. \
 
-\texttt{xai\_case\_0015} &
+\texttt{xai_case_0015} &
 \gls{sigmazero} &
-\texttt{non\_weapon} &
+\texttt{non_weapon} &
 \texttt{weapon} &
 High-confidence adversarial false positive, representative of the unreliability
-of confidence alone in the presence of an attack. \\
+of confidence alone in the presence of an attack. \
 
 \bottomrule
 \end{tabular}
@@ -2954,7 +2931,7 @@ of confidence alone in the presence of an attack. \\
 
 \XAIcaseFigureMaskGrid
 {fig:xai-case1-clean-correct}
-{Correct case on a clean input \texttt{xai\_case\_0001}. The EfficientNet-B0
+{Correct case on a clean input \texttt{xai_case_0001}. The EfficientNet-B0
 proxy model correctly classifies a \texttt{clean} image with manual label
 \texttt{weapon} as \texttt{weapon}.}
 {images/fig_xai_case1_clean_correct_input.png}
@@ -2962,9 +2939,9 @@ proxy model correctly classifies a \texttt{clean} image with manual label
 {images/fig_xai_case1_clean_correct_overlay.png}
 {images/fig_xai_case1_clean_correct_top10_mask.png}
 {\textbf{scenario}: \texttt{clean};
- \textbf{manual label}: \texttt{weapon};
- \textbf{prediction}: \texttt{weapon};
- \textbf{confidence}: 1.000}
+\textbf{manual label}: \texttt{weapon};
+\textbf{prediction}: \texttt{weapon};
+\textbf{confidence}: 1.000}
 
 The first case, shown in Figure~\ref{fig:xai-case1-clean-correct}, provides a
 qualitative reference in which the model prediction is consistent with the
@@ -2974,28 +2951,28 @@ class is \texttt{weapon}, and the prediction produced by EfficientNet-B0 is also
 useful for verifying whether the attribution pattern is compatible with the
 visually relevant region of the image, rather than being dominated by marginal
 elements, background, or acquisition artifacts. This example does not, by
-itself, demonstrate the general reliability of the model, but constitutes a
+itself, demonstrate the general reliability of the model, but serves as a
 reference case against which the subsequent failures can be compared.
 
 \XAIcaseFigureMaskGrid
 {fig:xai-case2-clean-false-negative}
-{False negative on a clean input \texttt{xai\_case\_0006}. A \texttt{clean}
+{False negative on a clean input \texttt{xai_case_0006}. A \texttt{clean}
 image with manual label \texttt{weapon} is classified as
-\texttt{non\_weapon}.}
+\texttt{non_weapon}.}
 {images/fig_xai_case2_clean_false_negative_input.png}
 {images/fig_xai_case2_clean_false_negative_heatmap.png}
 {images/fig_xai_case2_clean_false_negative_overlay.png}
 {images/fig_xai_case2_clean_false_negative_top10_mask.png}
 {\textbf{scenario}: \texttt{clean};
- \textbf{manual label}: \texttt{weapon};
- \textbf{prediction}: \texttt{non\_weapon};
- \textbf{confidence}: 0.692}
+\textbf{manual label}: \texttt{weapon};
+\textbf{prediction}: \texttt{non_weapon};
+\textbf{confidence}: 0.692}
 
 The second case, reported in
 Figure~\ref{fig:xai-case2-clean-false-negative}, is relevant because the error
 occurs on a clean input, without adversarial perturbations or anti-forensic
 transformations. The image is manually labeled as \texttt{weapon}, but
-EfficientNet-B0 classifies it as \texttt{non\_weapon} with moderate confidence.
+EfficientNet-B0 classifies it as \texttt{non_weapon} with moderate confidence.
 In a \gls{df} workflow, this type of error may produce a concrete operational
 risk, since a false negative may prevent a potentially relevant image from being
 prioritized during automated triage.
@@ -3009,16 +2986,16 @@ filter or rank large volumes of images in an investigative context.
 
 \XAIcaseFigureMaskGrid
 {fig:xai-case3-ood-as-weapon}
-{\gls{ood} case \texttt{xai\_case\_0009}. An out-of-distribution sample is
+{\gls{ood} case \texttt{xai_case_0009}. An out-of-distribution sample is
 classified as \texttt{weapon} with high confidence.}
 {images/fig_xai_case3_ood_as_weapon_input.png}
 {images/fig_xai_case3_ood_as_weapon_heatmap.png}
 {images/fig_xai_case3_ood_as_weapon_overlay.png}
 {images/fig_xai_case3_ood_as_weapon_top10_mask.png}
 {\textbf{scenario}: \texttt{ood};
- \textbf{manual label}: \texttt{ood};
- \textbf{prediction}: \texttt{weapon};
- \textbf{confidence}: 0.999}
+\textbf{manual label}: \texttt{ood};
+\textbf{prediction}: \texttt{weapon};
+\textbf{confidence}: 0.999}
 
 The third case, shown in Figure~\ref{fig:xai-case3-ood-as-weapon}, illustrates a
 risk that differs from an ordinary false positive. The sample is labeled as
@@ -3035,26 +3012,26 @@ and less semantically stable correlations. From a methodological perspective,
 this case supports the choice to treat \texttt{ood} as an autonomous category in
 dataset construction and in the evaluation of operational robustness, rather
 than mapping all inputs not belonging to the \texttt{weapon} class to the
-\texttt{non\_weapon} class alone.
+\texttt{non_weapon} class alone.
 
 \XAIcaseFigureMaskGrid
 {fig:xai-case4-antiforensic-failure}
-{Anti-forensic false negative \texttt{xai\_case\_0010}. A \texttt{weapon} image
+{Anti-forensic false negative \texttt{xai_case_0010}. A \texttt{weapon} image
 subjected to \gls{histogrammodification} is classified as
-\texttt{non\_weapon}.}
+\texttt{non_weapon}.}
 {images/fig_xai_case4_antiforensic_failure_input.png}
 {images/fig_xai_case4_antiforensic_failure_heatmap.png}
 {images/fig_xai_case4_antiforensic_failure_overlay.png}
 {images/fig_xai_case4_antiforensic_failure_top10_mask.png}
 {\textbf{scenario}: \gls{histogrammodification};
- \textbf{manual label}: \texttt{weapon};
- \textbf{prediction}: \texttt{non\_weapon};
- \textbf{confidence}: 0.870}
+\textbf{manual label}: \texttt{weapon};
+\textbf{prediction}: \texttt{non_weapon};
+\textbf{confidence}: 0.870}
 
 The fourth case, reported in
 Figure~\ref{fig:xai-case4-antiforensic-failure}, concerns an anti-forensic
 transformation based on \gls{histogrammodification}. The manual label remains
-\texttt{weapon}, but the model predicts \texttt{non\_weapon} with high
+\texttt{weapon}, but the model predicts \texttt{non_weapon} with high
 confidence. The case is relevant because the transformation does not represent
 only an abstract adversarial perturbation optimized against a differentiable
 model, but a low-level visual manipulation that may affect tonal distribution,
@@ -3064,29 +3041,29 @@ The \gls{ig} map makes it possible to observe whether the histogram modification
 alters the regions that contribute to the model decision, reducing the weight
 assigned to the object of interest or shifting attention toward less informative
 areas. From an operational perspective, this failure suggests that
-transformations that may still be compatible with human recognizability of the
-content can nevertheless compromise automated classification. In a forensic
-pipeline, this reinforces the need not to treat the classifier output as
-autonomous evidence, but as support to be critically verified.
+transformations that may remain visually recognizable to human analysts can
+nevertheless compromise automated classification. In a forensic pipeline, this
+reinforces the need not to treat the classifier output as autonomous evidence,
+but as support to be critically verified.
 
 \XAIcaseFigureMaskGrid
 {fig:xai-case5-adversarial-high-confidence-failure}
-{High-confidence adversarial false positive \texttt{xai\_case\_0015}. A
-\texttt{non\_weapon} image perturbed using \gls{sigmazero} is classified as
+{High-confidence adversarial false positive \texttt{xai_case_0015}. A
+\texttt{non_weapon} image perturbed using \gls{sigmazero} is classified as
 \texttt{weapon}.}
 {images/fig_xai_case5_adversarial_high_conf_failure_input.png}
 {images/fig_xai_case5_adversarial_high_conf_failure_heatmap.png}
 {images/fig_xai_case5_adversarial_high_conf_failure_overlay.png}
 {images/fig_xai_case5_adversarial_high_conf_failure_top10_mask.png}
 {\textbf{scenario}: \gls{sigmazero};
- \textbf{manual label}: \texttt{non\_weapon};
- \textbf{prediction}: \texttt{weapon};
- \textbf{confidence}: 1.000}
+\textbf{manual label}: \texttt{non_weapon};
+\textbf{prediction}: \texttt{weapon};
+\textbf{confidence}: 1.000}
 
 The fifth case, shown in
 Figure~\ref{fig:xai-case5-adversarial-high-confidence-failure}, represents a
 high-confidence adversarial false positive. The image has manual label
-\texttt{non\_weapon}, but, after the \gls{sigmazero} perturbation, it is
+\texttt{non_weapon}, but, after the \gls{sigmazero} perturbation, it is
 classified as \texttt{weapon} with a confidence of 1.000. For the purposes of
 this thesis, this case is particularly significant because it separates two
 concepts that may be incorrectly conflated in an operational workflow: model
@@ -3095,19 +3072,19 @@ confidence and forensic reliability of the prediction.
 The \gls{ig} visualization provides a diagnostic representation of the regions
 supporting the incorrect decision, but it must not be interpreted as a complete
 explanation of the attack mechanism. Its value lies in making a high-confidence
-failure inspectable, showing that an apparently certain prediction may still
-derive from unreliable input conditions. In an investigative context, this
+failure directly observable, showing that an apparently certain prediction may
+still derive from unreliable input conditions. In an investigative context, this
 result supports the need to maintain the \textit{human-in-the-loop} paradigm,
 especially when \gls{ai}-based systems are used to prioritize sensitive or
 potentially relevant content.
 
 Overall, the five selected cases show that \gls{xai} analysis can provide a
-useful interpretive contribution, provided that its role remains correctly
-delimited. The correct case on a clean input provides a qualitative reference of
-coherent attribution; the false negative on a clean input shows that missed
-detection can occur even in the absence of manipulation; the \gls{ood} case
-highlights the risk of absorbing out-of-distribution inputs into the
-\texttt{weapon} class; the anti-forensic case shows that low-level visual
+useful interpretive contribution, provided that its role remains properly
+delimited. The correct case on a clean input serves as a qualitative reference
+for coherent attribution behavior; the false negative on a clean input shows
+that missed detection can occur even in the absence of manipulation; the
+\gls{ood} case highlights the risk of absorbing out-of-distribution inputs into
+the \texttt{weapon} class; the anti-forensic case shows that low-level visual
 transformations can alter the automatic decision; and the high-confidence
 adversarial case shows that confidence cannot be assumed as a sufficient
 indicator of operational reliability.
@@ -3115,12 +3092,11 @@ indicator of operational reliability.
 For these reasons, \gls{xai} analysis is considered in this thesis as support
 for understanding representative cases and not as autonomous evidence of system
 robustness. It makes selected behaviors of the EfficientNet-B0 proxy model more
-transparent, but it does not automatically extend its conclusions to commercial
-black-box tools. In a \gls{df} pipeline, visualizations based on \gls{ig} must
-therefore be interpreted as tools supporting review, evaluation, and critical
-discussion of the results, while preserving the central role of the human
-analyst in the final assessment.
-
+transparent, but it does not automatically extend its conclusions to selected
+black-box software systems. In a \gls{df} pipeline, visualizations based on
+\gls{ig} must therefore be interpreted as instruments supporting review,
+evaluation, and critical discussion of the results, while preserving the central
+role of the human analyst in the final assessment.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Operational Interpretation and Experimental Limitations}
@@ -3131,30 +3107,54 @@ The results of Chapter~\ref{chap:results} show that the operational robustness
 of \gls{ai}-based systems for forensic image triage cannot be inferred from
 clean accuracy alone. The interpretation must jointly consider the direction of
 errors, behavior on \gls{ood} inputs, sensitivity to perturbations, the
-operational configuration of the tools, normalization of black-box outputs, and
-the availability of human review.
+operational configuration of the selected software systems, normalization of
+black-box outputs, and the availability of human review.
 
 From a forensic perspective, the most relevant point is that performance
 degradation does not always have the same operational meaning. A false negative
 on the \texttt{weapon} class may prevent investigatively relevant content from
 being submitted to review; a false positive or a weapon flag on \gls{ood}
 content may instead increase the triage workload and generate improper
-priorities. For this reason, the most significant evidence in this chapter
-concerns the observed failure modes, rather than only the aggregate value of
+priorities. For this reason, the most significant findings in this chapter
+concern the observed failure modes, rather than only the aggregate value of
 accuracy.
 
-The evaluation of commercial tools must be interpreted with particular caution:
-\gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
+The evaluation of selected software systems must be interpreted with particular
+caution: \gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
 \gls{cellebriteinseyets}, and \gls{griffeye}/\gls{t3kcore} are evaluated through
 observable outputs and documented mapping rules, not through access to internal
-models, thresholds, or proprietary decision logic. The commercial comparison is
+models, thresholds, or proprietary decision logic. The black-box comparison is
 therefore an operational comparison on the forensic evaluation bundle, not a
 general validation of the products and not a comparison among homogeneous
 classifiers.
 
-The main methodological limitations---model-dependent attacks generated with
-respect to EfficientNet-B0, the non-exhaustive space of anti-forensic
-transformations, bundle-weighted commercial metrics, and residual sensitivity to
-embedded metadata---are addressed systematically in
+The main methodological limitations---model-dependent attacks generated against
+EfficientNet-B0, the non-exhaustive space of anti-forensic transformations,
+bundle-weighted metrics for selected software systems, and residual sensitivity
+to embedded metadata---are addressed systematically in
 Chapter~\ref{chap:conclusions}, together with the methodological, operational,
-and legal implications of using \gls{ai}-assisted tools in \gls{df} workflows.
+and legal implications of using \gls{ai}-assisted software systems in \gls{df}
+workflows.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
