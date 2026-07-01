@@ -10,10 +10,10 @@ Chapter~\ref{chap:methodology}, nor does it anticipate the analysis of the
 results. Rather, it provides an operational reference for connecting the
 academic description of the pipeline to the scripts, manifests, hashes, and
 outputs maintained in the repository associated with the project. This approach
-is consistent with the general principles of \gls{df}, in which the preservation
-of provenance, artifact integrity, and documentation of operations are essential
-requirements for making a digital analysis process verifiable
-\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27037}.
+is consistent with the general principles of \gls{df}, in which the
+preservation of provenance, artifact integrity, and documentation of operations
+are essential requirements for making a digital analysis process
+verifiable~\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27037}.
 
 The complete source code is not reported in full within the document, since
 duplicating it in the thesis would make the text redundant and less
@@ -27,6 +27,7 @@ artifacts starting from the official manifests and scripts, whereas it does not
 necessarily imply the public redistribution of all raw images, which may be
 limited by legal, ethical, or source-dependent constraints.
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Repository Structure}
 \label{app:repository-structure}
@@ -37,8 +38,8 @@ prepared data, the final dataset, experimental splits, perturbations, proxy
 models, evaluation, explainability, results, and thesis documentation. This
 organization makes it possible to distinguish the phases of acquisition,
 preparation, manual selection, split generation, attack production, automated
-evaluation, and preparation of the bundle intended for commercial forensic
-tools.
+evaluation, and preparation of the bundle intended for selected black-box
+software systems.
 
 \begin{lstlisting}[caption={Simplified structure of the experimental repository.}, label={lst:repository-structure}]
 msc-thesis-ai-robustness-in-digital-forensics/
@@ -79,7 +80,7 @@ msc-thesis-ai-robustness-in-digital-forensics/
     figures/
     reports/
   docs/
-    LatexThesis_ITA/
+    LatexThesis/
   progress/
     milestones/
     logs/
@@ -92,9 +93,9 @@ directory collects the outputs of adversarial perturbations and anti-forensic
 transformations, whereas \codepath{models/} contains the scripts and checkpoints
 of the proxy models. The \codepath{evaluation/} directory collects the scripts
 and outputs of automated evaluation and normalization of the exports produced by
-commercial forensic tools. The \codepath{explainability/} directory is reserved
-for the generation of \gls{xai}-based case studies, whereas
-\codepath{docs/LatexThesi/} contains the LaTeX version of the thesis.
+selected black-box software systems. The \codepath{explainability/} directory
+is reserved for the generation of \gls{xai}-based case studies, whereas
+\codepath{docs/LatexThesis/} contains the LaTeX version of the thesis.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -106,7 +107,7 @@ Table~\ref{tab:official-experimental-artifacts} summarizes the main artifacts
 of the pipeline. These files are not merely intermediate outputs, but constitute
 the anchoring points between the methodology described in the body of the thesis
 and its experimental implementation. In particular, the manifests preserve the
-connection among image identifier, source, final class, hash, split, possible
+connection among image identifier, source, final label, hash, split, possible
 perturbation, and path of the generated file.
 
 \begin{longtable}{@{}%
@@ -149,7 +150,8 @@ and semantic assignments. \\
 \footnotesize\codepath{datasets/final/manifests/manual_selection_final_1500.csv}
 &
 Official manifest of the frozen dataset, composed of 1\,500 images balanced
-across the \texttt{weapon}, \texttt{non\_weapon}, and \gls{ood} classes. \\
+across the \texttt{weapon}, \texttt{non\_weapon}, and \gls{ood} evaluation
+categories. \\
 
 \footnotesize\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
 &
@@ -179,8 +181,8 @@ sample, fold, true class, and type of attack or transformation. \\
 
 \footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
 &
-Global manifest of the bundle intended for evaluation with commercial forensic
-tools. \\
+Global manifest of the bundle intended for evaluation with selected black-box
+software systems. \\
 
 \footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}
 &
@@ -190,10 +192,9 @@ forensic bundle. \\
 \footnotesize\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_summary.json}
 &
 Structured summary of the bundle, including counts, consistency checks, and
-operational instructions for import into forensic tools. \\
+operational instructions for import into selected black-box software systems. \\
 
 \end{longtable}
-
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -212,25 +213,27 @@ documented experimental artifact.
 
 The final dataset is represented by the
 \codepath{manual_selection_final_1500.csv} manifest and contains 1\,500 images
-distributed in a balanced manner across three classes: \texttt{weapon},
-\texttt{non\_weapon}, and \gls{ood}. The \texttt{weapon} class includes only
-realistic individual weapons that are clearly visible; the \texttt{non\_weapon}
-class includes realistic negative samples consistent with the task; and the
-\gls{ood} class collects borderline or out-of-distribution cases, such as
-knives, swords, replicas, airsoft items, synthetic renderings, videogame
-images, heavy military vehicles, explosions, war scenes, and degraded or
-anomalous images. The official adversarial subset, stored in
-\codepath{manual_selection_adversarial_subset.csv}, excludes \gls{ood} examples
-and retains only the two operational classes \texttt{weapon} and
-\texttt{non\_weapon}, for a total of 1\,000 images.
+distributed in a balanced manner across three evaluation categories:
+\texttt{weapon}, \texttt{non\_weapon}, and \gls{ood}. The \texttt{weapon} class
+includes only realistic individual weapons that are clearly visible; the
+\texttt{non\_weapon} class includes realistic negative samples consistent with
+the task; and the \gls{ood} category collects borderline or
+out-of-distribution cases, such as knives, swords, replicas, airsoft items,
+synthetic renderings, video game images, heavy military vehicles, explosions,
+war scenes, and degraded or anomalous images. The official adversarial subset,
+stored in \codepath{manual_selection_adversarial_subset.csv}, excludes
+\gls{ood} examples and retains only the two operational classes
+\texttt{weapon} and \texttt{non\_weapon}, for a total of 1\,000 images.
 
 Stable identifiers, \gls{sha256} hashes, relative paths, and intermediate
 manifests make it possible to reconstruct the derivation of each sample from
 the prepared pool to the splits, perturbed versions, and evaluation outputs.
-This connection is particularly relevant in the forensic phase, since
-commercial tools may rename files, modify the structure of exports, or produce
-reports in heterogeneous formats. The use of hashes therefore makes it possible
-to maintain a criterion that is independent of the file name and export path.
+This connection is particularly relevant in the black-box evaluation phase,
+since selected software systems may rename files, modify the structure of
+exports, or produce reports in heterogeneous formats. The use of hashes
+therefore makes it possible to maintain a criterion that is independent of the
+file name and export path.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Official Script Sequence}
@@ -274,25 +277,25 @@ python datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
 python explainability/scripts/17_generate_integrated_gradients_case_studies.py
 python explainability/scripts/18_xai_interactive_launcher.py
 
-# Commercial-tool export normalization
+# Black-box software export normalization
 python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 \end{lstlisting}
 
 The script
 \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}
-constitutes the connection point between the exports produced by commercial
-forensic tools and the final comparative metrics. In the final protocol, it
-exclusively supports outputs attributable to \texttt{magnet\_axiom},
-\texttt{excire\_foto\_2025}, \texttt{cellebrite\_inseyets}, and
-\texttt{griffeye}. Its role is to normalize the exports, map predictions back
-to the records of the forensic evaluation bundle, and produce results that are
-comparable with the proxy level through mapping based, in preferential order, on
-\texttt{bundle\_id}, \gls{sha256} hash, \gls{md5} hash, file name, and manual
-audit.
+constitutes the connection point between the exports produced by selected
+black-box software systems and the final comparative metrics. In the final
+protocol, it exclusively supports outputs attributable to
+\texttt{magnet\_axiom}, \texttt{excire\_foto\_2025},
+\texttt{cellebrite\_inseyets}, and \texttt{griffeye}. Its role is to normalize
+the exports, map predictions back to the records of the forensic evaluation
+bundle, and produce results that are comparable with the proxy level through
+mapping based, in preferential order, on \texttt{bundle\_id}, \gls{sha256}
+hash, \gls{md5} hash, file name, and manual audit.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Models, Attacks and Evaluation Outputs}
+\section{Models, Attacks, and Evaluation Outputs}
 \label{app:models-attacks-evaluation-outputs}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -303,8 +306,8 @@ manner, the behavior of classifiers with respect to clean, perturbed, and
 out-of-distribution inputs. Any preliminary components or exploratory baselines
 not included in the final evaluation are not considered part of the consolidated
 experimental protocol. The use of proxy models places the analysis within the
-broader context of robustness in \gls{ml} and \gls{ai} systems
-\cite{bishop2006pattern,biggio2018wild,radford2021learning}.
+broader context of robustness in \gls{ml} and \gls{ai}
+systems~\cite{bishop2006pattern,biggio2018wild,radford2021learning}.
 
 The adversarial attacks generated in the pipeline are \texttt{fgsm},
 \texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel}, and
@@ -313,10 +316,9 @@ The adversarial attacks generated in the pipeline are \texttt{fgsm},
 \texttt{gaussian\_blur}, \texttt{histogram\_modification}, and
 \texttt{contrast\_stretching}. This distinction is methodologically important:
 adversarial attacks are used to evaluate the decision vulnerability of the
-models, whereas anti-forensic transformations simulate realistic manipulations
-of the image content or file that may alter the visibility, quality, or
-technical traces of the artifact
-\cite{stamm2010anti,nowroozi2021survey,croce2020robustbench}.
+models, whereas anti-forensic transformations simulate operationally plausible
+manipulations of the image content or file that may alter the visibility,
+quality, or technical traces of the artifact~\cite{stamm2010anti,nowroozi2021survey,croce2020robustbench}.
 
 The outputs of the proxy model evaluation are collected in the
 \codepath{evaluation/proxy_models/} and \codepath{results/metrics/}
@@ -326,6 +328,7 @@ matrices, and comparisons among clean, adversarial, anti-forensic, and
 methodological: they make it possible to compare the controlled behavior of the
 proxy models with that of the \gls{ai}-based software evaluated in
 \textit{black-box} mode.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic Evaluation Bundle}
@@ -341,8 +344,9 @@ making the true class and applied transformation immediately recognizable. The
 bundle is generated by the script
 \codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py} and is
 saved in the \codepath{datasets/forensic_evaluation_bundle/} directory; its
-structure strictly separates the blind inputs intended for the software from the
-metadata required for the subsequent evaluation through hash-based mapping.
+structure strictly separates the blind inputs intended for the software systems
+from the metadata required for the subsequent evaluation through hash-based
+mapping.
 
 \begin{lstlisting}[caption={Logical structure of the forensic evaluation bundle.}, label={lst:forensic-evaluation-bundle-structure}]
 datasets/forensic_evaluation_bundle/
@@ -357,21 +361,21 @@ datasets/forensic_evaluation_bundle/
 
 In the \textit{black-box} evaluation, only the files contained in
 \codepath{blind_tool_input/files/} must be imported into the considered
-software. The \codepath{metadata/} and \codepath{structured_audit_view/}
-directories must not be imported, since they contain information that would
-reveal true classes, sources, attacks, transformations, and experimental
-mapping. This separation reduces the risk of bias induced by file names,
-directory structure, or prior knowledge of the ground truth.
+software systems. The \codepath{metadata/} and
+\codepath{structured_audit_view/} directories must not be imported, since they
+contain information that would reveal true classes, sources, attacks,
+transformations, and experimental mapping. This separation reduces the risk of
+bias induced by file names, directory structure, or prior knowledge of the
+ground truth.
 
 The current bundle includes clean images, \gls{ood} samples, adversarial
 perturbations, and anti-forensic transformations. The operational summary of the
 bundle documents 11\,500 files in total: 1\,000 clean images, 500 \gls{ood}
 samples, 5\,000 adversarial samples, and 5\,000 anti-forensic samples. The
 validation checks include uniqueness of the \texttt{bundle\_id}, uniqueness of
-the effective hashes, correspondence of hashes when present in the manifest,
+the actual hashes, correspondence of hashes when present in the manifest,
 semantic cleanliness of the blind paths, and separation of metadata from the
-inputs intended for the tools.
-
+inputs intended for the software systems.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -403,36 +407,37 @@ numerical backends, \gls{gpu} drivers, and hardware availability.
 \texttt{PyTorch} & Training, inference, and perturbation generation on neural models. \\
 \texttt{torchvision} & \gls{cnn} architectures, preprocessing, and support for proxy model evaluation. \\
 \texttt{open\_clip\_torch} & Implementation of the \gls{clip} model used as a proxy model. \\
-\texttt{Captum} & Generation of attribution maps through Integrated Gradients. \\
+\texttt{Captum} & Generation of attribution maps through \gls{ig}. \\
 \texttt{matplotlib} & Production of plots, curves, experimental figures, and diagnostic visualizations. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The operational-forensic evaluation also includes four software systems observed
-in \textit{black-box} mode: \textit{Magnet AXIOM}, version 10.1.0.48673, with
-the \textit{Magnet.AI} functionality; \textit{Excire Foto 2025}, version 4.1.5,
-used as a standalone general-purpose application with \gls{ai} functionalities;
-\textit{Cellebrite Inseyets}, version 10.9, with exports produced in the
-\textit{Cellebrite Physical Analyzer} 10.9.0.3029 environment; and
-\textit{Magnet Griffeye x64}, version 26.2.108, with the \textit{T3K CORE}
-v1.18.0 module. Unlike Python scripts and proxy models, these tools introduce a
-component that is not fully automatable, due to licenses, graphical interfaces,
-software versions, operational configurations, and export formats. For this
-reason, their evaluation is documented through the blind bundle, operational
-instructions, normalized exports, and hash-based mapping.
+The operational-forensic evaluation also includes four selected software systems
+observed in \textit{black-box} mode: \gls{magnetaxiomtool}, version
+10.1.0.48673, with \gls{magnetai} functionality; \gls{excirefoto2025}, version
+4.1.5, used as a stand-alone general-purpose application with \gls{ai}-based
+functionality; \gls{cellebriteinseyets}, version 10.9, with exports produced in
+the \textit{Cellebrite Physical Analyzer} 10.9.0.3029 environment; and
+\gls{griffeye} x64, version 26.2.108, with the \gls{t3kcore} v1.18.0 module.
+Unlike Python scripts and proxy models, these systems introduce a component that
+is not fully automatable, due to licenses, graphical interfaces, software
+versions, operational configurations, and export formats. For this reason, their
+evaluation is documented through the blind bundle, operational instructions,
+normalized exports, and hash-based mapping.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Logs, Reports and Audit Outputs}
+\section{Logs, Reports, and Audit Outputs}
 \label{app:logs-reports-audit-outputs}
 % ─────────────────────────────────────────────────────────────────────────────
 
-In addition to the main manifests, the repository preserves logs, summaries,
-and intermediate reports that are useful for verifying the operations performed.
+In addition to the main manifests, the repository preserves logs, summaries, and
+intermediate reports that are useful for verifying the operations performed.
 These artifacts do not all have the same role: some describe the status of the
 manual selection process, others summarize split generation, and others document
 the composition of the bundle or the evaluation of proxy models. Their overall
-function is to make the experimental path inspectable and to support any
+function is to make the experimental path directly observable and to support any
 subsequent checks.
 
 \begin{lstlisting}[caption={Schematic example of output from the dataset preparation phase.}, label={lst:dataset-preparation-log}]
@@ -453,6 +458,7 @@ The most relevant audit artifacts include
 only the final output, but also the status and operational assumptions of the
 main phases of the pipeline.
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Reproducibility Boundaries}
 \label{app:reproducibility-boundaries}
@@ -469,15 +475,16 @@ automatic procedure. The scientific value of this component lies in its
 traceability, in the explicit definition of the criteria, and in the freezing of
 the final manifest.
 
-Similarly, the evaluation with commercial forensic tools is not entirely
-reproducible through command-line execution, since it depends on proprietary
-software, specific versions, interface settings, internal \gls{ai}-based
-modules, and export procedures. To mitigate this limitation, the pipeline uses a
-common blind input, preserves file hashes, separates the ground truth from the
-inputs submitted to the tools, and includes a normalization phase for the
-exports. In this way, reproducibility is not understood as a bit-for-bit replica
-of every graphical interaction, but as verifiability of the protocol, inputs,
-mappings, and final metrics.
+Similarly, the evaluation with selected black-box software systems is not
+entirely reproducible through command-line execution, since it depends on
+proprietary software, specific versions, interface settings, internal
+\gls{ai}-based modules, and export procedures. To mitigate this limitation, the
+pipeline uses a common blind input, preserves file hashes, separates the ground
+truth from the inputs submitted to the software systems, and includes a
+normalization phase for the exports. In this way, reproducibility is not
+understood as a bit-for-bit replica of every graphical interaction, but as
+verifiability of the protocol, inputs, mappings, and final metrics.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Repository Availability}
@@ -498,7 +505,7 @@ ethical, and licensing constraints of the original sources. The source code of
 the repository is released under the MIT license, as indicated in the
 \codepath{LICENSE} file. This license applies to the code and experimental
 scripts, but it does not automatically imply the free redistribution of the
-thesis text, figures, datasets, raw images, forensic tool exports, model
+thesis text, figures, datasets, raw images, selected software exports, model
 checkpoints, or generated artifacts. These materials must be considered
 separately, according to their respective legal, ethical, institutional, and
 source-dependent licensing constraints.
