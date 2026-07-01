@@ -942,76 +942,65 @@ Section~\ref{subsec:results-embedded-metadata-sensitivity}, after the
 presentation of the normalized outputs of the selected software systems, since
 its interpretation requires comparison with the observed black-box results.
 
-
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Commercial Forensic Tools Evaluation}
+\section{Selected Black-Box Software Evaluation}
 \label{sec:results-commercial}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The evaluation of commercial tools represents the black-box level of the
-experimental pipeline. Unlike the proxy models analyzed in the previous
-sections, these tools do not provide access to the model architecture, training
-dataset, decision thresholds, internal preprocessing, or complete
+The evaluation of selected software systems represents the black-box level of
+the experimental pipeline. Unlike the proxy models analyzed in the previous
+sections, these systems do not provide access to the model architecture,
+training dataset, decision thresholds, internal preprocessing, or complete
 classification logic. The evaluation is therefore based exclusively on the
-observable outputs produced by the tools, such as assigned tags, exported
-categories, retrieval results, and semantic bookmarks, as well as on the
-matching between the files of the forensic evaluation bundle and the
+observable outputs produced by the software systems, such as assigned tags,
+exported categories, retrieval results, and semantic bookmarks, as well as on
+the matching between the files of the forensic evaluation bundle and the
 experimental ground truth.
 
-The commercial comparison includes four final tools:
+The comparison includes four selected software systems:
 \gls{magnetaxiomtool}/\gls{magnetai}, \gls{excirefoto2025},
 \gls{cellebriteinseyets}, and \gls{griffeye}/\gls{t3kcore}. Since
 \gls{excirefoto2025} is evaluated through three operational configurations of
 the \texttt{Distance limit} parameter, the metric comparison produces six
-normalized commercial profiles: \gls{magnetaxiomtool}/\gls{magnetai},
+normalized black-box profiles: \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{excirefoto2025} \texttt{D20}, \gls{excirefoto2025} \texttt{D50},
 \gls{excirefoto2025} \texttt{D80}, \gls{cellebriteinseyets}, and
 \gls{griffeye}/\gls{t3kcore}.
 
-The commercial tools are not treated as homogeneous classifiers. \gls{magnetai}
-exposes operational image categorization outputs; \gls{excirefoto2025} operates
-as a semantic retrieval engine; \gls{cellebriteinseyets} produces media analysis
-outputs exported from the Cellebrite environment; and
-\gls{griffeye}/\gls{t3kcore} produces automatic semantic bookmarks. The
-comparison is therefore operational and black-box: each output is mapped to the
-\texttt{weapon}/\texttt{non\_weapon} task through explicit and documented
-normalization rules.
+The selected software systems are not treated as homogeneous classifiers.
+\gls{magnetai} provides operational image categorization outputs;
+\gls{excirefoto2025} operates as a semantic retrieval engine;
+\gls{cellebriteinseyets} produces media analysis outputs exported from the
+Cellebrite environment; and \gls{griffeye}/\gls{t3kcore} produces automatic
+semantic bookmarks. The comparison is therefore operational and black-box: each
+output is mapped to the \texttt{weapon}/\texttt{non\_weapon} task through
+explicit and documented normalization rules.
 
 The adversarial perturbations included in the bundle must not be interpreted as
-white-box attacks optimized against the proprietary commercial tools. They are
-artifacts generated within the controlled proxy-model protocol and are used here
-to observe, in black-box mode, the operational sensitivity of commercial tools
-to manipulated inputs. Moreover, the aggregate metrics for commercial tools are
-\emph{bundle-weighted}: they describe behavior within the forensic evaluation
-bundle, whose composition is intentionally oriented toward robustness analysis,
-and not an absolute estimate of the overall quality of the product.
+white-box attacks optimized against the proprietary software systems. They are
+artifacts generated within the controlled proxy-model protocol and are used
+here to observe, in black-box mode, the operational sensitivity of selected
+software systems to manipulated inputs. Moreover, the aggregate metrics for
+these systems are \emph{bundle-weighted}: they describe behavior within the
+forensic evaluation bundle, whose composition is intentionally oriented toward
+robustness analysis, rather than providing an absolute estimate of overall
+product quality.
 
-To prevent the tools from using semantic information derived from file names,
-paths, or folder structure, the evaluation was conducted using the blind view of
-the forensic evaluation bundle. The files were imported with neutral names such
-as \texttt{bundle\_*.jpg}, while information related to class, source, fold,
-attack, transformation, hash, and ground truth was kept separate in the audit
-manifests. After processing, the exported outputs were normalized and mapped
-back to the original samples through bundle identifiers and
-\gls{sha256}/\gls{md5} hashes. This setting makes it possible to distinguish
-among correctly flagged images, unflagged images, false negatives on the
-\texttt{weapon} class, false positives on the \texttt{non\_weapon} class,
-non-interpretable outputs, and behavior on \gls{ood} samples.
+To prevent the evaluated software from using semantic information derived from
+file names, paths, or folder structure, the evaluation was conducted using the
+blind view of the forensic evaluation bundle. The files were imported with
+neutral names such as \texttt{bundle\_*.jpg}, while information related to
+class, source, fold, attack, transformation, hash, and ground truth was kept
+separate in the audit manifests. After processing, the exported outputs were
+normalized and mapped back to the original samples through bundle identifiers
+and \gls{sha256}/\gls{md5} hashes. This setting makes it possible to
+distinguish among correctly flagged images, unflagged images, false negatives
+on the \texttt{weapon} class, false positives on the \texttt{non\_weapon}
+class, non-interpretable outputs, and behavior on \gls{ood} samples.
 
 Table~\ref{tab:results-commercial-overview} reports a bundle-weighted summary
-of the metrics for the commercial systems and operational configurations
-considered. For all commercial profiles, normalization produced complete
+of the metrics for the selected systems and operational configurations
+considered. For all black-box profiles, normalization produced complete
 matching against the forensic evaluation bundle (11\,500/11\,500 files), with
 no unmapped rows or non-interpretable outputs. For \gls{excirefoto2025}, the
 three rows correspond to the \texttt{D20}, \texttt{D50}, and \texttt{D80}
@@ -1025,7 +1014,7 @@ permissive configurations.
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{2.6pt}
-\caption{Bundle-weighted summary of the black-box evaluation of commercial systems.}
+\caption{Bundle-weighted summary of the black-box evaluation of selected software systems.}
 \label{tab:results-commercial-overview}
 \begin{tabular}{@{}l r r r r r r r r@{}}
 \toprule
@@ -1079,7 +1068,7 @@ general product validation.
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{images/fig_forensic_tools_global_metrics_comparison.pdf}
-\caption{Global comparison of the aggregate metrics of the commercial black-box tools on the forensic evaluation bundle. The plot compares accuracy, balanced accuracy, \texttt{weapon} recall, FNR, FPR, and OOD weapon flag rate after output normalization.}
+\caption{Global comparison of the aggregate metrics of the selected black-box software systems on the forensic evaluation bundle. The plot compares accuracy, balanced accuracy, \texttt{weapon} recall, \acrshort{fnr}, \acrshort{fpr}, and \gls{ood} weapon flag rate after output normalization.}
 \label{fig:results-forensic-tools-global-comparison}
 \end{figure}
 
@@ -1089,23 +1078,23 @@ with caution. The metrics do not describe the internal accuracy of the
 commercial systems in an absolute sense, but the behavior observed after output
 normalization in the operational \texttt{weapon}/\texttt{non\_weapon} task. In
 particular, the case of \gls{excirefoto2025} clearly shows the effect of the
-retrieval threshold: \texttt{D20} reduces the false positive rate and the weapon
-flag rate on \gls{ood} samples, but increases false negatives; \texttt{D80}
-maximizes recall on the \texttt{weapon} class, but markedly increases false
-positives and \texttt{weapon} flags on \gls{ood} samples. \texttt{D50}
-therefore represents an intermediate configuration, useful for the operational
-comparison with \gls{magnetai}, \gls{cellebriteinseyets}, and
+retrieval threshold: \texttt{D20} reduces the false positive rate and the
+weapon flag rate on \gls{ood} samples, but increases false negatives;
+\texttt{D80} maximizes recall on the \texttt{weapon} class, but markedly
+increases false positives and \texttt{weapon} flags on \gls{ood} samples.
+\texttt{D50} therefore represents an intermediate configuration, useful for the
+operational comparison with \gls{magnetai}, \gls{cellebriteinseyets}, and
 \gls{griffeye}/\gls{t3kcore}.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.90\textwidth]{images/fig_forensic_tools_ood_weapon_flag_rate.pdf}
-\caption{Weapon flag rate of the commercial black-box tools on \gls{ood} samples.}
+\caption{Weapon flag rate of the selected black-box software systems on \gls{ood} samples.}
 \label{fig:results-forensic-tools-ood-weapon-flag-rate}
 \end{figure}
 
 Figure~\ref{fig:results-forensic-tools-ood-weapon-flag-rate} shows that even
-commercial tools with good performance on the binary task exhibit a non-zero
+commercial systems with good performance on the binary task exhibit a non-zero
 rate of absorption of \gls{ood} samples into the operational \texttt{weapon}
 class. This behavior is particularly relevant for forensic triage, since it may
 increase the human review workload and assign investigative priority to content
@@ -1118,24 +1107,20 @@ following subsections analyze the results of
 distinguishing clean performance, behavior on perturbed inputs, false negative
 risk on the \texttt{weapon} class, and weapon flag rate on \gls{ood} samples.
 
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Magnet AXIOM / Magnet.AI Results}
 \label{subsec:results-magnet}
 % ─────────────────────────────────────────────────────────────────────────────
 
 The evaluation of \gls{magnetaxiomtool}/\gls{magnetai} constitutes the first
-consolidated commercial black-box result of the pipeline. The outputs produced
-by the tool were normalized by mapping the \texttt{Possible weapons} tag as an
+consolidated black-box software result of the pipeline. The outputs produced by
+the module were normalized by mapping the \texttt{Possible weapons} tag as an
 operational positive prediction for the \texttt{weapon} class; the absence of
 this tag was instead mapped to the negative prediction
 \texttt{non\_weapon}. This recoding makes it possible to compare the observable
-output of the tool with the experimental ground truth of the forensic evaluation
-bundle, without assuming access to the internal decision logic of the
-proprietary module.
+output of the module with the experimental ground truth of the forensic
+evaluation bundle, without assuming access to the internal decision logic of
+the proprietary component.
 
 As indicated in Section~\ref{sec:results-commercial}, matching between the
 commercial export and the forensic evaluation bundle is complete for all
@@ -1145,11 +1130,11 @@ computed on the 11\,000 images belonging to the operational classes
 separately through the weapon flag rate.
 
 Table~\ref{tab:results-magnet-global-metrics} reports the overall metrics of
-\gls{magnetai} on the binary \texttt{weapon}/\texttt{non\_weapon} task. The tool
-achieves an accuracy of 0.933 and a precision of 0.963 on the \texttt{weapon}
-class. However, recall on the \texttt{weapon} class is 0.901, with a \gls{fnr}
-of 0.099: 542 images belonging to the \texttt{weapon} class were not flagged as
-\texttt{Possible weapons}.
+\gls{magnetai} on the binary \texttt{weapon}/\texttt{non\_weapon} task. The
+module achieves an accuracy of 0.933 and a precision of 0.963 on the
+\texttt{weapon} class. However, recall on the \texttt{weapon} class is 0.901,
+with a \gls{fnr} of 0.099: 542 \texttt{weapon} samples were not assigned the
+\texttt{Possible weapons} tag.
 
 \begin{table}[H]
 \centering
@@ -1182,12 +1167,11 @@ correspond to the arithmetic mean between clean and perturbed conditions,
 because the bundle includes 1\,000 clean images and 10\,000 perturbed images.
 \end{table}
 
-The note reported in Table~\ref{tab:results-magnet-global-metrics} highlights
-that the aggregate value is influenced by the composition of the bundle, in
-which perturbed images are numerically predominant with respect to clean
-samples. The overall metrics must therefore be read together with the
-disaggregation by experimental condition reported in
-Table~\ref{tab:results-magnet-condition-metrics}.
+The note in Table~\ref{tab:results-magnet-global-metrics} highlights that the
+aggregate value is influenced by the composition of the bundle, in which
+perturbed images are numerically predominant over clean samples. The overall
+metrics must therefore be read together with the disaggregation by experimental
+condition reported in Table~\ref{tab:results-magnet-condition-metrics}.
 
 \begin{table}[H]
 \centering
@@ -1246,18 +1230,18 @@ as \texttt{Possible weapons}. Standard binary metrics are not applicable. \\
 \end{tabularx}
 \end{table}
 
-The disaggregation by condition shows that adversarial attacks produce a more
-pronounced impact than anti-forensic transformations. The aggregate \gls{fnr}
-under adversarial conditions is 0.116, compared with 0.087 for anti-forensic
-transformations. This result indicates that, in the case of \gls{magnetai},
-perturbations designed to interfere with classifier behavior produce a more
-substantial increase in false negatives than realistic image degradation or
-manipulation transformations.
+The disaggregation by condition shows that adversarial perturbations produce a
+more pronounced impact than anti-forensic transformations. The aggregate
+\gls{fnr} under adversarial conditions is 0.116, compared with 0.087 for
+anti-forensic transformations. This result indicates that, in the case of
+\gls{magnetai}, perturbations designed to interfere with classifier behavior
+produce a more substantial increase in false negatives than plausible image
+degradation or manipulation transformations.
 
 The behavior on \gls{ood} images is relevant for the triage workflow.
 Out-of-distribution images do not belong to the binary
 \texttt{weapon}/\texttt{non\_weapon} task and therefore should not be
-interpreted as classical classification errors. However, the fact that 180
+interpreted as standard classification errors. However, the fact that 180
 \gls{ood} images out of 500 were flagged as \texttt{Possible weapons} indicates
 that the automatic module may assign investigative relevance to content that is
 semantically ambiguous or does not belong to the expected distribution.
@@ -1265,10 +1249,10 @@ semantically ambiguous or does not belong to the expected distribution.
 Unlike the proxy models, \gls{magnetai} does not export numerical confidence
 values associated with individual predictions. The observable classification is
 based exclusively on the presence or absence of the \texttt{Possible weapons}
-tag, without a quantitative indication of the degree of certainty. This
-characteristic prevents direct comparison with the confidence distributions of
-the proxy models and constitutes an operational limitation for the interpretive
-traceability of the output.
+tag, without a quantitative indication of the confidence level associated with
+the output. This characteristic prevents direct comparison with the confidence
+distributions of the proxy models and constitutes an operational limitation for
+the traceability and interpretability of the output.
 
 Table~\ref{tab:results-magnet-attack-metrics} reports the behavior of
 \gls{magnetai} with respect to all perturbations considered in the forensic
@@ -1395,23 +1379,22 @@ Anti-forensic &
 
 Overall, \gls{magnetai} shows good accuracy under clean conditions, equal to
 0.950, with a low \gls{fpr} of 0.030. However, the \gls{fnr} of 0.070 indicates
-that even in the absence of perturbations a non-negligible proportion of
+that even in the absence of perturbations, a non-negligible proportion of
 \texttt{weapon} images is not flagged. This value increases in the presence of
-some adversarial perturbations, with a relevant operational impact for triage.
-From this perspective, the most important datum is not accuracy reduction alone,
-but the increase in false negatives: in a triage scenario, a \texttt{weapon}
-image not flagged by the automatic module may receive lower priority for human
-review.
+some adversarial perturbations, with a significant operational impact for
+triage. From this perspective, the most important figure is not accuracy
+reduction alone, but the increase in false negatives: in a triage scenario, a
+\texttt{weapon} image not flagged by the automatic module may receive lower
+priority for human review.
 
 These results must be interpreted as indicators of operational reliability, not
 as a measure of the internal algorithmic robustness of \gls{magnetai}, which
-remains non-inspectable. The tool maintains good overall performance and high
+remains inaccessible. The module maintains good overall performance and high
 precision on the \texttt{weapon} class, but produces false negatives under both
 clean and perturbed conditions and flags a non-negligible proportion of
 \gls{ood} images as \texttt{Possible weapons}. These findings support the need
 to treat automatic output as an aid to triage and not as a conclusive or
 self-sufficient decision.
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Excire Foto 2025 Results and Sensitivity Analysis}
@@ -1421,9 +1404,9 @@ self-sufficient decision.
 The evaluation of \gls{excirefoto2025} requires specific interpretive caution.
 The software is not treated as a product developed exclusively for forensic
 purposes, nor as a native classifier for the binary
-\texttt{weapon}/\texttt{non\_weapon} distinction. In the experimental protocol,
+\texttt{weapon}/\texttt{non_weapon} distinction. In the experimental protocol,
 it is evaluated as a black-box semantic retrieval system equipped with
-\gls{ai}-based functionalities. The operational prediction is therefore derived
+\gls{ai}-based functionality. The operational prediction is therefore derived
 from the presence or absence of a sample among the results retrieved by the
 configured semantic search. This recoding enables a quantitative evaluation
 against the experimental ground truth, but it must not be interpreted as access
@@ -1435,8 +1418,8 @@ considered: \texttt{D20}, \texttt{D50}, and \texttt{D80}. The \texttt{D20}
 configuration represents a restrictive setting, oriented toward reducing false
 positives and semantically weak retrievals; \texttt{D50} constitutes the
 intermediate configuration of the sensitivity analysis; \texttt{D80} instead
-represents a permissive setting, oriented toward maximizing recall but exposed
-to a substantial increase in false positives and in the weapon flag rate on
+represents a permissive setting, oriented toward maximizing recall but at the
+cost of a substantial increase in false positives and in the weapon flag rate on
 \gls{ood} samples.
 
 \begin{table}[H]
@@ -1454,7 +1437,7 @@ to a substantial increase in false positives and in the weapon flag rate on
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
 \textbf{OOD W-rate} &
-\textbf{Operational profile} \\
+\textbf{Operational profile} \
 \midrule
 
 \texttt{D20} &
@@ -1464,7 +1447,7 @@ to a substantial increase in false positives and in the weapon flag rate on
 0.026 &
 0.238 &
 Restrictive: low operational noise and lower \gls{ood} absorption, but higher
-risk of false negatives. \\
+risk of false negatives. \
 
 \texttt{D50} &
 0.944 &
@@ -1472,7 +1455,7 @@ risk of false negatives. \\
 0.042 &
 0.070 &
 0.340 &
-Intermediate: more balanced compromise in the experimental context considered. \\
+Intermediate: balanced compromise in the experimental context considered. \
 
 \texttt{D80} &
 0.915 &
@@ -1481,14 +1464,14 @@ Intermediate: more balanced compromise in the experimental context considered. \
 0.156 &
 0.522 &
 Permissive: very high recall, but marked increase in false positives and
-\gls{ood} flags. \\
+\gls{ood} flags. \
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
 The comparison among the three configurations shows that the
-\texttt{Distance limit} parameter does not act as a merely technical variable,
+\texttt{Distance limit} parameter does not act merely as a technical variable,
 but as an operational threshold that modifies the risk profile of the system.
 \texttt{D20} is more conservative and reduces the review workload arising from
 false positives, but may fail to retrieve relevant \texttt{weapon} content.
@@ -1511,18 +1494,18 @@ the \texttt{weapon} class.
 \textbf{Accuracy} &
 \textbf{Recall weapon} &
 \textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} \\
+\textbf{\gls{fpr}} \
 \midrule
 
-\texttt{D20} & Anti-forensic & 0.927 & 0.875 & 0.125 & 0.022 \\
-\texttt{D50} & Anti-forensic & 0.941 & 0.957 & 0.043 & 0.074 \\
-\texttt{D80} & Anti-forensic & 0.908 & 0.984 & 0.016 & 0.169 \\
+\texttt{D20} & Anti-forensic & 0.927 & 0.875 & 0.125 & 0.022 \
+\texttt{D50} & Anti-forensic & 0.941 & 0.957 & 0.043 & 0.074 \
+\texttt{D80} & Anti-forensic & 0.908 & 0.984 & 0.016 & 0.169 \
 
 \midrule
 
-\texttt{D20} & Adversarial & 0.892 & 0.834 & 0.166 & 0.051 \\
-\texttt{D50} & Adversarial & 0.904 & 0.938 & 0.062 & 0.130 \\
-\texttt{D80} & Adversarial & 0.861 & 0.977 & 0.023 & 0.256 \\
+\texttt{D20} & Adversarial & 0.892 & 0.834 & 0.166 & 0.051 \
+\texttt{D50} & Adversarial & 0.904 & 0.938 & 0.062 & 0.130 \
+\texttt{D80} & Adversarial & 0.861 & 0.977 & 0.023 & 0.256 \
 
 \bottomrule
 \end{tabular}
@@ -1532,7 +1515,7 @@ The aggregate results under perturbed conditions show that, for
 \gls{excirefoto2025}, anti-forensic transformations produce a more limited
 impact than adversarial perturbations. However, in this case as well, the
 operational profile changes substantially as the threshold varies:
-\texttt{D20} maintains the lowest \gls{fpr} but presents the highest \gls{fnr},
+\texttt{D20} maintains the lowest \gls{fpr} but exhibits the highest \gls{fnr},
 \texttt{D80} almost completely reduces false negatives but increases
 operational noise, whereas \texttt{D50} maintains an intermediate compromise
 between recall and selectivity.
@@ -1559,7 +1542,7 @@ configuration between the restrictive and permissive profiles.
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
 \textbf{FN} &
-\textbf{FP} \\
+\textbf{FP} \
 \midrule
 
 Adversarial &
@@ -1569,7 +1552,7 @@ Adversarial &
 0.034 &
 0.068 &
 17 &
-34 \\
+34 \
 
 Adversarial &
 \gls{fgsm} &
@@ -1578,7 +1561,7 @@ Adversarial &
 0.110 &
 0.038 &
 55 &
-19 \\
+19 \
 
 Adversarial &
 \gls{onepixel} &
@@ -1587,7 +1570,7 @@ Adversarial &
 0.036 &
 0.072 &
 18 &
-36 \\
+36 \
 
 Adversarial &
 \gls{sigmazero} &
@@ -1596,7 +1579,7 @@ Adversarial &
 0.074 &
 0.442 &
 37 &
-221 \\
+221 \
 
 Adversarial &
 \gls{superdeepfool} &
@@ -1605,7 +1588,7 @@ Adversarial &
 0.056 &
 0.032 &
 28 &
-16 \\
+16 \
 
 \midrule
 
@@ -1616,7 +1599,7 @@ Anti-forensic &
 0.048 &
 0.070 &
 24 &
-35 \\
+35 \
 
 Anti-forensic &
 \gls{gaussianblur} &
@@ -1625,7 +1608,7 @@ Anti-forensic &
 0.040 &
 0.078 &
 20 &
-39 \\
+39 \
 
 Anti-forensic &
 \gls{histogrammodification} &
@@ -1634,7 +1617,7 @@ Anti-forensic &
 0.048 &
 0.088 &
 24 &
-44 \\
+44 \
 
 Anti-forensic &
 \gls{jpegrecompression} &
@@ -1643,7 +1626,7 @@ Anti-forensic &
 0.042 &
 0.066 &
 21 &
-33 \\
+33 \
 
 Anti-forensic &
 \gls{resampleresize} &
@@ -1652,19 +1635,19 @@ Anti-forensic &
 0.036 &
 0.070 &
 18 &
-35 \\
+35 \
 
 \bottomrule
 \end{tabular}
 \end{table}
 
-A particularly relevant case is represented by \gls{sigmazero}. Unlike a simple
+A particularly relevant case is that of \gls{sigmazero}. Unlike a simple
 evasion dynamic, in which the main effect would be the increase in false
 negatives on the \texttt{weapon} class, \gls{excirefoto2025} shows, under the
-\texttt{D50} and \texttt{D80} configurations, a behavior of semantic
-over-triggering. Under these conditions, the system continues to retrieve many
+\texttt{D50} and \texttt{D80} configurations, a semantic over-triggering
+behavior. Under these conditions, the system continues to retrieve many
 \texttt{weapon} images, but substantially increases the proportion of
-\texttt{non\_weapon} images erroneously retrieved as relevant.
+\texttt{non_weapon} images erroneously retrieved as relevant.
 
 \begin{table}[H]
 \centering
@@ -1679,26 +1662,26 @@ over-triggering. Under these conditions, the system continues to retrieve many
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
 \textbf{FN} &
-\textbf{FP} \\
+\textbf{FP} \
 \midrule
 
-\texttt{D20} & 0.815 & 0.820 & 0.180 & 0.190 & 90 & 95 \\
-\texttt{D50} & 0.742 & 0.926 & 0.074 & 0.442 & 37 & 221 \\
-\texttt{D80} & 0.657 & 0.976 & 0.024 & 0.662 & 12 & 331 \\
+\texttt{D20} & 0.815 & 0.820 & 0.180 & 0.190 & 90 & 95 \
+\texttt{D50} & 0.742 & 0.926 & 0.074 & 0.442 & 37 & 221 \
+\texttt{D80} & 0.657 & 0.976 & 0.024 & 0.662 & 12 & 331 \
 
 \bottomrule
 \end{tabular}
 \end{table}
 
 The joint interpretation of the three configurations shows that
-\gls{sigmazero} does not produce only a problem of missed detection. On the
+\gls{sigmazero} does not give rise only to a missed-detection problem. On the
 contrary, as the retrieval threshold increases, recall on the \texttt{weapon}
 class also increases, but the \gls{fpr} grows markedly as well: from 0.190 under
 \texttt{D20}, to 0.442 under \texttt{D50}, and up to 0.662 under \texttt{D80}.
-This behavior is operationally significant because a permissive configuration
-may appear preferable because it reduces the risk of false negatives, but it can
-generate a high volume of false positives, saturating human review and reducing
-the efficiency of the automatic filter.
+This behavior is operationally significant because, while a permissive
+configuration may appear preferable due to its lower risk of false negatives,
+it can generate a high volume of false positives, saturating human review and
+reducing the efficiency of the automatic filter.
 
 Overall, \gls{excirefoto2025} highlights the critical role of the retrieval
 threshold in black-box evaluation. A restrictive configuration reduces noise but
@@ -1709,32 +1692,30 @@ subsequent comparative discussion, the \texttt{D50} configuration is used as
 the main reference, whereas \texttt{D20} and \texttt{D80} are interpreted as
 operational extremes of the sensitivity analysis.
 
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Cellebrite Inseyets Results}
 \label{subsec:results-cellebrite}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The evaluation of \gls{cellebriteinseyets} constitutes one of the commercial
-black-box levels of the experimental pipeline. The tool is considered as a
-commercial system for \gls{ai}-assisted media analysis, evaluated exclusively
-through the observable outputs exported and normalized from the
-\texttt{Cellebrite Physical Analyzer 10.9.0.3029} environment. Consistently with
+The evaluation of \gls{cellebriteinseyets} constitutes part of the black-box
+level of the experimental pipeline. The system is evaluated as a commercial
+software platform for \gls{ai}-assisted media analysis, using exclusively the
+observable outputs exported and normalized from the
+\texttt{Cellebrite Physical Analyzer 10.9.0.3029} environment. Consistent with
 the methodology defined in Chapter~\ref{chap:methodology}, \gls{ufed} is not
-treated as an image classifier, but only as a possible component of the
-Cellebrite ecosystem for data acquisition and management.
+treated as an image classifier, but only as part of the broader Cellebrite
+ecosystem for data acquisition and management.
 
 As indicated in Section~\ref{sec:results-commercial}, matching between the
 commercial export and the forensic evaluation bundle is complete for all
 evaluated profiles. For \gls{cellebriteinseyets}, the binary metrics are
-therefore computed on the 11\,000 images belonging to the operational classes
-\texttt{weapon} and \texttt{non\_weapon}; the 500 \gls{ood} images are analyzed
+therefore computed on the 11,000 images belonging to the operational classes
+\texttt{weapon} and \texttt{non_weapon}; the 500 \gls{ood} images are analyzed
 separately through the weapon flag rate.
 
 Table~\ref{tab:results-cellebrite-global-metrics} reports the overall metrics
 of \gls{cellebriteinseyets} on the binary
-\texttt{weapon}/\texttt{non\_weapon} task. The tool achieves an accuracy of
+\texttt{weapon}/\texttt{non_weapon} task. The system achieves an accuracy of
 0.958 and a balanced accuracy of 0.958. Recall on the \texttt{weapon} class is
 0.958, with a \gls{fnr} of 0.042; the \gls{fpr} is also 0.042. This profile
 indicates a relatively symmetrical balance between false negatives and false
@@ -1742,31 +1723,31 @@ positives in the evaluated bundle.
 
 \begin{table}[H]
 \centering
-\caption{Overall performance of \gls{cellebriteinseyets} on the binary \texttt{weapon}/\texttt{non\_weapon} task.}
+\caption{Overall performance of \gls{cellebriteinseyets} on the binary \texttt{weapon}/\texttt{non_weapon} task.}
 \label{tab:results-cellebrite-global-metrics}
 \small
 \begin{tabular}{lr}
 \toprule
-\textbf{Metric} & \textbf{Value} \\
+\textbf{Metric} & \textbf{Value} \
 \midrule
-Accuracy & 0.958 \\
-Balanced accuracy & 0.958 \\
-Precision \texttt{weapon} & 0.958 \\
-Recall \texttt{weapon} & 0.958 \\
-F1 \texttt{weapon} & 0.958 \\
-False negative rate & 0.042 \\
-False positive rate & 0.042 \\
-True positives & 5\,268 \\
-True negatives & 5\,271 \\
-False positives & 229 \\
-False negatives & 232 \\
+Accuracy & 0.958 \
+Balanced accuracy & 0.958 \
+Precision \texttt{weapon} & 0.958 \
+Recall \texttt{weapon} & 0.958 \
+F1 \texttt{weapon} & 0.958 \
+False negative rate & 0.042 \
+False positive rate & 0.042 \
+True positives & 5,268 \
+True negatives & 5,271 \
+False positives & 229 \
+False negatives & 232 \
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} The metrics are computed on the 11\,000 images belonging to the
-binary \texttt{weapon}/\texttt{non\_weapon} task. The 500 \gls{ood} images are
+\textit{Note.} The metrics are computed on the 11,000 images belonging to the
+binary \texttt{weapon}/\texttt{non_weapon} task. The 500 \gls{ood} images are
 not included in the accuracy computation and are analyzed separately.
 \end{table}
 
@@ -1775,9 +1756,9 @@ by experimental condition. Under clean conditions, \gls{cellebriteinseyets}
 achieves an accuracy of 0.964, with \texttt{weapon} recall equal to 0.968 and a
 \gls{fnr} of 0.032. On perturbed images, the aggregate accuracy is 0.958, with
 a \gls{fnr} of 0.043 and a \gls{fpr} of 0.042. The distinction between
-adversarial perturbations and anti-forensic transformations shows a limited
-reduction with respect to the clean baseline, with aggregate values equal to
-0.955 and 0.960, respectively.
+adversarial perturbations and anti-forensic transformations reveals only a
+limited accuracy reduction relative to the clean baseline, with aggregate
+values of 0.955 and 0.960, respectively.
 
 \begin{table}[H]
 \centering
@@ -1791,7 +1772,7 @@ reduction with respect to the clean baseline, with aggregate values equal to
 \textbf{Recall weapon} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{Operational note} \\
+\textbf{Operational note} \
 \midrule
 
 Clean &
@@ -1799,29 +1780,29 @@ Clean &
 0.968 &
 0.032 &
 0.040 &
-Commercial baseline on 1\,000 unperturbed images. \\
+Commercial baseline on 1,000 unperturbed images. \
 
 Perturbed &
 0.958 &
 0.957 &
 0.043 &
 0.042 &
-Values computed on 10\,000 perturbed images: 5\,000 adversarial and 5\,000
-anti-forensic. \\
+Values computed on 10,000 perturbed images: 5,000 adversarial and 5,000
+anti-forensic. \
 
 Adversarial &
 0.955 &
 0.950 &
 0.050 &
 0.040 &
-Aggregate performance across the five adversarial perturbations considered. \\
+Aggregate performance across the five adversarial perturbations considered. \
 
 Anti-forensic &
 0.960 &
 0.963 &
 0.037 &
 0.043 &
-Aggregate performance across the five anti-forensic transformations considered. \\
+Aggregate performance across the five anti-forensic transformations considered. \
 
 \gls{ood} &
 -- &
@@ -1830,21 +1811,21 @@ Aggregate performance across the five anti-forensic transformations considered. 
 -- &
 Weapon flag rate equal to 0.292: 146 \gls{ood} images out of 500 were
 operationally mapped to the \texttt{weapon} class. Standard binary metrics are
-not applicable. \\
+not applicable. \
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The behavior on \gls{ood} samples is relevant because it highlights the tendency
-of the system to map out-of-distribution or semantically weapon-adjacent content
-to the operational \texttt{weapon} class. In the case of
-\gls{cellebriteinseyets}, 146 \gls{ood} images out of 500 were flagged as
-\texttt{weapon}, with a weapon flag rate of 0.292. This value does not represent
-a binary error in the strict sense, because \gls{ood} samples do not belong to
-the \texttt{weapon}/\texttt{non\_weapon} ground truth; rather, it describes the
-degree of operational absorption of out-of-distribution inputs into the binary
-triage task.
+The behavior on \gls{ood} samples is relevant because it highlights the
+tendency of the system to map out-of-distribution or semantically
+weapon-adjacent content to the operational \texttt{weapon} class. In the case
+of \gls{cellebriteinseyets}, 146 \gls{ood} images out of 500 were flagged as
+\texttt{weapon}, with a weapon flag rate of 0.292. This value does not
+represent a binary error in the strict sense, because \gls{ood} samples do not
+belong to the \texttt{weapon}/\texttt{non_weapon} ground truth; rather, it
+describes the degree of operational absorption of out-of-distribution inputs
+into the binary triage task.
 
 Table~\ref{tab:results-cellebrite-attack-metrics} reports the behavior of
 \gls{cellebriteinseyets} with respect to all perturbations considered in the
@@ -1871,7 +1852,7 @@ whereas \gls{gaussianblur} produces the highest \gls{fpr}, equal to 0.056.
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
 \textbf{FN} &
-\textbf{FP} \\
+\textbf{FP} \
 \midrule
 
 Adversarial &
@@ -1881,7 +1862,7 @@ Adversarial &
 0.032 &
 0.040 &
 16 &
-20 \\
+20 \
 
 Adversarial &
 \gls{fgsm} &
@@ -1890,7 +1871,7 @@ Adversarial &
 0.106 &
 0.058 &
 53 &
-29 \\
+29 \
 
 Adversarial &
 \gls{onepixel} &
@@ -1899,7 +1880,7 @@ Adversarial &
 0.032 &
 0.044 &
 16 &
-22 \\
+22 \
 
 Adversarial &
 \gls{sigmazero} &
@@ -1908,7 +1889,7 @@ Adversarial &
 0.042 &
 0.018 &
 21 &
-9 \\
+9 \
 
 Adversarial &
 \gls{superdeepfool} &
@@ -1917,7 +1898,7 @@ Adversarial &
 0.036 &
 0.042 &
 18 &
-21 \\
+21 \
 
 \midrule
 
@@ -1928,7 +1909,7 @@ Anti-forensic &
 0.028 &
 0.038 &
 14 &
-19 \\
+19 \
 
 Anti-forensic &
 \gls{gaussianblur} &
@@ -1937,7 +1918,7 @@ Anti-forensic &
 0.036 &
 0.056 &
 18 &
-28 \\
+28 \
 
 Anti-forensic &
 \gls{histogrammodification} &
@@ -1946,7 +1927,7 @@ Anti-forensic &
 0.060 &
 0.042 &
 30 &
-21 \\
+21 \
 
 Anti-forensic &
 \gls{jpegrecompression} &
@@ -1955,7 +1936,7 @@ Anti-forensic &
 0.028 &
 0.040 &
 14 &
-20 \\
+20 \
 
 Anti-forensic &
 \gls{resampleresize} &
@@ -1964,41 +1945,39 @@ Anti-forensic &
 0.032 &
 0.040 &
 16 &
-20 \\
+20 \
 
 \bottomrule
 \end{tabular}
 \end{table}
 
-The observed profile differs from both the proxy models and the other
-commercial tools. \gls{cellebriteinseyets} does not show extreme degradation
+The observed profile differs from both the proxy models and the other selected
+software systems. \gls{cellebriteinseyets} does not show extreme degradation
 under \gls{sigmazero}: in this condition, accuracy is 0.970, with a \gls{fnr}
 of 0.042 and a \gls{fpr} of 0.018. The most critical adversarial condition is
 instead \gls{fgsm}, which produces the highest number of false negatives among
-the attacks considered. This result must be interpreted with caution, because
-the tool remains black-box and it is not possible to determine whether the
-greater observed stability derives from architectural differences, internal
-preprocessing, proprietary media analysis logic, or characteristics specific to
-the evaluated export.
+the perturbations considered. This result must be interpreted with caution,
+because the system remains black-box and it is not possible to determine
+whether the greater observed stability derives from architectural differences,
+internal preprocessing, proprietary media analysis logic, or characteristics
+specific to the evaluated export.
 
 Overall, \gls{cellebriteinseyets} shows a good profile within the considered
 forensic evaluation bundle: clean accuracy is 0.964, the clean \gls{fnr} is
-0.032, and the weapon flag rate on \gls{ood} samples is 0.292. These values must
-not be interpreted as a guarantee of general robustness, but as the behavior
-observed under the defined experimental protocol. Compared with the other
-commercial tools, \gls{cellebriteinseyets} maintains high recall on the
-\texttt{weapon} class; however, \gls{griffeye}/\gls{t3kcore} presents the
-highest aggregate commercial accuracy and the lowest false positive rate in the
-considered protocol. The comparison among commercial tools must therefore be
-interpreted as a trade-off among recall, false negatives, false positives, and
-behavior on \gls{ood} inputs, not as the identification of a generally superior
-system.
+0.032, and the weapon flag rate on \gls{ood} samples is 0.292. These values
+must not be interpreted as a guarantee of general robustness, but as the
+behavior observed under the defined experimental protocol. Compared with the
+other selected software systems, \gls{cellebriteinseyets} maintains high recall
+on the \texttt{weapon} class; however, \gls{griffeye}/\gls{t3kcore} exhibits
+the highest aggregate accuracy and the lowest false positive rate in the
+considered protocol. The comparison among selected software systems must
+therefore be interpreted as a trade-off among recall, false negatives, false
+positives, and behavior on \gls{ood} inputs, not as the identification of a
+generally superior system.
 
 In this case as well, the automatic output must be treated as support for
-triage and not as a conclusive decision, especially in the presence of perturbed,
-out-of-distribution, or semantically ambiguous inputs.
-
-
+triage and not as a conclusive decision, especially in the presence of
+perturbed, out-of-distribution, or semantically ambiguous inputs.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Magnet Griffeye / T3K CORE Results}
@@ -2006,19 +1985,18 @@ out-of-distribution, or semantically ambiguous inputs.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The evaluation of \gls{griffeye}/\gls{t3kcore} introduces an additional
-commercial black-box output paradigm into the experimental protocol. Unlike
-tools that expose categories, classifications, or retrieval results,
-\gls{griffeye} was evaluated through the automatic semantic bookmarks generated
-by \gls{t3kcore}. Consistently with the methodology defined in
-Chapter~\ref{chap:methodology}, these bookmarks are treated as observable
-operational outputs and not as local explanations of the internal decision-making
-process.
+black-box output paradigm into the experimental protocol. Unlike systems that
+provide categories, classifications, or retrieval results, \gls{griffeye} was
+evaluated through the automatic semantic bookmarks generated by \gls{t3kcore}.
+Consistent with the methodology defined in Chapter~\ref{chap:methodology},
+these bookmarks are treated as observable operational outputs and not as local
+explanations of the internal decision-making process.
 
 As indicated in Section~\ref{sec:results-commercial}, matching between the
-commercial export and the forensic evaluation bundle is complete for all
+software export and the forensic evaluation bundle is complete for all
 evaluated profiles. For \gls{griffeye}/\gls{t3kcore}, the binary metrics are
-therefore computed on the 11\,000 images belonging to the operational classes
-\texttt{weapon} and \texttt{non\_weapon}; the 500 \gls{ood} images are analyzed
+therefore computed on the 11,000 images belonging to the operational classes
+\texttt{weapon} and \texttt{non_weapon}; the 500 \gls{ood} images are analyzed
 separately through the weapon flag rate. The operational mapping considers only
 the \texttt{CORE/Violence/Firearm} bookmark as a positive output, whereas other
 bookmarks semantically related to weapons, violence, or military context are
@@ -2026,37 +2004,37 @@ preserved as raw information but are not used as primary positives. This choice
 makes the mapping deliberately conservative: the low \gls{fpr} observed for
 \gls{griffeye}/\gls{t3kcore} must therefore also be interpreted as an effect of
 the adopted normalization rule, not as stand-alone evidence of inherently better
-tool performance. A more permissive mapping, including weapon-adjacent
+system performance. A more permissive mapping, including weapon-adjacent
 bookmarks as secondary positives, could have increased recall but also the
 number of false positives.
 
 \begin{table}[H]
 \centering
-\caption{Overall performance of \gls{griffeye}/\gls{t3kcore} on the binary \texttt{weapon}/\texttt{non\_weapon} task.}
+\caption{Overall performance of \gls{griffeye}/\gls{t3kcore} on the binary \texttt{weapon}/\texttt{non_weapon} task.}
 \label{tab:results-griffeye-global-metrics}
 \small
 \begin{tabular}{lr}
 \toprule
-\textbf{Metric} & \textbf{Value} \\
+\textbf{Metric} & \textbf{Value} \
 \midrule
-Accuracy & 0.972 \\
-Balanced accuracy & 0.972 \\
-Precision \texttt{weapon} & 0.992 \\
-Recall \texttt{weapon} & 0.951 \\
-F1 \texttt{weapon} & 0.971 \\
-False negative rate & 0.049 \\
-False positive rate & 0.007 \\
-True positives & 5\,229 \\
-True negatives & 5\,460 \\
-False positives & 40 \\
-False negatives & 271 \\
+Accuracy & 0.972 \
+Balanced accuracy & 0.972 \
+Precision \texttt{weapon} & 0.992 \
+Recall \texttt{weapon} & 0.951 \
+F1 \texttt{weapon} & 0.971 \
+False negative rate & 0.049 \
+False positive rate & 0.007 \
+True positives & 5,229 \
+True negatives & 5,460 \
+False positives & 40 \
+False negatives & 271 \
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} The metrics are computed on the 11\,000 images belonging to the
-binary \texttt{weapon}/\texttt{non\_weapon} task. The 500 \gls{ood} images are
+\textit{Note.} The metrics are computed on the 11,000 images belonging to the
+binary \texttt{weapon}/\texttt{non_weapon} task. The 500 \gls{ood} images are
 not included in the accuracy computation and are analyzed separately. The low
 \gls{fpr} also reflects the conservative mapping based only on the
 \texttt{CORE/Violence/Firearm} bookmark as the primary positive output.
@@ -2074,7 +2052,7 @@ not included in the accuracy computation and are analyzed separately. The low
 \textbf{Recall weapon} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{Operational note} \\
+\textbf{Operational note} \
 \midrule
 
 Clean &
@@ -2082,29 +2060,29 @@ Clean &
 0.964 &
 0.036 &
 0.008 &
-Commercial baseline on 1\,000 unperturbed images. \\
+Black-box baseline on 1,000 unperturbed images. \
 
 Perturbed &
 0.971 &
 0.949 &
 0.051 &
 0.007 &
-Values computed on 10\,000 perturbed images: 5\,000 adversarial and
-5\,000 anti-forensic. \\
+Values computed on 10,000 perturbed images: 5,000 adversarial and
+5,000 anti-forensic. \
 
 Adversarial &
 0.969 &
 0.945 &
 0.055 &
 0.008 &
-Aggregate performance across the five adversarial perturbations considered. \\
+Aggregate performance across the five adversarial perturbations considered. \
 
 Anti-forensic &
 0.974 &
 0.954 &
 0.046 &
 0.006 &
-Aggregate performance across the five anti-forensic transformations considered. \\
+Aggregate performance across the five anti-forensic transformations considered. \
 
 \gls{ood} &
 -- &
@@ -2113,7 +2091,7 @@ Aggregate performance across the five anti-forensic transformations considered. 
 -- &
 Weapon flag rate equal to 0.260: 130 \gls{ood} images out of 500 were
 operationally mapped to the \texttt{weapon} class. Standard binary metrics are
-not applicable. \\
+not applicable. \
 
 \bottomrule
 \end{tabularx}
@@ -2125,7 +2103,7 @@ to the operational \texttt{weapon} class. In the case of
 \gls{griffeye}/\gls{t3kcore}, 130 \gls{ood} images out of 500 were flagged as
 \texttt{weapon}, with a weapon flag rate of 0.260. This value does not represent
 a binary error in the strict sense, because \gls{ood} samples do not belong to
-the \texttt{weapon}/\texttt{non\_weapon} ground truth; rather, it describes the
+the \texttt{weapon}/\texttt{non_weapon} ground truth; rather, it describes the
 degree of operational absorption of out-of-distribution inputs into the binary
 triage task. The observed value is lower than those of \gls{magnetai},
 \gls{excirefoto2025} under the \texttt{D50} configuration, and
@@ -2138,11 +2116,11 @@ Table~\ref{tab:results-griffeye-attack-metrics} reports the behavior of
 forensic evaluation bundle. In the condition-level detail, \gls{sigmazero}
 produces the highest \gls{fnr} among the adversarial perturbations, with an
 accuracy of 0.959, recall on the \texttt{weapon} class equal to 0.926, and a
-\gls{fnr} of 0.074. \gls{fgsm} produces a very similar behavior, with an
-accuracy of 0.960 and a \gls{fnr} of 0.072. Among the anti-forensic
-transformations, \gls{histogrammodification} produces the highest \gls{fnr},
-equal to 0.068, whereas \gls{contraststretching} produces the highest
-\gls{fpr}, equal to 0.010.
+\gls{fnr} of 0.074. \gls{fgsm} exhibits very similar behavior, with an accuracy
+of 0.960 and a \gls{fnr} of 0.072. Among the anti-forensic transformations,
+\gls{histogrammodification} produces the highest \gls{fnr}, equal to 0.068,
+whereas \gls{contraststretching} produces the highest \gls{fpr}, equal to
+0.010.
 
 \begin{table}[H]
 \centering
@@ -2160,117 +2138,116 @@ equal to 0.068, whereas \gls{contraststretching} produces the highest
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
 \textbf{FN} &
-\textbf{FP} \\
+\textbf{FP} \
 \midrule
 
 Adversarial &
 \gls{colorshift} &
-0.977 & 0.960 & 0.040 & 0.006 & 20 & 3 \\
+0.977 & 0.960 & 0.040 & 0.006 & 20 & 3 \
 
 Adversarial &
 \gls{fgsm} &
-0.960 & 0.928 & 0.072 & 0.008 & 36 & 4 \\
+0.960 & 0.928 & 0.072 & 0.008 & 36 & 4 \
 
 Adversarial &
 \gls{onepixel} &
-0.978 & 0.964 & 0.036 & 0.008 & 18 & 4 \\
+0.978 & 0.964 & 0.036 & 0.008 & 18 & 4 \
 
 Adversarial &
 \gls{sigmazero} &
-0.959 & 0.926 & 0.074 & 0.008 & 37 & 4 \\
+0.959 & 0.926 & 0.074 & 0.008 & 37 & 4 \
 
 Adversarial &
 \gls{superdeepfool} &
-0.969 & 0.948 & 0.052 & 0.010 & 26 & 5 \\
+0.969 & 0.948 & 0.052 & 0.010 & 26 & 5 \
 
 \midrule
 
 Anti-forensic &
 \gls{contraststretching} &
-0.977 & 0.964 & 0.036 & 0.010 & 18 & 5 \\
+0.977 & 0.964 & 0.036 & 0.010 & 18 & 5 \
 
 Anti-forensic &
 \gls{gaussianblur} &
-0.972 & 0.948 & 0.052 & 0.004 & 26 & 2 \\
+0.972 & 0.948 & 0.052 & 0.004 & 26 & 2 \
 
 Anti-forensic &
 \gls{histogrammodification} &
-0.963 & 0.932 & 0.068 & 0.006 & 34 & 3 \\
+0.963 & 0.932 & 0.068 & 0.006 & 34 & 3 \
 
 Anti-forensic &
 \gls{jpegrecompression} &
-0.976 & 0.960 & 0.040 & 0.008 & 20 & 4 \\
+0.976 & 0.960 & 0.040 & 0.008 & 20 & 4 \
 
 Anti-forensic &
 \gls{resampleresize} &
-0.980 & 0.964 & 0.036 & 0.004 & 18 & 2 \\
+0.980 & 0.964 & 0.036 & 0.004 & 18 & 2 \
 
 \bottomrule
 \end{tabular}
 \end{table}
 
-The observed profile differs from both the proxy models and the other
-commercial tools. \gls{griffeye}/\gls{t3kcore} does not show extreme degradation
-under \gls{sigmazero}, unlike what was observed for EfficientNet-B0. Under this
-condition, however, the highest number of false negatives for the tool is
-recorded, equal to 37, and recall on the \texttt{weapon} class decreases to
-0.926. This result suggests residual sensitivity to sparse or localized
-perturbations, although without a performance collapse comparable to that
-observed in some proxy models.
+The observed profile differs from both the proxy models and the other selected
+software systems. \gls{griffeye}/\gls{t3kcore} does not show extreme
+degradation under \gls{sigmazero}, unlike what was observed for EfficientNet-B0.
+Under this condition, however, the highest number of false negatives for the
+system is recorded, equal to 37, and recall on the \texttt{weapon} class
+decreases to 0.926. This result suggests residual sensitivity to sparse or
+localized perturbations, although without a performance collapse comparable to
+that observed in some proxy models.
 
-Overall, \gls{griffeye}/\gls{t3kcore} presents the most selective commercial
+Overall, \gls{griffeye}/\gls{t3kcore} exhibits the most selective black-box
 profile in the considered protocol in terms of accuracy, balanced accuracy, and
 containment of false positives. The overall \gls{fpr}, equal to 0.007, is
-substantially lower than those of the other evaluated commercial tools, while
+substantially lower than those of the other selected software systems, while
 recall on the \texttt{weapon} class, equal to 0.951, remains high but is not the
 highest. Indeed, \gls{cellebriteinseyets} maintains slightly higher recall on
-the \texttt{weapon} class, whereas \gls{griffeye}/\gls{t3kcore} presents a more
+the \texttt{weapon} class, whereas \gls{griffeye}/\gls{t3kcore} exhibits a more
 selective profile and is less prone to generating false positives.
 
 These values must not be interpreted as a guarantee of general robustness, but
 as the behavior observed under the defined experimental protocol. In this case
-as well, the tool remains black-box: it is not possible to determine whether the
-observed profile depends on the internal architecture of the module,
+as well, the system remains black-box: it is not possible to determine whether
+the observed profile depends on the internal architecture of the module,
 preprocessing, proprietary thresholds, bookmark generation criteria, or the
 specific characteristics of the evaluated export. Automatic outputs must
 therefore be treated as support for triage and not as a conclusive decision,
 especially in the presence of perturbed, out-of-distribution, or semantically
 ambiguous inputs.
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Embedded Metadata Sensitivity Check}
 \label{subsec:results-embedded-metadata-sensitivity}
 % ─────────────────────────────────────────────────────────────────────────────
 
-After normalization of the commercial outputs, a sensitivity check was performed
-on the residual embedded metadata present in the blind view of the forensic
-evaluation bundle. The blindness of the bundle was primarily designed at the
-level of file names, paths, and directory structure; however, some black-box
-tools may also index metadata embedded in image files. For this reason, the
+After normalization of the selected software outputs, a sensitivity check was
+performed on the residual embedded metadata present in the blind view of the
+forensic evaluation bundle. Bundle blindness was primarily ensured at the level
+of file names, paths, and directory structure; however, some black-box software
+systems may also index metadata embedded in image files. For this reason, the
 check is retained in Chapter~\ref{chap:results} as a methodological audit, but
 not as a primary robustness result.
 
-The audit checked 11\,500 files in the blind directory
+The audit examined 11,500 files in the blind directory
 \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files}, detecting
-7\,640 files with embedded metadata and 15 files containing semantically or
+7,640 files with embedded metadata and 15 files containing semantically or
 experimentally sensitive terms. These 15 cases do not involve adversarial or
 anti-forensic artifacts, but only 11 clean images and 4 \gls{ood} images.
 Consequently, the phenomenon does not directly affect the main comparison
 concerning robustness under adversarial perturbations and anti-forensic
-transformations, but it represents a residual operational limitation of the
-bundle blindness.
+transformations, but it represents a residual operational limitation of bundle
+blindness.
 
 Two aspects are methodologically relevant. First, the presence of descriptive
-terms in the metadata does not automatically determine a positive classification
-by the black-box tools: some \texttt{weapon} samples with weapon-related
-metadata are still not flagged by at least some of the evaluated tools. Second,
-for the four \gls{ood} cases with sensitive hits, it is not possible to
-determine from the observable outputs alone whether the \texttt{weapon} flag
-derives from the visual content, the embedded metadata, or a combination of the
-two factors. These cases are therefore interpreted as part of the broader
-operational risk associated with \gls{ood} and semantically weapon-adjacent
-inputs.
+terms in the metadata does not automatically produce a positive classification
+by the black-box software systems: some \texttt{weapon} samples with
+weapon-related metadata are still not flagged by at least some of the evaluated
+systems. Second, for the four \gls{ood} cases with sensitive hits, it is not
+possible to determine from the observable outputs alone whether the
+\texttt{weapon} flag derives from the visual content, the embedded metadata, or
+a combination of the two factors. These cases are therefore interpreted as part
+of the broader operational risk associated with \gls{ood} and semantically
+weapon-adjacent inputs.
 
 \begin{table}[H]
 \centering
@@ -2285,46 +2262,46 @@ inputs.
 \textbf{Cases} &
 \textbf{Denominator} &
 \textbf{Weight} &
-\textbf{Observed impact} \\
+\textbf{Observed impact} \
 \midrule
 
 Full bundle &
 15 &
-11\,500 &
-0.130\% &
-Very limited proportion of the forensic evaluation bundle. \\
+11,500 &
+0.130% &
+Very limited proportion of the forensic evaluation bundle. \
 
 Overall binary metrics &
 11 &
-11\,000 &
-0.100\% &
-Negligible quantitative impact on the aggregate binary metrics. \\
+11,000 &
+0.100% &
+Negligible quantitative impact on the aggregate binary metrics. \
 
 Clean baseline &
 11 &
-1\,000 &
-1.100\% &
+1,000 &
+1.100% &
 Impact limited to the clean baseline; the observed accuracy variations remain
-on the order of a few thousandths. \\
+on the order of a few thousandths. \
 
 Adversarial robustness &
 0 &
-5\,000 &
-0.000\% &
-No case with sensitive hits belongs to the adversarial artifacts. \\
+5,000 &
+0.000% &
+No case with sensitive hits belongs to the adversarial artifacts. \
 
 Anti-forensic robustness &
 0 &
-5\,000 &
-0.000\% &
-No case with sensitive hits belongs to the anti-forensic artifacts. \\
+5,000 &
+0.000% &
+No case with sensitive hits belongs to the anti-forensic artifacts. \
 
 OOD weapon flag rate &
 4 &
 500 &
-0.800\% &
+0.800% &
 Impact limited to the weapon flag rate on \gls{ood} samples; the variation does
-not change the qualitative interpretation of the results. \\
+not change the qualitative interpretation of the results. \
 
 \bottomrule
 \end{tabularx}
@@ -2335,12 +2312,11 @@ sensitive hits, confirms that the aggregate metrics do not change substantially:
 the variations in clean accuracy remain between -0.0009 and +0.0015, whereas
 the variations in the weapon flag rate on \gls{ood} samples remain below 0.006
 in absolute value. Therefore, the identified cases are retained in the benchmark
-and discussed as a documented operational limitation of the bundle blindness,
-not as an invalidating factor for the experimental results. The residual
-presence of embedded metadata nevertheless suggests that, in future studies or
+and discussed as a documented operational limitation of bundle blindness, not
+as an invalidating factor for the experimental results. The residual presence
+of embedded metadata nevertheless suggests that, in future studies or
 operational validations, metadata neutralization should be included as a
 preventive control during the construction of the blind bundle.
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Comparative Robustness Discussion}
@@ -2350,40 +2326,40 @@ preventive control during the construction of the blind bundle.
 The results presented in the previous sections make it possible to interpret
 the robustness of the evaluated systems across three complementary levels. The
 first level concerns the proxy models, which allow the behavior of
-\gls{ai}-based classifiers to be observed in a controlled and transparent manner
-in the presence of clean, \gls{ood}, anti-forensic, and adversarial inputs. The
-second level concerns the commercial tools, evaluated as black-box systems
-through only observable and exportable outputs. The third level concerns the
-forensic evaluation bundle, which makes it possible to expose both proxy models
-and commercial tools to the same families of inputs, while keeping the white-box
-evaluation of the proxy models distinct from the operational black-box
-evaluation of the commercial systems.
+\gls{ai}-based classifiers to be observed in a controlled and transparent
+manner in the presence of clean, \gls{ood}, anti-forensic, and adversarial
+inputs. The second level concerns the selected software systems, evaluated as
+black-box systems through observable and exportable outputs only. The third
+level concerns the forensic evaluation bundle, which makes it possible to
+expose both proxy models and selected software systems to the same families of
+inputs, while keeping the white-box evaluation of the proxy models distinct
+from the operational black-box evaluation of the selected software systems.
 
 The comparison must therefore not be interpreted as a direct ranking between
 proxy models and commercial products. Proxy models operate on a controlled
 binary task, with explicit labels, confidence scores, and reproducible
-predictions. Commercial tools, instead, expose proprietary categories, semantic
-retrieval results, media analysis outputs, or automatic semantic bookmarks that
-must be normalized into the operational labels \texttt{weapon},
-\texttt{non\_weapon}, and, where necessary, non-informative or non-mappable
-categories. The value of the comparison is therefore methodological and
-operational: it makes it possible to understand which types of errors may emerge
-when \gls{ai}-based automation is used to support forensic image triage.
+predictions. Selected software systems, by contrast, provide proprietary
+categories, semantic retrieval results, media analysis outputs, or automatic
+semantic bookmarks that must be normalized into the operational labels
+\texttt{weapon}, \texttt{non_weapon}, and, where necessary, non-informative or
+non-mappable categories. The value of the comparison is therefore methodological
+and operational: it makes it possible to understand which types of errors may
+emerge when \gls{ai}-based automation is used to support forensic image triage.
 
 \paragraph{Clean performance and out-of-distribution behavior.}
 
 Table~\ref{tab:results-comparative-clean-ood} summarizes clean performance and
-behavior on \gls{ood} inputs. Clean accuracy measures nominal performance on the
-binary task, whereas the OOD weapon rate measures how frequently images outside
-the expected distribution are nevertheless mapped to the operational
-\texttt{weapon} class. In a forensic workflow, these two dimensions must be read
-jointly: a system may achieve good accuracy on clean data while still producing
-operational risk if it tends to absorb anomalous inputs into the class of
-investigative interest.
+behavior on \gls{ood} inputs. Clean accuracy measures nominal performance on
+the binary task, whereas the OOD weapon rate measures how frequently images
+outside the expected distribution are nevertheless mapped to the operational
+\texttt{weapon} class. In a forensic workflow, these two dimensions must be
+read jointly: a system may achieve good accuracy on clean data while still
+producing operational risk if it tends to absorb anomalous inputs into the
+class of investigative interest.
 
 \begin{table}[H]
 \centering
-\caption{Comparison between clean performance and OOD behavior of the proxy models and commercial black-box systems.}
+\caption{Comparison between clean performance and OOD behavior of the proxy models and selected black-box software systems.}
 \label{tab:results-comparative-clean-ood}
 \small
 \renewcommand{\arraystretch}{1.18}
@@ -2395,7 +2371,7 @@ investigative interest.
 \textbf{Clean acc.} &
 \textbf{Clean FNR} &
 \textbf{OOD W-rate} &
-\textbf{Operational interpretation} \\
+\textbf{Operational interpretation} \
 \midrule
 
 EfficientNet-B0 &
@@ -2404,8 +2380,8 @@ Proxy &
 0.016 &
 0.370 &
 Highest clean accuracy among the proxy models, with a low false negative rate
-on the \texttt{weapon} class; however, a non-negligible proportion of OOD inputs
-is mapped to the \texttt{weapon} class. \\
+on the \texttt{weapon} class; however, a non-negligible proportion of OOD
+inputs is mapped to the \texttt{weapon} class. \
 
 ResNet18 &
 Proxy &
@@ -2414,7 +2390,7 @@ Proxy &
 0.438 &
 Solid clean baseline, but with a higher FNR than EfficientNet-B0 and greater
 OOD absorption toward \texttt{weapon}; the mean confidence on OOD inputs makes
-this behavior relevant for triage. \\
+this behavior relevant for triage. \
 
 \gls{clip} &
 Proxy &
@@ -2422,41 +2398,41 @@ Proxy &
 0.012 &
 0.836 &
 Lower clean accuracy than the supervised models, but a very limited FNR; the
-main operational risk is the high weapon flag rate on OOD inputs. \\
+main operational risk is the high weapon flag rate on OOD inputs. \
 
 Magnet AXIOM / Magnet.AI &
-Commercial black-box &
+Black-box software &
 0.950 &
 0.070 &
 0.360 &
 High clean performance and relatively conservative behavior, but with a
-non-negligible risk of missed detection of \texttt{weapon} images. \\
+non-negligible risk of missed detection of \texttt{weapon} images. \
 
 Excire Foto 2025 D50 &
-Commercial black-box &
+Black-box software &
 0.944 &
 0.042 &
 0.340 &
 Intermediate semantic retrieval configuration, with a good compromise among
-recall on the \texttt{weapon} class, false positives, and OOD absorption. \\
+recall on the \texttt{weapon} class, false positives, and OOD absorption. \
 
 Cellebrite Inseyets &
-Commercial black-box &
+Black-box software &
 0.964 &
 0.032 &
 0.292 &
 Good balance on the clean set, with high recall on the \texttt{weapon} class
 and an OOD weapon flag rate lower than those of \gls{magnetai} and
-\gls{excirefoto2025} under the \texttt{D50} configuration. \\
+\gls{excirefoto2025} under the \texttt{D50} configuration. \
 
 Magnet Griffeye / T3K CORE &
-Commercial black-box &
+Black-box software &
 0.978 &
 0.036 &
 0.260 &
-Highest clean accuracy among the commercial tools under the adopted
+Highest clean accuracy among the selected software systems under the adopted
 conservative mapping; low OOD absorption, but with a residual proportion of
-false negatives on the \texttt{weapon} class. \\
+false negatives on the \texttt{weapon} class. \
 
 \bottomrule
 \end{tabularx}
@@ -2466,35 +2442,36 @@ The comparison on clean data shows that nominal performance is not sufficient
 to describe the operational robustness of a system. EfficientNet-B0 achieves
 the highest clean accuracy among the proxy models, whereas
 \gls{griffeye}/\gls{t3kcore} achieves the highest clean accuracy among the
-commercial tools considered, although this result must be interpreted in light
-of the conservative mapping adopted for the
+selected software systems considered, although this result must be interpreted
+in light of the conservative mapping adopted for the
 \texttt{CORE/Violence/Firearm} bookmark. \gls{cellebriteinseyets}, however,
 shows slightly higher \texttt{weapon} recall in the adopted aggregate protocol.
 Behavior on \gls{ood} inputs highlights an additional dimension of risk: even
-commercial tools with good clean accuracy exhibit non-zero weapon flag rates on
-content outside the task.
+selected software systems with good clean accuracy exhibit non-zero weapon flag
+rates on content outside the task.
 
 EfficientNet-B0 and ResNet18 show OOD weapon rates of 0.370 and 0.438,
 respectively. However, their higher mean confidence on \gls{ood} inputs makes
 these errors potentially more critical in an automatic prioritization process.
-The commercial tools present more limited values: \gls{magnetai} reaches an OOD
-weapon flag rate of 0.360, \gls{excirefoto2025} under the \texttt{D50}
-configuration reaches 0.340, \gls{cellebriteinseyets} reaches 0.292, and
-\gls{griffeye}/\gls{t3kcore} reaches 0.260. These results show a lower
-operational tendency of the commercial tools, under the adopted protocol, to
-absorb out-of-distribution samples into the \texttt{weapon} class. However,
-since the internal mechanisms, thresholds, and calibration of the commercial
-tools are not accessible, these values must not be interpreted as evidence of
-actual OOD recognition capability, but as observable behavior after black-box
-normalization and with respect to the adopted mapping rules.
+The selected software systems present more limited values: \gls{magnetai}
+reaches an OOD weapon flag rate of 0.360, \gls{excirefoto2025} under the
+\texttt{D50} configuration reaches 0.340, \gls{cellebriteinseyets} reaches
+0.292, and \gls{griffeye}/\gls{t3kcore} reaches 0.260. These results indicate
+a lower operational tendency of the selected software systems, under the
+adopted protocol, to absorb out-of-distribution samples into the
+\texttt{weapon} class. However, since the internal mechanisms, thresholds, and
+calibration of the selected software systems are not accessible, these values
+must not be interpreted as evidence of actual OOD recognition capability, but
+as observable behavior after black-box normalization and with respect to the
+adopted mapping rules.
 
 \paragraph{Robustness with respect to anti-forensic transformations.}
 
 Table~\ref{tab:results-comparative-antiforensic} reports the comparative
 behavior of the systems under anti-forensic transformations. These manipulations
 are not optimized against a specific model decision boundary. Rather, they
-represent realistic image-level transformations that may derive from
-recompression, resizing, blurring, tonal alterations, file re-sharing, or
+represent operationally plausible image-level transformations that may derive
+from recompression, resizing, blurring, tonal alterations, file re-sharing, or
 intentional manipulation. For this reason, even apparently limited drops may
 have operational relevance.
 
@@ -2511,7 +2488,7 @@ have operational relevance.
 \textbf{Anti acc./drop} &
 \textbf{Most critical condition} &
 \textbf{Main error} &
-\textbf{Robustness interpretation} \\
+\textbf{Robustness interpretation} \
 \midrule
 
 EfficientNet-B0 &
@@ -2519,50 +2496,50 @@ EfficientNet-B0 &
 \gls{gaussianblur}; acc. 0.965; drop 0.013 &
 17 induced errors, all W$\rightarrow$NW &
 Overall high anti-forensic robustness, although blurring introduces a targeted
-risk of false negatives on the \texttt{weapon} class. \\
+risk of false negatives on the \texttt{weapon} class. \
 
 ResNet18 &
 0.957 / 0.007 &
 \gls{histogrammodification}; acc. 0.934; drop 0.030 &
 39 induced errors; 23 W$\rightarrow$NW and 16 NW$\rightarrow$W &
 Stable profile on average, but more sensitive to tonal alterations, with errors
-in both operational directions. \\
+in both operational directions. \
 
 \gls{clip} &
 0.928 / -0.001 &
 \gls{histogrammodification}; 13 induced errors &
 Limited number of induced errors &
 High stability with respect to the considered transformations; the main
-criticality remains OOD behavior, not anti-forensic degradation. \\
+criticality remains OOD behavior, not anti-forensic degradation. \
 
 Magnet AXIOM / Magnet.AI &
 0.940 / 0.010 &
 \gls{gaussianblur}; FNR 0.120 &
 60 FN &
 Good aggregate robustness, although some transformations increase false
-negatives on \texttt{weapon}, with direct impact on triage. \\
+negatives on \texttt{weapon}, with direct impact on triage. \
 
 Excire Foto 2025 D50 &
 0.941 / 0.003 &
 \gls{histogrammodification}; acc. 0.932; FPR 0.088 &
 Increase in false positives &
 Stable anti-forensic profile under the D50 configuration, with the main
-criticality more related to operational noise than to missed detection of
-\texttt{weapon}. \\
+criticality more attributable to operational noise than to missed detection of
+\texttt{weapon}. \
 
 Cellebrite Inseyets &
 0.960 / 0.004 &
 \gls{histogrammodification}; acc. 0.949; FNR 0.060 &
 Residual false negatives on \texttt{weapon} images &
-Good aggregate commercial profile under anti-forensic transformations, although
-with residual sensitivity to tonal modifications. \\
+Good aggregate black-box profile under anti-forensic transformations, although
+with residual sensitivity to tonal modifications. \
 
 Magnet Griffeye / T3K CORE &
 0.974 / 0.004 &
 \gls{histogrammodification}; acc. 0.963; FNR 0.068 &
 34 FN &
-Most selective commercial profile under anti-forensic transformations, with a
-very limited \gls{fpr} but residual false negatives under tonal modifications. \\
+Most selective black-box profile under anti-forensic transformations, with a
+very limited \gls{fpr} but residual false negatives under tonal modifications. \
 
 \bottomrule
 \end{tabularx}
@@ -2570,59 +2547,60 @@ very limited \gls{fpr} but residual false negatives under tonal modifications. \
 \vspace{0.4em}
 \footnotesize
 \textit{Note.} For the proxy models, aggregate values are computed across the
-five anti-forensic transformations considered. For commercial systems, values
-derive from the normalized outputs on the forensic evaluation bundle. The drop
-is defined in Section~\ref{sec:results-scope}. W$\rightarrow$NW indicates
-transitions from \texttt{weapon} to \texttt{non\_weapon}; FN indicates false
-negatives; FNR indicates false negative rate; FPR indicates false positive rate.
+five anti-forensic transformations considered. For selected software systems,
+values derive from the normalized outputs on the forensic evaluation bundle.
+The drop is defined in Section~\ref{sec:results-scope}. W$\rightarrow$NW
+indicates transitions from \texttt{weapon} to \texttt{non_weapon}; FN
+indicates false negatives; FNR indicates false negative rate; FPR indicates
+false positive rate.
 \end{table}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{images/fig_forensic_tools_anti_forensic_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop of commercial black-box tools under anti-forensic transformations.}
+\caption{Accuracy drop of selected black-box software systems under anti-forensic transformations.}
 \label{fig:results-forensic-tools-antiforensic-drop-heatmap}
 \end{figure}
 
 Figure~\ref{fig:results-forensic-tools-antiforensic-drop-heatmap} complements
-the tabular interpretation by showing that, for commercial tools,
+the tabular interpretation by showing that, for selected software systems,
 anti-forensic transformations generally produce limited drops. The most evident
 variations are observed for \gls{excirefoto2025} under the \texttt{D80}
 configuration with \gls{histogrammodification} and, to a lesser extent, for
-\gls{magnetai} under \gls{gaussianblur}. \gls{griffeye}/\gls{t3kcore} maintains
-a limited drop, while still presenting residual false negatives in the most
-critical condition.
+\gls{magnetai} under \gls{gaussianblur}. \gls{griffeye}/\gls{t3kcore}
+maintains a limited drop, while still exhibiting residual false negatives in
+the most critical condition.
 
 The anti-forensic results show generally limited degradation in both proxy
-models and commercial tools. This result is important because it distinguishes
-the operational effect of realistic transformations from the more aggressive
-effect of adversarial perturbations. For EfficientNet-B0, the most critical
-condition is \gls{gaussianblur}, which produces 17 induced errors, all in the
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon} direction. Although the
-aggregate drop is limited, this error direction is forensically relevant,
-because it corresponds to missed detection of images containing weapons.
+models and selected software systems. This result is important because it
+distinguishes the operational effect of plausible transformations from the more
+aggressive effect of adversarial perturbations. For EfficientNet-B0, the most
+critical condition is \gls{gaussianblur}, which produces 17 induced errors, all
+in the \texttt{weapon}(\rightarrow)\texttt{non_weapon} direction. Although
+the aggregate drop is limited, this error direction is forensically relevant,
+because it corresponds to missed detection of \texttt{weapon} samples.
 
 ResNet18 shows the most marked anti-forensic degradation under
 \gls{histogrammodification}, with an accuracy of 0.934 and 39 induced errors.
 Unlike EfficientNet-B0, the error pattern is bidirectional: both missed
 detections of the \texttt{weapon} class and false \texttt{weapon} flags on
-\texttt{non\_weapon} images are present. \gls{clip}, instead, remains relatively
-stable with respect to the tested transformations. This confirms that, in the
-present protocol, the main criticality of \gls{clip} is not anti-forensic
-degradation, but the tendency to absorb \gls{ood} inputs into the
+\texttt{non_weapon} images are present. \gls{clip}, instead, remains
+relatively stable with respect to the tested transformations. This confirms
+that, in the present protocol, the main criticality of \gls{clip} is not
+anti-forensic degradation, but the tendency to absorb \gls{ood} inputs into the
 \texttt{weapon} class.
 
-Commercial tools also show limited aggregate degradation.
-\gls{griffeye}/\gls{t3kcore} presents the highest aggregate anti-forensic
+Selected software systems also show limited aggregate degradation.
+\gls{griffeye}/\gls{t3kcore} exhibits the highest aggregate anti-forensic
 accuracy, equal to 0.974, followed by \gls{cellebriteinseyets},
 \gls{excirefoto2025} under the \texttt{D50} configuration, and \gls{magnetai}.
-However, the operational interpretation varies across tools.
-\gls{griffeye}/\gls{t3kcore} maintains a very limited \gls{fpr}, but shows
+However, the operational interpretation varies across systems.
+\gls{griffeye}/\gls{t3kcore} maintains a very limited \gls{fpr}, but exhibits
 residual false negatives under \gls{histogrammodification}.
 \gls{cellebriteinseyets} maintains high recall, but with a higher \gls{fpr}
 than \gls{griffeye}/\gls{t3kcore}. \gls{magnetai} is more exposed to false
-negatives under \gls{gaussianblur}, whereas \gls{excirefoto2025} shows a
-criticality more related to the increase in false positives under
+negatives under \gls{gaussianblur}, whereas \gls{excirefoto2025} exhibits a
+criticality more attributable to false positive increase under
 \gls{histogrammodification}.
 
 \paragraph{Robustness with respect to adversarial perturbations.}
@@ -2633,7 +2611,7 @@ perturbations are designed to stress the decision behavior of \gls{ai}-based
 systems. For this reason, they produce more heterogeneous and more
 model-dependent effects. The results highlight an important distinction between
 the white-box vulnerability of proxy models and the operational black-box
-behavior of commercial tools.
+behavior of selected software systems.
 
 \begin{table}[H]
 \centering
@@ -2648,7 +2626,7 @@ behavior of commercial tools.
 \textbf{Adv. acc./drop} &
 \textbf{Most critical condition} &
 \textbf{Main error} &
-\textbf{Robustness interpretation} \\
+\textbf{Robustness interpretation} \
 \midrule
 
 EfficientNet-B0 &
@@ -2656,50 +2634,50 @@ EfficientNet-B0 &
 \gls{sigmazero}; acc. 0.015; drop 0.963 &
 963 induced errors; 489 W$\rightarrow$NW and 474 NW$\rightarrow$W &
 Most marked proxy vulnerability in the white-box scenario; high clean accuracy
-does not guarantee adversarial robustness. \\
+does not guarantee adversarial robustness. \
 
 ResNet18 &
 0.955 / 0.009 &
 \gls{fgsm}; acc. 0.918; drop 0.046 &
 47 induced errors; 27 W$\rightarrow$NW and 20 NW$\rightarrow$W &
 More stable adversarial profile than EfficientNet-B0, but with residual
-degradation under \gls{fgsm}. \\
+degradation under \gls{fgsm}. \
 
 \gls{clip} &
 0.927 / 0.000 &
 \gls{fgsm}; acc. 0.914; drop 0.013 &
 23 induced errors; 8 W$\rightarrow$NW and 15 NW$\rightarrow$W &
-Limited degradation with respect to the tested attacks; adversarial stability
-does not eliminate OOD risk. \\
+Limited degradation with respect to the tested perturbations; adversarial
+stability does not eliminate OOD risk. \
 
 Magnet AXIOM / Magnet.AI &
 0.923 / 0.027 &
 \gls{fgsm}; acc. 0.867; FNR 0.192 &
 96 FN &
 Moderate aggregate robustness, but \gls{fgsm} substantially increases false
-negatives on the \texttt{weapon} class. \\
+negatives on the \texttt{weapon} class. \
 
 Excire Foto 2025 D50 &
 0.904 / 0.040 &
 \gls{sigmazero}; acc. 0.742; FPR 0.442 &
 221 FP &
 The perturbation primarily produces semantic over-triggering, rather than
-systematic concealment of \texttt{weapon} images. \\
+systematic concealment of \texttt{weapon} images. \
 
 Cellebrite Inseyets &
 0.955 / 0.009 &
 \gls{fgsm}; acc. 0.918; FNR 0.106 &
 53 FN &
-Good aggregate commercial stability even in the adversarial scenario, with an
-increase in false negatives especially under \gls{fgsm}. \\
+Good aggregate black-box stability even in the adversarial scenario, with an
+increase in false negatives especially under \gls{fgsm}. \
 
 Magnet Griffeye / T3K CORE &
 0.969 / 0.009 &
 \gls{sigmazero}; acc. 0.959; FNR 0.074 &
 37 FN &
-Highest aggregate commercial accuracy in the adversarial scenario; the low
+Highest aggregate black-box accuracy in the adversarial scenario; the low
 \gls{fpr} also reflects the conservative mapping, while residual sensitivity to
-sparse perturbations remains. \\
+sparse perturbations remains. \
 
 \bottomrule
 \end{tabularx}
@@ -2707,29 +2685,30 @@ sparse perturbations remains. \\
 \vspace{0.4em}
 \footnotesize
 \textit{Note.} For the proxy models, aggregate values are computed across the
-five adversarial perturbations considered. For commercial systems, values derive
-from the normalized outputs on the forensic evaluation bundle. The drop is
-defined in Section~\ref{sec:results-scope}. W$\rightarrow$NW indicates
-transitions from \texttt{weapon} to \texttt{non\_weapon}; FN indicates false
-negatives; FNR indicates false negative rate; FPR indicates false positive rate.
+five adversarial perturbations considered. For selected software systems,
+values derive from the normalized outputs on the forensic evaluation bundle.
+The drop is defined in Section~\ref{sec:results-scope}. W$\rightarrow$NW
+indicates transitions from \texttt{weapon} to \texttt{non_weapon}; FN
+indicates false negatives; FNR indicates false negative rate; FPR indicates
+false positive rate.
 \end{table}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{images/fig_forensic_tools_adversarial_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop of commercial black-box tools under adversarial perturbations.}
+\caption{Accuracy drop of selected black-box software systems under adversarial perturbations.}
 \label{fig:results-forensic-tools-adversarial-drop-heatmap}
 \end{figure}
 
 Figure~\ref{fig:results-forensic-tools-adversarial-drop-heatmap} shows that the
-response of commercial tools to adversarial perturbations is strongly dependent
-on the system and configuration. \gls{excirefoto2025} is particularly sensitive
-to \gls{sigmazero} under the \texttt{D50} and \texttt{D80} configurations,
-whereas \gls{cellebriteinseyets} and \gls{griffeye}/\gls{t3kcore} show more
-limited aggregate drops. This result reinforces the interpretation that the
-operational robustness of commercial black-box tools is not uniform, but depends
-on the type of observable output, the adopted mapping, and the system
-configuration.
+response of selected software systems to adversarial perturbations is strongly
+dependent on the system and configuration. \gls{excirefoto2025} is particularly
+sensitive to \gls{sigmazero} under the \texttt{D50} and \texttt{D80}
+configurations, whereas \gls{cellebriteinseyets} and
+\gls{griffeye}/\gls{t3kcore} show more limited aggregate drops. This result
+reinforces the interpretation that the operational robustness of selected
+black-box software systems is not uniform, but depends on the type of
+observable output, the adopted mapping, and the system configuration.
 
 The adversarial comparison shows that the most severe degradation occurs at the
 proxy level, particularly for EfficientNet-B0 under \gls{sigmazero}. The model
@@ -2750,31 +2729,33 @@ white-box target, and \gls{clip} already exhibits a different criticality on
 \gls{ood} inputs. Therefore, the adversarial stability observed for \gls{clip}
 must not be generalized beyond the evaluated threat model.
 
-Commercial tools show a different pattern. \gls{magnetai} does not reproduce the
-catastrophic degradation observed for EfficientNet-B0 under \gls{sigmazero},
-but is substantially affected by \gls{fgsm}, with a \gls{fnr} of 0.192. From a
-forensic perspective, this is a critical error, because the missed detection of
-\texttt{weapon} images may lead to the deprioritization of relevant material.
+Selected software systems show a different pattern. \gls{magnetai} does not
+reproduce the catastrophic degradation observed for EfficientNet-B0 under
+\gls{sigmazero}, but is substantially affected by \gls{fgsm}, with a
+\gls{fnr} of 0.192. From a forensic perspective, this is a critical error,
+because the missed detection of \texttt{weapon} images may lead to the
+deprioritization of relevant material.
 
 \gls{excirefoto2025} under the \texttt{D50} configuration instead reacts
 differently: \gls{sigmazero} primarily produces an increase in the false
 positive rate, equal to 0.442, generating semantic over-triggering rather than
 systematic concealment of the \texttt{weapon} class. \gls{cellebriteinseyets}
-shows high recall and limited degradation, but maintains a higher false positive
-rate than \gls{griffeye}/\gls{t3kcore}. Under the adopted conservative mapping,
-\gls{griffeye}/\gls{t3kcore} presents the highest aggregate commercial accuracy
-and the lowest false positive rate, while still retaining residual false
-negatives on the \texttt{weapon} class.
+shows high recall and limited degradation, but maintains a higher false
+positive rate than \gls{griffeye}/\gls{t3kcore}. Under the adopted conservative
+mapping, \gls{griffeye}/\gls{t3kcore} exhibits the highest aggregate black-box
+accuracy and the lowest false positive rate, while still retaining residual
+false negatives on the \texttt{weapon} class.
 
-Overall, the commercial comparison does not identify a single preferable tool
-across all operational criteria, but highlights different risk profiles. \gls{griffeye}/\gls{t3kcore}
-presents the most selective profile and the lowest operational noise in terms
-of false positives; \gls{cellebriteinseyets} maintains slightly higher recall on
-the \texttt{weapon} class; \gls{excirefoto2025} shows behavior strongly
-dependent on the retrieval threshold; and \gls{magnetai} presents a more
-conservative profile but with greater false negative risk. This heterogeneity
-confirms that the operational robustness of commercial black-box software is
-tool-dependent and must be interpreted with respect to the type of observable
+Overall, the comparison among selected software systems does not identify a
+single preferable system across all operational criteria, but highlights
+different risk profiles. \gls{griffeye}/\gls{t3kcore} exhibits the most
+selective profile and the lowest operational noise in terms of false positives;
+\gls{cellebriteinseyets} maintains slightly higher recall on the
+\texttt{weapon} class; \gls{excirefoto2025} shows behavior strongly dependent
+on the retrieval threshold; and \gls{magnetai} exhibits a more conservative
+profile but with greater false negative risk. This heterogeneity confirms that
+the operational robustness of selected black-box software systems is
+system-dependent and must be interpreted with respect to the type of observable
 output, the adopted mapping, and the role of the analyst in the workflow.
 
 \paragraph{Threshold sensitivity and black-box interpretation.}
@@ -2784,32 +2765,33 @@ the system was evaluated as a semantic retrieval engine and not as a native
 forensic classifier. The \texttt{Distance limit} parameter defines the
 operational restrictiveness of semantic retrieval. The \texttt{D20}
 configuration is restrictive: it reduces false positives and weapon flags on
-\gls{ood} inputs, but increases the risk of missed detection of \texttt{weapon}
-images. The \texttt{D80} configuration is permissive: it maximizes recall, but
-increases false positives and the assignment of non-relevant or perturbed images
-to the semantic query related to weapons. The \texttt{D50} configuration was
-used as the main comparison point because it represents an intermediate profile.
+\gls{ood} inputs, but increases the risk of missed detection of
+\texttt{weapon} images. The \texttt{D80} configuration is permissive: it
+maximizes recall, but increases false positives and the assignment of
+non-relevant or perturbed images to the semantic query related to weapons. The
+\texttt{D50} configuration was used as the main comparison point because it
+represents an intermediate profile.
 
 This threshold dependence is particularly evident under \gls{sigmazero}. Under
 the \texttt{D20} configuration, \gls{excirefoto2025} achieves an accuracy of
 0.815, an FNR of 0.180, and an FPR of 0.190. Under the \texttt{D50}
-configuration, accuracy decreases to 0.742, while FNR improves to 0.074 and FPR
-increases to 0.442. Under the \texttt{D80} configuration, recall improves
-further, but FPR rises to 0.662. The same tool can therefore support different
-forensic priorities depending on the selected operating point: \texttt{D20} is
-more suitable for containing noise, \texttt{D80} for maximizing recall, and
-\texttt{D50} for balancing false negatives and false positives.
+configuration, accuracy decreases to 0.742, while FNR improves to 0.074 and
+FPR increases to 0.442. Under the \texttt{D80} configuration, recall improves
+further, but FPR rises to 0.662. The same software system can therefore support
+different forensic priorities depending on the selected operating point:
+\texttt{D20} is more suitable for containing noise, \texttt{D80} for maximizing
+recall, and \texttt{D50} for balancing false negatives and false positives.
 
-The black-box nature of commercial tools also limits the type of conclusions
-that can be formulated. Unlike the proxy models, these systems do not expose
-decision boundaries, calibrated scores, architectures, training data, or
+The black-box nature of selected software systems also limits the types of
+conclusions that can be drawn. Unlike the proxy models, these systems do not
+expose decision boundaries, calibrated scores, architectures, training data, or
 internal thresholding logic. Their outputs can therefore be evaluated only at
 the operational level, through observable categories, exported tags, retrieval
 results, semantic bookmarks, matching rate, non-mappable outputs, false
 negatives, false positives, and behavior on \gls{ood} inputs. This limitation
 does not represent a weakness of the evaluation protocol; on the contrary, it
 reflects the real condition in which forensic analysts interact with
-\gls{ai}-assisted commercial tools.
+\gls{ai}-assisted commercial software.
 
 \paragraph{Overall operational interpretation.}
 
@@ -2824,26 +2806,49 @@ attention, content prioritization, and the manual review strategy.
 Three main findings emerge. First, proxy models are useful because they make
 controlled degradation patterns observable and allow confidence shift, induced
 errors, and error direction to be measured. However, their behavior cannot be
-automatically transferred to commercial tools, which adopt proprietary
+automatically transferred to selected software systems, which adopt proprietary
 mechanisms for classification, tagging, retrieval, or semantic bookmark
-generation. Second, commercial tools show differentiated risk profiles: some
-privilege recall, others reduce false positives, and others depend strongly on
-the retrieval configuration or the adopted semantic mapping. Third, \gls{ood}
-behavior remains an autonomous risk: it may increase the analyst's workload,
-produce misleading prioritization, and generate weapon-related flags on material
-that does not belong to the expected binary task.
+generation. Second, selected software systems show differentiated risk
+profiles: some privilege recall, others reduce false positives, and others
+depend strongly on the retrieval configuration or the adopted semantic mapping.
+Third, \gls{ood} behavior remains an autonomous risk: it may increase the
+analyst's workload, produce misleading prioritization, and generate
+weapon-related flags on material that does not belong to the expected binary
+task.
 
 Overall, the results support a cautious interpretation of \gls{ai}-based
 automation in forensic contexts. The evaluated systems can provide useful
 support for triage, prioritization, and large-scale review of multimedia
-content. However, their outputs must not be treated as conclusive evidence or as
-substitutes for expert validation. In particular, missed detections of
+content. However, their outputs must not be treated as conclusive evidence or
+as substitutes for expert validation. In particular, missed detections of
 \texttt{weapon} images, high-confidence OOD assignments, and threshold-dependent
-errors must be explicitly documented when \gls{ai}-assisted tools are used in
-forensic workflows. The \textsc{FAIR-Lab} protocol responds to this need by
-combining frozen datasets, traceable manifests, hash-based reproducibility,
-controlled perturbation families, black-box output normalization, and manual
-auditability of the final interpretation.
+errors must be explicitly documented when \gls{ai}-assisted software systems
+are used in forensic workflows. The \gls{fairlab} protocol responds to this
+need by combining frozen datasets, traceable manifests, hash-based
+reproducibility, controlled perturbation families, black-box output
+normalization, and manual auditability of the final interpretation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
