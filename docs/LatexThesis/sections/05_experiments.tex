@@ -348,7 +348,7 @@ cost of a higher number of false positives.
 \begin{figure}[htbp]
 \centering
 
-\begin{minipage}{0.48\textwidth}
+\begin{minipage}{0.58\textwidth}
 \centering
 \small EfficientNet-B0
 
@@ -356,7 +356,7 @@ cost of a higher number of false positives.
 \includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_efficientnet_b0.pdf}
 \end{minipage}
 \hfill
-\begin{minipage}{0.48\textwidth}
+\begin{minipage}{0.58\textwidth}
 \centering
 \small ResNet18
 
@@ -366,7 +366,7 @@ cost of a higher number of false positives.
 
 \vspace{0.8em}
 
-\begin{minipage}{0.48\textwidth}
+\begin{minipage}{0.58\textwidth}
 \centering
 \small \acrshort{clip}
 
@@ -479,7 +479,7 @@ predictive confidence on \gls{ood} samples.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth]{images/fig_ood_weapon_rate_and_confidence.pdf}
+\includegraphics[width=0.95\textwidth]{images/fig_ood_weapon_rate_and_confidence.pdf}
 \caption{Behavior of the proxy models on \gls{ood} samples: proportion of \texttt{weapon} predictions, mean confidence, and proportion of high-confidence predictions.}
 \label{fig:results-ood-weapon-rate-confidence}
 \end{figure}
@@ -495,7 +495,7 @@ EfficientNet-B0 reaches 0.5008.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.82\textwidth]{images/fig_ood_confidence_distribution.pdf}
+\includegraphics[width=0.95\textwidth]{images/fig_ood_confidence_distribution.pdf}
 \caption{Distribution of predictive confidence on \gls{ood} samples for each proxy model. The plot highlights a distribution more concentrated around intermediate values for \gls{clip} than for the two supervised models.}
 \label{fig:results-ood-confidence-distribution}
 \end{figure}
@@ -1067,7 +1067,7 @@ general product validation.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{images/fig_forensic_tools_global_metrics_comparison.pdf}
+\includegraphics[width=1\textwidth]{images/fig_forensic_tools_global_metrics_comparison.pdf}
 \caption{Global comparison of the aggregate metrics of the selected black-box software systems on the forensic evaluation bundle. The plot compares accuracy, balanced accuracy, \texttt{weapon} recall, \acrshort{fnr}, \acrshort{fpr}, and \gls{ood} weapon flag rate after output normalization.}
 \label{fig:results-forensic-tools-global-comparison}
 \end{figure}
@@ -2357,14 +2357,23 @@ read jointly: a system may achieve good accuracy on clean data while still
 producing operational risk if it tends to absorb anomalous inputs into the
 class of investigative interest.
 
-\begin{table}[H]
+
+
+\begin{table}[!htbp]
 \centering
 \caption{Comparison between clean performance and OOD behavior of the proxy models and selected black-box software systems.}
 \label{tab:results-comparative-clean-ood}
-\small
-\renewcommand{\arraystretch}{1.18}
-\setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\textwidth}{@{}p{2.65cm} p{1.75cm} r r r X@{}}
+
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
+\setlength{\tabcolsep}{2.2pt}
+
+\begin{tabularx}{\textwidth}{@{}
+>{\raggedright\arraybackslash}p{2.35cm}
+>{\raggedright\arraybackslash}p{1.45cm}
+c c c
+>{\raggedright\arraybackslash}X
+@{}}
 \toprule
 \textbf{System} &
 \textbf{Type} &
@@ -2557,7 +2566,7 @@ false positive rate.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{images/fig_forensic_tools_anti_forensic_accuracy_drop_heatmap.pdf}
+\includegraphics[width=1\textwidth]{images/fig_forensic_tools_anti_forensic_accuracy_drop_heatmap.pdf}
 \caption{Accuracy drop of selected black-box software systems under anti-forensic transformations.}
 \label{fig:results-forensic-tools-antiforensic-drop-heatmap}
 \end{figure}
@@ -2695,7 +2704,7 @@ false positive rate.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{images/fig_forensic_tools_adversarial_accuracy_drop_heatmap.pdf}
+\includegraphics[width=1\textwidth]{images/fig_forensic_tools_adversarial_accuracy_drop_heatmap.pdf}
 \caption{Accuracy drop of selected black-box software systems under adversarial perturbations.}
 \label{fig:results-forensic-tools-adversarial-drop-heatmap}
 \end{figure}
