@@ -31,9 +31,9 @@ in order to compare the behavior of proxy models with that of systems used in
 operationally relevant forensic-context scenarios.
 
 The experimental process included the construction of a frozen dataset composed
-of 1,500 images, the evaluation of the EfficientNet-B0, ResNet18, and
+of 1\,500 images, the evaluation of the EfficientNet-B0, ResNet18, and
 \gls{clip} proxy models under clean, \gls{ood}, anti-forensic, and adversarial
-conditions, and the production of an 11,500-file forensic evaluation bundle
+conditions, and the production of an 11\,500-file forensic evaluation bundle
 for the black-box evaluation of \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{excirefoto2025}, \gls{cellebriteinseyets}, and
 \gls{griffeye}/\gls{t3kcore}.
@@ -58,300 +58,70 @@ of the model, but an observable property of the system within the investigative
 workflow in which it is used.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\subsection{Excire Foto 2025 Results and Sensitivity Analysis}
-\label{subsec:results-excire}
+\section{Main Contributions}
+\label{sec:conclusions-contributions}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The evaluation of \gls{excirefoto2025} requires specific interpretive caution.
-The software is not treated as a product developed exclusively for forensic
-purposes, nor as a native classifier for the binary
-\texttt{weapon}/\texttt{non_weapon} distinction. In the experimental protocol,
-it is evaluated as a black-box semantic retrieval system equipped with
-\gls{ai}-based functionality. The operational prediction is therefore derived
-from the presence or absence of a sample among the results retrieved by the
-configured semantic search. This recoding enables a quantitative evaluation
-against the experimental ground truth, but it must not be interpreted as access
-to the internal classification logic of the system.
+The contribution of this thesis is articulated along four complementary
+dimensions: the definition of a methodological protocol, the construction of a
+controlled experimental basis, the preparation of a traceable benchmark, and the
+interpretation of the results from a forensic perspective. These elements are
+not independent of one another, but jointly contribute to defining a coherent
+pipeline for evaluating the operational robustness of \gls{ai}-based systems
+used in image triage.
 
-To evaluate the sensitivity of the operational behavior to the retrieval
-threshold, three configurations of the \texttt{Distance limit} parameter were
-considered: \texttt{D20}, \texttt{D50}, and \texttt{D80}. The \texttt{D20}
-configuration represents a restrictive setting, oriented toward reducing false
-positives and semantically weak retrievals; \texttt{D50} constitutes the
-intermediate configuration of the sensitivity analysis; \texttt{D80} instead
-represents a permissive setting, oriented toward maximizing recall but at the
-cost of a substantial increase in false positives and in the weapon flag rate on
-\gls{ood} samples.
+From a methodological perspective, the thesis introduces \gls{fairlab} as an
+integrated experimental protocol for evaluating the operational robustness of
+\gls{ai}-based systems in \gls{df}. The value of the protocol does not lie in
+the introduction of a new classifier, but in the formalization of an auditable
+procedure that makes it possible to test existing systems under non-ideal
+conditions. From this perspective, datasets, proxy models, adversarial
+perturbations, anti-forensic transformations, evaluation metrics, traceability
+checks, normalized black-box outputs, and qualitative analysis are explicitly
+connected within a single experimental workflow.
 
-\begin{table}[H]
-\centering
-\scriptsize
-\renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{4pt}
-\caption{Sensitivity analysis of \gls{excirefoto2025} with respect to the \texttt{Distance limit} parameter.}
-\label{tab:results-excire-sensitivity}
-\begin{tabularx}{0.95\textwidth}{@{}l r r r r r X@{}}
-\toprule
-\textbf{Setting} &
-\textbf{Clean Acc.} &
-\textbf{Recall} &
-\textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} &
-\textbf{OOD W-rate} &
-\textbf{Operational profile} \
-\midrule
+The experimental dimension of the contribution concerns the construction of a
+frozen and reproducible experimental basis. The final dataset includes 1\,500
+images balanced across three evaluation categories: \texttt{weapon},
+\texttt{non\_weapon}, and \texttt{ood}. The official binary subset includes
+1\,000 images intended for the generation and evaluation of perturbations.
+Starting from this basis, five families of adversarial perturbations were
+produced, namely \gls{fgsm}, \gls{superdeepfool}, \gls{sigmazero},
+\gls{onepixel}, and \gls{colorshift}, as well as five model-agnostic
+anti-forensic transformations, namely \gls{jpegrecompression},
+\gls{resampleresize}, \gls{gaussianblur}, \gls{histogrammodification}, and
+\gls{contraststretching}. This organization made it possible to observe the
+behavior of the evaluated systems under clean, out-of-distribution, degraded,
+and deliberately manipulated conditions.
 
-\texttt{D20} &
-0.927 &
-0.880 &
-0.120 &
-0.026 &
-0.238 &
-Restrictive: low operational noise and lower \gls{ood} absorption, but higher
-risk of false negatives. \
+This experimental basis is complemented by the construction of the forensic
+evaluation bundle, composed of 11\,500 files organized into clean, \gls{ood},
+adversarial, and anti-forensic conditions. The bundle was prepared for
+black-box evaluation through blind naming, separate manifests, neutral
+identifiers, and \gls{sha256}/\gls{md5} hashes. This structure makes it
+possible to connect each final output to the corresponding experimental
+artifact, while keeping content, test condition, provenance, identifier, and
+metric result separate. In this way, the evaluation of selected software systems
+does not depend on implicit steps or undocumented manual associations, but on
+verifiable and reconstructible artifacts.
 
-\texttt{D50} &
-0.944 &
-0.958 &
-0.042 &
-0.070 &
-0.340 &
-Intermediate: balanced compromise in the experimental context considered. \
-
-\texttt{D80} &
-0.915 &
-0.986 &
-0.014 &
-0.156 &
-0.522 &
-Permissive: very high recall, but marked increase in false positives and
-\gls{ood} flags. \
-
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The comparison among the three configurations shows that the
-\texttt{Distance limit} parameter does not act merely as a technical variable,
-but as an operational threshold that modifies the risk profile of the system.
-\texttt{D20} is more conservative and reduces the review workload arising from
-false positives, but may fail to retrieve relevant \texttt{weapon} content.
-\texttt{D50} represents, in the experimental context considered, the most
-balanced configuration for triage, since it maintains high recall on the
-\texttt{weapon} class without producing the level of noise observed under
-\texttt{D80}. The latter strongly reduces false negatives, but substantially
-increases false positives and maps more than half of the \gls{ood} inputs to
-the \texttt{weapon} class.
-
-\begin{table}[H]
-\centering
-\caption{Aggregate performance of \gls{excirefoto2025} under perturbed conditions.}
-\label{tab:results-excire-perturbed-summary}
-\small
-\begin{tabular}{l l r r r r}
-\toprule
-\textbf{Setting} &
-\textbf{Condition} &
-\textbf{Accuracy} &
-\textbf{Recall weapon} &
-\textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} \
-\midrule
-
-\texttt{D20} & Anti-forensic & 0.927 & 0.875 & 0.125 & 0.022 \
-\texttt{D50} & Anti-forensic & 0.941 & 0.957 & 0.043 & 0.074 \
-\texttt{D80} & Anti-forensic & 0.908 & 0.984 & 0.016 & 0.169 \
-
-\midrule
-
-\texttt{D20} & Adversarial & 0.892 & 0.834 & 0.166 & 0.051 \
-\texttt{D50} & Adversarial & 0.904 & 0.938 & 0.062 & 0.130 \
-\texttt{D80} & Adversarial & 0.861 & 0.977 & 0.023 & 0.256 \
-
-\bottomrule
-\end{tabular}
-\end{table}
-
-The aggregate results under perturbed conditions show that, for
-\gls{excirefoto2025}, anti-forensic transformations produce a more limited
-impact than adversarial perturbations. However, in this case as well, the
-operational profile changes substantially as the threshold varies:
-\texttt{D20} maintains the lowest \gls{fpr} but exhibits the highest \gls{fnr},
-\texttt{D80} almost completely reduces false negatives but increases
-operational noise, whereas \texttt{D50} maintains an intermediate compromise
-between recall and selectivity.
-
-Table~\ref{tab:results-excire-d50-attack-metrics} reports the detailed results
-for the \texttt{D50} configuration, which is used as the main reference for the
-operational comparison. This choice does not imply that \texttt{D50} is optimal
-in an absolute sense, but makes it possible to analyze an intermediate
-configuration between the restrictive and permissive profiles.
-
-\begin{table}[H]
-\centering
-\caption{Performance of \gls{excirefoto2025} \texttt{D50} under adversarial and anti-forensic conditions.}
-\label{tab:results-excire-d50-attack-metrics}
-\scriptsize
-\renewcommand{\arraystretch}{1.12}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}l l r r r r r r@{}}
-\toprule
-\textbf{Family} &
-\textbf{Condition} &
-\textbf{Accuracy} &
-\textbf{Recall} &
-\textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} &
-\textbf{FN} &
-\textbf{FP} \
-\midrule
-
-Adversarial &
-\gls{colorshift} &
-0.949 &
-0.966 &
-0.034 &
-0.068 &
-17 &
-34 \
-
-Adversarial &
-\gls{fgsm} &
-0.926 &
-0.890 &
-0.110 &
-0.038 &
-55 &
-19 \
-
-Adversarial &
-\gls{onepixel} &
-0.946 &
-0.964 &
-0.036 &
-0.072 &
-18 &
-36 \
-
-Adversarial &
-\gls{sigmazero} &
-0.742 &
-0.926 &
-0.074 &
-0.442 &
-37 &
-221 \
-
-Adversarial &
-\gls{superdeepfool} &
-0.956 &
-0.944 &
-0.056 &
-0.032 &
-28 &
-16 \
-
-\midrule
-
-Anti-forensic &
-\gls{contraststretching} &
-0.941 &
-0.952 &
-0.048 &
-0.070 &
-24 &
-35 \
-
-Anti-forensic &
-\gls{gaussianblur} &
-0.941 &
-0.960 &
-0.040 &
-0.078 &
-20 &
-39 \
-
-Anti-forensic &
-\gls{histogrammodification} &
-0.932 &
-0.952 &
-0.048 &
-0.088 &
-24 &
-44 \
-
-Anti-forensic &
-\gls{jpegrecompression} &
-0.946 &
-0.958 &
-0.042 &
-0.066 &
-21 &
-33 \
-
-Anti-forensic &
-\gls{resampleresize} &
-0.947 &
-0.964 &
-0.036 &
-0.070 &
-18 &
-35 \
-
-\bottomrule
-\end{tabular}
-\end{table}
-
-A particularly relevant case is that of \gls{sigmazero}. Unlike a simple
-evasion dynamic, in which the main effect would be the increase in false
-negatives on the \texttt{weapon} class, \gls{excirefoto2025} shows, under the
-\texttt{D50} and \texttt{D80} configurations, a semantic over-triggering
-behavior. Under these conditions, the system continues to retrieve many
-\texttt{weapon} images, but substantially increases the proportion of
-\texttt{non_weapon} images erroneously retrieved as relevant.
-
-\begin{table}[H]
-\centering
-\caption{Behavior of \gls{excirefoto2025} on the \gls{sigmazero} perturbation.}
-\label{tab:results-excire-sigma-zero}
-\small
-\begin{tabular}{l r r r r r r}
-\toprule
-\textbf{Setting} &
-\textbf{Accuracy} &
-\textbf{Recall} &
-\textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} &
-\textbf{FN} &
-\textbf{FP} \
-\midrule
-
-\texttt{D20} & 0.815 & 0.820 & 0.180 & 0.190 & 90 & 95 \
-\texttt{D50} & 0.742 & 0.926 & 0.074 & 0.442 & 37 & 221 \
-\texttt{D80} & 0.657 & 0.976 & 0.024 & 0.662 & 12 & 331 \
-
-\bottomrule
-\end{tabular}
-\end{table}
-
-The joint interpretation of the three configurations shows that
-\gls{sigmazero} does not give rise only to a missed-detection problem. On the
-contrary, as the retrieval threshold increases, recall on the \texttt{weapon}
-class also increases, but the \gls{fpr} grows markedly as well: from 0.190 under
-\texttt{D20}, to 0.442 under \texttt{D50}, and up to 0.662 under \texttt{D80}.
-This behavior is operationally significant because, while a permissive
-configuration may appear preferable due to its lower risk of false negatives,
-it can generate a high volume of false positives, saturating human review and
-reducing the efficiency of the automatic filter.
-
-Overall, \gls{excirefoto2025} highlights the critical role of the retrieval
-threshold in black-box evaluation. A restrictive configuration reduces noise but
-increases the risk of missed detection; a permissive configuration increases
-recall but may strongly amplify operational noise, especially in the presence
-of perturbed or semantically ambiguous inputs. For this reason, in the
-subsequent comparative discussion, the \texttt{D50} configuration is used as
-the main reference, whereas \texttt{D20} and \texttt{D80} are interpreted as
-operational extremes of the sensitivity analysis.
+The evaluative and interpretive component completes the contribution of the
+thesis through the comparison between three proxy models, EfficientNet-B0,
+ResNet18, and \gls{clip}, and the selected software systems included in the
+final evaluation: \gls{magnetaxiomtool}/\gls{magnetai},
+\gls{excirefoto2025}, \gls{cellebriteinseyets}, and
+\gls{griffeye}/\gls{t3kcore}. \gls{excirefoto2025} was evaluated as
+general-purpose software with \gls{ai}-based semantic retrieval functionality,
+not as an exclusively forensic product; similarly, \gls{cellebriteinseyets} was
+treated as a commercial black-box software platform for \gls{ai}-assisted media
+analysis, whereas \gls{griffeye}/\gls{t3kcore} was evaluated through the
+automatic semantic bookmarks generated by \gls{t3kcore}. The observable outputs
+of the selected software systems were exported, normalized, and operationally
+recoded with respect to the \texttt{weapon}/\texttt{non\_weapon} task, while
+keeping the evaluation of \gls{ood} samples separate. The qualitative analysis
+using \gls{ig} on representative EfficientNet-B0 cases complements this
+interpretation by providing diagnostic support for selected failure modes
+without replacing the quantitative metrics.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Main Experimental Findings}
@@ -384,58 +154,58 @@ each experimental area to its corresponding operational implication.
 \renewcommand{\arraystretch}{1.2}
 \begin{tabularx}{\textwidth}{@{}p{0.18\textwidth} X X@{}}
 \toprule
-\textbf{Area} & \textbf{Main finding} & \textbf{Operational relevance} \
+\textbf{Area} & \textbf{Main finding} & \textbf{Operational relevance} \\
 \midrule
 Clean baseline
 & EfficientNet-B0 shows the highest clean performance among the proxy models
-(0.978); among the selected software systems, \gls{griffeye}/\gls{t3kcore}
-achieves the highest clean accuracy under the adopted conservative mapping,
-whereas \gls{cellebriteinseyets} exhibits a balanced profile with high
-\texttt{weapon} recall.
+  (0.978); among the selected software systems, \gls{griffeye}/\gls{t3kcore}
+  achieves the highest clean accuracy under the adopted conservative mapping,
+  whereas \gls{cellebriteinseyets} exhibits a balanced profile with high
+  \texttt{weapon} recall.
 & Nominal performance is necessary to describe the baseline behavior of the
-system, but it is not sufficient to evaluate its reliability under operational
-conditions. \
+  system, but it is not sufficient to evaluate its reliability under operational
+  conditions. \\
 
 \gls{ood}
 & \gls{clip} exhibits the highest rate of \texttt{weapon} predictions on
-\gls{ood} samples (0.8356); EfficientNet-B0 and ResNet18 instead exhibit high
-confidence levels even in the presence of inputs outside the nominal binary
-task.
+  \gls{ood} samples (0.8356); EfficientNet-B0 and ResNet18 instead exhibit high
+  confidence levels even in the presence of inputs outside the nominal binary
+  task.
 & Out-of-distribution inputs may be absorbed into the \texttt{weapon} class,
-generating operational noise, misleading prioritization, or additional
-workload for the analyst. \
+  generating operational noise, misleading prioritization, or additional
+  workload for the analyst. \\
 
 Anti-forensic
 & Anti-forensic transformations generally produce limited drops, but introduce
-operationally relevant errors, especially false negatives on
-\texttt{weapon}.
+  operationally relevant errors, especially false negatives on
+  \texttt{weapon}.
 & Operationally plausible manipulations such as blurring, recompression,
-resizing, or tonal alterations may affect automated triage even when the
-aggregate metric degradation appears limited. \
+  resizing, or tonal alterations may affect automated triage even when the
+  aggregate metric degradation appears limited. \\
 
 Adversarial
 & EfficientNet-B0 shows the most marked degradation under \gls{sigmazero}
-(accuracy 0.015); in selected black-box software systems, the effects of
-perturbations are heterogeneous and depend on the system, configuration, and
-operational mapping.
+  (accuracy 0.015); in selected black-box software systems, the effects of
+  perturbations are heterogeneous and depend on the system, configuration, and
+  operational mapping.
 & High clean accuracy does not guarantee robustness against deliberately
-manipulated inputs, especially when the system is exposed to perturbations
-designed to alter its decision. \
+  manipulated inputs, especially when the system is exposed to perturbations
+  designed to alter its decision. \\
 
 Selected software systems
 & The selected software systems show differentiated operational profiles:
-\gls{griffeye}/\gls{t3kcore} is more selective under the adopted conservative
-mapping, \gls{cellebriteinseyets} maintains a balanced profile, and
-\gls{magnetai} and \gls{excirefoto2025} exhibit specific failure modes.
+  \gls{griffeye}/\gls{t3kcore} is more selective under the adopted conservative
+  mapping, \gls{cellebriteinseyets} maintains a balanced profile, and
+  \gls{magnetai} and \gls{excirefoto2025} exhibit specific failure modes.
 & Selected software systems must be interpreted through observable outputs,
-operational thresholds, mapping rules, and black-box normalization, avoiding
-uncontrolled direct comparisons with proxy models. \
+  operational thresholds, mapping rules, and black-box normalization, avoiding
+  uncontrolled direct comparisons with proxy models. \\
 
 \gls{xai}
 & \gls{ig} maps make representative cases directly observable, but do not
-constitute stand-alone evidence of robustness.
+  constitute stand-alone evidence of robustness.
 & \gls{xai} supports critical review and qualitative diagnosis of failure modes,
-without replacing quantitative metrics or expert validation. \
+  without replacing quantitative metrics or expert validation. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -517,7 +287,7 @@ does not concern only proxy models, but also selected software systems, and may
 increase in the presence of perturbations or transformations capable of
 altering the automated readability of image content. The most severe case
 observed in the protocol is that of EfficientNet-B0 under \gls{sigmazero}, with
-489 \texttt{weapon}(\rightarrow)\texttt{non_weapon} transitions. This result
+489 \texttt{weapon}\(\rightarrow\)\texttt{non\_weapon} transitions. This result
 clearly shows that a system that is accurate under clean conditions may become
 operationally fragile when exposed to deliberately manipulated inputs.
 
@@ -566,7 +336,6 @@ by selected black-box software systems; in all these cases, operational
 reliability cannot be presumed, but must be evaluated, documented, and subjected
 to critical scrutiny.
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Limitations}
 \label{sec:conclusions-limitations}
@@ -580,9 +349,9 @@ representative.
 
 The main interpretive constraint concerns the dataset and the experimental
 task. The constructed corpus is aimed at a specific investigative problem,
-namely binary classification between \texttt{weapon} and \texttt{non_weapon},
+namely binary classification between \texttt{weapon} and \texttt{non\_weapon},
 with a separate evaluation of \gls{ood} samples. The overall size, equal to
-1,500 images, enables a controlled and traceable evaluation, but does not cover
+1\,500 images, enables a controlled and traceable evaluation, but does not cover
 the full variability of visual content that may arise in real investigations.
 For this reason, the results must not be automatically generalized to
 multi-class tasks, different visual domains, forensic content of a different
@@ -623,7 +392,7 @@ software systems must be understood as an operational triage comparison, not as
 an evaluation of homogeneous classifiers on identical labels.
 
 The recoding of black-box outputs into the \texttt{weapon} and
-\texttt{non_weapon} classes also introduces a component of interpretive
+\texttt{non\_weapon} classes also introduces a component of interpretive
 uncertainty. The adopted mapping is controlled and documented, but it cannot
 completely eliminate the limitations arising from the opacity of black-box
 systems. This aspect is particularly relevant for
@@ -781,17 +550,3 @@ component that must be validated, contextualized, and maintained within a
 controlled forensic workflow. Operational robustness therefore becomes a
 condition to be demonstrated experimentally, not a property to be presumed on
 the basis of nominal performance alone.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
