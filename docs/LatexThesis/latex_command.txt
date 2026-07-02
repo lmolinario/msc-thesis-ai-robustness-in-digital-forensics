@@ -55,6 +55,7 @@ rm -f main.aux main.bbl main.bcf main.blg main.run.xml main.out \
 main.toc main.lof main.lot main.acn main.acr main.alg \
 main.glg main.glo main.gls main.ist main.glsdefs main.log
 
+Remove-Item -Path main.aux,main.bbl,main.bcf,main.blg,main.run.xml,main.out,main.toc,main.lof,main.lot,main.acn,main.acr,main.alg,main.glg,main.glo,main.gls,main.ist,main.glsdefs,main.log -Force -ErrorAction SilentlyContinue
 
 pdflatex main.tex
 makeglossaries main
