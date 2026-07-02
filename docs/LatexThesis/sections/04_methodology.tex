@@ -2510,6 +2510,27 @@ violence, or military context are preserved only as secondary indicators. \\
 \end{tabularx}
 \end{table}
 
+
+To support the traceability of the black-box evaluation, Figure~\ref{fig:methodology-axiom-magnetai-setup}
+reports a representative operational view of the \gls{magnetaxiomtool}/\gls{magnetai}
+configuration used during the experiment. The screenshot documents the media
+categorization setup, in which the \textit{Weapons} category was enabled and
+mapped by the software to the \textit{Possible weapons} tag. This visual record is
+included only to clarify the experimental context and the observable output later
+normalized by the evaluation pipeline.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]{images/axiom_magnetai_setup.png}
+    \caption{Representative operational view of the \gls{magnetaxiomtool}/\gls{magnetai}
+    media categorization setup used in the black-box evaluation. The screenshot
+    documents the activation of the \textit{Weapons} category and its mapping to
+    the observable \textit{Possible weapons} tag. The figure is included for
+    methodological traceability and does not represent a functional review or
+    endorsement of the product.}
+    \label{fig:methodology-axiom-magnetai-setup}
+\end{figure}
+
 For \gls{excirefoto2025}, the evaluation was conducted using a predefined set
 of semantic prompts oriented toward the retrieval of firearm-oriented content.
 Since the software operates as a semantic retrieval engine rather than as a
@@ -2557,6 +2578,21 @@ The same prompts were applied to the three operational configurations
 \texttt{Distance limit = 80}. In this way, the difference among the three
 configurations depends on the retrieval parameter and not on a variation in the
 semantic vocabulary used to query the software.
+
+To document the operational setting used for \gls{excirefoto2025},
+Figure~\ref{fig:methodology-excire-operational-view} reports a representative
+view of the software after loading the blind evaluation bundle. The screenshot
+shows the database size, the input folder used for the black-box evaluation,
+and the visual results returned by the text-prompt retrieval interface. As for
+the other selected software systems, the screenshot is included only to support
+methodological traceability and not as a product review.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/excire_operational_view.png}
+    \caption[Operational view of \gls{excirefoto2025} during black-box evaluation]{Representative operational view of \gls{excirefoto2025} during the black-box evaluation. The screenshot documents the blind image bundle loaded into the software and the text-prompt-based retrieval interface used to obtain observable outputs for subsequent normalization and evaluation. The figure is included for methodological traceability and does not represent a functional review or endorsement of the product.}
+    \label{fig:methodology-excire-operational-view}
+\end{figure}
 
 For \gls{cellebriteinseyets}, output normalization is based on the categories
 exported from the \texttt{Cellebrite Physical Analyzer 10.9.0.3029}
@@ -2633,6 +2669,21 @@ Output not exported, ambiguous, or non-interpretable
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
+To document the operational setup used for \gls{griffeye}/\gls{t3kcore},
+Figure~\ref{fig:methodology-griffeye-t3kcore-setup} reports a representative
+view of the import workflow in which the \gls{t3kcore} plugin was selected for
+automatic post-import processing. The screenshot is included to document the
+configuration used to generate the observable semantic bookmarks later exported
+and normalized by the evaluation pipeline.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]{images/griffeye_t3kcore_setup.png}
+    \caption[Operational setup of \gls{griffeye}/\gls{t3kcore} during black-box evaluation]{Representative operational setup of \gls{griffeye}/\gls{t3kcore} during the black-box evaluation. The screenshot documents the selection of the \gls{t3kcore} plugin for automatic post-import processing. The resulting semantic bookmarks are treated as observable black-box outputs and subsequently normalized with respect to the forensic evaluation bundle. The figure is included for methodological traceability and does not represent a functional review or endorsement of the product.}
+    \label{fig:methodology-griffeye-t3kcore-setup}
+\end{figure}
 
 Output normalization is necessary because the internal categories of the
 software systems do not directly coincide with the experimental classes
