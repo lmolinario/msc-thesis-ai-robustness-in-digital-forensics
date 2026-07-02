@@ -730,6 +730,21 @@ prepared pool and assign one of four designated labels: \texttt{weapon},
 decisions are saved in an operational database and recorded in dedicated logs,
 thereby ensuring traceability of the selection process.
 
+Figure~\ref{fig:methodology-human-review-interface} shows a representative
+view of the manual review interface used during this phase. The figure is
+included to document the operational implementation of the
+\textit{human-in-the-loop} protocol and the explicit assignment of candidate
+images to the labels \texttt{weapon}, \texttt{non\_weapon}, \texttt{ood}, or
+\texttt{exclude}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/dataset_human_review_protocol.png}
+    \caption[Human-in-the-loop review interface for final dataset selection]{Representative view of the human-in-the-loop review interface used during final dataset selection. The interface supported the manual inspection of candidate images and the assignment of each sample to one of the operational labels defined by the protocol: \texttt{weapon}, \texttt{non\_weapon}, \texttt{ood}, or \texttt{exclude}. The figure is included for methodological traceability and does not represent an automated classification result.}
+    \label{fig:methodology-human-review-interface}
+\end{figure}
+
+
 The semantic criteria adopted for label assignment were formulated
 conservatively. The \texttt{weapon} class includes only firearm-oriented visual
 content, such as realistic individual firearms that are clearly visible and
