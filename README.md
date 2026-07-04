@@ -99,11 +99,11 @@ flowchart TD
     D[Binary evaluation subset<br/>1000 images]
     E[Clean OOD evaluation set<br/>500 images]
 
-    F[Perturbation generation<br/>adversarial <br/>+<br/> anti-forensic binary subset only]
+    F[Perturbation generation<br/>adversarial <br/>+<br/> anti-forensic <br/> binary subset only]
 
     G[Forensic evaluation bundle]
 
-    H[Controlled proxy model evaluation<br/>EfficientNet-B0 / ResNet18 / CLIP]
+    H[Controlled proxy model evaluation<br/>EfficientNet-B0 <br/> ResNet18 <br/> CLIP]
     I[Black-box software evaluation<br/>Magnet.AI <br/> Excire <br/> Cellebrite <br/> Griffeye]
 
     J[Metrics <br/> normalization <br/> XAI <br/> traceability]
