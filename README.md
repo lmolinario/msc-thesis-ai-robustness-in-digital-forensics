@@ -60,21 +60,20 @@ The experimental protocol follows the FAIR-Lab methodology described in the thes
 
 ```mermaid
 flowchart TD
-    A[Source image pool]
-    B[Human-in-the-loop review]
-    C[Final frozen dataset<br/>500 weapon / 500 non-weapon / 500 OOD]
+    A["Source pool"]
+    B["Human review"]
+    C["Frozen dataset<br/>W / NW / OOD"]
 
-    D[Binary evaluation subset<br/>1000 clean images]
-    E[Clean OOD evaluation set<br/>500 clean images]
+    D["Binary subset"]
+    E["Clean OOD"]
 
-    F[Perturbation generation<br/>adversarial + anti-forensic<br/>binary subset only]
+    F["Perturbations"]
+    G["Forensic bundle"]
 
-    G[Forensic evaluation bundle<br/>clean binary + clean OOD + perturbed binary samples]
+    H["Proxy eval."]
+    I["Black-box eval."]
 
-    H[Controlled proxy model evaluation<br/>EfficientNet-B0 / ResNet18 / CLIP]
-    I[Black-box software evaluation<br/>Magnet.AI / Excire Foto / Inseyets / Griffeye-T3K]
-
-    J[Metrics, normalization, XAI and traceability]
+    J["Metrics<br/>XAI<br/>Traceability"]
 
     A --> B --> C
     C --> D
