@@ -89,6 +89,39 @@ flowchart TD
 ```
 W = weapon, NW = non-weapon, OOD = out-of-distribution.  
 Perturbations include adversarial attacks and anti-forensic transformations and are generated only from the binary subset.
+
+```mermaid
+flowchart TD
+    A[Source image pool]
+    B[Human-in-the-loop review]
+    C[Final frozen dataset<br/>500 weapon / 500 non-weapon / 500 OOD]
+
+    D[Binary evaluation subset<br/>1000 images]
+    E[Clean OOD evaluation set<br/>500 images]
+
+    F[Perturbation generation<br/>adversarial + anti-forensic<br/>binary subset only]
+
+    G[Forensic evaluation bundle]
+
+    H[Controlled proxy model evaluation<br/>EfficientNet-B0 / ResNet18 / CLIP]
+    I[Black-box software evaluation<br/>Magnet.AI / Excire / Cellebrite / Griffeye]
+
+    J[Metrics, normalization, XAI and traceability]
+
+    A --> B --> C
+    C --> D
+    C --> E
+    D --> F
+    E --> G
+    F --> G
+    G --> H
+    G --> I
+    H --> J
+    I --> J
+```
+
+
+
 ---
 ## Frozen status
 
