@@ -87,7 +87,39 @@ flowchart TD
     H --> J
     I --> J
 ```
+## Experimental workflow
 
+The FAIR-Lab protocol separates dataset freezing, clean/OOD split construction, perturbation generation, proxy-model evaluation, black-box software evaluation, and final robustness reporting.
+
+```mermaid
+flowchart TD
+    A["Source image pool"]
+    B["Human review"]
+    C["Frozen dataset<br/>500 W / 500 NW / 500 OOD"]
+
+    D["Binary subset<br/>1000 clean images"]
+    E["Clean OOD set<br/>500 images"]
+
+    F["Perturbations<br/>binary subset only"]
+
+    G["Forensic bundle<br/>clean + OOD + perturbed"]
+
+    H["Proxy evaluation<br/>ResNet18 / EffNet-B0 / CLIP"]
+    I["Black-box evaluation<br/>Magnet / Excire / Inseyets / T3K"]
+
+    J["Metrics + XAI<br/>normalization + traceability"]
+
+    A --> B --> C
+    C --> D
+    C --> E
+    D --> F
+    D --> G
+    E --> G
+    F --> G
+    G --> H
+    G --> I
+    H --> J
+    I --> J
 ---
 
 ## Frozen status
