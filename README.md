@@ -123,13 +123,13 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[Source image pool<br/>heterogeneous image sources and initial metadata]
-    B[Human-in-the-loop review<br/>manual validation, cleaning and dataset freezing]
-    C[Final frozen dataset<br/>1500 images: 500 weapon, 500 non-weapon, 500 OOD]
+    B[Human-in-the-loop review<br/>manual validation<br/>  cleaning <br/>  dataset freezing]
+    C[Final frozen dataset<br/>1500 images:<br/> 500 weapon<br/> 500 non-weapon<br/> 500 OOD]
 
-    D[Binary evaluation subset<br/>1000 images: 500 weapon and 500 non-weapon]
-    E[Clean OOD evaluation set<br/>500 clean OOD images<br/>no adversarial or anti-forensic perturbations]
+    D[Binary evaluation subset<br/>1000 images:<br/> 500 weapon<br/> 500 non-weapon]
+    E[Clean OOD evaluation set<br/>500 clean OOD images<br/>no adversarial  <br/> no anti-forensic <br/> perturbations]
 
-    F[Perturbation generation<br/>adversarial attacks and anti-forensic transformations<br/>applied only to the binary subset]
+    F[Perturbation generation<br/>adversarial attacks and <br/> anti-forensic transformations<br/>applied only to the binary <br/> subset]
 
     G[Forensic evaluation bundle<br/>1000 clean + 500 clean OOD + 5000 adversarial + 5000 anti-forensic samples]
 
