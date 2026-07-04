@@ -120,7 +120,41 @@ flowchart TD
     I --> J
 ```
 
+```mermaid
+flowchart TD
+    A[Source image pool<br/>heterogeneous image sources and initial metadata]
+    B[Human-in-the-loop review<br/>manual validation, cleaning and dataset freezing]
+    C[Final frozen dataset<br/>1500 images: 500 weapon, 500 non-weapon, 500 OOD]
 
+    D[Binary evaluation subset<br/>1000 images: 500 weapon and 500 non-weapon]
+    E[Clean OOD evaluation set<br/>500 clean OOD images<br/>no adversarial or anti-forensic perturbations]
+
+    F[Perturbation generation<br/>adversarial attacks and anti-forensic transformations<br/>applied only to the binary subset]
+
+    G[Forensic evaluation bundle<br/>1000 clean + 500 clean OOD + 5000 adversarial + 5000 anti-forensic samples]
+
+    H[Controlled proxy model evaluation<br/>EfficientNet-B0, ResNet18 and CLIP]
+    I[Black-box software evaluation<br/>blind bundle input and output normalization<br/>Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, Griffeye/T3K CORE]
+
+    J[Metrics, XAI and traceability<br/>robustness analysis, Integrated Gradients,<br/>audit artifacts and reproducibility controls]
+
+    A --> B
+    B --> C
+
+    C --> D
+    C --> E
+
+    D --> F
+
+    E --> G
+    F --> G
+
+    G --> H
+    G --> I
+
+    H --> J
+    I --> J
+```
 
 ---
 ## Frozen status
