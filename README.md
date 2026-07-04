@@ -73,7 +73,7 @@ flowchart TD
     H["Proxy eval."]
     I["Black-box eval."]
 
-    J["Metrics<br/>XAI<br/>Traceability"]
+    J["Metrics<br/>Proxy XAI<br/>Traceability"]
 
     A --> B --> C
     C --> D
@@ -87,8 +87,9 @@ flowchart TD
     H --> J
     I --> J
 ```
-
-
+W = weapon, NW = non-weapon, OOD = out-of-distribution.  
+Perturbations include adversarial attacks and anti-forensic transformations and are generated only from the binary subset.
+---
 ## Frozen status
 
 | Area                                | Status                  | Main artifacts                                            |
