@@ -56,31 +56,62 @@ The evaluation is organized around three complementary perspectives:
 
 ## Experimental workflow
 
+The experimental protocol follows the FAIR-Lab methodology described in the thesis. It separates dataset construction, controlled proxy-model evaluation, black-box forensic-tool evaluation, output normalization, XAI inspection, and traceability controls.
+
 ```mermaid
-flowchart LR
-    A[Controlled image dataset] --> B[Clean binary split]
-    A --> C[OOD evaluation set]
-    B --> D[Adversarial perturbations]
-    B --> E[Anti-forensic transformations]
+flowchart TD
+    A[Source image pool<br/>heterogeneous image sources and initial metadata]
+    B[Human-in-the-loop review<br/>manual validation, cleaning, and dataset freezing]
+    C[Final frozen dataset<br/>1500 images: 500 weapon, 500 non-weapon, 500 OOD]
 
-    B --> F[Transparent proxy models]
-    C --> F
-    D --> F
-    E --> F
+    A --> B --> C
 
-    B --> G[Blind forensic evaluation bundle]
-    C --> G
-    D --> G
-    E --> G
+    C --> D[Binary evaluation subset<br/>1000 images: 500 weapon + 500 non-weapon]
+    C --> E[Clean OOD evaluation set<br/>500 out-of-distribution images]
 
-    G --> H[Commercial black-box tools]
+    D --> F[Clean binary folds<br/>fold-aware training and baseline evaluation]
+    E --> G[OOD evaluation branch<br/>kept clean and excluded from perturbation generation]
 
-    F --> I[Normalized predictions]
-    H --> I
+    F --> H[Proxy model training<br/>ResNet18, EfficientNet-B0, CLIP-based proxy]
+    F --> I[Perturbation generation<br/>adversarial attacks and anti-forensic transformations]
 
-    I --> J[Robustness metrics]
-    I --> K[XAI case studies]
-    I --> L[Traceability and thesis reporting assets]
+    I --> J[Adversarial artifacts<br/>generated from the binary subset]
+    I --> K[Anti-forensic artifacts<br/>generated from the binary subset]
+
+    F --> L[Forensic evaluation bundle]
+    G --> L
+    J --> L
+    K --> L
+
+    L --> M[Blind tool input<br/>neutral filenames and no exposed ground truth]
+    L --> N[Control metadata<br/>bundle manifest, hashes, labels, folds, attack family]
+
+    F --> O[Controlled proxy-model evaluation]
+    G --> O
+    J --> O
+    K --> O
+    H --> O
+
+    M --> P[Commercial black-box tool evaluation<br/>Magnet.AI, Excire Foto, Cellebrite Inseyets, Griffeye/T3K]
+    P --> Q[Exported tool outputs<br/>tags, classes, bookmarks, prompts, hashes]
+
+    Q --> R[Commercial-output normalization<br/>mapped back to bundle manifest]
+    N --> R
+
+    O --> S[Proxy predictions and metrics]
+    R --> T[Normalized black-box predictions and metrics]
+
+    S --> U[XAI case studies<br/>Integrated Gradients on transparent proxy models]
+    S --> V[Operational robustness analysis]
+    T --> V
+
+    V --> W[Thesis reporting assets<br/>tables, figures, summaries]
+    U --> W
+
+    N --> X[Traceability and audit controls<br/>SHA256, manifests, bundle IDs, metadata checks]
+    S --> X
+    T --> X
+    W --> X
 ```
 
 ---
