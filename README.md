@@ -64,15 +64,15 @@ flowchart TD
     B[Human-in-the-loop review]
     C[Final frozen dataset<br/>500 weapon / 500 non-weapon / 500 OOD]
 
-    D[Binary evaluation subset<br/>1000 images]
-    E[Clean OOD evaluation set<br/>500 images]
+    D[Binary evaluation subset<br/>1000 clean images]
+    E[Clean OOD evaluation set<br/>500 clean images]
 
     F[Perturbation generation<br/>adversarial + anti-forensic<br/>binary subset only]
 
-    G[Forensic evaluation bundle]
+    G[Forensic evaluation bundle<br/>clean binary + clean OOD + perturbed binary samples]
 
     H[Controlled proxy model evaluation<br/>EfficientNet-B0 / ResNet18 / CLIP]
-    I[Black-box software evaluation<br/>Magnet.AI / Excire / Cellebrite / Griffeye]
+    I[Black-box software evaluation<br/>Magnet.AI / Excire Foto / Inseyets / Griffeye-T3K]
 
     J[Metrics, normalization, XAI and traceability]
 
@@ -80,6 +80,7 @@ flowchart TD
     C --> D
     C --> E
     D --> F
+    D --> G
     E --> G
     F --> G
     G --> H
