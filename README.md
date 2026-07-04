@@ -94,7 +94,7 @@ Perturbations include adversarial attacks and anti-forensic transformations and 
 flowchart TD
     A[Source image pool]
     B[Human-in-the-loop review]
-    C[Final frozen dataset<br/>500 weapon / 500 non-weapon / 500 OOD]
+    C[Final frozen dataset<br/>500 weapon <br/> 500 non-weapon <br/> 500 OOD]
 
     D[Binary evaluation subset<br/>1000 images]
     E[Clean OOD evaluation set<br/>500 images]
