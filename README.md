@@ -120,7 +120,7 @@ flowchart TD
     G --> I
     H --> J
     I --> J
----
+```
 
 ## Frozen status
 
