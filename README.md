@@ -58,37 +58,7 @@ The evaluation is organized around three complementary perspectives:
 
 The experimental protocol follows the FAIR-Lab methodology described in the thesis. It separates dataset construction, controlled proxy-model evaluation, black-box forensic-tool evaluation, output normalization, XAI inspection, and traceability controls.
 
-```mermaid
-flowchart TD
-    A["Source pool"]
-    B["Human review"]
-    C["Frozen dataset<br/>W / NW / OOD"]
 
-    D["Binary subset"]
-    E["Clean OOD"]
-
-    F["Perturbations"]
-    G["Forensic bundle"]
-
-    H["Proxy eval."]
-    I["Black-box eval."]
-
-    J["Metrics<br/>Proxy XAI<br/>Traceability"]
-
-    A --> B --> C
-    C --> D
-    C --> E
-    D --> F
-    D --> G
-    E --> G
-    F --> G
-    G --> H
-    G --> I
-    H --> J
-    I --> J
-```
-W = weapon, NW = non-weapon, OOD = out-of-distribution.  
-Perturbations include adversarial attacks and anti-forensic transformations and are generated only from the binary subset.
 
 ```mermaid
 flowchart TD
@@ -101,10 +71,10 @@ flowchart TD
 
     F[Perturbation generation<br/>adversarial <br/>+<br/> anti-forensic <br/> binary subset only]
 
-    G[Forensic evaluation bundle]
+    G[Forensic evaluation bundle <br/>1500 images]
 
-    H[Controlled proxy model evaluation<br/>EfficientNet-B0 <br/> ResNet18 <br/> CLIP]
-    I[Black-box software evaluation<br/>Magnet.AI <br/> Excire <br/> Cellebrite <br/> Griffeye]
+    H[Controlled proxy model<br/> evaluation:<br/>EfficientNet-B0 <br/> ResNet18 <br/> CLIP]
+    I[Black-box software<br/> evaluation:<br/>Magnet.AI <br/> Excire <br/> Cellebrite <br/> Griffeye]
 
     J[Metrics <br/> normalization <br/> XAI <br/> traceability]
 
@@ -120,41 +90,6 @@ flowchart TD
     I --> J
 ```
 
-```mermaid
-flowchart TD
-    A[Source image pool<br/>heterogeneous image sources and initial metadata]
-    B[Human-in-the-loop review<br/>manual validation<br/>  cleaning <br/>  dataset freezing]
-    C[Final frozen dataset<br/>1500 images:<br/> 500 weapon<br/> 500 non-weapon<br/> 500 OOD]
-
-    D[Binary evaluation subset<br/>1000 images:<br/> 500 weapon<br/> 500 non-weapon]
-    E[Clean OOD evaluation set<br/>500 clean OOD images<br/>no adversarial  <br/> no anti-forensic <br/> perturbations]
-
-    F[Perturbation generation<br/>adversarial attacks and <br/> anti-forensic transformations<br/>applied only to the binary <br/> subset]
-
-    G[Forensic evaluation bundle<br/>1000 clean + 500 clean OOD + 5000 adversarial + 5000 anti-forensic samples]
-
-    H[Controlled proxy model evaluation<br/>EfficientNet-B0, ResNet18 and CLIP]
-    I[Black-box software evaluation<br/>blind bundle input and output normalization<br/>Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, Griffeye/T3K CORE]
-
-    J[Metrics, XAI and traceability<br/>robustness analysis, Integrated Gradients,<br/>audit artifacts and reproducibility controls]
-
-    A --> B
-    B --> C
-
-    C --> D
-    C --> E
-
-    D --> F
-
-    E --> G
-    F --> G
-
-    G --> H
-    G --> I
-
-    H --> J
-    I --> J
-```
 
 ---
 ## Frozen status
