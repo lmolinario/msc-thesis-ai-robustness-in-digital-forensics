@@ -147,7 +147,6 @@ jobs:
           from pathlib import Path
 
           patterns = [
-              'LatexThesis_ITA',
               '/run/media/lello',
               'X-Ways',
               'Oxygen Forensic Detective',
