@@ -1,8 +1,8 @@
 # Results
 
-This directory contains thesis-oriented metric outputs and reporting artifacts derived from the frozen experimental pipeline.
+This directory contains thesis-oriented metrics, reporting assets, and figure-generation artifacts derived from the frozen experimental pipeline.
 
-Results are downstream artifacts generated from manifests, predictions, normalized commercial-tool outputs, and explainability case selections.
+Results are downstream artifacts generated from dataset manifests, proxy predictions, normalized commercial-tool outputs, attack manifests, and explainability case selections.
 
 ---
 
@@ -11,19 +11,29 @@ Results are downstream artifacts generated from manifests, predictions, normaliz
 ```text
 results/
 ├── README.md
-└── metrics/
-    ├── proxy_model_clean_metrics.csv
-    ├── proxy_model_ood_metrics.csv
-    ├── proxy_model_comparative_metrics.csv
-    ├── proxy_model_evaluation_summary.json
-    ├── forensic_tools_metrics.csv
-    ├── magnet_axiom_metrics.csv
-    ├── excire_foto_2025_d20_metrics.csv
-    ├── excire_foto_2025_d50_metrics.csv
-    ├── excire_foto_2025_d80_metrics.csv
-    ├── cellebrite_inseyets_metrics.csv
-    └── griffeye_metrics.csv
+├── metrics/
+│   ├── proxy_model_clean_metrics.csv
+│   ├── proxy_model_ood_metrics.csv
+│   ├── proxy_model_comparative_metrics.csv
+│   ├── proxy_model_evaluation_summary.json
+│   ├── forensic_tools_metrics.csv
+│   ├── magnet_axiom_metrics.csv
+│   ├── excire_foto_2025_d20_metrics.csv
+│   ├── excire_foto_2025_d50_metrics.csv
+│   ├── excire_foto_2025_d80_metrics.csv
+│   ├── cellebrite_inseyets_metrics.csv
+│   └── griffeye_metrics.csv
+├── scripts/
+│   ├── 20_generate_experimental_reporting_assets.py
+│   └── 21_generate_embedded_metadata_sensitivity_check.py
+└── figures/
+    └── chapter_5/
+        ├── chapter5_figures_manifest.csv
+        ├── chapter5_figures_summary.json
+        └── embedded_metadata_sensitivity_summary.json
 ```
+
+The directory may also contain additional generated CSV, JSON, PDF, or PNG assets referenced by the thesis. Generated artifacts should remain traceable to their source metrics and scripts.
 
 ---
 
@@ -43,6 +53,8 @@ results/metrics/proxy_model_ood_metrics.csv
 results/metrics/proxy_model_comparative_metrics.csv
 results/metrics/proxy_model_evaluation_summary.json
 ```
+
+Operational-risk summaries derived from normalized proxy predictions are generated through the dedicated evaluation script and stored under `results/metrics/` and the thesis image directory.
 
 ---
 
@@ -85,6 +97,33 @@ The following values are computed on the 11,000 binary bundle items. OOD behavio
 
 ---
 
+## Reporting Asset Generation
+
+The official reporting scripts are:
+
+```text
+results/scripts/20_generate_experimental_reporting_assets.py
+results/scripts/21_generate_embedded_metadata_sensitivity_check.py
+```
+
+They generate or validate Chapter 5 reporting assets, including figure manifests, summaries, and the embedded-metadata sensitivity check.
+
+Primary generated reporting area:
+
+```text
+results/figures/chapter_5/
+```
+
+Thesis-ready copies may also be written to:
+
+```text
+docs/LatexThesis/images/
+```
+
+The source CSV/JSON artifacts remain the source of truth; figures are presentation-layer derivatives.
+
+---
+
 ## XAI / Explainability Results
 
 The Integrated Gradients analysis is completed for Chapter 5 as qualitative diagnostic support, not as a primary robustness metric.
@@ -105,7 +144,7 @@ These cases are used to interpret representative proxy-model behavior. They are 
 
 ## Reporting Rules
 
-When results are moved into LaTeX tables:
+When results are moved into LaTeX tables or figures:
 
 - keep proxy and commercial-tool results clearly separated;
 - avoid overclaiming robustness or vulnerability from a single metric;
@@ -115,4 +154,5 @@ When results are moved into LaTeX tables:
 - document any manual mapping or export-normalization decisions;
 - refer to Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool;
 - refer to Cellebrite as Cellebrite Inseyets 10.9;
-- refer to Griffeye as Magnet Griffeye x64 26.2.108 with T3K CORE v1.18.0.
+- refer to Griffeye as Magnet Griffeye x64 26.2.108 with T3K CORE v1.18.0;
+- regenerate presentation assets from frozen source metrics rather than editing numerical values manually.

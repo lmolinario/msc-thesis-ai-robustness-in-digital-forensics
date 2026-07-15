@@ -1,108 +1,162 @@
-# Documentation
+# English LaTeX Thesis Source
 
-Overleaf link at `https://www.overleaf.com/project/6a203c229eda2e2462eba7b3`
+This directory contains the current English source of the MSc thesis:
 
-This directory contains thesis documentation, LaTeX sources, figures, and repository-level supporting material.
+> **Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks**
 
-The current thesis writing base is:
+It is the thesis source of truth for the frozen research artifact. The separate Italian reference version is maintained under:
 
 ```text
-docs/LatexThesis/
+docs/LatexThesis_ITA/
 ```
 
-The thesis is written in Italian academic style, but the structure and terminology are kept compatible with a later translation into academic English.
+Private editor or collaboration URLs are intentionally not documented in the public repository.
+
+---
+
+## Main Entry Point
+
+Compile the thesis from:
+
+```text
+docs/LatexThesis/main.tex
+```
+
+From this directory, a typical local build is:
+
+```bash
+latexmk -pdf main.tex
+```
+
+The toolchain must support the packages and bibliography workflow configured in `packages.sty` and `main.tex`. When using a manual build sequence, ensure that bibliography, glossary/acronym generation, and repeated LaTeX passes are completed.
+
+Generated auxiliary files and local editor configuration should not be committed unless they are explicitly required by the frozen artifact.
 
 ---
 
 ## Directory Structure
 
 ```text
-docs/
+docs/LatexThesis/
 ├── README.md
-├── assets/
-│   └── repository_header.png
-└── LatexThesis/
-    ├── main.tex
-    ├── packages.sty
-    ├── title.tex
-    ├── sections/
-    └── tesi.bib
+├── main.tex
+├── packages.sty
+├── title.tex
+├── tesi.bib
+├── sections/
+│   ├── 000_acronyms.tex
+│   ├── 0_acknowledgment.tex
+│   ├── 00_abstract.tex
+│   ├── 01_introduction.tex
+│   ├── 02_background.tex
+│   ├── 03_StateoftheArt.tex
+│   ├── 04_methodology.tex
+│   ├── 05_experiments.tex
+│   ├── 06_conclusions.tex
+│   └── 07_appendix.tex
+├── methodology/
+└── images/
 ```
+
+Audit scripts and generated support files may also be present in the directory.
 
 ---
 
-## Thesis Structure Reference
+## Thesis Structure
 
-The working thesis structure is:
+The main document includes six chapters followed by an appendix and references:
 
 ```text
 Chapter 1 - Introduction
 Chapter 2 - Background
 Chapter 3 - State of the Art
 Chapter 4 - Methodology
-Chapter 5 - Results and Operational Robustness Analysis
-Chapter 6 - Discussion / Legal and Operational Implications
-Chapter 7 - Conclusions
+Chapter 5 - Experiments and Results
+Chapter 6 - Conclusions
+Appendix
+References
 ```
 
-Chapter 5 follows the stabilized order:
+The appendix source is:
 
 ```text
-status and dataset overview
-clean baseline
-OOD behavior
-anti-forensic robustness
-adversarial robustness
-forensic evaluation bundle
-commercial forensic tools evaluation
-comparative discussion
-xAI case studies
-operational implications and limitations
+sections/07_appendix.tex
 ```
+
+It is included after `\appendix` in `main.tex` and must not be described as a seventh main chapter.
 
 ---
 
-## Writing Principles
+## Acronyms and Glossary
 
-When updating thesis text:
+Acronym definitions are maintained in:
 
-- keep the focus on Digital/Computer Forensics;
-- frame adversarial and anti-forensic attacks as experimental stressors;
-- avoid turning the work into pure Adversarial Machine Learning optimization;
-- keep the human-in-the-loop selection protocol explicit;
-- distinguish methodology, results, and critical discussion;
-- keep terminology compatible with later English translation.
+```text
+sections/000_acronyms.tex
+```
+
+The front matter prints the acronym list, then resets acronym usage before the thesis body so that first occurrences in the main chapters are expanded according to the configured formatting rules.
 
 ---
 
-## LaTeX Notes
+## Bibliography
 
-The thesis uses glossary/acronym entries defined in:
-
-```text
-docs/LatexThesis/sections/000_acronyms.tex
-```
-
-Bibliography entries are maintained in:
+The bibliography database is:
 
 ```text
-docs/LatexThesis/tesi.bib
+tesi.bib
 ```
 
-Use `\texttt{...}` only for technical identifiers such as class names, file names, folders, scripts, or experimental parameters.
+Bibliographic metadata should be checked with the repository audit utilities before archival release. Citation keys used by the chapter sources must remain synchronized with `tesi.bib`.
 
 ---
 
-## Reporting Source of Truth
+## Figures and Reporting Assets
 
-For thesis tables and figures, prefer the following sources:
+Thesis-ready images are stored in:
+
+```text
+images/
+```
+
+Numerical figures and tables should be generated or verified from the frozen source artifacts, primarily:
 
 ```text
 results/metrics/
+results/figures/chapter_5/
 evaluation/proxy_models/
 evaluation/forensic_tools/
 explainability/outputs/integrated_gradients/
 datasets/forensic_evaluation_bundle/metadata/
 ```
 
-Do not derive final thesis values from screenshots or tool interfaces when a CSV/JSON export or normalized manifest is available.
+Do not manually alter numerical values in presentation-layer figures when a CSV/JSON source or generation script is available.
+
+---
+
+## Archival Editing Rules
+
+After thesis freeze, edits should be limited to:
+
+- typographical and language corrections;
+- bibliography or acronym consistency fixes;
+- broken-reference or compilation fixes;
+- documentation hygiene;
+- clearly documented archival corrections.
+
+Methodological changes, dataset changes, attack regeneration, model retraining, or metric replacement require explicit versioning and must not be introduced as silent documentation edits.
+
+---
+
+## Public Repository Safety
+
+Do not commit:
+
+- private editor or collaboration URLs;
+- local absolute paths;
+- credentials, tokens, or license files;
+- proprietary forensic-tool installers or case files;
+- controlled-access dataset URLs;
+- temporary exports containing unnecessary personal or sensitive data.
+
+Use the repository-level `DATA_ACCESS.md`, `SECURITY.md`, `.env.example`, and reproducibility documentation for controlled local configuration.
