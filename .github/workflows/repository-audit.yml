@@ -173,9 +173,6 @@ jobs:
               Path('forensic_tools/README.md'),
               Path('results/README.md'),
               Path('explainability/README.md'),
-              Path('progress/README.md'),
-              Path('progress/milestones/09_commercial_forensic_tools_evaluation.md'),
-              Path('progress/milestones/10_xai_case_studies.md'),
           ]
 
           failed = False
