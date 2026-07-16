@@ -203,7 +203,6 @@ msc-thesis-ai-robustness-in-digital-forensics/
 ├── forensic_tools/    # Commercial-tool export normalization support
 ├── results/           # Metrics, figures, scripts, and thesis-ready reporting assets
 ├── docs/              # English/Italian thesis sources, repository assets, and documentation
-├── progress/          # Internal progress and audit records
 ├── .github/           # Lightweight repository-audit workflow
 └── tasks.ps1          # Local audit helper
 ```
@@ -319,7 +318,6 @@ msc-thesis-ai-robustness-in-digital-forensics/
 ├── forensic_tools/
 ├── results/
 ├── docs/
-├── progress/
 ├── .github/
 ├── THESIS_ARTIFACT.md
 ├── REPOSITORY_MAP.md
