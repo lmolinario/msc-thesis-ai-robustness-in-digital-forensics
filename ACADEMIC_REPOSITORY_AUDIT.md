@@ -76,18 +76,19 @@ The public documentation is aligned to the following final commercial / black-bo
 |---|---|---|
 | Root README | Marked thesis reporting as completed and frozen; aligned title capitalization and final tool perimeter. | Completed |
 | Citation | Updated `CITATION.cff` to use the final thesis title. | Completed |
-| Documentation README | Removed private editor link and marked `docs/LatexThesis/` as the final frozen thesis source. | Completed |
+| Documentation README | Removed private editor links and marked `docs/LatexThesis/` as the final frozen thesis source. | Completed |
 | Dataset README | Marked dataset workflow as frozen and removed remaining-progress wording. | Completed |
 | Attacks README | Removed stale historical wording and retained only the final tool perimeter. | Completed |
 | Evaluation README | Retained only the final included tool perimeter. | Completed |
 | Forensic tools README | Clarified standalone Excire evaluation and retained only the final tool perimeter. | Completed |
 | Results README | Reinforced final reporting rules and retained only final evaluated tools. | Completed |
+| Progress archive | Removed historical milestone and working-note files from `main`; preserved them in `archive/pre-commission-cleanup-2026-07-16`. | Completed |
 
 ---
 
 ## 5. Remaining archival considerations
 
-The thesis is treated as frozen by the author. The following items are repository-archival considerations rather than methodological blockers:
+The thesis is treated as frozen by the author. The following items are repository-archival considerations rather than methodological blockers.
 
 ### 5.1 Dependency reproducibility
 
@@ -141,7 +142,13 @@ explainability/                   Integrated Gradients/XAI workflow
 docs/                             Thesis source and supporting documentation
 results/                          Metric tables and final outputs
 forensic_tools/                   Normalized commercial-tool export structure
-progress/                         Logs, notes, and milestones
+.github/                          Automated repository audit
+```
+
+Historical development records are preserved outside the public-facing structure in:
+
+```text
+archive/pre-commission-cleanup-2026-07-16
 ```
 
 ---
@@ -157,6 +164,7 @@ Before public archival release, verify:
 - [x] `evaluation/README.md` reflects the final tool perimeter;
 - [x] `forensic_tools/README.md` reflects the final commercial-tool perimeter;
 - [x] `results/README.md` reflects the final metric/reporting perimeter;
+- [x] historical progress records are removed from `main` and preserved in the archival branch;
 - [x] no hardcoded raw dataset links remain in the public bootstrap script;
 - [x] no `.env`, session, token, or credential files are intentionally tracked;
 - [x] citation metadata are available through `CITATION.cff`;
@@ -171,4 +179,4 @@ Before public archival release, verify:
 
 The repository is aligned with the frozen MSc thesis state as a controlled academic research artifact.
 
-The main remaining actions are optional archival hardening: generating a lock file from the actual working environment and creating a final release tag after owner approval.
+The main remaining actions are structural presentation cleanup, optional archival hardening, generation of a lock file from the actual working environment, and creation of a final release tag after owner approval.
