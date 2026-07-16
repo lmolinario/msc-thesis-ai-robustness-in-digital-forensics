@@ -1,22 +1,30 @@
 # Repository Map
 
-This document maps the repository structure to the MSc thesis artifact. It is intended for reviewers, supervisors, committee members, and researchers who need to understand where each component of the experimental workflow is stored.
+This document maps the public repository structure to the MSc thesis research artifact. It is intended for reviewers, supervisors, committee members, and researchers who need to locate the implementation, manifests, evaluation outputs, and thesis sources.
 
 ---
 
 ## Top-Level Structure
 
-| Path | Role | Artifact type | Thesis role |
-|---|---|---|---|
-| `datasets/` | Dataset acquisition, preparation, selection, splits, and forensic bundle metadata | Code, manifests, metadata | Dataset construction and source consolidation |
-| `attacks/` | Generated adversarial and anti-forensic perturbation artifacts and manifests | Outputs, manifests, documentation | Robustness stressors |
-| `models/` | Transparent proxy-model configuration, checkpoints, and training scripts | Code, model artifacts, registry | Reproducible proxy baseline |
-| `evaluation/` | Proxy-model evaluation and commercial-tool normalization | Code, predictions, normalized outputs | Quantitative evaluation layer |
-| `explainability/` | Integrated Gradients case-study workflow | Code, manifests, XAI outputs | Qualitative diagnostic interpretation |
-| `forensic_tools/` | Commercial-tool export organization and documentation | Raw export areas, notes, controlled outputs | Black-box forensic-tool evaluation |
-| `results/` | Thesis-oriented metrics, figures, tables, and reporting assets | Metrics, figures, scripts | Results chapter material |
-| `docs/` | LaTeX thesis source and supporting documentation | Thesis source, figures, bibliography | Official thesis text |
-| `progress/` | Milestones, operational notes, and working audit trail | Progress documentation | Historical workflow audit |
+| Path | Role | Main artifact type |
+|---|---|---|
+| `datasets/` | Dataset acquisition, preparation, human review, frozen manifests, splits, and forensic evaluation bundle | Scripts, manifests, metadata |
+| `attacks/` | Adversarial and anti-forensic perturbation artifacts | Generated inputs, manifests |
+| `models/` | Transparent proxy-model training and registry | Scripts, checkpoints, registry |
+| `evaluation/` | Proxy-model evaluation and commercial-tool output normalization | Predictions, normalized outputs, scripts |
+| `explainability/` | Integrated Gradients case-study workflow | Scripts, manifests, XAI outputs |
+| `forensic_tools/` | Commercial-tool export organization | Raw export areas and tool-specific documentation |
+| `results/` | Final metrics, figures, and reporting assets | CSV/JSON metrics, figures, scripts |
+| `docs/` | English and Italian LaTeX thesis sources and repository documentation | Thesis source, bibliography, figures |
+| `.github/` | Automated lightweight repository audit | GitHub Actions workflow |
+
+Historical development notes and milestone records are preserved in the archival branch:
+
+```text
+archive/pre-commission-cleanup-2026-07-16
+```
+
+They are intentionally excluded from the public-facing `main` branch because they are not canonical sources for the final experimental state.
 
 ---
 
@@ -25,7 +33,7 @@ This document maps the repository structure to the MSc thesis artifact. It is in
 Purpose:
 
 - controlled raw source acquisition;
-- technical preparation and deduplication;
+- technical validation and deduplication;
 - human-in-the-loop semantic review;
 - final dataset freezing;
 - clean/OOD split generation;
@@ -40,7 +48,7 @@ datasets/forensic_evaluation_bundle/metadata/
 datasets/scripts/
 ```
 
-Key files:
+Canonical files:
 
 ```text
 datasets/final/manifests/manual_selection_final_1500.csv
@@ -48,12 +56,6 @@ datasets/final/manifests/manual_selection_adversarial_subset.csv
 datasets/splits/manifests/clean_folds_manifest.csv
 datasets/splits/manifests/ood_eval_manifest.csv
 datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
-```
-
-Artifact role:
-
-```text
-frozen manifests + controlled split definitions + forensic bundle metadata
 ```
 
 ---
@@ -64,8 +66,7 @@ Purpose:
 
 - store adversarial perturbation outputs;
 - store anti-forensic transformation outputs;
-- preserve attack/transformation manifests;
-- document perturbation generation protocol.
+- preserve generation and evaluation manifests.
 
 Key areas:
 
@@ -75,17 +76,12 @@ attacks/anti_forensic/
 attacks/manifests/
 ```
 
-Main perturbation families:
+Final perturbation families:
 
 ```text
 adversarial: fgsm, superdeepfool, sigma_zero, one_pixel, color_shift
-anti-forensic: jpeg_recompression, resample_resize, gaussian_blur, histogram_modification, contrast_stretching
-```
-
-Artifact role:
-
-```text
-stress-test inputs for proxy models and commercial black-box tools
+anti-forensic: jpeg_recompression, resample_resize, gaussian_blur,
+               histogram_modification, contrast_stretching
 ```
 
 ---
@@ -96,7 +92,7 @@ Purpose:
 
 - train transparent proxy models;
 - preserve fold-aware checkpoints;
-- document model registry and training configuration.
+- document model configurations and hashes.
 
 Final proxy models:
 
@@ -111,13 +107,8 @@ Key areas:
 ```text
 models/scripts/
 models/checkpoints/
+models/reports/
 models/model_registry.json
-```
-
-Artifact role:
-
-```text
-transparent and reproducible proxy baseline for robustness testing
 ```
 
 ---
@@ -128,7 +119,7 @@ Purpose:
 
 - evaluate transparent proxy models;
 - normalize commercial black-box forensic-tool exports;
-- create prediction-level and metric-level outputs.
+- generate prediction-level and metric-level outputs.
 
 Key areas:
 
@@ -138,7 +129,7 @@ evaluation/forensic_tools/
 evaluation/scripts/
 ```
 
-Key files:
+Canonical files:
 
 ```text
 evaluation/proxy_models/proxy_model_predictions.csv
@@ -149,12 +140,6 @@ evaluation/scripts/15_evaluate_proxy_models.py
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
-Artifact role:
-
-```text
-common evaluation layer for transparent proxy outputs and black-box commercial outputs
-```
-
 ---
 
 ## `explainability/`
@@ -162,8 +147,8 @@ common evaluation layer for transparent proxy outputs and black-box commercial o
 Purpose:
 
 - generate qualitative Integrated Gradients case studies;
-- document selected representative cases;
-- support Chapter 5 interpretation.
+- preserve case-selection manifests;
+- support the interpretation presented in Chapter 5.
 
 Key areas:
 
@@ -173,42 +158,23 @@ explainability/manifests/
 explainability/outputs/integrated_gradients/
 ```
 
-Key scripts:
-
-```text
-explainability/scripts/17_generate_integrated_gradients_case_studies.py
-explainability/scripts/18_xai_interactive_launcher.py
-```
-
-Artifact role:
-
-```text
-qualitative diagnostic layer for transparent proxy models only
-```
-
 ---
 
 ## `forensic_tools/`
 
 Purpose:
 
-- organize commercial-tool raw export areas;
-- document tool versions and export context;
-- preserve the boundary between raw commercial exports and normalized evaluation outputs.
+- organize tool-specific raw export areas;
+- document versions and export context;
+- preserve the boundary between proprietary exports and normalized outputs.
 
 Final tool areas:
 
 ```text
-forensic_tools/magnet_axiom/raw_exports/
-forensic_tools/excire_foto_2025/raw_exports/
-forensic_tools/cellebrite_inseyets/raw_exports/
-forensic_tools/griffeye/raw_exports/
-```
-
-Artifact role:
-
-```text
-commercial black-box export organization and audit context
+forensic_tools/magnet_axiom/
+forensic_tools/excire_foto_2025/
+forensic_tools/cellebrite_inseyets/
+forensic_tools/griffeye/
 ```
 
 ---
@@ -218,8 +184,8 @@ commercial black-box export organization and audit context
 Purpose:
 
 - collect final metrics;
-- store thesis-oriented figures and reporting assets;
-- generate final reporting material for Chapter 5.
+- generate thesis-ready figures and reporting assets;
+- preserve the quantitative source files used by Chapter 5.
 
 Key areas:
 
@@ -229,17 +195,11 @@ results/figures/
 results/scripts/
 ```
 
-Key scripts:
+Official reporting scripts:
 
 ```text
 results/scripts/20_generate_experimental_reporting_assets.py
 results/scripts/21_generate_embedded_metadata_sensitivity_check.py
-```
-
-Artifact role:
-
-```text
-final quantitative and reporting layer
 ```
 
 ---
@@ -248,66 +208,40 @@ final quantitative and reporting layer
 
 Purpose:
 
-- store the final LaTeX thesis source;
-- store thesis figures, bibliography, acronym definitions, and supporting documentation.
-
-Official thesis source:
-
-```text
-docs/LatexThesis/
-```
-
-Key files:
-
-```text
-docs/LatexThesis/main.tex
-docs/LatexThesis/sections/
-docs/LatexThesis/tesi.bib
-docs/LatexThesis/sections/000_acronyms.tex
-```
-
-Artifact role:
-
-```text
-official frozen thesis source
-```
-
----
-
-## `progress/`
-
-Purpose:
-
-- preserve the operational history of the thesis workflow;
-- document milestone status;
-- record decisions and audit notes without mixing them with source code or thesis text.
+- store the final English LaTeX thesis source;
+- retain the Italian source as a separate archival language version;
+- store thesis figures, bibliography, acronym definitions, and repository assets.
 
 Key areas:
 
 ```text
-progress/milestones/
-progress/logs/
-progress/notes/
+docs/LatexThesis/
+docs/LatexThesis_ITA/
+docs/assets/
 ```
 
-Artifact role:
+The canonical thesis source for the submitted artifact is:
 
 ```text
-historical workflow audit, not numerical source of truth
+docs/LatexThesis/main.tex
 ```
 
 ---
 
 ## Source-of-Truth Principle
 
-Progress notes explain how and why the workflow evolved. The following areas define what was actually produced and reported:
+Repository documentation explains the workflow, but the following areas define what was actually produced and reported:
 
 ```text
 datasets/final/manifests/
 datasets/splits/manifests/
 attacks/manifests/
+models/model_registry.json
 evaluation/proxy_models/
 evaluation/forensic_tools/
 results/metrics/
+datasets/forensic_evaluation_bundle/metadata/
 docs/LatexThesis/
 ```
+
+Numerical values should be derived from the canonical manifests, normalized predictions, metrics, and final thesis source rather than from historical development notes.
