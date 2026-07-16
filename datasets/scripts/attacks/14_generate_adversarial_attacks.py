@@ -36,6 +36,7 @@ import csv
 import hashlib
 import json
 import logging
+import math
 import shutil
 import sys
 from collections import Counter, defaultdict
@@ -435,6 +436,19 @@ def safe_str(value: Any) -> str:
     if pd.isna(value):
         return ""
     return str(value).strip()
+
+
+def json_safe(value: Any) -> Any:
+    """Return a recursively strict-JSON-compatible representation."""
+    if isinstance(value, float) and not math.isfinite(value):
+        if math.isnan(value):
+            return "nan"
+        return "inf" if value > 0 else "-inf"
+    if isinstance(value, dict):
+        return {str(key): json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(item) for item in value]
+    return value
 
 
 def norm(value: Any) -> str:
@@ -1095,7 +1109,7 @@ def build_manifest_row(
         "perturbed_relative_path": repo_relative_string(output_path),
         "attack_family": "adversarial",
         "attack_name": attack_name,
-        "attack_parameters": json.dumps(attack_params, sort_keys=True),
+        "attack_parameters": json.dumps(json_safe(attack_params), sort_keys=True, allow_nan=False),
         "target_model": target_model,
         "model_dependency": model_dependency,
         "checkpoint_path": repo_relative_string(checkpoint_path),
@@ -1234,6 +1248,14 @@ def build_summary(
     created_at: str,
 ) -> dict[str, Any]:
     per_attack_counts = Counter(row["attack_name"] for row in rows)
+    has_model_dependent = any(is_model_dependent_attack_local(name) for name in selected_attacks)
+    has_model_agnostic = any(not is_model_dependent_attack_local(name) for name in selected_attacks)
+    effective_target_models = selected_target_models if has_model_dependent else []
+    generation_mode = (
+        "mixed" if has_model_dependent and has_model_agnostic
+        else "model_dependent" if has_model_dependent
+        else "model_agnostic"
+    )
     per_target_counts = Counter(row["target_model"] for row in rows)
     per_fold_counts: dict[str, Counter] = defaultdict(Counter)
     per_label_counts: dict[str, Counter] = defaultdict(Counter)
@@ -1258,8 +1280,9 @@ def build_summary(
         "manifest_csv": repo_relative_string(manifest_path),
         "summary_json": repo_relative_string(summary_path),
         "selected_attacks": selected_attacks,
-        "selected_target_models": selected_target_models,
-        "checkpoint_root": repo_relative_string(checkpoint_root),
+        "selected_target_models": effective_target_models,
+        "generation_mode": generation_mode,
+        "checkpoint_root": repo_relative_string(checkpoint_root) if has_model_dependent else "not_applicable",
         "parameters": {
             "fgsm_epsilon": args.fgsm_epsilon,
             "fgsm_output_format": "PNG",
@@ -1268,6 +1291,11 @@ def build_summary(
             "input_size": args.input_size,
             "device": args.device,
             "limit": args.limit,
+            "color_red_shift": args.color_red_shift,
+            "color_green_shift": args.color_green_shift,
+            "color_blue_shift": args.color_blue_shift,
+            "color_saturation_factor": args.color_saturation_factor,
+            "color_contrast_factor": args.color_contrast_factor,
             "one_pixel_max_iterations": args.one_pixel_max_iterations,
             "one_pixel_population_size": args.one_pixel_population_size,
             "one_pixel_seed": args.one_pixel_seed,
@@ -1305,12 +1333,13 @@ def build_summary(
 
 def write_summary(path: Path, summary: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+    path.write_text(
+        json.dumps(json_safe(summary), indent=2, ensure_ascii=False, allow_nan=False),
+        encoding="utf-8",
+    )
 
 
 def main() -> None:
-    import datetime
-    print (datetime.datetime.now(datetime.UTC))
     args = parse_args()
     setup_logging(args.verbose)
 

@@ -28,7 +28,7 @@
     "sigma_zero_sigma": 0.001,
     "sigma_zero_tau": 0.3,
     "sigma_zero_tau_factor": 0.01,
-    "sigma_zero_grad_norm": Infinity,
+    "sigma_zero_grad_norm": "inf",
     "superdeepfool_max_outer_iterations": 20,
     "superdeepfool_max_deepfool_iterations": 50,
     "superdeepfool_projection_steps": 1,

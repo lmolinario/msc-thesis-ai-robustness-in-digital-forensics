@@ -28,7 +28,7 @@
     "sigma_zero_sigma": 0.001,
     "sigma_zero_tau": 0.3,
     "sigma_zero_tau_factor": 0.01,
-    "sigma_zero_grad_norm": Infinity
+    "sigma_zero_grad_norm": "inf"
   },
   "counts": {
     "input_images": 1000,

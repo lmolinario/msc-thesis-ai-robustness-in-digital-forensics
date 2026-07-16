@@ -8,10 +8,8 @@
   "selected_attacks": [
     "color_shift"
   ],
-  "selected_target_models": [
-    "efficientnet_b0"
-  ],
-  "checkpoint_root": "models/checkpoints",
+  "selected_target_models": [],
+  "checkpoint_root": "not_applicable",
   "parameters": {
     "fgsm_epsilon": 0.03137254901960784,
     "fgsm_output_format": "PNG",
@@ -19,7 +17,12 @@
     "jpeg_quality": 95,
     "input_size": 224,
     "device": "auto",
-    "limit": 0
+    "limit": 0,
+    "color_red_shift": 12,
+    "color_green_shift": 0,
+    "color_blue_shift": -12,
+    "color_saturation_factor": 1.1,
+    "color_contrast_factor": 1.0
   },
   "counts": {
     "input_images": 1000,
@@ -57,5 +60,6 @@
     "generated_image_id_unique": true,
     "perturbed_sha256_unique": true,
     "manifest_written": true
-  }
+  },
+  "generation_mode": "model_agnostic"
 }

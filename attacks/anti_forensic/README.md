@@ -1,89 +1,64 @@
 # Anti-Forensic Transformations
 
-This directory contains realistic image transformations used to evaluate the robustness of AI-based classifiers and forensic AI tools under anti-forensic conditions.
+This directory contains controlled image-processing transformations used to
+evaluate robustness under realistic anti-forensic conditions.
 
-The official anti-forensic transformation targets are the clean binary folds:
+The transformations are model-agnostic and are applied to the official clean
+binary folds. They are not optimization-based adversarial examples.
 
-```text
-datasets/splits/clean/fold_1/
-datasets/splits/clean/fold_2/
-datasets/splits/clean/fold_3/
-datasets/splits/clean/fold_4/
-datasets/splits/clean/fold_5/
-```
+## Frozen transformation set
 
-Each transformation preserves the original fold structure and class labels.
+| Transformation | Frozen configuration |
+|---|---|
+| `jpeg_recompression` | JPEG quality 70 |
+| `resample_resize` | scale 0.5, bicubic downsampling and restoration to the original dimensions |
+| `gaussian_blur` | Gaussian radius 1.5 |
+| `histogram_modification` | histogram equalization |
+| `contrast_stretching` | autocontrast cutoff 1% |
 
----
+Non-recompression outputs are saved as JPEG quality 95 after the selected
+transformation. Exact parameters are preserved in the manifest.
 
-## Implemented Transformations
-
-Official numbered entry point:
+## Official entry point
 
 ```text
 datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
 ```
 
-
-Transformations:
-
-```text
-jpeg_recompression/
-resample_resize/
-gaussian_blur/
-histogram_modification/
-contrast_stretching/
-```
-
-These transformations are controlled image-processing operations, not model-optimized adversarial examples.
-
----
-
-## Official Command
-
-Run the interactive launcher directly:
-
-```bash
-python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
-```
-
-Generate all implemented anti-forensic transformations:
+Generate the frozen set:
 
 ```bash
 python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py --force
 ```
 
-Generate one transformation only:
+Generate one transformation:
 
 ```bash
-python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py \
-  --attack gaussian_blur \
-  --force
+python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py   --attack gaussian_blur   --force
 ```
 
-Smoke test all transformations:
+A smoke test can be run with `--limit 10`.
 
-```bash
-python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py \
-  --limit 10 \
-  --force
+## Output layout
+
+```text
+attacks/anti_forensic/<transformation>/<fold>/<label>/<image_id>__<transformation>.jpg
 ```
 
----
+The fold and label hierarchy is preserved for controlled evaluation; the blind
+forensic-tool bundle later replaces semantic paths with neutral identifiers.
 
-## Manifest Requirements
+## Traceability
 
-Each generated anti-forensic artifact must be traceable through a manifest containing at least:
+Each generated artifact records, at minimum:
 
 ```text
 generated_image_id
 original_image_id
 fold
 final_label
-source_dataset
 clean_relative_path
 perturbed_relative_path
-attack_family
 attack_name
 attack_parameters
 sha256_original
@@ -93,10 +68,13 @@ size_bytes
 created_at
 ```
 
----
+Canonical generation records:
 
-## Methodological Note
+```text
+attacks/manifests/anti_forensic_attacks_manifest.csv
+attacks/manifests/anti_forensic_generation_summary.json
+```
 
-Anti-forensic transformations are not necessarily optimization-based adversarial examples. They are implemented as controlled image-processing operations with explicit parameters, reproducible outputs, and forensic traceability through hashes and manifests.
-
-They are evaluated separately from adversarial FGSM perturbations because their purpose is to simulate realistic image-processing manipulations that may occur in operational or anti-forensic scenarios.
+The transformations are evaluated as a separate robustness family from FGSM,
+One Pixel, Sigma-Zero, SuperDeepFool, and the adversarial-style Color Shift
+variant.

@@ -1,209 +1,102 @@
 # Adversarial Attacks
 
-This directory contains adversarial and adversarial-style perturbations generated for the frozen thesis pipeline.
+This directory contains the adversarial and adversarial-style perturbations
+generated from the frozen 1,000-image binary subset.
 
-The official adversarial attack targets are the clean binary folds:
+## Threat model
 
-```text
-datasets/splits/clean/fold_1/
-datasets/splits/clean/fold_2/
-datasets/splits/clean/fold_3/
-datasets/splits/clean/fold_4/
-datasets/splits/clean/fold_5/
-```
+The protocol adopts a proxy-based limited-knowledge setting. Transparent local
+models are used to generate or evaluate perturbations, while commercial tools
+are evaluated separately as operational black boxes.
 
-Each attack preserves the original fold structure and class labels.
-
----
-
-## Generated Attacks
-
-Generated adversarial/adversarial-style attacks:
-
-```text
-fgsm/
-superdeepfool/
-sigma_zero/
-one_pixel/
-color_shift/
-```
-
-Operational status:
-
-```text
-adversarial generation completed
-proxy model evaluation completed
-commercial-tool normalization completed for the final black-box tool perimeter
-Chapter 5 XAI case selection completed and integrated
-```
-
----
-
-## Target-Model and Transferability Protocol
-
-The adversarial protocol follows a proxy-based, limited-knowledge threat model.
-
-Primary white-box proxy generation target:
+The primary generation target is:
 
 ```text
 efficientnet_b0
 ```
 
-EfficientNet-B0 is the primary target for model-dependent adversarial generation because it is a realistic CNN-based surrogate for image classification systems and provides a sustainable computational compromise for the thesis.
+ResNet18 and CLIP are used as transfer/evaluation targets in the proxy-model
+evaluation stage.
 
-Transfer/evaluation targets:
+## Frozen attack set
 
-```text
-resnet18
-clip
-```
-
-Black-box / operational forensic evaluation perimeter:
-
-```text
-Completed and normalized:
-- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
-- Excire Foto 2025, version 4.1.5
-- Cellebrite Inseyets, version 10.9
-- Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
-```
-
-Commercial forensic tools are treated as operational black boxes. The goal is not to know or reproduce their internal models, but to evaluate whether perturbations generated on transparent local proxy models correspond to observable robustness risks in AI-assisted forensic triage systems.
-
----
-
-## Attack Set
-
-| Attack | Type | Model dependency | Main role |
+| Attack | Type | Dependency | Frozen role |
 |---|---|---|---|
-| `fgsm` | gradient-based adversarial attack | model-dependent | baseline white-box evasion attack |
-| `superdeepfool` | decision-boundary adversarial attack | model-dependent | stronger/iterative adversarial perturbation |
-| `sigma_zero` | adversarial attack | model-dependent | high-impact adversarial perturbation |
-| `one_pixel` | sparse adversarial attack | model-dependent | localized perturbation stress test |
-| `color_shift` | adversarial-style image transformation | model-agnostic | color/channel robustness stress test |
+| `fgsm` | gradient-based, untargeted | model-dependent | white-box baseline |
+| `one_pixel` | score-based sparse attack | model-dependent | localized stress test |
+| `sigma_zero` | sparse optimization attack | model-dependent | high-impact L0-oriented stressor |
+| `superdeepfool` | iterative decision-boundary attack | model-dependent | stronger boundary-oriented stressor |
+| `color_shift` | image transformation | model-agnostic | adversarial-style color robustness stressor |
 
----
+Color Shift is not a gradient-based adversarial example. It remains under
+`attacks/adversarial/` because it was frozen as one of the five adversarial-side
+variants used by the bundle, evaluation scripts, and thesis reporting.
 
-## Fold-Aware Checkpoint Protocol
+## Fold-aware checkpoint protocol
 
-For every image belonging to fold `F`, model-dependent attacks must use the checkpoint:
+For an image belonging to fold `F`, every model-dependent attack uses:
 
 ```text
 models/checkpoints/<target_model>/F.pt
 ```
 
-Example:
+The checkpoint is trained on the other four folds and never on the attacked
+sample's fold.
+
+## Frozen parameters
+
+| Attack | Main frozen configuration |
+|---|---|
+| FGSM | epsilon `8/255`, untargeted, pixel space `[0,1]` |
+| One Pixel | 50 iterations, population-size multiplier 20, seed 42 |
+| Sigma-Zero | 1000 steps, eta 1.0, sigma 0.001, tau 0.3, tau factor 0.01, infinity gradient norm |
+| SuperDeepFool | 20 outer iterations, 50 DeepFool iterations, 1 projection step, `SDF(infinity,1)` |
+| Color Shift | R `+12`, G `0`, B `-12`, saturation `1.10`, contrast `1.00`, JPEG quality 95 |
+
+Exact run parameters are preserved in the corresponding JSON summaries and in
+each manifest's `attack_parameters` field.
+
+## Output format
+
+Model-dependent outputs are stored as lossless PNG files:
 
 ```text
-image in fold_1 + target efficientnet_b0
-→ models/checkpoints/efficientnet_b0/fold_1.pt
+attacks/adversarial/<attack>/<target_model>/<fold>/<label>/<image_id>__<attack>__<target_model>.png
 ```
 
-This ensures that the proxy model used for attack generation was trained on the other four folds and never on the images being attacked.
-
-Official numbered entry point:
-
-```text
-datasets/scripts/attacks/14_generate_adversarial_attacks.py
-```
-
-Use the numbered script in documentation, experiments, and reproducible commands.
-
----
-
-## Official Commands
-
-Model-agnostic Color Shift:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack color_shift \
-  --force
-```
-
-FGSM:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack fgsm \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --force
-```
-
-SuperDeepFool:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack superdeepfool \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --force
-```
-
-Sigma Zero:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack sigma_zero \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --force
-```
-
-One Pixel:
-
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack one_pixel \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --force
-```
-
-Smoke tests can be performed before full regeneration by adding:
-
-```text
---limit 10
-```
-
----
-
-## Output Format
-
-Model-dependent adversarial outputs are saved in lossless PNG format:
-
-```text
-attacks/adversarial/<attack_name>/<target_model>/<fold>/<label>/<image_id>__<attack_name>__<target_model>.png
-```
-
-PNG is required for gradient-based and model-dependent attacks because JPEG compression may introduce artifacts comparable to or stronger than the intended perturbation.
-
-Color Shift outputs remain JPEG because Color Shift is a model-agnostic image-processing perturbation:
+Color Shift is stored as JPEG because it is an explicit image-processing
+transformation:
 
 ```text
 attacks/adversarial/color_shift/model_agnostic/<fold>/<label>/<image_id>__color_shift__model_agnostic.jpg
 ```
 
----
+## Official entry point
 
-## Manifest Requirements
+```text
+datasets/scripts/attacks/14_generate_adversarial_attacks.py
+```
 
-Each generated adversarial artifact must be traceable through a manifest containing at least:
+General command:
+
+```bash
+python datasets/scripts/attacks/14_generate_adversarial_attacks.py   --attack <attack_name>   --target-model efficientnet_b0   --checkpoint-root models/checkpoints   --device auto   --force
+```
+
+For Color Shift, `--target-model` and `--checkpoint-root` are not operationally
+used. A smoke test can be run by adding `--limit 10`.
+
+## Traceability
+
+Each generated artifact records, at minimum:
 
 ```text
 generated_image_id
 original_image_id
 fold
 final_label
-source_dataset
 clean_relative_path
 perturbed_relative_path
-attack_family
 attack_name
 attack_parameters
 target_model
@@ -213,41 +106,8 @@ checkpoint_sha256
 sha256_original
 sha256_perturbed
 md5_perturbed
-size_bytes
-extension
 created_at
 ```
 
----
-
-## Evaluation Outputs
-
-The proxy model evaluation stage is performed by:
-
-```text
-evaluation/scripts/15_evaluate_proxy_models.py
-```
-
-Main outputs:
-
-```text
-evaluation/proxy_models/proxy_model_predictions.csv
-results/metrics/proxy_model_clean_metrics.csv
-results/metrics/proxy_model_ood_metrics.csv
-results/metrics/proxy_model_comparative_metrics.csv
-results/metrics/proxy_model_evaluation_summary.json
-```
-
-The comparative metrics match perturbed predictions to clean predictions through model, fold, and original image identifier.
-
----
-
-## XAI Status
-
-Integrated Gradients case studies for Chapter 5 have been completed and integrated into the thesis text. The selected cases include clean, OOD, anti-forensic, and adversarial scenarios, with `sigma_zero` represented as a high-confidence adversarial failure.
-
----
-
-## Methodological Note
-
-For this thesis, adversarial machine learning is not the final object of study. It is used as an experimental stressor to evaluate the operational robustness of AI-based image classification systems in a digital forensic workflow.
+Manifest CSV files and strict JSON summaries are stored in
+[`../manifests/`](../manifests/).

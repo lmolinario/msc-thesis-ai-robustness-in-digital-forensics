@@ -158,3 +158,6 @@ forensic_tools/**/temp/
 
 # Local manual-review session state
 datasets/final/reports/manual_selection_state.json
+# Optional local evaluation outputs from the anti-forensic generator
+attacks/manifests/anti_forensic_*_evaluation.csv
+attacks/manifests/anti_forensic_*_evaluation_summary.json
