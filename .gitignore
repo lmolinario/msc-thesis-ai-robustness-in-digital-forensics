@@ -155,3 +155,6 @@ forensic_tools/**/temp/
 *.ad1
 *.ufd
 *.ufdr
+
+# Local manual-review session state
+datasets/final/reports/manual_selection_state.json

@@ -187,7 +187,6 @@ datasets/final/manifests/manual_selection_final_1500.csv
 datasets/final/manifests/manual_selection_adversarial_subset.csv
 datasets/final/manifests/manual_selection_removed.csv
 datasets/final/reports/manual_selection_log.csv
-datasets/final/reports/manual_selection_state.json
 datasets/final/reports/manual_selection_summary.json
 ```
 
@@ -397,6 +396,8 @@ Images, raw datasets, forensic exports, generated perturbations, and model check
 
 ## Citation
 
-Citation details will be added upon thesis completion.
+Citation metadata for the repository and the thesis are maintained in
+[`CITATION.cff`](../CITATION.cff).
 
-Until then, cite the repository and the corresponding MSc thesis when referring to the dataset, methodology, or results.
+When referring to the dataset, methodology, or results, cite the repository
+and the corresponding MSc thesis.
