@@ -28,46 +28,61 @@ datasets/forensic_evaluation_bundle/blind_tool_input/
 datasets/forensic_evaluation_bundle/structured_audit_view/
 ```
 
-## External raw bundle
+## Controlled access procedure
 
-The raw source bundle is hosted externally on Google Drive and is restored with:
+The raw source bundle is stored externally and is not available through a
+publicly usable download link. Access is granted case by case by the thesis
+author or repository maintainer.
 
-```bash
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
-```
+A request should identify:
 
-Default bundle URL:
+1. the requester and institutional affiliation;
+2. the intended research, academic-review, or reproducibility purpose;
+3. the required access period;
+4. any applicable legal, ethical, or institutional constraints.
+
+Access may be denied, restricted, time-limited, or revoked when distribution or
+use would conflict with source terms, ethical limitations, or institutional
+requirements.
+
+After authorization, the requester receives an access-controlled URL. The URL
+must remain local and must not be committed, published, or redistributed.
+
+## Local restoration
+
+The restoration entry point is:
 
 ```text
-https://drive.google.com/file/d/1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link
+datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
 ```
 
-The Drive file must be shared as **Anyone with the link – Viewer** for
-unattended restoration. Publishing the URL does not grant redistribution rights
-beyond those applicable to the original sources.
+Provide the authorized URL through either the command line or the environment
+variable `FAIRLAB_RAW_DATASET_BUNDLE_URL`.
 
-URL precedence is:
-
-1. `--url <bundle-url>`;
-2. `FAIRLAB_RAW_DATASET_BUNDLE_URL`;
-3. the default URL embedded in the script.
-
-Examples:
+Windows PowerShell:
 
 ```powershell
+$env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<authorized-controlled-access-url>"
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
-$env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<alternative-url>"
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --force-download
 ```
+
+Linux/macOS:
 
 ```bash
+export FAIRLAB_RAW_DATASET_BUNDLE_URL="<authorized-controlled-access-url>"
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
-FAIRLAB_RAW_DATASET_BUNDLE_URL="<alternative-url>" \
-  python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --force-download
 ```
 
-The archive is validated as ZIP, its SHA256 is printed, archive paths are
-checked before extraction, and symbolic-link entries are rejected.
+Alternative one-time invocation:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --url "<authorized-controlled-access-url>"
+```
+
+The script validates that the downloaded object is a ZIP archive, prints its
+SHA256 digest, checks archive paths before extraction, and rejects symbolic-link
+entries.
 
 ## Regeneration boundary
 
@@ -86,5 +101,5 @@ handling requirements. Researchers are responsible for verifying that their
 use, storage, and redistribution are lawful and compatible with the original
 sources.
 
-The frozen thesis artifact is designed for traceable reproducibility, not as an
-unrestricted benchmark redistribution package.
+The frozen thesis artifact is designed for traceable controlled reproducibility,
+not as an unrestricted benchmark redistribution package.
