@@ -1,0 +1,782 @@
+name: One-time Remove Image Corpora
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/one-time-remove-image-corpora.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    name: Remove image corpora from main and configure external restoration
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository without LFS objects
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Remove tracked corpora and update restoration policy
+        shell: python
+        run: |
+          from __future__ import annotations
+
+          import os
+          import subprocess
+          import textwrap
+          from pathlib import Path
+
+          root = Path('.')
+          workflow_path = root / '.github/workflows/one-time-remove-image-corpora.yml'
+
+          corpus_dirs = [
+              'datasets/raw',
+              'datasets/prepared/final_pool/images',
+              'datasets/splits/clean',
+              'datasets/splits/ood',
+              'datasets/forensic_evaluation_bundle/blind_tool_input',
+              'datasets/forensic_evaluation_bundle/structured_audit_view',
+              'attacks/adversarial/color_shift',
+              'attacks/adversarial/fgsm',
+              'attacks/adversarial/one_pixel',
+              'attacks/adversarial/sigma_zero',
+              'attacks/adversarial/superdeepfool',
+              'attacks/anti_forensic/jpeg_recompression',
+              'attacks/anti_forensic/resample_resize',
+              'attacks/anti_forensic/gaussian_blur',
+              'attacks/anti_forensic/histogram_modification',
+              'attacks/anti_forensic/contrast_stretching',
+          ]
+
+          subprocess.run(
+              ['git', 'rm', '-r', '--ignore-unmatch', '--', *corpus_dirs],
+              check=True,
+          )
+
+          raw_readme = '''# Raw Dataset Restoration
+
+          Raw image corpora are intentionally not tracked on the `main` branch.
+
+          Restore the externally hosted raw bundle with:
+
+          ```bash
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          ```
+
+          The script uses the repository's default Google Drive bundle URL. It can be
+          overridden through `--url` or the `FAIRLAB_RAW_DATASET_BUNDLE_URL` environment
+          variable.
+
+          The downloaded archive and its extracted contents remain local and are ignored
+          by Git. Subsequent prepared datasets, clean/OOD splits, perturbations, and the
+          forensic evaluation bundle must be regenerated through the numbered pipeline.
+          '''
+          (root / 'datasets/raw').mkdir(parents=True, exist_ok=True)
+          (root / 'datasets/raw/README.md').write_text(textwrap.dedent(raw_readme), encoding='utf-8')
+
+          script = '''#!/usr/bin/env python3
+          # -*- coding: utf-8 -*-
+
+          """
+          00_download_raw_datasets_bundle.py
+
+          Restore the externally hosted raw dataset bundle used by the FAIR-Lab thesis
+          pipeline. Image corpora are not tracked on the public ``main`` branch.
+
+          Download URL precedence:
+          1. ``--url`` command-line argument;
+          2. ``FAIRLAB_RAW_DATASET_BUNDLE_URL`` environment variable;
+          3. the default Google Drive URL recorded below.
+
+          The archive is downloaded under ``datasets/raw/downloaded_raw_archives/`` and
+          extracted locally. Downloaded and extracted data are ignored by Git.
+          """
+
+          from __future__ import annotations
+
+          import argparse
+          import hashlib
+          import os
+          import shutil
+          import stat
+          import zipfile
+          from pathlib import Path
+
+          import gdown
+
+          from datasets.scripts.utils.paths import RAW_DATASETS_DIR, repo_relative_path
+
+          ENV_NAME = "FAIRLAB_RAW_DATASET_BUNDLE_URL"
+          DEFAULT_BUNDLE_URL = (
+              "https://drive.google.com/file/d/"
+              "1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link"
+          )
+
+          ARCHIVE_DIR = RAW_DATASETS_DIR / "downloaded_raw_archives"
+          ARCHIVE_PATH = ARCHIVE_DIR / "00_raw_datasets_bundle.zip"
+          EXTRACT_DIR = ARCHIVE_DIR / "extracted_bundle"
+
+
+          def build_parser() -> argparse.ArgumentParser:
+              parser = argparse.ArgumentParser(
+                  description="Download and safely extract the FAIR-Lab raw dataset bundle."
+              )
+              parser.add_argument(
+                  "--url",
+                  default="",
+                  help=(
+                      "Optional Google Drive or direct bundle URL. Precedence: --url, "
+                      f"{ENV_NAME}, repository default."
+                  ),
+              )
+              parser.add_argument(
+                  "--force-download",
+                  action="store_true",
+                  help="Replace an existing local archive before downloading.",
+              )
+              parser.add_argument(
+                  "--force-extract",
+                  action="store_true",
+                  help="Replace an existing extraction directory.",
+              )
+              return parser
+
+
+          def resolve_bundle_url(cli_url: str) -> tuple[str, str]:
+              cli_value = cli_url.strip()
+              if cli_value:
+                  return cli_value, "command line"
+
+              env_value = os.getenv(ENV_NAME, "").strip()
+              if env_value:
+                  return env_value, f"environment variable {ENV_NAME}"
+
+              return DEFAULT_BUNDLE_URL, "repository default"
+
+
+          def sha256_file(path: Path) -> str:
+              digest = hashlib.sha256()
+              with path.open("rb") as stream:
+                  for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                      digest.update(chunk)
+              return digest.hexdigest()
+
+
+          def validate_zip_archive(path: Path) -> None:
+              if not path.exists() or not path.is_file() or path.stat().st_size == 0:
+                  raise RuntimeError(f"Downloaded archive is missing or empty: {path}")
+              if not zipfile.is_zipfile(path):
+                  raise RuntimeError(
+                      "The downloaded file is not a valid ZIP archive. Confirm that the "
+                      "Google Drive file is shared as 'Anyone with the link - Viewer' and "
+                      "that the URL points to the raw dataset bundle."
+                  )
+
+
+          def validate_member_destination(member: zipfile.ZipInfo, extract_dir: Path) -> None:
+              extract_root = extract_dir.resolve()
+              destination = (extract_root / member.filename).resolve()
+              if destination != extract_root and extract_root not in destination.parents:
+                  raise RuntimeError(f"Unsafe archive path detected: {member.filename}")
+
+              unix_mode = member.external_attr >> 16
+              if unix_mode and stat.S_ISLNK(unix_mode):
+                  raise RuntimeError(f"Symbolic links are not allowed in the bundle: {member.filename}")
+
+
+          def extract_archive(archive_path: Path, extract_dir: Path, force: bool) -> None:
+              if extract_dir.exists() and any(extract_dir.iterdir()):
+                  if not force:
+                      print(f"[SKIP] Extraction directory already populated: {extract_dir}")
+                      return
+                  print(f"[INFO] Removing existing extraction directory: {extract_dir}")
+                  shutil.rmtree(extract_dir)
+
+              extract_dir.mkdir(parents=True, exist_ok=True)
+              with zipfile.ZipFile(archive_path, "r") as archive:
+                  for member in archive.infolist():
+                      validate_member_destination(member, extract_dir)
+                  archive.extractall(extract_dir)
+              print(f"[OK] Archive extracted to: {extract_dir}")
+
+
+          def download_archive(url: str, archive_path: Path, force: bool) -> None:
+              if archive_path.exists() and archive_path.stat().st_size > 0:
+                  if not force:
+                      validate_zip_archive(archive_path)
+                      print(f"[SKIP] Valid archive already exists: {archive_path}")
+                      return
+                  print(f"[INFO] Removing existing archive: {archive_path}")
+                  archive_path.unlink()
+
+              archive_path.parent.mkdir(parents=True, exist_ok=True)
+              try:
+                  result = gdown.download(
+                      url=url,
+                      output=str(archive_path),
+                      quiet=False,
+                      fuzzy=True,
+                  )
+              except Exception as exc:
+                  raise RuntimeError(
+                      "Google Drive download failed. Confirm that the bundle is shared as "
+                      "'Anyone with the link - Viewer', or provide an accessible URL with "
+                      f"--url or {ENV_NAME}."
+                  ) from exc
+
+              if result is None:
+                  raise RuntimeError(
+                      "Google Drive download returned no file. Check the file-sharing "
+                      "permissions or provide an alternative URL."
+                  )
+              validate_zip_archive(archive_path)
+              print(f"[OK] Download completed: {archive_path}")
+
+
+          def main() -> None:
+              args = build_parser().parse_args()
+              bundle_url, url_source = resolve_bundle_url(args.url)
+
+              archive_dir = repo_relative_path(ARCHIVE_DIR)
+              archive_path = repo_relative_path(ARCHIVE_PATH)
+              extract_dir = repo_relative_path(EXTRACT_DIR)
+              archive_dir.mkdir(parents=True, exist_ok=True)
+
+              print(f"[INFO] Bundle URL source: {url_source}")
+              download_archive(bundle_url, archive_path, args.force_download)
+              print(f"[INFO] Archive SHA256: {sha256_file(archive_path)}")
+              extract_archive(archive_path, extract_dir, args.force_extract)
+              print("[DONE] Raw dataset bundle restoration completed.")
+
+
+          if __name__ == "__main__":
+              main()
+          '''
+          (root / 'datasets/scripts/acquisition/00_download_raw_datasets_bundle.py').write_text(
+              textwrap.dedent(script), encoding='utf-8'
+          )
+
+          data_access = '''# Data Access and Local Restoration
+
+          This repository documents a research pipeline for evaluating the operational
+          robustness of AI-based forensic image-classification and media-triage tools.
+
+          ## Main-branch distribution policy
+
+          The `main` branch intentionally excludes image corpora. It retains the
+          reproducibility record required to inspect the frozen thesis artifact:
+
+          - acquisition, preparation, training, perturbation, evaluation, and reporting code;
+          - frozen dataset, split, attack, and bundle manifests;
+          - hashes, metadata, review logs, and generation summaries;
+          - normalized predictions and aggregate metrics;
+          - thesis sources and documentation.
+
+          The following data areas are restored or generated locally and are not tracked on
+          `main`:
+
+          ```text
+          datasets/raw/
+          datasets/prepared/final_pool/images/
+          datasets/splits/clean/
+          datasets/splits/ood/
+          attacks/adversarial/<variant>/
+          attacks/anti_forensic/<variant>/
+          datasets/forensic_evaluation_bundle/blind_tool_input/
+          datasets/forensic_evaluation_bundle/structured_audit_view/
+          ```
+
+          ## External raw bundle
+
+          The raw source bundle is hosted externally on Google Drive and is restored with:
+
+          ```bash
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          ```
+
+          Default bundle URL:
+
+          ```text
+          https://drive.google.com/file/d/1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link
+          ```
+
+          The Drive file must be shared as **Anyone with the link – Viewer** for unattended
+          restoration. Providing the URL does not grant redistribution rights beyond those
+          applicable to the original sources.
+
+          URL precedence is:
+
+          1. `--url <bundle-url>`;
+          2. `FAIRLAB_RAW_DATASET_BUNDLE_URL`;
+          3. the default URL embedded in the script.
+
+          Examples:
+
+          ```powershell
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          $env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<alternative-url>"
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --force-download
+          ```
+
+          ```bash
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          FAIRLAB_RAW_DATASET_BUNDLE_URL="<alternative-url>" \
+            python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --force-download
+          ```
+
+          The archive is validated as ZIP, its SHA256 is printed, archive paths are checked
+          before extraction, and symbolic-link entries are rejected.
+
+          ## Regeneration boundary
+
+          Step 00 restores the raw source bundle only. Prepared images, the frozen local
+          image pool, clean/OOD splits, adversarial and anti-forensic outputs, and the blind
+          forensic evaluation bundle are regenerated through the numbered pipeline.
+
+          Manifests and hashes committed to the repository provide the reference against
+          which regenerated files can be checked.
+
+          ## Legal and ethical note
+
+          Source images originate from heterogeneous collections and may remain subject to
+          third-party licenses, platform terms, ethical restrictions, or institutional
+          handling requirements. Researchers are responsible for verifying that their use,
+          storage, and redistribution are lawful and compatible with the original sources.
+
+          The frozen thesis artifact is designed for traceable reproducibility, not as an
+          unrestricted benchmark redistribution package.
+          '''
+          (root / 'DATA_ACCESS.md').write_text(textwrap.dedent(data_access), encoding='utf-8')
+
+          env_path = root / '.env.example'
+          env_text = env_path.read_text(encoding='utf-8')
+          env_text = env_text.replace(
+              '# Controlled-access raw dataset bundle URL.\n'
+              '# This value must be provided only after explicit access has been granted.\n'
+              'FAIRLAB_RAW_DATASET_BUNDLE_URL=',
+              '# Optional override for the default Google Drive raw dataset bundle URL.\n'
+              '# Leave empty to use the URL embedded in step 00.\n'
+              'FAIRLAB_RAW_DATASET_BUNDLE_URL=',
+          )
+          env_path.write_text(env_text, encoding='utf-8')
+
+          datasets_path = root / 'datasets/README.md'
+          datasets_text = datasets_path.read_text(encoding='utf-8')
+          datasets_text = datasets_text.replace(
+              '├── raw/\n'
+              '├── prepared/\n'
+              '│   ├── final_pool/\n'
+              '│   └── manifests/\n',
+              '├── raw/                         # local bundle restoration; images not tracked\n'
+              '├── prepared/\n'
+              '│   ├── final_pool/              # metadata tracked; images regenerated locally\n'
+              '│   └── manifests/\n',
+          )
+          datasets_text = datasets_text.replace(
+              '├── splits/\n'
+              '│   ├── clean/\n'
+              '│   ├── ood/\n'
+              '│   └── manifests/\n'
+              '├── forensic_evaluation_bundle/\n'
+              '│   ├── blind_tool_input/\n'
+              '│   ├── metadata/\n'
+              '│   └── structured_audit_view/\n',
+              '├── splits/\n'
+              '│   ├── clean/                   # generated locally; not tracked\n'
+              '│   ├── ood/                     # generated locally; not tracked\n'
+              '│   └── manifests/\n'
+              '├── forensic_evaluation_bundle/\n'
+              '│   ├── blind_tool_input/        # generated locally; not tracked\n'
+              '│   ├── metadata/                # canonical records tracked\n'
+              '│   └── structured_audit_view/   # generated locally; not tracked\n',
+          )
+          datasets_text = datasets_text.replace(
+              'The presence or future public removal of image corpora is a separate data\n'
+              'governance decision. The canonical scripts, manifests, reports, and metadata\n'
+              'remain the source of truth for the thesis artifact.\n',
+              'Image corpora are intentionally excluded from `main`. Step 00 restores the\n'
+              'external raw bundle locally; downstream image directories are regenerated by\n'
+              'the numbered scripts. Canonical manifests, reports, metadata, hashes, metrics,\n'
+              'and normalized outputs remain the source of truth for the thesis artifact.\n',
+          )
+          datasets_text = datasets_text.replace(
+              'For black-box evaluation, only the following directory is intended for tool\n'
+              'import:\n',
+              'After local regeneration, only the following directory is intended for\n'
+              'black-box tool import:\n',
+          )
+          datasets_path.write_text(datasets_text, encoding='utf-8')
+
+          bundle_path = root / 'datasets/forensic_evaluation_bundle/README.md'
+          bundle_text = bundle_path.read_text(encoding='utf-8')
+          bundle_text = bundle_text.replace(
+              "The repository's final policy for retaining or removing the image corpora from\n"
+              '`main` is handled separately from this documentation cleanup. In either case,\n'
+              'the metadata, manifests, hashes, scripts, and normalized outputs remain the\n'
+              'canonical reproducibility record.\n',
+              'The 11,500 bundle image files are generated locally and are not tracked on\n'
+              '`main`. The committed metadata, manifests, hashes, generation summary, scripts,\n'
+              'normalized predictions, and metrics are the canonical reproducibility record.\n'
+              'Run step 16 after restoring/regenerating its source images to recreate\n'
+              '`blind_tool_input/` and `structured_audit_view/`.\n',
+          )
+          bundle_path.write_text(bundle_text, encoding='utf-8')
+
+          attacks_path = root / 'attacks/README.md'
+          attacks_text = attacks_path.read_text(encoding='utf-8')
+          attacks_text = attacks_text.replace(
+              'The final decision on retaining or removing generated image files from `main`\n'
+              'is handled together with the dataset-image distribution policy. Regardless of\n'
+              'that decision, scripts, manifests, hashes, summaries, normalized predictions,\n'
+              'and metrics remain the canonical reproducibility record.\n',
+              'The 10,000 generated perturbation image files are intentionally excluded from\n'
+              '`main` and are regenerated locally with steps 13 and 14. Scripts, manifests,\n'
+              'hashes, strict JSON summaries, normalized predictions, and metrics remain the\n'
+              'canonical reproducibility record.\n',
+          )
+          attacks_path.write_text(attacks_text, encoding='utf-8')
+
+          card_path = root / 'datasets/DATASET_CARD.md'
+          card_text = card_path.read_text(encoding='utf-8')
+          card_text = card_text.replace(
+              'The repository may contain scripts, manifests, metrics, documentation, selected generated artifacts, and methodological outputs. Raw images, generated image corpora, and forensic-tool exports may be subject to third-party terms, ethical restrictions, legal constraints, institutional handling requirements, or source-specific limitations.\n\n'
+              'The dataset should therefore be treated as a research artifact whose redistribution status depends on the source and on the specific file category.\n',
+              'The `main` branch contains scripts, manifests, hashes, metrics, documentation, and methodological outputs, but it does not track raw or generated image corpora. Images and forensic-tool exports may remain subject to third-party terms, ethical restrictions, legal constraints, institutional handling requirements, or source-specific limitations.\n\n'
+              'The external bundle and locally regenerated images must therefore be treated as research data whose use and redistribution depend on the original source and file category.\n',
+          )
+          card_path.write_text(card_text, encoding='utf-8')
+
+          repro_path = root / 'REPRODUCIBILITY.md'
+          repro_text = repro_path.read_text(encoding='utf-8')
+          repro_text = repro_text.replace(
+              'The repository does not publicly redistribute the full raw dataset bundle. Raw data access is governed by `DATA_ACCESS.md`.\n',
+              'The `main` branch excludes all raw and generated image corpora. The raw source bundle is restored from external storage and downstream image artifacts are regenerated locally; see `DATA_ACCESS.md`.\n',
+          )
+          old_repro = '''The script does not contain a hardcoded download URL. After controlled access has been granted, configure the URL locally through:
+
+          ```text
+          FAIRLAB_RAW_DATASET_BUNDLE_URL
+          ```
+
+          Windows PowerShell:
+
+          ```powershell
+          $env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          ```
+
+          Linux/macOS:
+
+          ```bash
+          export FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          ```
+
+          Do not commit private URLs, `.env` files, API keys, or session files.'''
+          new_repro = '''The script contains the default external Google Drive bundle URL and may be run directly:
+
+          ```bash
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          ```
+
+          An alternative URL can be supplied with `--url` or through:
+
+          ```text
+          FAIRLAB_RAW_DATASET_BUNDLE_URL
+          ```
+
+          The environment variable overrides the repository default. Do not commit `.env`
+          files, API keys, credentials, or session files. After restoring the raw bundle,
+          regenerate prepared images, splits, perturbations, and the forensic evaluation
+          bundle with the numbered pipeline.'''
+          if textwrap.dedent(old_repro) not in repro_text:
+              raise RuntimeError('Expected controlled-access block not found in REPRODUCIBILITY.md')
+          repro_text = repro_text.replace(textwrap.dedent(old_repro), textwrap.dedent(new_repro))
+          repro_path.write_text(repro_text, encoding='utf-8')
+
+          readme_path = root / 'README.md'
+          readme_text = readme_path.read_text(encoding='utf-8')
+          readme_text = readme_text.replace(
+              '| Data policy | Controlled access; raw source data are not publicly redistributed |',
+              '| Data policy | Image corpora excluded from `main`; external raw-bundle restoration and local regeneration |',
+          )
+          old_root = '''The repository does **not** expose public raw dataset download links. Controlled restoration uses:
+
+          ```text
+          FAIRLAB_RAW_DATASET_BUNDLE_URL
+          ```
+
+          See:
+
+          - `DATA_ACCESS.md` for controlled raw dataset access;
+          - `.env.example` for safe local environment variable names;'''
+          new_root = '''The `main` branch does not track raw or generated image corpora. Restore the
+          external raw bundle with:
+
+          ```bash
+          python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          ```
+
+          `FAIRLAB_RAW_DATASET_BUNDLE_URL` remains available as an optional URL override.
+
+          See:
+
+          - `DATA_ACCESS.md` for the external bundle and local-regeneration boundary;
+          - `.env.example` for the optional override variable;'''
+          if textwrap.dedent(old_root) not in readme_text:
+              raise RuntimeError('Expected data-access block not found in README.md')
+          readme_text = readme_text.replace(textwrap.dedent(old_root), textwrap.dedent(new_root))
+          readme_text = readme_text.replace(
+              '├── attacks/           # Generated adversarial and anti-forensic perturbation artifacts',
+              '├── attacks/           # Perturbation scripts, manifests, summaries; images regenerated locally',
+          )
+          readme_text = readme_text.replace(
+              '├── datasets/          # Dataset manifests, splits, bundle construction, controlled metadata',
+              '├── datasets/          # Dataset scripts, manifests, metadata; image corpora restored/generated locally',
+          )
+          readme_path.write_text(readme_text, encoding='utf-8')
+
+          ignore_path = root / '.gitignore'
+          ignore_text = ignore_path.read_text(encoding='utf-8').rstrip() + '\n'
+          ignore_block = '''
+
+          # Image corpora are restored or generated locally and are not tracked on main
+          datasets/raw/**
+          !datasets/raw/README.md
+          datasets/prepared/final_pool/images/
+          datasets/splits/clean/
+          datasets/splits/ood/
+          datasets/forensic_evaluation_bundle/blind_tool_input/
+          datasets/forensic_evaluation_bundle/structured_audit_view/
+          attacks/adversarial/color_shift/
+          attacks/adversarial/fgsm/
+          attacks/adversarial/one_pixel/
+          attacks/adversarial/sigma_zero/
+          attacks/adversarial/superdeepfool/
+          attacks/anti_forensic/jpeg_recompression/
+          attacks/anti_forensic/resample_resize/
+          attacks/anti_forensic/gaussian_blur/
+          attacks/anti_forensic/histogram_modification/
+          attacks/anti_forensic/contrast_stretching/
+          '''
+          marker = '# Image corpora are restored or generated locally and are not tracked on main'
+          if marker not in ignore_text:
+              ignore_text += textwrap.dedent(ignore_block).lstrip('\n')
+          ignore_path.write_text(ignore_text, encoding='utf-8')
+
+          audit_path = root / '.github/workflows/repository-audit.yml'
+          audit_text = audit_path.read_text(encoding='utf-8')
+          audit_step = '''
+
+                - name: Check that image corpora are not tracked on main
+                  shell: bash
+                  run: |
+                    python - <<'PY'
+                    import subprocess
+
+                    forbidden_prefixes = (
+                        'datasets/raw/',
+                        'datasets/prepared/final_pool/images/',
+                        'datasets/splits/clean/',
+                        'datasets/splits/ood/',
+                        'datasets/forensic_evaluation_bundle/blind_tool_input/',
+                        'datasets/forensic_evaluation_bundle/structured_audit_view/',
+                        'attacks/adversarial/color_shift/',
+                        'attacks/adversarial/fgsm/',
+                        'attacks/adversarial/one_pixel/',
+                        'attacks/adversarial/sigma_zero/',
+                        'attacks/adversarial/superdeepfool/',
+                        'attacks/anti_forensic/jpeg_recompression/',
+                        'attacks/anti_forensic/resample_resize/',
+                        'attacks/anti_forensic/gaussian_blur/',
+                        'attacks/anti_forensic/histogram_modification/',
+                        'attacks/anti_forensic/contrast_stretching/',
+                    )
+                    allowed = {'datasets/raw/README.md'}
+                    tracked = subprocess.check_output(
+                        ['git', 'ls-files'], text=True
+                    ).splitlines()
+                    forbidden = [
+                        path for path in tracked
+                        if path not in allowed and path.startswith(forbidden_prefixes)
+                    ]
+                    if forbidden:
+                        print('Tracked corpus files are forbidden on main:')
+                        for path in forbidden[:100]:
+                            print(f'  - {path}')
+                        raise SystemExit(1)
+                    print('No image-corpus files are tracked on main.')
+                    PY
+          '''
+          insertion_point = '      - name: Check stale final-documentation patterns\n'
+          if 'Check that image corpora are not tracked on main' not in audit_text:
+              if insertion_point not in audit_text:
+                  raise RuntimeError('Audit insertion point not found')
+              audit_text = audit_text.replace(insertion_point, textwrap.dedent(audit_step) + '\n' + insertion_point)
+          audit_path.write_text(audit_text, encoding='utf-8')
+
+          workflow_path.unlink()
+
+      - name: Validate corpus removal and updated artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python - <<'PY'
+          import ast
+          import json
+          import py_compile
+          import subprocess
+          from pathlib import Path
+
+          forbidden_prefixes = (
+              'datasets/raw/',
+              'datasets/prepared/final_pool/images/',
+              'datasets/splits/clean/',
+              'datasets/splits/ood/',
+              'datasets/forensic_evaluation_bundle/blind_tool_input/',
+              'datasets/forensic_evaluation_bundle/structured_audit_view/',
+              'attacks/adversarial/color_shift/',
+              'attacks/adversarial/fgsm/',
+              'attacks/adversarial/one_pixel/',
+              'attacks/adversarial/sigma_zero/',
+              'attacks/adversarial/superdeepfool/',
+              'attacks/anti_forensic/jpeg_recompression/',
+              'attacks/anti_forensic/resample_resize/',
+              'attacks/anti_forensic/gaussian_blur/',
+              'attacks/anti_forensic/histogram_modification/',
+              'attacks/anti_forensic/contrast_stretching/',
+          )
+          allowed = {'datasets/raw/README.md'}
+          tracked = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+          forbidden = [
+              path for path in tracked
+              if path not in allowed and path.startswith(forbidden_prefixes)
+          ]
+          if forbidden:
+              raise SystemExit('Tracked corpus files remain:\n' + '\n'.join(forbidden[:100]))
+
+          required = [
+              'datasets/raw/README.md',
+              'datasets/scripts/acquisition/00_download_raw_datasets_bundle.py',
+              'datasets/prepared/final_pool/metadata.csv',
+              'datasets/final/manifests/manual_selection_final_1500.csv',
+              'datasets/splits/manifests/clean_folds_manifest.csv',
+              'datasets/splits/manifests/ood_eval_manifest.csv',
+              'datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv',
+              'attacks/manifests/anti_forensic_attacks_manifest.csv',
+              'attacks/manifests/adversarial_fgsm_efficientnet_b0_manifest.csv',
+          ]
+          missing = [path for path in required if not Path(path).is_file()]
+          if missing:
+              raise SystemExit('Required canonical artifacts missing:\n' + '\n'.join(missing))
+
+          script_path = Path('datasets/scripts/acquisition/00_download_raw_datasets_bundle.py')
+          py_compile.compile(str(script_path), doraise=True)
+          ast.parse(script_path.read_text(encoding='utf-8'))
+          script_text = script_path.read_text(encoding='utf-8')
+          required_script_tokens = [
+              '1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH',
+              'FAIRLAB_RAW_DATASET_BUNDLE_URL',
+              'zipfile.is_zipfile',
+              'validate_member_destination',
+              'allow',
+          ]
+          for token in required_script_tokens:
+              if token not in script_text:
+                  raise SystemExit(f'Missing expected script token: {token}')
+
+          for path in Path('attacks/manifests').glob('*_summary.json'):
+              json.loads(path.read_text(encoding='utf-8'), parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)))
+
+          stale_phrases = {
+              'datasets/README.md': 'future public removal',
+              'attacks/README.md': 'final decision on retaining or removing',
+              'datasets/forensic_evaluation_bundle/README.md': "final policy for retaining or removing",
+              'REPRODUCIBILITY.md': 'does not contain a hardcoded download URL',
+              'README.md': 'does **not** expose public raw dataset download links',
+          }
+          for filename, phrase in stale_phrases.items():
+              if phrase in Path(filename).read_text(encoding='utf-8'):
+                  raise SystemExit(f'Stale phrase remains in {filename}: {phrase}')
+
+          if Path('.github/workflows/one-time-remove-image-corpora.yml').exists():
+              raise SystemExit('Temporary workflow was not removed')
+
+          print('Corpus removal and restoration-policy validation passed.')
+          PY
+
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+
+          yaml.safe_load(Path('.github/workflows/repository-audit.yml').read_text(encoding='utf-8'))
+          print('Repository audit workflow YAML parsed successfully.')
+          PY
+
+      - name: Guard allowed change scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          python - <<'PY'
+          import subprocess
+
+          exact_allowed = {
+              '.github/workflows/one-time-remove-image-corpora.yml',
+              '.github/workflows/repository-audit.yml',
+              '.gitignore',
+              '.env.example',
+              'README.md',
+              'DATA_ACCESS.md',
+              'REPRODUCIBILITY.md',
+              'datasets/README.md',
+              'datasets/DATASET_CARD.md',
+              'datasets/raw/README.md',
+              'datasets/forensic_evaluation_bundle/README.md',
+              'datasets/scripts/acquisition/00_download_raw_datasets_bundle.py',
+              'attacks/README.md',
+          }
+          allowed_prefixes = (
+              'datasets/raw/',
+              'datasets/prepared/final_pool/images/',
+              'datasets/splits/clean/',
+              'datasets/splits/ood/',
+              'datasets/forensic_evaluation_bundle/blind_tool_input/',
+              'datasets/forensic_evaluation_bundle/structured_audit_view/',
+              'attacks/adversarial/color_shift/',
+              'attacks/adversarial/fgsm/',
+              'attacks/adversarial/one_pixel/',
+              'attacks/adversarial/sigma_zero/',
+              'attacks/adversarial/superdeepfool/',
+              'attacks/anti_forensic/jpeg_recompression/',
+              'attacks/anti_forensic/resample_resize/',
+              'attacks/anti_forensic/gaussian_blur/',
+              'attacks/anti_forensic/histogram_modification/',
+              'attacks/anti_forensic/contrast_stretching/',
+          )
+          changed = subprocess.check_output(
+              ['git', 'diff', '--cached', '--name-only'], text=True
+          ).splitlines()
+          unexpected = [
+              path for path in changed
+              if path not in exact_allowed and not path.startswith(allowed_prefixes)
+          ]
+          if unexpected:
+              raise SystemExit('Unexpected changed paths:\n' + '\n'.join(unexpected))
+          print(f'Allowed change-scope guard passed for {len(changed)} paths.')
+          PY
+
+      - name: Commit and push cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: remove image corpora from main"
+          git push origin main
