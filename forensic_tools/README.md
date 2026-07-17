@@ -1,308 +1,235 @@
 # Forensic Tools
 
-This directory is reserved for documentation, export organization, normalization artifacts, and audit notes related to the commercial forensic-tool evaluation phase of the frozen thesis.
+This directory documents the commercial black-box evaluation layer of the frozen MSc thesis artifact.
 
-Commercial forensic tools are treated as **operational black boxes**. The goal is not to reproduce, inspect, or infer their internal AI models, but to evaluate how their observable AI-assisted image-analysis behavior changes when the same forensic corpus contains clean, out-of-distribution (OOD), adversarial, and anti-forensic inputs.
+The tools are evaluated only through observable exports. The repository does not claim access to proprietary architectures, internal probabilities, model weights, training data, thresholds, or undocumented decision logic.
 
-The evaluation follows the thesis methodology and uses the official forensic evaluation bundle as the common blind input corpus.
+## Experimental perimeter
 
----
-
-## Final Tool Status
-
-| Tool | Version | Status | Notes |
+| Tool / configuration | Version | Operational role | Status |
 |---|---:|---|---|
-| Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Completed and normalized | The forensic evaluation bundle has been processed and the `Pictures.csv` export has been normalized against the bundle manifest. |
-| Excire Foto 2025 | 4.1.5 | Completed and normalized | Evaluated as a standalone general-purpose AI-assisted image retrieval tool in a controlled forensic context with `D20`, `D50`, and `D80` semantic-distance configurations. |
-| Cellebrite Inseyets | 10.9 | Completed and normalized | Evaluated through the Cellebrite Physical Analyzer report export. Observable image classifications are normalized as black-box operational signals. |
-| Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108 / T3K CORE v1.18.0 | Completed and normalized | Evaluated through automatically generated T3K CORE semantic bookmarks. Primary mapping uses `CORE/Violence/Firearm` only. |
+| Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Forensic AI-assisted image categorization | Completed |
+| Excire Foto 2025 D20 | 4.1.5 | Semantic image retrieval | Completed |
+| Excire Foto 2025 D50 | 4.1.5 | Semantic image retrieval | Completed |
+| Excire Foto 2025 D80 | 4.1.5 | Semantic image retrieval | Completed |
+| Cellebrite Inseyets / Physical Analyzer | 10.9 / 10.9.0.3029 | AI-assisted media classification | Completed |
+| Magnet Griffeye / T3K CORE | 26.2.108 / 1.18.0 | Semantic media triage and bookmarking | Completed |
 
----
+The six normalized configurations each cover the same 11,500-item forensic evaluation bundle.
 
-## Final Commercial-Tool Perimeter
+## Blind-input rule
 
-The final commercial-tool evaluation phase covers the following tools:
-
-```text
-Completed and normalized:
-- Magnet AXIOM / Magnet.AI, version 10.1.0.48673
-- Excire Foto 2025, version 4.1.5
-- Cellebrite Inseyets, version 10.9
-- Magnet Griffeye x64, version 26.2.108, with T3K CORE v1.18.0
-```
-
-Each included tool is documented and normalized according to:
-
-- import procedure;
-- software version;
-- analysis configuration;
-- export format;
-- observable AI labels, categories, tags, bookmarks, or search outputs;
-- mapping strategy to the forensic evaluation bundle;
-- operational limitations observed during analysis.
-
-The evaluation does not assume access to internal AI model logic, proprietary training data, internal thresholds, calibrated confidence scores, or undocumented decision rules.
-
----
-
-## Input Rule
-
-For blind black-box evaluation, import only:
+Commercial tools receive only:
 
 ```text
 datasets/forensic_evaluation_bundle/blind_tool_input/files/
 ```
 
-Do not import:
+They must not receive:
 
 ```text
 datasets/forensic_evaluation_bundle/metadata/
 datasets/forensic_evaluation_bundle/structured_audit_view/
 ```
 
-The excluded directories contain labels, attack names, provenance, hashes, source information, and ground-truth metadata. They are reserved for normalization and evaluation after the commercial-tool export has been produced.
+Ground truth, attack conditions, source information, and hash mappings are used only after export for normalization and audit.
 
----
-
-## Actual Directory Structure
+## Directory structure
 
 ```text
 forensic_tools/
 ├── README.md
+├── run_registry.json
+├── scripts/
+│   ├── build_public_tool_extracts.py
+│   └── validate_public_extract_equivalence.py
 ├── magnet_axiom/
-│   └── raw_exports/
+│   ├── README.md
+│   ├── raw_exports/
+│   └── public_extracts/              # generated locally after validation workflow
 ├── excire_foto_2025/
-│   └── raw_exports/
+│   ├── README.md
+│   ├── raw_exports/
+│   └── public_extracts/              # generated locally after validation workflow
 ├── cellebrite_inseyets/
-│   └── raw_exports/
+│   ├── README.md
+│   ├── raw_exports/
+│   └── public_extracts/              # generated locally after validation workflow
 └── griffeye/
-    └── raw_exports/
+    ├── README.md
+    ├── raw_exports/
+    └── public_extracts/              # generated locally after validation workflow
 ```
 
-Large proprietary case files, installer files, licensed databases, license files, and heavy exports should not be committed unless strictly necessary and legally/ethically appropriate.
+The `public_extracts/` directories are created by the sanitization script. They are not yet the basis for removing the original exports.
 
-Prefer:
+## Run registry
 
-- normalized CSV/JSON outputs;
-- methodological notes;
-- audit logs;
-- export summaries;
-- reproducible mapping artifacts;
-- aggregated metric files.
-
----
-
-## Magnet AXIOM / Magnet.AI Consolidated Run
-
-The consolidated Magnet AXIOM / Magnet.AI run currently available in the repository is:
+The consolidated run metadata are recorded in:
 
 ```text
-forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02
+forensic_tools/run_registry.json
 ```
 
-The normalized outputs are stored in:
+The registry provides, for each normalized configuration:
 
-```text
-evaluation/forensic_tools/normalized_predictions.csv
-evaluation/forensic_tools/magnet_axiom_normalized_predictions.csv
-evaluation/forensic_tools/tool_export_audit.csv
-evaluation/forensic_tools/tool_version_log.csv
-evaluation/forensic_tools/normalization_summary.json
-results/metrics/forensic_tools_metrics.csv
-results/metrics/magnet_axiom_metrics.csv
+- tool and version;
+- frozen run ID;
+- export format;
+- observable field;
+- positive mapping rule;
+- raw, matched, and unmatched row counts;
+- normalized tool identifier;
+- public metric artifact;
+- immutable historical snapshot reference.
+
+## Observable mappings
+
+| Configuration | Observable signal | Positive mapping |
+|---|---|---|
+| Magnet AXIOM | `Tags` | `Possible weapons` |
+| Excire D20/D50/D80 | fixed semantic prompt retrieval | at least one firearm-oriented prompt hit |
+| Cellebrite Inseyets | `Classifications` | `Armi`, `Pistola`, or `Fucile` |
+| Griffeye / T3K CORE | `Bookmarks` | `CORE/Violence/Firearm` |
+
+These are operational recodings of exported fields, not direct measurements of proprietary internal model probabilities.
+
+## Canonical normalization
+
+The official normalization entry point is:
+
+```bash
+python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py --force
 ```
 
-The Magnet normalization maps the exported `Possible weapons` tag to:
+Canonical regeneration requires:
 
-```text
-weapon_detected = true
-```
+- the locally restored blind bundle and metadata;
+- the official commercial-tool raw exports;
+- all six frozen configurations;
+- output coverage of 11,500 bundle items per configuration;
+- 69,000 matched normalized decisions in total;
+- zero `unknown` normalized decisions.
 
-and the absence of that tag to:
-
-```text
-weapon_detected = false
-```
-
-This is an operational recoding of observable tool output, not access to Magnet.AI internal model logic.
-
----
-
-## Excire Foto 2025 Evaluation
-
-Excire Foto 2025 is evaluated as a standalone AI-assisted image retrieval tool, not as a native forensic software package and not as a binary weapon classifier.
-
-The evaluation is based on observable semantic retrieval behavior under controlled configurations:
-
-```text
-forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D20_FIREARM_PROMPTS
-forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D50_FIREARM_PROMPTS
-forensic_tools/excire_foto_2025/raw_exports/FAIRLAB_EXCIRE_D80_FIREARM_PROMPTS
-```
-
-The normalization script treats each distance configuration as a separate operational setting:
-
-```text
-excire_foto_2025_d20
-excire_foto_2025_d50
-excire_foto_2025_d80
-```
-
-An image retrieved by at least one fixed firearm-oriented prompt is mapped to `weapon_detected=true`; all remaining bundle images are completed as `weapon_detected=false` for that configuration.
-
----
-
-## Cellebrite Inseyets Evaluation
-
-Cellebrite Inseyets is included in the final experimental perimeter as the Cellebrite commercial black-box tool.
-
-Run/export folder:
-
-```text
-forensic_tools/cellebrite_inseyets/raw_exports/FAIRLAB_CELLEBRITE_INSEYETS_RUN_01
-```
-
-Documented environment:
-
-```text
-Cellebrite Inseyets version 10.9
-Physical Analyzer 10.9.0.3029 / UFED 10.9.0.284
-```
-
-The normalized output is:
-
-```text
-evaluation/forensic_tools/cellebrite_inseyets_normalized_predictions.csv
-results/metrics/cellebrite_inseyets_metrics.csv
-```
-
-The mapping is based on the observable `Classifications` column exported from the Cellebrite report. The extended operational mapping treats an image as `weapon_detected=true` when `Classifications` contains at least one among:
-
-```text
-Armi
-Pistola
-Fucile
-```
-
-This is an operational recoding of exported tool output and does not imply access to Cellebrite internal AI model logic.
-
----
-
-## Magnet Griffeye / T3K CORE Evaluation
-
-Magnet Griffeye is included as a fourth commercial black-box forensic media-triage tool.
-
-Run/export folder:
-
-```text
-forensic_tools/griffeye/raw_exports/FAIRLAB_GRIFFEYE_T3_RUN_01
-```
-
-Documented environment:
-
-```text
-Magnet Griffeye x64 26.2.108
-T3K CORE v1.18.0
-```
-
-The normalized output is:
-
-```text
-evaluation/forensic_tools/griffeye_normalized_predictions.csv
-results/metrics/griffeye_metrics.csv
-```
-
-The evaluation relies exclusively on automatically generated T3K CORE semantic bookmarks. No manual bookmark addition, removal, or correction is used for quantitative metrics.
-
-The primary thesis mapping is firearm-oriented:
-
-```text
-weapon_detected = true  if Bookmarks contains CORE/Violence/Firearm
-weapon_detected = false otherwise
-```
-
-The following bookmarks are intentionally excluded from the primary metric and retained only as secondary semantic indicators:
-
-```text
-CORE/Violence/Explosive Weapon
-CORE/Violence/Bladed Weapon
-CORE/Violence/Archery Weapon
-CORE/Military/Military Equipment
-```
-
-Griffeye normalization checks:
-
-```text
-rows in normalized prediction file = 11501 (1 header + 11500 predictions)
-matched_rows                       = 11500
-unmatched_rows                     = 0
-unknown_rows                       = 0
-positive firearm bookmarks         = 5399
-negative / no-firearm rows         = 6101
-```
-
----
-
-## Normalization Target
-
-Raw commercial-tool exports are normalized by the official script:
-
-```text
-evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
-```
-
-Expected normalized output area:
+Prediction-level normalized outputs are generated locally and are not currently distributed on `main`. Public audit and metric artifacts remain under:
 
 ```text
 evaluation/forensic_tools/
-results/metrics/forensic_tools_metrics.csv
+results/metrics/
 ```
 
-The normalization process supports:
+## Sanitized public-extract workflow
 
-- Magnet AXIOM / Magnet.AI exports through `Pictures.csv`;
-- Excire Foto 2025 semantic retrieval prompt exports;
-- Cellebrite Inseyets / Physical Analyzer report exports;
-- Griffeye / T3K CORE CSV exports with automatic semantic `Bookmarks`;
-- matching through filename, SHA256, and MD5;
-- deduplication to one prediction per tool and bundle item;
-- export audit and tool-version logging.
+The raw exports are **not being removed at this stage**.
 
----
-
-## Mapping Strategy
-
-Tool outputs are mapped back to the forensic evaluation bundle through:
+The planned transition is deliberately fail-closed:
 
 ```text
-datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
+raw commercial exports
+→ local normalized predictions
+→ minimized public extracts
+→ decision equivalence validation
+→ 186-row metric equivalence validation
+→ explicit final decision on raw-export retention
 ```
 
-Preferred matching keys, in order:
+### 1. Build minimized extracts
 
-1. exported filename / bundle filename;
-2. SHA256 hash;
-3. MD5 hash;
-4. exported path and file size;
-5. manual audit only when automatic matching fails.
+After regenerating `evaluation/forensic_tools/normalized_predictions.csv` locally:
 
-Manual matching decisions must be logged. Manual correction of model/tool predictions is not used for quantitative performance evaluation.
+```bash
+python forensic_tools/scripts/build_public_tool_extracts.py
+```
 
----
+Use `--force` only for an intentional replacement:
 
-## Reporting Principle
+```bash
+python forensic_tools/scripts/build_public_tool_extracts.py --force
+```
 
-Commercial-tool results should be reported separately from proxy-model results unless their exports have been normalized and mapped back to the forensic evaluation bundle.
+The extracts retain only:
 
-The thesis must distinguish:
+- anonymized `bundle_id`;
+- experimental condition fields required to recompute metrics;
+- the observable tool signal required for audit;
+- normalized decision fields.
 
-- transparent proxy-model robustness;
-- black-box commercial-tool behavior;
-- Magnet AXIOM / Magnet.AI as a consolidated commercial-tool result;
-- Excire Foto 2025 as a standalone AI-assisted semantic retrieval tool evaluated in a controlled forensic context;
-- Cellebrite Inseyets 10.9 as a commercial black-box AI-assisted media-analysis tool;
-- Magnet Griffeye / T3K CORE as a commercial black-box semantic-bookmark media-triage tool;
-- operational implications for AI-assisted triage;
-- limitations caused by proprietary labels, export formats, unavailable confidence scores, semantic mappings, and unknown internal model behavior.
+They exclude local paths, case locations, device names, unrelated EXIF fields, serial numbers, PhotoDNA, case-management fields, and other export metadata unnecessary for the experiment.
 
-Commercial-tool outputs are interpreted as observable operational signals, not as direct evidence of internal AI model performance.
+### 2. Validate exact equivalence
+
+```bash
+python forensic_tools/scripts/validate_public_extract_equivalence.py
+```
+
+The validator fails if:
+
+- a tool/bundle decision is missing or added;
+- any `weapon_detected` value changes;
+- sample type, attack family, attack name, or final label changes;
+- the six configurations do not each contain 11,500 rows;
+- the 69,000 sanitized decisions differ from the local normalized source;
+- the recomputed 186 metric rows differ from `results/metrics/forensic_tools_metrics.csv`.
+
+Only a successful validation report can support a later proposal to remove or relocate complete raw exports.
+
+## Current raw-export policy
+
+The original exports remain temporarily tracked on `main` pending sanitized-extract equivalence validation.
+
+This temporary retention supports review of the complete transformation chain:
+
+```text
+commercial-tool export
+→ normalization
+→ bundle matching
+→ metric generation
+```
+
+No raw export will be removed without:
+
+1. generation of the sanitized extracts;
+2. exact decision equivalence;
+3. exact metric equivalence;
+4. review of the generated files;
+5. explicit approval of the final retention policy.
+
+## Historical preservation
+
+The full pre-cleanup repository state is independently preserved through:
+
+```text
+branch: archive/pre-commission-cleanup-2026-07-16
+tag:    snapshot/pre-commission-cleanup-2026-07-16
+commit: 309a4580537ebc3bb7950f29c090bb2729fc603b
+```
+
+Both branch and tag are protected against updates, deletion, and force pushes. See:
+
+```text
+docs/artifact/ARCHIVE_SNAPSHOT.md
+```
+
+The archive supports provenance and recovery, while `main` remains the authoritative curated research artifact.
+
+## Tool-specific documentation
+
+- `forensic_tools/magnet_axiom/README.md`
+- `forensic_tools/excire_foto_2025/README.md`
+- `forensic_tools/cellebrite_inseyets/README.md`
+- `forensic_tools/griffeye/README.md`
+
+## Public audit and result artifacts
+
+```text
+evaluation/forensic_tools/tool_export_audit.csv
+evaluation/forensic_tools/tool_version_log.csv
+evaluation/forensic_tools/normalization_summary.json
+evaluation/forensic_tools/normalized_predictions.schema.csv
+evaluation/forensic_tools/unmatched_predictions.schema.csv
+results/metrics/forensic_tools_metrics.csv
+results/metrics/<tool>_metrics.csv
+results/figures/chapter_5/
+```
+
+Commercial-tool results must remain distinct from transparent proxy-model results. Their exported labels and bookmarks are observable operational signals, not evidence of internal model behavior.
