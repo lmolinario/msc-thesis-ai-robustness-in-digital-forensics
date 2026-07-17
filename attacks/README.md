@@ -1,8 +1,7 @@
 # Attacks
 
-This directory contains the frozen adversarial and anti-forensic artifacts used
-to evaluate the operational robustness of image-classification systems in the
-thesis.
+This directory contains the scripts, manifests, and summaries for the frozen
+adversarial and anti-forensic perturbation stage used in the thesis.
 
 Perturbations are generated only from the official 1,000-image binary subset:
 
@@ -13,23 +12,32 @@ datasets/splits/manifests/clean_folds_manifest.csv
 
 The 500 OOD samples remain clean and are evaluated separately.
 
-## Structure
+## Main-branch policy
+
+The 10,000 generated perturbation image files are intentionally excluded from
+`main` and are regenerated locally with steps 13 and 14. Scripts, sample-level
+manifests, hashes, strict JSON summaries, normalized predictions, and metrics
+remain the canonical reproducibility record.
+
+## Logical structure
 
 ```text
 attacks/
 ├── adversarial/
-│   ├── color_shift/
-│   ├── fgsm/
-│   ├── one_pixel/
-│   ├── sigma_zero/
-│   └── superdeepfool/
+│   ├── README.md
+│   ├── color_shift/       # generated locally; not tracked
+│   ├── fgsm/              # generated locally; not tracked
+│   ├── one_pixel/         # generated locally; not tracked
+│   ├── sigma_zero/        # generated locally; not tracked
+│   └── superdeepfool/     # generated locally; not tracked
 ├── anti_forensic/
-│   ├── jpeg_recompression/
-│   ├── resample_resize/
-│   ├── gaussian_blur/
-│   ├── histogram_modification/
-│   └── contrast_stretching/
-└── manifests/
+│   ├── README.md
+│   ├── jpeg_recompression/     # generated locally; not tracked
+│   ├── resample_resize/        # generated locally; not tracked
+│   ├── gaussian_blur/          # generated locally; not tracked
+│   ├── histogram_modification/ # generated locally; not tracked
+│   └── contrast_stretching/    # generated locally; not tracked
+└── manifests/             # tracked canonical records
 ```
 
 ## Frozen composition
@@ -88,10 +96,3 @@ Detailed documentation:
 - [`adversarial/README.md`](adversarial/README.md)
 - [`anti_forensic/README.md`](anti_forensic/README.md)
 - [`manifests/README.md`](manifests/README.md)
-
-## Distribution status
-
-The final decision on retaining or removing generated image files from `main`
-is handled together with the dataset-image distribution policy. Regardless of
-that decision, scripts, manifests, hashes, summaries, normalized predictions,
-and metrics remain the canonical reproducibility record.
