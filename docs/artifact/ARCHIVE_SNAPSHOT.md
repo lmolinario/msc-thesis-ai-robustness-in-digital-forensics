@@ -19,11 +19,18 @@ branch:
 
 [`archive/pre-commission-cleanup-2026-07-16`](https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics/tree/archive/pre-commission-cleanup-2026-07-16)
 
-The branch points to the immutable commit:
+The same repository state is also identified by the annotated tag:
+
+[`snapshot/pre-commission-cleanup-2026-07-16`](https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics/tree/snapshot/pre-commission-cleanup-2026-07-16)
+
+Both references resolve to the immutable commit:
 
 ```text
 309a4580537ebc3bb7950f29c090bb2729fc603b
 ```
+
+The tag annotation records the snapshot as the repository state immediately
+before public-release cleanup and data minimization.
 
 This snapshot records the repository state immediately before the
 pre-commission public-release cleanup, data minimization, and structural
@@ -69,7 +76,11 @@ The branch is protected by the active GitHub ruleset
 - block force pushes;
 - allow no bypass actors.
 
-No further commits are expected on the archive branch.
+The annotated tag provides a second stable reference to the same commit. A
+separate tag ruleset should restrict updates and deletion of that tag.
+
+No further commits are expected on the archive branch, and the snapshot tag
+must not be moved to another commit.
 
 ## Data-access boundary
 
