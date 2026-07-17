@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "reviewer_id": "reviewer_01",
+  "candidate_rows": 1175,
+  "selected_cases": 15,
+  "requested_per_bucket": 3,
+  "buckets": {
+    "clean_correct_weapon": {"candidate_rows": 492, "selected_cases": 3},
+    "clean_false_negative_weapon": {"candidate_rows": 8, "selected_cases": 3},
+    "ood_as_weapon": {"candidate_rows": 139, "selected_cases": 3},
+    "anti_forensic_failure": {"candidate_rows": 36, "selected_cases": 3},
+    "adversarial_high_conf_failure": {"candidate_rows": 500, "selected_cases": 3}
+  },
+  "thesis_selection": [
+    "xai_case_0001",
+    "xai_case_0006",
+    "xai_case_0009",
+    "xai_case_0010",
+    "xai_case_0015"
+  ]
+}
