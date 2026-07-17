@@ -4,36 +4,16 @@
 """
 12_train_proxy_models.py
 
-Train fold-aware proxy models for the FAIR-Lab adversarial attack pipeline.
+Train the fold-aware proxy models used by the FAIR-Lab thesis pipeline.
 
-Purpose
--------
-This script trains transparent binary proxy models for the official
-weapon/non_weapon task. The generated checkpoints are later used to create
-model-dependent adversarial perturbations such as FGSM, Sigma Zero,
-SuperDeepFool, and One Pixel attacks.
-
-Training protocol
------------------
-For each target fold, the proxy model is trained on all other folds and saved as:
+For each held-out fold, the corresponding checkpoint is trained on the other
+four folds and stored under:
 
     models/checkpoints/<model_name>/<fold>.pt
 
-This avoids training a proxy model on the same fold that will later be attacked.
-
-Supported models
-----------------
-- resnet18
-- efficientnet_b0
-- clip
-
-CLIP is implemented as a frozen visual encoder plus a trained binary head.
-
-Execution modes
----------------
-- CLI mode: pass explicit arguments for fully reproducible runs.
-- Interactive mode: run the script without arguments, e.g. from PyCharm, and use
-  the guided menu. The generated configuration is printed before training.
+The script preserves the checkpoint payload format consumed by the adversarial
+and proxy-evaluation adapters. It validates the frozen split manifest and the
+SHA256 of every locally restored image before training.
 """
 
 from __future__ import annotations
@@ -51,7 +31,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-# Make the repository root importable when the script is executed directly.
 REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
@@ -60,11 +39,6 @@ import pandas as pd
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 from datasets.scripts.utils.paths import SPLIT_MANIFESTS_DIR, repo_relative_path
-
-
-# =============================================================================
-# Configuration
-# =============================================================================
 
 SCRIPT_NAME = "models/scripts/12_train_proxy_models.py"
 INPUT_MANIFEST_PATH = SPLIT_MANIFESTS_DIR / "clean_folds_manifest.csv"
@@ -75,12 +49,9 @@ TRAINING_REPORTS_DIR = REPO_ROOT / "models" / "reports"
 VALID_LABELS = ("non_weapon", "weapon")
 LABEL_TO_INDEX = {"non_weapon": 0, "weapon": 1}
 SUPPORTED_MODELS = ("resnet18", "efficientnet_b0", "clip")
-SUPPORTED_FOLD_SELECTION = ("all", "fold_1", "fold_2", "fold_3", "fold_4", "fold_5")
+EXPECTED_FOLDS = tuple(f"fold_{index}" for index in range(1, 6))
+SUPPORTED_FOLD_SELECTION = ("all", *EXPECTED_FOLDS)
 
-
-# =============================================================================
-# Data classes
-# =============================================================================
 
 @dataclass(frozen=True)
 class TrainConfig:
@@ -98,72 +69,62 @@ class TrainConfig:
     freeze_backbone: bool
 
 
-# =============================================================================
-# Argument parsing and interactive launcher
-# =============================================================================
-
-def parse_args() -> argparse.Namespace:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Train fold-aware binary proxy models for FAIR-Lab."
     )
     parser.add_argument(
         "--manifest",
-        type=str,
         default=str(INPUT_MANIFEST_PATH),
-        help=f"Clean folds manifest (default: {INPUT_MANIFEST_PATH})",
+        help=f"Clean-fold manifest (default: {INPUT_MANIFEST_PATH}).",
     )
     parser.add_argument(
         "--model",
         nargs="+",
         choices=SUPPORTED_MODELS,
         required=True,
-        help="Proxy model(s) to train.",
+        help="Proxy model or models to train.",
     )
     parser.add_argument(
         "--fold",
         nargs="+",
         choices=SUPPORTED_FOLD_SELECTION,
         default=["fold_1"],
-        help="Target fold(s) to train for. Use 'all' for all folds.",
+        help="Held-out fold or folds. Use 'all' for the complete suite.",
     )
-    parser.add_argument("--epochs", type=int, default=10, help="Training epochs.")
-    parser.add_argument("--batch-size", type=int, default=16, help="Batch size.")
-    parser.add_argument("--learning-rate", type=float, default=1e-4, help="Learning rate.")
-    parser.add_argument("--weight-decay", type=float, default=1e-4, help="Weight decay.")
+    parser.add_argument("--epochs", type=int, default=10)
+    parser.add_argument("--batch-size", type=int, default=16)
+    parser.add_argument("--learning-rate", type=float, default=1e-4)
+    parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument(
         "--validation-ratio",
         type=float,
         default=0.15,
-        help="Internal stratified validation ratio from the training folds.",
+        help="Internal stratified validation ratio from the four training folds.",
     )
-    parser.add_argument("--seed", type=int, default=42, help="Random seed.")
+    parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
         "--device",
-        type=str,
         choices=("auto", "cpu", "cuda"),
         default="auto",
-        help="Training device.",
     )
-    parser.add_argument("--input-size", type=int, default=224, help="Square input size.")
-    parser.add_argument("--num-workers", type=int, default=2, help="DataLoader workers.")
+    parser.add_argument("--input-size", type=int, default=224)
+    parser.add_argument("--num-workers", type=int, default=2)
     parser.add_argument(
         "--freeze-backbone",
         action="store_true",
-        help="Freeze CNN backbone and train only the classifier head.",
+        help=(
+            "Freeze the ResNet18/EfficientNet-B0 backbone and train only the "
+            "classifier head. The CLIP visual encoder is always frozen."
+        ),
     )
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Overwrite existing checkpoints.",
+        help="Overwrite existing checkpoint files.",
     )
-    parser.add_argument("--verbose", action="store_true", help="Enable verbose logging.")
-    return parser.parse_args()
-
-
-def print_header(title: str) -> None:
-    print("\n" + "=" * 78)
-    print(title)
-    print("=" * 78)
+    parser.add_argument("--verbose", action="store_true")
+    return parser
 
 
 def ask_yes_no(prompt: str, default: bool = True) -> bool:
@@ -176,7 +137,7 @@ def ask_yes_no(prompt: str, default: bool = True) -> bool:
             return True
         if answer in {"n", "no"}:
             return False
-        print("Invalid answer. Please enter y or n.")
+        print("Enter y or n.")
 
 
 def ask_choice(prompt: str, options: list[str], default_index: int = 0) -> str:
@@ -184,158 +145,95 @@ def ask_choice(prompt: str, options: list[str], default_index: int = 0) -> str:
     for index, option in enumerate(options, start=1):
         marker = " [default]" if index - 1 == default_index else ""
         print(f"  {index}. {option}{marker}")
-
     while True:
         answer = input("Selection: ").strip()
         if not answer:
             return options[default_index]
-        if answer.isdigit():
-            selected = int(answer)
-            if 1 <= selected <= len(options):
-                return options[selected - 1]
-        print(f"Invalid selection. Please enter a number between 1 and {len(options)}.")
+        if answer.isdigit() and 1 <= int(answer) <= len(options):
+            return options[int(answer) - 1]
+        print(f"Enter a number between 1 and {len(options)}.")
 
 
-def ask_multi_choice(prompt: str, options: list[str], default_all: bool = False) -> list[str]:
-    print(f"\n{prompt}")
-    for index, option in enumerate(options, start=1):
-        print(f"  {index}. {option}")
-
-    default_text = "all" if default_all else ""
-    print("\nExamples: 1 | 1 2 | 1,2,3 | all")
-
+def ask_int(prompt: str, default: int) -> int:
     while True:
-        answer = input(f"Selection [{default_text}]: ").strip().lower()
-        if not answer and default_all:
-            return options.copy()
-        if answer == "all":
-            return options.copy()
-
-        tokens = answer.replace(",", " ").split()
-        selected: list[str] = []
-        valid = bool(tokens)
-
-        for token in tokens:
-            if not token.isdigit():
-                valid = False
-                break
-            index = int(token)
-            if not (1 <= index <= len(options)):
-                valid = False
-                break
-            value = options[index - 1]
-            if value not in selected:
-                selected.append(value)
-
-        if valid and selected:
-            return selected
-
-        print(f"Invalid selection. Use numbers between 1 and {len(options)} or 'all'.")
-
-
-def ask_int(prompt: str, default_value: int) -> int:
-    while True:
-        answer = input(f"{prompt} [{default_value}]: ").strip()
+        answer = input(f"{prompt} [{default}]: ").strip()
         if not answer:
-            return default_value
+            return default
         try:
             return int(answer)
         except ValueError:
-            print("Invalid value. Please enter an integer.")
+            print("Enter an integer.")
 
 
-def ask_float(prompt: str, default_value: float) -> float:
+def ask_float(prompt: str, default: float) -> float:
     while True:
-        answer = input(f"{prompt} [{default_value}]: ").strip()
+        answer = input(f"{prompt} [{default}]: ").strip()
         if not answer:
-            return default_value
+            return default
         try:
             return float(answer)
         except ValueError:
-            print("Invalid value. Please enter a number.")
+            print("Enter a number.")
 
 
 def interactive_args() -> argparse.Namespace:
-    print_header("FAIR-Lab proxy model training launcher")
-    print(f"Repository root: {REPO_ROOT}")
-    print(f"Default manifest: {INPUT_MANIFEST_PATH}")
+    scenarios = [
+        "Smoke test: ResNet18 / fold_1 / 2 epochs",
+        "ResNet18: all folds",
+        "EfficientNet-B0: all folds",
+        "CLIP binary head: all folds",
+        "All proxy models: all folds",
+    ]
+    scenario = ask_choice("Training scenario", scenarios)
 
-    scenario = ask_choice(
-        prompt="What training scenario do you want to run?",
-        options=[
-            "Smoke test: resnet18 on fold_1 for 2 epochs",
-            "Train ResNet18 on all folds",
-            "Train EfficientNet-B0 on all folds",
-            "Train CLIP binary head on all folds",
-            "Custom selection",
-        ],
-        default_index=0,
-    )
-
-    if scenario.startswith("Smoke test"):
-        model = ["resnet18"]
-        fold = ["fold_1"]
+    if scenario.startswith("Smoke"):
+        models = ["resnet18"]
+        folds = ["fold_1"]
         epochs = 2
         batch_size = 16
-        learning_rate = 1e-4
-        freeze_backbone = False
-    elif scenario.startswith("Train ResNet18"):
-        model = ["resnet18"]
-        fold = ["all"]
+    elif scenario.startswith("ResNet18"):
+        models = ["resnet18"]
+        folds = ["all"]
         epochs = 10
         batch_size = 16
-        learning_rate = 1e-4
-        freeze_backbone = False
-    elif scenario.startswith("Train EfficientNet"):
-        model = ["efficientnet_b0"]
-        fold = ["all"]
+    elif scenario.startswith("EfficientNet"):
+        models = ["efficientnet_b0"]
+        folds = ["all"]
         epochs = 10
         batch_size = 16
-        learning_rate = 1e-4
-        freeze_backbone = False
-    elif scenario.startswith("Train CLIP"):
-        model = ["clip"]
-        fold = ["all"]
+    elif scenario.startswith("CLIP"):
+        models = ["clip"]
+        folds = ["all"]
         epochs = 10
         batch_size = 32
-        learning_rate = 1e-4
-        freeze_backbone = True
     else:
-        model = ask_multi_choice(
-            prompt="Select proxy model(s) to train:",
-            options=list(SUPPORTED_MODELS),
-            default_all=False,
-        )
-        fold = ask_multi_choice(
-            prompt="Select target fold(s):",
-            options=list(SUPPORTED_FOLD_SELECTION),
-            default_all=False,
-        )
-        epochs = ask_int("Training epochs", 10)
-        batch_size = ask_int("Batch size", 16)
-        learning_rate = ask_float("Learning rate", 1e-4)
-        freeze_backbone = ask_yes_no("Freeze backbone and train only classifier head?", default=False)
+        models = list(SUPPORTED_MODELS)
+        folds = ["all"]
+        epochs = 10
+        batch_size = 16
 
-    print_header("Training parameters")
-    epochs = ask_int("Training epochs", epochs)
+    epochs = ask_int("Epochs", epochs)
     batch_size = ask_int("Batch size", batch_size)
-    learning_rate = ask_float("Learning rate", learning_rate)
+    learning_rate = ask_float("Learning rate", 1e-4)
     weight_decay = ask_float("Weight decay", 1e-4)
     validation_ratio = ask_float("Validation ratio", 0.15)
     seed = ask_int("Random seed", 42)
     input_size = ask_int("Input size", 224)
     num_workers = ask_int("DataLoader workers", 2)
-    device = ask_choice("Training device:", ["auto", "cpu", "cuda"], default_index=0)
-    force = ask_yes_no("Overwrite existing checkpoints if present?", default=True)
-    verbose = ask_yes_no("Enable verbose logging?", default=False)
+    device = ask_choice("Device", ["auto", "cpu", "cuda"])
+    freeze_backbone = ask_yes_no(
+        "Freeze CNN backbone? (CLIP is always frozen)", default=False
+    )
+    force = ask_yes_no("Overwrite existing checkpoints?", default=True)
+    verbose = ask_yes_no("Verbose logging?", default=False)
 
-    command_preview = [
+    command = [
         sys.executable,
         str(Path(__file__).resolve()),
         "--model",
-        *model,
+        *models,
         "--fold",
-        *fold,
+        *folds,
         "--epochs",
         str(epochs),
         "--batch-size",
@@ -356,22 +254,21 @@ def interactive_args() -> argparse.Namespace:
         str(num_workers),
     ]
     if freeze_backbone:
-        command_preview.append("--freeze-backbone")
+        command.append("--freeze-backbone")
     if force:
-        command_preview.append("--force")
+        command.append("--force")
     if verbose:
-        command_preview.append("--verbose")
+        command.append("--verbose")
 
-    print_header("Equivalent reproducible command")
-    print(" ".join(shlex.quote(part) for part in command_preview))
-
-    if not ask_yes_no("Start training now?", default=True):
-        raise SystemExit("Execution cancelled by user.")
+    print("\nEquivalent command:")
+    print(" ".join(shlex.quote(part) for part in command))
+    if not ask_yes_no("Start training?", default=True):
+        raise SystemExit("Execution cancelled.")
 
     return argparse.Namespace(
         manifest=str(INPUT_MANIFEST_PATH),
-        model=model,
-        fold=fold,
+        model=models,
+        fold=folds,
         epochs=epochs,
         batch_size=batch_size,
         learning_rate=learning_rate,
@@ -388,13 +285,11 @@ def interactive_args() -> argparse.Namespace:
 
 
 def setup_logging(verbose: bool) -> None:
-    level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(level=level, format="[%(levelname)s] %(message)s")
+    logging.basicConfig(
+        level=logging.DEBUG if verbose else logging.INFO,
+        format="[%(levelname)s] %(message)s",
+    )
 
-
-# =============================================================================
-# Generic helpers
-# =============================================================================
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
@@ -410,8 +305,8 @@ def norm(value: Any) -> str:
     return safe_str(value).lower()
 
 
-def resolve_repo_path(path_str: str) -> Path:
-    path = Path(path_str)
+def resolve_repo_path(path_value: str | Path) -> Path:
+    path = Path(path_value)
     if path.is_absolute():
         return path.resolve()
     return (REPO_ROOT / path).resolve()
@@ -426,72 +321,126 @@ def repo_relative_string(path: Path) -> str:
 
 
 def compute_sha256(path: Path) -> str:
-    sha256 = hashlib.sha256()
-    with path.open("rb") as f:
-        for chunk in iter(lambda: f.read(1024 * 1024), b""):
-            sha256.update(chunk)
-    return sha256.hexdigest()
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def set_reproducibility(seed: int) -> None:
     random.seed(seed)
     try:
         import numpy as np
+
         np.random.seed(seed)
     except ImportError:
         pass
 
-    try:
-        import torch
-        torch.manual_seed(seed)
-        if torch.cuda.is_available():
-            torch.cuda.manual_seed_all(seed)
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.deterministic = True
-    except ImportError:
-        pass
-
-
-def select_device(requested_device: str) -> Any:
     import torch
 
-    requested = requested_device.strip().lower()
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+
+
+def select_device(requested: str) -> Any:
+    import torch
+
     if requested == "auto":
         return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if requested == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError("CUDA was requested but is not available.")
     return torch.device(requested)
 
 
-def expand_folds(selected: list[str], available_folds: list[str]) -> list[str]:
+def expand_folds(selected: list[str], available: list[str]) -> list[str]:
     if "all" in selected:
-        return available_folds
+        return available
     requested = list(dict.fromkeys(selected))
-    missing = [fold for fold in requested if fold not in available_folds]
+    missing = [fold for fold in requested if fold not in available]
     if missing:
         raise ValueError(f"Requested folds not found in manifest: {missing}")
     return requested
 
 
-# =============================================================================
-# Manifest and dataset handling
-# =============================================================================
-
 def load_manifest(path: Path) -> pd.DataFrame:
-    if not path.exists():
+    if not path.is_file():
         raise FileNotFoundError(f"Manifest not found: {path}")
 
     df = pd.read_csv(path)
-    required = {"image_id", "fold", "final_label", "split_relative_path", "sha256"}
+    required = {
+        "image_id",
+        "fold",
+        "final_label",
+        "split_relative_path",
+        "sha256",
+    }
     missing = required - set(df.columns)
     if missing:
-        raise ValueError(f"Missing required columns in manifest: {sorted(missing)}")
+        raise ValueError(f"Missing manifest columns: {sorted(missing)}")
 
     df = df.copy()
+    df["image_id"] = df["image_id"].map(safe_str)
+    df["fold"] = df["fold"].map(safe_str)
     df["final_label"] = df["final_label"].map(norm)
-    invalid_labels = sorted(set(df["final_label"].unique()) - set(VALID_LABELS))
+    df["split_relative_path"] = df["split_relative_path"].map(safe_str)
+    df["sha256"] = df["sha256"].map(lambda value: safe_str(value).lower())
+
+    invalid_labels = sorted(set(df["final_label"]) - set(VALID_LABELS))
     if invalid_labels:
         raise ValueError(f"Invalid labels in manifest: {invalid_labels}")
-
     return df
+
+
+def validate_manifest_files(df: pd.DataFrame) -> None:
+    duplicate_ids = df.loc[df["image_id"].duplicated(), "image_id"].tolist()
+    if duplicate_ids:
+        raise ValueError(f"Duplicate image_id values: {duplicate_ids[:10]}")
+
+    actual_folds = sorted(df["fold"].unique().tolist())
+    if actual_folds != list(EXPECTED_FOLDS):
+        raise ValueError(
+            f"Expected folds {list(EXPECTED_FOLDS)}, found {actual_folds}."
+        )
+
+    grouped = df.groupby(["fold", "final_label"]).size()
+    unexpected_counts: list[str] = []
+    for fold in EXPECTED_FOLDS:
+        for label in VALID_LABELS:
+            count = int(grouped.get((fold, label), 0))
+            if count != 100:
+                unexpected_counts.append(f"{fold}/{label}={count}")
+    if unexpected_counts:
+        raise ValueError(
+            "The official split requires 100 samples per class and fold. "
+            f"Unexpected counts: {unexpected_counts}"
+        )
+
+    missing_files: list[str] = []
+    hash_mismatches: list[str] = []
+    for row in df.itertuples(index=False):
+        image_path = resolve_repo_path(row.split_relative_path)
+        if not image_path.is_file():
+            missing_files.append(repo_relative_string(image_path))
+            continue
+        actual_sha256 = compute_sha256(image_path).lower()
+        if actual_sha256 != row.sha256:
+            hash_mismatches.append(
+                f"{row.image_id}: expected {row.sha256}, found {actual_sha256}"
+            )
+
+    if missing_files:
+        raise FileNotFoundError(
+            "Split images are missing. Restore the controlled-access data and "
+            f"regenerate step 11. First missing paths: {missing_files[:10]}"
+        )
+    if hash_mismatches:
+        raise ValueError(
+            f"Split-image SHA256 verification failed: {hash_mismatches[:10]}"
+        )
 
 
 def split_train_validation(
@@ -499,29 +448,26 @@ def split_train_validation(
     validation_ratio: float,
     seed: int,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    if not (0.0 < validation_ratio < 0.5):
-        raise ValueError("--validation-ratio must be in the interval (0, 0.5).")
+    if not 0.0 < validation_ratio < 0.5:
+        raise ValueError("--validation-ratio must be in (0, 0.5).")
 
-    validation_parts: list[pd.DataFrame] = []
     train_parts: list[pd.DataFrame] = []
-
-    for label, group in train_df.groupby("final_label", sort=True):
-        group = group.sample(frac=1.0, random_state=seed).reset_index(drop=True)
-        validation_count = max(1, int(round(len(group) * validation_ratio)))
-        validation_parts.append(group.iloc[:validation_count])
-        train_parts.append(group.iloc[validation_count:])
+    validation_parts: list[pd.DataFrame] = []
+    for _, group in train_df.groupby("final_label", sort=True):
+        shuffled = group.sample(frac=1.0, random_state=seed).reset_index(drop=True)
+        validation_count = max(1, int(round(len(shuffled) * validation_ratio)))
+        validation_parts.append(shuffled.iloc[:validation_count])
+        train_parts.append(shuffled.iloc[validation_count:])
 
     train_split = pd.concat(train_parts, ignore_index=True)
     validation_split = pd.concat(validation_parts, ignore_index=True)
-
-    train_split = train_split.sample(frac=1.0, random_state=seed).reset_index(drop=True)
-    validation_split = validation_split.sample(frac=1.0, random_state=seed).reset_index(drop=True)
-    return train_split, validation_split
+    return (
+        train_split.sample(frac=1.0, random_state=seed).reset_index(drop=True),
+        validation_split.sample(frac=1.0, random_state=seed).reset_index(drop=True),
+    )
 
 
 class ManifestImageDataset:
-    """PyTorch-compatible dataset backed by the official fold manifest."""
-
     def __init__(self, df: pd.DataFrame, transform: Any) -> None:
         self.df = df.reset_index(drop=True)
         self.transform = transform
@@ -531,22 +477,16 @@ class ManifestImageDataset:
 
     def __getitem__(self, index: int) -> tuple[Any, int]:
         row = self.df.iloc[index]
-        image_path = resolve_repo_path(safe_str(row["split_relative_path"]))
+        image_path = resolve_repo_path(row["split_relative_path"])
         label = LABEL_TO_INDEX[norm(row["final_label"])]
-
         try:
-            with Image.open(image_path) as img:
-                img = ImageOps.exif_transpose(img).convert("RGB")
-                tensor = self.transform(img)
+            with Image.open(image_path) as image:
+                image = ImageOps.exif_transpose(image).convert("RGB")
+                tensor = self.transform(image)
         except UnidentifiedImageError as exc:
-            raise ValueError(f"Cannot identify image file: {image_path}") from exc
-
+            raise ValueError(f"Cannot identify image: {image_path}") from exc
         return tensor, label
 
-
-# =============================================================================
-# Model builders
-# =============================================================================
 
 def build_transforms(model_name: str, input_size: int) -> tuple[Any, Any]:
     from torchvision import transforms
@@ -566,38 +506,48 @@ def build_transforms(model_name: str, input_size: int) -> tuple[Any, Any]:
             transforms.Normalize(mean=mean, std=std),
         ]
     )
-    eval_transform = transforms.Compose(
+    evaluation_transform = transforms.Compose(
         [
             transforms.Resize((input_size, input_size)),
             transforms.ToTensor(),
             transforms.Normalize(mean=mean, std=std),
         ]
     )
-    return train_transform, eval_transform
+    return train_transform, evaluation_transform
 
 
-def build_torchvision_binary_model(model_name: str, freeze_backbone: bool) -> Any:
+def build_torchvision_binary_model(
+    model_name: str,
+    freeze_backbone: bool,
+) -> Any:
     import torch
     from torchvision import models
 
     if model_name == "resnet18":
         try:
             weights = models.ResNet18_Weights.IMAGENET1K_V1
-        except AttributeError:
-            weights = None
+        except AttributeError as exc:
+            raise RuntimeError(
+                "torchvision does not expose ResNet18_Weights.IMAGENET1K_V1. "
+                "Refusing to use random initialization because it would change "
+                "the frozen protocol."
+            ) from exc
         model = models.resnet18(weights=weights)
         if freeze_backbone:
             for parameter in model.parameters():
                 parameter.requires_grad_(False)
-        in_features = model.fc.in_features
-        model.fc = torch.nn.Linear(in_features, 2)
+        model.fc = torch.nn.Linear(model.fc.in_features, 2)
         return model
 
     if model_name == "efficientnet_b0":
         try:
             weights = models.EfficientNet_B0_Weights.IMAGENET1K_V1
-        except AttributeError:
-            weights = None
+        except AttributeError as exc:
+            raise RuntimeError(
+                "torchvision does not expose EfficientNet_B0_Weights.IMAGENET1K_V1. "
+                "Refusing to use random initialization because it would change "
+                "the frozen protocol."
+            ) from exc
         model = models.efficientnet_b0(weights=weights)
         if freeze_backbone:
             for parameter in model.parameters():
@@ -610,8 +560,6 @@ def build_torchvision_binary_model(model_name: str, freeze_backbone: bool) -> An
 
 
 class ClipBinaryClassifier:
-    """Frozen CLIP visual encoder plus trainable binary classification head."""
-
     def __init__(self, clip_model: Any, feature_dim: int) -> None:
         import torch
 
@@ -635,9 +583,12 @@ class ClipBinaryClassifier:
         self.binary_head.to(device)
         return self
 
-    def __call__(self, x: Any) -> Any:
-        features = self.clip_model.encode_image(x)
-        features = features / features.norm(dim=-1, keepdim=True).clamp_min(1e-12)
+    def __call__(self, tensor: Any) -> Any:
+        with self.torch.no_grad():
+            features = self.clip_model.encode_image(tensor)
+            features = features / features.norm(
+                dim=-1, keepdim=True
+            ).clamp_min(1e-12)
         return self.binary_head(features)
 
     def state_dict(self) -> dict[str, Any]:
@@ -648,7 +599,10 @@ def build_clip_binary_model(input_size: int) -> ClipBinaryClassifier:
     import open_clip
     import torch
 
-    clip_model, _, _ = open_clip.create_model_and_transforms("ViT-B-32", pretrained="openai")
+    clip_model, _, _ = open_clip.create_model_and_transforms(
+        "ViT-B-32",
+        pretrained="openai",
+    )
     clip_model.eval()
     for parameter in clip_model.parameters():
         parameter.requires_grad_(False)
@@ -657,23 +611,21 @@ def build_clip_binary_model(input_size: int) -> ClipBinaryClassifier:
     if not isinstance(output_dim, int) or output_dim <= 0:
         with torch.no_grad():
             dummy = torch.zeros(1, 3, input_size, input_size)
-            features = clip_model.encode_image(dummy)
-            output_dim = int(features.shape[-1])
-
-    return ClipBinaryClassifier(clip_model=clip_model, feature_dim=output_dim)
+            output_dim = int(clip_model.encode_image(dummy).shape[-1])
+    return ClipBinaryClassifier(clip_model, output_dim)
 
 
-def build_model(model_name: str, input_size: int, freeze_backbone: bool) -> Any:
+def build_model(
+    model_name: str,
+    input_size: int,
+    freeze_backbone: bool,
+) -> Any:
     if model_name in {"resnet18", "efficientnet_b0"}:
-        return build_torchvision_binary_model(model_name, freeze_backbone=freeze_backbone)
+        return build_torchvision_binary_model(model_name, freeze_backbone)
     if model_name == "clip":
-        return build_clip_binary_model(input_size=input_size)
+        return build_clip_binary_model(input_size)
     raise ValueError(f"Unsupported model: {model_name}")
 
-
-# =============================================================================
-# Training and evaluation
-# =============================================================================
 
 def build_loaders(
     train_df: pd.DataFrame,
@@ -683,48 +635,54 @@ def build_loaders(
 ) -> tuple[Any, Any]:
     from torch.utils.data import DataLoader
 
-    train_transform, eval_transform = build_transforms(model_name, config.input_size)
-    train_dataset = ManifestImageDataset(train_df, transform=train_transform)
-    validation_dataset = ManifestImageDataset(validation_df, transform=eval_transform)
-
-    train_loader = DataLoader(
-        train_dataset,
-        batch_size=config.batch_size,
-        shuffle=True,
-        num_workers=config.num_workers,
-        pin_memory=True,
+    train_transform, evaluation_transform = build_transforms(
+        model_name,
+        config.input_size,
     )
-    validation_loader = DataLoader(
-        validation_dataset,
-        batch_size=config.batch_size,
-        shuffle=False,
-        num_workers=config.num_workers,
-        pin_memory=True,
+    train_dataset = ManifestImageDataset(train_df, train_transform)
+    validation_dataset = ManifestImageDataset(
+        validation_df,
+        evaluation_transform,
     )
-    return train_loader, validation_loader
+    common = {
+        "batch_size": config.batch_size,
+        "num_workers": config.num_workers,
+        "pin_memory": config.device != "cpu",
+    }
+    return (
+        DataLoader(train_dataset, shuffle=True, **common),
+        DataLoader(validation_dataset, shuffle=False, **common),
+    )
 
 
-def train_one_epoch(model: Any, loader: Any, optimizer: Any, criterion: Any, device: Any) -> dict[str, float]:
+def train_one_epoch(
+    model: Any,
+    loader: Any,
+    optimizer: Any,
+    criterion: Any,
+    device: Any,
+) -> dict[str, float]:
     import torch
 
     model.train()
     total_loss = 0.0
     total_correct = 0
     total_samples = 0
-
     for images, labels in loader:
         images = images.to(device)
         labels = labels.to(device)
-
         optimizer.zero_grad(set_to_none=True)
         logits = model(images)
         loss = criterion(logits, labels)
         loss.backward()
         optimizer.step()
 
-        total_loss += float(loss.detach().cpu().item()) * len(labels)
-        total_correct += int((torch.argmax(logits, dim=1) == labels).sum().detach().cpu().item())
-        total_samples += int(len(labels))
+        count = int(len(labels))
+        total_loss += float(loss.detach().cpu().item()) * count
+        total_correct += int(
+            (torch.argmax(logits, dim=1) == labels).sum().detach().cpu().item()
+        )
+        total_samples += count
 
     return {
         "loss": total_loss / max(1, total_samples),
@@ -732,14 +690,18 @@ def train_one_epoch(model: Any, loader: Any, optimizer: Any, criterion: Any, dev
     }
 
 
-def evaluate(model: Any, loader: Any, criterion: Any, device: Any) -> dict[str, float]:
+def evaluate(
+    model: Any,
+    loader: Any,
+    criterion: Any,
+    device: Any,
+) -> dict[str, float]:
     import torch
 
     model.eval()
     total_loss = 0.0
     total_correct = 0
     total_samples = 0
-
     with torch.no_grad():
         for images, labels in loader:
             images = images.to(device)
@@ -747,9 +709,16 @@ def evaluate(model: Any, loader: Any, criterion: Any, device: Any) -> dict[str, 
             logits = model(images)
             loss = criterion(logits, labels)
 
-            total_loss += float(loss.detach().cpu().item()) * len(labels)
-            total_correct += int((torch.argmax(logits, dim=1) == labels).sum().detach().cpu().item())
-            total_samples += int(len(labels))
+            count = int(len(labels))
+            total_loss += float(loss.detach().cpu().item()) * count
+            total_correct += int(
+                (torch.argmax(logits, dim=1) == labels)
+                .sum()
+                .detach()
+                .cpu()
+                .item()
+            )
+            total_samples += count
 
     return {
         "loss": total_loss / max(1, total_samples),
@@ -772,32 +741,27 @@ def save_checkpoint(
     import torch
 
     path.parent.mkdir(parents=True, exist_ok=True)
-
+    common = {
+        "model_name": model_name,
+        "fold": fold,
+        "label_mapping": LABEL_TO_INDEX,
+        "input_size": config.input_size,
+        "created_at": utc_now_iso(),
+        "training_config": config.__dict__,
+        "metrics_history": metrics_history,
+    }
     if model_name == "clip":
         payload = {
-            "model_name": model_name,
-            "fold": fold,
+            **common,
             "clip_model_name": "ViT-B-32",
             "clip_pretrained": "openai",
             "binary_head_state_dict": model.state_dict(),
-            "label_mapping": LABEL_TO_INDEX,
-            "input_size": config.input_size,
-            "created_at": utc_now_iso(),
-            "training_config": config.__dict__,
-            "metrics_history": metrics_history,
         }
     else:
         payload = {
-            "model_name": model_name,
-            "fold": fold,
+            **common,
             "model_state_dict": model.state_dict(),
-            "label_mapping": LABEL_TO_INDEX,
-            "input_size": config.input_size,
-            "created_at": utc_now_iso(),
-            "training_config": config.__dict__,
-            "metrics_history": metrics_history,
         }
-
     torch.save(payload, path)
 
 
@@ -811,14 +775,16 @@ def train_for_fold(
 
     output_path = checkpoint_path(model_name, fold)
     if output_path.exists() and not args.force:
-        raise FileExistsError(f"Checkpoint already exists. Use --force to overwrite: {output_path}")
+        raise FileExistsError(
+            f"Checkpoint exists; use --force to overwrite: {output_path}"
+        )
 
-    train_source_df = df[df["fold"] != fold].copy()
-    holdout_df = df[df["fold"] == fold].copy()
+    train_source = df[df["fold"] != fold].copy()
+    holdout = df[df["fold"] == fold].copy()
     train_df, validation_df = split_train_validation(
-        train_source_df,
-        validation_ratio=args.validation_ratio,
-        seed=args.seed,
+        train_source,
+        args.validation_ratio,
+        args.seed,
     )
 
     config = TrainConfig(
@@ -833,15 +799,31 @@ def train_for_fold(
         device=args.device,
         input_size=args.input_size,
         num_workers=args.num_workers,
-        freeze_backbone=args.freeze_backbone,
+        freeze_backbone=True if model_name == "clip" else args.freeze_backbone,
     )
 
     device = select_device(args.device)
-    logging.info("Training %s for %s on %s", model_name, fold, device)
-    logging.info("Train images: %d | Validation images: %d | Holdout images: %d", len(train_df), len(validation_df), len(holdout_df))
+    logging.info(
+        "Training %s for %s on %s | train=%d validation=%d holdout=%d",
+        model_name,
+        fold,
+        device,
+        len(train_df),
+        len(validation_df),
+        len(holdout),
+    )
 
-    model = build_model(model_name, input_size=args.input_size, freeze_backbone=args.freeze_backbone).to(device)
-    train_loader, validation_loader = build_loaders(train_df, validation_df, model_name, config)
+    model = build_model(
+        model_name,
+        input_size=args.input_size,
+        freeze_backbone=config.freeze_backbone,
+    ).to(device)
+    train_loader, validation_loader = build_loaders(
+        train_df,
+        validation_df,
+        model_name,
+        config,
+    )
 
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(
@@ -852,23 +834,31 @@ def train_for_fold(
 
     history: list[dict[str, Any]] = []
     best_validation_accuracy = -1.0
-    best_payload_path = output_path
-
     for epoch in range(1, args.epochs + 1):
-        train_metrics = train_one_epoch(model, train_loader, optimizer, criterion, device)
-        validation_metrics = evaluate(model, validation_loader, criterion, device)
-
-        epoch_record = {
+        train_metrics = train_one_epoch(
+            model,
+            train_loader,
+            optimizer,
+            criterion,
+            device,
+        )
+        validation_metrics = evaluate(
+            model,
+            validation_loader,
+            criterion,
+            device,
+        )
+        record = {
             "epoch": epoch,
             "train_loss": train_metrics["loss"],
             "train_accuracy": train_metrics["accuracy"],
             "validation_loss": validation_metrics["loss"],
             "validation_accuracy": validation_metrics["accuracy"],
         }
-        history.append(epoch_record)
-
+        history.append(record)
         logging.info(
-            "%s %s epoch %d/%d | train_acc=%.4f val_acc=%.4f train_loss=%.4f val_loss=%.4f",
+            "%s %s epoch %d/%d | train_acc=%.4f val_acc=%.4f "
+            "train_loss=%.4f val_loss=%.4f",
             model_name,
             fold,
             epoch,
@@ -878,55 +868,84 @@ def train_for_fold(
             train_metrics["loss"],
             validation_metrics["loss"],
         )
-
         if validation_metrics["accuracy"] >= best_validation_accuracy:
             best_validation_accuracy = validation_metrics["accuracy"]
-            save_checkpoint(best_payload_path, model_name, fold, model, config, history)
+            save_checkpoint(
+                output_path,
+                model_name,
+                fold,
+                model,
+                config,
+                history,
+            )
 
-    sha256 = compute_sha256(output_path)
     return {
         "model_name": model_name,
         "fold": fold,
         "checkpoint_path": repo_relative_string(output_path),
-        "checkpoint_sha256": sha256,
+        "checkpoint_sha256": compute_sha256(output_path),
         "train_images": len(train_df),
         "validation_images": len(validation_df),
-        "holdout_images": len(holdout_df),
+        "holdout_images": len(holdout),
         "best_validation_accuracy": best_validation_accuracy,
         "last_epoch": history[-1] if history else {},
         "created_at": utc_now_iso(),
     }
 
 
-# =============================================================================
-# Reporting
-# =============================================================================
+REPORT_FIELDS = [
+    "model_name",
+    "fold",
+    "checkpoint_path",
+    "checkpoint_sha256",
+    "train_images",
+    "validation_images",
+    "holdout_images",
+    "best_validation_accuracy",
+    "last_epoch",
+    "created_at",
+]
+
 
 def write_training_report(records: list[dict[str, Any]]) -> Path:
+    """Upsert model/fold records while retaining untouched frozen records."""
     TRAINING_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     report_path = TRAINING_REPORTS_DIR / "proxy_model_training_summary.csv"
 
-    fieldnames = [
-        "model_name",
-        "fold",
-        "checkpoint_path",
-        "checkpoint_sha256",
-        "train_images",
-        "validation_images",
-        "holdout_images",
-        "best_validation_accuracy",
-        "last_epoch",
-        "created_at",
-    ]
+    merged: dict[tuple[str, str], dict[str, Any]] = {}
+    if report_path.exists():
+        with report_path.open("r", newline="", encoding="utf-8") as stream:
+            reader = csv.DictReader(stream)
+            if reader.fieldnames != REPORT_FIELDS:
+                raise ValueError(
+                    f"Unexpected training-report schema: {reader.fieldnames}"
+                )
+            for row in reader:
+                merged[(row["model_name"], row["fold"])] = dict(row)
 
-    with report_path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+    for record in records:
+        row = dict(record)
+        row["last_epoch"] = json.dumps(
+            row.get("last_epoch", {}),
+            sort_keys=True,
+            allow_nan=False,
+        )
+        merged[(row["model_name"], row["fold"])] = row
+
+    model_order = {name: index for index, name in enumerate(SUPPORTED_MODELS)}
+    fold_order = {fold: index for index, fold in enumerate(EXPECTED_FOLDS)}
+    ordered = sorted(
+        merged.values(),
+        key=lambda row: (
+            model_order.get(row["model_name"], len(model_order)),
+            fold_order.get(row["fold"], len(fold_order)),
+        ),
+    )
+
+    with report_path.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=REPORT_FIELDS)
         writer.writeheader()
-        for record in records:
-            row = dict(record)
-            row["last_epoch"] = json.dumps(row.get("last_epoch", {}), sort_keys=True)
-            writer.writerow(row)
-
+        writer.writerows(ordered)
     return report_path
 
 
@@ -941,57 +960,85 @@ def update_registry(records: list[dict[str, Any]]) -> None:
             "fold_protocol": "leave_one_fold_out_proxy_training",
             "input_manifest": repo_relative_string(INPUT_MANIFEST_PATH),
             "checkpoint_root": repo_relative_string(CHECKPOINT_ROOT),
+            "training_script": SCRIPT_NAME,
+            "training_report": (
+                "models/reports/proxy_model_training_summary.csv"
+            ),
+            "checkpoint_distribution": "git_lfs",
             "models": {},
         }
 
     for record in records:
         model_name = record["model_name"]
         fold = record["fold"]
-        model_entry = registry.setdefault("models", {}).setdefault(model_name, {})
-        sha_map = model_entry.setdefault("sha256", {})
-        sha_map[fold] = record["checkpoint_sha256"]
+        model_entry = registry.setdefault("models", {}).setdefault(
+            model_name,
+            {},
+        )
+        model_entry.setdefault("sha256", {})[fold] = record[
+            "checkpoint_sha256"
+        ]
         model_entry["last_trained_at"] = record["created_at"]
 
-    MODEL_REGISTRY_PATH.write_text(json.dumps(registry, indent=2, ensure_ascii=False), encoding="utf-8")
+    MODEL_REGISTRY_PATH.write_text(
+        json.dumps(
+            registry,
+            indent=2,
+            ensure_ascii=False,
+            allow_nan=False,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
-# =============================================================================
-# Main
-# =============================================================================
+def validate_arguments(args: argparse.Namespace) -> None:
+    if args.epochs <= 0:
+        raise ValueError("--epochs must be greater than zero.")
+    if args.batch_size <= 0:
+        raise ValueError("--batch-size must be greater than zero.")
+    if args.input_size <= 0:
+        raise ValueError("--input-size must be greater than zero.")
+    if args.num_workers < 0:
+        raise ValueError("--num-workers cannot be negative.")
+    if not 0.0 < args.validation_ratio < 0.5:
+        raise ValueError("--validation-ratio must be in (0, 0.5).")
+
 
 def main() -> None:
-    args = interactive_args() if len(sys.argv) == 1 else parse_args()
+    args = interactive_args() if len(sys.argv) == 1 else build_parser().parse_args()
     setup_logging(args.verbose)
+    validate_arguments(args)
     set_reproducibility(args.seed)
-
-    if args.epochs <= 0:
-        raise ValueError("--epochs must be greater than 0.")
-    if args.batch_size <= 0:
-        raise ValueError("--batch-size must be greater than 0.")
-    if args.input_size <= 0:
-        raise ValueError("--input-size must be greater than 0.")
 
     manifest_path = repo_relative_path(args.manifest)
     df = load_manifest(manifest_path)
-    available_folds = sorted(df["fold"].unique())
-    selected_folds = expand_folds(args.fold, available_folds)
+    logging.info("Validating split files and SHA256 hashes")
+    validate_manifest_files(df)
 
+    available_folds = sorted(df["fold"].unique().tolist())
+    selected_folds = expand_folds(args.fold, available_folds)
     logging.info("Manifest: %s", manifest_path)
     logging.info("Models: %s", ", ".join(args.model))
-    logging.info("Folds: %s", ", ".join(selected_folds))
+    logging.info("Held-out folds: %s", ", ".join(selected_folds))
 
     records: list[dict[str, Any]] = []
     for model_name in args.model:
         for fold in selected_folds:
-            record = train_for_fold(df=df, model_name=model_name, fold=fold, args=args)
-            records.append(record)
+            records.append(
+                train_for_fold(
+                    df=df,
+                    model_name=model_name,
+                    fold=fold,
+                    args=args,
+                )
+            )
 
     report_path = write_training_report(records)
     update_registry(records)
-
-    logging.info("Training report written: %s", report_path)
-    logging.info("Model registry updated: %s", MODEL_REGISTRY_PATH)
-    logging.info("Proxy model training completed successfully.")
+    logging.info("Training report: %s", report_path)
+    logging.info("Model registry: %s", MODEL_REGISTRY_PATH)
+    logging.info("Proxy-model training completed.")
 
 
 if __name__ == "__main__":
