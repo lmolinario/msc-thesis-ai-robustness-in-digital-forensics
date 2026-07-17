@@ -12,7 +12,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ENTRY_POINT = "explainability/scripts/17_generate_integrated_gradients_case_studies.py"
-LOG_PATH = REPO_ROOT / "explainability/logs/xai_interactive_launcher_commands.jsonl"
+LOG_PATH = REPO_ROOT / "explainability/logs/xai_interactive_launcher_commands.local.jsonl"
 
 PRESETS = {
     "1": {
