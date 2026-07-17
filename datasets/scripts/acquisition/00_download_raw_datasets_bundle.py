@@ -8,13 +8,15 @@ Restore the externally hosted raw dataset bundle used by the FAIR-Lab thesis
 pipeline. Image corpora are intentionally not tracked on the public ``main``
 branch.
 
-Download URL precedence:
-1. ``--url`` command-line argument;
-2. ``FAIRLAB_RAW_DATASET_BUNDLE_URL`` environment variable;
-3. the default Google Drive URL recorded below.
+The bundle is distributed under controlled access. The download URL is supplied
+only after authorization and must be provided locally through either:
 
-The archive is downloaded under ``datasets/raw/downloaded_raw_archives/`` and
-extracted locally. Downloaded and extracted data are ignored by Git.
+1. the ``--url`` command-line argument; or
+2. the ``FAIRLAB_RAW_DATASET_BUNDLE_URL`` environment variable.
+
+No private Google Drive URL is stored in this repository. The archive is
+downloaded under ``datasets/raw/downloaded_raw_archives/`` and extracted
+locally. Downloaded and extracted data are ignored by Git.
 """
 
 from __future__ import annotations
@@ -32,9 +34,9 @@ import gdown
 from datasets.scripts.utils.paths import RAW_DATASETS_DIR, repo_relative_path
 
 ENV_NAME = "FAIRLAB_RAW_DATASET_BUNDLE_URL"
-DEFAULT_BUNDLE_URL = (
-    "https://drive.google.com/file/d/"
-    "1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link"
+ACCESS_REQUEST_NOTE = (
+    "Access is granted case by case by the thesis author or repository "
+    "maintainer. Request authorization before running this script."
 )
 
 ARCHIVE_DIR = RAW_DATASETS_DIR / "downloaded_raw_archives"
@@ -45,14 +47,17 @@ EXTRACT_DIR = ARCHIVE_DIR / "extracted_bundle"
 def build_parser() -> argparse.ArgumentParser:
     """Build the command-line interface."""
     parser = argparse.ArgumentParser(
-        description="Download and safely extract the FAIR-Lab raw dataset bundle."
+        description=(
+            "Download and safely extract the controlled-access FAIR-Lab raw "
+            "dataset bundle."
+        )
     )
     parser.add_argument(
         "--url",
         default="",
         help=(
-            "Optional Google Drive or direct bundle URL. Precedence: --url, "
-            f"{ENV_NAME}, repository default."
+            "Authorized Google Drive or direct bundle URL. When omitted, the "
+            f"script reads {ENV_NAME}."
         ),
     )
     parser.add_argument(
@@ -69,7 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def resolve_bundle_url(cli_url: str) -> tuple[str, str]:
-    """Resolve the effective bundle URL and report its source."""
+    """Resolve the authorized bundle URL and report its local source."""
     cli_value = cli_url.strip()
     if cli_value:
         return cli_value, "command line"
@@ -78,7 +83,10 @@ def resolve_bundle_url(cli_url: str) -> tuple[str, str]:
     if env_value:
         return env_value, f"environment variable {ENV_NAME}"
 
-    return DEFAULT_BUNDLE_URL, "repository default"
+    raise RuntimeError(
+        f"Missing authorized dataset bundle URL. Provide --url or set {ENV_NAME}. "
+        f"{ACCESS_REQUEST_NOTE}"
+    )
 
 
 def sha256_file(path: Path) -> str:
@@ -96,9 +104,9 @@ def validate_zip_archive(path: Path) -> None:
         raise RuntimeError(f"Downloaded archive is missing or empty: {path}")
     if not zipfile.is_zipfile(path):
         raise RuntimeError(
-            "The downloaded file is not a valid ZIP archive. Confirm that the "
-            "Google Drive file is shared as 'Anyone with the link - Viewer' and "
-            "that the URL points to the raw dataset bundle."
+            "The downloaded file is not a valid ZIP archive. Confirm that access "
+            "has been granted for the current account and that the supplied URL "
+            "points to the authorized raw dataset bundle."
         )
 
 
@@ -134,7 +142,7 @@ def extract_archive(archive_path: Path, extract_dir: Path, force: bool) -> None:
 
 
 def download_archive(url: str, archive_path: Path, force: bool) -> None:
-    """Download the bundle with gdown and validate the resulting archive."""
+    """Download the authorized bundle with gdown and validate the archive."""
     if archive_path.exists() and archive_path.stat().st_size > 0:
         if not force:
             validate_zip_archive(archive_path)
@@ -153,15 +161,16 @@ def download_archive(url: str, archive_path: Path, force: bool) -> None:
         )
     except Exception as exc:
         raise RuntimeError(
-            "Google Drive download failed. Confirm that the bundle is shared as "
-            "'Anyone with the link - Viewer', or provide an accessible URL with "
-            f"--url or {ENV_NAME}."
+            "Controlled-access download failed. Confirm that authorization was "
+            "granted to the account used for the download and that the supplied "
+            f"URL is current. The URL may be provided with --url or {ENV_NAME}."
         ) from exc
 
     if result is None:
         raise RuntimeError(
-            "Google Drive download returned no file. Check the file-sharing "
-            "permissions or provide an alternative URL."
+            "The controlled-access download returned no file. Confirm the access "
+            "authorization and request a current link from the thesis author or "
+            "repository maintainer."
         )
 
     validate_zip_archive(archive_path)
@@ -169,7 +178,7 @@ def download_archive(url: str, archive_path: Path, force: bool) -> None:
 
 
 def main() -> None:
-    """Download, validate, hash, and safely extract the raw dataset bundle."""
+    """Download, validate, hash, and safely extract the authorized bundle."""
     args = build_parser().parse_args()
     bundle_url, url_source = resolve_bundle_url(args.url)
 
@@ -178,11 +187,11 @@ def main() -> None:
     extract_dir = repo_relative_path(EXTRACT_DIR)
     archive_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[INFO] Bundle URL source: {url_source}")
+    print(f"[INFO] Authorized bundle URL source: {url_source}")
     download_archive(bundle_url, archive_path, args.force_download)
     print(f"[INFO] Archive SHA256: {sha256_file(archive_path)}")
     extract_archive(archive_path, extract_dir, args.force_extract)
-    print("[DONE] Raw dataset bundle restoration completed.")
+    print("[DONE] Controlled-access raw dataset restoration completed.")
 
 
 if __name__ == "__main__":
