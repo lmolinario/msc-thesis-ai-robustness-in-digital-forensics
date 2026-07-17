@@ -107,7 +107,7 @@ dmypy.json
 .pytype/
 .ruff_cache/
 cython_debug/
-.abstra/
+.abstra
 marimo/_static/
 marimo/_lsp/
 __marimo__/
@@ -158,6 +158,26 @@ forensic_tools/**/temp/
 
 # Local manual-review session state
 datasets/final/reports/manual_selection_state.json
+
 # Optional local evaluation outputs from the anti-forensic generator
 attacks/manifests/anti_forensic_*_evaluation.csv
 attacks/manifests/anti_forensic_*_evaluation_summary.json
+
+# Image corpora restored or generated locally; never track them on main
+datasets/raw/**
+!datasets/raw/README.md
+datasets/prepared/final_pool/images/
+datasets/splits/clean/
+datasets/splits/ood/
+datasets/forensic_evaluation_bundle/blind_tool_input/
+datasets/forensic_evaluation_bundle/structured_audit_view/
+attacks/adversarial/color_shift/
+attacks/adversarial/fgsm/
+attacks/adversarial/one_pixel/
+attacks/adversarial/sigma_zero/
+attacks/adversarial/superdeepfool/
+attacks/anti_forensic/jpeg_recompression/
+attacks/anti_forensic/resample_resize/
+attacks/anti_forensic/gaussian_blur/
+attacks/anti_forensic/histogram_modification/
+attacks/anti_forensic/contrast_stretching/
