@@ -13,6 +13,7 @@ explainability/
 │   ├── 17_generate_integrated_gradients_case_studies.py
 │   ├── _17_generate_integrated_gradients_case_studies_impl.py
 │   ├── 18_xai_interactive_launcher.py
+│   ├── sync_chapter5_xai_metadata.py
 │   └── validate_chapter5_xai_artifacts.py
 ├── manifests/
 │   └── chapter5/
@@ -34,6 +35,7 @@ The complete pre-minimization XAI output tree remains available in the protected
 ```bash
 python explainability/scripts/17_generate_integrated_gradients_case_studies.py --help
 python explainability/scripts/18_xai_interactive_launcher.py
+python explainability/scripts/sync_chapter5_xai_metadata.py --check
 python explainability/scripts/validate_chapter5_xai_artifacts.py
 ```
 
@@ -60,7 +62,12 @@ The original review considered 1,175 candidates and selected 15 cases, three per
 | `xai_case_0010` | `anti_forensic_failure` | histogram-modification false negative |
 | `xai_case_0015` | `adversarial_high_conf_failure` | Sigma-Zero high-confidence false positive |
 
-The authoritative public mapping is `explainability/manifests/chapter5/thesis_selection.csv`.
+The authoritative public mapping is `explainability/manifests/chapter5/thesis_selection.csv`. The synchronizer checks or updates the confidence values displayed in both thesis-language variants:
+
+```bash
+python explainability/scripts/sync_chapter5_xai_metadata.py --check
+python explainability/scripts/sync_chapter5_xai_metadata.py --write
+```
 
 ## Regeneration and convergence
 
