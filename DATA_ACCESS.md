@@ -1,90 +1,90 @@
-# Data Access Policy
+# Data Access and Local Restoration
 
-This repository documents a research pipeline for evaluating the operational robustness of AI-based forensic image-classification and media-triage tools.
+This repository documents a research pipeline for evaluating the operational
+robustness of AI-based forensic image-classification and media-triage tools.
 
-The repository intentionally separates reproducible code, manifests, metrics, documentation, and thesis material from raw image data that may be subject to third-party licensing, platform terms, source-specific limitations, ethical constraints, or institutional review considerations.
+## Main-branch distribution policy
 
----
+The `main` branch intentionally excludes image corpora. It retains the
+reproducibility record required to inspect the frozen thesis artifact:
 
-## Publicly available in the repository
+- acquisition, preparation, training, perturbation, evaluation, and reporting code;
+- frozen dataset, split, attack, and bundle manifests;
+- hashes, metadata, review logs, and generation summaries;
+- normalized predictions and aggregate metrics;
+- thesis sources and documentation.
 
-The public repository may include:
-
-- source code for dataset preparation, model training, perturbation generation, evaluation, normalization, and reporting;
-- dataset manifests and audit metadata where redistribution is appropriate;
-- hash-based traceability artifacts;
-- aggregate metrics and thesis-ready result tables;
-- LaTeX thesis source files;
-- documentation describing the experimental protocol.
-
----
-
-## Not publicly distributed
-
-The archived raw dataset bundle is not distributed through a public URL in this repository.
-
-Raw images and source-specific exports are kept under controlled access because they may include material obtained from heterogeneous sources, including public datasets, web scraping, social-media-like sources, and other operationally relevant acquisition contexts.
-
-The repository therefore does not expose:
-
-- public raw dataset download links;
-- private Google Drive URLs;
-- local acquisition credentials;
-- forensic-tool proprietary case files;
-- commercial-tool working databases;
-- temporary signed URLs or installer links.
-
----
-
-## Controlled access procedure
-
-Access to the raw dataset bundle may be requested from the thesis author or repository maintainer.
-
-Requests should specify:
-
-1. the requester identity and affiliation;
-2. the intended research or review purpose;
-3. whether access is needed for thesis verification, academic review, or reproducibility assessment;
-4. any applicable legal, ethical, or institutional constraints.
-
-Access may be denied or restricted when redistribution would be incompatible with source terms, ethical limitations, or institutional constraints.
-
----
-
-## Local restoration mechanism
-
-The public bootstrap script is:
+The following data areas are restored or generated locally and are not tracked
+on `main`:
 
 ```text
-datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+datasets/raw/
+datasets/prepared/final_pool/images/
+datasets/splits/clean/
+datasets/splits/ood/
+attacks/adversarial/<variant>/
+attacks/anti_forensic/<variant>/
+datasets/forensic_evaluation_bundle/blind_tool_input/
+datasets/forensic_evaluation_bundle/structured_audit_view/
 ```
 
-The script does not contain a hardcoded URL. After controlled access has been granted, the raw bundle URL must be configured locally through the environment variable:
+## External raw bundle
 
-```text
-FAIRLAB_RAW_DATASET_BUNDLE_URL
-```
-
-Example for Windows PowerShell:
-
-```powershell
-$env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
-```
-
-Example for Linux/macOS:
+The raw source bundle is hosted externally on Google Drive and is restored with:
 
 ```bash
-export FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
 ```
 
-The environment variable must not be committed to the repository.
+Default bundle URL:
 
----
+```text
+https://drive.google.com/file/d/1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link
+```
 
-## Reproducibility note
+The Drive file must be shared as **Anyone with the link – Viewer** for
+unattended restoration. Publishing the URL does not grant redistribution rights
+beyond those applicable to the original sources.
 
-The repository is designed for controlled reproducibility rather than unrestricted redistribution of all raw data. The methodological record is preserved through scripts, manifests, hashes, metrics, normalized outputs, and thesis documentation.
+URL precedence is:
 
-Where raw images cannot be redistributed, auditability is supported through documented acquisition procedures, file-level hashes, frozen manifests, and aggregate experimental outputs.
+1. `--url <bundle-url>`;
+2. `FAIRLAB_RAW_DATASET_BUNDLE_URL`;
+3. the default URL embedded in the script.
+
+Examples:
+
+```powershell
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+$env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<alternative-url>"
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --force-download
+```
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+FAIRLAB_RAW_DATASET_BUNDLE_URL="<alternative-url>" \
+  python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --force-download
+```
+
+The archive is validated as ZIP, its SHA256 is printed, archive paths are
+checked before extraction, and symbolic-link entries are rejected.
+
+## Regeneration boundary
+
+Step 00 restores the raw source bundle only. Prepared images, the frozen local
+image pool, clean/OOD splits, adversarial and anti-forensic outputs, and the
+blind forensic evaluation bundle are regenerated through the numbered pipeline.
+
+Manifests and hashes committed to the repository provide the reference against
+which regenerated files can be checked.
+
+## Legal and ethical note
+
+Source images originate from heterogeneous collections and may remain subject
+to third-party licenses, platform terms, ethical restrictions, or institutional
+handling requirements. Researchers are responsible for verifying that their
+use, storage, and redistribution are lawful and compatible with the original
+sources.
+
+The frozen thesis artifact is designed for traceable reproducibility, not as an
+unrestricted benchmark redistribution package.
