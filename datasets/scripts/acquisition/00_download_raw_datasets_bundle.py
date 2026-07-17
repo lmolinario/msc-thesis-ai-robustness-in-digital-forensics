@@ -8,15 +8,20 @@ Restore the externally hosted raw dataset bundle used by the FAIR-Lab thesis
 pipeline. Image corpora are intentionally not tracked on the public ``main``
 branch.
 
-The bundle is distributed under controlled access. The download URL is supplied
-only after authorization and must be provided locally through either:
+The Google Drive page is intentionally retained so that an interested reviewer
+can request access. The file itself remains restricted and access is granted
+case by case by the thesis author or repository maintainer.
 
-1. the ``--url`` command-line argument; or
-2. the ``FAIRLAB_RAW_DATASET_BUNDLE_URL`` environment variable.
+Recommended workflow:
 
-No private Google Drive URL is stored in this repository. The archive is
-downloaded under ``datasets/raw/downloaded_raw_archives/`` and extracted
-locally. Downloaded and extracted data are ignored by Git.
+1. run this script with ``--request-access``;
+2. sign in to Google Drive and submit the access request;
+3. after approval, download the ZIP through the browser;
+4. pass the downloaded ZIP to this script with ``--archive``.
+
+An authorized direct-download URL may alternatively be supplied through
+``--url`` or ``FAIRLAB_RAW_DATASET_BUNDLE_URL``. Private or temporary URLs must
+not be committed to the repository.
 """
 
 from __future__ import annotations
@@ -26,6 +31,7 @@ import hashlib
 import os
 import shutil
 import stat
+import webbrowser
 import zipfile
 from pathlib import Path
 
@@ -34,9 +40,9 @@ import gdown
 from datasets.scripts.utils.paths import RAW_DATASETS_DIR, repo_relative_path
 
 ENV_NAME = "FAIRLAB_RAW_DATASET_BUNDLE_URL"
-ACCESS_REQUEST_NOTE = (
-    "Access is granted case by case by the thesis author or repository "
-    "maintainer. Request authorization before running this script."
+REQUEST_ACCESS_URL = (
+    "https://drive.google.com/file/d/"
+    "1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link"
 )
 
 ARCHIVE_DIR = RAW_DATASETS_DIR / "downloaded_raw_archives"
@@ -48,22 +54,38 @@ def build_parser() -> argparse.ArgumentParser:
     """Build the command-line interface."""
     parser = argparse.ArgumentParser(
         description=(
-            "Download and safely extract the controlled-access FAIR-Lab raw "
-            "dataset bundle."
+            "Request access to, download, or safely extract the controlled-access "
+            "FAIR-Lab raw dataset bundle."
         )
+    )
+    parser.add_argument(
+        "--request-access",
+        action="store_true",
+        help=(
+            "Open the restricted Google Drive page in the default browser so that "
+            "the current Google account can submit an access request."
+        ),
+    )
+    parser.add_argument(
+        "--archive",
+        type=Path,
+        help=(
+            "Path to a ZIP downloaded through the browser after access approval. "
+            "The archive is validated and extracted without uploading it to Git."
+        ),
     )
     parser.add_argument(
         "--url",
         default="",
         help=(
-            "Authorized Google Drive or direct bundle URL. When omitted, the "
-            f"script reads {ENV_NAME}."
+            "Authorized direct-download URL. When omitted, the script reads "
+            f"{ENV_NAME}."
         ),
     )
     parser.add_argument(
         "--force-download",
         action="store_true",
-        help="Replace an existing local archive before downloading.",
+        help="Replace an existing locally downloaded archive.",
     )
     parser.add_argument(
         "--force-extract",
@@ -73,8 +95,18 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def open_access_request_page() -> None:
+    """Open the restricted Drive page used to submit an access request."""
+    print("[INFO] Opening the controlled-access request page:")
+    print(f"       {REQUEST_ACCESS_URL}")
+    opened = webbrowser.open(REQUEST_ACCESS_URL, new=2)
+    if not opened:
+        print("[WARN] The browser could not be opened automatically.")
+        print("       Copy the URL above into a browser and select 'Request access'.")
+
+
 def resolve_bundle_url(cli_url: str) -> tuple[str, str]:
-    """Resolve the authorized bundle URL and report its local source."""
+    """Resolve an authorized direct-download URL and report its local source."""
     cli_value = cli_url.strip()
     if cli_value:
         return cli_value, "command line"
@@ -84,8 +116,10 @@ def resolve_bundle_url(cli_url: str) -> tuple[str, str]:
         return env_value, f"environment variable {ENV_NAME}"
 
     raise RuntimeError(
-        f"Missing authorized dataset bundle URL. Provide --url or set {ENV_NAME}. "
-        f"{ACCESS_REQUEST_NOTE}"
+        "No authorized direct-download URL was provided. Run this script with "
+        "--request-access, wait for approval, download the ZIP through the browser, "
+        "and then use --archive <downloaded-zip>. Alternatively, provide an "
+        f"authorized URL with --url or {ENV_NAME}."
     )
 
 
@@ -99,14 +133,13 @@ def sha256_file(path: Path) -> str:
 
 
 def validate_zip_archive(path: Path) -> None:
-    """Ensure that the downloaded object is a non-empty ZIP archive."""
+    """Ensure that the supplied object is a non-empty ZIP archive."""
     if not path.exists() or not path.is_file() or path.stat().st_size == 0:
-        raise RuntimeError(f"Downloaded archive is missing or empty: {path}")
+        raise RuntimeError(f"Archive is missing or empty: {path}")
     if not zipfile.is_zipfile(path):
         raise RuntimeError(
-            "The downloaded file is not a valid ZIP archive. Confirm that access "
-            "has been granted for the current account and that the supplied URL "
-            "points to the authorized raw dataset bundle."
+            "The supplied file is not a valid ZIP archive. Confirm that it is the "
+            "bundle downloaded after access approval."
         )
 
 
@@ -142,7 +175,7 @@ def extract_archive(archive_path: Path, extract_dir: Path, force: bool) -> None:
 
 
 def download_archive(url: str, archive_path: Path, force: bool) -> None:
-    """Download the authorized bundle with gdown and validate the archive."""
+    """Download an authorized bundle URL with gdown and validate the archive."""
     if archive_path.exists() and archive_path.stat().st_size > 0:
         if not force:
             validate_zip_archive(archive_path)
@@ -157,20 +190,18 @@ def download_archive(url: str, archive_path: Path, force: bool) -> None:
             url=url,
             output=str(archive_path),
             quiet=False,
-            fuzzy=True,
         )
     except Exception as exc:
         raise RuntimeError(
-            "Controlled-access download failed. Confirm that authorization was "
-            "granted to the account used for the download and that the supplied "
-            f"URL is current. The URL may be provided with --url or {ENV_NAME}."
+            "The direct download failed. A restricted Drive page cannot submit an "
+            "access request through gdown. Run with --request-access, complete the "
+            "approval flow in the browser, download the ZIP, and use --archive."
         ) from exc
 
     if result is None:
         raise RuntimeError(
-            "The controlled-access download returned no file. Confirm the access "
-            "authorization and request a current link from the thesis author or "
-            "repository maintainer."
+            "The direct download returned no file. Complete the controlled-access "
+            "flow in the browser and use --archive with the downloaded ZIP."
         )
 
     validate_zip_archive(archive_path)
@@ -178,16 +209,30 @@ def download_archive(url: str, archive_path: Path, force: bool) -> None:
 
 
 def main() -> None:
-    """Download, validate, hash, and safely extract the authorized bundle."""
+    """Request access, download, validate, hash, and safely extract the bundle."""
     args = build_parser().parse_args()
-    bundle_url, url_source = resolve_bundle_url(args.url)
 
-    archive_dir = repo_relative_path(ARCHIVE_DIR)
-    archive_path = repo_relative_path(ARCHIVE_PATH)
+    if args.request_access:
+        open_access_request_page()
+        if args.archive is None and not args.url.strip() and not os.getenv(ENV_NAME, "").strip():
+            print("[DONE] Submit the browser request and rerun after authorization.")
+            return
+
     extract_dir = repo_relative_path(EXTRACT_DIR)
-    archive_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[INFO] Authorized bundle URL source: {url_source}")
+    if args.archive is not None:
+        local_archive = args.archive.expanduser().resolve()
+        validate_zip_archive(local_archive)
+        print(f"[INFO] Local archive: {local_archive}")
+        print(f"[INFO] Archive SHA256: {sha256_file(local_archive)}")
+        extract_archive(local_archive, extract_dir, args.force_extract)
+        print("[DONE] Controlled-access raw dataset restoration completed.")
+        return
+
+    bundle_url, url_source = resolve_bundle_url(args.url)
+    archive_path = repo_relative_path(ARCHIVE_PATH)
+
+    print(f"[INFO] Authorized direct-download URL source: {url_source}")
     download_archive(bundle_url, archive_path, args.force_download)
     print(f"[INFO] Archive SHA256: {sha256_file(archive_path)}")
     extract_archive(archive_path, extract_dir, args.force_extract)
