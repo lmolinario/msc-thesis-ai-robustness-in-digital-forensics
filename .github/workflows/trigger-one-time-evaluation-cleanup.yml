@@ -1,0 +1,57 @@
+name: Trigger One-time Evaluation Cleanup
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+jobs:
+  trigger:
+    if: github.event.issue.title == 'RUN ONE-TIME EVALUATION CLEANUP'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Enable workflow dispatch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('.github/workflows/one-time-evaluation-cleanup.yml')
+          text = path.read_text(encoding='utf-8')
+          if '  workflow_dispatch:' not in text:
+              marker = "    paths: ['.github/workflows/one-time-evaluation-cleanup.yml']\n"
+              if marker not in text:
+                  raise SystemExit('workflow trigger marker not found')
+              text = text.replace(marker, marker + '  workflow_dispatch:\n', 1)
+              path.write_text(text, encoding='utf-8')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/one-time-evaluation-cleanup.yml
+          if ! git diff --cached --quiet; then
+            git commit -m 'ci: enable evaluation cleanup dispatch'
+            git push origin main
+          fi
+
+      - name: Dispatch cleanup workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5; do
+            if gh workflow run one-time-evaluation-cleanup.yml --ref main; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
