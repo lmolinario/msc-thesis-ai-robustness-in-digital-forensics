@@ -22,14 +22,23 @@ datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
 The canonical counts and validation checks are recorded in
 `metadata/bundle_summary.json`.
 
+## Main-branch policy
+
+The 11,500 bundle image files are generated locally and are not tracked on
+`main`. The committed metadata, manifests, hashes, generation summary, scripts,
+normalized predictions, and metrics form the canonical reproducibility record.
+
+Run step 16 after restoring or regenerating its source images to recreate the
+local `blind_tool_input/` and `structured_audit_view/` directories.
+
 ## Directory roles
 
 ```text
 forensic_evaluation_bundle/
-├── blind_tool_input/
+├── blind_tool_input/        # generated locally; not tracked
 │   └── files/
-├── metadata/
-└── structured_audit_view/
+├── metadata/                # tracked canonical records
+└── structured_audit_view/   # generated locally; not tracked
 ```
 
 ### `blind_tool_input/files/`
@@ -41,8 +50,8 @@ models, or provenance.
 
 ### `metadata/`
 
-This directory preserves ground truth and audit information for post-export
-normalization. It must not be imported into the evaluated tools.
+This tracked directory preserves ground truth and audit information for
+post-export normalization. It must not be imported into the evaluated tools.
 
 Canonical files include:
 
@@ -56,12 +65,12 @@ metadata/embedded_metadata_audit_summary.json
 
 ### `structured_audit_view/`
 
-This optional internal view preserves a semantic hierarchy for controlled
-audit and debugging. It is not a valid input view for blind tool evaluation.
+This optional local view preserves a semantic hierarchy for controlled audit
+and debugging. It is not a valid input view for blind tool evaluation.
 
 ## Bias-control rule
 
-Tool operators must import only:
+After local regeneration, tool operators must import only:
 
 ```text
 datasets/forensic_evaluation_bundle/blind_tool_input/files/
@@ -82,12 +91,5 @@ The bundle-generation summary records checks for:
 - separation between tool inputs and metadata.
 
 The embedded-metadata audit is non-destructive. It reports metadata that could
-reveal semantic or experiment-specific information without modifying the image
+reveal semantic or experiment-specific information without modifying image
 files.
-
-## Distribution status
-
-The repository's final policy for retaining or removing the image corpora from
-`main` is handled separately from this documentation cleanup. In either case,
-the metadata, manifests, hashes, scripts, and normalized outputs remain the
-canonical reproducibility record.
