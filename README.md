@@ -59,37 +59,68 @@ The evaluation is organized around three complementary perspectives:
 The experimental protocol follows the FAIR-Lab methodology described in the thesis. It separates dataset construction, controlled proxy-model evaluation, blind black-box forensic-tool evaluation, output normalization, XAI inspection, and traceability controls.
 
 ```mermaid
+%%{init: {
+  "flowchart": {
+    "curve": "linear",
+    "nodeSpacing": 60,
+    "rankSpacing": 45
+  }
+}}%%
+
 flowchart TD
-    A[Source image pool]
-    B[Human-in-the-loop review]
-    C[Final frozen dataset<br/>500 weapon + 500 non-weapon + 500 OOD<br/>1,500 images]
 
-    D[Clean binary subset<br/>1,000 images]
-    E[Clean OOD set<br/>500 images]
-    F[Perturbation generation on binary subset<br/>5,000 adversarial + 5,000 anti-forensic]
+    A["<b>Source image pool</b><br/>heterogeneous image sources and initial metadata"]
 
-    G[Controlled proxy-model evaluation<br/>EfficientNet-B0 + ResNet18 + CLIP]
-    H[Forensic evaluation bundle<br/>1,000 clean + 500 OOD + 10,000 perturbed<br/>11,500 files]
-    I[Black-box software evaluation<br/>Magnet.AI + Excire + Cellebrite + Griffeye]
-    J[Normalization + metrics + XAI + traceability]
+    B["<b>Human-in-the-loop review</b><br/>manual validation, cleaning and dataset freezing"]
 
-    A --> B --> C
+    C["<b>Final frozen dataset</b><br/>1500 images: 500 weapon, 500 non-weapon, 500 OOD"]
+
+    D["<b>Binary evaluation subset</b><br/>1000 images: 500 weapon and 500 non-weapon"]
+
+    E["<b>Clean OOD evaluation set</b><br/>500 clean out-of-distribution images<br/>no adversarial or anti-forensic perturbations"]
+
+    F["<b>Perturbation generation</b><br/>adversarial attacks and anti-forensic transformations<br/>applied only to the binary subset"]
+
+    H["<b>Forensic evaluation bundle</b><br/>1000 clean + 500 clean OOD + 5000 adversarial<br/>+ 5000 anti-forensic samples"]
+
+    G["<b>Controlled proxy model evaluation</b><br/>structured evaluation on bundle artifacts<br/>EfficientNet-B0, ResNet18 and CLIP"]
+
+    I["<b>Black-box software evaluation</b><br/>blind bundle input and output normalization<br/>Magnet.AI, Excire Foto 2025, Cellebrite Inseyets<br/>and Griffeye/T3K CORE"]
+
+    J["<b>Metrics, XAI and traceability</b><br/>robustness analysis, output normalization, Integrated Gradients,<br/>audit artifacts and reproducibility controls"]
+
+    A --> B
+    B --> C
+
     C --> D
     C --> E
+
     D --> F
 
-    D --> G
-    E --> G
-    F --> G
-
-    D --> H
-    E --> H
     F --> H
+    E --> H
+
+    H --> G
     H --> I
 
     G --> J
     I --> J
+
+    classDef source fill:#f7f7f7,stroke:#333333,stroke-width:1px,color:#000000;
+    classDef process fill:#eeeeff,stroke:#333333,stroke-width:1px,color:#000000;
+    classDef subset fill:#fffde8,stroke:#333333,stroke-width:1px,color:#000000;
+    classDef evaluation fill:#fff0e4,stroke:#333333,stroke-width:1px,color:#000000;
+    classDef output fill:#eeffee,stroke:#333333,stroke-width:1px,color:#000000;
+
+    class A source;
+    class B,C,F,H process;
+    class D,E subset;
+    class G,I evaluation;
+    class J output;
+
+    linkStyle default stroke:#333333,stroke-width:1px;
 ```
+
 
 The 1,500-image frozen dataset is the methodological source dataset. The forensic evaluation bundle contains **11,500 files** because it consolidates 1,000 clean binary images, 500 clean OOD images, 5,000 adversarial samples, and 5,000 anti-forensic samples.
 
