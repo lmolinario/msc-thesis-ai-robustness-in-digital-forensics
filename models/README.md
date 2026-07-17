@@ -1,138 +1,69 @@
 # Proxy Models
 
-This directory contains the reproducible configuration for the open proxy models used in the FAIR-Lab adversarial attack pipeline.
+This directory contains the transparent proxy-model artifact used by the
+FAIR-Lab thesis experiments. The models are research instruments for controlled
+robustness evaluation and are not commercial forensic tools.
 
-The proxy models are not commercial forensic tools. They are transparent, reproducible binary classifiers used to generate model-dependent adversarial perturbations and to study transferability toward other AI systems and forensic tools.
+See [`MODEL_CARD.md`](MODEL_CARD.md) for the complete scope, limitations, and
+reported baseline behavior.
 
-## Official task
+## Structure
 
-All proxy models use the same binary classification task:
+```text
+models/
+├── README.md
+├── MODEL_CARD.md
+├── model_registry.json
+├── checkpoints/
+│   ├── resnet18/fold_1.pt ... fold_5.pt
+│   ├── efficientnet_b0/fold_1.pt ... fold_5.pt
+│   └── clip/fold_1.pt ... fold_5.pt
+├── reports/
+│   └── proxy_model_training_summary.csv
+└── scripts/
+    └── 12_train_proxy_models.py
+```
+
+## Task and protocol
 
 ```text
 0 = non_weapon
 1 = weapon
 ```
 
-OOD samples are not used to train or generate adversarial attacks. They remain reserved for separate robustness and out-of-distribution evaluation.
+OOD samples are excluded from training. For every target fold, the checkpoint is
+trained on the other four folds. The complete frozen suite therefore contains 15
+checkpoints: three models across five held-out folds.
 
-## Directory layout
-
-```text
-models/
-├── README.md
-├── model_registry.json
-├── scripts/
-│   └── 12_train_proxy_models.py        
-└── checkpoints/
-    ├── .gitkeep
-    ├── resnet18/
-    │   ├── fold_1.pt
-    │   ├── fold_2.pt
-    │   ├── fold_3.pt
-    │   ├── fold_4.pt
-    │   └── fold_5.pt
-    ├── efficientnet_b0/
-    │   ├── fold_1.pt
-    │   ├── fold_2.pt
-    │   ├── fold_3.pt
-    │   ├── fold_4.pt
-    │   └── fold_5.pt
-    └── clip/
-        ├── fold_1.pt
-        ├── fold_2.pt
-        ├── fold_3.pt
-        ├── fold_4.pt
-        └── fold_5.pt
-```
-
-## Official numbered entry point
-
-The official pipeline entry point for proxy model training is:
-
-```text
-models/scripts/12_train_proxy_models.py
-```
-
-
-## Per-fold training protocol
-
-The official training protocol is fold-aware:
-
-```text
-checkpoint for fold_1: train on fold_2 + fold_3 + fold_4 + fold_5
-checkpoint for fold_2: train on fold_1 + fold_3 + fold_4 + fold_5
-checkpoint for fold_3: train on fold_1 + fold_2 + fold_4 + fold_5
-checkpoint for fold_4: train on fold_1 + fold_2 + fold_3 + fold_5
-checkpoint for fold_5: train on fold_1 + fold_2 + fold_3 + fold_4
-```
-
-This avoids training a proxy model on the same images that are later attacked for that fold.
-
-## Supported proxy models
-
-| Model name | Meaning | Checkpoint path pattern |
+| Model | Implementation | Checkpoint contents |
 |---|---|---|
-| `resnet18` | ResNet18 binary classifier | `models/checkpoints/resnet18/<fold>.pt` |
-| `efficientnet_b0` | EfficientNet-B0 binary classifier | `models/checkpoints/efficientnet_b0/<fold>.pt` |
-| `clip` | Frozen CLIP visual encoder + trained binary head | `models/checkpoints/clip/<fold>.pt` |
+| `resnet18` | ImageNet-initialized `torchvision.resnet18` | Complete binary classifier |
+| `efficientnet_b0` | ImageNet-initialized `torchvision.efficientnet_b0` | Complete binary classifier |
+| `clip` | `open_clip` ViT-B/32 | Trained binary head only; external base weights required |
 
-## Training commands
+## Controlled-data prerequisite
 
-Run the interactive launcher directly:
+Image corpora are not tracked on `main`. Before training, obtain authorized
+access to the raw bundle and regenerate the clean split files through steps
+00–11. The canonical split manifest remains:
+
+```text
+datasets/splits/manifests/clean_folds_manifest.csv
+```
+
+## Training
+
+Official entry point:
 
 ```bash
 python models/scripts/12_train_proxy_models.py
 ```
 
-Smoke test on ResNet18 for `fold_1`:
+Frozen CNN training command:
 
 ```bash
 python models/scripts/12_train_proxy_models.py \
-  --model resnet18 \
-  --fold fold_1 \
-  --epochs 2 \
-  --batch-size 16 \
-  --device auto
-```
-
-Train all ResNet18 fold checkpoints:
-
-```bash
-python models/scripts/12_train_proxy_models.py \
-  --model resnet18 \
-  --fold all \
-  --epochs 10 \
-  --batch-size 16 \
-  --device auto
-```
-
-Train all EfficientNet-B0 fold checkpoints:
-
-```bash
-python models/scripts/12_train_proxy_models.py \
-  --model efficientnet_b0 \
-  --fold all \
-  --epochs 10 \
-  --batch-size 16 \
-  --device auto
-```
-
-Train all CLIP binary-head fold checkpoints:
-
-```bash
-python models/scripts/12_train_proxy_models.py \
-  --model clip \
-  --fold all \
-  --epochs 10 \
-  --batch-size 32 \
-  --device auto
-```
-
-Train all official proxy models:
-
-```bash
-python models/scripts/12_train_proxy_models.py \
-  --model resnet18 efficientnet_b0 clip \
+  --model resnet18 efficientnet_b0 \
   --fold all \
   --epochs 10 \
   --batch-size 16 \
@@ -146,51 +77,48 @@ python models/scripts/12_train_proxy_models.py \
   --force
 ```
 
-## Adversarial generation with per-fold checkpoints
-
-The official fold-aware adversarial entry point is:
-
-```text
-datasets/scripts/attacks/14_generate_adversarial_attacks.py
-```
-
-The script resolves checkpoints deterministically as:
-
-```text
-models/checkpoints/<target_model>/<fold>.pt
-```
-
-For example, an image from `fold_1` attacked against `efficientnet_b0` uses:
-
-```text
-models/checkpoints/efficientnet_b0/fold_1.pt
-```
-
-Official FGSM generation against the primary proxy target:
+Frozen CLIP-head training command:
 
 ```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack fgsm \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
+python models/scripts/12_train_proxy_models.py \
+  --model clip \
+  --fold all \
+  --epochs 10 \
+  --batch-size 32 \
+  --learning-rate 0.0001 \
+  --weight-decay 0.0001 \
+  --validation-ratio 0.15 \
+  --seed 42 \
   --device auto \
+  --input-size 224 \
+  --num-workers 2 \
   --force
 ```
 
-Smoke test before full generation:
+The interactive launcher remains available when the script is run without
+arguments. For CLIP, the visual encoder is always frozen and only the binary
+head is trained. The `--freeze-backbone` option affects only ResNet18 and
+EfficientNet-B0.
 
-```bash
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py \
-  --attack fgsm \
-  --target-model efficientnet_b0 \
-  --checkpoint-root models/checkpoints \
-  --device auto \
-  --limit 10 \
-  --force
+Before training, the script validates image presence, fold/class balance,
+identifier uniqueness, and SHA256 correspondence with the split manifest.
+Training-report updates use an upsert keyed by `model_name + fold`, preventing a
+partial rerun from deleting records for the other checkpoints.
+
+## Registry, reports, and checkpoints
+
+```text
+models/model_registry.json
+models/reports/proxy_model_training_summary.csv
+models/checkpoints/<model_name>/<fold>.pt
 ```
 
-FGSM outputs are saved as lossless PNG files to preserve epsilon-bounded perturbations.
+The registry stores architecture metadata, checkpoint paths, SHA256 identifiers,
+and training timestamps. Checkpoints are tracked through Git LFS; no public
+image corpus is required to inspect their recorded identities.
 
-## Git LFS
+Official evaluation entry point:
 
-Checkpoint files (`*.pt`, `*.pth`, `*.ckpt`, `*.safetensors`) must be tracked with Git LFS or stored externally and downloaded through the model registry.
+```text
+evaluation/scripts/15_evaluate_proxy_models.py
+```
