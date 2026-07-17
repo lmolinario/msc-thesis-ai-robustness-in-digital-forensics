@@ -158,6 +158,16 @@ The 1,500-image frozen dataset is the methodological source dataset. The forensi
 
 ---
 
+## Repository Versions and Historical Preservation
+
+The `main` branch is the authoritative, curated version of this research artifact.
+
+For provenance and audit purposes, the repository also preserves the protected historical snapshot [`archive/pre-commission-cleanup-2026-07-16`](https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics/tree/archive/pre-commission-cleanup-2026-07-16), representing the state before public-release cleanup and data minimization.
+
+The archive is read-only and is not the current source of documentation or experimental results. The protected annotated tag [`snapshot/pre-commission-cleanup-2026-07-16`](https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics/tree/snapshot/pre-commission-cleanup-2026-07-16) identifies the same immutable commit. See [`docs/artifact/ARCHIVE_SNAPSHOT.md`](docs/artifact/ARCHIVE_SNAPSHOT.md) for the preservation and access boundary.
+
+---
+
 ## Official Dataset Artifacts
 
 Official frozen dataset manifest:
