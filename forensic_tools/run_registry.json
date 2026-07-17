@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0",
+  "artifact_status": "frozen_experimental_runs",
+  "authoritative_branch": "main",
+  "historical_snapshot": {
+    "branch": "archive/pre-commission-cleanup-2026-07-16",
+    "tag": "snapshot/pre-commission-cleanup-2026-07-16",
+    "commit": "309a4580537ebc3bb7950f29c090bb2729fc603b"
+  },
+  "blind_input": "datasets/forensic_evaluation_bundle/blind_tool_input/files/",
+  "bundle_manifest": "datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv",
+  "normalization_entry_point": "evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py",
+  "public_metric_artifact": "results/metrics/forensic_tools_metrics.csv",
+  "raw_export_policy": "retained_on_main_pending_sanitized_extract_equivalence_validation",
+  "configurations": [
+    {
+      "tool_name": "magnet_axiom",
+      "display_name": "Magnet AXIOM / Magnet.AI",
+      "tool_version": "10.1.0.48673",
+      "run_id": "FAIRLAB_AXIOM_RUN_02",
+      "raw_export_format": "CSV and JSON",
+      "prediction_source": "Pictures.csv",
+      "observable_field": "Tags",
+      "positive_mapping": [
+        "Possible weapons"
+      ],
+      "raw_prediction_rows": 11500,
+      "matched_bundle_rows": 11500,
+      "unmatched_rows": 0,
+      "normalized_tool_name": "magnet_axiom",
+      "tool_metric_artifact": "results/metrics/magnet_axiom_metrics.csv"
+    },
+    {
+      "tool_name": "excire_foto_2025_d20",
+      "display_name": "Excire Foto 2025",
+      "tool_version": "4.1.5",
+      "run_id": "FAIRLAB_EXCIRE_D20_FIREARM_PROMPTS",
+      "configuration": "semantic_distance_20",
+      "raw_export_format": "CSV prompt hit lists",
+      "prediction_source": "eight fixed firearm-oriented semantic prompts",
+      "observable_field": "prompt retrieval membership",
+      "positive_mapping": [
+        "at least one prompt hit"
+      ],
+      "raw_prompt_hit_rows": 20329,
+      "matched_bundle_rows": 11500,
+      "unmatched_rows": 0,
+      "normalized_tool_name": "excire_foto_2025_d20",
+      "tool_metric_artifact": "results/metrics/excire_foto_2025_d20_metrics.csv"
+    },
+    {
+      "tool_name": "excire_foto_2025_d50",
+      "display_name": "Excire Foto 2025",
+      "tool_version": "4.1.5",
+      "run_id": "FAIRLAB_EXCIRE_D50_FIREARM_PROMPTS",
+      "configuration": "semantic_distance_50",
+      "raw_export_format": "CSV prompt hit lists",
+      "prediction_source": "eight fixed firearm-oriented semantic prompts",
+      "observable_field": "prompt retrieval membership",
+      "positive_mapping": [
+        "at least one prompt hit"
+      ],
+      "raw_prompt_hit_rows": 32076,
+      "matched_bundle_rows": 11500,
+      "unmatched_rows": 0,
+      "normalized_tool_name": "excire_foto_2025_d50",
+      "tool_metric_artifact": "results/metrics/excire_foto_2025_d50_metrics.csv"
+    },
+    {
+      "tool_name": "excire_foto_2025_d80",
+      "display_name": "Excire Foto 2025",
+      "tool_version": "4.1.5",
+      "run_id": "FAIRLAB_EXCIRE_D80_FIREARM_PROMPTS",
+      "configuration": "semantic_distance_80",
+      "raw_export_format": "CSV prompt hit lists",
+      "prediction_source": "eight fixed firearm-oriented semantic prompts",
+      "observable_field": "prompt retrieval membership",
+      "positive_mapping": [
+        "at least one prompt hit"
+      ],
+      "raw_prompt_hit_rows": 43736,
+      "matched_bundle_rows": 11500,
+      "unmatched_rows": 0,
+      "normalized_tool_name": "excire_foto_2025_d80",
+      "tool_metric_artifact": "results/metrics/excire_foto_2025_d80_metrics.csv"
+    },
+    {
+      "tool_name": "cellebrite_inseyets",
+      "display_name": "Cellebrite Inseyets / Physical Analyzer",
+      "tool_version": "10.9",
+      "tool_build": "Physical Analyzer 10.9.0.3029 / UFED 10.9.0.284",
+      "run_id": "FAIRLAB_CELLEBRITE_INSEYETS_RUN_01",
+      "raw_export_format": "XLSX report",
+      "prediction_source": "Physical Analyzer report export",
+      "observable_field": "Classifications",
+      "positive_mapping": [
+        "Armi",
+        "Pistola",
+        "Fucile"
+      ],
+      "raw_prediction_rows": 11829,
+      "matched_bundle_rows": 11500,
+      "unmatched_rows": 329,
+      "normalized_tool_name": "cellebrite_inseyets",
+      "tool_metric_artifact": "results/metrics/cellebrite_inseyets_metrics.csv"
+    },
+    {
+      "tool_name": "griffeye",
+      "display_name": "Magnet Griffeye / T3K CORE",
+      "tool_version": "26.2.108",
+      "tool_build": "T3K CORE 1.18.0",
+      "run_id": "FAIRLAB_GRIFFEYE_T3_RUN_01",
+      "raw_export_format": "CSV",
+      "prediction_source": "automatically generated semantic bookmarks",
+      "observable_field": "Bookmarks",
+      "positive_mapping": [
+        "CORE/Violence/Firearm"
+      ],
+      "raw_export_rows": 12053,
+      "non_bundle_rows": 553,
+      "matched_bundle_rows": 11500,
+      "unmatched_rows": 0,
+      "normalized_tool_name": "griffeye",
+      "tool_metric_artifact": "results/metrics/griffeye_metrics.csv"
+    }
+  ]
+}
