@@ -8,6 +8,9 @@
   "fold_protocol": "leave_one_fold_out_proxy_training",
   "input_manifest": "datasets/splits/manifests/clean_folds_manifest.csv",
   "checkpoint_root": "models/checkpoints",
+  "training_script": "models/scripts/12_train_proxy_models.py",
+  "training_report": "models/reports/proxy_model_training_summary.csv",
+  "checkpoint_distribution": "git_lfs",
   "models": {
     "resnet18": {
       "architecture": "torchvision.resnet18",
@@ -16,7 +19,7 @@
       "input_size": 224,
       "normalization": "imagenet",
       "checkpoint_pattern": "models/checkpoints/resnet18/{fold}.pt",
-      "download_url": "",
+      "checkpoint_distribution": "git_lfs",
       "sha256": {
         "fold_1": "faf898a9fec3e9ef3d691aa93d6d6c5f145f27bbf2f585c4bcd22cbab236d828",
         "fold_2": "ae985687404b80572830482a31a1ecf563f60df54619aab770abb48401782814",
@@ -33,7 +36,7 @@
       "input_size": 224,
       "normalization": "imagenet",
       "checkpoint_pattern": "models/checkpoints/efficientnet_b0/{fold}.pt",
-      "download_url": "",
+      "checkpoint_distribution": "git_lfs",
       "sha256": {
         "fold_1": "46d1fd9ccfebf39a370169d94cd374212a8ca7cb24a6502cc9adf283b1191ff6",
         "fold_2": "59fef93da20f0f8b6598e3653485e9feb8ed0e9ded97db52ae6e415175f517e5",
@@ -50,7 +53,10 @@
       "input_size": 224,
       "normalization": "clip",
       "checkpoint_pattern": "models/checkpoints/clip/{fold}.pt",
-      "download_url": "",
+      "checkpoint_distribution": "git_lfs",
+      "external_base_weights_required": true,
+      "external_base_model": "open_clip.ViT-B-32",
+      "external_base_weights": "openai",
       "sha256": {
         "fold_1": "12b68c964e111044f2e36a7da815d47a7135f6fbaa8a751cf3182cb5293bb98b",
         "fold_2": "c3acc87c3cea4b018f8641d0a68226fc7d3a37c83a429acc5a1c9afd148f21b6",
