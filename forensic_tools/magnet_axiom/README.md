@@ -32,18 +32,26 @@ This is an operational recoding of observable output. It does not imply access t
 
 ## Public artifacts
 
+- `forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv`
+- `forensic_tools/public_extracts_summary.json`
+- `forensic_tools/public_extracts_validation.json`
 - `forensic_tools/run_registry.json`
 - `evaluation/forensic_tools/tool_version_log.csv`
 - `evaluation/forensic_tools/tool_export_audit.csv`
-- `evaluation/forensic_tools/normalization_summary.json`
 - `results/metrics/magnet_axiom_metrics.csv`
 - `results/metrics/forensic_tools_metrics.csv`
 
 ## Raw-export boundary
 
-The original AXIOM export includes fields not required by the weapon-tag metric, such as file-system timestamps, hashes, paths, EXIF-derived values, device identifiers, and case-export metadata. The raw export is temporarily retained on `main` while a minimized public extract is built and validated.
+The complete AXIOM export included file-system timestamps, hashes, paths, EXIF-derived values, device identifiers, and case-export metadata not required by the weapon-tag metric.
 
-No raw export will be removed until the sanitized extract has been shown to reproduce the frozen bundle-level decisions and metrics exactly. The protected branch and tag documented in `docs/artifact/ARCHIVE_SNAPSHOT.md` preserve the complete pre-cleanup repository state for provenance.
+After exact equivalence validation of all 69,000 sanitized decisions and all 186 metric rows, the complete AXIOM raw export was removed from `main`. It remains preserved in the protected historical snapshot and may be restored locally under:
+
+```text
+forensic_tools/magnet_axiom/raw_exports/
+```
+
+That local path is ignored by Git.
 
 ## Normalization
 
@@ -53,4 +61,4 @@ The official entry point is:
 python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py --force
 ```
 
-Canonical regeneration also requires the local blind-bundle metadata and all official commercial-tool exports.
+Canonical regeneration requires the local blind-bundle metadata and all official commercial-tool raw exports.

@@ -36,18 +36,26 @@ This operational mapping does not imply access to internal Cellebrite model prob
 
 ## Public artifacts
 
+- `forensic_tools/cellebrite_inseyets/public_extracts/cellebrite_classifications_extract.csv`
+- `forensic_tools/public_extracts_summary.json`
+- `forensic_tools/public_extracts_validation.json`
 - `forensic_tools/run_registry.json`
 - `evaluation/forensic_tools/tool_version_log.csv`
 - `evaluation/forensic_tools/tool_export_audit.csv`
-- `evaluation/forensic_tools/normalization_summary.json`
 - `results/metrics/cellebrite_inseyets_metrics.csv`
 - `results/metrics/forensic_tools_metrics.csv`
 
 ## Raw-export boundary
 
-The original report contains substantially more information than the `Classifications` field required for this experiment, including file-system and case-export details. It is temporarily retained on `main` while a minimized classification extract is generated and validated.
+The original XLSX report contained file-system and case-export details not required by the `Classifications` mapping. The public extract retains anonymized bundle identifiers, the observable classification field, and normalized decision fields; the 329 non-bundle rows remain documented only as aggregate audit counts.
 
-The planned public extract will contain only anonymized bundle identifiers, the observable classification field, match status, and normalized binary decision. The complete report will not be removed before exact equivalence validation and an explicit final decision.
+After exact equivalence validation, the complete report was removed from `main`. It remains preserved in the protected historical snapshot and may be restored locally under:
+
+```text
+forensic_tools/cellebrite_inseyets/raw_exports/
+```
+
+That local path is ignored by Git.
 
 ## Normalization
 

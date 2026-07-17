@@ -27,17 +27,7 @@ assault rifle
 
 ## Observable mapping
 
-For each distance configuration, an image retrieved by at least one fixed prompt is mapped to:
-
-```text
-weapon_detected = true
-```
-
-Images not retrieved by any prompt are completed against the frozen 11,500-item bundle as:
-
-```text
-weapon_detected = false
-```
+For each distance configuration, an image retrieved by at least one fixed prompt is mapped to `weapon_detected=true`. Images not retrieved by any prompt are completed against the frozen 11,500-item bundle as `weapon_detected=false`.
 
 The three settings remain separate normalized configurations:
 
@@ -49,10 +39,12 @@ excire_foto_2025_d80
 
 ## Public artifacts
 
+- `forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv`
+- `forensic_tools/public_extracts_summary.json`
+- `forensic_tools/public_extracts_validation.json`
 - `forensic_tools/run_registry.json`
 - `evaluation/forensic_tools/tool_version_log.csv`
 - `evaluation/forensic_tools/tool_export_audit.csv`
-- `evaluation/forensic_tools/normalization_summary.json`
 - `results/metrics/excire_foto_2025_d20_metrics.csv`
 - `results/metrics/excire_foto_2025_d50_metrics.csv`
 - `results/metrics/excire_foto_2025_d80_metrics.csv`
@@ -60,9 +52,15 @@ excire_foto_2025_d80
 
 ## Raw-export boundary
 
-The original prompt-hit CSV files currently preserve local Windows paths in addition to anonymized bundle filenames. They are temporarily retained on `main` while sanitized prompt-level extracts are generated and checked for exact decision and metric equivalence.
+The 24 original prompt-hit CSV files included local Windows paths in addition to anonymized bundle filenames. The sanitized public extract retains only bundle identifiers, semantic-distance configuration, prompt membership, and normalized decision fields.
 
-The planned public extract will retain only the bundle identifier, semantic distance, prompt membership, and normalized decision. Original raw exports will not be removed before equivalence validation and an explicit final decision.
+After exact equivalence validation, the 24 raw CSV files were removed from `main`. They remain preserved in the protected historical snapshot and may be restored locally under:
+
+```text
+forensic_tools/excire_foto_2025/raw_exports/
+```
+
+That local path is ignored by Git.
 
 ## Normalization
 

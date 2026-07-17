@@ -38,20 +38,28 @@ CORE/Military/Military Equipment
 
 ## Public artifacts
 
+- `forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv`
+- `forensic_tools/public_extracts_summary.json`
+- `forensic_tools/public_extracts_validation.json`
 - `forensic_tools/run_registry.json`
 - `evaluation/forensic_tools/tool_version_log.csv`
 - `evaluation/forensic_tools/tool_export_audit.csv`
-- `evaluation/forensic_tools/normalization_summary.json`
 - `results/metrics/griffeye_metrics.csv`
 - `results/metrics/forensic_tools_metrics.csv`
 
 ## Raw-export boundary
 
-The original Griffeye CSV contains many fields unrelated to the firearm-bookmark metric, including multiple hashes, PhotoDNA, paths, timestamps, EXIF fields, face-detection fields, RIC/CSA columns, file-system records, and case-management metadata.
+The original Griffeye CSV contained multiple hashes, PhotoDNA, paths, timestamps, EXIF fields, face-detection fields, RIC/CSA columns, file-system records, and case-management metadata unrelated to the firearm-bookmark metric.
 
-The raw export is temporarily retained on `main` while a minimized bookmark extract is generated and validated. The planned extract will preserve only the anonymized bundle identifier, the firearm bookmark, selected secondary weapon bookmarks, and the normalized decision.
+The sanitized public extract preserves only anonymized bundle identifiers, the firearm bookmark, selected secondary weapon bookmarks, and normalized decision fields. After exact equivalence validation, the complete raw CSV was removed from `main`.
 
-No raw export will be removed before exact bundle-decision and metric equivalence has been demonstrated and an explicit final decision has been made.
+It remains preserved in the protected historical snapshot and may be restored locally under:
+
+```text
+forensic_tools/griffeye/raw_exports/
+```
+
+That local path is ignored by Git.
 
 ## Normalization
 

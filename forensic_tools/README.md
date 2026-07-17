@@ -34,34 +34,32 @@ datasets/forensic_evaluation_bundle/structured_audit_view/
 
 Ground truth, attack conditions, source information, and hash mappings are used only after export for normalization and audit.
 
-## Directory structure
+## Public structure
 
 ```text
 forensic_tools/
 ├── README.md
 ├── run_registry.json
+├── public_extracts_summary.json
+├── public_extracts_validation.json
 ├── scripts/
 │   ├── build_public_tool_extracts.py
 │   └── validate_public_extract_equivalence.py
 ├── magnet_axiom/
 │   ├── README.md
-│   ├── raw_exports/
-│   └── public_extracts/              # generated locally after validation workflow
+│   └── public_extracts/
 ├── excire_foto_2025/
 │   ├── README.md
-│   ├── raw_exports/
-│   └── public_extracts/              # generated locally after validation workflow
+│   └── public_extracts/
 ├── cellebrite_inseyets/
 │   ├── README.md
-│   ├── raw_exports/
-│   └── public_extracts/              # generated locally after validation workflow
+│   └── public_extracts/
 └── griffeye/
     ├── README.md
-    ├── raw_exports/
-    └── public_extracts/              # generated locally after validation workflow
+    └── public_extracts/
 ```
 
-The `public_extracts/` directories are created by the sanitization script. They are not yet the basis for removing the original exports.
+Complete commercial-tool raw exports are not distributed on `main`.
 
 ## Run registry
 
@@ -71,17 +69,7 @@ The consolidated run metadata are recorded in:
 forensic_tools/run_registry.json
 ```
 
-The registry provides, for each normalized configuration:
-
-- tool and version;
-- frozen run ID;
-- export format;
-- observable field;
-- positive mapping rule;
-- raw, matched, and unmatched row counts;
-- normalized tool identifier;
-- public metric artifact;
-- immutable historical snapshot reference.
+The registry provides tool versions, frozen run IDs, export formats, observable fields, positive mapping rules, raw and matched row counts, sanitized extract paths, metric artifacts, and the immutable historical snapshot reference.
 
 ## Observable mappings
 
@@ -94,109 +82,90 @@ The registry provides, for each normalized configuration:
 
 These are operational recodings of exported fields, not direct measurements of proprietary internal model probabilities.
 
-## Canonical normalization
+## Sanitized public extracts
 
-The official normalization entry point is:
+The public prediction-level artifacts are:
+
+```text
+forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv
+forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv
+forensic_tools/cellebrite_inseyets/public_extracts/cellebrite_classifications_extract.csv
+forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv
+```
+
+They contain 69,000 rows in total:
+
+- 11,500 Magnet AXIOM decisions;
+- 34,500 Excire decisions across D20, D50, and D80;
+- 11,500 Cellebrite decisions;
+- 11,500 Griffeye decisions.
+
+The extracts retain only anonymized bundle identifiers, experimental condition fields required to recompute metrics, the observable tool signal required for audit, and normalized decision fields. Local paths, device names, serial numbers, unrelated EXIF fields, PhotoDNA, case-management fields, and other unnecessary export metadata are excluded.
+
+## Exact equivalence validation
+
+The validation report:
+
+```text
+forensic_tools/public_extracts_validation.json
+```
+
+records that:
+
+```text
+69,000 sanitized decisions are identical
+186 metric rows are identical
+```
+
+The corresponding hashes and row counts are recorded in:
+
+```text
+forensic_tools/public_extracts_summary.json
+```
+
+The validator fails if any tool/bundle decision, condition field, or frozen metric changes.
+
+## Raw-export distribution policy
+
+The 31 complete raw export files used in the experiment are not distributed on `main`.
+
+They remain available only through:
+
+- the protected historical branch `archive/pre-commission-cleanup-2026-07-16`;
+- the protected annotated tag `snapshot/pre-commission-cleanup-2026-07-16`;
+- the exact immutable commit `309a4580537ebc3bb7950f29c090bb2729fc603b`;
+- controlled local or authorized research storage.
+
+The historical snapshot supports provenance and audit. Its existence does not grant permission to redistribute third-party images, proprietary exports, or controlled underlying data.
+
+`evaluation/forensic_tools/tool_export_audit.csv` remains on `main` as a historical record of the raw files processed by the frozen pipeline. Paths recorded there identify the original experiment layout and are not expected to resolve on the curated branch.
+
+## Local regeneration
+
+Canonical regeneration requires locally restored raw exports under the ignored directories:
+
+```text
+forensic_tools/**/raw_exports/
+```
+
+Run step 19:
 
 ```bash
 python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py --force
 ```
 
-Canonical regeneration requires:
-
-- the locally restored blind bundle and metadata;
-- the official commercial-tool raw exports;
-- all six frozen configurations;
-- output coverage of 11,500 bundle items per configuration;
-- 69,000 matched normalized decisions in total;
-- zero `unknown` normalized decisions.
-
-Prediction-level normalized outputs are generated locally and are not currently distributed on `main`. Public audit and metric artifacts remain under:
-
-```text
-evaluation/forensic_tools/
-results/metrics/
-```
-
-## Sanitized public-extract workflow
-
-The raw exports are **not being removed at this stage**.
-
-The planned transition is deliberately fail-closed:
-
-```text
-raw commercial exports
-→ local normalized predictions
-→ minimized public extracts
-→ decision equivalence validation
-→ 186-row metric equivalence validation
-→ explicit final decision on raw-export retention
-```
-
-### 1. Build minimized extracts
-
-After regenerating `evaluation/forensic_tools/normalized_predictions.csv` locally:
-
-```bash
-python forensic_tools/scripts/build_public_tool_extracts.py
-```
-
-Use `--force` only for an intentional replacement:
+Then rebuild and validate the public extracts:
 
 ```bash
 python forensic_tools/scripts/build_public_tool_extracts.py --force
+python forensic_tools/scripts/validate_public_extract_equivalence.py --force
 ```
 
-The extracts retain only:
-
-- anonymized `bundle_id`;
-- experimental condition fields required to recompute metrics;
-- the observable tool signal required for audit;
-- normalized decision fields.
-
-They exclude local paths, case locations, device names, unrelated EXIF fields, serial numbers, PhotoDNA, case-management fields, and other export metadata unnecessary for the experiment.
-
-### 2. Validate exact equivalence
-
-```bash
-python forensic_tools/scripts/validate_public_extract_equivalence.py
-```
-
-The validator fails if:
-
-- a tool/bundle decision is missing or added;
-- any `weapon_detected` value changes;
-- sample type, attack family, attack name, or final label changes;
-- the six configurations do not each contain 11,500 rows;
-- the 69,000 sanitized decisions differ from the local normalized source;
-- the recomputed 186 metric rows differ from `results/metrics/forensic_tools_metrics.csv`.
-
-Only a successful validation report can support a later proposal to remove or relocate complete raw exports.
-
-## Current raw-export policy
-
-The original exports remain temporarily tracked on `main` pending sanitized-extract equivalence validation.
-
-This temporary retention supports review of the complete transformation chain:
-
-```text
-commercial-tool export
-→ normalization
-→ bundle matching
-→ metric generation
-```
-
-No raw export will be removed without:
-
-1. generation of the sanitized extracts;
-2. exact decision equivalence;
-3. exact metric equivalence;
-4. review of the generated files;
-5. explicit approval of the final retention policy.
+Raw exports, case files, and local staging outputs must not be committed to `main`.
 
 ## Historical preservation
 
-The full pre-cleanup repository state is independently preserved through:
+The full pre-cleanup repository state is preserved through:
 
 ```text
 branch: archive/pre-commission-cleanup-2026-07-16
@@ -210,7 +179,7 @@ Both branch and tag are protected against updates, deletion, and force pushes. S
 docs/artifact/ARCHIVE_SNAPSHOT.md
 ```
 
-The archive supports provenance and recovery, while `main` remains the authoritative curated research artifact.
+`main` remains the authoritative curated research artifact.
 
 ## Tool-specific documentation
 
@@ -232,4 +201,4 @@ results/metrics/<tool>_metrics.csv
 results/figures/chapter_5/
 ```
 
-Commercial-tool results must remain distinct from transparent proxy-model results. Their exported labels and bookmarks are observable operational signals, not evidence of internal model behavior.
+Commercial-tool results remain distinct from transparent proxy-model results. Their exported labels and bookmarks are observable operational signals, not evidence of internal model behavior.
