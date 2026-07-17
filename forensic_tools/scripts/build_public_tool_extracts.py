@@ -290,7 +290,7 @@ def main() -> None:
             for label, path in OUTPUTS.items()
         },
         "decision_profile": EXPECTED_COUNTS,
-        "local_paths_detected": false if False else False,
+        "local_paths_detected": False,
         "validation_required": "forensic_tools/scripts/validate_public_extract_equivalence.py",
     }
     if summary_path.exists() and not args.force:
