@@ -2,24 +2,35 @@
 
 Raw image corpora are intentionally not tracked on the `main` branch.
 
-Access to the externally hosted raw bundle is granted case by case by the thesis
-author or repository maintainer. No private download URL is stored in this
-repository.
-
-After authorization, provide the received URL locally through:
+The raw bundle is stored on Google Drive with **Restricted** access. The Drive
+page is retained only to allow an interested reviewer or researcher to request
+authorization:
 
 ```text
-FAIRLAB_RAW_DATASET_BUNDLE_URL
+https://drive.google.com/file/d/1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link
 ```
 
-and run:
+Opening the link does not grant access. Use:
 
 ```bash
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --request-access
 ```
 
-The URL may alternatively be supplied with `--url`. It must not be committed,
-published, or redistributed.
+Sign in to Google Drive, select **Request access**, and wait for approval by the
+thesis author or repository maintainer.
+
+After approval, download the ZIP through the authenticated browser and restore
+it locally with:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --archive "/path/to/00_raw_datasets_bundle.zip"
+```
+
+An authorized direct-download URL may alternatively be provided through `--url`
+or `FAIRLAB_RAW_DATASET_BUNDLE_URL`. Private or temporary URLs must not be
+committed or redistributed.
 
 Downloaded and extracted data remain local and are ignored by Git. Prepared
 images, clean/OOD splits, perturbations, and the forensic evaluation bundle must
