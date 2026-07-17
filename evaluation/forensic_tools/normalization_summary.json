@@ -1,12 +1,34 @@
 {
+  "schema_version": "2.0",
   "script": "evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py",
-  "created_at": "2026-06-10T16:14:10+00:00",
+  "frozen_run_created_at": "2026-06-10T16:14:10+00:00",
+  "public_distribution_policy": "metrics_audit_and_schemas_only",
+  "prediction_level_outputs": {
+    "distributed_on_main": false,
+    "reason": "Per-sample normalized outputs are locally regenerable and may contain proprietary-export-derived or legacy local-path details.",
+    "local_outputs": [
+      "evaluation/forensic_tools/normalized_predictions.csv",
+      "evaluation/forensic_tools/unmatched_predictions.csv"
+    ],
+    "schema_files": [
+      "evaluation/forensic_tools/normalized_predictions.schema.csv",
+      "evaluation/forensic_tools/unmatched_predictions.schema.csv"
+    ]
+  },
   "bundle_rows": 11500,
   "tools_requested": [
     "magnet_axiom",
     "excire_foto_2025",
     "cellebrite_inseyets",
     "griffeye"
+  ],
+  "output_tool_names": [
+    "cellebrite_inseyets",
+    "excire_foto_2025_d20",
+    "excire_foto_2025_d50",
+    "excire_foto_2025_d80",
+    "griffeye",
+    "magnet_axiom"
   ],
   "selected_run_dirs_by_tool": {
     "magnet_axiom": [
@@ -32,14 +54,6 @@
     "cellebrite_inseyets": 1,
     "griffeye": 1
   },
-  "per_tool_total_export_counts": {
-    "magnet_axiom": 5,
-    "excire_foto_2025_d20": 8,
-    "excire_foto_2025_d50": 8,
-    "excire_foto_2025_d80": 8,
-    "cellebrite_inseyets": 1,
-    "griffeye": 1
-  },
   "per_tool_raw_row_counts": {
     "magnet_axiom": 11500,
     "excire_foto_2025_d20": 20329,
@@ -48,18 +62,23 @@
     "cellebrite_inseyets": 11829,
     "griffeye": 11500
   },
-  "output_tool_names": [
-    "cellebrite_inseyets",
-    "excire_foto_2025_d20",
-    "excire_foto_2025_d50",
-    "excire_foto_2025_d80",
-    "griffeye",
-    "magnet_axiom"
-  ],
-  "stale_outputs_removed": [],
+  "raw_rows_parsed": 130970,
+  "pre_normalized_rows": 34500,
+  "normalized_rows_before_deduplication": 69329,
+  "matched_rows_before_deduplication": 69000,
+  "unmatched_rows_before_deduplication": 329,
+  "unmatched_rows_by_tool": {
+    "cellebrite_inseyets": 329
+  },
+  "deduplication_enabled": true,
+  "normalized_rows_after_deduplication": 69000,
+  "matched_rows_after_deduplication": 69000,
+  "interpretable_rows_after_deduplication": 69000,
+  "weapon_detected_true_after_deduplication": 34131,
+  "weapon_detected_false_after_deduplication": 34869,
+  "weapon_detected_unknown_after_deduplication": 0,
   "metric_output_validation": {
     "aggregate_path": "results/metrics/forensic_tools_metrics.csv",
-    "aggregate_exists": true,
     "aggregate_rows": 186,
     "expected_aggregate_rows": 186,
     "aggregate_tool_counts": {
@@ -70,83 +89,9 @@
       "griffeye": 31,
       "magnet_axiom": 31
     },
-    "expected_tool_counts": {
-      "cellebrite_inseyets": 31,
-      "excire_foto_2025_d20": 31,
-      "excire_foto_2025_d50": 31,
-      "excire_foto_2025_d80": 31,
-      "griffeye": 31,
-      "magnet_axiom": 31
-    },
-    "aggregate_matches_memory": true,
-    "aggregate_error": "",
-    "per_tool_files": {
-      "cellebrite_inseyets": {
-        "path": "results/metrics/cellebrite_inseyets_metrics.csv",
-        "exists": true,
-        "rows": 31,
-        "expected_rows": 31,
-        "matches_expected": true,
-        "error": ""
-      },
-      "excire_foto_2025_d20": {
-        "path": "results/metrics/excire_foto_2025_d20_metrics.csv",
-        "exists": true,
-        "rows": 31,
-        "expected_rows": 31,
-        "matches_expected": true,
-        "error": ""
-      },
-      "excire_foto_2025_d50": {
-        "path": "results/metrics/excire_foto_2025_d50_metrics.csv",
-        "exists": true,
-        "rows": 31,
-        "expected_rows": 31,
-        "matches_expected": true,
-        "error": ""
-      },
-      "excire_foto_2025_d80": {
-        "path": "results/metrics/excire_foto_2025_d80_metrics.csv",
-        "exists": true,
-        "rows": 31,
-        "expected_rows": 31,
-        "matches_expected": true,
-        "error": ""
-      },
-      "griffeye": {
-        "path": "results/metrics/griffeye_metrics.csv",
-        "exists": true,
-        "rows": 31,
-        "expected_rows": 31,
-        "matches_expected": true,
-        "error": ""
-      },
-      "magnet_axiom": {
-        "path": "results/metrics/magnet_axiom_metrics.csv",
-        "exists": true,
-        "rows": 31,
-        "expected_rows": 31,
-        "matches_expected": true,
-        "error": ""
-      }
-    },
-    "per_tool_files_match_memory": true,
     "all_metric_outputs_consistent": true
   },
-  "raw_rows_parsed": 130970,
-  "pre_normalized_rows": 34500,
-  "normalized_rows_before_deduplication": 69329,
-  "matched_rows_before_deduplication": 69000,
-  "deduplication_enabled": true,
-  "normalized_rows_after_deduplication": 69000,
-  "matched_rows_after_deduplication": 69000,
-  "unmatched_rows_after_deduplication": 0,
-  "interpretable_rows_after_deduplication": 69000,
-  "weapon_detected_true_after_deduplication": 34131,
-  "weapon_detected_false_after_deduplication": 34869,
-  "weapon_detected_unknown_after_deduplication": 0,
-  "outputs": {
-    "normalized_predictions": "evaluation/forensic_tools/normalized_predictions.csv",
+  "public_outputs": {
     "tool_export_audit": "evaluation/forensic_tools/tool_export_audit.csv",
     "tool_version_log": "evaluation/forensic_tools/tool_version_log.csv",
     "normalization_summary": "evaluation/forensic_tools/normalization_summary.json",

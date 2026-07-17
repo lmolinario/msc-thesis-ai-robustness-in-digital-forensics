@@ -1,0 +1,8 @@
+# Locally regenerated prediction-level outputs
+normalized_predictions.csv
+unmatched_predictions.csv
+*_normalized_predictions.csv
+
+# Public schema-only files
+!normalized_predictions.schema.csv
+!unmatched_predictions.schema.csv
