@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "entry_point": "explainability/scripts/17_generate_integrated_gradients_case_studies.py",
+  "frozen_implementation": "explainability/scripts/_17_generate_integrated_gradients_case_studies_impl.py",
+  "model_registry": "models/model_registry.json",
+  "prediction_source": "evaluation/proxy_models/proxy_model_predictions.csv",
+  "historical_snapshot": {
+    "branch": "archive/pre-commission-cleanup-2026-07-16",
+    "tag": "snapshot/pre-commission-cleanup-2026-07-16",
+    "commit": "309a4580537ebc3bb7950f29c090bb2729fc603b"
+  },
+  "integrity_policy": {
+    "checkpoint_sha256": "required_against_model_registry",
+    "input_sha256": "verified_when_expected_hash_is_available",
+    "run_output_cleanup": "atomic_per_run_tag_when_force_is_used",
+    "reviewer_identifier": "pseudonymous",
+    "absolute_local_paths": "not_distributed"
+  },
+  "convergence_policy": {
+    "historical_steps": 32,
+    "recommended_initial_steps": 64,
+    "maximum_steps": 256,
+    "normalized_delta_threshold": 0.05,
+    "status": "adaptive_regeneration_pending"
+  }
+}
