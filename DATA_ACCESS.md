@@ -30,8 +30,17 @@ datasets/forensic_evaluation_bundle/structured_audit_view/
 
 ## Controlled access procedure
 
-The raw source bundle is stored externally and is not available through a
-publicly usable download link. Access is granted case by case by the thesis
+The raw source bundle is stored on Google Drive with **Restricted** access. The
+repository retains the Drive page only so that an interested academic reviewer
+or researcher can submit an access request:
+
+```text
+https://drive.google.com/file/d/1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link
+```
+
+Opening the page does not grant access or permit download. A signed-in Google
+account without permission should receive the Google Drive access-request page.
+The requester must select **Request access** and wait for approval by the thesis
 author or repository maintainer.
 
 A request should identify:
@@ -43,10 +52,8 @@ A request should identify:
 
 Access may be denied, restricted, time-limited, or revoked when distribution or
 use would conflict with source terms, ethical limitations, or institutional
-requirements.
-
-After authorization, the requester receives an access-controlled URL. The URL
-must remain local and must not be committed, published, or redistributed.
+requirements. The Drive link and any downloaded archive must not be
+redistributed.
 
 ## Local restoration
 
@@ -56,31 +63,31 @@ The restoration entry point is:
 datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
 ```
 
-Provide the authorized URL through either the command line or the environment
-variable `FAIRLAB_RAW_DATASET_BUNDLE_URL`.
-
-Windows PowerShell:
-
-```powershell
-$env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<authorized-controlled-access-url>"
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
-```
-
-Linux/macOS:
-
-```bash
-export FAIRLAB_RAW_DATASET_BUNDLE_URL="<authorized-controlled-access-url>"
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
-```
-
-Alternative one-time invocation:
+### 1. Submit the access request
 
 ```bash
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
-  --url "<authorized-controlled-access-url>"
+  --request-access
 ```
 
-The script validates that the downloaded object is a ZIP archive, prints its
+The command opens the restricted Drive page in the default browser. Sign in with
+the account that should receive access and submit the request.
+
+### 2. Download after approval
+
+For restricted Drive files, the recommended procedure is to download the ZIP
+through the authenticated browser after approval and then run:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --archive "/path/to/00_raw_datasets_bundle.zip"
+```
+
+An authorized direct-download URL may alternatively be supplied through
+`--url` or the local environment variable `FAIRLAB_RAW_DATASET_BUNDLE_URL`.
+Private or temporary URLs must never be committed.
+
+The script validates that the supplied object is a ZIP archive, prints its
 SHA256 digest, checks archive paths before extraction, and rejects symbolic-link
 entries.
 
