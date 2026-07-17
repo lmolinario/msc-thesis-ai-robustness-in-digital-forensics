@@ -1,0 +1,16 @@
+timestamp,reviewer_id,action,case_id,case_bucket,selection_rank,attack_name,source_sample_id
+2026-05-23T08:11:06+00:00,reviewer_01,select,xai_case_0001,clean_correct_weapon,1,clean,img_00012716
+2026-05-23T08:11:12+00:00,reviewer_01,select,xai_case_0002,clean_correct_weapon,2,clean,img_00003524
+2026-05-23T08:11:27+00:00,reviewer_01,select,xai_case_0003,clean_correct_weapon,3,clean,img_00000156
+2026-05-23T08:11:35+00:00,reviewer_01,select,xai_case_0004,clean_false_negative_weapon,4,clean,img_00000324
+2026-05-23T08:11:36+00:00,reviewer_01,select,xai_case_0005,clean_false_negative_weapon,5,clean,img_00012777
+2026-05-23T08:11:36+00:00,reviewer_01,select,xai_case_0006,clean_false_negative_weapon,6,clean,img_00000003
+2026-05-23T08:11:47+00:00,reviewer_01,select,xai_case_0007,ood_as_weapon,7,ood,img_00013734
+2026-05-23T08:11:54+00:00,reviewer_01,select,xai_case_0008,ood_as_weapon,8,ood,img_00015067
+2026-05-23T08:11:59+00:00,reviewer_01,select,xai_case_0009,ood_as_weapon,9,ood,img_00014615
+2026-05-23T08:12:26+00:00,reviewer_01,select,xai_case_0010,anti_forensic_failure,10,histogram_modification,img_00013599__histogram_modification
+2026-05-23T08:12:32+00:00,reviewer_01,select,xai_case_0011,anti_forensic_failure,11,gaussian_blur,img_00013599__gaussian_blur
+2026-05-23T08:12:36+00:00,reviewer_01,select,xai_case_0012,anti_forensic_failure,12,histogram_modification,img_00013607__histogram_modification
+2026-05-23T08:12:42+00:00,reviewer_01,select,xai_case_0013,adversarial_high_conf_failure,13,sigma_zero,img_00014450__sigma_zero__efficientnet_b0
+2026-05-23T08:12:43+00:00,reviewer_01,select,xai_case_0014,adversarial_high_conf_failure,14,sigma_zero,img_00014592__sigma_zero__efficientnet_b0
+2026-05-23T08:12:44+00:00,reviewer_01,select,xai_case_0015,adversarial_high_conf_failure,15,sigma_zero,img_00014436__sigma_zero__efficientnet_b0
