@@ -1,1 +1,9 @@
+# Locally regenerated XAI images and run-specific state
 outputs/
+manifests/integrated_gradients_*.csv
+manifests/integrated_gradients_*.json
+manifests/xai_case_studies_*.csv
+manifests/xai_manual_selection_db__*.csv
+manifests/xai_manual_selection_summary__*.json
+logs/xai_manual_selection_log__*.csv
+logs/xai_interactive_launcher_commands.local.jsonl
