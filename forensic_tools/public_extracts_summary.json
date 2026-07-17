@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "source": "forensic_tools/.staging/evaluation/normalized_predictions.csv",
+  "source_sha256": "c761239327743565ef5a757b21648e92a569041360fe417a5ec8680529ef7903",
+  "source_rows": 69000,
+  "outputs": {
+    "magnet": {
+      "path": "forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv",
+      "rows": 11500,
+      "sha256": "f66023b5178ddcb823aec35d310b14f0c9e3e0d007c5e936eb4c80b19183b3db"
+    },
+    "excire": {
+      "path": "forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv",
+      "rows": 34500,
+      "sha256": "48c6e736041418c7db1a007696ad5cdb5192f101606fcf1e50ca8eaf352d1896"
+    },
+    "cellebrite": {
+      "path": "forensic_tools/cellebrite_inseyets/public_extracts/cellebrite_classifications_extract.csv",
+      "rows": 11500,
+      "sha256": "7098677b3efc7f811893ecbca58e166ca626d21f12ac44574f0521a8a8d2a9cd"
+    },
+    "griffeye": {
+      "path": "forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv",
+      "rows": 11500,
+      "sha256": "e24683b8ca49cf477e9a3089d69f0e22b2b10e2834cd6dad17df2a53ebd8d8ea"
+    }
+  },
+  "decision_profile": {
+    "magnet_axiom": 11500,
+    "excire_foto_2025_d20": 11500,
+    "excire_foto_2025_d50": 11500,
+    "excire_foto_2025_d80": 11500,
+    "cellebrite_inseyets": 11500,
+    "griffeye": 11500
+  },
+  "local_paths_detected": false,
+  "validation_required": "forensic_tools/scripts/validate_public_extract_equivalence.py"
+}
