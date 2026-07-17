@@ -76,8 +76,13 @@ The branch is protected by the active GitHub ruleset
 - block force pushes;
 - allow no bypass actors.
 
-The annotated tag provides a second stable reference to the same commit. A
-separate tag ruleset should restrict updates and deletion of that tag.
+The annotated tag is protected by the active GitHub ruleset
+`Immutable pre-commission snapshot tag`, configured to:
+
+- restrict updates;
+- restrict deletions;
+- block force pushes;
+- allow no bypass actors.
 
 No further commits are expected on the archive branch, and the snapshot tag
 must not be moved to another commit.
