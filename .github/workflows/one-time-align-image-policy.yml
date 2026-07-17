@@ -1,0 +1,194 @@
+name: One-time Align Image Policy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/one-time-align-image-policy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Align documentation and audit policy
+        shell: python
+        run: |
+          from pathlib import Path
+
+          def replace_exact(path_value: str, old: str, new: str) -> None:
+              path = Path(path_value)
+              text = path.read_text(encoding='utf-8')
+              if old not in text:
+                  raise RuntimeError(f'Expected text not found in {path}')
+              path.write_text(text.replace(old, new), encoding='utf-8')
+
+          replace_exact(
+              'datasets/DATASET_CARD.md',
+              'The repository may contain scripts, manifests, metrics, documentation, selected generated artifacts, and methodological outputs. Raw images, generated image corpora, and forensic-tool exports may be subject to third-party terms, ethical restrictions, legal constraints, institutional handling requirements, or source-specific limitations.\n\nThe dataset should therefore be treated as a research artifact whose redistribution status depends on the source and on the specific file category.',
+              'The `main` branch contains scripts, manifests, hashes, metrics, documentation, and methodological outputs, but it does not track raw or generated image corpora. Images and forensic-tool exports may remain subject to third-party terms, ethical restrictions, legal constraints, institutional handling requirements, or source-specific limitations.\n\nThe external bundle and locally regenerated images must therefore be treated as research data whose use and redistribution depend on the original source and file category.',
+          )
+
+          replace_exact(
+              'REPRODUCIBILITY.md',
+              'The repository does not publicly redistribute the full raw dataset bundle. Raw data access is governed by `DATA_ACCESS.md`.',
+              'The `main` branch excludes raw and generated image corpora. The raw source bundle is restored from external storage and downstream image artifacts are regenerated locally; see `DATA_ACCESS.md`.',
+          )
+
+          replace_exact(
+              'REPRODUCIBILITY.md',
+              '''The script does not contain a hardcoded download URL. After controlled access has been granted, configure the URL locally through:
+
+```text
+FAIRLAB_RAW_DATASET_BUNDLE_URL
+```
+
+Windows PowerShell:
+
+```powershell
+$env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+```
+
+Linux/macOS:
+
+```bash
+export FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+```
+
+Do not commit private URLs, `.env` files, API keys, or session files.''',
+              '''The script contains the default external Google Drive bundle URL and may be run directly:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+```
+
+An alternative URL can be supplied with `--url` or through:
+
+```text
+FAIRLAB_RAW_DATASET_BUNDLE_URL
+```
+
+The environment variable overrides the repository default. Do not commit `.env` files, API keys, credentials, or session files. After restoring the raw bundle, regenerate prepared images, splits, perturbations, and the forensic evaluation bundle with the numbered pipeline.''',
+          )
+
+          replace_exact(
+              'README.md',
+              '| Data policy | Controlled access; raw source data are not publicly redistributed |',
+              '| Data policy | Image corpora excluded from `main`; external restoration and local regeneration |',
+          )
+
+          replace_exact(
+              'README.md',
+              '''The repository does **not** expose public raw dataset download links. Controlled restoration uses:
+
+```text
+FAIRLAB_RAW_DATASET_BUNDLE_URL
+```
+
+See:
+
+- `DATA_ACCESS.md` for controlled raw dataset access;
+- `.env.example` for safe local environment variable names;''',
+              '''The `main` branch does not track raw or generated image corpora. Restore the external raw bundle with:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+```
+
+`FAIRLAB_RAW_DATASET_BUNDLE_URL` remains available as an optional URL override.
+
+See:
+
+- `DATA_ACCESS.md` for the external bundle and local-regeneration boundary;
+- `.env.example` for the optional override variable;''',
+          )
+
+          replace_exact(
+              'README.md',
+              '├── datasets/          # Dataset manifests, splits, bundle construction, controlled metadata\n├── attacks/           # Generated adversarial and anti-forensic perturbation artifacts',
+              '├── datasets/          # Scripts, manifests, metadata; image corpora restored/generated locally\n├── attacks/           # Perturbation scripts, manifests, summaries; images generated locally',
+          )
+
+          audit_path = Path('.github/workflows/repository-audit.yml')
+          audit_text = audit_path.read_text(encoding='utf-8')
+          insertion = '''      - name: Check stale final-documentation patterns
+'''
+          step = '''      - name: Check that image corpora are not tracked on main
+        shell: bash
+        run: |
+          python - <<'PY'
+          import subprocess
+
+          forbidden_prefixes = (
+              'datasets/raw/',
+              'datasets/prepared/final_pool/images/',
+              'datasets/splits/clean/',
+              'datasets/splits/ood/',
+              'datasets/forensic_evaluation_bundle/blind_tool_input/',
+              'datasets/forensic_evaluation_bundle/structured_audit_view/',
+              'attacks/adversarial/color_shift/',
+              'attacks/adversarial/fgsm/',
+              'attacks/adversarial/one_pixel/',
+              'attacks/adversarial/sigma_zero/',
+              'attacks/adversarial/superdeepfool/',
+              'attacks/anti_forensic/jpeg_recompression/',
+              'attacks/anti_forensic/resample_resize/',
+              'attacks/anti_forensic/gaussian_blur/',
+              'attacks/anti_forensic/histogram_modification/',
+              'attacks/anti_forensic/contrast_stretching/',
+          )
+          allowed = {'datasets/raw/README.md'}
+          tracked = subprocess.check_output(['git', 'ls-files'], text=True).splitlines()
+          forbidden = [
+              path for path in tracked
+              if path not in allowed and path.startswith(forbidden_prefixes)
+          ]
+          if forbidden:
+              print('Tracked corpus files are forbidden on main:')
+              for path in forbidden[:100]:
+                  print(f'  - {path}')
+              raise SystemExit(1)
+          print('No image-corpus files are tracked on main.')
+          PY
+
+'''
+          if 'Check that image corpora are not tracked on main' not in audit_text:
+              if insertion not in audit_text:
+                  raise RuntimeError('Repository-audit insertion point not found')
+              audit_path.write_text(audit_text.replace(insertion, step + insertion), encoding='utf-8')
+
+          Path('.github/workflows/one-time-align-image-policy.yml').unlink()
+
+      - name: Validate and commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+          python - <<'PY'
+          from pathlib import Path
+          required = {
+              'datasets/scripts/acquisition/00_download_raw_datasets_bundle.py': '1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH',
+              'DATA_ACCESS.md': 'Image corpora',
+              'README.md': 'Image corpora excluded from `main`',
+              'REPRODUCIBILITY.md': 'default external Google Drive bundle URL',
+              'datasets/DATASET_CARD.md': 'does not track raw or generated image corpora',
+              '.github/workflows/repository-audit.yml': 'Check that image corpora are not tracked on main',
+          }
+          for filename, token in required.items():
+              if token not in Path(filename).read_text(encoding='utf-8'):
+                  raise SystemExit(f'Missing token {token!r} in {filename}')
+          PY
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: align external image corpus policy"
+          git push origin main
