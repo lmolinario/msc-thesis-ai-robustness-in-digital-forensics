@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0",
+  "artifact_status": "minimized_public_xai_artifact",
+  "method": "Integrated Gradients",
+  "model": "efficientnet_b0",
+  "strategy": "chapter5_core",
+  "attribution_target": "predicted_label",
+  "baseline": "zero_tensor_in_preprocessed_input_space",
+  "historical_run": {
+    "created_at": "2026-05-23T08:10:49+00:00",
+    "candidate_rows": 1175,
+    "human_selected_cases": 15,
+    "thesis_selected_cases": 5,
+    "n_steps": 32,
+    "top_percentile": 90.0,
+    "high_confidence_threshold": 0.9
+  },
+  "current_public_policy": {
+    "generated_output_directory": "local_not_distributed_on_main",
+    "thesis_assets": 20,
+    "canonical_selection": "explainability/manifests/chapter5/thesis_selection.csv",
+    "adaptive_regeneration_status": "pending"
+  },
+  "methodological_note": "XAI is qualitative diagnostic support for transparent proxy models and is not an explanation of commercial black-box tools."
+}
