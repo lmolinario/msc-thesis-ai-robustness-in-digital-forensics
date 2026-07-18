@@ -10,8 +10,7 @@ Final frozen MSc thesis research artifact supporting:
 
 ### Added
 
-- authoritative English thesis source under `docs/LatexThesis/`;
-- Italian reference source under `docs/LatexThesis_ITA/`;
+- authoritative thesis source under `docs/LatexThesis/`;
 - frozen dataset and split manifests;
 - 11,500-item forensic evaluation bundle metadata;
 - fold-aware proxy checkpoints and registry;
@@ -26,7 +25,7 @@ Final frozen MSc thesis research artifact supporting:
 - organized artifact documentation under `docs/artifact/`;
 - maintenance and release records under `docs/maintenance/`;
 - security/data-exposure policy under `.github/SECURITY.md`;
-- local audit helpers under `tools/`.
+- Linux/Kali and PowerShell audit helpers under `tools/`.
 
 ### Final Commercial Perimeter
 
@@ -40,7 +39,7 @@ Final frozen MSc thesis research artifact supporting:
 - aligned the root README with the final curated repository structure;
 - established `evaluation/forensic_tools/normalized_predictions.csv` as the canonical public commercial prediction table;
 - documented `500 unique OOD images × 5 folds = 2,500 predictions per architecture`;
-- made the English LaTeX tree authoritative and documented the Italian tree as a reference version;
+- retained a single authoritative LaTeX thesis source;
 - updated CI to validate final paths, JSON, Python syntax, canonical prediction SHA256, decision profile, metric count, and documentation guards;
 - moved governance documents out of the repository root;
 - moved local repository utilities under `tools/`;
@@ -52,6 +51,7 @@ Final frozen MSc thesis research artifact supporting:
 - complete commercial-tool raw exports;
 - historical progress and milestone working documents;
 - bulk historical XAI output directories;
+- the redundant Italian LaTeX thesis tree;
 - redundant root-level governance documents and audit utilities;
 - stale references to excluded tools, private paths, and obsolete source directories.
 
