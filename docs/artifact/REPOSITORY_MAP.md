@@ -1,52 +1,45 @@
 # Repository Map
 
-This document maps the public repository structure to the MSc thesis research artifact. It is intended for reviewers, supervisors, committee members, and researchers who need to locate the implementation, manifests, evaluation outputs, and thesis sources.
+This document maps the curated public repository to the MSc thesis research workflow.
 
----
+## Final Top-Level Structure
 
-## Top-Level Structure
+| Path | Role |
+|---|---|
+| `.github/` | Security policy and lightweight repository audit workflow |
+| `attacks/` | Adversarial and anti-forensic manifests plus local-output boundaries |
+| `datasets/` | Dataset acquisition/preparation scripts, frozen manifests, splits, and bundle metadata |
+| `docs/` | Artifact documentation, maintenance records, repository assets, and LaTeX thesis trees |
+| `evaluation/` | Proxy predictions and canonical commercial-tool normalization outputs |
+| `explainability/` | Integrated Gradients scripts, logs, and canonical thesis-selection manifest |
+| `forensic_tools/` | Tool registry, sanitized extracts, validation reports, and tool documentation |
+| `models/` | Proxy checkpoints, training script, model card, and registry |
+| `results/` | Frozen metrics, Chapter 5 reporting outputs, and validators |
+| `tools/` | Local PowerShell and LaTeX audit helpers |
 
-| Path | Role | Main artifact type |
-|---|---|---|
-| `datasets/` | Dataset acquisition, preparation, human review, frozen manifests, splits, and forensic evaluation bundle | Scripts, manifests, metadata |
-| `attacks/` | Adversarial and anti-forensic perturbation artifacts | Generated inputs, manifests |
-| `models/` | Transparent proxy-model training and registry | Scripts, checkpoints, registry |
-| `evaluation/` | Proxy-model evaluation and commercial-tool output normalization | Predictions, normalized outputs, scripts |
-| `explainability/` | Integrated Gradients case-study workflow | Scripts, manifests, XAI outputs |
-| `forensic_tools/` | Commercial-tool export organization | Raw export areas and tool-specific documentation |
-| `results/` | Final metrics, figures, and reporting assets | CSV/JSON metrics, figures, scripts |
-| `docs/` | English and Italian LaTeX thesis sources and repository documentation | Thesis source, bibliography, figures |
-| `.github/` | Automated lightweight repository audit | GitHub Actions workflow |
-
-Historical development notes and milestone records are preserved in the archival branch:
+The root intentionally contains only core repository metadata:
 
 ```text
-archive/pre-commission-cleanup-2026-07-16
+.env.example
+.gitattributes
+.gitignore
+CHANGELOG.md
+CITATION.cff
+LICENSE
+README.md
+requirements.txt
 ```
-
-They are intentionally excluded from the public-facing `main` branch because they are not canonical sources for the final experimental state.
-
----
 
 ## `datasets/`
 
 Purpose:
 
-- controlled raw source acquisition;
+- controlled source acquisition;
 - technical validation and deduplication;
-- human-in-the-loop semantic review;
+- human-in-the-loop review;
 - final dataset freezing;
 - clean/OOD split generation;
 - forensic evaluation bundle construction.
-
-Key areas:
-
-```text
-datasets/final/manifests/
-datasets/splits/manifests/
-datasets/forensic_evaluation_bundle/metadata/
-datasets/scripts/
-```
 
 Canonical files:
 
@@ -58,43 +51,33 @@ datasets/splits/manifests/ood_eval_manifest.csv
 datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
 ```
 
----
+Image corpora and generated image directories are restored or regenerated locally and are excluded from current `main`.
 
 ## `attacks/`
-
-Purpose:
-
-- store adversarial perturbation outputs;
-- store anti-forensic transformation outputs;
-- preserve generation and evaluation manifests.
-
-Key areas:
-
-```text
-attacks/adversarial/
-attacks/anti_forensic/
-attacks/manifests/
-```
 
 Final perturbation families:
 
 ```text
-adversarial: fgsm, superdeepfool, sigma_zero, one_pixel, color_shift
-anti-forensic: jpeg_recompression, resample_resize, gaussian_blur,
-               histogram_modification, contrast_stretching
+adversarial:
+  fgsm
+  superdeepfool
+  sigma_zero
+  one_pixel
+  color_shift
+
+anti_forensic:
+  jpeg_recompression
+  resample_resize
+  gaussian_blur
+  histogram_modification
+  contrast_stretching
 ```
 
----
+Public `main` retains scripts, manifests, and reports. Generated perturbation images remain local or controlled.
 
 ## `models/`
 
-Purpose:
-
-- train transparent proxy models;
-- preserve fold-aware checkpoints;
-- document model configurations and hashes.
-
-Final proxy models:
+Final proxy architectures:
 
 ```text
 efficientnet_b0
@@ -102,135 +85,135 @@ resnet18
 clip
 ```
 
-Key areas:
+Key files:
 
 ```text
-models/scripts/
+models/MODEL_CARD.md
+models/model_registry.json
+models/scripts/12_train_proxy_models.py
 models/checkpoints/
 models/reports/
-models/model_registry.json
 ```
 
----
+The registry records the 15 fold-aware checkpoints and their SHA256 digests.
 
 ## `evaluation/`
 
-Purpose:
-
-- evaluate transparent proxy models;
-- normalize commercial black-box forensic-tool exports;
-- generate prediction-level and metric-level outputs.
-
-Key areas:
-
-```text
-evaluation/proxy_models/
-evaluation/forensic_tools/
-evaluation/scripts/
-```
-
-Canonical files:
+### Proxy layer
 
 ```text
 evaluation/proxy_models/proxy_model_predictions.csv
+evaluation/scripts/15_evaluate_proxy_models.py
+```
+
+### Commercial-tool layer
+
+```text
 evaluation/forensic_tools/normalized_predictions.csv
+evaluation/forensic_tools/normalized_predictions_public_summary.json
+evaluation/forensic_tools/normalization_summary.json
 evaluation/forensic_tools/tool_export_audit.csv
 evaluation/forensic_tools/tool_version_log.csv
-evaluation/scripts/15_evaluate_proxy_models.py
 evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
 ```
 
----
-
-## `explainability/`
-
-Purpose:
-
-- generate qualitative Integrated Gradients case studies;
-- preserve case-selection manifests;
-- support the interpretation presented in Chapter 5.
-
-Key areas:
-
-```text
-explainability/scripts/
-explainability/manifests/
-explainability/outputs/integrated_gradients/
-```
-
----
+The canonical commercial table contains 69,000 sanitized decisions and excludes complete raw-export paths and unrelated proprietary metadata.
 
 ## `forensic_tools/`
 
 Purpose:
 
-- organize tool-specific raw export areas;
-- document versions and export context;
-- preserve the boundary between proprietary exports and normalized outputs.
+- document the six evaluated configurations;
+- preserve tool versions and run identifiers;
+- retain tool-specific sanitized prediction extracts;
+- reconstruct the canonical combined prediction table;
+- validate exact decision and metric equivalence.
 
-Final tool areas:
+Key files:
 
 ```text
-forensic_tools/magnet_axiom/
-forensic_tools/excire_foto_2025/
-forensic_tools/cellebrite_inseyets/
-forensic_tools/griffeye/
+forensic_tools/run_registry.json
+forensic_tools/public_extracts_summary.json
+forensic_tools/public_extracts_validation.json
+forensic_tools/scripts/build_public_tool_extracts.py
+forensic_tools/scripts/build_canonical_normalized_predictions.py
+forensic_tools/scripts/validate_public_extract_equivalence.py
+forensic_tools/*/public_extracts/
 ```
 
----
+Complete raw commercial exports are not distributed on current `main`.
+
+## `explainability/`
+
+Purpose:
+
+- generate Integrated Gradients case studies for transparent proxies;
+- document human-reviewed candidate selection;
+- preserve the five cases and twenty image assets used by Chapter 5.
+
+Key files:
+
+```text
+explainability/scripts/17_generate_integrated_gradients_case_studies.py
+explainability/scripts/18_xai_interactive_launcher.py
+explainability/scripts/validate_chapter5_xai_artifacts.py
+explainability/manifests/chapter5/thesis_selection.csv
+```
+
+The complete historical XAI output tree is not distributed on current `main`. Thesis-ready assets are stored under the LaTeX image directories.
 
 ## `results/`
 
-Purpose:
-
-- collect final metrics;
-- generate thesis-ready figures and reporting assets;
-- preserve the quantitative source files used by Chapter 5.
-
-Key areas:
+Canonical metric sources:
 
 ```text
-results/metrics/
-results/figures/
-results/scripts/
+results/metrics/final_core_metrics.csv
+results/metrics/final_robustness_metrics.csv
+results/metrics/final_confusion_matrices.csv
+results/metrics/final_ood_metrics.csv
+results/metrics/forensic_tools_metrics.csv
 ```
 
-Official reporting scripts:
+Reporting and validation:
 
 ```text
+results/figures/chapter_5/
 results/scripts/20_generate_experimental_reporting_assets.py
 results/scripts/21_generate_embedded_metadata_sensitivity_check.py
+results/scripts/23_validate_results_artifacts.py
+results/scripts/24_audit_reporting_asset_usage.py
 ```
 
----
+OOD accounting uses 500 unique images evaluated by five fold-specific checkpoints, yielding 2,500 predictions per architecture.
 
 ## `docs/`
 
-Purpose:
-
-- store the final English LaTeX thesis source;
-- retain the Italian source as a separate archival language version;
-- store thesis figures, bibliography, acronym definitions, and repository assets.
-
-Key areas:
-
 ```text
-docs/LatexThesis/
-docs/LatexThesis_ITA/
-docs/assets/
+docs/artifact/       research-artifact governance and reproducibility documents
+docs/maintenance/    audit and release-maintenance records
+docs/assets/         repository-facing graphics
+docs/LatexThesis/    authoritative English thesis source
+docs/LatexThesis_ITA/ Italian reference source
 ```
 
-The canonical thesis source for the submitted artifact is:
+Authoritative thesis entry point:
 
 ```text
 docs/LatexThesis/main.tex
 ```
 
----
+## `tools/`
+
+```text
+tools/tasks.ps1
+tools/latex/audit_latex_images_used.py
+```
+
+These tools perform non-destructive local checks and are not part of the numbered experimental pipeline.
 
 ## Source-of-Truth Principle
 
-Repository documentation explains the workflow, but the following areas define what was actually produced and reported:
+The following areas define what was actually produced and reported:
 
 ```text
 datasets/final/manifests/
@@ -238,10 +221,12 @@ datasets/splits/manifests/
 attacks/manifests/
 models/model_registry.json
 evaluation/proxy_models/
-evaluation/forensic_tools/
+evaluation/forensic_tools/normalized_predictions.csv
+forensic_tools/public_extracts_validation.json
 results/metrics/
+explainability/manifests/chapter5/thesis_selection.csv
 datasets/forensic_evaluation_bundle/metadata/
 docs/LatexThesis/
 ```
 
-Numerical values should be derived from the canonical manifests, normalized predictions, metrics, and final thesis source rather than from historical development notes.
+Historical development records are preserved outside the curated branch through the protected snapshot documented in `docs/artifact/ARCHIVE_SNAPSHOT.md`.
