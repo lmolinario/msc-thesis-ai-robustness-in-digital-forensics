@@ -44,6 +44,7 @@ forensic_tools/
 ├── public_extracts_validation.json
 ├── scripts/
 │   ├── build_public_tool_extracts.py
+│   ├── build_canonical_normalized_predictions.py
 │   └── validate_public_extract_equivalence.py
 ├── magnet_axiom/
 │   ├── README.md
@@ -59,6 +60,12 @@ forensic_tools/
     └── public_extracts/
 ```
 
+The combined canonical prediction table is stored separately under:
+
+```text
+evaluation/forensic_tools/normalized_predictions.csv
+```
+
 Complete commercial-tool raw exports are not distributed on `main`.
 
 ## Run registry
@@ -69,7 +76,7 @@ The consolidated run metadata are recorded in:
 forensic_tools/run_registry.json
 ```
 
-The registry provides tool versions, frozen run IDs, export formats, observable fields, positive mapping rules, raw and matched row counts, sanitized extract paths, metric artifacts, and the immutable historical snapshot reference.
+The registry provides tool versions, frozen run IDs, export formats, observable fields, positive mapping rules, raw and matched row counts, public extract paths, the combined canonical table, metric artifacts, and the immutable historical snapshot reference.
 
 ## Observable mappings
 
@@ -82,9 +89,40 @@ The registry provides tool versions, frozen run IDs, export formats, observable 
 
 These are operational recodings of exported fields, not direct measurements of proprietary internal model probabilities.
 
-## Sanitized public extracts
+## Canonical sanitized prediction table
 
-The public prediction-level artifacts are:
+The repository-wide commercial-tool prediction source is:
+
+```text
+evaluation/forensic_tools/normalized_predictions.csv
+```
+
+It contains exactly 69,000 rows:
+
+- 11,500 Magnet AXIOM decisions;
+- 11,500 Excire D20 decisions;
+- 11,500 Excire D50 decisions;
+- 11,500 Excire D80 decisions;
+- 11,500 Cellebrite decisions;
+- 11,500 Griffeye decisions.
+
+The table is reconstructed from the validated public extracts by:
+
+```text
+forensic_tools/scripts/build_canonical_normalized_predictions.py
+```
+
+Its SHA256 digest, columns, source-extract hashes, and decision profile are recorded in:
+
+```text
+evaluation/forensic_tools/normalized_predictions_public_summary.json
+```
+
+The table contains only anonymized bundle identifiers, experimental condition fields, normalized decisions, and minimum observable tool signals. It excludes raw-export paths, image hashes, device identifiers, unrelated EXIF data, PhotoDNA, local file-system information, and case-management fields.
+
+## Tool-specific sanitized extracts
+
+The source extracts used to construct the canonical table are:
 
 ```text
 forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv
@@ -93,14 +131,7 @@ forensic_tools/cellebrite_inseyets/public_extracts/cellebrite_classifications_ex
 forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv
 ```
 
-They contain 69,000 rows in total:
-
-- 11,500 Magnet AXIOM decisions;
-- 34,500 Excire decisions across D20, D50, and D80;
-- 11,500 Cellebrite decisions;
-- 11,500 Griffeye decisions.
-
-The extracts retain only anonymized bundle identifiers, experimental condition fields required to recompute metrics, the observable tool signal required for audit, and normalized decision fields. Local paths, device names, serial numbers, unrelated EXIF fields, PhotoDNA, case-management fields, and other unnecessary export metadata are excluded.
+They also contain 69,000 rows in total and retain the minimum tool-specific observable signals required for audit.
 
 ## Exact equivalence validation
 
@@ -113,17 +144,50 @@ forensic_tools/public_extracts_validation.json
 records that:
 
 ```text
-69,000 sanitized decisions are identical
-186 metric rows are identical
+69,000 canonical decisions are identical
+186 frozen metric rows are identical
 ```
 
-The corresponding hashes and row counts are recorded in:
+The corresponding source hashes and row counts are recorded in:
 
 ```text
 forensic_tools/public_extracts_summary.json
+evaluation/forensic_tools/normalized_predictions_public_summary.json
 ```
 
 The validator fails if any tool/bundle decision, condition field, or frozen metric changes.
+
+## Rebuild from committed public artifacts
+
+The canonical table can be regenerated without proprietary raw exports:
+
+```bash
+python forensic_tools/scripts/build_canonical_normalized_predictions.py --force
+python forensic_tools/scripts/validate_public_extract_equivalence.py \
+  --source evaluation/forensic_tools/normalized_predictions.csv \
+  --metrics results/metrics/forensic_tools_metrics.csv \
+  --report forensic_tools/public_extracts_validation.json \
+  --force
+```
+
+## Full local regeneration from authorized raw exports
+
+Where the raw exports are legitimately available, restore them only under the ignored local directories:
+
+```text
+forensic_tools/**/raw_exports/
+```
+
+Then run:
+
+```bash
+python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py --force
+python forensic_tools/scripts/build_public_tool_extracts.py --force
+python forensic_tools/scripts/build_canonical_normalized_predictions.py --force
+python forensic_tools/scripts/validate_public_extract_equivalence.py --force
+```
+
+Raw exports, case files, and local staging outputs must not be committed to `main`.
 
 ## Raw-export distribution policy
 
@@ -139,29 +203,6 @@ They remain available only through:
 The historical snapshot supports provenance and audit. Its existence does not grant permission to redistribute third-party images, proprietary exports, or controlled underlying data.
 
 `evaluation/forensic_tools/tool_export_audit.csv` remains on `main` as a historical record of the raw files processed by the frozen pipeline. Paths recorded there identify the original experiment layout and are not expected to resolve on the curated branch.
-
-## Local regeneration
-
-Canonical regeneration requires locally restored raw exports under the ignored directories:
-
-```text
-forensic_tools/**/raw_exports/
-```
-
-Run step 19:
-
-```bash
-python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py --force
-```
-
-Then rebuild and validate the public extracts:
-
-```bash
-python forensic_tools/scripts/build_public_tool_extracts.py --force
-python forensic_tools/scripts/validate_public_extract_equivalence.py --force
-```
-
-Raw exports, case files, and local staging outputs must not be committed to `main`.
 
 ## Historical preservation
 
@@ -191,6 +232,8 @@ docs/artifact/ARCHIVE_SNAPSHOT.md
 ## Public audit and result artifacts
 
 ```text
+evaluation/forensic_tools/normalized_predictions.csv
+evaluation/forensic_tools/normalized_predictions_public_summary.json
 evaluation/forensic_tools/tool_export_audit.csv
 evaluation/forensic_tools/tool_version_log.csv
 evaluation/forensic_tools/normalization_summary.json
