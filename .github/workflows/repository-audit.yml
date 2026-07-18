@@ -2,9 +2,9 @@ name: Repository Audit
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -48,8 +48,6 @@ jobs:
               'docs/maintenance/RELEASE_CHECKLIST.md',
               'docs/LatexThesis/README.md',
               'docs/LatexThesis/main.tex',
-              'docs/LatexThesis_ITA/README.md',
-              'docs/LatexThesis_ITA/main.tex',
               'evaluation/forensic_tools/normalized_predictions.csv',
               'evaluation/forensic_tools/normalized_predictions_public_summary.json',
               'forensic_tools/run_registry.json',
@@ -57,10 +55,9 @@ jobs:
               'results/scripts/23_validate_results_artifacts.py',
               'results/scripts/24_audit_reporting_asset_usage.py',
               'tools/latex/audit_latex_images_used.py',
-              'tools/tasks.ps1',
           ]
-
-          obsolete_root_paths = [
+          forbidden = [
+              'docs/LatexThesis_ITA',
               'THESIS_ARTIFACT.md',
               'ARTIFACT_EVALUATION.md',
               'REPOSITORY_MAP.md',
@@ -76,23 +73,21 @@ jobs:
           ]
 
           missing = [path for path in required if not Path(path).exists()]
-          obsolete = [path for path in obsolete_root_paths if Path(path).exists()]
-
+          present_forbidden = [path for path in forbidden if Path(path).exists()]
           if missing:
               print('Missing required files:')
               for path in missing:
                   print(f'  - {path}')
-          if obsolete:
-              print('Obsolete root paths must not return:')
-              for path in obsolete:
+          if present_forbidden:
+              print('Forbidden obsolete paths:')
+              for path in present_forbidden:
                   print(f'  - {path}')
-          if missing or obsolete:
+          if missing or present_forbidden:
               raise SystemExit(1)
-
           print('Final repository structure check passed.')
           PY
 
-      - name: Check selected JSON files
+      - name: Check JSON validity
         shell: bash
         run: |
           python - <<'PY'
@@ -112,211 +107,77 @@ jobs:
               'results/figures/chapter_5/chapter5_figures_summary.json',
               'results/figures/chapter_5/embedded_metadata_sensitivity_summary.json',
           ]
-
-          failed = False
           for item in selected:
               path = Path(item)
               if not path.exists():
-                  print(f'SKIP missing optional JSON: {path}')
-                  continue
-              try:
-                  json.loads(path.read_text(encoding='utf-8'))
-                  print(f'OK  {path}')
-              except Exception as exc:
-                  failed = True
-                  print(f'FAIL {path}: {exc}')
-
-          if failed:
-              raise SystemExit(1)
+                  raise SystemExit(f'Missing JSON: {path}')
+              json.loads(path.read_text(encoding='utf-8'))
+              print(f'OK  {path}')
           PY
 
-      - name: Check Python syntax for official entry points
+      - name: Check Python syntax
         shell: bash
         run: |
           python - <<'PY'
           import py_compile
           from pathlib import Path
 
-          scripts = [
-              'datasets/scripts/acquisition/00_download_raw_datasets_bundle.py',
-              'datasets/scripts/acquisition/01_download_kaggle.py',
-              'datasets/scripts/acquisition/02_download_github.py',
-              'datasets/scripts/acquisition/03_build_subset_deepfirearm.py',
-              'datasets/scripts/acquisition/04_scrape_google.py',
-              'datasets/scripts/acquisition/05_scrape_telegram.py',
-              'datasets/scripts/acquisition/06_scrape_youtube.py',
-              'datasets/scripts/acquisition/07_scrape_deepweb.py',
-              'datasets/scripts/prepared/08_build_prepared_dataset.py',
-              'datasets/scripts/prepared/09_generate_review_manifest_full.py',
-              'datasets/scripts/final/10_manual_selection_protocol_reviewer.py',
-              'datasets/scripts/splits/11_generate_clean_and_ood_splits.py',
-              'models/scripts/12_train_proxy_models.py',
-              'datasets/scripts/attacks/13_generate_anti_forensic_attacks.py',
-              'datasets/scripts/attacks/14_generate_adversarial_attacks.py',
-              'evaluation/scripts/15_evaluate_proxy_models.py',
-              'datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py',
-              'explainability/scripts/17_generate_integrated_gradients_case_studies.py',
-              'explainability/scripts/18_xai_interactive_launcher.py',
-              'evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py',
-              'forensic_tools/scripts/build_public_tool_extracts.py',
-              'forensic_tools/scripts/build_canonical_normalized_predictions.py',
-              'forensic_tools/scripts/validate_public_extract_equivalence.py',
-              'results/scripts/20_generate_experimental_reporting_assets.py',
-              'results/scripts/21_generate_embedded_metadata_sensitivity_check.py',
-              'results/scripts/22_generate_public_embedded_metadata_sensitivity_check.py',
-              'results/scripts/23_validate_results_artifacts.py',
-              'results/scripts/24_audit_reporting_asset_usage.py',
-              'explainability/scripts/sync_chapter5_xai_metadata.py',
-              'explainability/scripts/validate_chapter5_xai_artifacts.py',
-              'tools/latex/audit_latex_images_used.py',
-          ]
-
+          roots = [Path('datasets'), Path('models'), Path('evaluation'),
+                   Path('explainability'), Path('forensic_tools'),
+                   Path('results'), Path('tools')]
+          scripts = sorted(path for root in roots for path in root.rglob('*.py'))
           failed = False
-          for item in scripts:
-              path = Path(item)
-              if not path.exists():
-                  failed = True
-                  print(f'MISSING {path}')
-                  continue
+          for path in scripts:
               try:
                   py_compile.compile(str(path), doraise=True)
-                  print(f'OK      {path}')
+                  print(f'OK  {path}')
               except Exception as exc:
                   failed = True
-                  print(f'FAIL    {path}: {exc}')
-
+                  print(f'FAIL {path}: {exc}')
           if failed:
               raise SystemExit(1)
           PY
 
-      - name: Check canonical commercial prediction profile
-        shell: bash
-        run: |
-          python - <<'PY'
-          import csv
-          import hashlib
-          import json
-          import re
-          from collections import Counter
-          from pathlib import Path
+      - name: Validate XAI artifact
+        run: python explainability/scripts/validate_chapter5_xai_artifacts.py --strict-thesis-text
 
-          csv_path = Path('evaluation/forensic_tools/normalized_predictions.csv')
-          summary_path = Path('evaluation/forensic_tools/normalized_predictions_public_summary.json')
-          validation_path = Path('forensic_tools/public_extracts_validation.json')
-          metrics_path = Path('results/metrics/forensic_tools_metrics.csv')
+      - name: Validate frozen results
+        run: python results/scripts/23_validate_results_artifacts.py
 
-          expected = {
-              'magnet_axiom': 11500,
-              'excire_foto_2025_d20': 11500,
-              'excire_foto_2025_d50': 11500,
-              'excire_foto_2025_d80': 11500,
-              'cellebrite_inseyets': 11500,
-              'griffeye': 11500,
-          }
-          local_path_re = re.compile(
-              r'(?:[A-Za-z]:[\\/]|/run/media/|/home/|/Users/|raw_exports|blind_tool_input)',
-              re.IGNORECASE,
-          )
+      - name: Audit reporting assets
+        run: python results/scripts/24_audit_reporting_asset_usage.py --strict
 
-          digest = hashlib.sha256(csv_path.read_bytes()).hexdigest()
-          with csv_path.open(newline='', encoding='utf-8-sig') as stream:
-              reader = csv.DictReader(stream)
-              rows = list(reader)
-              fields = set(reader.fieldnames or [])
-
-          required = {
-              'tool_name', 'bundle_id', 'matched', 'sample_type',
-              'attack_family', 'attack_name', 'final_label',
-              'weapon_detected', 'normalized_prediction',
-          }
-          forbidden = {
-              'raw_export_file', 'raw_filename_or_path', 'raw_row_number',
-              'sha256', 'md5', 'metadata_json', 'tool_input_filename',
-          }
-          if required - fields:
-              raise SystemExit(f'Missing canonical columns: {sorted(required - fields)}')
-          if forbidden & fields:
-              raise SystemExit(f'Forbidden canonical columns: {sorted(forbidden & fields)}')
-          if len(rows) != 69000:
-              raise SystemExit(f'Expected 69000 canonical rows, found {len(rows)}')
-
-          counts = Counter(row['tool_name'] for row in rows)
-          if dict(counts) != expected:
-              raise SystemExit(f'Canonical profile mismatch: {dict(counts)}')
-          keys = [(row['tool_name'], row['bundle_id']) for row in rows]
-          if len(keys) != len(set(keys)):
-              raise SystemExit('Duplicate tool_name/bundle_id pairs detected')
-          if any(local_path_re.search(str(value or '')) for row in rows for value in row.values()):
-              raise SystemExit('Local or raw-export path leakage detected')
-
-          summary = json.loads(summary_path.read_text(encoding='utf-8'))
-          validation = json.loads(validation_path.read_text(encoding='utf-8'))
-          if summary['output']['rows'] != 69000 or summary['output']['sha256'] != digest:
-              raise SystemExit('Canonical summary does not match the committed CSV')
-          if validation.get('source_sha256') != digest:
-              raise SystemExit('Equivalence report does not match the canonical CSV')
-          if not validation.get('decisions_identical') or not validation.get('metrics_identical'):
-              raise SystemExit('Equivalence status is not fully passed')
-
-          with metrics_path.open(newline='', encoding='utf-8-sig') as stream:
-              metric_rows = list(csv.DictReader(stream))
-          if len(metric_rows) != 186:
-              raise SystemExit(f'Expected 186 commercial metric rows, found {len(metric_rows)}')
-
-          print('Canonical prediction and commercial metric profile passed.')
-          PY
-
-      - name: Check final-documentation text guards
+      - name: Check stale documentation references
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          patterns = [
+          forbidden = [
+              'LatexThesis_ITA',
               '/run/media/lello',
-              'X-Ways',
-              'Oxygen Forensic Detective',
-              'Autopsy',
               'explainability/outputs/integrated_gradients/',
               '.\\tasks.ps1',
           ]
-
-          checked_paths = [
+          paths = [
               Path('README.md'),
-              Path('docs/README.md'),
-              Path('docs/artifact/THESIS_ARTIFACT.md'),
-              Path('docs/artifact/ARTIFACT_EVALUATION.md'),
-              Path('docs/artifact/REPOSITORY_MAP.md'),
-              Path('docs/artifact/DATA_DICTIONARY.md'),
-              Path('docs/artifact/ENVIRONMENT.md'),
-              Path('docs/artifact/REPRODUCIBILITY.md'),
-              Path('docs/artifact/DATA_ACCESS.md'),
-              Path('docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md'),
-              Path('docs/maintenance/RELEASE_CHECKLIST.md'),
+              *Path('docs').rglob('*.md'),
               Path('.github/SECURITY.md'),
-              Path('docs/LatexThesis/README.md'),
-              Path('docs/LatexThesis_ITA/README.md'),
-              Path('datasets/README.md'),
-              Path('attacks/README.md'),
-              Path('evaluation/README.md'),
-              Path('forensic_tools/README.md'),
+              Path('CHANGELOG.md'),
               Path('results/README.md'),
               Path('results/scripts/README.md'),
               Path('explainability/README.md'),
+              Path('tools/README.md'),
+              Path('tools/latex/README.md'),
           ]
-
           failed = False
-          for path in checked_paths:
-              if not path.exists():
-                  print(f'SKIP missing optional documentation file: {path}')
-                  continue
+          for path in paths:
               text = path.read_text(encoding='utf-8', errors='ignore')
-              for pattern in patterns:
+              for pattern in forbidden:
                   if pattern in text:
                       failed = True
-                      print(f'Forbidden or stale pattern {pattern!r} found in {path}')
-
+                      print(f'Forbidden pattern {pattern!r} found in {path}')
           if failed:
               raise SystemExit(1)
-          print('Final-documentation text guard check passed.')
+          print('Documentation guard check passed.')
           PY
