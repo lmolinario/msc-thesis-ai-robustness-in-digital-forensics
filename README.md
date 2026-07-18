@@ -58,36 +58,57 @@ The evaluation is organized around three complementary perspectives:
 
 The experimental protocol follows the FAIR-Lab methodology described in the thesis. It separates dataset construction, controlled proxy-model evaluation, blind black-box forensic-tool evaluation, output normalization, XAI inspection, and traceability controls.
 
+
 ```mermaid
 %%{init: {
+  "htmlLabels": false,
   "flowchart": {
     "curve": "linear",
-    "nodeSpacing": 60,
-    "rankSpacing": 45
+    "nodeSpacing": 70,
+    "rankSpacing": 45,
+    "wrappingWidth": 340,
+    "useMaxWidth": true
   }
 }}%%
 
 flowchart TD
 
-    A["<b>Source image pool</b><br/>heterogeneous image sources and initial metadata"]
+    A["`**Source image pool**
+heterogeneous image sources and initial metadata`"]
 
-    B["<b>Human-in-the-loop review</b><br/>manual validation, cleaning and dataset freezing"]
+    B["`**Human-in-the-loop review**
+manual validation, cleaning and dataset freezing`"]
 
-    C["<b>Final frozen dataset</b><br/>1500 images: 500 weapon, 500 non-weapon, 500 OOD"]
+    C["`**Final frozen dataset**
+1500 images: 500 weapon, 500 non-weapon, 500 OOD`"]
 
-    D["<b>Binary evaluation subset</b><br/>1000 images: 500 weapon and 500 non-weapon"]
+    D["`**Binary evaluation subset**
+1000 images: 500 weapon and 500 non-weapon`"]
 
-    E["<b>Clean OOD evaluation set</b><br/>500 clean out-of-distribution images<br/>no adversarial or anti-forensic perturbations"]
+    E["`**Clean OOD evaluation set**
+500 clean out-of-distribution images
+no adversarial or anti-forensic perturbations`"]
 
-    F["<b>Perturbation generation</b><br/>adversarial attacks and anti-forensic transformations<br/>applied only to the binary subset"]
+    F["`**Perturbation generation**
+adversarial attacks and anti-forensic transformations
+applied only to the binary subset`"]
 
-    H["<b>Forensic evaluation bundle</b><br/>1000 clean + 500 clean OOD + 5000 adversarial<br/>+ 5000 anti-forensic samples"]
+    H["`**Forensic evaluation bundle**
+1000 clean + 500 clean OOD + 5000 adversarial
++ 5000 anti-forensic samples`"]
 
-    G["<b>Controlled proxy model evaluation</b><br/>structured evaluation on bundle artifacts<br/>EfficientNet-B0, ResNet18 and CLIP"]
+    G["`**Controlled proxy model evaluation**
+structured evaluation on bundle artifacts
+EfficientNet-B0, ResNet18 and CLIP`"]
 
-    I["<b>Black-box software evaluation</b><br/>blind bundle input and output normalization<br/>Magnet.AI, Excire Foto 2025, Cellebrite Inseyets<br/>and Griffeye/T3K CORE"]
+    I["`**Black-box software evaluation**
+blind bundle input and output normalization
+Magnet.AI, Excire Foto 2025, Cellebrite Inseyets
+and Griffeye/T3K CORE`"]
 
-    J["<b>Metrics, XAI and traceability</b><br/>robustness analysis, output normalization, Integrated Gradients,<br/>audit artifacts and reproducibility controls"]
+    J["`**Metrics, XAI and traceability**
+robustness analysis, output normalization, Integrated Gradients,
+audit artifacts and reproducibility controls`"]
 
     A --> B
     B --> C
