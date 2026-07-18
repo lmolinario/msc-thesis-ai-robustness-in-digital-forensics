@@ -1,8 +1,6 @@
 # LaTeX Image Audit
 
-`audit_latex_images_used.py` scans a LaTeX project from `main.tex`, follows
-`\input`, `\include`, and related inclusion commands, resolves
-`\includegraphics` references, and produces CSV/JSON audit reports.
+`audit_latex_images_used.py` scans the thesis from `main.tex`, follows `\input`, `\include`, and related inclusion commands, resolves `\includegraphics` references, and produces CSV/JSON audit reports.
 
 Run from the repository root:
 
@@ -21,9 +19,7 @@ The audit can identify:
 - duplicate image content through SHA256;
 - raster dimensions when Pillow is available.
 
-The generated reports are evidence for manual review. Do not delete an image solely
-because it appears unused or duplicated: first verify LaTeX inclusion order, both
-language trees, reporting-layer provenance, and release requirements.
+The generated reports are evidence for manual review. Do not delete an image solely because it appears unused or duplicated: first verify LaTeX inclusion order, reporting-layer provenance, and release requirements.
 
 For Chapter 5 reporting copies, also run:
 
