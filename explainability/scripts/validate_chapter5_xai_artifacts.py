@@ -12,11 +12,11 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SELECTION = REPO_ROOT / "explainability/manifests/chapter5/thesis_selection.csv"
 EXPECTED_CASES = {
-    "xai_case_0001": ("clean_correct_weapon", 1.0),
-    "xai_case_0006": ("clean_false_negative_weapon", 0.6920745372772217),
-    "xai_case_0009": ("ood_as_weapon", 0.9990302324295044),
-    "xai_case_0010": ("anti_forensic_failure", 0.8515904545783997),
-    "xai_case_0015": ("adversarial_high_conf_failure", 1.0),
+    "xai_case_0001": ("clean_correct_weapon", 1.0, "fig:xai-case1-clean-correct"),
+    "xai_case_0006": ("clean_false_negative_weapon", 0.6920745372772217, "fig:xai-case2-clean-false-negative"),
+    "xai_case_0009": ("ood_as_weapon", 0.9990302324295044, "fig:xai-case3-ood-as-weapon"),
+    "xai_case_0010": ("anti_forensic_failure", 0.8515904545783997, "fig:xai-case4-antiforensic-failure"),
+    "xai_case_0015": ("adversarial_high_conf_failure", 1.0, "fig:xai-case5-adversarial-high-confidence-failure"),
 }
 LOCAL_PATTERN = re.compile(r"(?:[A-Za-z]:[\\/]|/run/media/|/home/|/Users/|lello|molinario)", re.I)
 
@@ -33,24 +33,44 @@ def fail(message: str) -> None:
     raise RuntimeError(message)
 
 
+def figure_confidence(content: str, figure_label: str) -> str:
+    pattern = re.compile(
+        rf"\\XAIcaseFigureMaskGrid\s*"
+        rf"\{{{re.escape(figure_label)}\}}"
+        rf"(?:(?!\\XAIcaseFigureMaskGrid).)*?"
+        rf"\\textbf\{{confidence\}}\s*:\s*"
+        rf"([0-9]+(?:\.[0-9]+)?)"
+        rf"\s*\}}",
+        re.DOTALL,
+    )
+    matches = pattern.findall(content)
+    if len(matches) != 1:
+        fail(f"Expected one confidence value for figure {figure_label}, found {len(matches)}")
+    return matches[0]
+
+
 def main() -> None:
     args = parse_args()
     selection = Path(args.selection)
     if not selection.is_absolute():
         selection = REPO_ROOT / selection
+
     rows = list(csv.DictReader(selection.open(encoding="utf-8")))
     if len(rows) != 5:
         fail(f"Expected 5 thesis cases, found {len(rows)}")
+
     ids = {row["case_id"] for row in rows}
     if ids != set(EXPECTED_CASES):
         fail(f"Unexpected case IDs: {sorted(ids)}")
+
     for row in rows:
         case_id = row["case_id"]
-        bucket, confidence = EXPECTED_CASES[case_id]
+        bucket, confidence, _ = EXPECTED_CASES[case_id]
         if row["case_bucket"] != bucket:
             fail(f"Bucket mismatch for {case_id}")
         if abs(float(row["confidence"]) - confidence) > 1e-9:
             fail(f"Confidence mismatch for {case_id}")
+
         for column in ("input_asset", "heatmap_asset", "overlay_asset", "top10_mask_asset"):
             value = row[column]
             if LOCAL_PATTERN.search(value):
@@ -58,15 +78,21 @@ def main() -> None:
             if not (REPO_ROOT / value).is_file():
                 fail(f"Missing thesis asset: {value}")
 
-    warnings = []
-    english = (REPO_ROOT / "docs/LatexThesis/sections/05_experiments.tex").read_text(encoding="utf-8")
-    italian = (REPO_ROOT / "docs/LatexThesis_ITA/sections/05_experiments.tex").read_text(encoding="utf-8")
-    for label, content in (("English", english), ("Italian", italian)):
-        if "xai\\_case\\_0010" in content and "0.870" in content:
-            message = f"{label} thesis still reports legacy rounded confidence 0.870; expected 0.852"
-            if args.strict_thesis_text:
-                fail(message)
-            warnings.append(message)
+    warnings: list[str] = []
+    thesis_files = [
+        ("English", REPO_ROOT / "docs/LatexThesis/sections/05_experiments.tex"),
+        ("Italian", REPO_ROOT / "docs/LatexThesis_ITA/sections/05_experiments.tex"),
+    ]
+    for language, path in thesis_files:
+        content = path.read_text(encoding="utf-8")
+        for case_id, (_, confidence, figure_label) in EXPECTED_CASES.items():
+            current = figure_confidence(content, figure_label)
+            expected = f"{confidence:.3f}"
+            if current != expected:
+                message = f"{language} thesis reports {current} for {case_id}; expected {expected}"
+                if args.strict_thesis_text:
+                    fail(message)
+                warnings.append(message)
 
     if args.regenerated_manifest:
         manifest = Path(args.regenerated_manifest)
