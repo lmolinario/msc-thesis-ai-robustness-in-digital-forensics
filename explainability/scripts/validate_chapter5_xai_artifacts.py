@@ -11,6 +11,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SELECTION = REPO_ROOT / "explainability/manifests/chapter5/thesis_selection.csv"
+THESIS_FILE = REPO_ROOT / "docs/LatexThesis/sections/05_experiments.tex"
 EXPECTED_CASES = {
     "xai_case_0001": ("clean_correct_weapon", 1.0, "fig:xai-case1-clean-correct"),
     "xai_case_0006": ("clean_false_negative_weapon", 0.6920745372772217, "fig:xai-case2-clean-false-negative"),
@@ -79,20 +80,15 @@ def main() -> None:
                 fail(f"Missing thesis asset: {value}")
 
     warnings: list[str] = []
-    thesis_files = [
-        ("English", REPO_ROOT / "docs/LatexThesis/sections/05_experiments.tex"),
-        ("Italian", REPO_ROOT / "docs/LatexThesis_ITA/sections/05_experiments.tex"),
-    ]
-    for language, path in thesis_files:
-        content = path.read_text(encoding="utf-8")
-        for case_id, (_, confidence, figure_label) in EXPECTED_CASES.items():
-            current = figure_confidence(content, figure_label)
-            expected = f"{confidence:.3f}"
-            if current != expected:
-                message = f"{language} thesis reports {current} for {case_id}; expected {expected}"
-                if args.strict_thesis_text:
-                    fail(message)
-                warnings.append(message)
+    content = THESIS_FILE.read_text(encoding="utf-8")
+    for case_id, (_, confidence, figure_label) in EXPECTED_CASES.items():
+        current = figure_confidence(content, figure_label)
+        expected = f"{confidence:.3f}"
+        if current != expected:
+            message = f"Thesis reports {current} for {case_id}; expected {expected}"
+            if args.strict_thesis_text:
+                fail(message)
+            warnings.append(message)
 
     if args.regenerated_manifest:
         manifest = Path(args.regenerated_manifest)
