@@ -11,10 +11,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SELECTION = REPO_ROOT / "explainability/manifests/chapter5/thesis_selection.csv"
-TEX_FILES = [
-    REPO_ROOT / "docs/LatexThesis/sections/05_experiments.tex",
-    REPO_ROOT / "docs/LatexThesis_ITA/sections/05_experiments.tex",
-]
+TEX_FILE = REPO_ROOT / "docs/LatexThesis/sections/05_experiments.tex"
 FIGURE_LABELS = {
     "xai_case_0001": "fig:xai-case1-clean-correct",
     "xai_case_0006": "fig:xai-case2-clean-false-negative",
@@ -42,12 +39,6 @@ def expected_values() -> dict[str, str]:
 
 
 def figure_confidence_pattern(figure_label: str) -> re.Pattern[str]:
-    """Match only the metadata argument of the intended XAI figure macro.
-
-    A plain search for ``{fig:...}`` also matches later ``\\ref{fig:...}``
-    references. Anchoring the expression to ``\\XAIcaseFigureMaskGrid`` and
-    preventing it from crossing into the next XAI macro makes the match unique.
-    """
     return re.compile(
         rf"(\\XAIcaseFigureMaskGrid\s*"
         rf"\{{{re.escape(figure_label)}\}}"
@@ -88,19 +79,14 @@ def main() -> None:
     args = parse_args()
     write = bool(args.write)
     expected = expected_values()
-    all_changes: list[str] = []
+    changes = synchronize(TEX_FILE, expected, write=write)
 
-    for path in TEX_FILES:
-        changes = synchronize(path, expected, write=write)
+    if changes:
         for change in changes:
-            all_changes.append(f"{path.relative_to(REPO_ROOT)} | {change}")
-
-    if all_changes:
-        for change in all_changes:
-            print(change)
+            print(f"{TEX_FILE.relative_to(REPO_ROOT)} | {change}")
         if not write:
             raise SystemExit(1)
-        print(f"Updated {len(all_changes)} Chapter 5 XAI metadata field(s).")
+        print(f"Updated {len(changes)} Chapter 5 XAI metadata field(s).")
     else:
         print("Chapter 5 XAI metadata is synchronized.")
 
