@@ -1,129 +1,120 @@
 # Artifact Evaluation Statement
 
-This document defines what can be evaluated, audited, and reproduced from this repository as an academic research artifact.
-
----
+This document defines what can be evaluated, audited, and reproduced from the public MSc thesis research artifact.
 
 ## Artifact Type
 
-This repository is a thesis-oriented research artifact containing:
+The repository contains experimental code, frozen manifests, transparent proxy-model outputs, sanitized commercial-tool decisions, metric summaries, XAI case-study material, reporting assets, LaTeX thesis sources, and governance documentation.
 
-- experimental code;
-- dataset manifests and split definitions;
-- perturbation manifests;
-- proxy-model evaluation outputs;
-- normalized commercial-tool outputs;
-- metric summaries;
-- explainability case-study artifacts;
-- LaTeX thesis source;
-- governance and reproducibility documentation.
+It is not a general-purpose software library, an unrestricted raw-image benchmark, or a reproduction package for proprietary forensic software.
 
-It is not a general-purpose software library and not a public raw-image dataset mirror.
+## Claims Supported by the Public Repository
 
----
-
-## Claims Supported by the Repository
-
-The repository supports audit and inspection of the following claims:
-
-| Claim area | Supported by |
+| Claim area | Public support |
 |---|---|
 | Dataset construction and freezing | `datasets/final/manifests/`, `datasets/splits/manifests/` |
-| Clean/OOD separation | `clean_folds_manifest.csv`, `ood_eval_manifest.csv` |
-| Perturbation generation design | `attacks/`, `attacks/manifests/`, numbered generation scripts |
-| Proxy-model robustness evaluation | `evaluation/proxy_models/`, `results/metrics/` |
-| Commercial-tool black-box normalization | `evaluation/forensic_tools/`, `forensic_tools/`, `results/metrics/` |
-| XAI qualitative case studies | `explainability/`, `docs/LatexThesis/images/`, Chapter 5 source |
-| Thesis reporting | `docs/LatexThesis/`, `results/figures/`, `results/metrics/` |
+| Clean/OOD separation | clean fold and OOD evaluation manifests |
+| Perturbation protocol | numbered attack scripts and `attacks/manifests/` |
+| Proxy-model evaluation | `evaluation/proxy_models/`, `models/model_registry.json`, `results/metrics/` |
+| Commercial black-box normalization | canonical sanitized prediction table, public extracts, registry, validation report |
+| Commercial metric reproduction | 69,000 committed decisions and 186 frozen metric rows |
+| XAI qualitative analysis | five-case manifest and thesis-ready image assets |
+| Thesis reporting | English/Italian LaTeX sources, reporting manifest, figures, and source metrics |
+| Historical provenance | protected branch, protected annotated tag, exact snapshot commit |
 
----
+## Canonical Commercial Evaluation Evidence
+
+```text
+evaluation/forensic_tools/normalized_predictions.csv
+evaluation/forensic_tools/normalized_predictions_public_summary.json
+forensic_tools/public_extracts_summary.json
+forensic_tools/public_extracts_validation.json
+results/metrics/forensic_tools_metrics.csv
+```
+
+The committed validation report establishes:
+
+```text
+69,000 decision rows identical
+186 metric rows identical
+```
+
+The public prediction table excludes raw-export paths, image hashes, unrelated metadata, device identifiers, and case-management fields.
 
 ## Claims Not Supported by the Public Repository Alone
 
-The public repository alone does not support unrestricted rerun of every experiment because several components depend on controlled resources.
+The public repository cannot independently provide:
 
-The following are not publicly redistributable or not fully reproducible without external access:
+- unrestricted access to source or derived image corpora;
+- commercial forensic-tool licenses;
+- proprietary commercial models, thresholds, weights, or training data;
+- complete raw commercial exports on current `main`;
+- private acquisition credentials or reusable direct-download URLs;
+- a guaranteed byte-identical full training environment without a separately frozen lock file.
 
-- raw third-party image sources;
-- controlled-access source bundles;
-- commercial forensic software;
-- proprietary AI models inside commercial forensic tools;
-- licensed forensic case formats and proprietary tool databases;
-- private acquisition credentials or dataset links.
+These limitations are intentional and documented in:
 
-This limitation is intentional and documented in `DATA_ACCESS.md`, `SECURITY.md`, and `REPRODUCIBILITY.md`.
-
----
+```text
+docs/artifact/DATA_ACCESS.md
+docs/artifact/REPRODUCIBILITY.md
+docs/artifact/ENVIRONMENT.md
+.github/SECURITY.md
+```
 
 ## Evaluation Levels
 
-| Level | Description | Supported |
+| Level | Description | Status |
 |---|---|---:|
-| Structural audit | Verify repository layout, manifests, scripts, and documented paths | Yes |
-| Metric audit | Inspect CSV/JSON metrics, normalized outputs, and thesis-reported results | Yes |
-| Thesis-source audit | Inspect LaTeX source, figures, bibliography, and section-level reporting | Yes |
-| Code review | Review dataset, perturbation, model, evaluation, XAI, and reporting scripts | Yes |
-| Partial rerun | Rerun code stages when controlled-access data and dependencies are available | Controlled |
-| Full proxy rerun | Reproduce training/evaluation using original images and compute environment | Controlled |
-| Full commercial-tool rerun | Reprocess the blind bundle in licensed forensic tools | Licensed / controlled |
-| Commercial AI internals | Inspect proprietary models, thresholds, or training data | No |
+| Structural audit | Verify repository layout, scripts, manifests, and documented paths | Public |
+| Prediction audit | Inspect proxy predictions and 69,000 commercial decisions | Public |
+| Metric audit | Inspect and recompute frozen CSV/JSON metrics | Public |
+| Result validation | Run committed read-only validators | Public |
+| Thesis-source audit | Inspect LaTeX, bibliography, labels, figures, and tables | Public |
+| Partial rerun | Run stages when controlled data and dependencies are available | Controlled |
+| Full proxy rerun | Reproduce training and evaluation with original images | Controlled |
+| Full commercial rerun | Process the blind bundle in licensed software | Licensed / controlled |
+| Commercial AI internals | Inspect proprietary implementation details | Unsupported |
 
----
+## Reviewer Checklist
 
-## Artifact Scope
+A reviewer can inspect:
 
-The artifact supports the thesis as follows:
-
-1. It defines the experimental dataset and split structure.
-2. It preserves the perturbation generation protocol.
-3. It stores transparent proxy-model evaluation outputs.
-4. It normalizes commercial black-box forensic-tool outputs into a common schema.
-5. It preserves thesis-ready metric summaries and figures.
-6. It documents limitations, access boundaries, and security constraints.
-
----
-
-## Artifact Evaluation Checklist
-
-A reviewer can check:
-
-- root `README.md` for high-level orientation;
-- `THESIS_ARTIFACT.md` for official artifact boundaries;
-- `REPOSITORY_MAP.md` for directory-level navigation;
-- `DATA_DICTIONARY.md` for CSV/JSON schema interpretation;
-- `REPRODUCIBILITY.md` for controlled rerun guidance;
-- `DATA_ACCESS.md` for raw data access constraints;
-- `SECURITY.md` for secret and proprietary-data handling;
-- `docs/LatexThesis/` for the final thesis source;
+- root `README.md` for orientation;
+- `docs/artifact/THESIS_ARTIFACT.md` for the official scope;
+- `docs/artifact/REPOSITORY_MAP.md` for navigation;
+- `docs/artifact/DATA_DICTIONARY.md` for schema interpretation;
+- `docs/artifact/REPRODUCIBILITY.md` for rerun guidance;
+- `docs/artifact/DATA_ACCESS.md` for controlled data access;
+- `.github/SECURITY.md` for exposure handling;
+- `docs/LatexThesis/` for the authoritative thesis source;
 - `results/metrics/` for final quantitative outputs;
-- `evaluation/forensic_tools/` for normalized commercial-tool predictions.
+- `evaluation/forensic_tools/normalized_predictions.csv` for canonical commercial decisions;
+- `forensic_tools/public_extracts_validation.json` for exact equivalence;
+- `explainability/manifests/chapter5/thesis_selection.csv` for the final XAI selection.
 
----
+Recommended read-only checks:
+
+```bash
+python explainability/scripts/validate_chapter5_xai_artifacts.py --strict-thesis-text
+python results/scripts/23_validate_results_artifacts.py
+python results/scripts/24_audit_reporting_asset_usage.py --strict
+python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
+```
 
 ## Expected Interpretation
 
-The correct interpretation of this repository is:
+The repository should be interpreted as:
 
 ```text
-final thesis research artifact with controlled-access reproducibility and public audit material
+final thesis research artifact with public audit material and controlled-access reproduction boundaries
 ```
 
-The repository should not be interpreted as:
+It should not be interpreted as:
 
 ```text
-unrestricted public dataset release or complete reproduction package for licensed commercial forensic software
+unrestricted data release or complete public reproduction package for licensed forensic software
 ```
 
----
+## Frozen Status
 
-## Final Artifact Status
-
-The repository is intended to represent the final frozen state of the MSc thesis artifact. Future changes should be limited to:
-
-- documentation corrections;
-- citation updates;
-- release metadata updates;
-- non-substantive reproducibility clarifications;
-- post-freeze archival metadata such as DOI or release notes.
-
-Substantive experimental changes should be documented as a new version rather than silently replacing the thesis artifact.
+Future changes should be limited to documented archival corrections, citation or DOI updates, dependency hardening, security fixes, and release metadata. Substantive experimental changes require a new version rather than silent replacement of the thesis artifact.
