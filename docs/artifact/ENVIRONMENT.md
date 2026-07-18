@@ -1,171 +1,201 @@
 # Environment Notes
 
-This document summarizes the execution environment assumptions for the MSc thesis research artifact.
+This document summarizes execution-environment assumptions for the MSc thesis research artifact.
 
-The repository is not distributed as a software package. It is a research artifact containing scripts, manifests, metrics, normalized outputs, and thesis source.
-
----
+The repository is not distributed as a software package. It contains scripts, manifests, checkpoints, predictions, metrics, reporting assets, and LaTeX thesis sources.
 
 ## Tested Context
 
-The project has been developed and executed primarily in a local research environment with:
+The project was developed primarily with:
 
-- Python virtual environment;
-- PowerShell / Windows-oriented local workflow;
-- GPU or CPU execution depending on the stage;
+- Python virtual environments;
+- Windows PowerShell for the principal local workflow;
+- Linux/Kali for additional repository and script checks;
+- CPU or CUDA-enabled GPU execution depending on the stage;
 - licensed commercial forensic tools for black-box export generation;
-- LaTeX environment for thesis compilation.
+- a LaTeX toolchain for thesis compilation.
 
-Exact local paths, usernames, private drives, credentials, and controlled-access URLs are intentionally not part of the public repository.
+Exact usernames, storage-device paths, credentials, signed URLs, and commercial license information are intentionally excluded.
 
----
+## Python Environment
 
-## Python Dependencies
-
-The canonical dependency list is:
+The human-maintained dependency list is:
 
 ```text
 requirements.txt
 ```
 
-Create and activate a local virtual environment before running scripts.
-
-Example PowerShell workflow:
+### Windows PowerShell
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
+python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r requirements.txt
 ```
 
----
+### Linux/macOS
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
+```
+
+For CUDA-dependent stages, install PyTorch using a build compatible with the local GPU driver and CUDA runtime.
 
 ## Environment Variables
 
-Use:
-
-```text
-.env.example
-```
-
-as the safe template for local configuration.
-
-Do not commit:
+Use `.env.example` only as a safe variable-name template. Never commit:
 
 ```text
 .env
-*.env
-private URLs
+private or signed URLs
 API keys
 credentials
 session cookies
-licensed software keys
+commercial license keys
 ```
 
-Raw dataset restoration, if permitted, must use controlled local environment variables and not hard-coded public links.
+Controlled data restoration may use:
 
----
+```text
+FAIRLAB_RAW_DATASET_BUNDLE_URL
+```
 
-## Compute Notes
+but the value must remain local.
 
-Some stages can be inspected or rerun with limited compute, while others require more substantial resources.
+## Compute Expectations
 
-| Stage | Compute expectation |
+| Stage | Typical requirement |
 |---|---|
-| Manifest inspection | Low |
-| JSON/CSV audit | Low |
+| Documentation, JSON, CSV, and manifest audit | Low |
+| Canonical commercial-table rebuild | Low |
+| Reporting and result validators | Low |
 | Reporting asset generation | Low to moderate |
-| Proxy-model evaluation | Moderate |
-| Proxy-model training | Moderate to high |
-| Iterative adversarial attack generation | High |
-| Commercial-tool evaluation | Requires licensed tools, not just compute |
+| Proxy inference | Moderate |
+| Proxy training | Moderate to high |
+| Iterative adversarial generation | High |
+| Integrated Gradients regeneration | Moderate to high |
+| Commercial-tool evaluation | Licensed software and compatible workstation |
 
----
+## Commercial Tool Environment
 
-## Commercial Forensic Tools
-
-The following tools are part of the final black-box perimeter:
+Frozen black-box perimeter:
 
 ```text
 Magnet AXIOM / Magnet.AI 10.1.0.48673
 Excire Foto 2025 4.1.5
-Cellebrite Inseyets 10.9
-Magnet Griffeye x64 26.2.108 with T3K CORE v1.18.0
+Cellebrite Inseyets 10.9 / Physical Analyzer 10.9.0.3029
+Magnet Griffeye 26.2.108 / T3K CORE 1.18.0
 ```
 
-Their internal AI models and proprietary resources are not reproduced by this repository. Only observable exports and normalized outputs are part of the public artifact when appropriate.
-
-Full commercial-tool reruns require:
+Full commercial reruns require:
 
 - licensed software;
-- compatible workstation environment;
-- controlled forensic evaluation bundle;
-- tool-specific import/export workflow;
+- compatible import/export environments;
+- the controlled blind bundle;
+- tool-specific processing procedures;
 - post-export normalization.
 
----
+The public repository contains sanitized observable outputs, not proprietary internal models.
 
 ## LaTeX Environment
 
-The official thesis source is:
+Authoritative source:
 
 ```text
-docs/LatexThesis/
+docs/LatexThesis/main.tex
 ```
 
-Compilation generates auxiliary files such as:
+Italian reference source:
 
 ```text
-main.aux
-main.log
-main.out
-main.toc
+docs/LatexThesis_ITA/main.tex
+```
+
+Typical local build:
+
+```bash
+cd docs/LatexThesis
+latexmk -pdf main.tex
+```
+
+Common generated files include:
+
+```text
 main.acn
 main.acr
 main.alg
+main.aux
+main.bbl
+main.bcf
+main.blg
+main.fdb_latexmk
+main.fls
+main.glg
+main.glo
+main.gls
+main.log
+main.out
+main.run.xml
+main.synctex.gz
+main.toc
 main.pdf
 ```
 
-These generated files should not be committed unless explicitly selected as a final release asset. The preferred repository source of truth remains the LaTeX source, bibliography, acronym file, figures, and tracked thesis assets.
+These files are ignored. A final PDF should normally be attached to a versioned release rather than committed to the source tree.
 
----
-
-## Recommended Non-Destructive Checks
+## Lightweight Validation
 
 From the repository root:
 
-```powershell
-git status -sb
-python -m compileall datasets models evaluation explainability results
+```bash
+python -m py_compile \
+  forensic_tools/scripts/build_canonical_normalized_predictions.py \
+  forensic_tools/scripts/validate_public_extract_equivalence.py \
+  explainability/scripts/validate_chapter5_xai_artifacts.py \
+  results/scripts/23_validate_results_artifacts.py \
+  results/scripts/24_audit_reporting_asset_usage.py \
+  tools/latex/audit_latex_images_used.py
+
+python results/scripts/23_validate_results_artifacts.py
+python results/scripts/24_audit_reporting_asset_usage.py --strict
 ```
 
-For thesis log checks after compiling LaTeX:
+Windows helper:
 
 ```powershell
-cd docs\LatexThesis
-Select-String -Path .\main.log -Pattern "Undefined references","Citation.*undefined","LaTeX Error","Package glossaries Warning"
+.\tools\tasks.ps1 audit-all
 ```
 
----
+## Thesis Log Check on Windows
+
+After a local compilation:
+
+```powershell
+Select-String `
+  -Path .\docs\LatexThesis\main.log `
+  -Pattern "Undefined references","Citation.*undefined","LaTeX Error","Package glossaries Warning"
+```
 
 ## Reproducibility Boundary
 
 The public repository supports:
 
-- structural audit;
-- script inspection;
-- manifest inspection;
-- metric inspection;
-- thesis-source review;
-- normalized commercial-tool output inspection.
+- script and structural inspection;
+- committed manifest and metric inspection;
+- reconstruction of the canonical sanitized commercial prediction table;
+- metric and reporting validation;
+- thesis-source review.
 
-The public repository alone does not provide:
+It does not independently provide unrestricted images, licensed forensic software, proprietary AI internals, or a guaranteed byte-identical operating-system environment.
 
-- unrestricted raw image access;
-- commercial forensic-tool licenses;
-- proprietary AI models;
-- private source credentials;
-- full rerun capability for every stage.
+Related documents:
 
-This is a controlled-access research artifact, not an unrestricted data release.
+```text
+docs/artifact/REPRODUCIBILITY.md
+docs/artifact/DATA_ACCESS.md
+.github/SECURITY.md
+```
