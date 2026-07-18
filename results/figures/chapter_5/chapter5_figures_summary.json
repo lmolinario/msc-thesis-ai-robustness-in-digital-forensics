@@ -1,5 +1,5 @@
 {
-  "script": "evaluation/scripts/20_generate_experimental_reporting_assets.py",
+  "script": "results/scripts/20_generate_experimental_reporting_assets.py",
   "created_at": "2026-06-10T18:04:26+00:00",
   "inputs": {
     "core_metrics_csv": "results/metrics/final_core_metrics.csv",
@@ -49,5 +49,5 @@
     "tab_forensic_tools_worst_cases"
   ],
   "warnings": [],
-  "methodological_note": "This script only generates thesis figures from consolidated metric outputs. It does not regenerate datasets, perturbations, model predictions, or metrics."
+  "methodological_note": "This script only generates thesis figures from consolidated metric outputs. It does not regenerate datasets, perturbations, model predictions, or metrics. The script path was normalized to its current repository location during the public-artifact audit."
 }
