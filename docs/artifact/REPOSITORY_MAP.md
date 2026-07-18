@@ -9,7 +9,7 @@ This document maps the curated public repository to the MSc thesis research work
 | `.github/` | Security policy and lightweight repository audit workflow |
 | `attacks/` | Adversarial and anti-forensic manifests plus local-output boundaries |
 | `datasets/` | Dataset acquisition/preparation scripts, frozen manifests, splits, and bundle metadata |
-| `docs/` | Artifact documentation, maintenance records, repository assets, and LaTeX thesis trees |
+| `docs/` | Artifact documentation, maintenance records, repository assets, and the authoritative LaTeX thesis source |
 | `evaluation/` | Proxy predictions and canonical commercial-tool normalization outputs |
 | `explainability/` | Integrated Gradients scripts, logs, and canonical thesis-selection manifest |
 | `forensic_tools/` | Tool registry, sanitized extracts, validation reports, and tool documentation |
@@ -160,7 +160,7 @@ explainability/scripts/validate_chapter5_xai_artifacts.py
 explainability/manifests/chapter5/thesis_selection.csv
 ```
 
-The complete historical XAI output tree is not distributed on current `main`. Thesis-ready assets are stored under the LaTeX image directories.
+The complete historical XAI output tree is not distributed on current `main`. Thesis-ready assets are stored under `docs/LatexThesis/images/`.
 
 ## `results/`
 
@@ -192,8 +192,7 @@ OOD accounting uses 500 unique images evaluated by five fold-specific checkpoint
 docs/artifact/       research-artifact governance and reproducibility documents
 docs/maintenance/    audit and release-maintenance records
 docs/assets/         repository-facing graphics
-docs/LatexThesis/    authoritative English thesis source
-docs/LatexThesis_ITA/ Italian reference source
+docs/LatexThesis/    authoritative thesis source
 ```
 
 Authoritative thesis entry point:
