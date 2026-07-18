@@ -145,9 +145,12 @@ __marimo__/
 *.xdy
 /out/
 docs/LatexThesis/out/
-docs/LatexThesis_ITA/out/
 docs/LatexThesis/main.pdf
-docs/LatexThesis_ITA/main.pdf
+
+# Local audit reports
+latex_image_audit/
+results/results_validation_summary.json
+results/reporting_asset_usage_summary.json
 
 # Local/generated manual-selection backups
 datasets/final/reports/backups/
