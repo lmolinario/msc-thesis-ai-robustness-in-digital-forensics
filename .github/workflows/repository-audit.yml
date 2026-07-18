@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Check required research-artifact files
+      - name: Check final repository structure
         shell: bash
         run: |
           python - <<'PY'
@@ -29,46 +29,67 @@ jobs:
 
           required = [
               'README.md',
-              'THESIS_ARTIFACT.md',
-              'REPOSITORY_MAP.md',
-              'ARTIFACT_EVALUATION.md',
-              'DATA_DICTIONARY.md',
-              'ENVIRONMENT.md',
-              'RELEASE_CHECKLIST.md',
               'CHANGELOG.md',
               'CITATION.cff',
-              'DATA_ACCESS.md',
-              '.github/SECURITY.md',
-              'REPRODUCIBILITY.md',
-              'ACADEMIC_REPOSITORY_AUDIT.md',
-              'requirements.txt',
               'LICENSE',
+              'requirements.txt',
+              '.env.example',
+              '.github/SECURITY.md',
               'docs/README.md',
               'docs/artifact/ARCHIVE_SNAPSHOT.md',
+              'docs/artifact/THESIS_ARTIFACT.md',
+              'docs/artifact/ARTIFACT_EVALUATION.md',
+              'docs/artifact/REPOSITORY_MAP.md',
+              'docs/artifact/DATA_DICTIONARY.md',
+              'docs/artifact/ENVIRONMENT.md',
+              'docs/artifact/REPRODUCIBILITY.md',
+              'docs/artifact/DATA_ACCESS.md',
+              'docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md',
+              'docs/maintenance/RELEASE_CHECKLIST.md',
               'docs/LatexThesis/README.md',
               'docs/LatexThesis/main.tex',
               'docs/LatexThesis_ITA/README.md',
               'docs/LatexThesis_ITA/main.tex',
-              'evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py',
               'evaluation/forensic_tools/normalized_predictions.csv',
               'evaluation/forensic_tools/normalized_predictions_public_summary.json',
               'forensic_tools/run_registry.json',
               'forensic_tools/public_extracts_validation.json',
-              'forensic_tools/scripts/build_canonical_normalized_predictions.py',
-              'results/scripts/20_generate_experimental_reporting_assets.py',
-              'results/scripts/21_generate_embedded_metadata_sensitivity_check.py',
               'results/scripts/23_validate_results_artifacts.py',
               'results/scripts/24_audit_reporting_asset_usage.py',
+              'tools/latex/audit_latex_images_used.py',
+              'tools/tasks.ps1',
+          ]
+
+          obsolete_root_paths = [
+              'THESIS_ARTIFACT.md',
+              'ARTIFACT_EVALUATION.md',
+              'REPOSITORY_MAP.md',
+              'DATA_DICTIONARY.md',
+              'ENVIRONMENT.md',
+              'REPRODUCIBILITY.md',
+              'DATA_ACCESS.md',
+              'SECURITY.md',
+              'ACADEMIC_REPOSITORY_AUDIT.md',
+              'RELEASE_CHECKLIST.md',
+              'audit_latex_images_used.py',
+              'tasks.ps1',
           ]
 
           missing = [path for path in required if not Path(path).exists()]
+          obsolete = [path for path in obsolete_root_paths if Path(path).exists()]
+
           if missing:
               print('Missing required files:')
               for path in missing:
                   print(f'  - {path}')
+          if obsolete:
+              print('Obsolete root paths must not return:')
+              for path in obsolete:
+                  print(f'  - {path}')
+          if missing or obsolete:
               raise SystemExit(1)
 
-          print('Required research-artifact files are present.')
+          print('Final repository structure check passed.')
           PY
 
       - name: Check selected JSON files
@@ -147,6 +168,7 @@ jobs:
               'results/scripts/24_audit_reporting_asset_usage.py',
               'explainability/scripts/sync_chapter5_xai_metadata.py',
               'explainability/scripts/validate_chapter5_xai_artifacts.py',
+              'tools/latex/audit_latex_images_used.py',
           ]
 
           failed = False
@@ -174,6 +196,7 @@ jobs:
           import csv
           import hashlib
           import json
+          import re
           from collections import Counter
           from pathlib import Path
 
@@ -190,6 +213,10 @@ jobs:
               'cellebrite_inseyets': 11500,
               'griffeye': 11500,
           }
+          local_path_re = re.compile(
+              r'(?:[A-Za-z]:[\\/]|/run/media/|/home/|/Users/|raw_exports|blind_tool_input)',
+              re.IGNORECASE,
+          )
 
           digest = hashlib.sha256(csv_path.read_bytes()).hexdigest()
           with csv_path.open(newline='', encoding='utf-8-sig') as stream:
@@ -219,6 +246,8 @@ jobs:
           keys = [(row['tool_name'], row['bundle_id']) for row in rows]
           if len(keys) != len(set(keys)):
               raise SystemExit('Duplicate tool_name/bundle_id pairs detected')
+          if any(local_path_re.search(str(value or '')) for row in rows for value in row.values()):
+              raise SystemExit('Local or raw-export path leakage detected')
 
           summary = json.loads(summary_path.read_text(encoding='utf-8'))
           validation = json.loads(validation_path.read_text(encoding='utf-8'))
@@ -237,7 +266,7 @@ jobs:
           print('Canonical prediction and commercial metric profile passed.')
           PY
 
-      - name: Check stale final-documentation patterns
+      - name: Check final-documentation text guards
         shell: bash
         run: |
           python - <<'PY'
@@ -249,21 +278,22 @@ jobs:
               'Oxygen Forensic Detective',
               'Autopsy',
               'explainability/outputs/integrated_gradients/',
+              '.\\tasks.ps1',
           ]
 
           checked_paths = [
               Path('README.md'),
-              Path('THESIS_ARTIFACT.md'),
-              Path('REPOSITORY_MAP.md'),
-              Path('ARTIFACT_EVALUATION.md'),
-              Path('DATA_DICTIONARY.md'),
-              Path('ENVIRONMENT.md'),
-              Path('RELEASE_CHECKLIST.md'),
-              Path('CHANGELOG.md'),
-              Path('REPRODUCIBILITY.md'),
-              Path('DATA_ACCESS.md'),
-              Path('.github/SECURITY.md'),
               Path('docs/README.md'),
+              Path('docs/artifact/THESIS_ARTIFACT.md'),
+              Path('docs/artifact/ARTIFACT_EVALUATION.md'),
+              Path('docs/artifact/REPOSITORY_MAP.md'),
+              Path('docs/artifact/DATA_DICTIONARY.md'),
+              Path('docs/artifact/ENVIRONMENT.md'),
+              Path('docs/artifact/REPRODUCIBILITY.md'),
+              Path('docs/artifact/DATA_ACCESS.md'),
+              Path('docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md'),
+              Path('docs/maintenance/RELEASE_CHECKLIST.md'),
+              Path('.github/SECURITY.md'),
               Path('docs/LatexThesis/README.md'),
               Path('docs/LatexThesis_ITA/README.md'),
               Path('datasets/README.md'),
