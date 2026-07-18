@@ -39,7 +39,7 @@ The curated `main` branch contains:
 - four tool-specific sanitized extracts and an exact equivalence report;
 - 186 frozen commercial metric rows;
 - five thesis-selected Integrated Gradients cases and 20 thesis-ready XAI assets;
-- English and Italian LaTeX source trees;
+- the authoritative LaTeX thesis source;
 - access, security, reproducibility, audit, and release documentation.
 
 ## Deliberately Excluded from `main`
@@ -61,12 +61,6 @@ Full end-to-end reruns therefore require controlled-access images and, for comme
 
 ```text
 docs/LatexThesis/
-```
-
-The Italian reference tree is:
-
-```text
-docs/LatexThesis_ITA/
 ```
 
 ### Frozen dataset and splits
