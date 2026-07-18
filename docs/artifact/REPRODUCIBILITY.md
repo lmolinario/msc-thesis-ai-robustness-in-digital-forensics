@@ -1,174 +1,157 @@
 # Reproducibility Guide
 
-This document describes how to reproduce, audit, and extend the experimental pipeline used in this repository.
+This document describes how to audit and reproduce the experimental pipeline supporting:
 
-The repository supports the MSc thesis:
+> **Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks**
 
-```text
-Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks
-```
+The artifact supports controlled reproducibility. It does not provide unrestricted public redistribution of the full image corpus or licensed commercial software.
 
-The project evaluates the operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics. The objective is not to provide an unrestricted raw-image benchmark, but to document a traceable and controlled forensic AI evaluation workflow.
+## 1. Repository Scope
 
----
+Public `main` includes:
 
-## 1. Repository scope
+- numbered acquisition, preparation, training, perturbation, evaluation, and reporting scripts;
+- frozen dataset, split, attack, and bundle manifests;
+- proxy checkpoints and prediction outputs;
+- 69,000 sanitized commercial-tool decisions;
+- 186 commercial metric rows;
+- proxy robustness and OOD metric tables;
+- canonical XAI selection and thesis-ready assets;
+- English and Italian LaTeX sources;
+- validation and audit utilities.
 
-The repository includes:
+Public `main` excludes image corpora and complete commercial raw exports.
 
-- acquisition and dataset-preparation scripts;
-- frozen manifests and audit metadata;
-- human-in-the-loop final selection records;
-- proxy-model training and evaluation scripts;
-- adversarial and anti-forensic perturbation scripts;
-- blind forensic evaluation bundle construction;
-- commercial black-box tool normalization scripts;
-- metric outputs and thesis-ready result tables;
-- Integrated Gradients explainability workflow;
-- LaTeX thesis source files and documentation.
+## 2. Environment Setup
 
-The repository does not publicly redistribute the full raw dataset bundle. Raw data access is governed by `DATA_ACCESS.md`.
-
----
-
-## 2. Environment setup
-
-Clone the repository:
+Clone and enter the repository:
 
 ```bash
 git clone https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics.git
 cd msc-thesis-ai-robustness-in-digital-forensics
 ```
 
-Create and activate a Python virtual environment.
-
-Linux/macOS:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install --upgrade pip setuptools wheel
-```
-
-Windows PowerShell:
+### Windows PowerShell
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
 ```
 
-Install dependencies:
+### Linux/macOS
 
 ```bash
-pip install -r requirements.txt
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+python -m pip install -r requirements.txt
 ```
 
-For CUDA-enabled systems, install `torch` and `torchvision` according to the official PyTorch selector before running GPU-dependent stages.
+For GPU-dependent stages, install a PyTorch build compatible with the local CUDA environment.
 
----
+## 3. Controlled Data Access
 
-## 3. Controlled raw data access
-
-The raw dataset bundle is restored through:
+The raw source bundle is governed by:
 
 ```text
-datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
+docs/artifact/DATA_ACCESS.md
 ```
 
-The script does not contain a hardcoded download URL. After controlled access has been granted, configure the URL locally through:
+Request access:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --request-access
+```
+
+After approval, download the archive through the authenticated browser and validate/extract it locally:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --archive "/path/to/00_raw_datasets_bundle.zip"
+```
+
+An authorized direct URL may be supplied locally through `--url` or:
 
 ```text
 FAIRLAB_RAW_DATASET_BUNDLE_URL
 ```
 
-Windows PowerShell:
+Never commit the value.
 
-```powershell
-$env:FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
-```
+## 4. Numbered Experimental Pipeline
 
-Linux/macOS:
+| Step | Entry point | Purpose |
+|---:|---|---|
+| 00 | `datasets/scripts/acquisition/00_download_raw_datasets_bundle.py` | Controlled raw-bundle restoration |
+| 01 | `datasets/scripts/acquisition/01_download_kaggle.py` | Kaggle-source acquisition |
+| 02 | `datasets/scripts/acquisition/02_download_github.py` | GitHub-source acquisition |
+| 03 | `datasets/scripts/acquisition/03_build_subset_deepfirearm.py` | DeepFirearm subset preparation |
+| 04 | `datasets/scripts/acquisition/04_scrape_google.py` | Controlled web-source acquisition |
+| 05 | `datasets/scripts/acquisition/05_scrape_telegram.py` | Controlled Telegram acquisition |
+| 06 | `datasets/scripts/acquisition/06_scrape_youtube.py` | Controlled YouTube acquisition |
+| 07 | `datasets/scripts/acquisition/07_scrape_deepweb.py` | Controlled non-indexed-source acquisition |
+| 08 | `datasets/scripts/prepared/08_build_prepared_dataset.py` | Technical preparation and global deduplication |
+| 09 | `datasets/scripts/prepared/09_generate_review_manifest_full.py` | Human-review manifest generation |
+| 10 | `datasets/scripts/final/10_manual_selection_protocol_reviewer.py` | Human-in-the-loop final dataset freezing |
+| 11 | `datasets/scripts/splits/11_generate_clean_and_ood_splits.py` | Clean folds and OOD evaluation split |
+| 12 | `models/scripts/12_train_proxy_models.py` | Fold-aware proxy training |
+| 13 | `datasets/scripts/attacks/13_generate_anti_forensic_attacks.py` | Anti-forensic transformation generation |
+| 14 | `datasets/scripts/attacks/14_generate_adversarial_attacks.py` | Adversarial perturbation generation |
+| 15 | `evaluation/scripts/15_evaluate_proxy_models.py` | Transparent proxy evaluation |
+| 16 | `datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py` | 11,500-item bundle construction |
+| 17 | `explainability/scripts/17_generate_integrated_gradients_case_studies.py` | Integrated Gradients generation |
+| 18 | `explainability/scripts/18_xai_interactive_launcher.py` | Human XAI case review |
+| 19 | `evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py` | Commercial export normalization |
+| 20 | `results/scripts/20_generate_experimental_reporting_assets.py` | Chapter 5 figure/table generation |
+| 21 | `results/scripts/21_generate_embedded_metadata_sensitivity_check.py` | Frozen metadata-sensitivity analysis |
 
-```bash
-export FAIRLAB_RAW_DATASET_BUNDLE_URL="<controlled-access-url>"
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py
-```
+Steps 22–24 are public-artifact support utilities rather than original experimental stages:
 
-Do not commit private URLs, `.env` files, API keys, or session files.
+| Utility | Entry point | Purpose |
+|---|---|---|
+| 22 | `results/scripts/22_generate_public_embedded_metadata_sensitivity_check.py` | Optional privacy-reduced metadata analysis |
+| 23 | `results/scripts/23_validate_results_artifacts.py` | Read-only frozen-result validation |
+| 24 | `results/scripts/24_audit_reporting_asset_usage.py` | Reporting/LaTeX asset usage audit |
 
----
-
-## 4. Official pipeline sequence
-
-The repository follows a numbered research pipeline:
-
-```text
-00_download_raw_datasets_bundle.py
-01_download_kaggle.py
-02_download_github.py
-03_build_subset_deepfirearm.py
-04_scrape_google.py
-05_scrape_telegram.py
-06_scrape_youtube.py
-07_scrape_deepweb.py
-08_build_prepared_dataset.py
-09_generate_review_manifest_full.py
-10_manual_selection_protocol_reviewer.py
-11_generate_clean_and_ood_splits.py
-12_train_proxy_models.py
-13_generate_anti_forensic_attacks.py
-14_generate_adversarial_attacks.py
-15_evaluate_proxy_models.py
-16_build_forensic_evaluation_bundle.py
-17_generate_integrated_gradients_case_studies.py
-18_xai_interactive_launcher.py
-19_normalize_forensic_ai_tool_predictions.py
-```
-
----
-
-## 5. Final dataset and evaluation bundle
-
-Official frozen dataset:
+## 5. Frozen Dataset and Bundle
 
 ```text
 datasets/final/manifests/manual_selection_final_1500.csv
+datasets/final/manifests/manual_selection_adversarial_subset.csv
+datasets/splits/manifests/clean_folds_manifest.csv
+datasets/splits/manifests/ood_eval_manifest.csv
 ```
 
-Official binary subset:
+Frozen dataset:
 
 ```text
-datasets/final/manifests/manual_selection_adversarial_subset.csv
+500 weapon + 500 non-weapon + 500 OOD = 1,500 images
 ```
 
 Forensic evaluation bundle:
 
 ```text
-datasets/forensic_evaluation_bundle/
+1,000 clean binary
+  500 clean OOD
+5,000 adversarial
+5,000 anti-forensic
+-------------------
+11,500 files
 ```
 
-For commercial tool processing, import only:
+For commercial processing, import only:
 
 ```text
 datasets/forensic_evaluation_bundle/blind_tool_input/files/
 ```
 
-Do not import:
+Do not import the metadata or structured audit views.
 
-```text
-datasets/forensic_evaluation_bundle/metadata/
-datasets/forensic_evaluation_bundle/structured_audit_view/
-```
+## 6. Proxy Models
 
-These directories contain ground-truth labels, source metadata, perturbation metadata, and hash mappings.
-
----
-
-## 6. Proxy models
-
-Transparent proxy models used in the thesis:
+Architectures:
 
 ```text
 efficientnet_b0
@@ -176,24 +159,14 @@ resnet18
 clip
 ```
 
-Training entry point:
+Registry and checkpoints:
 
-```bash
-python models/scripts/12_train_proxy_models.py \
-  --model resnet18 efficientnet_b0 clip \
-  --fold all \
-  --epochs 10 \
-  --batch-size 16 \
-  --learning-rate 0.0001 \
-  --weight-decay 0.0001 \
-  --validation-ratio 0.15 \
-  --seed 42 \
-  --device auto \
-  --input-size 224 \
-  --num-workers 2
+```text
+models/model_registry.json
+models/checkpoints/
 ```
 
-Evaluation entry point:
+Example evaluation:
 
 ```bash
 python evaluation/scripts/15_evaluate_proxy_models.py \
@@ -201,18 +174,11 @@ python evaluation/scripts/15_evaluate_proxy_models.py \
   --device auto
 ```
 
-Main outputs:
+Partial or diagnostic runs must use a separate diagnostic output directory and must not replace canonical frozen outputs.
 
-```text
-evaluation/proxy_models/
-results/metrics/
-```
+## 7. Perturbations
 
----
-
-## 7. Perturbation generation
-
-Adversarial attacks:
+Adversarial families:
 
 ```text
 fgsm
@@ -222,7 +188,7 @@ one_pixel
 color_shift
 ```
 
-Anti-forensic transformations:
+Anti-forensic families:
 
 ```text
 jpeg_recompression
@@ -232,109 +198,136 @@ histogram_modification
 contrast_stretching
 ```
 
-Entry points:
+Generated image directories are local. Public manifests preserve provenance, parameters, source identifiers, and integrity digests.
+
+## 8. Commercial Black-Box Evaluation
+
+Frozen perimeter:
+
+| Configuration | Version |
+|---|---|
+| Magnet AXIOM / Magnet.AI | 10.1.0.48673 |
+| Excire Foto D20/D50/D80 | 4.1.5 |
+| Cellebrite Inseyets | 10.9 / Physical Analyzer 10.9.0.3029 |
+| Griffeye / T3K CORE | 26.2.108 / 1.18.0 |
+
+Complete raw exports are local or controlled. The public canonical table is:
+
+```text
+evaluation/forensic_tools/normalized_predictions.csv
+```
+
+It can be rebuilt without proprietary raw exports from the four committed validated extracts:
 
 ```bash
-python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
-python datasets/scripts/attacks/14_generate_adversarial_attacks.py
+python forensic_tools/scripts/build_canonical_normalized_predictions.py --force
 ```
 
-Attack outputs are stored under:
-
-```text
-attacks/adversarial/
-attacks/anti_forensic/
-attacks/manifests/
-```
-
----
-
-## 8. Final commercial black-box tool perimeter
-
-The final experimental perimeter is restricted to the following tools:
-
-| Tool | Version / module | Role in the thesis |
-|---|---|---|
-| Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Commercial forensic AI categorization |
-| Excire Foto 2025 | 4.1.5 | Standalone AI-assisted semantic image retrieval |
-| Cellebrite Inseyets | 10.9 | Commercial black-box AI-assisted media analysis |
-| Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE 1.18.0 | Commercial forensic media triage and semantic bookmarking |
-
-Commercial-tool outputs are normalized through:
+Validate exact equivalence:
 
 ```bash
-python evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py
+python forensic_tools/scripts/validate_public_extract_equivalence.py \
+  --source evaluation/forensic_tools/normalized_predictions.csv \
+  --metrics results/metrics/forensic_tools_metrics.csv \
+  --report forensic_tools/public_extracts_validation.json \
+  --force
 ```
 
-Main outputs:
+Expected frozen profile:
 
 ```text
-evaluation/forensic_tools/
-results/metrics/forensic_tools_metrics.csv
+69,000 identical decision rows
+186 identical metric rows
 ```
 
-The commercial tools are evaluated as black boxes. The pipeline does not assume access to internal models, proprietary thresholds, training data, or calibrated confidence scores.
+## 9. Explainability
 
----
+Integrated Gradients is applied only to transparent proxy models.
 
-## 9. Explainability workflow
-
-Explainability uses Integrated Gradients on transparent proxy models only.
-
-Entry points:
+Final five-case manifest:
 
 ```text
-explainability/scripts/17_generate_integrated_gradients_case_studies.py
-explainability/scripts/18_xai_interactive_launcher.py
+explainability/manifests/chapter5/thesis_selection.csv
 ```
 
-The XAI layer is qualitative and diagnostic. It is not a primary robustness metric and is not used to explain proprietary black-box commercial forensic tools.
+Validate Chapter 5 metadata and 20 selected assets:
 
----
+```bash
+python explainability/scripts/validate_chapter5_xai_artifacts.py \
+  --strict-thesis-text
+```
 
-## 10. Traceability and auditability
+Historical full output directories are not required for the public thesis artifact.
 
-The pipeline preserves traceability through:
+## 10. Result and Reporting Validation
 
-- stable image identifiers;
-- SHA256 hashes;
-- MD5 hashes for forensic-tool compatibility;
-- source metadata;
-- fold identifiers;
-- attack and transformation manifests;
-- bundle manifests;
-- commercial-tool normalization logs;
-- metric CSV/JSON files;
-- thesis table and figure references.
+```bash
+python results/scripts/23_validate_results_artifacts.py
+python results/scripts/24_audit_reporting_asset_usage.py --strict
+```
 
-SHA256 is the primary integrity hash used in the thesis pipeline.
+The result validator checks:
 
----
+- 69,000 canonical commercial decisions;
+- 186 commercial metrics;
+- 40,500 proxy prediction rows;
+- the `500 OOD images × 5 folds = 2,500 predictions per architecture` accounting;
+- Chapter 5 manifest counts;
+- metadata-sensitivity counts.
 
-## 11. Reproducibility limitations
+The asset audit checks references and SHA256 equality between reporting-layer files and thesis-ready copies.
 
-Full reproduction requires access to controlled raw data and, for the black-box evaluation layer, access to proprietary commercial forensic tools. Therefore, the repository supports controlled reproducibility rather than unrestricted end-to-end public reruns.
+## 11. LaTeX Audit
 
-Where raw images or proprietary tool outputs cannot be redistributed, auditability is preserved through code, manifests, hashes, normalized outputs, metrics, and documentation.
+```bash
+python tools/latex/audit_latex_images_used.py \
+  --main docs/LatexThesis/main.tex
+```
 
----
+Compile locally from `docs/LatexThesis/`. Generated auxiliary files and `main.pdf` are ignored.
 
-## 12. Frozen thesis state
+## 12. Windows Audit Helper
 
-The thesis source is frozen under:
+```powershell
+.\tools\tasks.ps1 status
+.\tools\tasks.ps1 check-json
+.\tools\tasks.ps1 check-python-syntax
+.\tools\tasks.ps1 check-text-guards
+.\tools\tasks.ps1 check-thesis-log
+.\tools\tasks.ps1 audit-all
+```
+
+## 13. Traceability
+
+The pipeline preserves traceability through stable identifiers, SHA256 digests, bundle IDs, fold assignments, attack manifests, checkpoint hashes, normalized decisions, metric tables, XAI manifests, and figure-generation records.
+
+SHA256 is the primary integrity digest. MD5 is retained only where required for compatibility with commercial-tool matching workflows.
+
+## 14. Reproducibility Boundary
+
+Publicly reproducible:
+
+- repository and code audit;
+- canonical commercial-table reconstruction;
+- commercial metric recomputation from sanitized decisions;
+- result and reporting validation;
+- LaTeX source and figure audit.
+
+Controlled or licensed:
+
+- raw image restoration;
+- complete image-pipeline rerun;
+- proxy retraining and attack regeneration;
+- commercial-tool reprocessing.
+
+## 15. Related Documents
 
 ```text
-docs/LatexThesis/
+docs/artifact/DATA_ACCESS.md
+docs/artifact/ENVIRONMENT.md
+docs/artifact/DATA_DICTIONARY.md
+.github/SECURITY.md
+docs/maintenance/RELEASE_CHECKLIST.md
 ```
 
-No further methodological or dataset changes are expected. Future edits should be limited to archival corrections, documentation hygiene, optional dependency locking, or optional release tagging.
-
----
-
-## 13. Related policy files
-
-- `DATA_ACCESS.md` describes controlled raw dataset access.
-- `SECURITY.md` describes handling of exposed secrets or private data links.
-- `.env.example` lists safe environment variable names without secrets.
-- `CITATION.cff` provides repository citation metadata.
-- `ACADEMIC_REPOSITORY_AUDIT.md` records repository-level academic readiness checks.
+The authoritative thesis source is `docs/LatexThesis/`. Substantive changes require a new versioned release rather than silent replacement of the frozen artifact.
