@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "artifact_status": "canonical_sanitized_prediction_table",
+  "output": {
+    "path": "evaluation/forensic_tools/normalized_predictions.csv",
+    "rows": 69000,
+    "sha256": "a8e5ef9b138a3b02454f24ff008e04843cb034bd40b7056f305de085bb1ce85e",
+    "columns": [
+      "tool_name",
+      "bundle_id",
+      "matched",
+      "match_method",
+      "sample_type",
+      "attack_family",
+      "attack_name",
+      "final_label",
+      "weapon_detected",
+      "normalized_prediction",
+      "tags",
+      "classifications",
+      "excire_distance_limit",
+      "n_prompt_hits",
+      "hit_prompts",
+      "prompt_firearm_hit",
+      "prompt_gun_hit",
+      "prompt_pistol_hit",
+      "prompt_handgun_hit",
+      "prompt_revolver_hit",
+      "prompt_rifle_hit",
+      "prompt_shotgun_hit",
+      "prompt_assault_rifle_hit",
+      "firearm_bookmark",
+      "secondary_weapon_bookmarks"
+    ]
+  },
+  "sources": [
+    {
+      "path": "forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv",
+      "rows": 11500,
+      "sha256": "f66023b5178ddcb823aec35d310b14f0c9e3e0d007c5e936eb4c80b19183b3db",
+      "columns": [
+        "tool_name",
+        "bundle_id",
+        "sample_type",
+        "attack_family",
+        "attack_name",
+        "final_label",
+        "weapon_detected",
+        "normalized_prediction",
+        "tags"
+      ]
+    },
+    {
+      "path": "forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv",
+      "rows": 34500,
+      "sha256": "48c6e736041418c7db1a007696ad5cdb5192f101606fcf1e50ca8eaf352d1896",
+      "columns": [
+        "tool_name",
+        "bundle_id",
+        "sample_type",
+        "attack_family",
+        "attack_name",
+        "final_label",
+        "weapon_detected",
+        "normalized_prediction",
+        "excire_distance_limit",
+        "n_prompt_hits",
+        "hit_prompts",
+        "prompt_firearm_hit",
+        "prompt_gun_hit",
+        "prompt_pistol_hit",
+        "prompt_handgun_hit",
+        "prompt_revolver_hit",
+        "prompt_rifle_hit",
+        "prompt_shotgun_hit",
+        "prompt_assault_rifle_hit"
+      ]
+    },
+    {
+      "path": "forensic_tools/cellebrite_inseyets/public_extracts/cellebrite_classifications_extract.csv",
+      "rows": 11500,
+      "sha256": "7098677b3efc7f811893ecbca58e166ca626d21f12ac44574f0521a8a8d2a9cd",
+      "columns": [
+        "tool_name",
+        "bundle_id",
+        "sample_type",
+        "attack_family",
+        "attack_name",
+        "final_label",
+        "weapon_detected",
+        "normalized_prediction",
+        "classifications"
+      ]
+    },
+    {
+      "path": "forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv",
+      "rows": 11500,
+      "sha256": "e24683b8ca49cf477e9a3089d69f0e22b2b10e2834cd6dad17df2a53ebd8d8ea",
+      "columns": [
+        "tool_name",
+        "bundle_id",
+        "sample_type",
+        "attack_family",
+        "attack_name",
+        "final_label",
+        "weapon_detected",
+        "normalized_prediction",
+        "firearm_bookmark",
+        "secondary_weapon_bookmarks"
+      ]
+    }
+  ],
+  "decision_profile": {
+    "magnet_axiom": 11500,
+    "excire_foto_2025_d20": 11500,
+    "excire_foto_2025_d50": 11500,
+    "excire_foto_2025_d80": 11500,
+    "cellebrite_inseyets": 11500,
+    "griffeye": 11500
+  },
+  "local_paths_detected": false,
+  "raw_export_fields_included": false,
+  "validation_command": "python forensic_tools/scripts/validate_public_extract_equivalence.py --source evaluation/forensic_tools/normalized_predictions.csv --force",
+  "methodological_note": "The canonical table is reconstructed only from the four committed, validated sanitized public extracts. It does not contain complete commercial-tool exports or local acquisition paths."
+}

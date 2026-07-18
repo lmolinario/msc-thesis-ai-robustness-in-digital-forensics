@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "decisions_identical": true,
   "metrics_identical": true,
-  "source": "forensic_tools/.staging/evaluation/normalized_predictions.csv",
-  "source_sha256": "c761239327743565ef5a757b21648e92a569041360fe417a5ec8680529ef7903",
+  "source": "evaluation/forensic_tools/normalized_predictions.csv",
+  "source_sha256": "a8e5ef9b138a3b02454f24ff008e04843cb034bd40b7056f305de085bb1ce85e",
   "source_rows": 69000,
   "public_extract_rows": 69000,
   "decision_profile": {
