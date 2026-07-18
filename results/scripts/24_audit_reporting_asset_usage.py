@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Audit Chapter 5 reporting assets against both LaTeX thesis trees.
+"""Audit Chapter 5 reporting assets against the authoritative LaTeX thesis.
 
 The script is read-only by default. It reports which manifest asset identifiers
-are referenced by the English and Italian thesis sources, whether thesis-ready
-copies exist, and whether those copies are byte-identical to the reporting-layer
-files under ``results/figures/chapter_5``.
+are referenced by the English thesis source, whether thesis-ready copies exist,
+and whether those copies are byte-identical to the reporting-layer files under
+``results/figures/chapter_5``.
 """
 
 from __future__ import annotations
@@ -21,10 +21,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = (
     REPO_ROOT / "results" / "figures" / "chapter_5" / "chapter5_figures_manifest.csv"
 )
-THESIS_TREES = {
-    "english": REPO_ROOT / "docs" / "LatexThesis",
-    "italian": REPO_ROOT / "docs" / "LatexThesis_ITA",
-}
+THESIS_ROOT = REPO_ROOT / "docs" / "LatexThesis"
 
 
 def parse_args() -> argparse.Namespace:
@@ -77,10 +74,10 @@ def read_manifest() -> list[dict[str, str]]:
 
 
 def load_tex_sources(root: Path) -> tuple[str, list[str]]:
+    if not root.is_dir():
+        raise FileNotFoundError(f"Missing authoritative thesis tree: {root}")
     files = sorted(root.rglob("*.tex"))
-    text_parts: list[str] = []
-    for path in files:
-        text_parts.append(path.read_text(encoding="utf-8", errors="replace"))
+    text_parts = [path.read_text(encoding="utf-8", errors="replace") for path in files]
     return "\n".join(text_parts), [repo_relative(path) for path in files]
 
 
@@ -90,12 +87,7 @@ def main() -> int:
     if len(manifest_rows) != 41:
         raise ValueError(f"Expected 41 manifest rows, found {len(manifest_rows)}")
 
-    tex_content: dict[str, str] = {}
-    tex_files: dict[str, list[str]] = {}
-    for language, root in THESIS_TREES.items():
-        content, files = load_tex_sources(root)
-        tex_content[language] = content
-        tex_files[language] = files
+    tex_content, tex_files = load_tex_sources(THESIS_ROOT)
 
     by_id: dict[str, list[dict[str, str]]] = {}
     for row in manifest_rows:
@@ -111,20 +103,21 @@ def main() -> int:
     for figure_id, rows in sorted(by_id.items()):
         record: dict[str, Any] = {
             "figure_id": figure_id,
-            "referenced": {
-                language: figure_id in content
-                for language, content in tex_content.items()
-            },
+            "referenced": figure_id in tex_content,
             "files": [],
         }
         for row in rows:
             output = (REPO_ROOT / row["output_path"]).resolve()
+            candidate = THESIS_ROOT / "images" / output.name
             file_record: dict[str, Any] = {
                 "format": row["format"],
                 "reporting_path": repo_relative(output),
                 "reporting_exists": output.is_file(),
                 "source_csv": row["source_csv"],
-                "thesis_copies": {},
+                "thesis_copy": {
+                    "path": repo_relative(candidate),
+                    "exists": candidate.is_file(),
+                },
             }
             if not output.is_file():
                 missing_outputs.append(repo_relative(output))
@@ -133,55 +126,38 @@ def main() -> int:
 
             reporting_hash = sha256_file(output)
             file_record["reporting_sha256"] = reporting_hash
-            for language, root in THESIS_TREES.items():
-                candidate = root / "images" / output.name
-                copy_info: dict[str, Any] = {
-                    "path": repo_relative(candidate),
-                    "exists": candidate.is_file(),
-                }
-                if candidate.is_file():
-                    candidate_hash = sha256_file(candidate)
-                    identical = candidate_hash == reporting_hash
-                    copy_info["sha256"] = candidate_hash
-                    copy_info["byte_identical"] = identical
-                    if identical:
-                        exact_copy_count += 1
-                    else:
-                        mismatched_copies.append(
-                            {
-                                "figure_id": figure_id,
-                                "language": language,
-                                "reporting_path": repo_relative(output),
-                                "thesis_path": repo_relative(candidate),
-                            }
-                        )
-                file_record["thesis_copies"][language] = copy_info
+            if candidate.is_file():
+                candidate_hash = sha256_file(candidate)
+                identical = candidate_hash == reporting_hash
+                file_record["thesis_copy"]["sha256"] = candidate_hash
+                file_record["thesis_copy"]["byte_identical"] = identical
+                if identical:
+                    exact_copy_count += 1
+                else:
+                    mismatched_copies.append(
+                        {
+                            "figure_id": figure_id,
+                            "reporting_path": repo_relative(output),
+                            "thesis_path": repo_relative(candidate),
+                        }
+                    )
             record["files"].append(file_record)
         asset_records.append(record)
 
-    unreferenced_both = [
-        record["figure_id"]
-        for record in asset_records
-        if not any(record["referenced"].values())
+    unreferenced = [
+        record["figure_id"] for record in asset_records if not record["referenced"]
     ]
-    referenced_english = sum(
-        1 for record in asset_records if record["referenced"]["english"]
-    )
-    referenced_italian = sum(
-        1 for record in asset_records if record["referenced"]["italian"]
-    )
+    referenced_count = sum(1 for record in asset_records if record["referenced"])
 
     report = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "manifest": repo_relative(MANIFEST),
+        "thesis_root": repo_relative(THESIS_ROOT),
         "manifest_rows": len(manifest_rows),
         "unique_asset_ids": len(by_id),
         "tex_files_scanned": tex_files,
-        "referenced_asset_ids": {
-            "english": referenced_english,
-            "italian": referenced_italian,
-        },
-        "unreferenced_in_both_theses": unreferenced_both,
+        "referenced_asset_ids": referenced_count,
+        "unreferenced_in_thesis": unreferenced,
         "missing_reporting_outputs": missing_outputs,
         "mismatched_existing_thesis_copies": mismatched_copies,
         "byte_identical_thesis_copy_relations": exact_copy_count,
@@ -199,15 +175,14 @@ def main() -> int:
     print("Chapter 5 reporting-asset audit completed.")
     print(f" - manifest rows: {len(manifest_rows)}")
     print(f" - unique asset IDs: {len(by_id)}")
-    print(f" - referenced in English thesis: {referenced_english}")
-    print(f" - referenced in Italian thesis: {referenced_italian}")
-    print(f" - unreferenced in both theses: {len(unreferenced_both)}")
+    print(f" - referenced in thesis: {referenced_count}")
+    print(f" - unreferenced in thesis: {len(unreferenced)}")
     print(f" - byte-identical thesis copy relations: {exact_copy_count}")
     print(f" - missing reporting outputs: {len(missing_outputs)}")
     print(f" - mismatched existing thesis copies: {len(mismatched_copies)}")
-    if unreferenced_both:
+    if unreferenced:
         print(" - unreferenced IDs:")
-        for figure_id in unreferenced_both:
+        for figure_id in unreferenced:
             print(f"   - {figure_id}")
     if report_path is not None:
         print(f" - report: {repo_relative(report_path)}")
