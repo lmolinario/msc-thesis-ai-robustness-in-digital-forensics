@@ -1,7 +1,10 @@
-# Locally regenerated prediction-level outputs
-normalized_predictions.csv
+# Locally regenerated non-canonical outputs
 unmatched_predictions.csv
 *_normalized_predictions.csv
+
+# Canonical public sanitized prediction table
+!normalized_predictions.csv
+!normalized_predictions_public_summary.json
 
 # Public schema-only files
 !normalized_predictions.schema.csv
