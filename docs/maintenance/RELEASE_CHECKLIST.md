@@ -14,9 +14,9 @@ Recommended title:
 MSc Thesis Research Artifact — Final Frozen Version
 ```
 
-## 1. Synchronize the Local Repository
+## 1. Synchronize the Repository
 
-```powershell
+```bash
 git fetch origin
 git switch main
 git pull --ff-only origin main
@@ -30,9 +30,7 @@ Expected:
 ## main...origin/main
 ```
 
-No local commit should be ahead of `origin/main` unless it is intentionally being prepared for the release.
-
-## 2. Verify the Final Root Layout
+## 2. Verify the Final Layout
 
 Expected root:
 
@@ -57,30 +55,34 @@ README.md
 requirements.txt
 ```
 
-The old governance files and audit utilities must not reappear in the root.
+The obsolete Italian thesis tree and old root-level governance files must not reappear.
 
-## 3. Run Local Audit Helpers
+## 3. Run the Kali/Linux Audit Helper
 
-```powershell
-.\tools\tasks.ps1 status
-.\tools\tasks.ps1 check-json
-.\tools\tasks.ps1 check-python-syntax
-.\tools\tasks.ps1 check-text-guards
+```bash
+bash tools/tasks.sh status
+bash tools/tasks.sh check-json
+bash tools/tasks.sh check-python-syntax
+bash tools/tasks.sh check-text-guards
+bash tools/tasks.sh check-xai
+bash tools/tasks.sh check-results
+bash tools/tasks.sh check-assets
+bash tools/tasks.sh check-latex-images
 ```
 
-Full helper:
+Complete audit:
 
-```powershell
-.\tools\tasks.ps1 audit-all
+```bash
+bash tools/tasks.sh audit-all
 ```
 
-## 4. Validate Canonical Commercial Predictions
+## 4. Validate Commercial Predictions
 
-```powershell
-python .\forensic_tools\scripts\validate_public_extract_equivalence.py `
-  --source .\evaluation\forensic_tools\normalized_predictions.csv `
-  --metrics .\results\metrics\forensic_tools_metrics.csv `
-  --report .\forensic_tools\public_extracts_validation.json `
+```bash
+python forensic_tools/scripts/validate_public_extract_equivalence.py \
+  --source evaluation/forensic_tools/normalized_predictions.csv \
+  --metrics results/metrics/forensic_tools_metrics.csv \
+  --report forensic_tools/public_extracts_validation.json \
   --force
 ```
 
@@ -91,46 +93,38 @@ Expected:
 186 identical metric rows
 ```
 
-Confirm:
-
-```text
-evaluation/forensic_tools/normalized_predictions.csv
-evaluation/forensic_tools/normalized_predictions_public_summary.json
-forensic_tools/public_extracts_validation.json
-```
-
-all report the same canonical CSV SHA256.
+Confirm that the canonical CSV, public summary, and equivalence report record the same SHA256.
 
 ## 5. Validate XAI and Results
 
-```powershell
-python .\explainability\scripts\validate_chapter5_xai_artifacts.py `
+```bash
+python explainability/scripts/validate_chapter5_xai_artifacts.py \
   --strict-thesis-text
 
-python .\results\scripts\23_validate_results_artifacts.py
+python results/scripts/23_validate_results_artifacts.py
 
-python .\results\scripts\24_audit_reporting_asset_usage.py `
-  --strict `
-  --report .\results\reporting_asset_usage_summary.json
+python results/scripts/24_audit_reporting_asset_usage.py \
+  --strict \
+  --report results/reporting_asset_usage_summary.json
 ```
 
-Review the ignored local asset-audit report before removing or replacing any duplicate figure.
+Review the ignored local report before removing or replacing any reporting asset.
 
 ## 6. Audit LaTeX Images
 
-```powershell
-python .\tools\latex\audit_latex_images_used.py `
-  --main .\docs\LatexThesis\main.tex
+```bash
+python tools/latex/audit_latex_images_used.py \
+  --main docs/LatexThesis/main.tex
 ```
 
 Review missing, ambiguous, unused, and duplicate image reports.
 
-## 7. Compile the English Thesis
+## 7. Compile the Thesis
 
-```powershell
-Set-Location .\docs\LatexThesis
+```bash
+cd docs/LatexThesis
 latexmk -pdf main.tex
-Set-Location ..\..
+cd ../..
 ```
 
 Check:
@@ -140,29 +134,18 @@ Check:
 - acronym/glossary warnings are understood;
 - no LaTeX error remains;
 - Chapter 5 figures and tables render correctly;
-- the PDF reflects the canonical metrics and XAI confidence values.
+- the PDF reflects the canonical metrics and XAI values.
 
 Log check:
 
-```powershell
-Select-String `
-  -Path .\docs\LatexThesis\main.log `
-  -Pattern "Undefined references","Citation.*undefined","LaTeX Error","Package glossaries Warning"
+```bash
+grep -En 'Undefined references|Citation.*undefined|LaTeX Error|Package glossaries Warning' \
+  docs/LatexThesis/main.log || true
 ```
 
 The local `main.pdf` and auxiliary files are ignored.
 
-## 8. Compile the Italian Reference Version
-
-```powershell
-Set-Location .\docs\LatexThesis_ITA
-latexmk -pdf main.tex
-Set-Location ..\..
-```
-
-Verify that numerical values, labels, identifiers, and figure references remain synchronized with the English source. The English thesis remains authoritative.
-
-## 9. Documentation Check
+## 8. Documentation Check
 
 Verify:
 
@@ -183,24 +166,24 @@ CHANGELOG.md
 CITATION.cff
 ```
 
-## 10. Data and Security Check
+## 9. Data and Security Check
 
 Confirm that current `main` does not contain:
 
 - `.env` or credential files;
 - API tokens, passwords, or commercial license keys;
 - reusable private or signed download URLs;
-- image corpora excluded by policy;
+- excluded image corpora;
 - complete raw commercial exports;
 - proprietary case databases or evidence material;
 - unnecessary local absolute paths;
 - LaTeX compilation products.
 
-Run a secret scanner such as `gitleaks` where available.
+Use `gitleaks` or an equivalent secret scanner where available.
 
-## 11. Historical Snapshot Check
+## 10. Historical Snapshot Check
 
-Verify that both references still resolve exactly to:
+Both protected references must still resolve to:
 
 ```text
 309a4580537ebc3bb7950f29c090bb2729fc603b
@@ -215,9 +198,9 @@ snapshot/pre-commission-cleanup-2026-07-16
 
 Do not move or modify them.
 
-## 12. Release Assets
+## 11. Release Assets
 
-Preferred release assets:
+Preferred assets:
 
 ```text
 thesis-final.pdf
@@ -227,45 +210,16 @@ repository-audit-summary.md
 
 Do not add the generated PDF to the Git tree solely for distribution. Attach it to the release.
 
-Generate checksums, for example:
+Example checksum:
 
-```powershell
-Get-FileHash .\docs\LatexThesis\main.pdf -Algorithm SHA256
+```bash
+sha256sum docs/LatexThesis/main.pdf
 ```
 
-## 13. GitHub Release
+## 12. DOI Archival
 
-Recommended release notes:
+After GitHub release creation, archive through Zenodo or an institutional repository. Then update `CITATION.cff`, add the DOI badge, update `CHANGELOG.md`, and record the DOI in the academic audit document.
 
-```text
-Final frozen research artifact supporting the MSc thesis
-"Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks".
+## 13. Post-Release Rule
 
-The release includes the final thesis source, numbered scripts, frozen manifests,
-proxy checkpoints and predictions, sanitized commercial-tool decisions, exact metric
-equivalence records, XAI case-study material, reporting assets, and governance documentation.
-
-Raw images, controlled-access datasets, complete proprietary exports, licensed forensic
-software, and commercial AI internals are not redistributed.
-```
-
-## 14. DOI Archival
-
-After GitHub release creation, archive through Zenodo or an institutional repository. After DOI assignment:
-
-1. update `CITATION.cff`;
-2. add the DOI badge to `README.md`;
-3. update `CHANGELOG.md`;
-4. record the release date and DOI in the academic audit document.
-
-## 15. Post-Release Rule
-
-Allowed maintenance:
-
-- citation and DOI corrections;
-- documentation typo fixes;
-- release-note clarifications;
-- security corrections;
-- non-substantive archival improvements.
-
-Substantive experimental changes require a new versioned release.
+Allowed maintenance includes citation/DOI corrections, documentation fixes, release clarifications, security corrections, and non-substantive archival improvements. Substantive experimental changes require a new versioned release.
