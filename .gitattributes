@@ -1,26 +1,40 @@
-# *.webp filter=lfs diff=lfs merge=lfs -text
-# *.zip filter=lfs diff=lfs merge=lfs -text
-# *.jpg filter=lfs diff=lfs merge=lfs -text
-# *.jpeg filter=lfs diff=lfs merge=lfs -text
-# *.png filter=lfs diff=lfs merge=lfs -text
-# *.bmp filter=lfs diff=lfs merge=lfs -text
-# *.tif filter=lfs diff=lfs merge=lfs -text
-# *.tiff filter=lfs diff=lfs merge=lfs -text
-*.pt filter=lfs diff=lfs merge=lfs -text
-*.pth filter=lfs diff=lfs merge=lfs -text
-*.ckpt filter=lfs diff=lfs merge=lfs -text
+# Normalize text files across Windows and Linux working environments
+* text=auto
+
+*.py   text eol=lf
+*.ps1  text eol=lf
+*.md   text eol=lf
+*.txt  text eol=lf
+*.tex  text eol=lf
+*.sty  text eol=lf
+*.bib  text eol=lf
+*.csv  text eol=lf
+*.json text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.cff  text eol=lf
+
+# Keep proxy checkpoints in Git LFS
+*.pt          filter=lfs diff=lfs merge=lfs -text
+*.pth         filter=lfs diff=lfs merge=lfs -text
+*.ckpt        filter=lfs diff=lfs merge=lfs -text
 *.safetensors filter=lfs diff=lfs merge=lfs -text
-/docs/assets/*.png -filter -diff -merge -text
 
+# Public thesis and reporting images remain ordinary Git objects
+*.png  -filter -diff -merge -text
+*.jpg  -filter -diff -merge -text
+*.jpeg -filter -diff -merge -text
+*.webp -filter -diff -merge -text
+*.bmp  -filter -diff -merge -text
+*.tif  -filter -diff -merge -text
+*.tiff -filter -diff -merge -text
+*.pdf  -filter -diff -merge -text
+*.eps  -filter -diff -merge -text
+*.svg  -filter -diff -merge -text
 
-# Keep thesis generated figures and documentation screenshots in normal Git, not Git LFS
-results/figures/** -filter -diff -merge -text
-docs/assets/** -filter -diff -merge -text
-
-# Keep thesis images and generated figures in normal Git, not Git LFS
-docs/LatexThesis_ITA/images/** -filter -diff -merge -text
-docs/assets/** -filter -diff -merge -text
-results/figures/** -filter -diff -merge -text
-
-# Keep generated XAI outputs in normal Git, not Git LFS
-explainability/outputs/** -filter -diff -merge -text
+# Archives and proprietary forensic containers are binary when intentionally tracked
+*.zip  -text
+*.7z   -text
+*.tar  -text
+*.gz   -text
+*.xlsx -text
