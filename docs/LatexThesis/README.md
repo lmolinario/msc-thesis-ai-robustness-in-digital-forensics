@@ -1,10 +1,8 @@
 # English LaTeX Thesis Source
 
-This directory contains the authoritative English source of the MSc thesis:
+This directory contains the authoritative source of the MSc thesis:
 
 > **Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks**
-
-The Italian reference version is maintained separately under `docs/LatexThesis_ITA/`.
 
 ## Main Entry Point
 
@@ -93,7 +91,7 @@ python results/scripts/24_audit_reporting_asset_usage.py --strict
 python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
 
-The result validator checks prediction and metric counts, canonical commercial SHA256, OOD accounting, reporting-manifest counts, and metadata-sensitivity counts. The asset audit checks both thesis trees and compares existing copies by SHA256.
+The result validator checks prediction and metric counts, canonical commercial SHA256, OOD accounting, reporting-manifest counts, and metadata-sensitivity counts. The asset audit checks the authoritative thesis tree and compares existing copies by SHA256.
 
 ## Archival Editing Rules
 
