@@ -30,7 +30,7 @@ latexmk -pdf main.tex
 
 The toolchain must support the packages and bibliography workflow configured in `packages.sty` and `main.tex`. When using a manual build sequence, ensure that bibliography, glossary/acronym generation, and repeated LaTeX passes are completed.
 
-Generated auxiliary files and local editor configuration should not be committed unless they are explicitly required by the frozen artifact.
+Generated auxiliary files and the local `main.pdf` are ignored by Git. The tracked LaTeX sources, bibliography, figures, manifests, and numerical source artifacts—not a locally compiled PDF—define the repository source of truth.
 
 ---
 
@@ -57,8 +57,6 @@ docs/LatexThesis/
 ├── methodology/
 └── images/
 ```
-
-Audit scripts and generated support files may also be present in the directory.
 
 ---
 
@@ -119,18 +117,40 @@ Thesis-ready images are stored in:
 images/
 ```
 
-Numerical figures and tables should be generated or verified from the frozen source artifacts, primarily:
+Numerical figures and tables must be generated or verified from the frozen source artifacts, primarily:
 
 ```text
 results/metrics/
 results/figures/chapter_5/
 evaluation/proxy_models/
-evaluation/forensic_tools/
-explainability/outputs/integrated_gradients/
+evaluation/forensic_tools/normalized_predictions.csv
+evaluation/forensic_tools/normalized_predictions_public_summary.json
+forensic_tools/public_extracts_validation.json
+explainability/manifests/chapter5/thesis_selection.csv
 datasets/forensic_evaluation_bundle/metadata/
 ```
 
+The five selected XAI cases are documented by the canonical manifest. Their 20 thesis-ready image assets are retained in `images/`; the larger historical Integrated Gradients output tree is not distributed on current `main`.
+
 Do not manually alter numerical values in presentation-layer figures when a CSV/JSON source or generation script is available.
+
+Before deleting or replacing duplicated Chapter 5 reporting assets, run:
+
+```bash
+python results/scripts/24_audit_reporting_asset_usage.py --strict
+```
+
+---
+
+## Chapter 5 Validation
+
+The frozen result layer can be checked with:
+
+```bash
+python results/scripts/23_validate_results_artifacts.py
+```
+
+This validates the commercial and proxy result counts, canonical prediction SHA256, OOD accounting, figure-manifest profile, and embedded-metadata sensitivity counts. It does not regenerate metrics.
 
 ---
 
@@ -159,4 +179,4 @@ Do not commit:
 - controlled-access dataset URLs;
 - temporary exports containing unnecessary personal or sensitive data.
 
-Use the repository-level `DATA_ACCESS.md`, `SECURITY.md`, `.env.example`, and reproducibility documentation for controlled local configuration.
+Use the repository-level `DATA_ACCESS.md`, `SECURITY.md`, `.env.example`, and reproducibility documentation for controlled local configuration until those governance documents are moved during the final root cleanup.
