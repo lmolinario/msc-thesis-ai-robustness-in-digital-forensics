@@ -17,33 +17,17 @@ Public `main` includes:
 - 186 commercial metric rows;
 - proxy robustness and OOD metric tables;
 - canonical XAI selection and thesis-ready assets;
-- English and Italian LaTeX sources;
+- the authoritative LaTeX thesis source;
 - validation and audit utilities.
 
 Public `main` excludes image corpora and complete commercial raw exports.
 
-## 2. Environment Setup
-
-Clone and enter the repository:
+## 2. Environment Setup on Kali/Linux
 
 ```bash
 git clone https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics.git
 cd msc-thesis-ai-robustness-in-digital-forensics
-```
-
-### Windows PowerShell
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip setuptools wheel
-python -m pip install -r requirements.txt
-```
-
-### Linux/macOS
-
-```bash
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r requirements.txt
@@ -65,20 +49,14 @@ Request access:
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --request-access
 ```
 
-After approval, download the archive through the authenticated browser and validate/extract it locally:
+After approval, validate and extract the downloaded archive locally:
 
 ```bash
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
   --archive "/path/to/00_raw_datasets_bundle.zip"
 ```
 
-An authorized direct URL may be supplied locally through `--url` or:
-
-```text
-FAIRLAB_RAW_DATASET_BUNDLE_URL
-```
-
-Never commit the value.
+An authorized direct URL may be supplied through `--url` or the local variable `FAIRLAB_RAW_DATASET_BUNDLE_URL`. Never commit the value.
 
 ## 4. Numbered Experimental Pipeline
 
@@ -92,28 +70,28 @@ Never commit the value.
 | 05 | `datasets/scripts/acquisition/05_scrape_telegram.py` | Controlled Telegram acquisition |
 | 06 | `datasets/scripts/acquisition/06_scrape_youtube.py` | Controlled YouTube acquisition |
 | 07 | `datasets/scripts/acquisition/07_scrape_deepweb.py` | Controlled non-indexed-source acquisition |
-| 08 | `datasets/scripts/prepared/08_build_prepared_dataset.py` | Technical preparation and global deduplication |
+| 08 | `datasets/scripts/prepared/08_build_prepared_dataset.py` | Technical preparation and deduplication |
 | 09 | `datasets/scripts/prepared/09_generate_review_manifest_full.py` | Human-review manifest generation |
-| 10 | `datasets/scripts/final/10_manual_selection_protocol_reviewer.py` | Human-in-the-loop final dataset freezing |
-| 11 | `datasets/scripts/splits/11_generate_clean_and_ood_splits.py` | Clean folds and OOD evaluation split |
+| 10 | `datasets/scripts/final/10_manual_selection_protocol_reviewer.py` | Human-in-the-loop final freezing |
+| 11 | `datasets/scripts/splits/11_generate_clean_and_ood_splits.py` | Clean folds and OOD split |
 | 12 | `models/scripts/12_train_proxy_models.py` | Fold-aware proxy training |
-| 13 | `datasets/scripts/attacks/13_generate_anti_forensic_attacks.py` | Anti-forensic transformation generation |
-| 14 | `datasets/scripts/attacks/14_generate_adversarial_attacks.py` | Adversarial perturbation generation |
+| 13 | `datasets/scripts/attacks/13_generate_anti_forensic_attacks.py` | Anti-forensic generation |
+| 14 | `datasets/scripts/attacks/14_generate_adversarial_attacks.py` | Adversarial generation |
 | 15 | `evaluation/scripts/15_evaluate_proxy_models.py` | Transparent proxy evaluation |
 | 16 | `datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py` | 11,500-item bundle construction |
 | 17 | `explainability/scripts/17_generate_integrated_gradients_case_studies.py` | Integrated Gradients generation |
-| 18 | `explainability/scripts/18_xai_interactive_launcher.py` | Human XAI case review |
+| 18 | `explainability/scripts/18_xai_interactive_launcher.py` | Human XAI review |
 | 19 | `evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py` | Commercial export normalization |
-| 20 | `results/scripts/20_generate_experimental_reporting_assets.py` | Chapter 5 figure/table generation |
-| 21 | `results/scripts/21_generate_embedded_metadata_sensitivity_check.py` | Frozen metadata-sensitivity analysis |
+| 20 | `results/scripts/20_generate_experimental_reporting_assets.py` | Chapter 5 reporting |
+| 21 | `results/scripts/21_generate_embedded_metadata_sensitivity_check.py` | Metadata-sensitivity analysis |
 
-Steps 22–24 are public-artifact support utilities rather than original experimental stages:
+Public-artifact support utilities:
 
 | Utility | Entry point | Purpose |
 |---|---|---|
-| 22 | `results/scripts/22_generate_public_embedded_metadata_sensitivity_check.py` | Optional privacy-reduced metadata analysis |
-| 23 | `results/scripts/23_validate_results_artifacts.py` | Read-only frozen-result validation |
-| 24 | `results/scripts/24_audit_reporting_asset_usage.py` | Reporting/LaTeX asset usage audit |
+| 22 | `results/scripts/22_generate_public_embedded_metadata_sensitivity_check.py` | Optional privacy-reduced analysis |
+| 23 | `results/scripts/23_validate_results_artifacts.py` | Frozen-result validation |
+| 24 | `results/scripts/24_audit_reporting_asset_usage.py` | Reporting/LaTeX asset audit |
 
 ## 5. Frozen Dataset and Bundle
 
@@ -141,13 +119,7 @@ Forensic evaluation bundle:
 11,500 files
 ```
 
-For commercial processing, import only:
-
-```text
-datasets/forensic_evaluation_bundle/blind_tool_input/files/
-```
-
-Do not import the metadata or structured audit views.
+For commercial processing, import only `datasets/forensic_evaluation_bundle/blind_tool_input/files/`. Do not import metadata or structured audit views.
 
 ## 6. Proxy Models
 
@@ -174,7 +146,7 @@ python evaluation/scripts/15_evaluate_proxy_models.py \
   --device auto
 ```
 
-Partial or diagnostic runs must use a separate diagnostic output directory and must not replace canonical frozen outputs.
+Partial or diagnostic runs must use a separate output directory and must not replace canonical frozen outputs.
 
 ## 7. Perturbations
 
@@ -211,13 +183,13 @@ Frozen perimeter:
 | Cellebrite Inseyets | 10.9 / Physical Analyzer 10.9.0.3029 |
 | Griffeye / T3K CORE | 26.2.108 / 1.18.0 |
 
-Complete raw exports are local or controlled. The public canonical table is:
+Public canonical table:
 
 ```text
 evaluation/forensic_tools/normalized_predictions.csv
 ```
 
-It can be rebuilt without proprietary raw exports from the four committed validated extracts:
+Rebuild from committed public extracts:
 
 ```bash
 python forensic_tools/scripts/build_canonical_normalized_predictions.py --force
@@ -233,7 +205,7 @@ python forensic_tools/scripts/validate_public_extract_equivalence.py \
   --force
 ```
 
-Expected frozen profile:
+Expected:
 
 ```text
 69,000 identical decision rows
@@ -250,14 +222,12 @@ Final five-case manifest:
 explainability/manifests/chapter5/thesis_selection.csv
 ```
 
-Validate Chapter 5 metadata and 20 selected assets:
+Validate:
 
 ```bash
 python explainability/scripts/validate_chapter5_xai_artifacts.py \
   --strict-thesis-text
 ```
-
-Historical full output directories are not required for the public thesis artifact.
 
 ## 10. Result and Reporting Validation
 
@@ -266,35 +236,34 @@ python results/scripts/23_validate_results_artifacts.py
 python results/scripts/24_audit_reporting_asset_usage.py --strict
 ```
 
-The result validator checks:
+The result validator checks 69,000 commercial decisions, 186 commercial metrics, 40,500 proxy predictions, the `500 OOD images × 5 folds = 2,500 predictions per architecture` accounting, Chapter 5 manifest counts, and metadata-sensitivity counts.
 
-- 69,000 canonical commercial decisions;
-- 186 commercial metrics;
-- 40,500 proxy prediction rows;
-- the `500 OOD images × 5 folds = 2,500 predictions per architecture` accounting;
-- Chapter 5 manifest counts;
-- metadata-sensitivity counts.
-
-The asset audit checks references and SHA256 equality between reporting-layer files and thesis-ready copies.
-
-## 11. LaTeX Audit
+## 11. LaTeX Audit and Compilation
 
 ```bash
 python tools/latex/audit_latex_images_used.py \
   --main docs/LatexThesis/main.tex
+
+cd docs/LatexThesis
+latexmk -pdf main.tex
+cd ../..
 ```
 
-Compile locally from `docs/LatexThesis/`. Generated auxiliary files and `main.pdf` are ignored.
+Generated auxiliary files and `main.pdf` are ignored.
 
-## 12. Windows Audit Helper
+## 12. Kali/Linux Audit Helper
 
-```powershell
-.\tools\tasks.ps1 status
-.\tools\tasks.ps1 check-json
-.\tools\tasks.ps1 check-python-syntax
-.\tools\tasks.ps1 check-text-guards
-.\tools\tasks.ps1 check-thesis-log
-.\tools\tasks.ps1 audit-all
+```bash
+bash tools/tasks.sh status
+bash tools/tasks.sh check-json
+bash tools/tasks.sh check-python-syntax
+bash tools/tasks.sh check-text-guards
+bash tools/tasks.sh check-xai
+bash tools/tasks.sh check-results
+bash tools/tasks.sh check-assets
+bash tools/tasks.sh check-latex-images
+bash tools/tasks.sh check-thesis-log
+bash tools/tasks.sh audit-all
 ```
 
 ## 13. Traceability
