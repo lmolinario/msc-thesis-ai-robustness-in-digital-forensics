@@ -114,6 +114,9 @@ __marimo__/
 .pypirc
 
 # LaTeX build artifacts
+*.acn
+*.acr
+*.alg
 *.aux
 *.bbl
 *.bcf
@@ -127,8 +130,10 @@ __marimo__/
 *.ilg
 *.ind
 *.ist
+*.loa
 *.lof
 *.log
+*.lol
 *.lot
 *.nav
 *.out
@@ -137,8 +142,12 @@ __marimo__/
 *.synctex.gz
 *.toc
 *.vrb
+*.xdy
 /out/
 docs/LatexThesis/out/
+docs/LatexThesis_ITA/out/
+docs/LatexThesis/main.pdf
+docs/LatexThesis_ITA/main.pdf
 
 # Local/generated manual-selection backups
 datasets/final/reports/backups/
