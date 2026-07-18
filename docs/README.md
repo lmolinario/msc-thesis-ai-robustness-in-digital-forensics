@@ -1,22 +1,6 @@
 # Documentation
 
-This directory contains the thesis sources, thesis-ready figures, repository assets, and artifact-preservation documentation.
-
-The final English thesis source is:
-
-```text
-docs/LatexThesis/
-```
-
-The Italian reference version is maintained separately under:
-
-```text
-docs/LatexThesis_ITA/
-```
-
-The two directories must not be treated as interchangeable during compilation or archival checks. The English source under `docs/LatexThesis/` is the source of truth for the frozen thesis artifact. The Italian tree is a synchronized reference version and must not silently override English thesis content or numerical claims.
-
----
+This directory contains research-artifact documentation, maintenance records, repository assets, and both LaTeX thesis trees.
 
 ## Directory Structure
 
@@ -24,7 +8,17 @@ The two directories must not be treated as interchangeable during compilation or
 docs/
 ├── README.md
 ├── artifact/
+│   ├── THESIS_ARTIFACT.md
+│   ├── ARTIFACT_EVALUATION.md
+│   ├── REPOSITORY_MAP.md
+│   ├── DATA_DICTIONARY.md
+│   ├── ENVIRONMENT.md
+│   ├── REPRODUCIBILITY.md
+│   ├── DATA_ACCESS.md
 │   └── ARCHIVE_SNAPSHOT.md
+├── maintenance/
+│   ├── ACADEMIC_REPOSITORY_AUDIT.md
+│   └── RELEASE_CHECKLIST.md
 ├── assets/
 │   └── repository_header.png
 ├── LatexThesis/
@@ -37,6 +31,7 @@ docs/
 │   ├── images/
 │   └── tesi.bib
 └── LatexThesis_ITA/
+    ├── README.md
     ├── main.tex
     ├── packages.sty
     ├── title.tex
@@ -45,13 +40,23 @@ docs/
     └── tesi.bib
 ```
 
-Repository-governance documents currently located at the repository root are scheduled for the final root cleanup. Their content remains authoritative until the move is completed and all links are updated.
+## Thesis Authority
 
----
+Authoritative frozen English source:
 
-## Thesis Structure Reference
+```text
+docs/LatexThesis/
+```
 
-The frozen English thesis structure is:
+Italian reference source:
+
+```text
+docs/LatexThesis_ITA/
+```
+
+The English source controls final wording, structure, experimental claims, numerical values, labels, and release status. The Italian tree is maintained for reference and review.
+
+## Thesis Structure
 
 ```text
 Chapter 1 - Introduction
@@ -64,87 +69,24 @@ Appendix
 References
 ```
 
-The source sequence is defined in:
+The appendix source is included after `\appendix` and is not a seventh main chapter.
 
-```text
-docs/LatexThesis/main.tex
-```
-
-and currently includes:
-
-```text
-sections/01_introduction.tex
-sections/02_background.tex
-sections/03_StateoftheArt.tex
-sections/04_methodology.tex
-sections/05_experiments.tex
-sections/06_conclusions.tex
-sections/07_appendix.tex
-```
-
-The appendix is introduced after `\appendix`; it is not a seventh main chapter.
-
----
-
-## Chapter 5 Reporting Order
-
-Chapter 5 follows the stabilized order:
-
-```text
-status and dataset overview
-clean baseline
-OOD behavior
-anti-forensic robustness
-adversarial robustness
-forensic evaluation bundle
-commercial forensic tools evaluation
-comparative discussion
-XAI case studies
-operational implications and limitations
-```
-
----
-
-## Writing Principles
-
-When making archival corrections:
+## Writing and Archival Principles
 
 - keep the focus on Digital/Computer Forensics;
-- frame adversarial and anti-forensic attacks as experimental stressors;
-- avoid turning the work into pure Adversarial Machine Learning optimization;
-- keep the human-in-the-loop selection protocol explicit;
-- distinguish methodology, experimental results, and critical interpretation;
-- preserve the terminology used in the frozen English thesis;
-- keep numerical claims synchronized with frozen CSV/JSON sources;
-- treat commercial-tool outputs as observable black-box signals, not internal model evidence.
+- treat attacks and transformations as experimental stressors;
+- preserve the human-in-the-loop selection protocol;
+- distinguish transparent proxy results from black-box commercial observations;
+- synchronize all numerical statements with committed CSV/JSON sources;
+- avoid introducing methodological changes through silent documentation edits;
+- keep repository paths, identifiers, labels, and script names exact;
+- do not commit local paths, temporary build files, credentials, private links, or proprietary case material.
 
----
+## LaTeX Build Products
 
-## LaTeX Notes
-
-The English thesis uses glossary and acronym entries defined in:
-
-```text
-docs/LatexThesis/sections/000_acronyms.tex
-```
-
-Bibliography entries are maintained in:
-
-```text
-docs/LatexThesis/tesi.bib
-```
-
-Use `\texttt{...}` only for technical identifiers such as class names, filenames, folders, scripts, or experimental parameters.
-
-Private editor URLs, temporary collaboration links, local paths, installer links, credentials, and controlled-access dataset URLs must not be committed to this public repository.
-
-Compilation products such as `.acn`, `.acr`, `.alg`, `.aux`, `.log`, `.toc`, and the local `main.pdf` files are ignored. They may remain in a local working tree without appearing in `git status` after the current `.gitignore` is pulled.
-
----
+Local compilation products, including `.acn`, `.acr`, `.alg`, `.aux`, `.log`, `.toc`, and `main.pdf`, are ignored in both thesis trees. The source of truth is the tracked LaTeX, bibliography, acronym definitions, figures, and supporting research artifacts.
 
 ## Reporting Sources of Truth
-
-Use the following authoritative sources for thesis tables, figures, and numerical statements:
 
 ```text
 results/metrics/
@@ -157,26 +99,29 @@ explainability/manifests/chapter5/thesis_selection.csv
 datasets/forensic_evaluation_bundle/metadata/
 ```
 
-The five thesis-selected XAI cases are documented in the canonical manifest. Their 20 thesis-ready image assets are stored under `docs/LatexThesis/images/`; the larger historical XAI output directory is not distributed on current `main`.
+The five selected XAI cases are documented by the canonical manifest. Their thesis-ready images are retained in the LaTeX image directories; the larger historical XAI output tree is not distributed on current `main`.
 
-Do not derive final thesis values from screenshots or tool interfaces when a CSV/JSON export, normalized manifest, or validated reporting table is available.
-
-Presentation-layer copies in `docs/LatexThesis/images/` must remain traceable to the corresponding source metrics, manifests, or reporting scripts. Use:
+## Validation
 
 ```bash
+python explainability/scripts/validate_chapter5_xai_artifacts.py --strict-thesis-text
+python results/scripts/23_validate_results_artifacts.py
 python results/scripts/24_audit_reporting_asset_usage.py --strict
+python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
 
-before removing or replacing any duplicated reporting image.
+Do not delete a reporting image merely because a byte-identical LaTeX copy exists. Review usage, source provenance, and release purpose first.
 
----
+## Governance
+
+Artifact scope and reproducibility documents are under `docs/artifact/`. Ongoing audit and release documents are under `docs/maintenance/`. Security and data-exposure handling are defined in `.github/SECURITY.md`.
 
 ## Historical Snapshot
 
-The protected pre-cleanup state is documented in:
+The protected pre-cleanup branch and annotated tag are documented in:
 
 ```text
 docs/artifact/ARCHIVE_SNAPSHOT.md
 ```
 
-The snapshot supports provenance and audit. It is not the authoritative current source and does not grant redistribution rights for third-party data or proprietary exports.
+The snapshot supports provenance only. Current `main` remains authoritative and historical preservation does not grant redistribution rights.
