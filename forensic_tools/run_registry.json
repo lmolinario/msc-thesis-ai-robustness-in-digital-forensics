@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.1",
-  "artifact_status": "validated_sanitized_public_extracts",
+  "schema_version": "1.2",
+  "artifact_status": "canonical_sanitized_predictions_and_validated_extracts",
   "authoritative_branch": "main",
   "historical_snapshot": {
     "branch": "archive/pre-commission-cleanup-2026-07-16",
@@ -10,6 +10,10 @@
   "blind_input": "datasets/forensic_evaluation_bundle/blind_tool_input/files/",
   "bundle_manifest": "datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv",
   "normalization_entry_point": "evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py",
+  "canonical_prediction_builder": "forensic_tools/scripts/build_canonical_normalized_predictions.py",
+  "public_normalized_predictions": "evaluation/forensic_tools/normalized_predictions.csv",
+  "public_normalized_predictions_summary": "evaluation/forensic_tools/normalized_predictions_public_summary.json",
+  "public_normalized_predictions_sha256": "a8e5ef9b138a3b02454f24ff008e04843cb034bd40b7056f305de085bb1ce85e",
   "public_metric_artifact": "results/metrics/forensic_tools_metrics.csv",
   "public_extract_summary": "forensic_tools/public_extracts_summary.json",
   "public_extract_validation": "forensic_tools/public_extracts_validation.json",
@@ -17,7 +21,8 @@
     "decisions_identical": true,
     "decision_rows": 69000,
     "metrics_identical": true,
-    "metric_rows": 186
+    "metric_rows": 186,
+    "validation_source": "evaluation/forensic_tools/normalized_predictions.csv"
   },
   "raw_export_policy": "controlled_access_not_distributed_on_main",
   "raw_export_local_pattern": "forensic_tools/**/raw_exports/",
@@ -38,6 +43,7 @@
       "unmatched_rows": 0,
       "normalized_tool_name": "magnet_axiom",
       "public_extract_artifact": "forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv",
+      "canonical_prediction_artifact": "evaluation/forensic_tools/normalized_predictions.csv",
       "tool_metric_artifact": "results/metrics/magnet_axiom_metrics.csv"
     },
     {
@@ -57,6 +63,7 @@
       "unmatched_rows": 0,
       "normalized_tool_name": "excire_foto_2025_d20",
       "public_extract_artifact": "forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv",
+      "canonical_prediction_artifact": "evaluation/forensic_tools/normalized_predictions.csv",
       "tool_metric_artifact": "results/metrics/excire_foto_2025_d20_metrics.csv"
     },
     {
@@ -76,6 +83,7 @@
       "unmatched_rows": 0,
       "normalized_tool_name": "excire_foto_2025_d50",
       "public_extract_artifact": "forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv",
+      "canonical_prediction_artifact": "evaluation/forensic_tools/normalized_predictions.csv",
       "tool_metric_artifact": "results/metrics/excire_foto_2025_d50_metrics.csv"
     },
     {
@@ -95,6 +103,7 @@
       "unmatched_rows": 0,
       "normalized_tool_name": "excire_foto_2025_d80",
       "public_extract_artifact": "forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv",
+      "canonical_prediction_artifact": "evaluation/forensic_tools/normalized_predictions.csv",
       "tool_metric_artifact": "results/metrics/excire_foto_2025_d80_metrics.csv"
     },
     {
@@ -116,6 +125,7 @@
       "unmatched_rows": 329,
       "normalized_tool_name": "cellebrite_inseyets",
       "public_extract_artifact": "forensic_tools/cellebrite_inseyets/public_extracts/cellebrite_classifications_extract.csv",
+      "canonical_prediction_artifact": "evaluation/forensic_tools/normalized_predictions.csv",
       "tool_metric_artifact": "results/metrics/cellebrite_inseyets_metrics.csv"
     },
     {
@@ -136,6 +146,7 @@
       "unmatched_rows": 0,
       "normalized_tool_name": "griffeye",
       "public_extract_artifact": "forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv",
+      "canonical_prediction_artifact": "evaluation/forensic_tools/normalized_predictions.csv",
       "tool_metric_artifact": "results/metrics/griffeye_metrics.csv"
     }
   ]
