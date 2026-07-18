@@ -42,7 +42,7 @@ The audit considers:
 | Proxy models | 15 fold-aware checkpoints retained and registry-hashed |
 | XAI | Historical bulk outputs removed; five cases and 20 thesis assets retained |
 | Results | Validators added; OOD denominator documented |
-| LaTeX | English source authoritative; Italian reference documented; build outputs ignored |
+| LaTeX | A single authoritative thesis source retained; build outputs ignored |
 | Root structure | Governance docs moved to `docs/`; utilities moved to `tools/`; security policy moved to `.github/` |
 | CI | Required paths, canonical prediction SHA256, schema, metrics, and stale references checked |
 
@@ -112,10 +112,10 @@ python results/scripts/24_audit_reporting_asset_usage.py --strict
 python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
 
-Windows helper:
+Kali/Linux helper:
 
-```powershell
-.\tools\tasks.ps1 audit-all
+```bash
+bash tools/tasks.sh audit-all
 ```
 
 ## Current Strengths
@@ -131,7 +131,7 @@ The repository now provides:
 - a minimal thesis-focused XAI layer;
 - controlled data governance;
 - protected historical preservation;
-- source-level English and Italian thesis trees;
+- one authoritative thesis source;
 - lightweight CI and local audit utilities.
 
 ## Remaining Archival Considerations
@@ -139,7 +139,7 @@ The repository now provides:
 These are not methodological blockers:
 
 - optional creation of a fully pinned environment lock generated from the verified working environment;
-- local execution and review of the new result and asset validators;
+- local execution and review of the result and asset validators;
 - independent final LaTeX compilation and log inspection;
 - creation of the official thesis release tag after owner approval;
 - optional Zenodo or institutional DOI archival.
@@ -157,9 +157,10 @@ These are not methodological blockers:
 - [x] citation metadata and MIT license are present;
 - [x] controlled access is documented;
 - [x] LaTeX build products are ignored;
+- [x] redundant thesis source tree removed;
 - [x] CI guards the final file layout and canonical prediction profile;
 - [ ] local execution of all final validators after the last pull;
-- [ ] final English and Italian LaTeX build check;
+- [ ] final LaTeX build check;
 - [ ] optional environment lock;
 - [ ] final release and DOI archival after approval.
 
