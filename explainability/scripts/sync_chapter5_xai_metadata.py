@@ -41,23 +41,44 @@ def expected_values() -> dict[str, str]:
     return values
 
 
+def figure_confidence_pattern(figure_label: str) -> re.Pattern[str]:
+    """Match only the metadata argument of the intended XAI figure macro.
+
+    A plain search for ``{fig:...}`` also matches later ``\\ref{fig:...}``
+    references. Anchoring the expression to ``\\XAIcaseFigureMaskGrid`` and
+    preventing it from crossing into the next XAI macro makes the match unique.
+    """
+    return re.compile(
+        rf"(\\XAIcaseFigureMaskGrid\s*"
+        rf"\{{{re.escape(figure_label)}\}}"
+        rf"(?:(?!\\XAIcaseFigureMaskGrid).)*?"
+        rf"\\textbf\{{confidence\}}\s*:\s*)"
+        rf"([0-9]+(?:\.[0-9]+)?)"
+        rf"(\s*\}})",
+        re.DOTALL,
+    )
+
+
 def synchronize(path: Path, expected: dict[str, str], write: bool) -> list[str]:
     text = path.read_text(encoding="utf-8")
     updated = text
     changes: list[str] = []
+
     for case_id, figure_label in FIGURE_LABELS.items():
-        pattern = re.compile(
-            rf"(\{{{re.escape(figure_label)}\}}.*?\\textbf\{{confidence\}}:\s*)([0-9.]+)(\}})",
-            re.DOTALL,
-        )
+        pattern = figure_confidence_pattern(figure_label)
         matches = list(pattern.finditer(updated))
         if len(matches) != 1:
-            raise RuntimeError(f"Expected one confidence field for {case_id} in {path}, found {len(matches)}")
+            raise RuntimeError(
+                f"Expected one XAI figure metadata confidence for {case_id} "
+                f"in {path}, found {len(matches)}"
+            )
+
         current = matches[0].group(2)
         target = expected[case_id]
         if current != target:
             changes.append(f"{case_id}: {current} -> {target}")
             updated = pattern.sub(rf"\g<1>{target}\g<3>", updated, count=1)
+
     if write and updated != text:
         path.write_text(updated, encoding="utf-8")
     return changes
@@ -68,10 +89,12 @@ def main() -> None:
     write = bool(args.write)
     expected = expected_values()
     all_changes: list[str] = []
+
     for path in TEX_FILES:
         changes = synchronize(path, expected, write=write)
         for change in changes:
             all_changes.append(f"{path.relative_to(REPO_ROOT)} | {change}")
+
     if all_changes:
         for change in all_changes:
             print(change)
