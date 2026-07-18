@@ -185,7 +185,7 @@ msc-thesis-ai-robustness-in-digital-forensics/
 ├── .github/           # Security policy and lightweight CI audit
 ├── attacks/           # Perturbation manifests and local-output boundaries
 ├── datasets/          # Dataset manifests, metadata and numbered pipeline scripts
-├── docs/              # Artifact docs, maintenance docs and LaTeX thesis sources
+├── docs/              # Artifact docs and authoritative LaTeX thesis source
 ├── evaluation/        # Proxy and commercial-tool predictions / normalization
 ├── explainability/    # XAI scripts and canonical thesis-selection manifest
 ├── forensic_tools/    # Tool-specific sanitized extracts and run registry
@@ -231,12 +231,6 @@ python results/scripts/24_audit_reporting_asset_usage.py --strict
 python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
 
-Windows PowerShell helper:
-
-```powershell
-.\tools\tasks.ps1 audit-all
-```
-
 The GitHub Actions workflow under `.github/workflows/repository-audit.yml` performs lightweight file, JSON, Python syntax, canonical-prediction, and documentation-guard checks.
 
 ---
@@ -257,16 +251,10 @@ The branch and annotated tag are protected against update, deletion, and force-p
 
 ## Thesis Source
 
-Authoritative English LaTeX source:
+The authoritative LaTeX source is:
 
 ```text
 docs/LatexThesis/
-```
-
-Italian reference version:
-
-```text
-docs/LatexThesis_ITA/
 ```
 
 Local compilation products, including `main.pdf`, are ignored. A final PDF may be attached to a versioned GitHub release instead of being committed to the source tree.
