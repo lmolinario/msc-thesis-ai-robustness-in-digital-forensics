@@ -43,10 +43,22 @@ jobs:
               'ACADEMIC_REPOSITORY_AUDIT.md',
               'requirements.txt',
               'LICENSE',
+              'docs/README.md',
+              'docs/artifact/ARCHIVE_SNAPSHOT.md',
+              'docs/LatexThesis/README.md',
               'docs/LatexThesis/main.tex',
+              'docs/LatexThesis_ITA/README.md',
+              'docs/LatexThesis_ITA/main.tex',
               'evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py',
+              'evaluation/forensic_tools/normalized_predictions.csv',
+              'evaluation/forensic_tools/normalized_predictions_public_summary.json',
+              'forensic_tools/run_registry.json',
+              'forensic_tools/public_extracts_validation.json',
+              'forensic_tools/scripts/build_canonical_normalized_predictions.py',
               'results/scripts/20_generate_experimental_reporting_assets.py',
               'results/scripts/21_generate_embedded_metadata_sensitivity_check.py',
+              'results/scripts/23_validate_results_artifacts.py',
+              'results/scripts/24_audit_reporting_asset_usage.py',
           ]
 
           missing = [path for path in required if not Path(path).exists()]
@@ -70,7 +82,14 @@ jobs:
               'datasets/splits/manifests/split_generation_summary.json',
               'datasets/forensic_evaluation_bundle/metadata/bundle_summary.json',
               'evaluation/forensic_tools/normalization_summary.json',
+              'evaluation/forensic_tools/normalized_predictions_public_summary.json',
+              'forensic_tools/run_registry.json',
+              'forensic_tools/public_extracts_summary.json',
+              'forensic_tools/public_extracts_validation.json',
               'models/model_registry.json',
+              'results/metrics/proxy_model_evaluation_summary.json',
+              'results/figures/chapter_5/chapter5_figures_summary.json',
+              'results/figures/chapter_5/embedded_metadata_sensitivity_summary.json',
           ]
 
           failed = False
@@ -118,8 +137,16 @@ jobs:
               'explainability/scripts/17_generate_integrated_gradients_case_studies.py',
               'explainability/scripts/18_xai_interactive_launcher.py',
               'evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py',
+              'forensic_tools/scripts/build_public_tool_extracts.py',
+              'forensic_tools/scripts/build_canonical_normalized_predictions.py',
+              'forensic_tools/scripts/validate_public_extract_equivalence.py',
               'results/scripts/20_generate_experimental_reporting_assets.py',
               'results/scripts/21_generate_embedded_metadata_sensitivity_check.py',
+              'results/scripts/22_generate_public_embedded_metadata_sensitivity_check.py',
+              'results/scripts/23_validate_results_artifacts.py',
+              'results/scripts/24_audit_reporting_asset_usage.py',
+              'explainability/scripts/sync_chapter5_xai_metadata.py',
+              'explainability/scripts/validate_chapter5_xai_artifacts.py',
           ]
 
           failed = False
@@ -140,6 +167,76 @@ jobs:
               raise SystemExit(1)
           PY
 
+      - name: Check canonical commercial prediction profile
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          import hashlib
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          csv_path = Path('evaluation/forensic_tools/normalized_predictions.csv')
+          summary_path = Path('evaluation/forensic_tools/normalized_predictions_public_summary.json')
+          validation_path = Path('forensic_tools/public_extracts_validation.json')
+          metrics_path = Path('results/metrics/forensic_tools_metrics.csv')
+
+          expected = {
+              'magnet_axiom': 11500,
+              'excire_foto_2025_d20': 11500,
+              'excire_foto_2025_d50': 11500,
+              'excire_foto_2025_d80': 11500,
+              'cellebrite_inseyets': 11500,
+              'griffeye': 11500,
+          }
+
+          digest = hashlib.sha256(csv_path.read_bytes()).hexdigest()
+          with csv_path.open(newline='', encoding='utf-8-sig') as stream:
+              reader = csv.DictReader(stream)
+              rows = list(reader)
+              fields = set(reader.fieldnames or [])
+
+          required = {
+              'tool_name', 'bundle_id', 'matched', 'sample_type',
+              'attack_family', 'attack_name', 'final_label',
+              'weapon_detected', 'normalized_prediction',
+          }
+          forbidden = {
+              'raw_export_file', 'raw_filename_or_path', 'raw_row_number',
+              'sha256', 'md5', 'metadata_json', 'tool_input_filename',
+          }
+          if required - fields:
+              raise SystemExit(f'Missing canonical columns: {sorted(required - fields)}')
+          if forbidden & fields:
+              raise SystemExit(f'Forbidden canonical columns: {sorted(forbidden & fields)}')
+          if len(rows) != 69000:
+              raise SystemExit(f'Expected 69000 canonical rows, found {len(rows)}')
+
+          counts = Counter(row['tool_name'] for row in rows)
+          if dict(counts) != expected:
+              raise SystemExit(f'Canonical profile mismatch: {dict(counts)}')
+          keys = [(row['tool_name'], row['bundle_id']) for row in rows]
+          if len(keys) != len(set(keys)):
+              raise SystemExit('Duplicate tool_name/bundle_id pairs detected')
+
+          summary = json.loads(summary_path.read_text(encoding='utf-8'))
+          validation = json.loads(validation_path.read_text(encoding='utf-8'))
+          if summary['output']['rows'] != 69000 or summary['output']['sha256'] != digest:
+              raise SystemExit('Canonical summary does not match the committed CSV')
+          if validation.get('source_sha256') != digest:
+              raise SystemExit('Equivalence report does not match the canonical CSV')
+          if not validation.get('decisions_identical') or not validation.get('metrics_identical'):
+              raise SystemExit('Equivalence status is not fully passed')
+
+          with metrics_path.open(newline='', encoding='utf-8-sig') as stream:
+              metric_rows = list(csv.DictReader(stream))
+          if len(metric_rows) != 186:
+              raise SystemExit(f'Expected 186 commercial metric rows, found {len(metric_rows)}')
+
+          print('Canonical prediction and commercial metric profile passed.')
+          PY
+
       - name: Check stale final-documentation patterns
         shell: bash
         run: |
@@ -151,9 +248,9 @@ jobs:
               'X-Ways',
               'Oxygen Forensic Detective',
               'Autopsy',
+              'explainability/outputs/integrated_gradients/',
           ]
 
-          # Final public-facing documents that should not contain stale tool or path references.
           checked_paths = [
               Path('README.md'),
               Path('THESIS_ARTIFACT.md'),
@@ -167,11 +264,14 @@ jobs:
               Path('DATA_ACCESS.md'),
               Path('SECURITY.md'),
               Path('docs/README.md'),
+              Path('docs/LatexThesis/README.md'),
+              Path('docs/LatexThesis_ITA/README.md'),
               Path('datasets/README.md'),
               Path('attacks/README.md'),
               Path('evaluation/README.md'),
               Path('forensic_tools/README.md'),
               Path('results/README.md'),
+              Path('results/scripts/README.md'),
               Path('explainability/README.md'),
           ]
 
