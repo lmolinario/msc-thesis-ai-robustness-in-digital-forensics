@@ -4,7 +4,7 @@ This document defines what can be evaluated, audited, and reproduced from the pu
 
 ## Artifact Type
 
-The repository contains experimental code, frozen manifests, transparent proxy-model outputs, sanitized commercial-tool decisions, metric summaries, XAI case-study material, reporting assets, LaTeX thesis sources, and governance documentation.
+The repository contains experimental code, frozen manifests, transparent proxy-model outputs, sanitized commercial-tool decisions, metric summaries, XAI case-study material, reporting assets, the authoritative LaTeX thesis source, and governance documentation.
 
 It is not a general-purpose software library, an unrestricted raw-image benchmark, or a reproduction package for proprietary forensic software.
 
@@ -19,7 +19,7 @@ It is not a general-purpose software library, an unrestricted raw-image benchmar
 | Commercial black-box normalization | canonical sanitized prediction table, public extracts, registry, validation report |
 | Commercial metric reproduction | 69,000 committed decisions and 186 frozen metric rows |
 | XAI qualitative analysis | five-case manifest and thesis-ready image assets |
-| Thesis reporting | English/Italian LaTeX sources, reporting manifest, figures, and source metrics |
+| Thesis reporting | `docs/LatexThesis/`, reporting manifest, figures, and source metrics |
 | Historical provenance | protected branch, protected annotated tag, exact snapshot commit |
 
 ## Canonical Commercial Evaluation Evidence
