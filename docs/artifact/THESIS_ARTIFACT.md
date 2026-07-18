@@ -15,64 +15,61 @@
 | Supervisor | Davide Maiorca |
 | Repository role | Final frozen research artifact supporting the MSc thesis |
 
----
-
 ## Artifact Purpose
 
-This repository preserves the experimental and documentary artifact supporting the thesis.
-
-The thesis evaluates the operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics when exposed to:
+This repository preserves the experimental and documentary artifact supporting a study of the operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics under:
 
 - clean in-distribution inputs;
 - out-of-distribution images;
 - adversarial perturbations;
-- anti-forensic image transformations;
-- observable black-box outputs from commercial forensic tools.
+- anti-forensic transformations;
+- observable black-box outputs from commercial tools.
 
-The repository is designed to support auditability, traceability, and controlled reproducibility. It is not intended to be a general-purpose software package or a redistributable dataset mirror.
+The artifact supports auditability, traceability, and controlled reproducibility. It is not a general-purpose classifier, unrestricted benchmark release, or redistributable dataset mirror.
 
----
+## Main Contents
 
-## What This Repository Contains
+The curated `main` branch contains:
 
-The repository contains:
+- numbered dataset, training, perturbation, evaluation, XAI, and reporting scripts;
+- frozen dataset, split, attack, and bundle manifests;
+- 15 transparent proxy-model checkpoints and their registry;
+- proxy prediction and metric outputs;
+- a canonical sanitized commercial-tool prediction table containing 69,000 decisions;
+- four tool-specific sanitized extracts and an exact equivalence report;
+- 186 frozen commercial metric rows;
+- five thesis-selected Integrated Gradients cases and 20 thesis-ready XAI assets;
+- English and Italian LaTeX source trees;
+- access, security, reproducibility, audit, and release documentation.
 
-- source code for dataset preparation, split generation, perturbation generation, proxy-model training, evaluation, XAI generation, and reporting;
-- frozen dataset manifests and split manifests;
-- perturbation manifests and metadata;
-- proxy-model evaluation outputs and metrics;
-- normalized commercial forensic-tool outputs and metric summaries;
-- Integrated Gradients case-study artifacts for transparent proxy models;
-- LaTeX thesis source;
-- governance documents for data access, security, reproducibility, and repository audit.
-
----
-
-## What This Repository Does Not Contain
+## Deliberately Excluded from `main`
 
 The repository does not intentionally redistribute:
 
-- raw third-party image datasets;
-- controlled-access source collections;
-- licensed forensic software;
-- proprietary forensic case files;
-- commercial tool databases;
-- secrets, credentials, access tokens, or private dataset URLs;
-- evidence material or operational investigative data.
+- raw third-party image corpora;
+- prepared, split, perturbed, or blind-input image directories;
+- complete commercial-tool raw exports;
+- licensed forensic software or proprietary databases;
+- commercial case files, evidence material, or operational investigative data;
+- secrets, credentials, tokens, temporary signed URLs, or private download links.
 
-Some experiments can therefore be structurally audited from the public repository, while full end-to-end reruns require controlled-access data and, for commercial-tool evaluation, licensed software environments.
+Full end-to-end reruns therefore require controlled-access images and, for commercial-tool processing, licensed software environments.
 
----
+## Official Sources of Truth
 
-## Official Source of Truth
-
-The official thesis source is:
+### Thesis
 
 ```text
 docs/LatexThesis/
 ```
 
-The official dataset manifests are:
+The Italian reference tree is:
+
+```text
+docs/LatexThesis_ITA/
+```
+
+### Frozen dataset and splits
 
 ```text
 datasets/final/manifests/manual_selection_final_1500.csv
@@ -81,69 +78,95 @@ datasets/splits/manifests/clean_folds_manifest.csv
 datasets/splits/manifests/ood_eval_manifest.csv
 ```
 
-The official forensic evaluation bundle metadata are:
+### Forensic evaluation bundle
 
 ```text
-datasets/forensic_evaluation_bundle/metadata/
+datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
 ```
 
-The official metric and reporting outputs are:
+### Proxy predictions and results
 
 ```text
+evaluation/proxy_models/proxy_model_predictions.csv
 results/metrics/
-results/figures/
+results/figures/chapter_5/
 ```
 
-The official commercial-tool normalization outputs are:
+### Commercial-tool predictions and validation
 
 ```text
-evaluation/forensic_tools/
+evaluation/forensic_tools/normalized_predictions.csv
+evaluation/forensic_tools/normalized_predictions_public_summary.json
+forensic_tools/public_extracts_validation.json
+results/metrics/forensic_tools_metrics.csv
 ```
 
----
+### XAI selection
+
+```text
+explainability/manifests/chapter5/thesis_selection.csv
+```
 
 ## Final Commercial-Tool Perimeter
 
-The final black-box commercial-tool perimeter is:
-
-| Tool | Version / module | Role |
+| Tool | Version / module | Evaluated signal |
 |---|---|---|
-| Magnet AXIOM / Magnet.AI | 10.1.0.48673 | Commercial forensic AI categorization |
-| Excire Foto 2025 | 4.1.5 | Standalone AI-assisted semantic image retrieval |
-| Cellebrite Inseyets | 10.9 | Commercial black-box AI-assisted media analysis |
-| Magnet Griffeye / T3K CORE | Griffeye x64 26.2.108, T3K CORE v1.18.0 | Commercial forensic media triage and semantic bookmarking |
+| Magnet AXIOM / Magnet.AI | 10.1.0.48673 | exported `Possible weapons` tag |
+| Excire Foto 2025 | 4.1.5, D20/D50/D80 | fixed firearm-oriented semantic prompt membership |
+| Cellebrite Inseyets | 10.9 / Physical Analyzer 10.9.0.3029 | exported weapon classifications |
+| Magnet Griffeye / T3K CORE | Griffeye 26.2.108 / T3K CORE 1.18.0 | exported firearm bookmark |
 
-The internal models, thresholds, training data, and proprietary decision logic of these tools are not inspected. Only observable exported outputs are normalized and evaluated.
-
----
+The internal architectures, thresholds, weights, training data, calibrated probabilities, and undocumented decision logic are not inspected.
 
 ## Reproducibility Level
 
-| Component | Publicly auditable | Publicly rerunnable | Notes |
+| Component | Publicly auditable | Publicly rerunnable | Boundary |
 |---|---:|---:|---|
-| Code structure | Yes | Yes | Scripts and configuration are tracked. |
-| Manifests and metrics | Yes | Yes | CSV/JSON outputs support inspection and consistency checks. |
-| Raw data acquisition | Partially | Controlled | Raw sources are governed by access, licensing, ethical, and platform constraints. |
-| Proxy-model pipeline | Partially | Controlled | Full rerun requires controlled-access images and compute environment. |
-| Commercial-tool evaluation | Yes, through normalized outputs | No, unless licensed | Requires licensed forensic software and controlled exports. |
-| Thesis source | Yes | Yes | LaTeX sources are tracked under `docs/LatexThesis/`. |
+| Code and repository structure | Yes | Yes | Lightweight scripts and documentation are tracked |
+| Frozen manifests and metrics | Yes | Yes | CSV/JSON artifacts are committed |
+| Canonical commercial decisions | Yes | Yes | Rebuilt from committed sanitized extracts |
+| Reporting and result validation | Yes | Yes | Read-only validators are committed |
+| Raw image pipeline | Partially | Controlled | Requires approved data access |
+| Full proxy training/evaluation | Partially | Controlled | Requires images and compatible compute |
+| Commercial-tool execution | Through outputs | Licensed / controlled | Requires licensed software and blind input files |
+| Proprietary commercial AI internals | No | No | Outside the black-box protocol |
 
----
+## Governance Documents
+
+```text
+docs/artifact/ARTIFACT_EVALUATION.md
+docs/artifact/REPOSITORY_MAP.md
+docs/artifact/DATA_DICTIONARY.md
+docs/artifact/ENVIRONMENT.md
+docs/artifact/REPRODUCIBILITY.md
+docs/artifact/DATA_ACCESS.md
+.github/SECURITY.md
+docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md
+docs/maintenance/RELEASE_CHECKLIST.md
+```
+
+## Historical Preservation
+
+The complete pre-cleanup state is preserved for provenance through:
+
+```text
+branch: archive/pre-commission-cleanup-2026-07-16
+tag:    snapshot/pre-commission-cleanup-2026-07-16
+commit: 309a4580537ebc3bb7950f29c090bb2729fc603b
+```
+
+The current `main` branch remains authoritative. Historical preservation does not grant redistribution permission for third-party data or proprietary exports.
 
 ## Artifact Boundary
 
-This repository supports the experimental claims made in the thesis by preserving the reproducible structure, manifests, scripts, metrics, normalized outputs, and thesis source.
-
-It does not claim to provide unrestricted public redistribution of all source images, proprietary forensic exports, or commercial AI internals.
-
-The correct interpretation is therefore:
+The correct interpretation is:
 
 ```text
-public research artifact + controlled-access data policy + black-box commercial-tool evaluation outputs
+public research artifact + controlled-access data + black-box commercial evaluation
 ```
 
 not:
 
 ```text
-fully open raw dataset + fully reproducible commercial-tool rerun
+fully open raw dataset + unrestricted commercial-tool reproduction package
 ```
