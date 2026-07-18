@@ -1,6 +1,7 @@
 # Documentation
 
-This directory contains research-artifact documentation, maintenance records, repository assets, and both LaTeX thesis trees.
+This directory contains research-artifact documentation, maintenance records,
+repository assets, and the authoritative LaTeX thesis source.
 
 ## Directory Structure
 
@@ -21,40 +22,27 @@ docs/
 │   └── RELEASE_CHECKLIST.md
 ├── assets/
 │   └── repository_header.png
-├── LatexThesis/
-│   ├── README.md
-│   ├── main.tex
-│   ├── packages.sty
-│   ├── title.tex
-│   ├── sections/
-│   ├── methodology/
-│   ├── images/
-│   └── tesi.bib
-└── LatexThesis_ITA/
+└── LatexThesis/
     ├── README.md
     ├── main.tex
     ├── packages.sty
     ├── title.tex
     ├── sections/
+    ├── methodology/
     ├── images/
     └── tesi.bib
 ```
 
 ## Thesis Authority
 
-Authoritative frozen English source:
+The only current thesis source is:
 
 ```text
 docs/LatexThesis/
 ```
 
-Italian reference source:
-
-```text
-docs/LatexThesis_ITA/
-```
-
-The English source controls final wording, structure, experimental claims, numerical values, labels, and release status. The Italian tree is maintained for reference and review.
+It controls final wording, structure, experimental claims, numerical values,
+labels, and release status.
 
 ## Thesis Structure
 
@@ -77,14 +65,16 @@ The appendix source is included after `\appendix` and is not a seventh main chap
 - treat attacks and transformations as experimental stressors;
 - preserve the human-in-the-loop selection protocol;
 - distinguish transparent proxy results from black-box commercial observations;
-- synchronize all numerical statements with committed CSV/JSON sources;
-- avoid introducing methodological changes through silent documentation edits;
+- synchronize numerical statements with committed CSV/JSON sources;
+- avoid silent methodological changes;
 - keep repository paths, identifiers, labels, and script names exact;
-- do not commit local paths, temporary build files, credentials, private links, or proprietary case material.
+- do not commit local paths, build files, credentials, private links, or case material.
 
 ## LaTeX Build Products
 
-Local compilation products, including `.acn`, `.acr`, `.alg`, `.aux`, `.log`, `.toc`, and `main.pdf`, are ignored in both thesis trees. The source of truth is the tracked LaTeX, bibliography, acronym definitions, figures, and supporting research artifacts.
+Local compilation products, including `.acn`, `.acr`, `.alg`, `.aux`, `.log`,
+`.toc`, and `main.pdf`, are ignored. The source of truth is the tracked LaTeX,
+bibliography, acronym definitions, figures, and supporting research artifacts.
 
 ## Reporting Sources of Truth
 
@@ -99,7 +89,8 @@ explainability/manifests/chapter5/thesis_selection.csv
 datasets/forensic_evaluation_bundle/metadata/
 ```
 
-The five selected XAI cases are documented by the canonical manifest. Their thesis-ready images are retained in the LaTeX image directories; the larger historical XAI output tree is not distributed on current `main`.
+The five selected XAI cases are documented by the canonical manifest. Their
+thesis-ready images are retained in `docs/LatexThesis/images/`.
 
 ## Validation
 
@@ -110,18 +101,15 @@ python results/scripts/24_audit_reporting_asset_usage.py --strict
 python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
 
-Do not delete a reporting image merely because a byte-identical LaTeX copy exists. Review usage, source provenance, and release purpose first.
+Do not delete a reporting image solely because a byte-identical thesis copy exists.
+Review usage, provenance, and release purpose first.
 
 ## Governance
 
-Artifact scope and reproducibility documents are under `docs/artifact/`. Ongoing audit and release documents are under `docs/maintenance/`. Security and data-exposure handling are defined in `.github/SECURITY.md`.
+Artifact documentation is under `docs/artifact/`. Audit and release records are
+under `docs/maintenance/`. Security handling is defined in `.github/SECURITY.md`.
 
 ## Historical Snapshot
 
-The protected pre-cleanup branch and annotated tag are documented in:
-
-```text
-docs/artifact/ARCHIVE_SNAPSHOT.md
-```
-
-The snapshot supports provenance only. Current `main` remains authoritative and historical preservation does not grant redistribution rights.
+The protected pre-cleanup branch and annotated tag are documented in
+`docs/artifact/ARCHIVE_SNAPSHOT.md`. Current `main` remains authoritative.
