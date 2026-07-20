@@ -1,10 +1,13 @@
 # Reproducibility Guide
 
-This document describes how to audit and reproduce the experimental pipeline supporting:
+This document describes how to audit and reproduce the experimental pipeline
+supporting:
 
 > **Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks**
 
-The artifact supports controlled reproducibility. It does not provide unrestricted public redistribution of the full image corpus or licensed commercial software.
+The artifact supports controlled reproducibility. It does not provide
+unrestricted public redistribution of the full image corpus or licensed
+commercial software.
 
 ## 1. Repository Scope
 
@@ -18,7 +21,8 @@ Public `main` includes:
 - proxy robustness and OOD metric tables;
 - canonical XAI selection and thesis-ready assets;
 - the authoritative LaTeX thesis source;
-- validation and audit utilities.
+- validation and audit utilities;
+- authoritative complete-ZIP checksums for the controlled image artifacts.
 
 Public `main` excludes image corpora and complete commercial raw exports.
 
@@ -33,36 +37,82 @@ python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r requirements.txt
 ```
 
-For GPU-dependent stages, install a PyTorch build compatible with the local CUDA environment.
+For GPU-dependent stages, install a PyTorch build compatible with the local CUDA
+environment.
 
 ## 3. Controlled Data Access
 
-The raw source bundle is governed by:
+Access conditions are governed by:
 
 ```text
 docs/artifact/DATA_ACCESS.md
 ```
 
+Authoritative archive-level digests are stored in:
+
+```text
+docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256
+```
+
+Two controlled artifacts serve different purposes:
+
+| Artifact | Purpose |
+|---|---|
+| `00_raw_datasets_bundle.zip` | Restore the heterogeneous source corpora and regenerate the numbered pipeline |
+| `16_frozen_forensic_evaluation_bundle.zip` | Restore the exact 11,500 files used for commercial black-box processing |
+
+### Raw source restoration
+
 Request access:
 
 ```bash
-python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py --request-access
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --artifact raw \
+  --request-access
 ```
 
 After approval, validate and extract the downloaded archive locally:
 
 ```bash
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --artifact raw \
   --archive "/path/to/00_raw_datasets_bundle.zip"
 ```
 
-An authorized direct URL may be supplied through `--url` or the local variable `FAIRLAB_RAW_DATASET_BUNDLE_URL`. Never commit the value.
+### Exact frozen-bundle restoration
+
+After the stable request page has been configured, request access with:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --artifact frozen \
+  --request-access
+```
+
+Restore the exact black-box input with:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --artifact frozen \
+  --archive "/path/to/16_frozen_forensic_evaluation_bundle.zip"
+```
+
+The script automatically verifies the complete archive against the authoritative
+repository checksum. Frozen restoration additionally verifies all 11,500 blind
+files against:
+
+```text
+datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
+```
+
+Authorized direct URLs may be supplied through `--url` or the corresponding
+local environment variables. Never commit private, signed, or temporary values.
 
 ## 4. Numbered Experimental Pipeline
 
 | Step | Entry point | Purpose |
 |---:|---|---|
-| 00 | `datasets/scripts/acquisition/00_download_raw_datasets_bundle.py` | Controlled raw-bundle restoration |
+| 00 | `datasets/scripts/acquisition/00_download_raw_datasets_bundle.py` | Controlled raw or exact frozen-bundle restoration |
 | 01 | `datasets/scripts/acquisition/01_download_kaggle.py` | Kaggle-source acquisition |
 | 02 | `datasets/scripts/acquisition/02_download_github.py` | GitHub-source acquisition |
 | 03 | `datasets/scripts/acquisition/03_build_subset_deepfirearm.py` | DeepFirearm subset preparation |
@@ -88,7 +138,7 @@ An authorized direct URL may be supplied through `--url` or the local variable `
 Public-artifact support utilities:
 
 | Utility | Entry point | Purpose |
-|---|---|---|
+|---:|---|---|
 | 22 | `results/scripts/22_generate_public_embedded_metadata_sensitivity_check.py` | Optional privacy-reduced analysis |
 | 23 | `results/scripts/23_validate_results_artifacts.py` | Frozen-result validation |
 | 24 | `results/scripts/24_audit_reporting_asset_usage.py` | Reporting/LaTeX asset audit |
@@ -119,7 +169,13 @@ Forensic evaluation bundle:
 11,500 files
 ```
 
-For commercial processing, import only `datasets/forensic_evaluation_bundle/blind_tool_input/files/`. Do not import metadata or structured audit views.
+For commercial processing, import only:
+
+```text
+datasets/forensic_evaluation_bundle/blind_tool_input/files/
+```
+
+Do not import metadata or structured audit views.
 
 ## 6. Proxy Models
 
@@ -146,7 +202,8 @@ python evaluation/scripts/15_evaluate_proxy_models.py \
   --device auto
 ```
 
-Partial or diagnostic runs must use a separate output directory and must not replace canonical frozen outputs.
+Partial or diagnostic runs must use a separate output directory and must not
+replace canonical frozen outputs.
 
 ## 7. Perturbations
 
@@ -170,7 +227,8 @@ histogram_modification
 contrast_stretching
 ```
 
-Generated image directories are local. Public manifests preserve provenance, parameters, source identifiers, and integrity digests.
+Generated image directories are local. Public manifests preserve provenance,
+parameters, source identifiers, and integrity digests.
 
 ## 8. Commercial Black-Box Evaluation
 
@@ -236,7 +294,10 @@ python results/scripts/23_validate_results_artifacts.py
 python results/scripts/24_audit_reporting_asset_usage.py --strict
 ```
 
-The result validator checks 69,000 commercial decisions, 186 commercial metrics, 40,500 proxy predictions, the `500 OOD images × 5 folds = 2,500 predictions per architecture` accounting, Chapter 5 manifest counts, and metadata-sensitivity counts.
+The result validator checks 69,000 commercial decisions, 186 commercial metrics,
+40,500 proxy predictions, the `500 OOD images × 5 folds = 2,500 predictions per
+architecture` accounting, Chapter 5 manifest counts, and metadata-sensitivity
+counts.
 
 ## 11. LaTeX Audit and Compilation
 
@@ -268,9 +329,17 @@ bash tools/tasks.sh audit-all
 
 ## 13. Traceability
 
-The pipeline preserves traceability through stable identifiers, SHA256 digests, bundle IDs, fold assignments, attack manifests, checkpoint hashes, normalized decisions, metric tables, XAI manifests, and figure-generation records.
+The pipeline preserves traceability through stable identifiers, SHA-256 digests,
+bundle IDs, fold assignments, attack manifests, checkpoint hashes, normalized
+decisions, metric tables, XAI manifests, and figure-generation records.
 
-SHA256 is the primary integrity digest. MD5 is retained only where required for compatibility with commercial-tool matching workflows.
+SHA-256 is the primary integrity digest. MD5 is retained only where required for
+compatibility with commercial-tool matching workflows.
+
+Archive-level and per-file integrity are distinct:
+
+- `CONTROLLED_ARTIFACT_CHECKSUMS.sha256` authenticates the complete distributed ZIP;
+- `bundle_hashes_sha256.csv` authenticates each restored blind input.
 
 ## 14. Reproducibility Boundary
 
@@ -282,21 +351,33 @@ Publicly reproducible:
 - result and reporting validation;
 - LaTeX source and figure audit.
 
-Controlled or licensed:
+Controlled:
 
 - raw image restoration;
 - complete image-pipeline rerun;
-- proxy retraining and attack regeneration;
+- exact restoration of the frozen 11,500-file black-box input;
+- proxy retraining and attack regeneration.
+
+Licensed:
+
 - commercial-tool reprocessing.
+
+Exact frozen-bundle restoration makes the original commercial inputs available
+under controlled access, but it does not remove the need for compatible licensed
+software or guarantee access to proprietary model internals.
 
 ## 15. Related Documents
 
 ```text
 docs/artifact/DATA_ACCESS.md
+docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256
 docs/artifact/ENVIRONMENT.md
 docs/artifact/DATA_DICTIONARY.md
+datasets/forensic_evaluation_bundle/README.md
 .github/SECURITY.md
 docs/maintenance/RELEASE_CHECKLIST.md
 ```
 
-The authoritative thesis source is `docs/LatexThesis/`. Substantive changes require a new versioned release rather than silent replacement of the frozen artifact.
+The authoritative thesis source is `docs/LatexThesis/`. Substantive changes
+require a new versioned release rather than silent replacement of the frozen
+artifact.
