@@ -52,23 +52,30 @@ datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
 
 ## Controlled access procedure
 
-The raw source bundle is stored with **Restricted** access. The repository
-retains the stable access-request page so that an interested academic reviewer
-or researcher can request authorization:
+Both archives and their companion `.sha256` files are stored in a single Google
+Drive folder with **Restricted** access. The repository retains the stable folder
+page so that an interested academic reviewer or researcher can request
+authorization:
 
 ```text
-https://drive.google.com/file/d/1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link
+https://drive.google.com/drive/folders/1cgQWKe9gPR1keJuoXeQ7SI6z-5IlAtF8
 ```
 
-The frozen forensic evaluation bundle is also distributed only under controlled
-access. Its stable request page must be provided through the repository
-configuration, `--request-page`, or the local environment variable
-`FAIRLAB_FROZEN_FORENSIC_EVALUATION_BUNDLE_REQUEST_URL` after the upload has been
-frozen. Signed, private, or temporary direct-download URLs must never be
-committed.
+The folder contains:
 
-Opening an access-request page does not grant permission or permit download. A
-requester should identify:
+```text
+00_raw_datasets_bundle.zip
+00_raw_datasets_bundle.zip.sha256
+16_frozen_forensic_evaluation_bundle.zip
+16_frozen_forensic_evaluation_bundle.zip.sha256
+```
+
+After access approval, a requester may download only the archive needed for the
+intended reproducibility task. Opening the folder page does not grant permission
+or permit download. Signed, private, or temporary direct-download URLs must never
+be committed.
+
+A requester should identify:
 
 1. the requester and institutional affiliation;
 2. the intended research, academic-review, or reproducibility purpose;
