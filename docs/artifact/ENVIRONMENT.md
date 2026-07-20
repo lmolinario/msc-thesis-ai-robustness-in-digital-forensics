@@ -1,8 +1,11 @@
 # Environment Notes
 
-This document summarizes execution-environment assumptions for the MSc thesis research artifact.
+This document summarizes execution-environment assumptions for the MSc thesis
+research artifact.
 
-The repository is not distributed as a software package. It contains scripts, manifests, checkpoints, predictions, metrics, reporting assets, and the LaTeX thesis source.
+The repository is not distributed as a software package. It contains scripts,
+manifests, checkpoints, predictions, metrics, reporting assets, and the LaTeX
+thesis source.
 
 ## Tested Context
 
@@ -15,7 +18,8 @@ The project was developed primarily with:
 - licensed commercial forensic tools for black-box export generation;
 - a LaTeX toolchain for thesis compilation.
 
-Exact usernames, storage-device paths, credentials, signed URLs, and commercial license information are intentionally excluded.
+Exact usernames, storage-device paths, credentials, signed URLs, and commercial
+license information are intentionally excluded.
 
 ## Python Environment
 
@@ -43,7 +47,8 @@ python -m pip install --upgrade pip setuptools wheel
 python -m pip install -r requirements.txt
 ```
 
-For CUDA-dependent stages, install PyTorch using a build compatible with the local GPU driver and CUDA runtime.
+For CUDA-dependent stages, install PyTorch using a build compatible with the
+local GPU driver and CUDA runtime.
 
 ## Environment Variables
 
@@ -58,7 +63,26 @@ session cookies
 commercial license keys
 ```
 
-Controlled data restoration may use `FAIRLAB_RAW_DATASET_BUNDLE_URL`, but its value must remain local.
+Controlled artifact access may use:
+
+```text
+FAIRLAB_RAW_DATASET_BUNDLE_REQUEST_URL
+FAIRLAB_RAW_DATASET_BUNDLE_URL
+FAIRLAB_FROZEN_FORENSIC_EVALUATION_BUNDLE_REQUEST_URL
+FAIRLAB_FROZEN_FORENSIC_EVALUATION_BUNDLE_URL
+```
+
+Stable request pages may be documented publicly. Authorized direct-download URLs
+must remain local when they are private, signed, temporary, or account-specific.
+
+The authoritative complete-ZIP digests are tracked in:
+
+```text
+docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256
+```
+
+The restoration script reads this file automatically. The
+`--expected-sha256` option is available only as an explicit override.
 
 ## Compute Expectations
 
@@ -85,7 +109,8 @@ Cellebrite Inseyets 10.9 / Physical Analyzer 10.9.0.3029
 Magnet Griffeye 26.2.108 / T3K CORE 1.18.0
 ```
 
-Full commercial reruns require licensed software, the controlled blind bundle, compatible import/export environments, and post-export normalization.
+Full commercial reruns require licensed software, the controlled blind bundle,
+compatible import/export environments, and post-export normalization.
 
 ## LaTeX Environment
 
@@ -102,7 +127,9 @@ cd docs/LatexThesis
 latexmk -pdf main.tex
 ```
 
-Common generated files include `.acn`, `.acr`, `.alg`, `.aux`, `.bbl`, `.bcf`, `.blg`, `.fdb_latexmk`, `.fls`, `.glg`, `.glo`, `.gls`, `.log`, `.out`, `.run.xml`, `.synctex.gz`, `.toc`, and `main.pdf`. These files are ignored.
+Common generated files include `.acn`, `.acr`, `.alg`, `.aux`, `.bbl`, `.bcf`,
+`.blg`, `.fdb_latexmk`, `.fls`, `.glg`, `.glo`, `.gls`, `.log`, `.out`,
+`.run.xml`, `.synctex.gz`, `.toc`, and `main.pdf`. These files are ignored.
 
 ## Lightweight Validation on Kali
 
@@ -124,14 +151,24 @@ bash tools/tasks.sh audit-all
 
 ## Reproducibility Boundary
 
-The public repository supports script and structural inspection, manifest and metric inspection, reconstruction of the canonical sanitized commercial prediction table, reporting validation, and thesis-source review.
+The public repository supports script and structural inspection, manifest and
+metric inspection, reconstruction of the canonical sanitized commercial
+prediction table, reporting validation, and thesis-source review.
 
-It does not independently provide unrestricted images, licensed forensic software, proprietary AI internals, or a guaranteed byte-identical operating-system environment.
+Controlled raw access supports complete pipeline regeneration. The separately
+controlled frozen evaluation archive supports restoration of the exact 11,500
+files used as commercial black-box input. Commercial reprocessing still requires
+licensed software and a compatible execution environment.
+
+The repository does not independently provide unrestricted images, licensed
+forensic software, proprietary AI internals, or a guaranteed byte-identical
+operating-system environment.
 
 Related documents:
 
 ```text
 docs/artifact/REPRODUCIBILITY.md
 docs/artifact/DATA_ACCESS.md
+docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256
 .github/SECURITY.md
 ```
