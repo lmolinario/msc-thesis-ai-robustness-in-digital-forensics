@@ -24,30 +24,47 @@ The canonical counts and integrity checks are recorded in
 
 ## Main-branch policy
 
-The 11,500 bundle image files are generated locally and are not tracked on
-`main`. The public repository retains the generation scripts, anonymized bundle
-manifests, hashes, summaries and minimized audit records required for
-traceability.
+The 11,500 bundle image files are not tracked on `main`. The public repository
+retains the generation scripts, anonymized bundle manifests, hashes, summaries,
+and minimized audit records required for traceability.
 
-Run step 16 after restoring or regenerating the controlled-access source images
-to recreate the local `blind_tool_input/` and `structured_audit_view/`
-directories.
+The images can be regenerated through the numbered pipeline. For exact
+black-box replication, the byte-identical bundle used in the thesis is also
+preserved as a controlled-access archive:
+
+```text
+16_frozen_forensic_evaluation_bundle.zip
+```
+
+Its authoritative archive-level SHA-256 digest is published in:
+
+```text
+docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256
+```
+
+This archive checksum identifies the complete ZIP object. It complements, and
+does not replace, the per-file checks in:
+
+```text
+metadata/bundle_hashes_sha256.csv
+```
 
 ## Directory roles
 
 ```text
 forensic_evaluation_bundle/
-├── blind_tool_input/        # generated locally; not tracked
+├── README.md
+├── blind_tool_input/        # restored or generated locally; not tracked
 │   └── files/
 ├── metadata/                # tracked public records + ignored private audit
-└── structured_audit_view/   # generated locally; not tracked
+└── structured_audit_view/   # restored or generated locally; not tracked
 ```
 
 ### `blind_tool_input/files/`
 
 This is the only directory intended for import into evaluated black-box tools.
 Files use neutral bundle identifiers and a flat layout so that paths do not
-expose labels, OOD status, folds, attack families, attack names, source models
+expose labels, OOD status, folds, attack families, attack names, source models,
 or provenance.
 
 ### `metadata/`
@@ -100,9 +117,27 @@ leave-out sensitivity analysis without redistributing complete metadata values.
 This optional local view preserves a semantic hierarchy for controlled audit
 and debugging. It is not a valid input view for blind tool evaluation.
 
+## Controlled restoration
+
+After access approval and browser download, restore the exact frozen bundle with:
+
+```bash
+python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
+  --artifact frozen \
+  --archive "/path/to/16_frozen_forensic_evaluation_bundle.zip"
+```
+
+The restoration script verifies the complete archive against the authoritative
+repository SHA-256 and then verifies the filename and SHA-256 of every blind
+input against `metadata/bundle_hashes_sha256.csv`.
+
+Use `--force-extract` only when intentionally replacing an existing local
+`blind_tool_input/` or `structured_audit_view/`. Committed public metadata remain
+authoritative and are not overwritten by metadata packaged in the archive.
+
 ## Bias-control rule
 
-After local regeneration, tool operators must import only:
+Tool operators must import only:
 
 ```text
 datasets/forensic_evaluation_bundle/blind_tool_input/files/
@@ -117,7 +152,7 @@ traceability for normalization.
 The bundle-generation summary records checks for:
 
 - unique bundle identifiers;
-- unique actual SHA256 values;
+- unique actual SHA-256 values;
 - hash agreement with source manifests;
 - semantically neutral blind paths;
 - separation between tool inputs and metadata.
@@ -127,3 +162,6 @@ could expose semantic or experiment-specific information without modifying the
 image files. Publication of the audit is subject to data minimization: complete
 metadata values remain local or in the protected historical snapshot, while
 `main` retains only the minimized schema and aggregate sensitivity outputs.
+
+Controlled-access conditions and the two archive digests are documented in
+[`../../docs/artifact/DATA_ACCESS.md`](../../docs/artifact/DATA_ACCESS.md).
