@@ -14,9 +14,14 @@ Artifacts:
 
 Recommended workflow:
 1. ``--artifact <raw|frozen> --request-access``;
-2. request access through the restricted Google Drive page;
+2. request access through the restricted storage page;
 3. download the approved ZIP through the browser;
 4. restore it with ``--artifact <...> --archive <path>``.
+
+The complete ZIP is verified against the authoritative digests in
+``docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256``. For the frozen bundle,
+every blind input is additionally verified against the committed per-file hash
+manifest.
 
 Authorized direct-download URLs may alternatively be supplied through ``--url``
 or the artifact-specific environment variable. Private or temporary URLs must
@@ -29,6 +34,7 @@ import argparse
 import csv
 import hashlib
 import os
+import re
 import shutil
 import stat
 import webbrowser
@@ -45,6 +51,9 @@ from datasets.scripts.utils.paths import (
     repo_relative_path,
 )
 
+CHECKSUMS_PATH = REPO_ROOT / "docs" / "artifact" / "CONTROLLED_ARTIFACT_CHECKSUMS.sha256"
+SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
+
 
 @dataclass(frozen=True)
 class ArtifactSpec:
@@ -59,6 +68,10 @@ class ArtifactSpec:
     allowed_archive_roots: tuple[str, ...] = ()
     replace_roots: tuple[str, ...] = ()
     hash_manifest_path: Path | None = None
+
+    @property
+    def archive_filename(self) -> str:
+        return self.archive_path.name
 
 
 RAW_ARTIFACT = ArtifactSpec(
@@ -80,7 +93,7 @@ FROZEN_ARTIFACT = ArtifactSpec(
     label="frozen forensic evaluation bundle",
     direct_url_env="FAIRLAB_FROZEN_FORENSIC_EVALUATION_BUNDLE_URL",
     request_url_env="FAIRLAB_FROZEN_FORENSIC_EVALUATION_BUNDLE_REQUEST_URL",
-    # Add the stable public request page here after the Drive upload is frozen.
+    # Add the stable public request page here after the controlled upload is frozen.
     default_request_url="",
     archive_path=(
         REPO_ROOT
@@ -116,7 +129,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--request-page",
         default="",
-        help="Stable Drive view-page override for the selected artifact.",
+        help="Stable storage view-page override for the selected artifact.",
     )
     parser.add_argument(
         "--archive",
@@ -131,7 +144,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--expected-sha256",
         default="",
-        help="Optional expected SHA256 digest for the complete ZIP archive.",
+        help=(
+            "Explicit archive SHA-256 override. When omitted, the script reads "
+            "docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256."
+        ),
     )
     parser.add_argument(
         "--force-download",
@@ -149,7 +165,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--skip-content-verification",
         action="store_true",
-        help="Skip frozen per-file SHA256 verification (diagnostic use only).",
+        help="Skip frozen per-file SHA-256 verification (diagnostic use only).",
     )
     return parser
 
@@ -157,8 +173,9 @@ def build_parser() -> argparse.ArgumentParser:
 def resolve_request_page(spec: ArtifactSpec, cli_page: str) -> tuple[str, str]:
     if cli_page.strip():
         return cli_page.strip(), "command line"
-    if os.getenv(spec.request_url_env, "").strip():
-        return os.environ[spec.request_url_env].strip(), f"environment variable {spec.request_url_env}"
+    env_value = os.getenv(spec.request_url_env, "").strip()
+    if env_value:
+        return env_value, f"environment variable {spec.request_url_env}"
     if spec.default_request_url:
         return spec.default_request_url, "repository configuration"
     raise RuntimeError(
@@ -172,19 +189,71 @@ def open_access_request_page(spec: ArtifactSpec, cli_page: str) -> None:
     print(f"[INFO] Opening access page for the {spec.label} ({source}):")
     print(f"       {request_page}")
     if not webbrowser.open(request_page, new=2):
-        print("[WARN] Browser launch failed. Copy the URL above and select 'Request access'.")
+        print("[WARN] Browser launch failed. Copy the URL above and request access.")
 
 
 def resolve_bundle_url(spec: ArtifactSpec, cli_url: str) -> tuple[str, str]:
     if cli_url.strip():
         return cli_url.strip(), "command line"
-    if os.getenv(spec.direct_url_env, "").strip():
-        return os.environ[spec.direct_url_env].strip(), f"environment variable {spec.direct_url_env}"
+    env_value = os.getenv(spec.direct_url_env, "").strip()
+    if env_value:
+        return env_value, f"environment variable {spec.direct_url_env}"
     raise RuntimeError(
         f"No authorized direct-download URL was provided for the {spec.label}. "
         "Use --request-access and then --archive, or provide --url or "
         f"{spec.direct_url_env}."
     )
+
+
+def normalize_sha256(value: str, source: str) -> str:
+    digest = value.strip().lower()
+    if not SHA256_RE.fullmatch(digest):
+        raise RuntimeError(f"Invalid SHA-256 digest from {source}: {value!r}")
+    return digest
+
+
+def load_authoritative_checksums(path: Path) -> dict[str, str]:
+    if not path.exists() or not path.is_file():
+        raise FileNotFoundError(f"Authoritative checksum file not found: {path}")
+
+    checksums: dict[str, str] = {}
+    with path.open("r", encoding="utf-8-sig") as stream:
+        for line_number, raw_line in enumerate(stream, start=1):
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            parts = line.split(maxsplit=1)
+            if len(parts) != 2:
+                raise RuntimeError(f"Malformed checksum line {line_number} in {path}: {line}")
+            digest = normalize_sha256(parts[0], f"{path}:{line_number}")
+            filename = parts[1].lstrip("*").strip()
+            filename = PurePosixPath(filename.replace("\\", "/")).name
+            if not filename:
+                raise RuntimeError(f"Missing filename on checksum line {line_number} in {path}")
+            if filename in checksums:
+                raise RuntimeError(f"Duplicate checksum filename in {path}: {filename}")
+            checksums[filename] = digest
+
+    if not checksums:
+        raise RuntimeError(f"No checksums found in: {path}")
+    return checksums
+
+
+def resolve_expected_archive_digest(
+    spec: ArtifactSpec,
+    cli_expected: str,
+) -> tuple[str, str]:
+    if cli_expected.strip():
+        return normalize_sha256(cli_expected, "--expected-sha256"), "command line override"
+
+    checksums = load_authoritative_checksums(CHECKSUMS_PATH)
+    try:
+        return checksums[spec.archive_filename], str(CHECKSUMS_PATH)
+    except KeyError as exc:
+        raise RuntimeError(
+            f"No authoritative checksum is registered for {spec.archive_filename} in "
+            f"{CHECKSUMS_PATH}."
+        ) from exc
 
 
 def sha256_file(path: Path) -> str:
@@ -197,10 +266,9 @@ def sha256_file(path: Path) -> str:
 
 def validate_archive_digest(path: Path, expected_sha256: str) -> str:
     actual = sha256_file(path)
-    expected = expected_sha256.strip().lower()
-    if expected and actual.lower() != expected:
+    if actual.lower() != expected_sha256.lower():
         raise RuntimeError(
-            f"Archive SHA256 mismatch: expected={expected}, actual={actual}, path={path}"
+            f"Archive SHA-256 mismatch: expected={expected_sha256}, actual={actual}, path={path}"
         )
     return actual
 
@@ -364,8 +432,11 @@ def load_expected_hashes(path: Path) -> dict[str, str]:
             raise RuntimeError(f"Missing columns in {path}: {sorted(missing)}")
         for row in reader:
             filename = str(row.get("tool_input_filename", "")).strip()
-            sha256 = str(row.get("sha256", "")).strip().lower()
-            if not filename or not sha256:
+            sha256 = normalize_sha256(
+                str(row.get("sha256", "")),
+                f"{path}:{filename or '<missing filename>'}",
+            )
+            if not filename:
                 raise RuntimeError(f"Incomplete frozen hash row: {row}")
             if filename in expected:
                 raise RuntimeError(f"Duplicate filename in frozen hash manifest: {filename}")
@@ -419,7 +490,7 @@ def verify_frozen_bundle(spec: ArtifactSpec) -> None:
             f"Frozen content hash mismatches: {len(mismatches)}\n"
             + "\n".join(mismatches[:20])
         )
-    print(f"[OK] Frozen bundle verified: {len(actual_paths)} files match the SHA256 manifest.")
+    print(f"[OK] Frozen bundle verified: {len(actual_paths)} files match the SHA-256 manifest.")
 
 
 def extract_archive(
@@ -486,9 +557,15 @@ def main() -> None:
         print(f"[INFO] Authorized URL source: {source}")
         download_archive(bundle_url, archive_path, args.force_download)
 
-    digest = validate_archive_digest(archive_path, args.expected_sha256)
+    expected_digest, digest_source = resolve_expected_archive_digest(
+        spec,
+        args.expected_sha256,
+    )
+    print(f"[INFO] Expected archive SHA-256 source: {digest_source}")
+    digest = validate_archive_digest(archive_path, expected_digest)
     print(f"[INFO] Archive: {archive_path}")
-    print(f"[INFO] Archive SHA256: {digest}")
+    print(f"[OK] Archive SHA-256 verified: {digest}")
+
     extract_archive(
         archive_path,
         spec,
