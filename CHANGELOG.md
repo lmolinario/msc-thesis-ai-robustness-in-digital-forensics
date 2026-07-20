@@ -13,6 +13,9 @@ Final frozen MSc thesis research artifact supporting:
 - authoritative thesis source under `docs/LatexThesis/`;
 - frozen dataset and split manifests;
 - 11,500-item forensic evaluation bundle metadata;
+- controlled restoration of the exact 11,500-file commercial black-box input;
+- authoritative SHA-256 digests for the raw and frozen controlled ZIP archives;
+- automatic complete-ZIP verification and frozen per-file verification in the step-00 restoration script;
 - fold-aware proxy checkpoints and registry;
 - adversarial and anti-forensic generation workflows;
 - transparent proxy predictions and robustness metrics;
@@ -39,8 +42,10 @@ Final frozen MSc thesis research artifact supporting:
 - aligned the root README with the final curated repository structure;
 - established `evaluation/forensic_tools/normalized_predictions.csv` as the canonical public commercial prediction table;
 - documented `500 unique OOD images × 5 folds = 2,500 predictions per architecture`;
+- distinguished full pipeline regeneration from exact frozen black-box input restoration;
+- centralized controlled archive digests in `docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256`;
 - retained a single authoritative LaTeX thesis source;
-- updated CI to validate final paths, JSON, Python syntax, canonical prediction SHA256, decision profile, metric count, and documentation guards;
+- updated CI to validate final paths, JSON, Python syntax, the controlled checksum registry, canonical prediction SHA256, decision profile, metric count, and documentation guards;
 - moved governance documents out of the repository root;
 - moved local repository utilities under `tools/`;
 - ignored LaTeX auxiliary files and local thesis PDFs.
@@ -65,7 +70,7 @@ tag:    snapshot/pre-commission-cleanup-2026-07-16
 commit: 309a4580537ebc3bb7950f29c090bb2729fc603b
 ```
 
-Current `main` is authoritative. The public artifact supports structural audit, prediction and metric inspection, canonical-table reconstruction, reporting validation, and thesis-source review. Full raw-data and commercial-tool reruns require controlled-access data and licensed software.
+Current `main` is authoritative. The public artifact supports structural audit, prediction and metric inspection, canonical-table reconstruction, reporting validation, and thesis-source review. Full pipeline regeneration requires the controlled raw archive. Exact restoration of the original black-box input uses the separately controlled frozen 11,500-file archive. Commercial-tool reprocessing additionally requires licensed software.
 
 ## Current Source-of-Truth Areas
 
