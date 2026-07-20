@@ -13,7 +13,8 @@ evaluation/
 │   ├── 15_evaluate_proxy_models.py
 │   ├── _15_evaluate_proxy_models_impl.py
 │   ├── 19_normalize_forensic_ai_tool_predictions.py
-│   └── _19_normalize_forensic_ai_tool_predictions_impl.py
+│   ├── _19_normalize_forensic_ai_tool_predictions_impl.py
+│   └── compute_proxy_operational_risk_metrics.py
 ├── proxy_models/
 │   └── proxy_model_predictions.csv
 └── forensic_tools/
@@ -126,6 +127,40 @@ evaluation/forensic_tools/normalized_predictions.csv
 evaluation/forensic_tools/unmatched_predictions.csv
 evaluation/forensic_tools/*_normalized_predictions.csv
 ```
+
+## Operational-risk summary
+
+The reporting helper:
+
+```text
+evaluation/scripts/compute_proxy_operational_risk_metrics.py
+```
+
+reads the canonical proxy prediction table and computes one operational-risk
+summary row for each transparent proxy model. It combines those computed rows
+with the consolidated black-box values already reported in Chapter 5 so that
+the final comparison table and figure can be regenerated without manual editing.
+It does not rerun commercial tools, alter normalized decisions, or replace the
+canonical metric files produced by steps 15 and 19.
+
+Run from the repository root:
+
+```bash
+python evaluation/scripts/compute_proxy_operational_risk_metrics.py
+```
+
+Outputs:
+
+```text
+results/metrics/proxy_operational_risk_metrics.csv
+results/metrics/operational_risk_summary_data.csv
+docs/LatexThesis/images/fig_results_operational_risk_summary.pdf
+docs/LatexThesis/images/fig_results_operational_risk_summary.png
+```
+
+The script validates the expected frozen proxy counts before writing the
+reporting artifacts. Its embedded black-box rows must remain aligned with the
+consolidated Chapter 5 results.
 
 ## Separation rule
 
