@@ -52,6 +52,10 @@ from datasets.scripts.utils.paths import (
 )
 
 CHECKSUMS_PATH = REPO_ROOT / "docs" / "artifact" / "CONTROLLED_ARTIFACT_CHECKSUMS.sha256"
+CONTROLLED_ARTIFACTS_REQUEST_URL = (
+    "https://drive.google.com/drive/folders/"
+    "1cgQWKe9gPR1keJuoXeQ7SI6z-5IlAtF8"
+)
 SHA256_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 
 
@@ -79,10 +83,7 @@ RAW_ARTIFACT = ArtifactSpec(
     label="raw dataset bundle",
     direct_url_env="FAIRLAB_RAW_DATASET_BUNDLE_URL",
     request_url_env="FAIRLAB_RAW_DATASET_BUNDLE_REQUEST_URL",
-    default_request_url=(
-        "https://drive.google.com/file/d/"
-        "1yGbGZ3aFJRUZZQdSxrNlwY20Txa6KqbH/view?usp=drive_link"
-    ),
+    default_request_url=CONTROLLED_ARTIFACTS_REQUEST_URL,
     archive_path=RAW_DATASETS_DIR / "downloaded_raw_archives" / "00_raw_datasets_bundle.zip",
     extract_dir=RAW_DATASETS_DIR / "downloaded_raw_archives" / "extracted_bundle",
 )
@@ -93,8 +94,7 @@ FROZEN_ARTIFACT = ArtifactSpec(
     label="frozen forensic evaluation bundle",
     direct_url_env="FAIRLAB_FROZEN_FORENSIC_EVALUATION_BUNDLE_URL",
     request_url_env="FAIRLAB_FROZEN_FORENSIC_EVALUATION_BUNDLE_REQUEST_URL",
-    # Add the stable public request page here after the controlled upload is frozen.
-    default_request_url="",
+    default_request_url=CONTROLLED_ARTIFACTS_REQUEST_URL,
     archive_path=(
         REPO_ROOT
         / "downloads"
