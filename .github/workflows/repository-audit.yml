@@ -44,10 +44,12 @@ jobs:
               'docs/artifact/ENVIRONMENT.md',
               'docs/artifact/REPRODUCIBILITY.md',
               'docs/artifact/DATA_ACCESS.md',
+              'docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256',
               'docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md',
               'docs/maintenance/RELEASE_CHECKLIST.md',
               'docs/LatexThesis/README.md',
               'docs/LatexThesis/main.tex',
+              'datasets/forensic_evaluation_bundle/README.md',
               'evaluation/forensic_tools/normalized_predictions.csv',
               'evaluation/forensic_tools/normalized_predictions_public_summary.json',
               'forensic_tools/run_registry.json',
@@ -85,6 +87,44 @@ jobs:
           if missing or present_forbidden:
               raise SystemExit(1)
           print('Final repository structure check passed.')
+          PY
+
+      - name: Validate controlled artifact checksum registry
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path, PurePosixPath
+
+          path = Path('docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256')
+          sha256_re = re.compile(r'^[0-9a-f]{64}$')
+          entries = {}
+
+          for line_number, raw_line in enumerate(path.read_text(encoding='utf-8-sig').splitlines(), start=1):
+              line = raw_line.strip()
+              if not line or line.startswith('#'):
+                  continue
+              parts = line.split(maxsplit=1)
+              if len(parts) != 2:
+                  raise SystemExit(f'Malformed checksum line {line_number}: {line}')
+              digest = parts[0].lower()
+              filename = PurePosixPath(parts[1].lstrip('*').strip().replace('\\', '/')).name
+              if not sha256_re.fullmatch(digest):
+                  raise SystemExit(f'Invalid SHA256 on line {line_number}: {digest}')
+              if filename in entries:
+                  raise SystemExit(f'Duplicate checksum filename: {filename}')
+              entries[filename] = digest
+
+          expected_names = {
+              '00_raw_datasets_bundle.zip',
+              '16_frozen_forensic_evaluation_bundle.zip',
+          }
+          if set(entries) != expected_names:
+              raise SystemExit(
+                  f'Unexpected checksum registry names: expected={sorted(expected_names)}, '
+                  f'actual={sorted(entries)}'
+              )
+          print('Controlled artifact checksum registry passed.')
           PY
 
       - name: Check JSON validity
@@ -164,6 +204,9 @@ jobs:
               *Path('docs').rglob('*.md'),
               Path('.github/SECURITY.md'),
               Path('CHANGELOG.md'),
+              Path('datasets/README.md'),
+              Path('datasets/raw/README.md'),
+              Path('datasets/forensic_evaluation_bundle/README.md'),
               Path('results/README.md'),
               Path('results/scripts/README.md'),
               Path('explainability/README.md'),
