@@ -33,7 +33,8 @@ The repository is a research artifact, not a general-purpose forensic classifier
 | Public prediction outputs | 69,000 sanitized commercial-tool decisions |
 | Main quantitative outputs | Proxy metrics, 186 commercial metric rows, reporting figures and tables |
 | XAI | Five Integrated Gradients case studies selected for Chapter 5 |
-| Data policy | Controlled access; image corpora and complete raw exports are not distributed on `main` |
+| Data policy | Controlled access; raw corpora and the exact frozen 11,500-file input are distributed separately from `main` |
+| Integrity | Authoritative complete-ZIP and per-file SHA-256 records |
 
 ---
 
@@ -108,12 +109,16 @@ The 1,500-image dataset is the methodological source dataset. The 11,500-file bu
 ### Dataset and bundle
 
 ```text
+docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256
 datasets/final/manifests/manual_selection_final_1500.csv
 datasets/final/manifests/manual_selection_adversarial_subset.csv
 datasets/splits/manifests/clean_folds_manifest.csv
 datasets/splits/manifests/ood_eval_manifest.csv
 datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
+datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
 ```
+
+The archive checksum file authenticates the two controlled ZIP objects. The bundle hash manifest authenticates each of the 11,500 blind inputs individually.
 
 ### Proxy evaluation
 
@@ -170,6 +175,8 @@ The thesis evaluates exported observable signals. It does not claim access to pr
 | [`docs/artifact/ENVIRONMENT.md`](docs/artifact/ENVIRONMENT.md) | Environment and dependency assumptions |
 | [`docs/artifact/REPRODUCIBILITY.md`](docs/artifact/REPRODUCIBILITY.md) | Controlled reproducibility workflow |
 | [`docs/artifact/DATA_ACCESS.md`](docs/artifact/DATA_ACCESS.md) | Controlled data-access procedure |
+| [`docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256`](docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256) | Authoritative raw and frozen archive digests |
+| [`datasets/forensic_evaluation_bundle/README.md`](datasets/forensic_evaluation_bundle/README.md) | Exact black-box input restoration and integrity boundary |
 | [`.github/SECURITY.md`](.github/SECURITY.md) | Secret, proprietary-data, and exposure policy |
 | [`docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md`](docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md) | Academic repository audit record |
 | [`docs/maintenance/RELEASE_CHECKLIST.md`](docs/maintenance/RELEASE_CHECKLIST.md) | Final release and DOI checklist |
@@ -204,7 +211,9 @@ msc-thesis-ai-robustness-in-digital-forensics/
 
 The public repository supports structural audit, code review, manifest inspection, metric recomputation from committed sanitized decisions, reporting validation, and thesis-source review.
 
-Full end-to-end reruns require controlled image access. Commercial-tool reruns additionally require compatible licensed software. For black-box processing, import only the blind input view and never the metadata or structured audit views.
+Full pipeline regeneration requires controlled access to `00_raw_datasets_bundle.zip`. Exact restoration of the byte-identical black-box input uses the separately controlled `16_frozen_forensic_evaluation_bundle.zip`. Both complete archives are authenticated by `docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256`; the frozen bundle is additionally checked against the canonical per-file manifest.
+
+Commercial-tool reruns require compatible licensed software. For black-box processing, import only the blind input view and never the metadata or structured audit views.
 
 Controlled restoration and reproducibility instructions are documented in:
 
