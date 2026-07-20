@@ -124,6 +124,71 @@ artifact and is intentionally not part of the frozen repository.
 Scripts 12 and 15 belong respectively to `models/` and `evaluation/`, while
 generated perturbations are stored locally under `attacks/`.
 
+## Supplementary public-audit entry point
+
+The following script is a post-bundle privacy-minimization utility rather than a
+step that changes the frozen experimental dataset:
+
+```text
+17  datasets/scripts/bundle/17_build_public_embedded_metadata_audit.py
+```
+
+Step 16 may produce a detailed local embedded-metadata audit containing complete
+EXIF/XMP values or binary metadata payload information. Step 17 derives a
+minimized public audit that retains only:
+
+- anonymized bundle identifiers;
+- file suffixes;
+- metadata-presence flags;
+- metadata key names;
+- sensitive-term hits and hit counts.
+
+By default, the script writes reviewable outputs under:
+
+```text
+datasets/forensic_evaluation_bundle/metadata/.staging/
+```
+
+Canonical installation is explicit:
+
+```bash
+python datasets/scripts/bundle/17_build_public_embedded_metadata_audit.py \
+  --install
+```
+
+With `--install`, the complete source audit is preserved in the ignored local
+file `embedded_metadata_audit.private.csv`, while the minimized files become:
+
+```text
+datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv
+datasets/forensic_evaluation_bundle/metadata/embedded_metadata_sensitive_hits.csv
+datasets/forensic_evaluation_bundle/metadata/embedded_metadata_public_summary.json
+```
+
+The script validates the frozen 11,500-row profile, identifier uniqueness, the
+expected sensitive-hit profile, the public schema, and the absence of local path
+leakage. Its minimized output supports the optional privacy-reduced sensitivity
+workflow in `results/scripts/22_generate_public_embedded_metadata_sensitivity_check.py`.
+It does not replace the detailed frozen analysis unless explicitly installed and
+validated.
+
+## Internal modules
+
+The following files support the numbered pipeline but are not standalone entry
+points and should not normally be executed directly:
+
+| Internal module | Role |
+|---|---|
+| `datasets/scripts/utils/paths.py` | Central repository-path definitions and helpers used across dataset, attack, evaluation and reporting scripts. |
+| `datasets/scripts/attacks/adversarial_model_interface.py` | Common target-model configuration and interface used by adversarial attack generators. |
+| `datasets/scripts/attacks/adversarial_torch_model_adapters.py` | PyTorch checkpoint loading, preprocessing, inference and gradient access for ResNet18, EfficientNet-B0 and CLIP-based proxy models. |
+| `datasets/scripts/attacks/sigma_zero_reference_adapter.py` | Adapter that connects the frozen attack pipeline to the reference Sigma-Zero implementation. |
+| `datasets/scripts/attacks/superdeepfool_adapter.py` | Adapter that connects the frozen attack pipeline to the reference SuperDeepFool implementation. |
+
+These modules are imported by the official scripts. Renaming, deleting or
+executing them independently may bypass the manifest discovery, output
+protection and integrity checks implemented by the public entry points.
+
 ## Controlled archive restoration
 
 The step-00 entry point handles two artifact types:
