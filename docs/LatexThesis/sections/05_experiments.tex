@@ -588,7 +588,10 @@ and transformations.
 \end{figure}
 
 The results show that the anti-forensic transformations produce overall limited
-effects on the proxy models, especially when compared with the adversarial
+effects on the proxy models,
+%l'ho visto anche prima nella metodologia ma cosa intendi con proxy models? non l'ho mai sentito... se è qualcosa che hai definito tu va spiegato
+
+especially when compared with the adversarial
 perturbations discussed in Section~\ref{sec:results-adversarial}.
 EfficientNet-B0 maintains high performance under all conditions, but is more
 sensitive to \gls{gaussianblur}, with an accuracy of 0.965 and a drop of 0.013.
@@ -664,8 +667,9 @@ The adversarial evaluation measures the response of the proxy models to
 perturbations designed to alter classifier
 behavior~\cite{szegedy2014intriguing,goodfellow2015explaining,biggio2018wild}.
 In the context of this thesis, these perturbations are not analyzed as an
-autonomous objective of \gls{advml}, but as experimental stressors useful for
-evaluating the operational reliability of \gls{ai}-based systems in forensic
+autonomous objective of \gls{advml}, but as experimental stressors
+%anche qui, l'ho visto prima nella metodologia ma cosa intendi per stressor? non è un termine frequente
+useful for evaluating the operational reliability of \gls{ai}-based systems in forensic
 scenarios. The main interest therefore does not concern only the ability of an
 attack to reduce accuracy, but the risk that \texttt{weapon} samples are
 reclassified as \texttt{non\_weapon}, generating potentially critical false
@@ -944,7 +948,8 @@ presentation of the normalized outputs of the selected software systems, since
 its interpretation requires comparison with the observed black-box results.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Selected Black-Box Software Evaluation}
+\section{Selected Black-Box Software Evaluation} %ne hai già parlato nella metodologia, non ha senso ripetere
+
 \label{sec:results-commercial}
 % ─────────────────────────────────────────────────────────────────────────────
 

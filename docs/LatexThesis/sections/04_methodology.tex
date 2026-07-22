@@ -481,6 +481,10 @@ because it makes it possible to distinguish what pertains to the technical
 validity of an image file from what pertains to its semantic interpretation
 with respect to the forensic task.
 
+%Silvia Sanna
+%21 July, 9:13 am
+%la metodologia deve spiegare come funziona ad alto livello il tool senza dettagli implementativi o organizzazione di cartelle, creazione di file csv, perchè altre persone devono seguirla come guida adattandola ai loro contesti quindi non forzando csv perchè si potrebbero usare altre strutture come json o altro ancora, addirittura proprietario
+
 The initial phase involved organizing five heterogeneous sources within the
 \codepath{datasets/raw/} directory. The sources include public datasets,
 material derived from specialized repositories, collections obtained through
@@ -515,6 +519,11 @@ contemporary digital investigations.
 \bottomrule
 \end{tabularx}
 \end{table}
+
+%
+%Silvia Sanna 21 July, 9:29 am
+%idem no dettagli implementativi. io potrei fare lo stesso con file .c, .java, .silvia
+%
 
 Starting from the raw sources, the script
 \codepath{datasets/scripts/prepared/08_build_prepared_dataset.py} builds the
@@ -901,6 +910,11 @@ specific manifests for the subsequent experimental phases.
 The binary subset, composed of the \texttt{weapon} and \texttt{non\_weapon}
 classes, is divided into five deterministic folds, named \texttt{fold\_1},
 \texttt{fold\_2}, \texttt{fold\_3}, \texttt{fold\_4}, and \texttt{fold\_5}.
+
+
+%Silvia Sanna 21 July, 9:45 am
+%anche qui, cerca di essere più generico perchè un'altra persona può creare 5 cartelle con 500 immagini ciascuna. oppure 3 cartelle con 1000 immagini ciascuna etc. la metodologia deve essere generale
+
 Each fold contains 200 images, evenly distributed between the two operational
 classes of the binary task. The split procedure uses a pseudo-random seed fixed
 at 42, so that the partition can be reproducibly regenerated from the official
@@ -911,8 +925,17 @@ experimental units, not training partitions in the sense of traditional
 cross-validation. The decision to adopt five folds addresses a twofold
 methodological requirement. On the one hand, it makes it possible to divide the
 binary subset into units that are homogeneous in size and class composition,
+
+% Silvia Sanna 21 July, 9:45 am
+%ok nel nostro caso ma avendo altri numeri magari hai risultati omogenei anche con 3 cartelle
+
+
+
 facilitating comparison among baseline evaluation, perturbation generation,
 and results analysis. On the other hand, it makes it possible to maintain a
+% Silvia Sanna 21 July, 9:45 am
+%idem
+
 controlled separation between the samples used for training the proxy models
 and those used as experimental holdout data, reducing the risk of leakage in
 the subsequent robustness evaluation. The folds are therefore not introduced
@@ -948,7 +971,11 @@ robustness evaluation.
 The \gls{ood} set is instead kept separate from the binary subset and organized
 into a single evaluation set, located in
 \codepath{datasets/splits/ood/ood_eval_set/ood/}. This choice reflects the
-different methodological function of out-of-distribution samples. They are not
+different methodological function of out-of-distribution samples.
+
+%a volte la scrivi così altre volte OOD. sono formalmente entrambe corrette ma è meglio uniformare. si fa così: la prima volta per esteso e tra parentesi l'acronimo, le altre volte sempre l'acronimo
+
+They are not
 used to generate adversarial perturbations or anti-forensic transformations on
 known classes, but rather to evaluate system behavior when the input consists
 of content that should not be treated as an ordinary example of \texttt{weapon}
@@ -1103,6 +1130,8 @@ for training the proxy models nor for perturbation generation.
 \end{tikzpicture}%
 }
 \caption[Split generation and proxy model training position in the pipeline]{Position of split generation and proxy model training in the experimental pipeline. The frozen manual selection manifests are transformed into balanced clean binary folds and a separate clean \gls{ood} evaluation set. Only the binary folds are used for fold-aware proxy model training, while the \gls{ood} set remains separate and is not used for training or perturbation generation.}
+%di solito non si mette il punto alla fine della descrizione delle figure. di solito si mette una specie di titolo affianco a figura n. e poi dopo titolo la descrizione, che spiega la figura non il funzionamento, si cerca anche di evitare (ma questo in generale in tutta la scrittura) una sola riga con una sola parola
+
 \label{fig:methodology-split-to-proxy-training}
 \end{figure}
 
@@ -1137,6 +1166,8 @@ Sections~\ref{sec:methodology-research-design} and
 to keep the evaluation of binary robustness separate from the handling of
 borderline, anomalous, or semantically external inputs with respect to the
 operational domain.
+
+%anche qui, descrivere la metodologia generale perchè io potrei usare resnet50 o altre, questi sono dettagli implementativi
 
 The official proxy models considered in this phase are ResNet18,
 EfficientNet-B0, and \gls{clip}. ResNet18 represents a well-established and
@@ -2403,6 +2434,8 @@ exclusively on the observable outputs exported from the
 access to the internal model, training data, or decision thresholds employed by
 the vendor.
 
+%uniforma lo stile dei tool, alcuni sono in texttt, altri con gls per acronimo, altri normali. Segui poi sempre lo stesso stile quando li richiami. ti consiglio textttt
+
 In this context, \gls{ufed} is not treated as an image classifier, but as a
 possible component of the Cellebrite ecosystem dedicated to data acquisition
 and management. The experimental analysis therefore concerns the automatic
@@ -2414,6 +2447,9 @@ associate each result with a confidence score between 0 and
 1~\cite{cellebrite_media_classification}. Within the \gls{fairlab} protocol,
 these outputs are recoded as black-box results and normalized with respect to
 the experimental manifest.
+%recorded. in generale controlla grammatica, typo, sintassi, semantica, evita frasi troppo lunghe (di solito max 2 virgole all'interno della frase)
+
+%seguirei 1 l'ordine che metti sopra nell'elenco quando li presenti "The software systems included in the final evaluation are magnet axiom with magnet.ai module, excire blablabla" e raggrupperei griffeye con axiom perchè sempre di magnet sono
 
 \gls{griffeye} is considered as a commercial media triage and forensic review
 platform evaluated in black-box mode. In the experimental protocol, the tool is
@@ -2543,6 +2579,8 @@ normalized by the evaluation pipeline.
     the observable \textit{Possible weapons} tag. The figure is included for
     methodological traceability and does not represent a functional review or
     endorsement of the product.}
+    %molto bene ma questi sono tutti dettagli implementativi. a questo punto per non buttare quanto hai scritto, io farei così. capitolo 4 metodologia generale dove la descrivi ad alto livello in modo che sia riproducibile per tutti. capitolo 5 dove metti dettagli implementativi come gli script, i csv, le configurazioni dei tool. anche i parametri dei tool sono dettagli implementativi perchè potrebbero cambiare versione, grafica etc e non essere più validi quindi nella metodologia generale dici che hai selezionato la categoria opportuna per la classificazione del tool poi nel dettaglio implementativo inserisci ad esempio questo screen con i dettagli etc
+
     \label{fig:methodology-axiom-magnetai-setup}
 \end{figure}
 
@@ -2557,6 +2595,7 @@ application and not as an integrated module in \texttt{X-Ways Forensics}; the
 latter falls outside the scope of the final experimental protocol.
 
 In the experimental protocol, the intermediate threshold
+%dettaglio implementativo che, come giustamente scritto più avanti, un'altra persona può scegliere 20 o 80 o 60 come ci eravamo detti etc
 \texttt{Distance limit = 50} was adopted as the reference configuration, since
 it represents an operational balance between more restrictive and more
 permissive retrieval criteria. To avoid making the evaluation dependent on a
@@ -2952,6 +2991,7 @@ distribution includes 3\,000 rows related to clean samples, 7\,500 rows related
 to the \gls{ood} set, and 30\,000 rows related to perturbed samples.
 
 In the case of the \gls{ood} evaluation, the 7\,500 prediction rows derive from
+%questi sono già dettagli di risultati
 the evaluation of the 500 out-of-distribution images against the five
 fold-aware checkpoints of the three proxy models, according to the scheme
 500~$\times$~5~$\times$~3~=~7\,500. This count should not be interpreted as an
