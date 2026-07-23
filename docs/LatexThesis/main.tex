@@ -1,29 +1,31 @@
 \documentclass{report}
 % !TeX root = main.tex
 
-% ----------------- Pacchetti ----------------------
+% ----------------- Packages ----------------------
 \usepackage{packages}
 
-% ----------------- Info Tesi ----------------------
+% ----------------- Thesis Information ----------------------
 \title{Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks}
 \author{Lello Molinario}
 \date{25/05/2026}
 
 \begin{document}
 
-% ----------------- Front matter numbering ----------------------
+% ============================================================
+% Front Matter
+% ============================================================
+
 \pagenumbering{roman}
 \pagestyle{frontmatterstyle}
 
-% ----------------- Acronyms and glossary definitions ----------------------
+% ----------------- Acronyms and Glossary Definitions ----------------------
 \input{sections/000_acronyms}
 \DisableBoldFirstAcronyms
 
-% ----------------- Frontespizio ----------------------
+% ----------------- Title Page ----------------------
 \import{./}{title}
 
-
-% ----------------- Copyright / License ----------------------
+% ----------------- Copyright and License ----------------------
 \clearpage
 \thispagestyle{empty}
 
@@ -51,19 +53,18 @@ To view a copy of this license, visit:
 
 \clearpage
 
-
-% ----------------- Front matter text ----------------------
+% ----------------- Acknowledgments ----------------------
 \input{sections/0_acknowledgment}
 
-% Abstract without visible page numbering.
+% ----------------- Abstract ----------------------
+% The abstract is displayed without visible page numbering.
 \clearpage
 \pagestyle{empty}
 \input{sections/00_abstract}
 \clearpage
 \pagestyle{plain}
 
-
-% ----------------- Indice e liste ----------------------
+% ----------------- Contents and Lists ----------------------
 \tableofcontents
 \clearpage
 
@@ -71,44 +72,71 @@ To view a copy of this license, visit:
 \clearpage
 
 \listoftables
+\clearpage
 
-% Print only acronyms actually used in the thesis body.
+% ----------------- Acronym List ----------------------
+% Print only acronyms used in the thesis.
+% Use the following command only when all defined acronyms must be printed:
 % \glsaddall[types=\acronymtype]
 
 \begingroup
 \let\cleardoublepage\clearpage
-\printglossary[type=\acronymtype,title={Acronyms}]
+\printglossary[
+    type=\acronymtype,
+    title={Acronyms}
+]
 \endgroup
 
-% Reset acronym usage so first occurrences in the thesis body are expanded.
-\glsresetall
 \clearpage
 
-
-
-% Reset acronym usage again before the thesis body.
+% Reset acronym usage so that first occurrences in the thesis body are expanded.
 \glsresetall
 \EnableBoldFirstAcronyms
 
-% ----------------- Main matter ----------------------
+% ============================================================
+% Main Matter
+% ============================================================
+
 \cleardoublepage
 \pagenumbering{arabic}
 \pagestyle{mainmatterstyle}
 
-
+% ----------------- Chapter 1: Introduction ----------------------
 \input{sections/01_introduction}
+
+% ----------------- Chapter 2: Background ----------------------
 \input{sections/02_background}
+
+% ----------------- Chapter 3: State of the Art ----------------------
 \input{sections/03_StateoftheArt}
+
+% ----------------- Chapter 4: Methodology ----------------------
 \input{sections/04_methodology}
-\input{sections/05_experiments}
-\input{sections/06_conclusions}
 
-% ----------------- Appendice ----------------------
+% ----------------- Chapter 5: Implementation and Experimental Setup ----------------------
+\input{sections/05_implementation}
+
+% ----------------- Chapter 6: Experimental Results ----------------------
+\input{sections/06_results}
+
+% ----------------- Chapter 7: Conclusions and Future Work ----------------------
+\input{sections/07_conclusions}
+
+% ============================================================
+% Appendices
+% ============================================================
+
 \appendix
-\input{sections/07_appendix}
+\input{sections/08_appendix}
 
-% ----------------- Bibliografia ----------------------
+% ============================================================
+% Bibliography
+% ============================================================
+
 \cleardoublepage
-\printbibliography[heading=bibintoc, title={References}]
+\printbibliography[
+    heading=bibintoc,
+    title={References}
+]
 
 \end{document}
