@@ -22,10 +22,11 @@ A central methodological principle of the thesis is the use of a common frozen
 experimental corpus across two complementary evaluation levels. The first level
 uses fully inspectable classification models under controlled and reproducible
 conditions. The second level applies the same experimental artifacts to
-professional \gls{ai}-based tools evaluated as black-box systems. This parallel
-design enables a direct comparison between experimentally controlled model
-behavior and the observable operational behavior of proprietary software,
-without assuming access to its internal architecture or decision process.
+selected \gls{ai}-based software systems evaluated as black-box or
+near-black-box components. This parallel design enables a direct comparison
+between experimentally controlled model behavior and the observable operational
+behavior of external software systems, without assuming access to their
+internal architectures or decision processes.
 
 The chapter first introduces the overall \gls{fairlab} framework and the
 experimental assumptions underlying the case study. It then describes the
@@ -38,9 +39,9 @@ traceability and reproducibility.
 
 Implementation-specific choices, including concrete data structures, scripts,
 model architectures, parameter values, software versions, and tool
-configurations, are reported in the implementation and experimental setup
-section of Chapter~\ref{chap:results}. Quantitative outcomes and their
-interpretation are presented separately in the results sections of that chapter.
+configurations, are reported in Chapter~\ref{chap:implementation}.
+Quantitative outcomes and their interpretation are presented separately in
+Chapter~\ref{chap:results}.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -344,218 +345,8 @@ operational definitions.
 \centering
 \caption{Operational definitions adopted in the experimental protocol}
 \label{tab:methodology-operational-classes}
-\begin{tabularx}{\textwidth}{@{}L{3.0cm}L{3.6cm}X@{}}
-\toprule
-\textbf{Label} &
-\textbf{Role in the protocol} &
-\textbf{Operational assignment criterion} \\
-\midrule
-
-\texttt{weapon}
-&
-Positive class of the binary task
-&
-Images containing clearly recognizable and realistic firearm-related visual
-content. Representative examples include pistols, rifles, submachine guns, and
-shotguns. The target object must be sufficiently visible and reliably
-attributable to the experimental category. Marginal, strongly occluded,
-excessively ambiguous, synthetic, toy-like, replica-like, or airsoft-like
-objects are excluded from this class. \\
-
-\texttt{non\_weapon}
-&
-In-domain negative class of the binary task
-&
-Realistic, usable, and visually interpretable images that do not contain an
-object belonging to the experimental target category. Examples may include
-people, environments, vehicles, ordinary objects, and indoor or outdoor scenes.
-Borderline, synthetic, or anomalous content is excluded. Images containing
-knives, swords, replicas, airsoft weapons, toy weapons, videogame weapons, or
-rendered weapon-like objects are also excluded because they may introduce
-semantic ambiguity. \\
-
-\texttt{ood}
-&
-Separate branch for distributional evaluation
-&
-Borderline, anomalous, or non-representative images that do not constitute clean
-positive or negative samples. Examples include knives, swords, replicas, toys,
-airsoft weapons, videogame weapons, \gls{cgi} content, synthetic images,
-generated images, tanks, missiles, explosions, and war scenes. The branch also
-includes strongly degraded, unusual, or semantically ambiguous images. Such
-content may be contextually related to weapons or violence without constituting
-a valid sample for the binary task. \\
-
-\texttt{exclude}
-&
-Review-only exclusion label
-&
-Images that are corrupted, unreadable, unusable, non-interpretable, or
-semantically irrelevant to the experimental protocol. This label is used during
-human review to document the removal of unsuitable samples. Excluded images do
-not contribute to the frozen dataset or to any subsequent evaluation branch. \\
-
-\bottomrule
-\end{tabularx}
-\end{table}
-
-Figure~\ref{fig:methodology-class-examples} presents representative examples of
-the three analytical categories. The examples are illustrative and do not
-exhaust the internal variability of the corresponding groups.
-
-\begin{figure}[H]
-\centering
-
-\begin{minipage}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[
-        width=\textwidth,
-        height=4.0cm,
-        keepaspectratio
-    ]{images/Arma}
-    \vspace{1mm}
-
-    \textbf{\texttt{weapon}}\\
-    \footnotesize
-    Recognizable firearm-related content consistent with the binary target class
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[
-        width=\textwidth,
-        height=4.0cm,
-        keepaspectratio
-    ]{images/Non_Arma}
-    \vspace{1mm}
-
-    \textbf{\texttt{non\_weapon}}\\
-    \footnotesize
-    Realistic negative content containing no object from the target category
-\end{minipage}
-\hfill
-\begin{minipage}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[
-        width=\textwidth,
-        height=4.0cm,
-        keepaspectratio
-    ]{images/ood}
-    \vspace{1mm}
-
-    \textbf{\texttt{ood}}\\
-    \footnotesize
-    Borderline or distributionally different content kept outside the binary task
-\end{minipage}
-
-\caption[Representative operational class examples]{Representative operational
-class examples. The images illustrate the \texttt{weapon},
-\texttt{non\_weapon}, and \texttt{ood} categories adopted during
-human-in-the-loop review}
-\label{fig:methodology-class-examples}
-\end{figure}
-
-The \texttt{exclude} label does not represent an additional analytical category.
-It functions exclusively as a quality-control disposition during
-human-in-the-loop review. It enables unsuitable samples to be documented and
-kept separate from the images included in the frozen experimental corpus.
-
-The inclusion of an explicit \gls{ood} branch addresses a distinct
-methodological requirement. Operational classification systems are not exposed
-only to clean images that are semantically aligned with the expected classes.
-They may also process ambiguous, degraded, synthetic, irrelevant, or
-distributionally different content. Research on \gls{ood} detection has shown
-that classifiers may produce high-confidence predictions for inputs outside
-their training distribution
-\cite{hendrycks2017baseline,fort2021exploring}. It is therefore necessary to
-distinguish errors involving known classes from predictions produced for
-samples that should not be treated as ordinary positive or negative instances.
-
-The \gls{ood} branch must not be interpreted as a homogeneous semantic class or
-as a subclass of \texttt{non\_weapon}. It is a methodological collection of
-distributionally different and borderline cases used to assess whether an
-automated system forces anomalous inputs into the known operational classes.
-For this reason, \gls{ood} samples remain separate from the binary subset. They
-are not subjected to the adversarial attacks or anti-forensic transformations
-generated for the \texttt{weapon}/\texttt{non\_weapon} task.
-
-The methodology further distinguishes among classification performance,
-robustness, and operational evaluation. Classification performance concerns the
-ability of a system to assign the expected label to an image. Robustness
-concerns the stability of that behavior when the input is degraded, altered, or
-deliberately manipulated. Operational evaluation concerns the consequences of
-the observed output for the forensic workflow.
-
-These consequences include false negatives that may prevent relevant images
-from being prioritized, false positives that increase the analytical workload,
-and inappropriate in-domain classifications of \gls{ood} samples. This
-distinction prevents performance on clean data from being interpreted as a
-sufficient guarantee of reliability under investigative conditions.
-
-Finally, the protocol adopts a documented human-in-the-loop approach. Manual
-review is not treated as an external or residual component of the experiment.
-It is an integral part of dataset construction and validation. In a forensic
-context, class assignment cannot depend exclusively on automated labels or on
-the original organization of the source material. Inclusion, exclusion, and
-class-assignment criteria must be explicit, traceable, and consistent with the
-operational task. This approach preserves both the final selection and the
-reasoning rules used to construct the frozen experimental corpus.
-
-
-% ─────────────────────────────────────────────────────────────────────────────
-\section{Research design and experimental assumptions}
-\label{sec:methodology-research-design}
-% ─────────────────────────────────────────────────────────────────────────────
-
-The experimental design adopts forensic visual triage as its reference
-scenario. In this setting, an automated classification system supports the
-analyst in the preliminary identification and prioritization of potentially
-relevant images.
-
-The case study is based on a binary classification task and a separate
-\gls{ood} evaluation branch. The binary task distinguishes between the
-operational labels \texttt{weapon} and \texttt{non\_weapon}. The \texttt{ood}
-label identifies samples reserved for a separate analysis of distributional
-mismatch. These labels must not be interpreted as legal qualifications of the
-depicted content or as universal semantic categories. They are operational
-definitions established specifically for the experimental protocol adopted in
-this thesis.
-
-The study does not attempt to cover the entire domain of weapon detection.
-Instead, it defines a controlled, firearm-related case study that is
-operationally relevant to the evaluation of automated visual triage systems.
-This restricted scope provides a clear target category while preserving
-sufficient visual variability for robustness assessment.
-
-Within the binary task, \texttt{weapon} represents the positive class. It
-includes images in which a clearly recognizable object belonging to the
-firearm-related target category is visible. The \texttt{non\_weapon} class
-represents the in-domain negative class. It includes realistic and interpretable
-images that do not contain the target object while remaining compatible with
-the visual domain of the experimental collection.
-
-The \gls{ood} branch includes images that should not be treated as ordinary
-positive or negative instances. These samples may be ambiguous, anomalous,
-synthetic, degraded, borderline, or drawn from a different visual distribution.
-The \gls{ood} branch is therefore not modeled as a third supervised class within
-the binary task.
-
-In the forensic triage scenario considered in this thesis, false negatives on
-the \texttt{weapon} class are particularly critical. They may reduce the
-likelihood that potentially relevant material is selected for detailed human
-review. False positives also have operational consequences because they may
-increase the number of irrelevant images requiring manual examination.
-
-The class-assignment criteria were formalized before the experimental corpus was
-frozen. The same criteria governed human-in-the-loop validation, sample
-selection, and the documentation of inclusion and exclusion decisions.
-Table~\ref{tab:methodology-operational-classes} summarizes the resulting
-operational definitions.
-
-\begin{table}[H]
-\centering
-\caption{Operational definitions adopted in the experimental protocol}
-\label{tab:methodology-operational-classes}
+\footnotesize
+\renewcommand{\arraystretch}{1.05}
 \begin{tabularx}{\textwidth}{@{}L{3.0cm}L{3.6cm}X@{}}
 \toprule
 \textbf{Label} &
@@ -1307,8 +1098,7 @@ training and evaluation. Relevant information includes the architecture,
 initialization strategy, preprocessing procedure, class mapping, optimization
 method, training configuration, and the identity of the resulting checkpoints.
 The concrete architectures and configurations adopted in this thesis are
-reported in the implementation and experimental setup section of
-Chapter~\ref{chap:results}.
+reported in Chapter~\ref{chap:implementation}.
 
 Proxy-model training follows the fold-aware strategy introduced in
 Section~\ref{sec:methodology-split-generation}. For each target fold, the
@@ -1381,7 +1171,7 @@ training data, calibration procedure, or decision logic.
 This separation enables the methodology to combine experimental control with
 operational relevance. Proxy models explain how known architectures respond
 under reproducible conditions, while black-box evaluation measures how
-professional software systems behave when exposed to the same clean,
+operationally relevant software systems behave when exposed to the same clean,
 adversarial, anti-forensic, and \gls{ood} artifacts.
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -1546,8 +1336,7 @@ This distinction enables computational sustainability and operational
 plausibility to be considered without introducing timing measurements that were
 not collected systematically. The concrete attacks, transformations, parameter
 values, and execution configurations adopted in this thesis are reported in
-the implementation and experimental setup section of
-Chapter~\ref{chap:results}.
+Chapter~\ref{chap:implementation}.
 
 Adversarial and anti-forensic perturbations are generated exclusively from the
 binary in-domain subset. The clean \gls{ood} set remains outside this process
@@ -1815,9 +1604,8 @@ conditions:
 \end{enumerate}
 
 The specific attack algorithms, model configurations, parameter values, output
-formats, and traceability artifacts adopted in this thesis are reported in the
-implementation and experimental setup section of
-Chapter~\ref{chap:results}.
+formats, and traceability artifacts adopted in this thesis are reported in
+Chapter~\ref{chap:implementation}.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-forensic evaluation methodology}
@@ -1853,8 +1641,8 @@ The methodology considers transformation families that affect complementary
 properties of the image artifact. These include lossy re-encoding, spatial
 resampling, blurring, tonal redistribution, and contrast adjustment. The
 specific algorithms and parameter values used to instantiate these families
-are implementation choices and are reported in the implementation and
-experimental setup section of Chapter~\ref{chap:results}.
+are implementation choices documented in
+Chapter~\ref{chap:implementation}.
 
 Table~\ref{tab:methodology-anti-forensic-transformations} summarizes the
 methodological roles of the principal transformation families.
@@ -1944,7 +1732,8 @@ the common metrics and comparison framework.
 The generated artifacts are evaluated on both the proxy classification models
 and the selected black-box software systems. This common evaluation supports
 the comparison of controlled model behavior with the operational response of
-professional \gls{ai}-based tools under the same anti-forensic conditions.
+selected \gls{ai}-based software systems under the same anti-forensic
+conditions.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic evaluation bundle and blind-input design}
@@ -2086,9 +1875,9 @@ associated with the corresponding control record.
 
 These controls establish the technical validity of the evaluation corpus but do
 not constitute evidence of classification performance. Quantitative bundle
-composition and integrity outcomes belong to the implementation and
-experimental setup, whereas the observed software predictions belong to the
-results analysis.
+composition and integrity outcomes are documented in
+Chapter~\ref{chap:implementation}, whereas the observed software predictions
+are analyzed in Chapter~\ref{chap:results}.
 
 The selected software systems are treated as black-box or near-black-box
 components. The methodology does not assume access to their internal
@@ -2108,168 +1897,6 @@ during normalization, and comparability during evaluation, without presenting
 the results as a general certification of the evaluated products
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
-
-% ─────────────────────────────────────────────────────────────────────────────
-\section{Forensic evaluation bundle and blind-input design}
-\label{sec:methodology-forensic-evaluation-bundle}
-% ─────────────────────────────────────────────────────────────────────────────
-
-The operational evaluation of external software systems requires the
-experimental artifacts to be transferred without exposing information that
-could reveal their class, provenance, perturbation condition, or expected
-ground truth. For this purpose, the \gls{fairlab} protocol introduces a
-\textit{forensic evaluation bundle}: a controlled and traceable collection of
-clean, \gls{ood}, adversarial, and anti-forensic artifacts prepared for
-black-box evaluation.
-
-The bundle does not alter the experimental ground truth or the generated
-artifacts. Its methodological function is to separate the inputs submitted to
-the evaluated software from the information required for subsequent
-normalization, verification, and analysis.
-
-This separation supports two complementary views of the same experimental
-corpus:
-
-\begin{enumerate}
-    \item a \textit{blind input view}, containing only the files submitted to
-    the evaluated software;
-
-    \item a \textit{control and audit view}, preserving the associations among
-    each submitted file, its source sample, operational class, experimental
-    family, perturbation condition, provenance, and integrity information.
-\end{enumerate}
-
-The blind input view must avoid semantic information in filenames, directory
-names, and paths. In particular, the submitted artifacts must not expose the
-operational class, fold assignment, attack family, transformation type, proxy
-model, or any other experimental descriptor.
-
-This requirement reduces the risk that either the software or the analyst may
-infer the nature of a sample from its organization rather than from its actual
-content. Neutral identifiers should therefore be assigned to the submitted
-files, while the mapping to the experimental ground truth must remain available
-only within the separate control records.
-
-The control and audit view must preserve sufficient information to reconstruct
-the identity and experimental role of every artifact. Relevant information
-includes:
-
-\begin{itemize}
-    \item a neutral bundle identifier;
-    \item the corresponding source-image identifier;
-    \item the reference operational label;
-    \item the experimental family;
-    \item the attack or transformation condition, when applicable;
-    \item the fold or evaluation partition;
-    \item provenance information;
-    \item integrity information;
-    \item the path or identifier used in the blind input view.
-\end{itemize}
-
-The methodology does not prescribe a specific directory structure, manifest
-format, database technology, or naming convention. The adopted implementation
-must nevertheless ensure that the blind software input remains logically and
-physically separated from the experimental metadata.
-
-Table~\ref{tab:methodology-forensic-bundle-layout} summarizes the methodological
-components of the forensic evaluation bundle.
-
-\begin{table}[H]
-\centering
-\caption{Methodological components of the forensic evaluation bundle}
-\label{tab:methodology-forensic-bundle-layout}
-\begin{tabularx}{\textwidth}{@{}L{4.0cm}X@{}}
-\toprule
-\textbf{Component} &
-\textbf{Methodological function} \\
-\midrule
-
-Blind input view
-&
-Contains only neutrally identified artifacts submitted to the evaluated
-software. It must not expose classes, perturbation families, folds, model names,
-or other experimental descriptors. \\
-
-Control metadata
-&
-Preserve the mapping between each blind identifier and the corresponding source
-sample, ground truth, experimental condition, provenance, and integrity
-information. \\
-
-Structured audit view
-&
-Provides an internal organization of the experimental artifacts for technical
-verification and inspection. It is not submitted to the evaluated software. \\
-
-Integrity and consistency records
-&
-Document artifact identity, uniqueness, completeness, and correspondence with
-the source records produced during the preceding experimental phases. \\
-
-Embedded-information audit
-&
-Examines whether image files contain metadata or descriptors that could reveal
-experimental information not removed by neutral filenames and paths. \\
-
-\bottomrule
-\end{tabularx}
-\end{table}
-
-Only the blind input view is submitted to the evaluated software. Control
-metadata and structured audit records remain external to the import process and
-are used only after the software outputs have been exported.
-
-This separation also prevents the evaluated systems from receiving ground-truth
-information through the organization of the experimental corpus. The resulting
-software outputs can therefore be aligned with the control records only during
-the normalization and analysis phases.
-
-The blindness of the bundle primarily concerns information channels directly
-controlled by the experimental pipeline, including filenames, paths, directory
-structure, and accompanying metadata files. However, image files may also
-contain embedded information related to acquisition devices, processing
-software, provenance, or content descriptors
-\cite{xiang2021forensicmetadata,lee2023forensicmethodology,zheng2023exif}.
-
-For this reason, the bundle-construction process should include an audit of
-embedded metadata and other machine-readable information that could reveal the
-experimental condition. The audit should identify potentially informative
-fields without modifying the evaluated artifacts unless metadata removal is
-explicitly included in the research design.
-
-The presence of embedded metadata must be treated as a controlled limitation of
-blindness rather than as a robustness result. Any relationship between such
-metadata and the observable outputs of the evaluated systems must be analyzed
-separately as a sensitivity condition.
-
-The bundle must include all experimental families required by the protocol and
-must preserve their expected composition. Completeness and uniqueness checks
-should verify that no required artifact is missing, duplicated, or incorrectly
-associated with the corresponding control record.
-
-These controls establish the technical validity of the evaluation corpus but do
-not constitute evidence of classification performance. Quantitative bundle
-composition and integrity outcomes belong to the implementation and
-experimental setup, whereas the observed software predictions belong to the
-results analysis.
-
-The selected software systems are treated as black-box or near-black-box
-components. The methodology does not assume access to their internal
-architectures, training data, thresholds, confidence calibration, or
-proprietary decision logic. Evaluation is based exclusively on the artifacts
-submitted to the systems and on the outputs that can be observed or exported.
-
-After processing, the software outputs are normalized against the control
-metadata of the bundle. This normalization reconstructs the relationship
-between each blind identifier and its experimental ground truth, enabling
-consistent metric computation across heterogeneous software products.
-
-The forensic evaluation bundle therefore represents the controlled interface
-between the reproducible experimental pipeline and external software
-environments. It preserves operational blindness during import, traceability
-during normalization, and comparability during evaluation, without presenting
-the results as a general certification of the evaluated products
-\cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Black-box software evaluation protocol}
@@ -2298,8 +1925,8 @@ software systems.
 This design creates two complementary evaluation levels. Proxy models provide
 an inspectable environment for studying model behavior, attack generation, and
 transferability. Black-box software evaluation instead measures the behavior of
-professional or operationally relevant systems whose internal decision process
-is not fully accessible.
+operationally relevant systems whose internal decision processes are not fully
+accessible.
 
 The evaluation begins with the blind input view of the forensic evaluation
 bundle described in
@@ -2365,9 +1992,11 @@ positive or negative prediction. The protocol therefore preserves an explicit
 unknown or unmapped state for missing, ambiguous, unsupported, or
 non-interpretable outputs.
 
-This distinction is essential because conflating unknown outputs with negative
-predictions may artificially increase false-negative counts. Conversely,
-treating every semantically related output as a positive detection may inflate
+This distinction is essential because unknown outputs and explicit negative
+predictions represent different observable states. They must remain separate in
+the normalized records, even when both are treated as missed detections in the
+operational-risk analysis of \texttt{weapon} samples. Conversely, treating
+every semantically related output as a positive detection may inflate
 false-positive counts. The normalization criteria must therefore remain
 conservative, explicit, and traceable.
 
@@ -2408,8 +2037,9 @@ relationship with the target class. \\
 
 Missing, unsupported, or non-interpretable output
 &
-Recorded as unknown or unmapped and excluded from automatic positive or negative
-assignment. \\
+Preserved as unknown or unmapped in the normalized records. For
+\texttt{weapon} samples, this state contributes to the operational
+missed-detection count while remaining separately reportable. \\
 
 \bottomrule
 \end{tabularx}
@@ -2425,9 +2055,8 @@ affect detection coverage and false-positive behavior.
 The methodology does not prescribe specific products, versions, graphical
 interfaces, category names, semantic prompts, or threshold values. Such
 elements may change across software releases and operational environments. The
-concrete systems and configurations used in this thesis are documented in the
-implementation and experimental setup section of
-Chapter~\ref{chap:results}.
+concrete systems and configurations used in this thesis are documented in
+Chapter~\ref{chap:implementation}.
 
 For every evaluated system, the protocol follows the same general workflow:
 
@@ -2673,7 +2302,7 @@ defined as:
 Recall for the positive \texttt{weapon} class is defined as:
 
 \begin{equation}
-\mathrm{Recall}_{\texttt{weapon}}
+\mathrm{Recall}_{\text{\texttt{weapon}}}
 =
 \frac{TP}{TP + FN}
 \end{equation}
@@ -2681,7 +2310,7 @@ Recall for the positive \texttt{weapon} class is defined as:
 The corresponding false-negative rate is:
 
 \begin{equation}
-\mathrm{FNR}_{\texttt{weapon}}
+\mathrm{FNR}_{\text{\texttt{weapon}}}
 =
 \frac{FN}{TP + FN}
 \end{equation}
@@ -2723,11 +2352,11 @@ Precision and F1-score are defined as:
 \frac{
 \mathrm{Precision}
 \cdot
-\mathrm{Recall}_{\texttt{weapon}}
+\mathrm{Recall}_{\text{\texttt{weapon}}}
 }{
 \mathrm{Precision}
 +
-\mathrm{Recall}_{\texttt{weapon}}
+\mathrm{Recall}_{\text{\texttt{weapon}}}
 }
 \end{equation}
 
@@ -2755,18 +2384,18 @@ number of clean samples that were initially classified correctly.
 Particular attention is given to the transition:
 
 \begin{equation}
-\texttt{weapon}
+\text{\texttt{weapon}}
 \rightarrow
-\texttt{non\_weapon}
+\text{\texttt{non\_weapon}}
 \end{equation}
 
 because it represents the loss of a positive detection for investigatively
 relevant content. The reverse transition:
 
 \begin{equation}
-\texttt{non\_weapon}
+\text{\texttt{non\_weapon}}
 \rightarrow
-\texttt{weapon}
+\text{\texttt{weapon}}
 \end{equation}
 
 is also measured because it may increase the number of irrelevant artifacts
@@ -2802,12 +2431,12 @@ to the known operational classes. The principal indicators include:
 The \gls{ood} weapon flag rate is defined as:
 
 \begin{equation}
-\mathrm{WeaponFlagRate}_{\gls{ood}}
+\mathrm{WeaponFlagRate}_{\mathrm{OOD}}
 =
 \frac{
-N_{\gls{ood}\rightarrow\texttt{weapon}}
+N_{\mathrm{OOD}\rightarrow\text{\texttt{weapon}}}
 }{
-N_{\gls{ood}}
+N_{\mathrm{OOD}}
 }
 \end{equation}
 
@@ -2824,9 +2453,11 @@ absence of target detection, and unknown or unmapped output.
 For samples whose reference class is \texttt{weapon}, any outcome that fails to
 surface the target category constitutes an operational miss. Such outcomes may
 include an explicit negative result, absence of detection, an uncategorized
-state, or an unknown output. Unknown and unmapped outcomes are nevertheless
-reported separately so that they are not silently transformed into ordinary
-negative classifications.
+state, or an unknown or unmapped output. For operational-risk analysis, these
+outcomes are included in the missed-detection count. Unknown and unmapped
+outputs are also reported separately through the corresponding coverage metric,
+so that they remain distinguishable from explicit negative classifications in
+the normalized records.
 
 For samples whose reference class is \texttt{non\_weapon}, a target-related
 output constitutes a false positive. The corresponding false-positive rate
@@ -3524,4 +3155,6 @@ repeated, whereas artifact-level traceability makes it possible to verify which
 specific inputs, models, software configurations, and derived files contributed
 to each reported result.
 
-
+The concrete implementation of these controls is documented in
+Chapter~\ref{chap:implementation}, whereas the corresponding experimental
+outcomes are reported in Chapter~\ref{chap:results}.
