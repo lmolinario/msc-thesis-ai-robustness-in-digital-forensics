@@ -26,6 +26,16 @@ Chapter~\ref{chap:results}. This separation prevents implementation choices,
 software configurations, and data-management procedures from being conflated
 with the measured robustness of the evaluated systems.
 
+A central implementation principle is that the two evaluation levels operate
+on the same frozen experimental corpus. The 1\,000 clean binary images and the
+500 clean \gls{ood} images define the common source population, while the
+10\,000 adversarial and anti-forensic variants are derived exclusively from
+the binary subset. The proxy models process the manifest-linked experimental
+artifacts, whereas the selected black-box software systems receive
+byte-identical anonymized copies through the blind forensic evaluation bundle.
+The equivalence between these two views is verified through \gls{sha256}
+digests. Consequently, the parallel comparison is based on the same samples
+and experimental conditions rather than on independently assembled datasets.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Experimental Workflow and Implementation Environment}
@@ -549,6 +559,13 @@ locations, and final consistency checks. \\
 \end{tabularx}
 \end{table}
 
+The frozen working database contained 1\,500 reviewed records and 13\,821
+records that remained pending. Therefore, the complete technically prepared
+pool was not manually reviewed exhaustively. Human assessment continued only
+until the predefined targets of 500 \texttt{weapon}, 500
+\texttt{non\_weapon}, and 500 \texttt{ood} images had been reached and
+subsequently verified through the selection-review mode.
+
 The implemented review process therefore separates three distinct elements:
 technical file validity, semantic suitability for the experimental task, and
 final inclusion in the frozen corpus. This distinction ensures that neither
@@ -632,11 +649,12 @@ official binary subset:
 
 The binary subset contains exactly 1\,000 images, balanced between 500
 \texttt{weapon} and 500 \texttt{non\_weapon} samples. It provides the common
-source population for clean fold generation, proxy-model training and
-evaluation, adversarial perturbation generation, and anti-forensic
-transformation generation. The 500 \texttt{ood} samples are excluded from
-these procedures and retained as clean inputs for the separate
-out-of-distribution evaluation.
+source population for clean-fold construction, proxy-model training, clean
+binary evaluation, and adversarial and anti-forensic perturbation generation.
+The 500 \gls{ood} samples are excluded from proxy-model training and
+perturbation generation, but are retained as clean inputs and evaluated
+separately by both the proxy architectures and the selected black-box software
+systems.
 
 The distinction between the two manifests is summarized in
 Table~\ref{tab:implementation-frozen-manifests}.
@@ -1616,17 +1634,17 @@ and creation timestamp.
 
 For model-dependent attacks, the manifest additionally stores the original and
 adversarial predictions, confidence values, correctness states, perturbation
-norms, convergence information, and an \texttt{attack\_success} field. Attack
-success is defined operationally as a perturbed prediction that differs from
-the manually assigned true label. These values are recorded during generation,
-but their quantitative interpretation is reserved for
-Chapter~\ref{chap:results}.
+norms, convergence information, and a generation-time
+\texttt{attack\_success} field. This field is set when the perturbed prediction
+differs from the manually assigned true label.
 
-The generation summaries confirm that every frozen condition produced the
-expected 1\,000 outputs, with 200 samples per fold and 500 samples per binary
-label. They also verify uniqueness of the generated identifiers and perturbed
-\gls{sha256} values. Existing attack directories and run-specific manifests
-are not overwritten unless the explicit \texttt{--force} option is supplied.
+The generation-time indicator must be distinguished from the comparative
+attack success rate computed by the evaluation pipeline. The latter considers
+only samples that were correctly classified in the corresponding clean
+condition and measures the proportion of those samples rendered incorrect by
+the perturbation. Generation-time values are retained for traceability, whereas
+their comparative quantitative interpretation is reported in
+Chapter~\ref{chap:results}.
 
 The corresponding implementation of the model-agnostic anti-forensic
 transformations is described in
@@ -3186,10 +3204,13 @@ however, no confidence value is fabricated for tools that do not expose one.
 
 Unmatched records are excluded from the canonical prediction table because
 they do not belong to the official forensic evaluation bundle. They remain
-documented through the export audit and unmatched-record artifacts. In the
-frozen normalization run, 69\,329 rows were present before final
-consolidation, including 329 unmatched Cellebrite report rows. Excluding these
-non-bundle records produced exactly 69\,000 matched normalized decisions:
+documented through the export audit and unmatched-record artifacts.
+
+After tool-specific parsing and the preliminary exclusion of the 553
+non-bundle Griffeye records, the normalization workspace contained 69\,329
+candidate records. This population comprised the expected 69\,000 bundle-level
+decisions and 329 unmatched Cellebrite report records. Excluding the latter
+produced exactly 69\,000 matched normalized decisions:
 
 \begin{equation}
     69\,329
@@ -3205,21 +3226,34 @@ uninterpretable after the frozen mappings were applied.
 
 \paragraph{Audit and output artifacts.}
 
-The complete local normalization outputs include:
-
-\begin{center}
-\codepath{evaluation/forensic_tools/normalized_predictions.csv}
-\end{center}
-
-and the corresponding per-configuration files:
+The normalization stage maintains two distinct representations. The controlled
+normalization workspace preserves the complete matching, provenance, audit,
+and tool-specific fields required to reconstruct the transformation from raw
+software exports to normalized decisions. Its per-configuration outputs follow
+the pattern:
 
 \begin{center}
 \codepath{evaluation/forensic_tools/<tool_name>_normalized_predictions.csv}
 \end{center}
 
 Unmatched export records are maintained separately from the canonical matched
-prediction table. The publicly retained schemas documenting the
-prediction-level formats are:
+population.
+
+The public artifact retains a reduced and sanitized canonical representation
+containing the fields required to audit the observable decision mappings and
+reproduce the reported black-box software metrics. The canonical public table
+is:
+
+\begin{center}
+\codepath{evaluation/forensic_tools/normalized_predictions.csv}
+\end{center}
+
+It contains all 69\,000 normalized bundle-level decisions and is reconstructed
+from the four validated sanitized public extracts. It excludes complete raw
+exports, local execution paths, unrelated forensic fields, and controlled case
+metadata.
+
+The publicly retained schemas documenting the prediction-level formats are:
 
 \begin{center}
 \codepath{evaluation/forensic_tools/normalized_predictions.schema.csv}
@@ -3231,8 +3265,7 @@ and:
 \codepath{evaluation/forensic_tools/unmatched_predictions.schema.csv}
 \end{center}
 
-The normalization stage also produces the audit artifacts listed in
-Table~\ref{tab:implementation-normalization-artifacts}.
+
 
 \begin{table}[H]
 \centering
@@ -3275,17 +3308,10 @@ controlled local prediction table. \\
 \end{tabularx}
 \end{table}
 
-The complete raw-export-derived normalization workspace remains controlled,
-whereas the public branch retains a canonical sanitized prediction table
-containing all 69\,000 normalized decisions. This table is reconstructed from
-the four validated public extracts and excludes raw-export paths, local
-execution paths, unrelated forensic fields, and complete proprietary export
-content. The public
-artifact instead retains sanitized per-tool extracts containing the
-decision-relevant observable fields and anonymized bundle identifiers.
+
 
 The equivalence validation confirms that the sanitized extracts preserve all
-69\,000 normalized decisions and reproduce all 186 frozen commercial-tool
+69\,000 normalized decisions and reproduce all 186 frozen black-box software
 metric rows without differences. Their cryptographic hashes are recorded in
 the validation artifact.
 
@@ -3888,6 +3914,14 @@ Pseudonymous identifier \texttt{reviewer\_01} \\
 \end{tabularx}
 \end{table}
 
+The identifiers \texttt{chapter5\_core} and
+\codepath{explainability/manifests/chapter5/} are retained as historical
+artifact names created before the final reorganization of the thesis chapters.
+They identify the frozen implementation records and do not indicate that the
+corresponding qualitative results are reported in the present chapter. The
+resulting attribution analyses are discussed in
+Section~\ref{sec:results-explainability}.
+
 \paragraph{Case-selection procedure.}
 
 The \texttt{chapter5\_core} strategy organizes candidate predictions into five
@@ -4080,25 +4114,18 @@ perturbed cases. The historical figures must therefore be interpreted as
 qualitative diagnostic visualizations rather than as attributions for which a
 strict numerical convergence threshold has been demonstrated.
 
-The hardened entry point subsequently introduced adaptive convergence
-diagnostics. It begins from the requested number of steps and doubles the
-integration resolution until either:
+The hardened entry point additionally supports adaptive convergence diagnostics.
+Starting from the requested number of integration steps, the procedure can
+double the integration resolution until the normalized convergence delta is at
+most 0.05 or the maximum of 256 steps is reached. A regenerated case is marked
+as \texttt{passed} only when the threshold is satisfied; otherwise, the state
+\texttt{threshold\_not\_met} is retained.
 
-\begin{itemize}
-    \item the normalized convergence delta is at most 0.05; or
-    \item the maximum of 256 integration steps is reached.
-\end{itemize}
-
-The normalized convergence delta is computed relative to the difference between
-the selected model output at the input and at the baseline. A regenerated case
-is marked \texttt{passed} only when the threshold is satisfied. When the
-maximum number of steps is reached without satisfying the threshold, the
-explicit state \texttt{threshold\_not\_met} is retained.
-
-Adaptive regeneration of the historical thesis selection is recorded as
-pending in the frozen public artifact. Accordingly, the adaptive mechanism is
-documented as a reproducibility and validation control, but it is not used to
-retroactively claim convergence for the 32-step historical assets.
+This adaptive functionality was introduced after the historical 32-step assets
+had been generated and was not used to produce the figures analyzed in this
+thesis. It is therefore documented only as an available validation control. No
+strict convergence claim is made for the retained historical assets, which are
+used exclusively for qualitative diagnostic interpretation.
 
 The canonical \gls{xai} metadata and provenance artifacts are listed in
 Table~\ref{tab:implementation-xai-artifacts}.
@@ -4278,9 +4305,13 @@ Per-file hashes are recorded at the main transformation boundaries, including:
     \item adversarial and anti-forensic outputs;
     \item blind and structured bundle copies;
     \item proxy-model checkpoints;
-    \item selected explainability inputs and outputs;
+    \item selected explainability inputs and the corresponding fold-specific checkpoints;
     \item sanitized commercial-tool extracts and canonical metric artifacts.
 \end{itemize}
+
+Thesis-level explainability outputs are validated through their canonical
+manifest paths, selection metadata, and reporting-asset audits rather than
+being treated as independently hash-authenticated model artifacts.
 
 Where an artifact is copied between stages, the output hash is recomputed and
 compared with the authoritative value from the originating manifest. A mismatch
@@ -4604,4 +4635,5 @@ information required to audit the evaluation within them.
 
 Chapter~\ref{chap:results} presents the quantitative outcomes obtained from the
 frozen implementation and analyzes their implications for the operational
-robustness of the evaluated proxy models and commercial \gls{ai}-based tools.
+robustness of the evaluated proxy models and selected black-box
+\gls{ai}-based software systems.
