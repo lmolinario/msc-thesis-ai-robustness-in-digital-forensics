@@ -3299,10 +3299,852 @@ Section~\ref{subsec:implementation-metrics}.
 
 \subsection{Metric Computation and Evaluation Artifacts}
 \label{subsec:implementation-metrics}
+The proxy-model and commercial-tool outputs were evaluated through two
+separate computational pipelines. This separation preserves the distinction
+between fully accessible model predictions and the operational decisions
+reconstructed from black-box software exports.
+
+Proxy-model predictions and metrics were generated through:
+
+\begin{center}
+\codepath{evaluation/scripts/15_evaluate_proxy_models.py}
+\end{center}
+
+Commercial-tool metrics were generated as part of the normalization pipeline
+implemented through:
+
+\begin{center}
+\codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}
+\end{center}
+
+Although the two pipelines process different observable information, they use
+the same positive and negative classes:
+
+\begin{equation}
+    \text{positive class} = \texttt{weapon},
+    \qquad
+    \text{negative class} = \texttt{non\_weapon}.
+\end{equation}
+
+The \gls{ood} branch is handled separately and does not contribute to the
+binary accuracy, precision, recall, F1-score, \gls{fpr}, or \gls{fnr}
+denominators.
+
+\paragraph{Proxy-model prediction generation.}
+
+The proxy evaluation pipeline consumes:
+
+\begin{itemize}
+    \item the clean-fold manifest;
+    \item the separate \gls{ood} manifest;
+    \item the adversarial-generation manifests;
+    \item the anti-forensic transformation manifest;
+    \item the 15 fold-specific proxy-model checkpoints.
+\end{itemize}
+
+Each clean or perturbed binary sample is evaluated by the checkpoint associated
+with its assigned fold. This ensures that the model used for prediction was
+trained while excluding the fold containing the corresponding source image.
+
+For each evaluated sample, the implementation records:
+
+\begin{itemize}
+    \item the evaluated architecture and fold-specific checkpoint;
+    \item the clean, \gls{ood}, or perturbed sample type;
+    \item the perturbation family, condition, and target model;
+    \item the original and generated image identifiers;
+    \item the assigned fold and operational label;
+    \item the image path and actual \gls{sha256} and \gls{md5} values;
+    \item the predicted class;
+    \item the maximum predicted-class probability;
+    \item the probabilities assigned to \texttt{weapon} and
+    \texttt{non\_weapon};
+    \item the probability assigned to the true label for binary samples;
+    \item the correctness state and any evaluation error.
+\end{itemize}
+
+The complete prediction-level artifact is:
+
+\begin{center}
+\codepath{evaluation/proxy_models/proxy_model_predictions.csv}
+\end{center}
+
+Before inference, every file is opened through the same EXIF-aware RGB loading
+procedure used elsewhere in the pipeline. The file hashes are recomputed, and
+the corresponding fold-aware model adapter applies the architecture-specific
+preprocessing defined in the model implementation.
+
+The evaluation population contains 11\,500 distinct input artifacts:
+
+\begin{equation}
+    1\,000\ \text{clean}
+    +
+    500\ \text{\gls{ood}}
+    +
+    5\,000\ \text{adversarial}
+    +
+    5\,000\ \text{anti-forensic}
+    =
+    11\,500.
+\end{equation}
+
+Clean and perturbed binary samples are each evaluated once by every proxy
+architecture using their assigned fold checkpoint. Therefore, the prediction
+counts for these branches are:
+
+\begin{equation}
+    1\,000
+    \times
+    3
+    =
+    3\,000
+    \quad
+    \text{clean prediction rows},
+\end{equation}
+
+and:
+
+\begin{equation}
+    10\,000
+    \times
+    3
+    =
+    30\,000
+    \quad
+    \text{perturbed prediction rows}.
+\end{equation}
+
+The \gls{ood} branch follows a different protocol. Each of the 500 unique
+\gls{ood} images is evaluated by all five fold-specific checkpoints of each
+architecture:
+
+\begin{equation}
+    500
+    \times
+    5
+    \times
+    3
+    =
+    7\,500
+    \quad
+    \text{\gls{ood} prediction rows}.
+\end{equation}
+
+Consequently, the complete proxy prediction table contains:
+
+\begin{equation}
+    3\,000
+    +
+    30\,000
+    +
+    7\,500
+    =
+    40\,500
+    \quad
+    \text{rows}.
+\end{equation}
+
+The 2\,500 \gls{ood} predictions associated with one architecture correspond
+to 500 unique images evaluated through five different fold-specific
+checkpoints. They must not be interpreted as 2\,500 distinct
+out-of-distribution images.
+
+\paragraph{Binary metric computation.}
+
+For each binary evaluation group, the implementation derives the confusion
+matrix using the fixed layout:
+
+\begin{equation}
+    \begin{bmatrix}
+        \gls{tn} & \gls{fp} \\
+        \gls{fn} & \gls{tp}
+    \end{bmatrix}.
+\end{equation}
+
+The resulting metric records contain:
+
+\begin{itemize}
+    \item accuracy and balanced accuracy;
+    \item class-specific precision, recall, and F1-score;
+    \item macro-averaged precision, recall, and F1-score;
+    \item \gls{tp}, \gls{tn}, \gls{fp}, and \gls{fn} counts;
+    \item \gls{fpr} and \gls{fnr};
+    \item misclassification rate;
+    \item \texttt{weapon}-to-\texttt{non\_weapon} and
+    \texttt{non\_weapon}-to-\texttt{weapon} error counts;
+    \item mean predicted-class confidence.
+\end{itemize}
+
+The \gls{fpr} and \gls{fnr} are implemented as:
+
+\begin{equation}
+    \gls{fpr}
+    =
+    \frac{\gls{fp}}
+         {\gls{fp}+\gls{tn}},
+    \qquad
+    \gls{fnr}
+    =
+    \frac{\gls{fn}}
+         {\gls{fn}+\gls{tp}}.
+\end{equation}
+
+Clean proxy metrics are grouped by architecture. Adversarial metrics are
+grouped by evaluated architecture, perturbation condition, and attack target
+model. Anti-forensic metrics are grouped by evaluated architecture and
+transformation condition.
+
+The attack-target field is retained because the model-dependent adversarial
+examples were generated against fold-aware EfficientNet-B0 checkpoints but
+were subsequently evaluated on all three proxy architectures. This distinction
+supports separate analysis of target-model vulnerability and cross-model
+transfer behavior.
+
+\paragraph{Clean-to-perturbed comparison.}
+
+Each perturbed prediction is associated with its corresponding clean prediction
+through the tuple:
+
+\begin{center}
+\texttt{evaluated\_model},
+\quad
+\texttt{evaluation\_fold},
+\quad
+\texttt{original\_image\_id}.
+\end{center}
+
+The prediction table is enriched with the clean prediction, clean correctness
+state, clean class probabilities, clean confidence, and confidence difference
+relative to the perturbed input.
+
+For each model and perturbation condition, the comparative layer computes:
+
+\begin{itemize}
+    \item clean accuracy and perturbed accuracy;
+    \item robust accuracy, defined as the perturbed accuracy;
+    \item accuracy drop;
+    \item clean and perturbed macro F1-scores;
+    \item macro F1-score drop;
+    \item attack success rate;
+    \item induced-error count;
+    \item mean confidence shift;
+    \item directional error counts and rates.
+\end{itemize}
+
+An induced error occurs when the clean image is classified correctly but its
+perturbed counterpart is classified incorrectly. The implemented attack
+success rate is therefore:
+
+\begin{equation}
+    \text{attack success rate}
+    =
+    \frac{
+        \text{number of clean-correct samples rendered incorrect}
+    }{
+        \text{number of clean-correct samples}
+    }.
+\end{equation}
+
+This denominator differs from the complete number of evaluated samples because
+images already misclassified in the clean condition cannot represent newly
+induced errors.
+
+The confidence shift is computed as:
+
+\begin{equation}
+    \Delta c
+    =
+    c_{\mathrm{perturbed}}
+    -
+    c_{\mathrm{clean}},
+\end{equation}
+
+and averaged within each model--condition group. The value refers to the
+maximum predicted-class probability, not necessarily to the probability of the
+ground-truth class.
+
+\paragraph{Proxy-model \gls{ood} metrics.}
+
+The \gls{ood} branch is summarized independently for each proxy architecture.
+The resulting records contain:
+
+\begin{itemize}
+    \item the fold-aggregated number of predictions;
+    \item the number and rate of predictions assigned to \texttt{weapon};
+    \item the number of predictions assigned to \texttt{non\_weapon};
+    \item the mean maximum predicted-class probability;
+    \item the high-confidence threshold;
+    \item the number and rate of predictions whose maximum probability meets
+    or exceeds that threshold.
+\end{itemize}
+
+The frozen high-confidence threshold is:
+
+\begin{equation}
+    \tau_{\mathrm{high}}
+    =
+    0.90.
+\end{equation}
+
+The high-confidence count includes predictions assigned to either binary class.
+It measures confident assignment of an \gls{ood} input to the closed-set task,
+whereas the predicted-weapon rate measures the specific operational tendency
+to flag \gls{ood} content as firearm-related.
+
+\paragraph{Proxy-model metric artifacts.}
+
+The proxy evaluation stage produces the artifacts listed in
+Table~\ref{tab:implementation-proxy-metric-artifacts}.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\caption{Proxy-model prediction and metric artifacts}
+\label{tab:implementation-proxy-metric-artifacts}
+\begin{tabularx}{\textwidth}{@{}p{0.47\textwidth} X@{}}
+\toprule
+\textbf{Artifact} &
+\textbf{Role} \\
+\midrule
+
+\codepath{evaluation/proxy_models/proxy_model_predictions.csv} &
+Sample-level predictions, probabilities, fold associations, integrity values,
+clean-to-perturbed links, and evaluation errors. \\
+
+\codepath{results/metrics/proxy_model_clean_metrics.csv} &
+Architecture-level clean binary metrics. \\
+
+\codepath{results/metrics/proxy_model_adversarial_metrics.csv} &
+Binary metrics grouped by architecture, adversarial condition, and attack
+target model. \\
+
+\codepath{results/metrics/proxy_model_anti_forensic_metrics.csv} &
+Binary metrics grouped by architecture and anti-forensic transformation. \\
+
+\codepath{results/metrics/proxy_model_ood_metrics.csv} &
+Fold-aggregated \gls{ood} prediction, weapon-rate, mean-confidence, and
+high-confidence statistics. \\
+
+\codepath{results/metrics/proxy_model_comparative_metrics.csv} &
+Clean-to-perturbed accuracy, F1-score, induced-error, directional-error, and
+confidence-shift comparisons. \\
+
+\codepath{results/metrics/proxy_model_evaluation_summary.json} &
+Models, output paths, row counts, evaluation-error count, metric-table counts,
+and canonical schema notes. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The same stage generates four schema-stable reporting tables:
+
+\begin{itemize}
+    \item
+    \codepath{results/metrics/final_core_metrics.csv};
+    \item
+    \codepath{results/metrics/final_robustness_metrics.csv};
+    \item
+    \codepath{results/metrics/final_confusion_matrices.csv};
+    \item
+    \codepath{results/metrics/final_ood_metrics.csv}.
+\end{itemize}
+
+The core table consolidates the clean and condition-level binary metrics into a
+common schema. It contains 33 rows:
+
+\begin{equation}
+    3\ \text{clean architecture rows}
+    +
+    15\ \text{adversarial rows}
+    +
+    15\ \text{anti-forensic rows}
+    =
+    33.
+\end{equation}
+
+The robustness table contains 30 clean-to-perturbed comparisons:
+
+\begin{equation}
+    3\ \text{architectures}
+    \times
+    10\ \text{perturbation conditions}
+    =
+    30.
+\end{equation}
+
+The confusion-matrix table contains one record for each of the 33 binary
+condition rows, while the final \gls{ood} table contains one record for each of
+the three proxy architectures.
+
+The frozen proxy evaluation completed all 40\,500 prediction operations without
+recorded inference errors.
+
+\paragraph{Commercial-tool metric computation.}
+
+Commercial-tool metrics are computed from the normalized decisions described
+in Section~\ref{subsec:implementation-normalization}. Only matched records with
+an interpretable \texttt{true} or \texttt{false}
+\texttt{weapon\_detected} value contribute to the binary confusion matrix.
+
+The implementation computes:
+
+\begin{itemize}
+    \item accuracy;
+    \item balanced accuracy;
+    \item weapon precision, recall, and F1-score;
+    \item non-weapon specificity;
+    \item \gls{fpr} and \gls{fnr};
+    \item \gls{tp}, \gls{tn}, \gls{fp}, and \gls{fn} counts;
+    \item the number of uninterpretable normalized decisions;
+    \item the number and rate of \gls{ood} samples flagged as weapons;
+    \item the number of \gls{ood} samples not flagged or left unknown.
+\end{itemize}
+
+The metrics are generated at several aggregation scopes:
+
+\begin{itemize}
+    \item the complete normalized configuration;
+    \item sample type;
+    \item perturbation family;
+    \item individual perturbation condition;
+    \item combined sample-type and perturbation-condition scope.
+\end{itemize}
+
+Each of the six normalized configurations produces 31 metric rows. The
+consolidated commercial-tool metric table therefore contains:
+
+\begin{equation}
+    6
+    \times
+    31
+    =
+    186
+    \quad
+    \text{rows}.
+\end{equation}
+
+The canonical commercial-tool metric source is:
+
+\begin{center}
+\codepath{results/metrics/forensic_tools_metrics.csv}
+\end{center}
+
+The corresponding per-configuration files are filtered views of this
+consolidated artifact:
+
+\begin{center}
+\codepath{results/metrics/<tool_name>_metrics.csv}
+\end{center}
+
+The normalizer validates that every per-configuration file contains the
+expected number of rows and that the aggregate table was generated from the
+same in-memory metric records. The frozen validation confirmed consistency for
+all 186 records.
+
+\paragraph{Authoritative reporting layer.}
+
+The source CSV and JSON metric artifacts remain authoritative for numerical
+reporting. Figures and thesis-ready tables are generated from these frozen
+records rather than being edited manually.
+
+The main downstream reporting entry point is:
+
+\begin{center}
+\codepath{results/scripts/20_generate_experimental_reporting_assets.py}
+\end{center}
+
+This script transforms the canonical metric tables into presentation-layer
+figures and tabular extracts. The resulting visualization files do not replace
+the source metrics and must be regenerated whenever an authoritative metric
+artifact changes.
+
+The complete metric layer therefore preserves three distinct levels:
+
+\begin{enumerate}
+    \item sample-level predictions or normalized software decisions;
+    \item condition-level and comparative metric tables;
+    \item presentation-layer figures and thesis tables.
+\end{enumerate}
+
+Maintaining this separation allows every reported value in
+Chapter~\ref{chap:results} to be traced back to the corresponding prediction
+records, frozen input manifests, model checkpoint, or commercial-tool
+observable output.
 
 \subsection{Integrated Gradients Implementation}
 \label{subsec:implementation-explainability}
+The explainability layer was implemented through \gls{ig}, following the
+method introduced by Sundararajan et al.~\cite{Sundararajan2017}. The
+authoritative entry point is:
 
+\begin{center}
+\codepath{explainability/scripts/17_generate_integrated_gradients_case_studies.py}
+\end{center}
+
+The entry point wraps the frozen implementation stored in:
+
+\begin{center}
+\codepath{explainability/scripts/_17_generate_integrated_gradients_case_studies_impl.py}
+\end{center}
+
+The \gls{xai} workflow is restricted to transparent proxy models. It is not
+used to explain \gls{magnetai}, \gls{t3kcore},
+\gls{excirefoto2025}, or \gls{cellebriteinseyets}, because the gradients,
+internal representations, and model parameters required by the attribution
+method are not accessible for those commercial black-box systems.
+
+The prediction-level source used for case selection is:
+
+\begin{center}
+\codepath{evaluation/proxy_models/proxy_model_predictions.csv}
+\end{center}
+
+This artifact provides the model prediction, confidence, fold assignment,
+operational label, perturbation condition, clean-to-perturbed association, and
+input path required to identify diagnostically relevant cases. The frozen
+thesis workflow applies \gls{ig} to EfficientNet-B0, which was also the primary
+transparent model used for model-dependent adversarial generation.
+
+For each selected case, the fold-specific checkpoint associated with the input
+image is loaded. The hardened entry point computes the checkpoint
+\gls{sha256} digest and compares it with the authoritative value recorded in:
+
+\begin{center}
+\codepath{models/model_registry.json}
+\end{center}
+
+Generation is interrupted when the checkpoint is missing, when its digest is
+not present in the registry, or when the actual and expected digests differ.
+The input-image \gls{sha256} value is also validated whenever an expected hash
+is available in the prediction or perturbation metadata.
+
+The image is opened through the common EXIF-aware RGB loading procedure and
+processed using the same EfficientNet-B0 transformation applied during
+evaluation. The resulting model-input tensor is passed to the Captum
+implementation of \gls{ig}. The baseline is defined as:
+
+\begin{center}
+\texttt{zero\_tensor\_in\_preprocessed\_input\_space}
+\end{center}
+
+The attribution target used for the frozen Chapter~\ref{chap:results} cases is
+the class predicted by the proxy model. Predicted-label attribution was adopted
+so that each visualization represents the input sensitivity associated with the
+decision that was actually produced, including erroneous and \gls{ood}
+assignments. The workflow can also generate attributions for the true label or
+for both binary targets, but these alternatives are not used by the frozen
+thesis selection.
+
+The historical thesis assets were generated using the configuration reported
+in Table~\ref{tab:implementation-ig-configuration}.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{5pt}
+\caption{Frozen Integrated Gradients configuration used for the thesis assets}
+\label{tab:implementation-ig-configuration}
+\begin{tabularx}{0.94\textwidth}{@{}l X@{}}
+\toprule
+\textbf{Configuration field} &
+\textbf{Frozen value} \\
+\midrule
+
+Proxy architecture &
+EfficientNet-B0 \\
+
+Selection strategy &
+\texttt{chapter5\_core} \\
+
+Attribution target &
+Predicted binary label \\
+
+Baseline &
+Zero tensor in preprocessed input space \\
+
+Integration steps &
+32 \\
+
+Input resolution &
+\(224 \times 224\) pixels \\
+
+High-confidence selection threshold &
+0.90 \\
+
+Attribution-mask percentile &
+90th percentile, corresponding to the highest-attribution 10\% of pixels \\
+
+Reviewer identifier &
+Pseudonymous identifier \texttt{reviewer\_01} \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Case-selection procedure.}
+
+The \texttt{chapter5\_core} strategy organizes candidate predictions into five
+narrative and operational buckets:
+
+\begin{enumerate}
+    \item a correctly classified clean weapon image;
+    \item a clean weapon false negative;
+    \item a high-confidence \gls{ood} image assigned to the weapon class;
+    \item a clean-correct image rendered incorrect by an anti-forensic
+    transformation;
+    \item a clean-correct image rendered incorrect with high confidence by an
+    adversarial perturbation.
+\end{enumerate}
+
+Candidates within each bucket are ordered deterministically according to
+confidence, fold, and input path. Perturbation-induced failures are additionally
+ranked according to operational relevance, prioritizing
+\texttt{weapon}-to-\texttt{non\_weapon} transitions, followed by
+\texttt{non\_weapon}-to-\texttt{weapon} transitions and other induced
+misclassifications.
+
+The automatic filtering stage identified 1\,175 candidate records. The
+candidate and manual-selection distribution is reported in
+Table~\ref{tab:implementation-xai-selection-buckets}.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{5pt}
+\caption{Human-in-the-loop selection of Integrated Gradients cases}
+\label{tab:implementation-xai-selection-buckets}
+\begin{tabularx}{0.96\textwidth}{@{}X r r@{}}
+\toprule
+\textbf{Case bucket} &
+\textbf{Candidates} &
+\textbf{Initially selected} \\
+\midrule
+
+\texttt{clean\_correct\_weapon} &
+492 &
+3 \\
+
+\texttt{clean\_false\_negative\_weapon} &
+8 &
+3 \\
+
+\texttt{ood\_as\_weapon} &
+139 &
+3 \\
+
+\texttt{anti\_forensic\_failure} &
+36 &
+3 \\
+
+\texttt{adversarial\_high\_conf\_failure} &
+500 &
+3 \\
+
+\midrule
+\textbf{Total} &
+\textbf{1\,175} &
+\textbf{15} \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The final selection remained human-in-the-loop. The reviewer inspected the
+candidate images in an interactive interface displaying the input, fold,
+ground-truth label, predicted label, confidence, perturbation condition, and
+selection rationale. Selection and deselection actions were logged together
+with their timestamps, ranks, case identifiers, and pseudonymous reviewer
+identifier.
+
+Three cases were initially retained for each bucket. From these 15 manually
+reviewed cases, one representative case per bucket was selected for the thesis.
+The authoritative five-case mapping is:
+
+\begin{center}
+\codepath{explainability/manifests/chapter5/thesis_selection.csv}
+\end{center}
+
+The selected cases are summarized in
+Table~\ref{tab:implementation-xai-thesis-selection}.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{5pt}
+\caption{Authoritative Integrated Gradients case selection}
+\label{tab:implementation-xai-thesis-selection}
+\begin{tabularx}{0.96\textwidth}{@{}l X@{}}
+\toprule
+\textbf{Case identifier} &
+\textbf{Diagnostic role} \\
+\midrule
+
+\texttt{xai\_case\_0001} &
+Correctly classified clean weapon reference. \\
+
+\texttt{xai\_case\_0006} &
+Clean weapon false-negative case. \\
+
+\texttt{xai\_case\_0009} &
+High-confidence \gls{ood} assignment to the weapon class. \\
+
+\texttt{xai\_case\_0010} &
+Failure associated with Histogram Modification. \\
+
+\texttt{xai\_case\_0015} &
+High-confidence failure associated with Sigma-Zero. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+These categories define the diagnostic role of the selected cases. Their
+operational interpretation and the corresponding attribution patterns are
+reported in Section~\ref{sec:results-explainability}.
+
+\paragraph{Attribution processing and visual artifacts.}
+
+For each target, the channel-wise attribution tensor is converted into a
+two-dimensional map by summing the absolute attribution magnitudes across the
+three input channels. The resulting map is min--max normalized to the interval
+\([0,1]\).
+
+Because absolute values are used, the visualizations represent attribution
+magnitude rather than the direction of the contribution. They identify regions
+to which the selected model output is sensitive along the baseline-to-input
+path, but they do not distinguish positive evidence from negative evidence.
+
+The implementation produces the following diagnostic assets for each case:
+
+\begin{itemize}
+    \item the resized RGB input image;
+    \item a colorized attribution heatmap;
+    \item an overlay combining the input and heatmap;
+    \item a normalized grayscale attribution mask;
+    \item a binary mask containing pixels at or above the selected attribution
+    percentile;
+    \item a side-by-side diagnostic comparison;
+    \item a histogram of normalized attribution values.
+\end{itemize}
+
+The heatmap uses the \texttt{inferno} color map. The overlay combines the
+resized input with the colorized heatmap using an attribution opacity of 0.45.
+The binary high-attribution mask is computed from the 90th percentile of the
+normalized map and therefore highlights approximately the highest-attribution
+10\% of image locations.
+
+The thesis retains four assets for each of the five selected cases:
+
+\begin{enumerate}
+    \item input image;
+    \item standalone heatmap;
+    \item heatmap overlay;
+    \item top-10\% attribution mask.
+\end{enumerate}
+
+The resulting thesis-level visual corpus contains:
+
+\begin{equation}
+    5\ \text{cases}
+    \times
+    4\ \text{assets}
+    =
+    20\ \text{images}.
+\end{equation}
+
+The thesis-ready copies are stored under:
+
+\begin{center}
+\codepath{docs/LatexThesis/images/}
+\end{center}
+
+The complete generated diagnostic tree under
+\codepath{explainability/outputs/} remains a local artifact and is not
+distributed through the public branch.
+
+\paragraph{Convergence diagnostics.}
+
+The historical thesis images were generated with 32 integration steps. The
+corresponding legacy convergence deltas are retained in the authoritative
+selection manifest. Some of these values are large, particularly for selected
+perturbed cases. The historical figures must therefore be interpreted as
+qualitative diagnostic visualizations rather than as attributions for which a
+strict numerical convergence threshold has been demonstrated.
+
+The hardened entry point subsequently introduced adaptive convergence
+diagnostics. It begins from the requested number of steps and doubles the
+integration resolution until either:
+
+\begin{itemize}
+    \item the normalized convergence delta is at most 0.05; or
+    \item the maximum of 256 integration steps is reached.
+\end{itemize}
+
+The normalized convergence delta is computed relative to the difference between
+the selected model output at the input and at the baseline. A regenerated case
+is marked \texttt{passed} only when the threshold is satisfied. When the
+maximum number of steps is reached without satisfying the threshold, the
+explicit state \texttt{threshold\_not\_met} is retained.
+
+Adaptive regeneration of the historical thesis selection is recorded as
+pending in the frozen public artifact. Accordingly, the adaptive mechanism is
+documented as a reproducibility and validation control, but it is not used to
+retroactively claim convergence for the 32-step historical assets.
+
+The canonical \gls{xai} metadata and provenance artifacts are listed in
+Table~\ref{tab:implementation-xai-artifacts}.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\caption{Canonical Integrated Gradients selection and provenance artifacts}
+\label{tab:implementation-xai-artifacts}
+\begin{tabularx}{\textwidth}{@{}p{0.47\textwidth} X@{}}
+\toprule
+\textbf{Artifact} &
+\textbf{Role} \\
+\midrule
+
+\codepath{explainability/manifests/chapter5/thesis_selection.csv} &
+Authoritative mapping of the five cases, prediction metadata, attribution
+configuration, thesis image paths, and selection rationales. \\
+
+\codepath{explainability/manifests/chapter5/candidate_selection_summary.json} &
+Candidate and manually selected counts for the five diagnostic buckets. \\
+
+\codepath{explainability/manifests/chapter5/run_summary.json} &
+Frozen model, strategy, baseline, target, integration-step count, percentile,
+selection counts, and public-artifact policy. \\
+
+\codepath{explainability/manifests/chapter5/run_provenance.json} &
+Entry point, frozen implementation, prediction source, model registry,
+integrity controls, and convergence policy. \\
+
+\codepath{explainability/logs/chapter5_manual_selection.csv} &
+Human-in-the-loop case-selection log. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The \gls{xai} layer is intentionally qualitative. The generated maps are not
+semantic segmentations, causal demonstrations, calibrated reliability
+estimates, or explanations of proprietary commercial tools. They provide
+diagnostic evidence concerning the sensitivity of the transparent
+EfficientNet-B0 proxy and complement, rather than replace, the quantitative
+robustness metrics.
+
+The integrity and provenance controls shared across the complete experimental
+pipeline are consolidated in
+Section~\ref{sec:implementation-traceability}.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Traceability, Integrity, and Reproducibility Controls}
