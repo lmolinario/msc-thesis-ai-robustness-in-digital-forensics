@@ -3275,9 +3275,12 @@ controlled local prediction table. \\
 \end{tabularx}
 \end{table}
 
-The prediction-level normalized outputs are locally regenerable but are not
-distributed in full on the public branch because they may contain
-proprietary-export-derived fields or legacy local-path information. The public
+The complete raw-export-derived normalization workspace remains controlled,
+whereas the public branch retains a canonical sanitized prediction table
+containing all 69\,000 normalized decisions. This table is reconstructed from
+the four validated public extracts and excludes raw-export paths, local
+execution paths, unrelated forensic fields, and complete proprietary export
+content. The public
 artifact instead retains sanitized per-tool extracts containing the
 decision-relevant observable fields and anonymized bundle identifiers.
 
@@ -4150,3 +4153,455 @@ Section~\ref{sec:implementation-traceability}.
 \section{Traceability, Integrity, and Reproducibility Controls}
 \label{sec:implementation-traceability}
 % ─────────────────────────────────────────────────────────────────────────────
+
+Traceability, integrity, and controlled reproducibility were implemented as
+cross-cutting properties of the complete experimental workflow rather than as
+controls added only after evaluation. The resulting artifact links the frozen
+dataset, deterministic partitions, proxy checkpoints, generated
+perturbations, black-box inputs, normalized software outputs, metric tables,
+explainability cases, and reporting assets through stable identifiers,
+cryptographic digests, manifests, and version-controlled metadata.
+
+The implementation distinguishes three related but non-equivalent objectives:
+
+\begin{itemize}
+    \item \emph{traceability}, defined as the ability to reconstruct the
+    provenance and processing history of an experimental artifact;
+    \item \emph{integrity}, defined as the ability to verify that an artifact
+    has not changed relative to its authoritative recorded state;
+    \item \emph{controlled reproducibility}, defined as the ability to inspect
+    or rerun the workflow to the extent permitted by data-access restrictions,
+    licensed-software requirements, and the available execution environment.
+\end{itemize}
+
+This distinction is necessary because public access to code and metadata does
+not imply unrestricted redistribution of the source images or availability of
+the proprietary software required to repeat the commercial-tool processing.
+
+\paragraph{Stable identity and provenance chain.}
+
+The pipeline assigns stable identifiers at successive processing stages.
+Prepared source images receive an \texttt{image\_id}; generated perturbations
+receive a \texttt{generated\_image\_id}; black-box inputs receive an anonymized
+\texttt{bundle\_id}; and selected explainability cases receive a
+\texttt{case\_id}. Model artifacts are identified through the combination of
+architecture and held-out fold.
+
+The resulting provenance chain can be represented as:
+
+\begin{equation}
+\begin{split}
+    \texttt{image\_id}
+    &\longrightarrow
+    \texttt{generated\_image\_id}
+    \longrightarrow
+    \texttt{bundle\_id} \\
+    &\longrightarrow
+    \texttt{normalized\_prediction}
+    \longrightarrow
+    \texttt{metric\_row}
+    \longrightarrow
+    \texttt{reporting\_asset}.
+\end{split}
+\end{equation}
+
+For clean and \gls{ood} samples, the original and generated identifiers may
+coincide because no new image artifact is created. For adversarial and
+anti-forensic samples, the generated identifier preserves the link to the
+corresponding clean source image while distinguishing the perturbation
+condition and, where applicable, the target proxy model.
+
+The manifests retain repository-relative paths rather than relying on
+machine-specific absolute locations. This allows artifacts generated on
+different workstations to be associated with the same logical repository
+structure. Run summaries and registries additionally preserve configurations,
+creation timestamps, sample counts, fold assignments, and output locations.
+
+Table~\ref{tab:implementation-identity-controls} summarizes the principal
+identity controls.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\caption{Stable identifiers used throughout the experimental pipeline}
+\label{tab:implementation-identity-controls}
+\begin{tabularx}{\textwidth}{@{}p{0.21\textwidth} p{0.33\textwidth} X@{}}
+\toprule
+\textbf{Identifier} &
+\textbf{Authoritative context} &
+\textbf{Traceability role} \\
+\midrule
+
+\texttt{image\_id} &
+Prepared and frozen dataset manifests &
+Identifies the reviewed source image across dataset preparation, freezing,
+partitioning, and clean evaluation. \\
+
+\texttt{generated\_image\_id} &
+Adversarial and anti-forensic manifests &
+Identifies a derived image while preserving its association with the original
+source image and perturbation condition. \\
+
+\texttt{bundle\_id} &
+Forensic evaluation bundle manifest &
+Provides a semantically neutral identifier for black-box import and later
+reconnection to ground truth. \\
+
+Architecture and fold &
+Model registry and checkpoint paths &
+Identifies the fold-aware checkpoint used for training, inference,
+model-dependent perturbation generation, and explainability. \\
+
+\texttt{case\_id} &
+Integrated Gradients selection manifest &
+Identifies a manually selected qualitative diagnostic case and its associated
+thesis assets. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{Cryptographic integrity controls.}
+
+\gls{sha256} is the primary integrity digest throughout the pipeline.
+\gls{md5} is retained only as an auxiliary compatibility identifier because
+some commercial forensic exports expose MD5-oriented fields or matching
+workflows. It is not treated as the primary integrity mechanism.
+
+Per-file hashes are recorded at the main transformation boundaries, including:
+
+\begin{itemize}
+    \item prepared and frozen source images;
+    \item deterministic clean and \gls{ood} partitions;
+    \item adversarial and anti-forensic outputs;
+    \item blind and structured bundle copies;
+    \item proxy-model checkpoints;
+    \item selected explainability inputs and outputs;
+    \item sanitized commercial-tool extracts and canonical metric artifacts.
+\end{itemize}
+
+Where an artifact is copied between stages, the output hash is recomputed and
+compared with the authoritative value from the originating manifest. A mismatch
+causes the relevant script to terminate rather than silently accepting a
+different file.
+
+The checkpoint digests stored in:
+
+\begin{center}
+\codepath{models/model_registry.json}
+\end{center}
+
+bind every proxy architecture and fold to the corresponding serialized model
+artifact. These values are checked before model-dependent adversarial
+generation and by the hardened explainability entry point.
+
+Archive-level integrity is maintained separately from per-file integrity. The
+authoritative controlled-archive digests are stored in:
+
+\begin{center}
+\codepath{docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256}
+\end{center}
+
+The complete-archive digest authenticates the downloaded ZIP file, whereas:
+
+\begin{center}
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}
+\end{center}
+
+authenticates each of the 11\,500 restored blind inputs individually. The
+distinction prevents a valid archive-level digest from replacing the need to
+verify the expected file population after extraction.
+
+\paragraph{Deterministic configuration controls.}
+
+A fixed seed of 42 is used for the principal stochastic procedures, including
+fold construction, internal training--validation partitioning, and
+image-specific randomized search initialization where applicable. The seed is
+recorded in the corresponding configuration and summary artifacts.
+
+The use of a fixed seed supports repeatability of the logical partitions and
+algorithmic initialization. It does not imply that every numerical result is
+guaranteed to be bit-identical across different operating systems, hardware
+architectures, library versions, or CPU and GPU implementations. PyTorch and
+cuDNN deterministic options reduce nondeterministic behavior where supported,
+but the execution environment remains part of the reproducibility boundary.
+
+The frozen configurations also specify:
+
+\begin{itemize}
+    \item accepted labels and expected class counts;
+    \item the five clean folds and independent \gls{ood} branch;
+    \item preprocessing and normalization parameters;
+    \item training hyperparameters;
+    \item perturbation parameters;
+    \item model and checkpoint associations;
+    \item commercial-tool versions and observable output mappings;
+    \item metric definitions and confusion-matrix layout;
+    \item explainability targets, baseline, integration steps, and selection
+    criteria.
+\end{itemize}
+
+These values are stored in machine-readable CSV or JSON artifacts rather than
+being represented only in narrative documentation.
+
+\paragraph{Overwrite and rerun controls.}
+
+The main generation and evaluation scripts implement fail-visible output
+guards. Existing canonical outputs are not silently replaced. A rebuild
+generally requires the explicit \texttt{--force} option, which removes or
+replaces only the output scope associated with the selected run.
+
+This policy reduces the risk of combining artifacts generated from different
+configurations or of overwriting a frozen result with a partial diagnostic
+execution. Partial experiments and exploratory runs must use separate output
+locations and must not replace the canonical manifests, predictions, or metric
+tables.
+
+An explicit forced rebuild does not by itself establish equivalence with the
+frozen artifact. The regenerated files must still satisfy the expected counts,
+identifier constraints, hashes, and downstream validation procedures.
+
+\paragraph{Audit summaries and machine-readable invariants.}
+
+Each major stage produces both sample-level records and a run-level summary.
+The summary files record the input manifests, parameters, output paths,
+expected and actual counts, validation results, and creation metadata. This
+design allows structural checks to be performed without reopening every image
+or manually inspecting every prediction.
+
+The principal invariants include:
+
+\begin{itemize}
+    \item 1\,500 records in the frozen dataset;
+    \item 1\,000 binary and 500 \gls{ood} samples;
+    \item five folds containing 200 binary images each;
+    \item 15 fold-aware proxy checkpoints;
+    \item 5\,000 adversarial and 5\,000 anti-forensic artifacts;
+    \item 11\,500 unique forensic evaluation bundle items;
+    \item 40\,500 proxy-model prediction rows;
+    \item 69\,000 canonical sanitized commercial-tool decisions;
+    \item 186 commercial-tool metric rows;
+    \item five authoritative thesis-level explainability cases and 20 associated
+    thesis assets.
+\end{itemize}
+
+These counts are implementation invariants and completeness checks. Their
+presence does not establish model robustness; the quantitative behavior of the
+evaluated systems is analyzed separately in
+Chapter~\ref{chap:results}.
+
+\paragraph{Commercial-output equivalence controls.}
+
+The complete commercial-tool raw exports are excluded from the public
+repository because they may contain proprietary structures, local file paths,
+case metadata, device-related fields, or information unrelated to the
+experimental decision mapping.
+
+The public artifact retains sanitized decision extracts for the four software
+families. These extracts are combined into the canonical table:
+
+\begin{center}
+\codepath{evaluation/forensic_tools/normalized_predictions.csv}
+\end{center}
+
+The table contains 69\,000 sanitized sample-level decisions across the six
+normalized configurations. It excludes complete raw-export fields and local
+execution paths while preserving the decision-relevant observable values,
+bundle identifiers, experimental conditions, and normalized predictions.
+
+The canonical table can be reconstructed through:
+
+\begin{center}
+\codepath{forensic_tools/scripts/build_canonical_normalized_predictions.py}
+\end{center}
+
+Exact equivalence between the sanitized extracts, canonical decisions, and
+commercial metric table is checked through:
+
+\begin{center}
+\codepath{forensic_tools/scripts/validate_public_extract_equivalence.py}
+\end{center}
+
+The corresponding validation verifies both decision-level equivalence and
+metric-level equivalence. Cryptographic digests of the canonical table and each
+sanitized source extract are preserved in the public summary and validation
+artifacts.
+
+\paragraph{Result, explainability, and reporting validation.}
+
+The repository provides dedicated read-only or fail-visible validation
+utilities for the downstream artifact layers. Their principal roles are
+summarized in Table~\ref{tab:implementation-validation-controls}.
+
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\caption{Validation utilities applied to the frozen research artifact}
+\label{tab:implementation-validation-controls}
+\begin{tabularx}{\textwidth}{@{}p{0.48\textwidth} X@{}}
+\toprule
+\textbf{Validation entry point} &
+\textbf{Principal checks} \\
+\midrule
+
+\codepath{forensic_tools/scripts/validate_public_extract_equivalence.py} &
+Decision equivalence between the sanitized commercial extracts and the
+canonical 69\,000-row table, together with equivalence of the 186 commercial
+metric rows. \\
+
+\codepath{results/scripts/23_validate_results_artifacts.py} &
+Commercial and proxy prediction counts, metric-table counts, \gls{ood}
+accounting, canonical hashes, reporting manifests, and metadata-sensitivity
+artifacts. \\
+
+\codepath{results/scripts/24_audit_reporting_asset_usage.py} &
+Consistency between reporting manifests, generated assets, and files referenced
+by the thesis. \\
+
+\codepath{explainability/scripts/validate_chapter5_xai_artifacts.py} &
+Consistency of the five-case selection, thesis image paths, displayed
+prediction metadata, and \gls{xai} provenance. \\
+
+\codepath{tools/latex/audit_latex_images_used.py} &
+Missing, ambiguous, unused, and duplicate image references in the LaTeX
+project. \\
+
+\codepath{tools/tasks.sh audit-all} &
+Aggregated JSON, Python syntax, text-guard, result, explainability, reporting,
+and LaTeX-image checks. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The metric CSV and JSON files remain the numerical source of truth. PDF and PNG
+figures are presentation-layer artifacts generated from those frozen values.
+They must not be edited manually to alter numerical content.
+
+The LaTeX thesis is compiled from:
+
+\begin{center}
+\codepath{docs/LatexThesis/main.tex}
+\end{center}
+
+The final compilation audit verifies bibliography resolution,
+cross-references, glossary entries, figure availability, and the absence of
+unresolved LaTeX errors. Generated auxiliary files and the local PDF are not
+used as authoritative source files.
+
+\paragraph{Public, controlled, and licensed reproducibility layers.}
+
+The artifact defines three access layers, summarized in
+Table~\ref{tab:implementation-reproducibility-boundary}.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{5pt}
+\caption{Reproducibility boundary of the research artifact}
+\label{tab:implementation-reproducibility-boundary}
+\begin{tabularx}{\textwidth}{@{}p{0.18\textwidth} X@{}}
+\toprule
+\textbf{Layer} &
+\textbf{Supported activities} \\
+\midrule
+
+Public &
+Inspection of source code, manifests, checkpoints, prediction tables, metric
+tables, sanitized commercial decisions, explainability metadata, reporting
+assets, validation utilities, and LaTeX sources; reconstruction of the
+canonical commercial prediction table; recomputation of metrics from publicly
+retained decisions. \\
+
+Controlled &
+Restoration of the heterogeneous raw image sources; regeneration of the
+prepared and frozen image pipeline; restoration of the exact 11\,500-file
+commercial input bundle; proxy retraining; perturbation regeneration; and
+selected image-level validation subject to approved data access. \\
+
+Licensed &
+Reprocessing of the blind bundle through the proprietary commercial software
+versions and compatible import/export environments used in the frozen
+evaluation. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two distinct controlled archives support the controlled layer:
+
+\begin{itemize}
+    \item
+    \texttt{00\_raw\_datasets\_bundle.zip}, used to restore the heterogeneous
+    source collections and rerun the numbered image-processing pipeline;
+    \item
+    \texttt{16\_frozen\_forensic\_evaluation\_bundle.zip}, used to restore the
+    exact 11\,500 files supplied to the commercial systems.
+\end{itemize}
+
+The restoration entry point verifies the complete archive against the
+authoritative repository digest. Restoration of the frozen bundle additionally
+checks the expected file names and the \gls{sha256} value of every blind input.
+
+The controlled-access model reflects the legal, ethical, and licensing
+constraints associated with heterogeneous image sources. Access to an archive
+does not grant unrestricted redistribution rights, remove obligations imposed
+by the original sources, or provide access to proprietary model internals.
+
+\paragraph{Environment and security boundary.}
+
+The pipeline was developed using Python virtual environments across Windows and
+Linux/Kali contexts, with CPU or CUDA-enabled execution depending on the
+computational stage. Commercial evaluation additionally requires compatible
+licensed software and a suitable workstation.
+
+The repository records the dependency specification and operational setup but
+does not claim to reproduce a byte-identical operating-system environment.
+Exact usernames, credentials, API keys, signed download URLs, commercial
+license information, session data, and unnecessary local absolute paths are
+excluded.
+
+The public branch also excludes:
+
+\begin{itemize}
+    \item unrestricted copies of the image corpora;
+    \item complete raw commercial exports;
+    \item proprietary case databases;
+    \item evidence-related material not required for the experimental record;
+    \item private or temporary artifact-access URLs;
+    \item generated LaTeX auxiliary files.
+\end{itemize}
+
+This minimization preserves the information required to audit the experimental
+claims while reducing disclosure of unrelated sensitive or proprietary
+material.
+
+\paragraph{Version control and artifact freezing.}
+
+Source code, manifests, registries, sanitized decisions, metric tables,
+documentation, and thesis sources are maintained through Git version control.
+Large proxy checkpoints are managed through Git LFS while their
+\gls{sha256} values remain recorded in the model registry.
+
+The repository policy treats the thesis artifact as a versioned frozen object.
+Substantive changes to data, perturbations, checkpoints, normalized decisions,
+metrics, or thesis conclusions require a new versioned release rather than
+silent replacement of the existing frozen state. Documentation corrections,
+security fixes, and non-substantive archival improvements must remain clearly
+distinguishable from changes to the experimental evidence.
+
+Taken together, these controls provide a traceable connection between the
+implemented protocol and the results reported in the following chapter. They
+do not eliminate the limitations associated with controlled data access,
+hardware and software variation, human review, or proprietary black-box
+systems. They instead make those boundaries explicit and preserve the
+information required to audit the evaluation within them.
+
+Chapter~\ref{chap:results} presents the quantitative outcomes obtained from the
+frozen implementation and analyzes their implications for the operational
+robustness of the evaluated proxy models and commercial \gls{ai}-based tools.
