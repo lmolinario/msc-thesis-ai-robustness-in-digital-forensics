@@ -473,6 +473,22 @@ assignment is considered unsuitable. This second mode provides an explicit
 quality-control pass over the selected images rather than treating an initial
 assignment as immutable.
 
+
+Figure~\ref{fig:implementation-human-review-interface} documents the
+interactive environment used during the human-in-the-loop selection process.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]
+    {images/dataset_human_review_protocol.png}
+    \caption[Human-in-the-loop review interface]{Human-in-the-loop review
+    interface used during final dataset selection. The interface supported the
+    manual inspection of candidate images and their assignment to the
+    operational labels \texttt{weapon}, \texttt{non\_weapon}, \texttt{ood},
+    or \texttt{exclude}}
+    \label{fig:implementation-human-review-interface}
+\end{figure}
+
 The class-assignment criteria displayed by the reviewer reproduce the
 operational definitions established in Chapter~\ref{chap:methodology}.
 Recognizable and realistic firearm-related content is assigned to
@@ -637,6 +653,49 @@ Frozen source dataset supporting the complete experimental protocol. \\
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
+Table~\ref{tab:implementation-final-source-distribution} reports the
+source-level composition of the frozen dataset. The distribution reflects the
+outcome of the semantically driven review process and must not be interpreted
+as the result of rigid source quotas.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{5pt}
+\caption{Distribution of the final frozen dataset by source and operational group}
+\label{tab:implementation-final-source-distribution}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Source} &
+\textbf{\texttt{weapon}} &
+\textbf{\texttt{non\_weapon}} &
+\textbf{\texttt{ood}} &
+\textbf{Total} \\
+\midrule
+\texttt{01\_kaggle\_weapon}    & 100 &   0 & 100 & 200 \\
+\texttt{02\_deepfirearm}       & 100 &   0 &   0 & 100 \\
+\texttt{03\_google\_scraped}   & 100 &  30 &  71 & 201 \\
+\texttt{04\_telegram\_youtube} & 100 &  57 & 225 & 382 \\
+\texttt{05\_deepweb}           & 100 & 413 & 104 & 617 \\
+\midrule
+\textbf{Total} &
+\textbf{500} &
+\textbf{500} &
+\textbf{500} &
+\textbf{1\,500} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The source composition is not uniform. In particular, the
+\texttt{non\_weapon} branch is predominantly derived from
+\texttt{05\_deepweb}. This imbalance is a consequence of the semantically
+driven selection process and represents a limitation to be considered when
+interpreting the experimental results.
+
 
 The \texttt{ood} group was preserved as a distinct operational branch and was
 not converted into a third supervised class of the binary task. Consequently,
@@ -1646,6 +1705,13 @@ the perturbation. Generation-time values are retained for traceability, whereas
 their comparative quantitative interpretation is reported in
 Chapter~\ref{chap:results}.
 
+The generation summaries confirm that every frozen condition produced the
+expected 1\,000 outputs, with 200 samples per fold and 500 samples per binary
+label. They also verify the uniqueness of the generated identifiers and
+perturbed \gls{sha256} values. Existing attack directories and run-specific
+manifests are not overwritten unless the explicit \texttt{--force} option is
+supplied.
+
 The corresponding implementation of the model-agnostic anti-forensic
 transformations is described in
 Section~\ref{subsec:implementation-antiforensic}.
@@ -1800,8 +1866,9 @@ binary subset.
 \paragraph{\gls{contraststretching}.}
 
 Contrast Stretching is implemented through automatic contrast normalization.
-A cutoff value of 1.0 removes the corresponding percentage of extreme
-intensity values before remapping the remaining range. This operation changes
+The transformation was applied through
+\texttt{ImageOps.autocontrast} using a cutoff percentage of 1.0 before
+remapping the remaining intensity range. This operation changes
 the global tonal distribution while preserving the image dimensions and
 operational label.
 
@@ -2240,6 +2307,22 @@ Observable decision field &
 \end{tabularx}
 \end{table}
 
+
+Figure~\ref{fig:implementation-axiom-magnetai-setup} documents the concrete
+media-analysis configuration used for the frozen AXIOM run.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.92\textwidth]
+    {images/axiom_magnetai_setup.png}
+    \caption[Magnet AXIOM and Magnet.AI operational setup]{Operational view of
+    the \gls{magnetaxiomtool}/\gls{magnetai} media-categorization setup used in
+    the black-box evaluation. The screenshot documents the activation of the
+    \textit{Weapons} category and the corresponding observable
+    \textit{Possible weapons} tag}
+    \label{fig:implementation-axiom-magnetai-setup}
+\end{figure}
+
 Only the semantically neutral blind input directory was added to the case.
 Neither the bundle metadata nor the structured audit view was imported into
 \gls{magnetaxiomtool}. Consequently, the platform received file names of the
@@ -2393,6 +2476,21 @@ Observable decision field &
 \bottomrule
 \end{tabularx}
 \end{table}
+
+
+Figure~\ref{fig:implementation-griffeye-t3kcore-setup} documents the concrete
+post-import configuration adopted for the frozen Griffeye run.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.82\textwidth]
+    {images/griffeye_t3kcore_setup.png}
+    \caption[Magnet Griffeye and T3K CORE operational setup]{Operational setup
+    of \gls{griffeye}/\gls{t3kcore} used during the black-box evaluation. The
+    screenshot documents the selection of the \gls{t3kcore} plugin for
+    automatic post-import processing}
+    \label{fig:implementation-griffeye-t3kcore-setup}
+\end{figure}
 
 Only the semantically neutral blind input directory was supplied to the
 platform. The metadata directory and the structured audit view were excluded
@@ -2551,26 +2649,22 @@ Table~\ref{tab:implementation-excire-configuration}.
 \toprule
 \textbf{Setting} &
 \textbf{Run identifier} &
-\textbf{Raw hits} &
 \textbf{Bundle rows} &
 \textbf{Normalized tool name} \\
 \midrule
 
 D20 &
 \texttt{FAIRLAB\_EXCIRE\_D20\_FIREARM\_PROMPTS} &
-20\,329 &
 11\,500 &
 \texttt{excire\_foto\_2025\_d20} \\
 
 D50 &
 \texttt{FAIRLAB\_EXCIRE\_D50\_FIREARM\_PROMPTS} &
-32\,076 &
 11\,500 &
 \texttt{excire\_foto\_2025\_d50} \\
 
 D80 &
 \texttt{FAIRLAB\_EXCIRE\_D80\_FIREARM\_PROMPTS} &
-43\,736 &
 11\,500 &
 \texttt{excire\_foto\_2025\_d80} \\
 
@@ -2580,10 +2674,25 @@ D80 &
 \vspace{0.4em}
 \footnotesize
 \textit{Note.} All three configurations were executed with
-\gls{excirefoto2025} version \texttt{4.1.5}. Raw hits are prompt-level
-retrieval records and may include the same bundle image under multiple
-prompts.
+\gls{excirefoto2025} version \texttt{4.1.5}. Raw hits are prompt-level retrieval records and may include the same bundle
+image under multiple prompts.
 \end{table}
+
+
+Figure~\ref{fig:implementation-excire-operational-view} documents the semantic
+retrieval interface used during the frozen Excire runs.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]
+    {images/excire_operational_view.png}
+    \caption[Excire Foto 2025 operational view]{Operational view of
+    \gls{excirefoto2025} during the black-box evaluation. The screenshot
+    documents the blind image collection loaded into the software and the
+    text-prompt retrieval interface used to obtain the observable outputs}
+    \label{fig:implementation-excire-operational-view}
+\end{figure}
+
 
 Only the semantically neutral directory:
 
@@ -2716,10 +2825,11 @@ only the final binary decision. For example, two images may both be normalized
 as positive even though one was retrieved by a single prompt and the other by
 several semantically related prompts.
 
-The three frozen runs produced the prompt-level volumes reported in
-Table~\ref{tab:implementation-excire-configuration}. These counts represent
-retrieval records rather than unique images because the same image may appear
-in multiple prompt hit lists. After union and bundle completion, every
+The three frozen runs produced separate prompt-level export sets. After union
+and bundle completion, every configuration contained exactly one normalized
+prediction for each of the 11\,500 bundle items, and no bundle image remained
+unmatched. The corresponding retrieval volumes and their sensitivity to the
+distance setting are reported in Section~\ref{subsec:results-excire}. After union and bundle completion, every
 configuration contained exactly one normalized prediction for each of the
 11\,500 bundle items, and no bundle image remained unmatched.
 
@@ -3266,6 +3376,8 @@ and:
 \end{center}
 
 
+The normalization stage also produces the audit artifacts listed in
+Table~\ref{tab:implementation-normalization-artifacts}.
 
 \begin{table}[H]
 \centering
@@ -3944,9 +4056,11 @@ ranked according to operational relevance, prioritizing
 \texttt{non\_weapon}-to-\texttt{weapon} transitions and other induced
 misclassifications.
 
-The automatic filtering stage identified 1\,175 candidate records. The
-candidate and manual-selection distribution is reported in
-Table~\ref{tab:implementation-xai-selection-buckets}.
+The automatic filtering stage identified the candidate records satisfying each
+diagnostic criterion. Three cases were initially retained from each bucket for
+human review, producing a 15-case intermediate selection. One representative
+case per bucket was subsequently retained for the thesis-level qualitative
+analysis.
 
 \begin{table}[H]
 \centering
