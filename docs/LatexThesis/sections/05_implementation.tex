@@ -2645,7 +2645,7 @@ Table~\ref{tab:implementation-excire-configuration}.
 \setlength{\tabcolsep}{4pt}
 \caption{Frozen Excire Foto 2025 configurations}
 \label{tab:implementation-excire-configuration}
-\begin{tabularx}{\textwidth}{@{}p{0.12\textwidth} p{0.37\textwidth} r r X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.12\textwidth} p{0.40\textwidth} r X@{}}
 \toprule
 \textbf{Setting} &
 \textbf{Run identifier} &
@@ -2674,8 +2674,7 @@ D80 &
 \vspace{0.4em}
 \footnotesize
 \textit{Note.} All three configurations were executed with
-\gls{excirefoto2025} version \texttt{4.1.5}. Raw hits are prompt-level retrieval records and may include the same bundle
-image under multiple prompts.
+\gls{excirefoto2025} version \texttt{4.1.5}.
 \end{table}
 
 
@@ -2829,9 +2828,8 @@ The three frozen runs produced separate prompt-level export sets. After union
 and bundle completion, every configuration contained exactly one normalized
 prediction for each of the 11\,500 bundle items, and no bundle image remained
 unmatched. The corresponding retrieval volumes and their sensitivity to the
-distance setting are reported in Section~\ref{subsec:results-excire}. After union and bundle completion, every
-configuration contained exactly one normalized prediction for each of the
-11\,500 bundle items, and no bundle image remained unmatched.
+distance setting are reported in
+Section~\ref{subsec:results-excire}.
 
 The raw export directories are expected locally under:
 
@@ -4058,63 +4056,15 @@ misclassifications.
 
 The automatic filtering stage identified the candidate records satisfying each
 diagnostic criterion. Three cases were initially retained from each bucket for
-human review, producing a 15-case intermediate selection. One representative
-case per bucket was subsequently retained for the thesis-level qualitative
-analysis.
+human review, producing a 15-case intermediate selection. The reviewer
+inspected the candidate images through an interactive interface displaying the
+input, fold, ground-truth label, predicted label, confidence, perturbation
+condition, and selection rationale. Selection and deselection actions were
+logged together with their timestamps, ranks, case identifiers, and
+pseudonymous reviewer identifier.
 
-\begin{table}[H]
-\centering
-\small
-\renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{5pt}
-\caption{Human-in-the-loop selection of Integrated Gradients cases}
-\label{tab:implementation-xai-selection-buckets}
-\begin{tabularx}{0.96\textwidth}{@{}X r r@{}}
-\toprule
-\textbf{Case bucket} &
-\textbf{Candidates} &
-\textbf{Initially selected} \\
-\midrule
-
-\texttt{clean\_correct\_weapon} &
-492 &
-3 \\
-
-\texttt{clean\_false\_negative\_weapon} &
-8 &
-3 \\
-
-\texttt{ood\_as\_weapon} &
-139 &
-3 \\
-
-\texttt{anti\_forensic\_failure} &
-36 &
-3 \\
-
-\texttt{adversarial\_high\_conf\_failure} &
-500 &
-3 \\
-
-\midrule
-\textbf{Total} &
-\textbf{1\,175} &
-\textbf{15} \\
-
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The final selection remained human-in-the-loop. The reviewer inspected the
-candidate images in an interactive interface displaying the input, fold,
-ground-truth label, predicted label, confidence, perturbation condition, and
-selection rationale. Selection and deselection actions were logged together
-with their timestamps, ranks, case identifiers, and pseudonymous reviewer
-identifier.
-
-Three cases were initially retained for each bucket. From these 15 manually
-reviewed cases, one representative case per bucket was selected for the thesis.
-The authoritative five-case mapping is:
+One representative case per bucket was subsequently retained for the
+thesis-level qualitative analysis. The authoritative five-case mapping is:
 
 \begin{center}
 \codepath{explainability/manifests/chapter5/thesis_selection.csv}
