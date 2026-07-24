@@ -1015,6 +1015,24 @@ commercial forensic tools. Instead, they provide a transparent reference layer
 through which gradients, logits, probabilities, checkpoints, and attribution
 maps can be accessed directly.
 
+The three architectures were selected to provide complementary experimental
+references rather than to identify a universally superior classification
+model. ResNet18 represents a conventional residual convolutional baseline,
+whereas EfficientNet-B0 provides an efficiency-oriented convolutional
+architecture based on a different design and scaling strategy. The
+\gls{clip}-based proxy introduces a distinct representation paradigm through a
+large-scale pretrained Vision Transformer whose visual encoder is kept frozen
+and adapted to the binary task through a supervised linear head.
+
+This combination makes it possible to compare two fully fine-tuned
+convolutional architectures with a proxy based on frozen pretrained visual
+representations. It also supports the analysis of whether model-dependent
+adversarial artifacts generated against EfficientNet-B0 transfer to
+architecturally different proxy models. The selection was therefore intended to
+provide controlled architectural diversity within a reproducible and fully
+inspectable evaluation layer, not to reproduce the internal models of the
+selected black-box software systems.
+
 All three proxies implement the same binary classification task:
 
 \begin{equation}

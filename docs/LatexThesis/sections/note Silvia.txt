@@ -1,0 +1,75 @@
+keyboard_arrow_down
+04_methodology.tex
+14
+Silvia Sanna
+21 July, 9:13 am
+la metodologia deve spiegare come funziona ad alto livello il tool senza dettagli implementativi o organizzazione di cartelle, creazione di file csv, perchè altre persone devono seguirla come guida adattandola ai loro contesti quindi non forzando csv perchè si potrebbero usare altre strutture come json o altro ancora, addirittura proprietario
+
+Silvia Sanna
+21 July, 9:29 am
+idem no dettagli implementativi. io potrei fare lo stesso con file .c, .java, .silvia
+
+Silvia Sanna
+21 July, 9:45 am
+anche qui, cerca di essere più generico perchè un'altra persona può creare 5 cartelle con 500 immagini ciascuna. oppure 3 cartelle con 1000 immagini ciascuna etc. la metodologia deve essere generale
+
+Silvia Sanna
+21 July, 9:45 am
+ok nel nostro caso ma avendo altri numeri magari hai risultati omogenei anche con 3 cartelle
+
+Silvia Sanna
+21 July, 9:45 am
+idem
+
+Silvia Sanna
+21 July, 9:51 am
+a volte la scrivi così altre volte OOD. sono formalmente entrambe corrette ma è meglio uniformare. si fa così: la prima volta per esteso e tra parentesi l'acronimo, le altre volte sempre l'acronimo
+
+Silvia Sanna
+21 July, 9:54 am
+di solito non si mette il punto alla fine della descrizione delle figure. di solito si mette una specie di titolo affianco a figura n. e poi dopo titolo la descrizione, che spiega la figura non il funzionamento, si cerca anche di evitare (ma questo in generale in tutta la scrittura) una sola riga con una sola parola
+
+Silvia Sanna
+21 July, 9:56 am
+anche qui, descrivere la metodologia generale perchè io potrei usare resnet50 o altre, questi sono dettagli implementativi
+
+Silvia Sanna
+21 July, 10:52 am
+uniforma lo stile dei tool, alcuni sono in texttt, altri con gls per acronimo, altri normali. Segui poi sempre lo stesso stile quando li richiami. ti consiglio textttt
+
+Silvia Sanna
+21 July, 10:53 am
+recorded. in generale controlla grammatica, typo, sintassi, semantica, evita frasi troppo lunghe (di solito max 2 virgole all'interno della frase)
+
+Silvia Sanna
+21 July, 10:55 am
+seguirei 1 l'ordine che metti sopra nell'elenco quando li presenti "The software systems included in the final evaluation are magnet axiom with magnet.ai module, excire blablabla" e raggrupperei griffeye con axiom perchè sempre di magnet sono
+
+Silvia Sanna
+21 July, 10:58 am
+molto bene ma questi sono tutti dettagli implementativi. a questo punto per non buttare quanto hai scritto, io farei così. capitolo 4 metodologia generale dove la descrivi ad alto livello in modo che sia riproducibile per tutti. capitolo 5 dove metti dettagli implementativi come gli script, i csv, le configurazioni dei tool. anche i parametri dei tool sono dettagli implementativi perchè potrebbero cambiare versione, grafica etc e non essere più validi quindi nella metodologia generale dici che hai selezionato la categoria opportuna per la classificazione del tool poi nel dettaglio implementativo inserisci ad esempio questo screen con i dettagli etc
+
+Silvia Sanna
+21 July, 11:00 am
+dettaglio implementativo che, come giustamente scritto più avanti, un'altra persona può scegliere 20 o 80 o 60 come ci eravamo detti etc
+
+Silvia Sanna
+21 July, 11:05 am
+questi sono già dettagli di risultati
+
+
+keyboard_arrow_down
+05_experiments.tex
+3
+Silvia Sanna
+21 July, 12:12 pm
+l'ho visto anche prima nella metodologia ma cosa intendi con proxy models? non l'ho mai sentito... se è qualcosa che hai definito tu va spiegato
+
+Silvia Sanna
+21 July, 12:14 pm
+anche qui, l'ho visto prima nella metodologia ma cosa intendi per stressor? non è un termine frequente
+
+Silvia Sanna
+21 July, 12:24 pm
+ne hai già parlato nella metodologia, non ha senso ripetere
+
