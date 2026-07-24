@@ -232,7 +232,7 @@ constructs a unified candidate pool under:
 
 This stage is deliberately limited to technical preparation. It does not
 perform semantic annotation, assign the final labels
-\texttt{weapon}, \texttt{non_weapon}, or \texttt{ood}, or determine whether
+\texttt{weapon}, \texttt{non\_weapon}, or \texttt{ood}, or determine whether
 an image is suitable for inclusion in the frozen experimental dataset. These
 decisions are deferred to the human-in-the-loop review process described in
 Section~\ref{subsec:implementation-human-review}.
@@ -437,7 +437,7 @@ groups of fields maintained in the review manifest.
 \toprule
 \textbf{Field group} &
 \textbf{Representative fields} &
-\textbf{Implementation role} \
+\textbf{Implementation role} \\
 \midrule
 
 Identity and provenance
@@ -446,42 +446,42 @@ Identity and provenance
 \texttt{source_dataset}, \texttt{source_relative_path}
 &
 Maintains the association among the review decision, the technically prepared
-file, and its original acquisition source. \
+file, and its original acquisition source. \\
 
 Technical metadata
 &
-\texttt{width}, \texttt{height}, \texttt{size_bytes},
-\texttt{extension}, \texttt{is_valid_image}
+\texttt{width}, \texttt{height}, \texttt{size\_bytes},
+\texttt{extension}, \texttt{is\_valid\_image}
 &
 Preserves the technical characteristics established during preparation without
-mixing them with semantic decisions. \
+mixing them with semantic decisions. \\
 
 Optional prelabel fields
 &
-\texttt{auto_label}, \texttt{auto_confidence},
-\texttt{weapon_score}, \texttt{non_weapon_score},
-\texttt{prelabel_status}
+\texttt{auto\_label}, \texttt{auto\_confidence},
+\texttt{weapon\_score}, \texttt{non\_weapon_score},
+\texttt{prelabel\_status}
 &
 Provides schema support for auxiliary prelabeling while keeping this
 information separate from the final human decision. These fields were not used
-to determine the frozen reference assignments. \
+to determine the frozen reference assignments. \\
 
 Manual review fields
 &
-\texttt{final_label}, \texttt{review_state},
-\texttt{review_notes}, \texttt{reviewer_id},
-\texttt{review_timestamp}
+\texttt{final\_label}, \texttt{review\_state},
+\texttt{review\_notes}, \texttt{reviewer\_id},
+\texttt{review\_timestamp}
 &
 Records the operational assignment or review disposition and the state of the
-manual assessment. \
+manual assessment. \\
 
 OOD and exclusion documentation
 &
-\texttt{ood_flag}, \texttt{ood_notes},
-\texttt{exclusion_reason}
+\texttt{ood\_flag}, \texttt{ood\_notes},
+\texttt{exclusion\_reason}
 &
 Supports explicit documentation of borderline, distributionally different, or
-otherwise unsuitable samples. \
+otherwise unsuitable samples. \\
 
 \bottomrule
 \end{tabularx}
@@ -502,15 +502,15 @@ The reviewer loads the full manifest into a persistent working database:
 
 and presents the images in batches of ten, arranged in a five-column grid. The
 interface supports mouse- and keyboard-based assignment to
-\texttt{weapon}, \texttt{non_weapon}, and \texttt{ood}, together with the
+\texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood}, together with the
 review-only \texttt{exclude} disposition. It also supports image zooming, page
 navigation, decision reversal, session changes, saving, and resumption of a
 previous review state.
 
-Two operating modes were implemented. In \texttt{review_pending} mode, the
+Two operating modes were implemented. In \texttt{review\_pending} mode, the
 reviewer inspects unassigned images from a selected source and assigns an
 operational assignment or exclusion disposition. In
-\texttt{review_selection} mode, images already assigned to one of the selected
+\texttt{review\_selection} mode, images already assigned to one of the selected
 experimental groups can be inspected again, optionally filtered by source, and
 returned to the pending pool when the previous assignment is considered
 unsuitable. This second mode provides an explicit quality-control pass over the
@@ -526,7 +526,7 @@ interactive environment used during the human-in-the-loop selection process.
 \caption[Human-in-the-loop review interface]{Human-in-the-loop review
 interface used during final dataset selection. The interface supported the
 manual inspection of candidate images and their assignment to
-\texttt{weapon}, \texttt{non_weapon}, or \texttt{ood}, as well as the
+\texttt{weapon}, \texttt{non\_weapon}, or \texttt{ood}, as well as the
 review-only \texttt{exclude} disposition}
 \label{fig:implementation-human-review-interface}
 \end{figure}
@@ -534,16 +534,16 @@ review-only \texttt{exclude} disposition}
 The assignment criteria displayed by the reviewer reproduce the operational
 definitions established in Chapter~\ref{chap:methodology}. Recognizable and
 realistic firearm-related content is assigned to \texttt{weapon}; realistic and
-interpretable negative content is assigned to \texttt{non_weapon}; borderline,
+interpretable negative content is assigned to \texttt{non\_weapon}; borderline,
 synthetic, replica-like, source-degraded, anomalous, or semantically
 out-of-task content is assigned to the separate \texttt{ood} branch; and
 unusable or irrelevant material is assigned to the review-only
 \texttt{exclude} disposition. When a sample cannot be assigned to either binary
 class with sufficient semantic clarity, the interface directs the reviewer not
-to force the case into \texttt{weapon} or \texttt{non_weapon}.
+to force the case into \texttt{weapon} or \texttt{non\_weapon}.
 
 The application enforces global targets of 500 images for each of the
-\texttt{weapon}, \texttt{non_weapon}, and \texttt{ood} groups. Once the target
+\texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood} groups. Once the target
 for a group is reached, further assignments to that group are blocked unless an
 existing selection is first removed. Advisory source-level targets of 100
 samples per group and source are also displayed. These source-level targets do
@@ -608,7 +608,7 @@ groups. \
 \codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
 &
 Binary subset containing only the selected \texttt{weapon} and
-\texttt{non_weapon} samples used for clean partitioning and perturbation
+\texttt{non\_weapon} samples used for clean partitioning and perturbation
 generation. \
 
 \codepath{datasets/final/manifests/manual_selection_removed.csv}
@@ -636,7 +636,7 @@ locations, and final consistency checks. \
 The frozen working database contained 1,500 reviewed records and 13,821
 records that remained pending. The complete technically prepared pool was
 therefore not reviewed exhaustively. Human assessment continued until the
-predefined targets of 500 \texttt{weapon}, 500 \texttt{non_weapon}, and 500
+predefined targets of 500 \texttt{weapon}, 500 \texttt{non\_weapon}, and 500
 \texttt{ood} images had been reached and subsequently verified through the
 \texttt{review_selection} mode.
 
@@ -656,7 +656,7 @@ Section~\ref{subsec:implementation-dataset-freezing}.
 
 The manual selection process was concluded when the three predefined global
 targets had been reached. The final reviewed selection contained exactly 500
-\texttt{weapon} images, 500 \texttt{non_weapon} images, and 500
+\texttt{weapon} images, 500 \texttt{non\_weapon} images, and 500
 \texttt{ood} images, for a total of 1,500 samples. The remaining candidates
 were not included in the frozen dataset and remained available in the working
 review database without being implicitly assigned to any experimental group.
@@ -699,7 +699,7 @@ composition and the experimental role of each group.
 Positive class of the binary image-classification task and source of the
 target-category samples used for clean and perturbed evaluation. \
 
-\texttt{non_weapon}
+\texttt{non\_weapon}
 &
 500
 &
@@ -741,7 +741,7 @@ rigid source quotas.
 \toprule
 \textbf{Source} &
 \textbf{\texttt{weapon}} &
-\textbf{\texttt{non_weapon}} &
+\textbf{\texttt{non\_weapon}} &
 \textbf{\texttt{ood}} &
 \textbf{Total} \
 \midrule
@@ -788,14 +788,14 @@ rigid source quotas.
 \end{table}
 
 The resulting source composition is non-uniform. In particular, 413 of the 500
-\texttt{non_weapon} samples originate from
+\texttt{non\_weapon} samples originate from
 \texttt{05_deepweb}. This distribution is preserved in the frozen manifest
 and is considered during the interpretation of the experimental results in
 Chapter~\ref{chap:results}.
 
 The \texttt{ood} group was preserved as a distinct evaluation branch and was
 not converted into a third supervised class of the binary task. Consequently,
-only the \texttt{weapon} and \texttt{non_weapon} samples were exported to the
+only the \texttt{weapon} and \texttt{non\_weapon} samples were exported to the
 official binary-subset manifest:
 
 \begin{center}
@@ -803,7 +803,7 @@ official binary-subset manifest:
 \end{center}
 
 The binary subset contains exactly 1,000 images, balanced between 500
-\texttt{weapon} and 500 \texttt{non_weapon} samples. It provides the common
+\texttt{weapon} and 500 \texttt{non\_weapon} samples. It provides the common
 source population for clean-fold construction, proxy-model training, clean
 binary evaluation, and adversarial and anti-forensic perturbation generation.
 The 500 \gls{ood} samples are excluded from proxy-model training and
@@ -833,7 +833,7 @@ Table~\ref{tab:implementation-frozen-manifests}.
 1,500
 &
 Canonical definition of the complete frozen dataset, including the
-\texttt{weapon}, \texttt{non_weapon}, and \texttt{ood} groups. \
+\texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood} groups. \
 
 \codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
 &
@@ -855,7 +855,7 @@ Reserved for candidates explicitly assigned to the review-only
 
 The review application generated the final manifests directly from the
 persistent selection database. Records assigned to \texttt{weapon},
-\texttt{non_weapon}, or \texttt{ood} were exported to the complete frozen
+\texttt{non\_weapon}, or \texttt{ood} were exported to the complete frozen
 manifest, whereas the binary subset was obtained by retaining only the two
 binary-class assignments. No independent relabeling or automatic semantic
 transformation was performed between these exports. The binary-subset manifest
@@ -929,7 +929,7 @@ manifest fields, the expected number of samples, the accepted assignment
 values, the uniqueness of the image identifiers and \gls{sha256} values, and
 the availability of the corresponding prepared image files. The complete
 manifest must contain exactly 500 \texttt{weapon}, 500
-\texttt{non_weapon}, and 500 \texttt{ood} records, whereas the binary subset
+\texttt{non\_weapon}, and 500 \texttt{ood} records, whereas the binary subset
 must contain exactly 500 samples for each of the two supervised classes.
 Generation is interrupted when any of these conditions is not satisfied.
 
@@ -941,7 +941,7 @@ seed:
 \end{center}
 
 Each fold contains exactly 200 images, comprising 100 \texttt{weapon} and 100
-\texttt{non_weapon} samples. Class balance is enforced as a hard constraint,
+\texttt{non\_weapon} samples. Class balance is enforced as a hard constraint,
 whereas source balance is treated as a secondary optimization objective. This
 distinction is necessary because the source distributions of the two classes
 are not identical and cannot always be divided uniformly across all folds.
@@ -970,7 +970,7 @@ source balance without relaxing the mandatory per-class quotas.
 \toprule
 \textbf{Fold} &
 \textbf{\texttt{weapon}} &
-\textbf{\texttt{non_weapon}} &
+\textbf{\texttt{non\_weapon}} &
 \textbf{Total} \
 \midrule
 
@@ -1185,7 +1185,7 @@ the selected black-box software systems.
 All three proxy models implement the same binary classification mapping:
 
 \begin{equation}
-\texttt{non_weapon} \rightarrow 0,
+\texttt{non\_weapon} \rightarrow 0,
 \qquad
 \texttt{weapon} \rightarrow 1.
 \end{equation}
@@ -1387,7 +1387,7 @@ implementation created an internal stratified validation partition by reserving
 The split between training and internal validation data was generated
 deterministically using seed 42. Records were first separated by class,
 shuffled within each class, and then recombined, thereby preserving the balance
-between \texttt{weapon} and \texttt{non_weapon}. The held-out fold was not
+between \texttt{weapon} and \texttt{non\_weapon}. The held-out fold was not
 involved in parameter optimization or checkpoint selection.
 
 The frozen training configuration is summarized in
@@ -1858,7 +1858,7 @@ file names follow the pattern:
 \end{center}
 
 Each condition produces 1,000 perturbed files, comprising 500
-\texttt{weapon} and 500 \texttt{non_weapon} samples distributed as 200 images
+\texttt{weapon} and 500 \texttt{non\_weapon} samples distributed as 200 images
 per fold. The complete adversarial-generation stage therefore produces:
 
 \begin{equation}
@@ -1975,7 +1975,7 @@ generation stage:
 
 Accordingly, each transformation is applied to the complete set of 1,000 clean
 binary images, comprising 500 \texttt{weapon} and 500
-\texttt{non_weapon} samples. The 500 \gls{ood} inputs remain outside this
+\texttt{non\_weapon} samples. The 500 \gls{ood} inputs remain outside this
 stage and are preserved in their clean form for the separate
 out-of-distribution evaluation.
 
@@ -2263,7 +2263,7 @@ Clean binary inputs
 &
 1,000
 &
-500 \texttt{weapon} and 500 \texttt{non_weapon} images from the
+500 \texttt{weapon} and 500 \texttt{non\_weapon} images from the
 deterministic clean folds. \
 
 Clean \gls{ood} inputs
@@ -2304,7 +2304,7 @@ Across the complete bundle, the experimental-group distribution is:
 \begin{equation}
 5,500\ \texttt{weapon}
 +
-5,500\ \texttt{non_weapon}
+5,500\ \texttt{non\_weapon}
 +
 500\ \texttt{ood}
 =
@@ -2667,7 +2667,7 @@ mapped as follows:
 \begin{equation}
 \texttt{weapon_detected = false}
 \longrightarrow
-\texttt{non_weapon}.
+\texttt{non\_weapon}.
 \end{equation}
 
 This recoding represents an operational interpretation of an observable
@@ -2869,7 +2869,7 @@ The corresponding common normalized states were:
 \begin{equation}
 \texttt{weapon_detected = false}
 \longrightarrow
-\texttt{non_weapon}.
+\texttt{non\_weapon}.
 \end{equation}
 
 This mapping aligns an observable software output with the firearm-oriented
@@ -3159,14 +3159,14 @@ The resulting normalized prediction was therefore:
 \begin{cases}
 \texttt{weapon},
 & \text{if at least one fixed prompt retrieved the image},\
-\texttt{non_weapon},
+\texttt{non\_weapon},
 & \text{otherwise}.
 \end{cases}
 \end{equation}
 
 This rule is an operational recoding of semantic-retrieval membership. It does
 not imply that \gls{excirefoto2025} internally performs binary
-\texttt{weapon}/\texttt{non_weapon} classification. Similarly, the distance
+\texttt{weapon}/\texttt{non\_weapon} classification. Similarly, the distance
 settings are software-specific retrieval parameters and must not be interpreted
 as calibrated probabilities or as directly comparable confidence thresholds.
 
@@ -3414,7 +3414,7 @@ The corresponding common normalized states are:
 \begin{equation}
 \texttt{weapon_detected = false}
 \longrightarrow
-\texttt{non_weapon}.
+\texttt{non\_weapon}.
 \end{equation}
 
 The inclusion of \texttt{Pistola} and \texttt{Fucile} alongside the broader
@@ -3657,7 +3657,7 @@ The corresponding normalized prediction is assigned as:
 \begin{cases}
 \texttt{weapon},
 & \text{if \texttt{weapon_detected = true}},\
-\texttt{non_weapon},
+\texttt{non\_weapon},
 & \text{if \texttt{weapon_detected = false}},\
 \texttt{unknown},
 & \text{otherwise}.
@@ -3914,7 +3914,7 @@ they use the same positive and negative reference classes:
 \qquad
 \text{negative class}
 =
-\texttt{non_weapon}.
+\texttt{non\_weapon}.
 \end{equation}
 
 The \gls{ood} branch is handled separately and does not contribute to the
@@ -3949,7 +3949,7 @@ For each evaluated input, the implementation records:
 \item the predicted class;
 \item the maximum predicted-class probability;
 \item the probabilities assigned to \texttt{weapon} and
-\texttt{non_weapon};
+\texttt{non\_weapon};
 \item the probability assigned to the reference class for binary samples;
 \item the correctness state and any evaluation error.
 \end{itemize}
@@ -4062,8 +4062,8 @@ The resulting metric records contain:
 \item \gls{tp}, \gls{tn}, \gls{fp}, and \gls{fn} counts;
 \item \gls{fpr} and \gls{fnr};
 \item misclassification rate;
-\item \texttt{weapon}-to-\texttt{non_weapon} and
-\texttt{non_weapon}-to-\texttt{weapon} error counts;
+\item \texttt{weapon}-to-\texttt{non\_weapon} and
+\texttt{non\_weapon}-to-\texttt{weapon} error counts;
 \item mean maximum predicted-class probability.
 \end{itemize}
 
@@ -4191,7 +4191,7 @@ The resulting records contain:
 \begin{itemize}
 \item the fold-aggregated number of checkpoint responses;
 \item the number and rate of predictions assigned to \texttt{weapon};
-\item the number of predictions assigned to \texttt{non_weapon};
+\item the number of predictions assigned to \texttt{non\_weapon};
 \item the mean maximum predicted-class probability;
 \item the high-confidence threshold;
 \item the number and rate of predictions whose maximum probability meets
@@ -4334,7 +4334,7 @@ The implementation computes:
 \item accuracy;
 \item balanced accuracy;
 \item \texttt{weapon} precision, recall, and F1-score;
-\item \texttt{non_weapon} specificity;
+\item \texttt{non\_weapon} specificity;
 \item \gls{fpr} and \gls{fnr};
 \item \gls{tp}, \gls{tn}, \gls{fp}, and \gls{fn} counts;
 \item the count and rate of \texttt{unknown} normalized decisions;
@@ -4345,7 +4345,7 @@ The implementation computes:
 \end{itemize}
 
 Binary metrics are computed only for records whose reference operational
-assignment is \texttt{weapon} or \texttt{non_weapon}. The \gls{ood}
+assignment is \texttt{weapon} or \texttt{non\_weapon}. The \gls{ood}
 weapon-flag rate instead uses the complete matched \gls{ood} population of the
 corresponding configuration as its operational denominator. This rate
 characterizes observable flagging behavior and is not interpreted as supervised
@@ -4580,9 +4580,9 @@ predicted-class probability by a model-dependent adversarial attack.
 Candidates within each bucket are ordered deterministically according to the
 maximum predicted-class probability, fold, and input path.
 Perturbation-induced failures are additionally ranked according to a predefined
-diagnostic priority: \texttt{weapon}-to-\texttt{non_weapon} transitions are
+diagnostic priority: \texttt{weapon}-to-\texttt{non\_weapon} transitions are
 considered first, followed by
-\texttt{non_weapon}-to-\texttt{weapon} transitions and other induced
+\texttt{non\_weapon}-to-\texttt{weapon} transitions and other induced
 misclassifications.
 
 The automatic filtering stage identified the candidate records satisfying each
