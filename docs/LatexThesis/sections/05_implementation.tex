@@ -78,7 +78,7 @@ technical outputs.
 \toprule
 \textbf{Implementation phase} &
 \textbf{Primary entry points} &
-\textbf{Main outputs} \
+\textbf{Main outputs} \\
 \midrule
 
 Controlled restoration and source acquisition
@@ -87,7 +87,7 @@ Controlled restoration and source acquisition
 and scripts \texttt{01}--\texttt{07}
 &
 Restored or acquired source corpora, acquisition metadata, and locally
-preserved source structures. \
+preserved source structures. \\
 
 Technical preparation and human review
 &
@@ -97,21 +97,21 @@ and
 \codepath{datasets/scripts/final/10_manual_selection_protocol_reviewer.py}
 &
 Validated candidate pool, duplicate and invalid-file reports, review manifests,
-manual decisions, and the frozen-dataset definition. \
+manual decisions, and the frozen-dataset definition. \\
 
 Dataset partitioning
 &
 \codepath{datasets/scripts/splits/11_generate_clean_and_ood_splits.py}
 &
 Deterministic clean folds, the separate \gls{ood} evaluation manifest, and the
-split-generation summary. \
+split-generation summary. \\
 
 Proxy-model training
 &
 \codepath{models/scripts/12_train_proxy_models.py}
 &
 Fold-aware checkpoints, training logs, training summaries, and the model
-registry. \
+registry. \\
 
 Perturbation generation
 &
@@ -120,7 +120,7 @@ and
 \codepath{datasets/scripts/attacks/14_generate_adversarial_attacks.py}
 &
 Anti-forensic and adversarial artifacts, generation manifests, perturbation
-parameters, source-image references, and integrity information. \
+parameters, source-image references, and integrity information. \\
 
 Proxy-model evaluation and bundle construction
 &
@@ -129,7 +129,7 @@ and
 \codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py}
 &
 Proxy-model predictions, evaluation metrics, and the blind and auditable
-11,500-file forensic evaluation bundle. \
+11,500-file forensic evaluation bundle. \\
 
 Explainability and black-box normalization
 &
@@ -139,7 +139,7 @@ and
 \codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}
 &
 Attribution maps, human-reviewed case selections, normalized black-box
-predictions, matching reports, and software-version records. \
+predictions, matching reports, and software-version records. \\
 
 Reporting and validation
 &
@@ -147,7 +147,7 @@ Scripts \texttt{20}--\texttt{24} under
 \codepath{results/scripts/}
 &
 Thesis-ready tables and figures, embedded-metadata sensitivity outputs,
-frozen-result validation reports, and reporting-asset audits. \
+frozen-result validation reports, and reporting-asset audits. \\
 
 \bottomrule
 \end{tabularx}
@@ -173,7 +173,7 @@ repository-level \codepath{requirements.txt} file and includes the libraries
 used for numerical processing, image manipulation, proxy-model training and
 inference, adversarial generation, explainability, visualization, and source
 acquisition. The deep-learning implementation is based on PyTorch and
-Torchvision, with \texttt{open_clip_torch} used for the \gls{clip}-based
+Torchvision, with \texttt{open\_clip\_torch} used for the \gls{clip}-based
 proxy model and Captum used for the Integrated Gradients workflow.
 
 The code supports both CPU and CUDA-enabled execution, with device selection
