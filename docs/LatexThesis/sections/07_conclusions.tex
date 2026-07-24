@@ -1,5 +1,5 @@
 % ─────────────────────────────────────────────────────────────────────────────
-\chapter{Conclusions, Limitations and Future Work}
+\chapter{Conclusions, Limitations, and Future Work}
 \label{chap:conclusions}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -27,17 +27,23 @@ study assessed whether high nominal performance remains stable when input
 conditions change and whether the resulting errors create operational risks for
 forensic triage.
 
-The experimental design combined two complementary evaluation levels. The first used the transparent EfficientNet-B0, ResNet18, and \gls{clip} proxy
-models, which enabled controlled analysis of predictions, confidence-related
-indicators, robustness degradation, and error direction. Selected attribution
-patterns were additionally examined for EfficientNet-B0 through the qualitative
-\gls{xai} analysis. The second evaluated
+The experimental design combined two complementary evaluation levels. The
+first level comprised three transparent proxy models: EfficientNet-B0,
+ResNet18, and \gls{clip}. In this thesis, proxy models denote fully inspectable
+experimental reference models used to analyze predictions, confidence-related
+indicators, robustness degradation, and error direction under controlled
+conditions. Selected attribution patterns were additionally examined for
+EfficientNet-B0 through the qualitative \gls{xai} analysis.
+
+The second level comprised
 \gls{magnetaxiomtool}/\gls{magnetai},
-\gls{excirefoto2025}, \gls{cellebriteinseyets}, and
-\gls{griffeye}/\gls{t3kcore} as black-box or near-black-box software systems,
-using only their observable outputs and documented normalization rules. The
-proxy models were not intended to reproduce the proprietary internal models of
-these systems; they served as fully inspectable experimental references.
+\gls{griffeye}/\gls{t3kcore},
+\gls{excirefoto2025}, and
+\gls{cellebriteinseyets}. These systems were evaluated as black-box or
+near-black-box software systems using only observable outputs and documented
+normalization rules. The proxy models were not intended to reproduce their
+proprietary internal models; they served as fully inspectable experimental
+references.
 
 A central methodological feature was the use of the same frozen experimental
 corpus at both evaluation levels. The corpus comprised a 1\,000-image binary
@@ -89,17 +95,20 @@ Second, the work establishes a common frozen experimental basis for parallel
 proxy-model and black-box evaluation. The final dataset contains 500
 \texttt{weapon} images, 500 \texttt{non\_weapon} images, and 500 images
 reserved for the separate \gls{ood} branch. The same underlying samples and
-derived artifacts are used across the two evaluation levels.
+derived artifacts were used across the two evaluation levels.
+
 The model-dependent adversarial artifacts generated against the fold-aware
 EfficientNet-B0 checkpoints were subsequently evaluated on the other proxy
 architectures and submitted, through the blind bundle, to all selected
-black-box configurations. The proxy-model pipeline therefore served not only
-as an inspectable evaluation layer but also as the controlled source of the
-adversarial artifacts used in the parallel black-box assessment. The proxy models
-process manifest-linked experimental files, whereas the selected software
-systems receive byte-identical anonymized copies through the blind bundle. This
-design makes the comparison dependent on system behavior and output mapping,
-not on independently assembled datasets.
+black-box configurations. The proxy-model pipeline therefore served both as an
+inspectable evaluation layer and as the controlled generation layer for the
+model-dependent adversarial artifacts used in the parallel black-box
+assessment.
+
+The proxy models processed manifest-linked experimental artifacts, whereas the
+selected software systems received byte-identical image copies under anonymized
+bundle identifiers. This design makes the comparison dependent on system
+behavior and output mapping, rather than on independently assembled datasets.
 
 Third, the thesis provides a traceable experimental artifact. Stable
 identifiers, manifests, fold assignments, model checkpoints, generated-image
@@ -110,18 +119,20 @@ controlled reproducibility is maintained throughout the implementation. This is
 particularly important when complete source datasets or proprietary software
 exports cannot be publicly redistributed.
 
-Fourth, the study provides an operational comparison between transparent proxy
-models and selected black-box software systems under the same clean,
-\gls{ood}, adversarial, and anti-forensic conditions. This comparison is not
-architectural and does not assume that the proxy models reconstruct proprietary
-components. Instead, it connects controlled model behavior with the observable
-behavior of systems used for classification, tagging, semantic retrieval, or
-bookmark generation. The analysis emphasizes false negatives, false-positive
-workload, \gls{ood} weapon assignments, configuration sensitivity, transfer
-behavior, and the need for human review.
+Fourth, the study provides an error-oriented operational analysis of
+heterogeneous automated image-analysis systems. The comparison does not assume
+architectural equivalence among the evaluated components. Instead, it examines
+their observable behavior through false negatives, false-positive workload,
+\gls{ood} weapon assignments, configuration sensitivity, transfer behavior,
+and the continued need for human review. This perspective makes it possible to
+compare different operational risk profiles without constructing an absolute
+ranking among systems.
 
-The contribution is completed by a qualitative \gls{xai} analysis based on
-\gls{ig} for five representative EfficientNet-B0 cases. These visualizations
+A complementary qualitative \gls{xai} analysis was conducted using
+\gls{ig} on five representative EfficientNet-B0 cases. These visualizations
+support the diagnosis of selected correct and incorrect decisions. They are not
+treated as independent evidence of robustness and are not extended to the
+selected black-box software systems. These visualizations
 support the diagnosis of selected correct and incorrect decisions, but they are
 not treated as independent evidence of robustness and are not extended to the
 selected black-box software systems.
@@ -213,8 +224,8 @@ Metadata sensitivity
 
 \gls{xai}
 & \gls{ig} makes five representative EfficientNet-B0 cases more directly
-  inspectable, including clean, \gls{ood}, anti-forensic, and adversarial
-  failures.
+  inspectable: one correct clean case and four failure cases involving clean,
+  \gls{ood}, anti-forensic, and adversarial conditions.
 & Explainability supports qualitative diagnosis but does not replace
   quantitative evaluation, convergence analysis, or expert validation. \\
 
@@ -232,10 +243,10 @@ workload.
 The separate \gls{ood} analysis identifies a distinct operational risk. The
 \gls{ood} samples are neither a third supervised class nor ordinary negative
 instances. They include anomalous, borderline, degraded, synthetic, and
-semantically adjacent content. The observed weapon-assignment rates show that
-both proxy models and selected black-box configurations may force such inputs
-into the closed-set binary task. These results do not demonstrate the absence
-or presence of investigative relevance in each \gls{ood} image; they describe
+semantically adjacent content. The observed weapon-assignment rates show that both proxy models and selected
+black-box configurations may map such inputs to one of the two closed-set
+operational classes. These results do not establish whether each \gls{ood} image is
+investigatively relevant; they describe
 how systems behave when confronted with content outside the nominal binary
 population.
 
@@ -278,8 +289,8 @@ traceability, and the continued role of human review.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The experimental evidence supports the use of automated image-analysis systems
-as triage aids rather than as autonomous evidentiary decision makers. Their
-principal operational value lies in helping analysts prioritize and organize
+as triage aids rather than as autonomous systems for evidentiary
+decision-making. Their principal operational value lies in helping analysts prioritize and organize
 large collections of multimedia content. This value depends, however, on the
 ability to reconstruct how a result was produced and to verify it against the
 source artifact and the broader investigative context.
@@ -332,7 +343,7 @@ oversight, reliability, and accountability in trustworthy \gls{ai}
 \label{sec:conclusions-limitations}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The findings are supported within the frozen protocol and the defined case
+The findings apply within the scope of the frozen protocol and the defined case
 study. They must not be interpreted as a universal validation of the evaluated
 models or software systems. The principal limitations are summarized below.
 
@@ -388,7 +399,7 @@ models or software systems. The principal limitations are summarized below.
     be isolated directly.
 
     \item The study evaluates operational triage behavior and does not determine
-    the legal admissibility or evidentiary weight of automated outputs. Such
+    the legal admissibility or evidentiary weight of automated outputs. Such an
     assessment would require consideration of the applicable legal framework,
     chain-of-custody requirements, independent validation, and case-specific
     evidentiary context.
@@ -453,9 +464,9 @@ realistic evidence-handling or content-sharing processes.
 A specific extension should address residual embedded metadata. Matched
 metadata-preserving and metadata-neutralized versions of the same blind bundle
 would make it possible to isolate the contribution of visual content from
-metadata-dependent behavior. This comparison would strengthen blind-input
-validation and provide a direct sensitivity control for systems that index embedded metadata fields, filenames, or other non-pixel
-information.
+metadata-dependent behavior. This comparison would strengthen blind-input validation.
+It would also provide a direct sensitivity control for systems that index embedded metadata,
+filenames, or other non-pixel information.
 
 The explainability component could be broadened through additional methods,
 larger case sets, stability analysis, and explicit attribution-convergence
@@ -480,11 +491,13 @@ proprietary material.
 \label{sec:conclusions-closing}
 % ─────────────────────────────────────────────────────────────────────────────
 
+
 This thesis has shown that the operational robustness of \gls{ai}-based image
-classification in \gls{df} cannot be reduced to clean accuracy. The same
-systems that perform well under nominal conditions may exhibit missed
+classification in \gls{df} cannot be reduced to clean accuracy. Systems that
+perform well under nominal conditions may nevertheless exhibit missed
 detections, additional review workload, \gls{ood} absorption, configuration
 sensitivity, or severe degradation under specific manipulations.
+
 
 The central contribution is the parallel evaluation of transparent proxy models
 and selected black-box software systems on the same frozen experimental corpus.
@@ -495,11 +508,13 @@ evaluation bundle make the complete process traceable from the source image to
 the reported metric.
 
 Within the defined scope, no evaluated system can be considered unconditionally
-robust. This conclusion does not preclude the use of \gls{ai}-assisted tools in
-forensic workflows. It defines the conditions required for their responsible
-use: task-specific validation, documented versions and configurations, explicit
-management of anomalous inputs, traceable artifacts, transparent mapping rules,
-and expert review of the resulting outputs.
+robust.
+
+This conclusion does not preclude the use of \gls{ai}-assisted software
+systems in forensic workflows. It defines the conditions required for their
+responsible use: task-specific validation, documented versions and
+configurations, explicit management of anomalous inputs, traceable artifacts,
+transparent mapping rules, and expert review of the resulting outputs.
 
 Operational robustness must therefore be demonstrated under the conditions in
 which a system is expected to operate. It cannot be presumed from nominal
