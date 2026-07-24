@@ -668,12 +668,7 @@ some cases, such as \gls{sigmazero}, the perturbed accuracy of \gls{clip} and
 ResNet18 is slightly higher than the respective clean baseline; this effect is
 interpreted as a distribution-specific oscillation and not as evidence of
 general robustness.
-\gls{clip} shows even more limited variations, with the maximum degradation
-equal to 0.013 under \gls{fgsm}. In some cases, such as \gls{sigmazero}, the
-perturbed accuracy of \gls{clip} and ResNet18 is slightly higher than the
-respective clean baseline; this effect is interpreted as an oscillation
-specific to the evaluated distribution and not as evidence of general
-robustness.
+
 
 Table~\ref{tab:results-adversarial-operational-errors} reports additional
 operational indicators for the most relevant adversarial conditions. These
@@ -2383,7 +2378,7 @@ software systems.
 \centering
 \caption{Comparison of robustness under adversarial perturbations}
 \label{tab:results-comparative-adversarial}
-\small
+\footnotesize
 \renewcommand{\arraystretch}{1.18}
 \setlength{\tabcolsep}{3pt}
 \begin{tabularx}{\textwidth}{@{}p{2.7cm} p{1.8cm} p{3.1cm} p{2.8cm} X@{}}
