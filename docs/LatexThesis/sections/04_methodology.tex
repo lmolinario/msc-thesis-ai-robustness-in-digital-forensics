@@ -1,3 +1,4 @@
+
 % ─────────────────────────────────────────────────────────────────────────────
 \chapter{Methodology}
 \label{chap:methodology}
@@ -13,20 +14,24 @@ conditions with operationally relevant forensic scenarios.
 Rather than describing a specific software implementation, the chapter
 formalizes a general experimental protocol that can be adapted to different
 datasets, classification architectures, storage formats, and software tools.
-The protocol connects dataset construction, human validation, controlled
+The protocol integrates dataset construction, human validation, controlled
 classification experiments, adversarial attacks, anti-forensic transformations,
 black-box software evaluation, quantitative metrics, explainability, and
 traceability within the \gls{fairlab} framework.
 
 A central methodological principle of the thesis is the use of a common frozen
 experimental corpus across two complementary evaluation levels. The first level
-uses fully inspectable classification models under controlled and reproducible
-conditions. The second level applies the same experimental artifacts to
-selected \gls{ai}-based software systems evaluated as black-box or
-near-black-box components. This parallel design enables a direct comparison
-between experimentally controlled model behavior and the observable operational
-behavior of external software systems, without assuming access to their
-internal architectures or decision processes.
+uses fully inspectable experimental reference models, hereafter referred to as
+proxy models, to study controlled classification behavior, robustness
+degradation, transferability, confidence patterns, and error direction. These
+models are not intended to replicate, reconstruct, or reverse engineer the
+architectures or decision processes of proprietary systems. The second level
+applies the same experimental samples and derived artifacts to selected
+\gls{ai}-based software systems evaluated as black-box or near-black-box
+components. This parallel design supports a structured comparison between
+experimentally controlled model behavior and the observable operational
+behavior of the selected black-box software systems, without assuming access
+to their internal architectures or decision processes.
 
 The chapter first introduces the overall \gls{fairlab} framework and the
 experimental assumptions underlying the case study. It then describes the
@@ -51,63 +56,67 @@ Chapter~\ref{chap:results}.
 
 The methodology is organized around the \gls{fairlab} experimental protocol,
 which provides a structured framework for evaluating the robustness of
-automated image-classification systems under clean, anomalous, adversarial, and
-anti-forensic conditions. Its purpose is to make the evaluation process
-reproducible and auditable while remaining sufficiently general to accommodate
-different datasets, classification models, software tools, and implementation
-technologies.
+automated image-classification systems under clean, out-of-distribution,
+adversarial, and anti-forensic conditions. Its purpose is to make the evaluation
+process reproducible and auditable while remaining sufficiently general to
+accommodate different datasets, classification models, software systems, and
+implementation technologies.
 
 The protocol extends beyond a conventional assessment of classification
 accuracy. In forensic workflows, automated classification may influence the
 prioritization of digital evidence and the allocation of human analytical
 resources. Robustness must therefore be assessed not only as a technical
-property of a classifier, but also in terms of its possible operational
+property of a classifier, but also in terms of its potential operational
 consequences. These include the risk of overlooking relevant content,
 increasing the analytical workload through false positives, or assigning
-confident in-domain labels to anomalous inputs.
+confident in-domain labels to out-of-distribution inputs.
 
 The \gls{fairlab} protocol integrates two complementary evaluation levels. The
 first is a controlled evaluation based on \textit{proxy classification models}.
-In this thesis, this term denotes fully inspectable machine-learning models used
-as experimental surrogates for analyzing classification behavior, robustness
-degradation, and explainability under reproducible conditions. These models are
-not intended to reproduce the proprietary internal architectures of the
-evaluated software tools. Instead, they provide a controlled reference against
-which the effects of the selected evaluation conditions can be systematically
-observed.
+In this thesis, this term denotes fully inspectable experimental reference
+models used to study controlled classification behavior, robustness
+degradation, transferability, confidence patterns, and error direction under
+reproducible conditions. These models are not replicas, functionally equivalent
+substitutes, or reverse-engineered reconstructions of the proprietary
+architectures or decision processes of the evaluated software systems. Instead,
+they provide a controlled reference through which the effects of the selected
+evaluation conditions can be systematically examined.
 
-The second level consists of the operational black-box evaluation of
-\gls{ai}-based tools. At this level, the tools are assessed exclusively through
-their observable inputs and outputs. No assumptions are made regarding their
-internal model architectures, training data, confidence calibration, or
-decision logic. This distinction is particularly relevant for proprietary
-systems whose internal components are only partially documented or are not
-accessible to the evaluator
-\cite{sanna2024preliminary,sanna2025pixelperfect}.
+The second level consists of the operational evaluation of selected
+\gls{ai}-based software systems under black-box or near-black-box access
+conditions. At this level, the systems are assessed exclusively through their
+observable inputs and outputs. No assumptions are made regarding their internal
+model architectures, training data, confidence calibration, or decision logic.
+This distinction is particularly relevant for proprietary systems whose
+internal components are only partially documented or are not accessible to the
+evaluator \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 Both evaluation levels rely on the same frozen experimental corpus. This shared
 foundation ensures that differences between the controlled models and the
-black-box tools are not caused by inconsistencies in the evaluated data. The
-corpus includes a binary in-domain component used for clean and perturbed
-evaluation, together with a separate \gls{ood} branch. The latter is not treated
-as a third supervised class. Instead, it is used to examine whether anomalous,
-borderline, synthetic, degraded, or otherwise distributionally different inputs
-are forced into the operational classes of the binary task.
+selected black-box software systems are not caused by inconsistencies in the
+evaluated data. The corpus includes a binary in-domain component used for clean
+and perturbed evaluation, together with a separate \gls{ood} branch. The latter
+is not treated as a third supervised class. Instead, it is used to examine
+whether out-of-distribution, borderline, synthetic, or otherwise
+distributionally different inputs are assigned to the operational classes of
+the binary task.
 
 Adversarial attacks and anti-forensic transformations are applied only to the
 binary evaluation component. The clean \gls{ood} branch is preserved separately
 so that distributional mismatch is not conflated with deliberate or incidental
-input manipulation. The resulting clean, \gls{ood}, adversarial, and
-anti-forensic artifacts form a common evaluation bundle. This bundle supports
-both the controlled analysis of the proxy classification models and the
-black-box analysis of the selected \gls{ai}-based tools.
+input manipulation. The resulting clean samples, clean \gls{ood} inputs,
+adversarial artifacts, and anti-forensic artifacts form a common evaluation
+bundle. This bundle supports both the controlled analysis of the proxy
+classification models and the operational analysis of the selected black-box
+software systems.
 
 The protocol also incorporates quantitative evaluation, explainability, and
 traceability. Quantitative metrics characterize classification performance and
-robustness degradation. Explainability methods support the examination of
-representative model decisions and failure cases. Traceability controls preserve
-the relationship between source samples, derived artifacts, experimental
-conditions, and observed outputs.
+robustness degradation. Explainability methods support the qualitative
+examination of representative decisions and failure cases for a selected
+inspectable proxy model; they are not extended to the selected black-box
+software systems. Traceability controls preserve the relationships among source
+samples, derived artifacts, experimental conditions, and observed outputs.
 
 Figure~\ref{fig:methodology-fairlab-overview} summarizes the resulting workflow.
 It shows the construction and validation of the frozen dataset, the separation
@@ -120,63 +129,63 @@ they represent one concrete instantiation of the general methodology.
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
-    >=latex,
-    font=\small,
-    block/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.4cm,
-        fill=gray!10
-    },
-    process/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.4cm,
-        fill=blue!8
-    },
-    subset/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.10cm,
-        minimum width=6.4cm,
-        fill=yellow!12
-    },
-    eval/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=6.8cm,
-        fill=orange!12
-    },
-    output/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=8.0cm,
-        fill=green!10
-    },
-    arrow/.style={
-        ->,
-        thick,
-        draw=black!75
-    }
+>=latex,
+font=\small,
+block/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.4cm,
+fill=gray!10
+},
+process/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.4cm,
+fill=blue!8
+},
+subset/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.10cm,
+minimum width=6.4cm,
+fill=yellow!12
+},
+eval/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=6.8cm,
+fill=orange!12
+},
+output/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=8.0cm,
+fill=green!10
+},
+arrow/.style={
+->,
+thick,
+draw=black!75
+}
 ]
 
 % -------------------------------------------------------------------------
@@ -184,20 +193,20 @@ they represent one concrete instantiation of the general methodology.
 % -------------------------------------------------------------------------
 \node[block] (sources) at (0,0)
 {\shortstack{
-    \textbf{Heterogeneous source image pool}\\[1mm]
-    \scriptsize image sources and provenance information
+\textbf{Heterogeneous source image pool}\[1mm]
+\scriptsize image sources and provenance information
 }};
 
 \node[process] (review) at (0,-1.9)
 {\shortstack{
-    \textbf{Human-in-the-loop validation}\\[1mm]
-    \scriptsize technical validation, semantic review, and sample selection
+\textbf{Human-in-the-loop validation}\[1mm]
+\scriptsize technical validation, semantic review, and sample selection
 }};
 
 \node[process] (dataset) at (0,-3.8)
 {\shortstack{
-    \textbf{Frozen experimental dataset}\\[1mm]
-    \scriptsize stable and traceable corpus for subsequent evaluation
+\textbf{Frozen experimental dataset}\[1mm]
+\scriptsize stable and traceable corpus for subsequent evaluation
 }};
 
 % -------------------------------------------------------------------------
@@ -205,14 +214,14 @@ they represent one concrete instantiation of the general methodology.
 % -------------------------------------------------------------------------
 \node[subset] (binary) at (-4.3,-6.2)
 {\shortstack{
-    \textbf{Binary in-domain component}\\[1mm]
-    \scriptsize clean positive and negative samples
+\textbf{Binary in-domain component}\[1mm]
+\scriptsize clean positive and negative samples
 }};
 
 \node[subset] (ood) at (4.3,-6.2)
 {\shortstack{
-    \textbf{Clean \gls{ood} component}\\[1mm]
-    \scriptsize anomalous, borderline, or distributionally different samples
+\textbf{Clean \gls{ood} component}\[1mm]
+\scriptsize out-of-distribution, borderline, or synthetic samples
 }};
 
 % -------------------------------------------------------------------------
@@ -220,9 +229,9 @@ they represent one concrete instantiation of the general methodology.
 % -------------------------------------------------------------------------
 \node[process] (perturb) at (-4.3,-8.8)
 {\shortstack{
-    \textbf{Perturbation generation}\\[1mm]
-    \scriptsize adversarial attacks and anti-forensic transformations\\
-    \scriptsize applied to the binary component
+\textbf{Perturbation generation}\[1mm]
+\scriptsize adversarial attacks and anti-forensic transformations\
+\scriptsize applied to the binary component
 }};
 
 % -------------------------------------------------------------------------
@@ -230,8 +239,8 @@ they represent one concrete instantiation of the general methodology.
 % -------------------------------------------------------------------------
 \node[process] (bundle) at (0,-11.3)
 {\shortstack{
-    \textbf{Common evaluation bundle}\\[1mm]
-    \scriptsize clean, \gls{ood}, adversarial, and anti-forensic artifacts
+\textbf{Common evaluation bundle}\[1mm]
+\scriptsize clean, \gls{ood}, adversarial, and anti-forensic artifacts
 }};
 
 % -------------------------------------------------------------------------
@@ -239,14 +248,14 @@ they represent one concrete instantiation of the general methodology.
 % -------------------------------------------------------------------------
 \node[eval] (proxy) at (-4.3,-14.1)
 {\shortstack{
-    \textbf{Controlled proxy-model evaluation}\\[1mm]
-    \scriptsize inspectable models under reproducible conditions
+\textbf{Controlled proxy-model evaluation}\[1mm]
+\scriptsize inspectable models under reproducible conditions
 }};
 
 \node[eval] (tools) at (4.3,-14.1)
 {\shortstack{
-    \textbf{Black-box tool evaluation}\\[1mm]
-    \scriptsize observable inputs and normalized outputs
+\textbf{Black-box software evaluation}\[1mm]
+\scriptsize observable inputs and normalized outputs
 }};
 
 % -------------------------------------------------------------------------
@@ -254,8 +263,8 @@ they represent one concrete instantiation of the general methodology.
 % -------------------------------------------------------------------------
 \node[output] (analysis) at (0,-17.0)
 {\shortstack{
-    \textbf{Operational robustness analysis}\\[1mm]
-    \scriptsize metrics, explainability, traceability, and comparative assessment
+\textbf{Operational robustness analysis}\[1mm]
+\scriptsize metrics, proxy-model explainability, traceability, and comparative assessment
 }};
 
 % -------------------------------------------------------------------------
@@ -280,13 +289,11 @@ they represent one concrete instantiation of the general methodology.
 
 \end{tikzpicture}%
 }
-\caption[FAIR-Lab experimental protocol]{FAIR-Lab experimental protocol. A
-heterogeneous source pool undergoes human-in-the-loop validation and dataset
-freezing. The resulting corpus is divided into a binary in-domain component and
-a separate clean \gls{ood} component. Adversarial and anti-forensic
-perturbations are applied only to the binary component. The resulting artifacts
-form a common bundle used for controlled proxy-model evaluation and black-box
-tool evaluation}
+\caption[FAIR-Lab experimental protocol]{FAIR-Lab experimental protocol. The
+frozen corpus is divided into a binary in-domain component and a separate clean
+\gls{ood} branch. Perturbations are applied only to the binary component, and
+the resulting common bundle is evaluated through complementary proxy-model and
+black-box software analyses}
 \label{fig:methodology-fairlab-overview}
 \end{figure}
 
@@ -303,12 +310,12 @@ relevant images.
 
 The case study is based on a binary classification task and a separate
 \gls{ood} evaluation branch. The binary task distinguishes between the
-operational labels \texttt{weapon} and \texttt{non\_weapon}. The \texttt{ood}
-label identifies samples reserved for a separate analysis of distributional
-mismatch. These labels must not be interpreted as legal qualifications of the
-depicted content or as universal semantic categories. They are operational
-definitions established specifically for the experimental protocol adopted in
-this thesis.
+operational labels \texttt{weapon} and \texttt{non_weapon}. The \gls{ood}
+designation identifies samples reserved for a separate analysis of
+distributional mismatch. These designations must not be interpreted as legal
+qualifications of the depicted content or as universal semantic categories.
+They are operational definitions established specifically for the experimental
+protocol adopted in this thesis.
 
 The study does not attempt to cover the entire domain of weapon detection.
 Instead, it defines a controlled, firearm-related case study that is
@@ -318,16 +325,16 @@ sufficient visual variability for robustness assessment.
 
 Within the binary task, \texttt{weapon} represents the positive class. It
 includes images in which a clearly recognizable object belonging to the
-firearm-related target category is visible. The \texttt{non\_weapon} class
+firearm-related target category is visible. The \texttt{non_weapon} class
 represents the in-domain negative class. It includes realistic and interpretable
 images that do not contain the target object while remaining compatible with
 the visual domain of the experimental collection.
 
 The \gls{ood} branch includes images that should not be treated as ordinary
 positive or negative instances. These samples may be ambiguous, anomalous,
-synthetic, degraded, borderline, or drawn from a different visual distribution.
-The \gls{ood} branch is therefore not modeled as a third supervised class within
-the binary task.
+synthetic, borderline, drawn from a different visual distribution, or affected
+by degradation already present in the source material. The \gls{ood} branch is
+therefore not modeled as a third supervised class within the binary task.
 
 In the forensic triage scenario considered in this thesis, false negatives on
 the \texttt{weapon} class are particularly critical. They may reduce the
@@ -335,7 +342,7 @@ likelihood that potentially relevant material is selected for detailed human
 review. False positives also have operational consequences because they may
 increase the number of irrelevant images requiring manual examination.
 
-The class-assignment criteria were formalized before the experimental corpus was
+The assignment criteria were formalized before the experimental corpus was
 frozen. The same criteria governed human-in-the-loop validation, sample
 selection, and the documentation of inclusion and exclusion decisions.
 Table~\ref{tab:methodology-operational-classes} summarizes the resulting
@@ -349,9 +356,9 @@ operational definitions.
 \renewcommand{\arraystretch}{1.05}
 \begin{tabularx}{\textwidth}{@{}L{3.0cm}L{3.6cm}X@{}}
 \toprule
-\textbf{Label} &
+\textbf{Designation} &
 \textbf{Role in the protocol} &
-\textbf{Operational assignment criterion} \\
+\textbf{Operational assignment criterion} \
 \midrule
 
 \texttt{weapon}
@@ -363,9 +370,9 @@ content. Representative examples include pistols, rifles, submachine guns, and
 shotguns. The target object must be sufficiently visible and reliably
 attributable to the experimental category. Marginal, strongly occluded,
 excessively ambiguous, synthetic, toy-like, replica-like, or airsoft-like
-objects are excluded from this class. \\
+objects are excluded from this class. \
 
-\texttt{non\_weapon}
+\texttt{non_weapon}
 &
 In-domain negative class of the binary task
 &
@@ -375,91 +382,94 @@ people, environments, vehicles, ordinary objects, and indoor or outdoor scenes.
 Borderline, synthetic, or anomalous content is excluded. Images containing
 knives, swords, replicas, airsoft weapons, toy weapons, videogame weapons, or
 rendered weapon-like objects are also excluded because they may introduce
-semantic ambiguity. \\
+semantic ambiguity. \
 
-\texttt{ood}
+\gls{ood}
 &
 Separate branch for distributional evaluation
 &
 Borderline, anomalous, or non-representative images that do not constitute clean
 positive or negative samples. Examples include knives, swords, replicas, toys,
 airsoft weapons, videogame weapons, \gls{cgi} content, synthetic images,
-generated images, tanks, missiles, explosions, and war scenes. The branch also
-includes strongly degraded, unusual, or semantically ambiguous images. Such
-content may be contextually related to weapons or violence without constituting
-a valid sample for the binary task. \\
+generated images, tanks, missiles, explosions, and war scenes. The branch may
+also include source images that are strongly degraded, unusual, or semantically
+ambiguous. These inputs are retained without experimental manipulation and are
+not equivalent to the adversarial or anti-forensic artifacts generated in later
+stages. Such content may be contextually related to weapons or violence without
+constituting a valid sample for the binary task. \
 
 \texttt{exclude}
 &
-Review-only exclusion label
+Review-only exclusion designation
 &
 Images that are corrupted, unreadable, unusable, non-interpretable, or
-semantically irrelevant to the experimental protocol. This label is used during
-human review to document the removal of unsuitable samples. Excluded images do
-not contribute to the frozen dataset or to any subsequent evaluation branch. \\
+semantically irrelevant to the experimental protocol. This designation is used
+during human review to document the removal of unsuitable samples. Excluded
+images do not contribute to the frozen dataset or to any subsequent evaluation
+branch. \
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
 Figure~\ref{fig:methodology-class-examples} presents representative examples of
-the three analytical categories. The examples are illustrative and do not
-exhaust the internal variability of the corresponding groups.
+the two binary classes and the separate \gls{ood} branch. The examples are
+illustrative and do not exhaust the internal variability of the corresponding
+groups.
 
 \begin{figure}[H]
 \centering
 
 \begin{minipage}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[
-        width=\textwidth,
-        height=4.0cm,
-        keepaspectratio
-    ]{images/Arma}
-    \vspace{1mm}
+\centering
+\includegraphics[
+width=\textwidth,
+height=4.0cm,
+keepaspectratio
+]{images/Arma}
+\vspace{1mm}
 
-    \textbf{\texttt{weapon}}\\
-    \footnotesize
-    Recognizable firearm-related content consistent with the binary target class
+\textbf{\texttt{weapon}}\\
+\footnotesize
+Recognizable firearm-related content consistent with the binary target class
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[
-        width=\textwidth,
-        height=4.0cm,
-        keepaspectratio
-    ]{images/Non_Arma}
-    \vspace{1mm}
+\centering
+\includegraphics[
+width=\textwidth,
+height=4.0cm,
+keepaspectratio
+]{images/Non_Arma}
+\vspace{1mm}
 
-    \textbf{\texttt{non\_weapon}}\\
-    \footnotesize
-    Realistic negative content containing no object from the target category
+\textbf{\texttt{non\_weapon}}\\
+\footnotesize
+Realistic negative content containing no object from the target category
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.31\textwidth}
-    \centering
-    \includegraphics[
-        width=\textwidth,
-        height=4.0cm,
-        keepaspectratio
-    ]{images/ood}
-    \vspace{1mm}
+\centering
+\includegraphics[
+width=\textwidth,
+height=4.0cm,
+keepaspectratio
+]{images/ood}
+\vspace{1mm}
 
-    \textbf{\texttt{ood}}\\
-    \footnotesize
-    Borderline or distributionally different content kept outside the binary task
+\textbf{\gls{ood}}\\
+\footnotesize
+Borderline or distributionally different content kept outside the binary task
 \end{minipage}
 
-\caption[Representative operational class examples]{Representative operational
-class examples. The images illustrate the \texttt{weapon},
-\texttt{non\_weapon}, and \texttt{ood} categories adopted during
-human-in-the-loop review}
+\caption[Representative operational class and OOD examples]{Representative
+examples of the binary operational classes and the separate \gls{ood} branch
+adopted during human-in-the-loop review}
 \label{fig:methodology-class-examples}
 \end{figure}
 
-The \texttt{exclude} label does not represent an additional analytical category.
-It functions exclusively as a quality-control disposition during
+The \texttt{exclude} designation does not represent an additional analytical
+category. It functions exclusively as a quality-control disposition during
 human-in-the-loop review. It enables unsuitable samples to be documented and
 kept separate from the images included in the frozen experimental corpus.
 
@@ -471,29 +481,30 @@ distributionally different content. Research on \gls{ood} detection has shown
 that classifiers may produce high-confidence predictions for inputs outside
 their training distribution
 \cite{hendrycks2017baseline,fort2021exploring}. It is therefore necessary to
-distinguish errors involving known classes from predictions produced for
-samples that should not be treated as ordinary positive or negative instances.
+distinguish errors involving the known binary classes from predictions produced
+for samples that should not be treated as ordinary positive or negative
+instances.
 
 The \gls{ood} branch must not be interpreted as a homogeneous semantic class or
-as a subclass of \texttt{non\_weapon}. It is a methodological collection of
-distributionally different and borderline cases used to assess whether an
-automated system forces anomalous inputs into the known operational classes.
-For this reason, \gls{ood} samples remain separate from the binary subset. They
-are not subjected to the adversarial attacks or anti-forensic transformations
-generated for the \texttt{weapon}/\texttt{non\_weapon} task.
+as a subclass of \texttt{non_weapon}. It is a methodological collection of
+distributionally different and borderline cases used to assess how an automated
+system assigns such inputs relative to the known operational classes. For this
+reason, \gls{ood} samples remain separate from the binary subset. They are not
+subjected to the adversarial attacks or anti-forensic transformations generated
+for the \texttt{weapon}/\texttt{non_weapon} task.
 
 The methodology further distinguishes among classification performance,
-robustness, and operational evaluation. Classification performance concerns the
-ability of a system to assign the expected label to an image. Robustness
-concerns the stability of that behavior when the input is degraded, altered, or
-deliberately manipulated. Operational evaluation concerns the consequences of
-the observed output for the forensic workflow.
+robustness, and operational evaluation. Within the binary task, classification
+performance concerns the ability of a system to assign the expected label to
+an image. Robustness concerns the stability of that behavior when the input is
+degraded, altered, or deliberately manipulated. Operational evaluation concerns
+the consequences of the observed output for the forensic workflow.
 
 These consequences include false negatives that may prevent relevant images
 from being prioritized, false positives that increase the analytical workload,
-and inappropriate in-domain classifications of \gls{ood} samples. This
-distinction prevents performance on clean data from being interpreted as a
-sufficient guarantee of reliability under investigative conditions.
+and in-domain assignments produced for \gls{ood} samples. This distinction
+prevents performance on clean data from being interpreted as a sufficient
+guarantee of operational robustness under investigative conditions.
 
 Finally, the protocol adopts a documented human-in-the-loop approach. Manual
 review is not treated as an external or residual component of the experiment.
@@ -503,7 +514,6 @@ the original organization of the source material. Inclusion, exclusion, and
 class-assignment criteria must be explicit, traceable, and consistent with the
 operational task. This approach preserves both the final selection and the
 reasoning rules used to construct the frozen experimental corpus.
-
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -519,7 +529,7 @@ the forensic classification task.
 
 The process begins with the consolidation of heterogeneous image sources. The
 objective is not to construct a visually homogeneous collection, but to obtain
-a sufficiently varied candidate pool that reflects part of the diversity
+a sufficiently varied candidate pool that captures part of the diversity
 encountered in contemporary digital investigations. The methodology may
 therefore incorporate public datasets, specialized repositories, openly
 accessible web content, \gls{osint}-oriented collections, and material obtained
@@ -541,38 +551,40 @@ roles of the source categories considered in the protocol.
 \begin{tabularx}{\textwidth}{@{}L{4.2cm}X@{}}
 \toprule
 \textbf{Source category} &
-\textbf{Methodological role} \\
+\textbf{Methodological role} \
 \midrule
 
 Public datasets
 &
 Provide structured and reproducible collections that can support the initial
-construction of the candidate pool. Their original labels are treated as source
-information and are not automatically inherited as experimental ground truth. \\
+construction of the candidate pool. Their original labels are retained as
+source information and are not automatically inherited as experimentally
+validated reference assignments. \
 
 Specialized repositories
 &
-Provide domain-specific images that increase the representation of the target
-visual category and support the inclusion of more controlled positive
-examples. \\
+Provide domain-specific images that can improve the representation of candidate
+content related to the target visual category. Samples obtained from these
+sources remain subject to the same validation and assignment criteria applied
+to the rest of the candidate pool. \
 
 Open-web collections
 &
 Introduce greater variability in image quality, composition, context, and
 acquisition conditions. They reduce dependence on curated benchmark
-distributions. \\
+distributions. \
 
 \gls{osint}-oriented sources
 &
 Represent less structured content obtained from social, multimedia, or other
-openly accessible investigative sources. They contribute operationally realistic
-variability. \\
+openly accessible investigative sources. They contribute operationally relevant
+variability. \
 
 Non-indexed or unconventional online sources
 &
 Provide heterogeneous material that may differ from conventional public
 datasets in content, quality, context, or distribution. Their inclusion supports
-the evaluation of less standardized investigative scenarios. \\
+the evaluation of less standardized acquisition contexts. \
 
 \bottomrule
 \end{tabularx}
@@ -585,9 +597,9 @@ validity, dimensional suitability, duplicate detection, and the generation of a
 stable sample identifier.
 
 The exact validation criteria may be adapted to the characteristics of the
-dataset and to the requirements of the experimental environment. For example,
+dataset and the requirements of the experimental environment. For example,
 minimum dimensional requirements may differ depending on the classification
-models or software tools being evaluated. The methodology therefore specifies
+models or software systems being evaluated. The methodology therefore specifies
 the purpose of the controls without imposing a particular script, programming
 language, storage format, or directory structure.
 
@@ -596,14 +608,15 @@ provenance and technical information to reconstruct its origin and processing
 history. Relevant records may include a stable identifier, the original
 location, the source category, technical file properties, an integrity digest,
 and the outcome of the validation checks. These records may be stored using
-tabular files, structured documents, databases, or proprietary formats,
+tabular files, structured documents, databases, or tool-specific formats,
 provided that traceability and consistency are maintained.
 
-Technical preparation does not assign the final semantic class. In particular,
-the source location, directory name, file name, or any pre-existing annotation
-must not be treated as definitive ground truth. These elements may be retained
-as descriptive or audit variables, but semantic assignment must be based on the
-explicit operational criteria defined for the experiment.
+Technical preparation does not determine the final semantic assignment. In
+particular, the source location, directory name, file name, or any pre-existing
+annotation must not be treated as definitive experimental ground truth. These
+elements may be retained as descriptive or audit variables, but semantic
+assignment must be based on the explicit operational criteria defined for the
+experiment.
 
 This distinction reduces the risk of propagating labeling errors, collection
 biases, or source-specific assumptions into the final dataset. It also preserves
@@ -620,10 +633,10 @@ samples to be documented and excluded.
 The relative contribution of each source to the candidate pool does not
 automatically determine its contribution to the frozen dataset. Highly
 asymmetric source collections may otherwise cause the final corpus to be
-dominated by a single repository or acquisition method. Sampling and balancing
-decisions must therefore be based on the objectives of the experimental design,
-the required class composition, and the need to preserve meaningful source
-diversity.
+dominated by a single repository or acquisition method. Sampling and
+composition-control decisions must therefore be based on the objectives of the
+experimental design, the required class composition, and the need to preserve
+meaningful source diversity.
 
 Figure~\ref{fig:methodology-dataset-source-consolidation} summarizes the general
 dataset-construction process. Heterogeneous sources are consolidated into a
@@ -636,93 +649,93 @@ source material.
 \centering
 \resizebox{0.62\textwidth}{!}{%
 \begin{tikzpicture}[
-    >=latex,
-    font=\small,
-    block/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.6cm,
-        fill=gray!10
-    },
-    process/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.6cm,
-        fill=blue!8
-    },
-    note/.style={
-        rectangle,
-        rounded corners,
-        draw=black!65,
-        dashed,
-        thick,
-        align=center,
-        minimum height=1.05cm,
-        minimum width=7.6cm,
-        fill=gray!5
-    },
-    final/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.6cm,
-        fill=green!10
-    },
-    arrow/.style={
-        ->,
-        thick,
-        draw=black!75
-    }
+>=latex,
+font=\small,
+block/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.6cm,
+fill=gray!10
+},
+process/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.6cm,
+fill=blue!8
+},
+note/.style={
+rectangle,
+rounded corners,
+draw=black!65,
+dashed,
+thick,
+align=center,
+minimum height=1.05cm,
+minimum width=7.6cm,
+fill=gray!5
+},
+final/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.6cm,
+fill=green!10
+},
+arrow/.style={
+->,
+thick,
+draw=black!75
+}
 ]
 
 \node[block] (sources) at (0,0)
 {\shortstack{
-    \textbf{Heterogeneous image sources}\\[1mm]
-    \scriptsize public datasets, specialized repositories, open-web content,\\
-    \scriptsize \gls{osint}-oriented collections, and unconventional sources
+\textbf{Heterogeneous image sources}\[1mm]
+\scriptsize public datasets, specialized repositories, open-web content,\
+\scriptsize \gls{osint}-oriented collections, and unconventional sources
 }};
 
 \node[process] (consolidation) at (0,-2.0)
 {\shortstack{
-    \textbf{Source consolidation}\\[1mm]
-    \scriptsize provenance preservation and candidate-pool construction
+\textbf{Source consolidation}\[1mm]
+\scriptsize provenance preservation and candidate-pool construction
 }};
 
 \node[process] (validation) at (0,-4.0)
 {\shortstack{
-    \textbf{Technical validation}\\[1mm]
-    \scriptsize readability, structural checks, dimensional suitability,\\
-    \scriptsize duplicate detection, and stable sample identification
+\textbf{Technical validation}\[1mm]
+\scriptsize readability, structural checks, dimensional suitability,\
+\scriptsize duplicate detection, and stable sample identification
 }};
 
 \node[note] (separation) at (0,-6.0)
 {\shortstack{
-    \textbf{Separation of provenance and ground truth}\\[1mm]
-    \scriptsize source names, directories, filenames, and pre-existing labels\\
-    \scriptsize are not inherited as definitive class assignments
+\textbf{Separation of provenance and reference assignment}\[1mm]
+\scriptsize source names, directories, filenames, and pre-existing labels\
+\scriptsize are not inherited as definitive class assignments
 }};
 
 \node[process] (review) at (0,-8.0)
 {\shortstack{
-    \textbf{Human-in-the-loop semantic review}\\[1mm]
-    \scriptsize explicit inclusion, exclusion, and class-assignment criteria
+\textbf{Human-in-the-loop semantic review}\[1mm]
+\scriptsize explicit inclusion, exclusion, and class-assignment criteria
 }};
 
 \node[final] (frozen) at (0,-10.0)
 {\shortstack{
-    \textbf{Frozen experimental dataset}\\[1mm]
-    \scriptsize validated, balanced, traceable, and stable experimental corpus
+\textbf{Frozen experimental dataset}\[1mm]
+\scriptsize validated, traceable, and stable experimental corpus
 }};
 
 \draw[arrow] (sources) -- (consolidation);
@@ -733,13 +746,14 @@ source material.
 
 \end{tikzpicture}%
 }
-\caption[Dataset source consolidation]{Dataset source consolidation. Heterogeneous
-sources are combined into a traceable candidate pool, subjected to technical
-validation, and reviewed according to explicit semantic criteria. Final class
-assignments are not inherited from source directories, filenames, or
-pre-existing annotations}
+\caption[Dataset source consolidation]{Dataset source consolidation.
+Heterogeneous sources are combined into a traceable candidate pool, subjected
+to technical validation, and reviewed according to explicit semantic criteria.
+Final class assignments are not inherited from source directories, filenames,
+or pre-existing annotations}
 \label{fig:methodology-dataset-source-consolidation}
 \end{figure}
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Review documentation and semantic decision records}
@@ -754,21 +768,21 @@ human-in-the-loop semantic assessment.
 The review documentation must preserve two distinct categories of information.
 The first concerns sample identity, provenance, and technical validity. The
 second concerns the semantic decisions produced during manual review, including
-the review status, assigned operational label, exclusion decision, reviewer
+the review status, operational assignment, exclusion disposition, reviewer
 notes, and any information required to document ambiguous or \gls{ood} cases.
 
 The methodology does not prescribe a specific representation for these records.
 They may be implemented through tabular files, structured documents, relational
 databases, or proprietary data-management systems. Regardless of the adopted
-technology, the representation must provide a stable association between each
+technology, the representation must provide a stable association among each
 sample, its provenance, the corresponding review decision, and any subsequent
 experimental artifact derived from it.
 
 Any auxiliary labels inherited from the source material or generated through
 automated preprocessing may be retained as contextual information. However,
 they must not replace the explicit semantic judgment produced during
-human-in-the-loop review. The final operational label is determined exclusively
-according to the class-assignment criteria defined in
+human-in-the-loop review. The final operational assignment is determined
+exclusively according to the criteria defined in
 Section~\ref{sec:methodology-research-design}.
 
 Maintaining review information separately from purely technical validation
@@ -778,10 +792,11 @@ of the binary task. Conversely, an ambiguous or borderline image may be
 methodologically valuable within the separate \gls{ood} evaluation branch.
 
 The resulting review documentation therefore serves three purposes. First, it
-supports consistent application of the operational labeling criteria. Second,
-it preserves the rationale underlying inclusion, exclusion, and class-assignment
-decisions. Third, it provides the traceability required to reconstruct the
-transition from the initial candidate pool to the frozen experimental dataset.
+supports the consistent application of the operational assignment criteria.
+Second, it preserves the rationale underlying inclusion, exclusion, and
+class-assignment decisions. Third, it provides the traceability required to
+reconstruct the transition from the initial candidate pool to the frozen
+experimental dataset.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Human-in-the-loop review and final dataset freezing}
@@ -792,11 +807,11 @@ Following technical validation, the candidate pool is subjected to a documented
 \textit{human-in-the-loop} review. The purpose of this phase is to determine
 whether each technically valid image is semantically suitable for the
 experimental task and, when applicable, to assign the corresponding operational
-label.
+designation.
 
 Each candidate sample may be assigned to the positive class
-\texttt{weapon}, the in-domain negative class \texttt{non\_weapon}, the
-separate \texttt{ood} branch, or the review-only \texttt{exclude} category.
+\texttt{weapon}, the in-domain negative class \texttt{non_weapon}, the
+separate \gls{ood} branch, or the review-only \texttt{exclude} disposition.
 The assignment is performed according to the operational criteria defined in
 Section~\ref{sec:methodology-research-design}. These criteria must be applied
 consistently throughout the review process and must not depend exclusively on
@@ -804,17 +819,20 @@ source directories, filenames, inherited annotations, or automated pre-labels.
 
 The review follows a conservative decision rule. Samples are included in the
 binary task only when they can be assigned to either \texttt{weapon} or
-\texttt{non\_weapon} with sufficient semantic clarity. Borderline, anomalous,
-synthetic, degraded, replica-like, or otherwise distributionally different
-content is retained within the separate \gls{ood} branch rather than being
-forced into one of the binary classes. Unusable or semantically irrelevant
-samples are excluded.
+\texttt{non_weapon} with sufficient semantic clarity. Borderline, anomalous,
+synthetic, replica-like, or otherwise distributionally different content is
+retained within the separate \gls{ood} branch rather than being forced into one
+of the binary classes. The branch may also include images affected by
+degradation already present in the source material. Such images remain distinct
+from the adversarial and anti-forensic artifacts generated during subsequent
+experimental phases. Unusable or semantically irrelevant samples are excluded.
 
-The resulting labels are operational categories defined for the experimental
-protocol. They must not be interpreted as definitive determinations of the
-legal, material, or evidentiary nature of the depicted objects. This distinction
-is particularly important for visually ambiguous cases, for which assignment to
-the \gls{ood} branch represents a deliberate methodological decision.
+The resulting assignments are operational designations defined for the
+experimental protocol. They must not be interpreted as definitive
+determinations of the legal, material, or evidentiary nature of the depicted
+objects. This distinction is particularly important for visually ambiguous
+cases, for which assignment to the \gls{ood} branch represents a deliberate
+methodological decision.
 
 The review process must preserve sufficient information to reconstruct each
 decision. Relevant records include the identity of the reviewed sample, the
@@ -825,36 +843,37 @@ specific review interface, database, or storage format, provided that the
 decision process remains consistent, inspectable, and traceable.
 
 Once all candidate samples have been reviewed, the selected corpus is subjected
-to dataset freezing. Freezing establishes a stable and authoritative
-experimental dataset whose composition must remain unchanged throughout the
-subsequent evaluation phases. Any correction or modification introduced after
-freezing must therefore be explicitly documented and treated as a new version
-of the experimental corpus.
+to dataset freezing. Freezing establishes a stable reference dataset whose
+composition must remain unchanged throughout the subsequent evaluation phases.
+Any correction or modification introduced after freezing must therefore be
+explicitly documented and treated as a new version of the experimental corpus.
 
 The frozen dataset provides the common basis for both the controlled evaluation
 of the proxy classification models and the black-box evaluation of the selected
-\gls{ai}-based tools. This shared foundation ensures that differences between
-the two evaluation levels are not caused by inconsistencies in dataset
+\gls{ai}-based software systems. This shared foundation ensures that differences
+between the two evaluation levels are not caused by inconsistencies in dataset
 composition.
 
 The binary evaluation subset is derived from the frozen corpus by retaining
-only the \texttt{weapon} and \texttt{non\_weapon} samples. This subset supports
+only the \texttt{weapon} and \texttt{non_weapon} samples. This subset supports
 clean evaluation and the generation of adversarial and anti-forensic variants.
 The \gls{ood} samples remain separate because they address a different
-experimental question: whether an automated system assigns known operational
-labels to anomalous, borderline, or distributionally different content.
+experimental question: how an automated system assigns anomalous, borderline,
+or distributionally different inputs relative to the known operational classes.
 
 The number of reviewers and the specific review workflow depend on the
 implementation context. When the protocol is conducted by a single reviewer,
 the absence of inter-annotator agreement must be acknowledged as a limitation.
-Nevertheless, explicit decision criteria, structured review records, and a
-frozen dataset make the process auditable and support reproducibility at the
-procedural level.
+Explicit decision criteria, structured review records, and a frozen dataset
+nevertheless make the process auditable and support reproducibility at the
+procedural level. They do not, by themselves, eliminate the subjectivity
+associated with semantic assessment.
 
 Dataset freezing is therefore not merely an organizational step. It is a
 methodological control that separates changes in the evaluated systems,
 perturbations, and metrics from undocumented changes in the underlying
 experimental corpus.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Data partitioning and OOD evaluation strategy}
@@ -866,7 +885,7 @@ branches: an in-domain binary subset and a separate \gls{ood} evaluation set.
 This separation reflects the different methodological purposes of the two
 components. The binary subset supports model training, clean evaluation, and
 robustness testing, whereas the \gls{ood} set is used to examine system behavior
-on anomalous, borderline, or distributionally different inputs.
+on borderline, semantically atypical, or distributionally different inputs.
 
 The binary subset is organized into mutually exclusive experimental
 partitions, hereafter referred to as folds. The number and size of these folds
@@ -876,10 +895,10 @@ fixed number of folds or a specific directory organization.
 
 Regardless of the adopted configuration, the partitioning procedure must
 satisfy four requirements. First, each sample must belong to only one fold.
-Second, the class distribution should remain consistent across folds whenever
-the dataset permits stratified partitioning. Third, sample identity and
-provenance must remain traceable. Fourth, the allocation procedure must be
-deterministic or otherwise documented in sufficient detail to allow the
+Second, the class distribution should remain sufficiently consistent across
+folds whenever the dataset permits stratified partitioning. Third, sample
+identity and provenance must remain traceable. Fourth, the allocation procedure
+must be deterministic or otherwise documented in sufficient detail to allow the
 partitions to be regenerated.
 
 Within this protocol, folds are not introduced primarily as a conventional
@@ -890,9 +909,11 @@ folds and evaluated on the held-out samples.
 
 This fold-aware organization prevents overlap between the samples used for
 model fitting and those used for clean and robustness evaluation. It also
-supports a consistent association between each held-out sample, the
-corresponding model configuration, and any adversarial or anti-forensic variant
-derived from that sample.
+preserves a consistent association between each held-out sample, the
+corresponding proxy-model checkpoint, and any model-dependent adversarial
+artifact generated from that sample. Model-agnostic anti-forensic
+transformations remain associated with the originating sample and its assigned
+fold but do not depend on a specific model checkpoint.
 
 The specific number of folds is an implementation choice rather than a general
 methodological requirement. A study may adopt a different number of partitions
@@ -904,15 +925,17 @@ train the proxy classification models and are not treated as a third supervised
 class. They are also excluded from the generation of adversarial and
 anti-forensic variants because they address a different experimental question.
 
-More specifically, the \gls{ood} evaluation examines whether an automated
-system assigns one of the known operational labels to content that should not
-be interpreted as an ordinary \texttt{weapon} or \texttt{non\_weapon} sample.
-Keeping this branch clean and separate prevents distributional mismatch from
+More specifically, the \gls{ood} evaluation examines how an automated system
+assigns content that should not be treated as an ordinary
+\texttt{weapon} or \texttt{non_weapon} sample relative to the known
+operational classes. The branch is kept clean in the methodological sense that
+no experimental adversarial perturbation or anti-forensic transformation is
+applied to its samples. This separation prevents distributional mismatch from
 being conflated with deliberate or incidental input manipulation.
 
 The partitioning procedure must produce structured records that associate each
 sample with its evaluation branch and, when applicable, its fold. These records
-should preserve sample identity, provenance, class assignment, integrity
+should preserve sample identity, provenance, operational assignment, integrity
 information, and the relationship between the original image and any derived
 experimental artifact. The methodology does not impose a specific file format,
 hashing algorithm, or storage technology.
@@ -928,102 +951,102 @@ generation processes.
 \centering
 \resizebox{0.94\textwidth}{!}{%
 \begin{tikzpicture}[
-    >=latex,
-    font=\small,
-    block/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=6.8cm,
-        fill=gray!10
-    },
-    process/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=6.8cm,
-        fill=blue!8
-    },
-    output/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=6.8cm,
-        fill=green!10
-    },
-    note/.style={
-        rectangle,
-        rounded corners,
-        draw=black!65,
-        dashed,
-        thick,
-        align=center,
-        minimum height=1.20cm,
-        minimum width=6.8cm,
-        fill=gray!5
-    },
-    arrow/.style={
-        ->,
-        thick,
-        draw=black!75
-    },
-    dashedarrow/.style={
-        ->,
-        thick,
-        dashed,
-        draw=black!75
-    }
+>=latex,
+font=\small,
+block/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=6.8cm,
+fill=gray!10
+},
+process/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=6.8cm,
+fill=blue!8
+},
+output/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=6.8cm,
+fill=green!10
+},
+note/.style={
+rectangle,
+rounded corners,
+draw=black!65,
+dashed,
+thick,
+align=center,
+minimum height=1.20cm,
+minimum width=6.8cm,
+fill=gray!5
+},
+arrow/.style={
+->,
+thick,
+draw=black!75
+},
+dashedarrow/.style={
+->,
+thick,
+dashed,
+draw=black!75
+}
 ]
 
 \node[block] (frozen) at (0,0)
 {\shortstack{
-    \textbf{Frozen experimental dataset}\\[1mm]
-    \scriptsize stable, validated, and traceable corpus
+\textbf{Frozen experimental dataset}\[1mm]
+\scriptsize stable, validated, and traceable corpus
 }};
 
 \node[process] (binary) at (-4.2,-2.6)
 {\shortstack{
-    \textbf{Binary in-domain subset}\\[1mm]
-    \scriptsize positive and negative operational classes
+\textbf{Binary in-domain subset}\[1mm]
+\scriptsize positive and negative operational classes
 }};
 
 \node[note] (ood) at (4.2,-2.6)
 {\shortstack{
-    \textbf{Clean \gls{ood} evaluation set}\\[1mm]
-    \scriptsize separate from model training and perturbation generation
+\textbf{Clean \gls{ood} evaluation set}\[1mm]
+\scriptsize separate from model training and perturbation generation
 }};
 
 \node[process] (folds) at (-4.2,-5.2)
 {\shortstack{
-    \textbf{Mutually exclusive experimental folds}\\[1mm]
-    \scriptsize traceable and class-consistent partitions
+\textbf{Mutually exclusive experimental folds}\[1mm]
+\scriptsize traceable and sufficiently class-consistent partitions
 }};
 
 \node[process] (training) at (-4.2,-7.8)
 {\shortstack{
-    \textbf{Fold-aware proxy-model evaluation}\\[1mm]
-    \scriptsize train on the remaining folds and evaluate on the held-out fold
+\textbf{Fold-aware proxy-model evaluation}\[1mm]
+\scriptsize train on the remaining folds and evaluate on the held-out fold
 }};
 
 \node[output] (binaryevaluation) at (-4.2,-10.4)
 {\shortstack{
-    \textbf{Binary robustness evaluation}\\[1mm]
-    \scriptsize clean, adversarial, and anti-forensic conditions
+\textbf{Binary robustness evaluation}\[1mm]
+\scriptsize clean, adversarial, and anti-forensic conditions
 }};
 
 \node[output] (oodevaluation) at (4.2,-10.4)
 {\shortstack{
-    \textbf{\gls{ood} behavior evaluation}\\[1mm]
-    \scriptsize analysis of assignments to known operational classes
+\textbf{\gls{ood} behavior evaluation}\[1mm]
+\scriptsize analysis of assignments relative to known operational classes
 }};
 
 \draw[arrow] (frozen.south west) -- (binary.north);
@@ -1038,12 +1061,12 @@ generation processes.
 \end{tikzpicture}%
 }
 \caption[Data partitioning and OOD evaluation strategy]{Data partitioning and
-OOD evaluation strategy. The frozen dataset is separated into a binary
-in-domain subset and a clean \gls{ood} evaluation set. The binary subset is
-organized into mutually exclusive folds for fold-aware training and held-out
-robustness evaluation, while the \gls{ood} branch remains separate}
+OOD evaluation strategy. The binary subset is organized into mutually exclusive
+folds for fold-aware training and held-out evaluation, while the clean
+\gls{ood} branch remains outside model training and perturbation generation}
 \label{fig:methodology-split-to-proxy-training}
 \end{figure}
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Proxy-model evaluation framework}
@@ -1052,53 +1075,53 @@ robustness evaluation, while the \gls{ood} branch remains separate}
 
 The controlled component of the methodology relies on a set of fully
 inspectable classification models, hereafter referred to as
-\textit{proxy classification models}. These models provide reproducible
-algorithmic references for analyzing classification behavior under clean,
-adversarial, and anti-forensic conditions.
+\textit{proxy classification models}. These models serve as experimental
+reference models for studying controlled classification behavior, robustness
+degradation, transferability, confidence patterns, and error direction under
+reproducible conditions.
 
-Proxy classification models are not intended to reproduce the internal
-architectures of the commercial software evaluated in the black-box phase.
-They are also not substitutes for those systems. Their role is to provide an
-experimental environment in which model architecture, training procedure,
-class mapping, checkpoints, and decision behavior can be inspected and
-controlled.
+Proxy classification models are not intended to replicate, reconstruct, or
+reverse engineer the internal architectures or decision processes of the
+selected black-box software systems. They are also not functionally equivalent
+substitutes for those systems. Their role is to provide an experimental
+environment in which model architecture, training procedure, class mapping,
+checkpoints, and decision behavior can be inspected and controlled.
 
 The proxy-model framework supports three methodological objectives. First, it
 provides a transparent reference for measuring classification performance and
-robustness degradation. Second, it enables the generation of adversarial
-examples that require access to model gradients, decision boundaries, or
-internal representations. Third, it supports the analysis of whether
-perturbations generated against one controlled model transfer to other
-classification architectures or to black-box software systems.
+robustness degradation. Second, it enables the generation of model-dependent
+adversarial examples under explicitly defined access assumptions, including
+white-box and score-based conditions. Third, it supports the analysis of whether
+perturbations generated against one controlled model transfer to other proxy
+architectures or to selected black-box software systems.
 
 The proxy models implement the binary classification task defined in
 Section~\ref{sec:methodology-research-design}. The two operational classes are
-\texttt{non\_weapon} and \texttt{weapon}. Their numerical encoding is an
+\texttt{non_weapon} and \texttt{weapon}. Their numerical encoding is an
 implementation choice and does not constitute a methodological requirement,
 provided that the mapping remains explicit and consistent throughout training,
 evaluation, and metric computation.
 
 The \gls{ood} branch is excluded from proxy-model training and is not treated as
 a third supervised class. It remains reserved for the separate evaluation of
-system behavior on anomalous, borderline, or distributionally different
-content, as described in
+system behavior on borderline, semantically atypical, or distributionally
+different content, as described in
 Section~\ref{sec:methodology-split-generation}. This separation prevents binary
-robustness from being conflated with the handling of samples outside the
+robustness from being conflated with system behavior on samples outside the
 operational distribution.
 
 The methodology does not prescribe specific model architectures. Instead, the
-controlled evaluation should include models that provide complementary
-algorithmic characteristics. Depending on the experimental context, these may
-include conventional convolutional architectures, efficiency-oriented
-architectures, and models based on large-scale pretrained visual
-representations.
+controlled evaluation should include models with complementary algorithmic
+characteristics. Depending on the experimental context, these may include
+conventional convolutional architectures, efficiency-oriented architectures,
+and models based on large-scale pretrained visual representations.
 
 The selected models should be sufficiently documented to support reproducible
 training and evaluation. Relevant information includes the architecture,
 initialization strategy, preprocessing procedure, class mapping, optimization
-method, training configuration, and the identity of the resulting checkpoints.
-The concrete architectures and configurations adopted in this thesis are
-reported in Chapter~\ref{chap:implementation}.
+method, training configuration, and identity of the resulting checkpoints. The
+concrete architectures and configurations adopted in this thesis are reported
+in Chapter~\ref{chap:implementation}.
 
 Proxy-model training follows the fold-aware strategy introduced in
 Section~\ref{sec:methodology-split-generation}. For each target fold, the
@@ -1106,11 +1129,11 @@ corresponding model instance is trained exclusively on the remaining folds and
 evaluated on the held-out samples. This organization preserves the separation
 between model fitting and experimental evaluation.
 
-The same separation must also be maintained during perturbation generation.
-An adversarial variant associated with a held-out sample must be generated
-using a model instance that was not trained on that sample. This requirement
-reduces the risk of information leakage and preserves the validity of the
-subsequent robustness analysis.
+The same separation must be maintained during model-dependent perturbation
+generation. An adversarial artifact associated with a held-out sample must be
+generated using a model checkpoint that was not trained on that sample. This
+requirement reduces the risk of information leakage and preserves the validity
+of the subsequent robustness analysis.
 
 Training conditions should remain consistent across folds for a given model
 configuration. This consistency ensures that observed differences among folds
@@ -1119,9 +1142,12 @@ changes in the optimization procedure. Any variation in architecture,
 preprocessing, initialization, or training parameters must be explicitly
 documented.
 
-For attacks that require white-box access, the protocol designates one
-controlled model as the \textit{primary proxy target}. This model acts as the
-source system against which model-dependent adversarial examples are generated.
+For model-dependent adversarial attacks, the protocol designates one controlled
+model as the \textit{primary proxy target}. This model acts as the source system
+against which adversarial examples are generated under the access assumptions
+required by each attack. White-box attacks may use gradients, decision
+boundaries, or other internal model information, whereas score-based attacks
+rely on observable model scores without requiring direct access to gradients.
 The choice of the primary proxy target is an implementation decision and does
 not imply that the selected architecture is universally more accurate, more
 representative, or more robust than the alternatives.
@@ -1130,49 +1156,59 @@ The use of a primary proxy target limits unnecessary multiplication of
 experimental variants. Rather than optimizing every model-dependent attack
 separately against every architecture, the protocol generates a coherent
 adversarial test set against one documented source model. The resulting
-examples are then evaluated on the remaining proxy models to examine
+artifacts are then evaluated on the remaining proxy models to examine
 cross-model transferability.
 
-This procedure distinguishes three evaluation conditions:
+For model-dependent adversarial artifacts, this procedure distinguishes three
+evaluation conditions:
 
 \begin{enumerate}
-    \item \textit{source-model evaluation}, in which adversarial examples are
-    assessed against the proxy model used to generate them;
+\item \textit{direct source-model evaluation}, in which adversarial
+artifacts are assessed against the proxy-model checkpoint used to generate
+them under the corresponding access assumptions;
 
-    \item \textit{cross-model evaluation}, in which the same examples are
-    assessed against different proxy architectures;
+\item \textit{cross-model transfer evaluation}, in which the same artifacts
+are assessed against different proxy architectures;
 
-    \item \textit{black-box transfer evaluation}, in which the same artifacts
-    are submitted to the selected commercial software systems.
+\item \textit{black-box transfer evaluation}, in which the same artifacts
+are submitted to the selected black-box software systems.
 \end{enumerate}
 
-Anti-forensic transformations and other model-agnostic perturbations follow a
-different rationale. They are applied directly to the image artifact according
-to controlled transformation rules and are not optimized against the gradient
-or decision boundary of a specific model. Their evaluation therefore concerns
-the stability of classification behavior under realistic image modifications
-rather than the success of an optimization procedure against a designated
-source model.
+Anti-forensic transformations follow a different rationale. They are applied
+directly to the image according to controlled transformation rules and are not
+optimized against the gradients, scores, or decision boundary of a specific
+model. Their evaluation therefore concerns the stability of classification
+behavior under operationally relevant image modifications rather than the
+success of an optimization procedure against a designated source model.
 
-The distinction between model-dependent and model-agnostic conditions is
+Model-agnostic adversarial-style conditions must also be distinguished from
+transfer attacks. Because they are generated without reference to a source
+model, their evaluation across different proxy models and black-box software
+systems measures response stability under a shared manipulated condition rather
+than adversarial transferability.
+
+The distinction among white-box, score-based, and model-agnostic conditions is
 methodologically important. Model-dependent adversarial attacks evaluate
-vulnerability under explicit access assumptions. Model-agnostic and
-anti-forensic transformations instead assess whether changes to encoding,
-resolution, visual quality, or image content alter the observable
-classification outcome.
+vulnerability under explicit access assumptions. Model-agnostic adversarial-
+style conditions and anti-forensic transformations instead assess whether
+controlled changes to image encoding, dimensions, visual quality, or appearance
+alter the observable classification outcome.
 
 Finally, the proxy-model framework must remain separate from the operational
-evaluation of the selected software systems. Proxy models are inspectable and
-configurable components for which training conditions and model artifacts are
-known. The selected software systems are evaluated as black-box or
-near-black-box systems, without assuming access to their internal architecture,
-training data, calibration procedure, or decision logic.
+evaluation of the selected black-box software systems. Proxy models are
+inspectable and configurable components for which training conditions and model
+artifacts are known. The selected software systems are evaluated under
+black-box or near-black-box access conditions, without assuming access to their
+internal architectures, training data, calibration procedures, or decision
+logic.
 
 This separation enables the methodology to combine experimental control with
-operational relevance. Proxy models explain how known architectures respond
-under reproducible conditions, while black-box evaluation measures how
-operationally relevant software systems behave when exposed to the same clean,
-adversarial, anti-forensic, and \gls{ood} artifacts.
+operational relevance. Proxy models support the controlled analysis of how
+documented architectures respond under reproducible conditions, while black-box
+evaluation measures the observable behavior of operationally relevant software
+systems when exposed to the same clean samples, clean \gls{ood} inputs,
+adversarial artifacts, and anti-forensic artifacts.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Perturbation selection rationale and operational relevance}
@@ -1191,43 +1227,47 @@ In forensic visual triage, automated systems may be required to process large
 image collections within operational time constraints. Computational cost is
 therefore methodologically relevant. A perturbation that requires extensive
 optimization for each image may be useful for controlled vulnerability
-analysis, but less representative of manipulations that can be applied rapidly
-and at scale.
+analysis, but may be less representative of manipulations that can be applied
+rapidly and at scale.
 
 The methodology distinguishes among three broad categories of input
 modification:
 
 \begin{enumerate}
-    \item \textit{model-dependent adversarial attacks}, which require access to
-    model gradients, scores, internal representations, or decision behavior;
+\item \textit{model-dependent adversarial attacks}, which are generated
+against a designated source model under explicit white-box or score-based
+access assumptions;
 
-    \item \textit{model-agnostic perturbations}, which alter the image without
-    being optimized against a specific classifier;
+\item \textit{model-agnostic adversarial-style conditions}, which alter the
+image according to predefined rules without being optimized against a
+specific classifier;
 
-    \item \textit{anti-forensic transformations}, which reproduce plausible
-    modifications of the image artifact or its visual representation.
+\item \textit{anti-forensic transformations}, which emulate plausible
+modifications of the image artifact or its visual representation.
 \end{enumerate}
 
 Model-dependent adversarial attacks provide controlled tests of classifier
 vulnerability under explicit access assumptions. Depending on the selected
 algorithm, they may involve a single gradient computation, an iterative
-procedure, an optimization process, or a search for minimal modifications near
-the decision boundary.
+procedure, an optimization process, a decision-boundary search, or repeated
+queries to observable model scores.
 
 These attacks are included primarily to investigate sensitivity, attack
 effectiveness, and transferability. They do not necessarily represent the most
 probable manipulation in an ordinary forensic scenario. Their operational
 relevance instead lies in demonstrating how classification behavior may change
-when an actor deliberately exploits information about the target model.
+when an actor deliberately exploits information obtained from, or interaction
+with, the designated source model.
 
-Model-agnostic perturbations do not require access to the internal properties of
-the evaluated classifier. They may modify localized image regions, color
-characteristics, resolution, or other visual properties according to predefined
-rules. Because they can be generated independently of a specific model, they
-support consistent comparison across multiple proxy architectures and
-black-box software systems.
+Model-agnostic adversarial-style conditions do not require access to the
+internal properties or observable scores of a specific classifier. They modify
+image characteristics according to predefined rules and can therefore be
+generated independently of the evaluated systems. Their application across
+multiple proxy architectures and black-box software systems supports comparison
+under a shared manipulated condition rather than transferability analysis from
+a designated source model.
 
-Anti-forensic transformations reproduce common or plausible image-processing
+Anti-forensic transformations emulate common or plausible image-processing
 operations that may occur deliberately or incidentally before forensic
 acquisition or analysis. Relevant transformation families include lossy
 re-encoding, resampling, resizing, filtering, tonal modification, and contrast
@@ -1245,14 +1285,15 @@ than several near-duplicate variants of the same manipulation. Selection should
 therefore consider the following criteria:
 
 \begin{itemize}
-    \item diversity of access assumptions;
-    \item diversity of algorithmic mechanisms;
-    \item computational sustainability;
-    \item reproducibility across experimental runs;
-    \item preservation or degradation of semantic content;
-    \item operational plausibility;
-    \item suitability for transferability analysis;
-    \item compatibility with the evaluated image formats and systems.
+\item diversity of access assumptions;
+\item diversity of algorithmic mechanisms;
+\item computational feasibility and scalability;
+\item reproducibility across experimental runs;
+\item preservation or degradation of semantic content;
+\item operational plausibility;
+\item suitability for cross-system comparison and, where applicable,
+transferability analysis;
+\item compatibility with the evaluated image formats and software systems.
 \end{itemize}
 
 Table~\ref{tab:methodology-attack-cost-operational-relevance} summarizes the
@@ -1264,57 +1305,64 @@ operational relevance.
 \caption{Perturbation categories, computational cost, and operational relevance}
 \label{tab:methodology-attack-cost-operational-relevance}
 \begin{tabularx}{\textwidth}{@{}
-    >{\raggedright\arraybackslash}p{0.25\textwidth}
-    >{\raggedright\arraybackslash}p{0.18\textwidth}
-    X
+>{\raggedright\arraybackslash}p{0.25\textwidth}
+>{\raggedright\arraybackslash}p{0.18\textwidth}
+X
 @{}}
 \toprule
 \textbf{Perturbation category} &
 \textbf{Typical cost} &
-\textbf{Methodological and operational role} \\
+\textbf{Methodological and operational role} \
 \midrule
 
-Single-step model-dependent attacks
+Single-step white-box attacks
 &
 Low to medium
 &
 Provide efficient baselines for evaluating sensitivity to gradient-informed
-input modifications. \\
+input modifications. \
 
-Iterative or optimization-based attacks
+Iterative or optimization-based white-box attacks
 &
 Medium to high
 &
 Support controlled analysis of decision-boundary vulnerability and minimal or
-targeted input modifications. \\
+targeted input modifications. \
 
-Model-agnostic visual perturbations
+Score-based attacks
+&
+Medium to high
+&
+Evaluate vulnerability through repeated interaction with observable model
+scores without requiring direct access to gradients or internal parameters. \
+
+Model-agnostic adversarial-style conditions
 &
 Low to medium
 &
-Enable architecture-independent testing through predefined changes to visual
-content or image characteristics. \\
+Enable source-model-independent testing through predefined changes to image
+appearance or statistical characteristics. \
 
 Lossy re-encoding and resampling
 &
 Low
 &
 Represent common modifications caused by editing, forwarding, format
-conversion, or platform-mediated processing. \\
+conversion, or platform-mediated processing. \
 
 Filtering and degradation
 &
 Low
 &
 Assess whether the reduction or alteration of discriminative visual details
-affects classification behavior. \\
+affects classification behavior. \
 
 Tonal and chromatic transformations
 &
 Low
 &
 Evaluate sensitivity to changes in color, contrast, luminance, or statistical
-image properties. \\
+image properties. \
 
 \bottomrule
 \end{tabularx}
@@ -1323,18 +1371,18 @@ image properties. \\
 The cost levels reported in
 Table~\ref{tab:methodology-attack-cost-operational-relevance} constitute a
 qualitative methodological assessment rather than measured execution times.
-Actual runtime depends on hardware, software libraries, image dimensions,
-parallelization, and implementation choices.
+Actual runtime depends on the algorithm, hardware, software libraries, image
+dimensions, degree of parallelization, and implementation choices.
 
-The qualitative distinction is based on the algorithmic properties of the
-perturbations. Direct transformations generally support efficient batch
-processing. Single-step attacks require limited model interaction, whereas
-iterative and optimization-based attacks may require repeated inference or
-gradient computation.
+The qualitative distinction is based on the general algorithmic properties of
+the perturbations. Direct transformations generally support efficient batch
+processing. Single-step white-box attacks require limited model interaction,
+whereas score-based, iterative, and optimization-based attacks may require
+repeated inference, model queries, or gradient computation.
 
-This distinction enables computational sustainability and operational
-plausibility to be considered without introducing timing measurements that were
-not collected systematically. The concrete attacks, transformations, parameter
+This distinction enables computational feasibility and operational plausibility
+to be considered without introducing timing measurements that were not
+collected systematically. The concrete attacks, transformations, parameter
 values, and execution configurations adopted in this thesis are reported in
 Chapter~\ref{chap:implementation}.
 
@@ -1345,137 +1393,138 @@ manipulation.
 
 Each generated artifact must remain associated with its source image, the
 applied perturbation family, the relevant configuration, and the evaluation
-condition. This association supports reproducibility and ensures that the same
-artifacts can be evaluated across the proxy models and the selected black-box
-software systems.
+condition. For model-dependent adversarial attacks, the record must also
+preserve the identity of the source-model checkpoint and the corresponding
+access assumption. This association supports reproducibility and ensures that
+the same artifacts can be evaluated across the proxy models and the selected
+black-box software systems.
 
 Figure~\ref{fig:methodology-perturbation-workflow} summarizes the general
 perturbation workflow. The clean binary subset is processed through separate
 adversarial and anti-forensic branches. The resulting artifacts are then
-integrated into the common evaluation bundle, whereas the clean \gls{ood}
-branch remains separate.
+integrated into the common evaluation bundle, together with the unmodified
+binary samples and the separate clean \gls{ood} inputs.
 
 \begin{figure}[H]
 \centering
 \resizebox{0.96\textwidth}{!}{%
 \begin{tikzpicture}[
-    >=latex,
-    font=\normalfont,
-    block/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.2cm,
-        fill=gray!10
-    },
-    process/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.2cm,
-        fill=blue!8
-    },
-    branch/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=5.8cm,
-        fill=yellow!12
-    },
-    output/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=5.8cm,
-        fill=green!10
-    },
-    note/.style={
-        rectangle,
-        rounded corners,
-        draw=black!65,
-        dashed,
-        thick,
-        align=center,
-        minimum height=1.00cm,
-        minimum width=5.4cm,
-        fill=gray!5
-    },
-    arrow/.style={
-        ->,
-        thick,
-        draw=black!75
-    },
-    dashedarrow/.style={
-        ->,
-        thick,
-        dashed,
-        draw=black!75
-    }
+>=latex,
+font=\normalfont,
+block/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.2cm,
+fill=gray!10
+},
+process/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.2cm,
+fill=blue!8
+},
+branch/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=5.8cm,
+fill=yellow!12
+},
+output/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=5.8cm,
+fill=green!10
+},
+note/.style={
+rectangle,
+rounded corners,
+draw=black!65,
+dashed,
+thick,
+align=center,
+minimum height=1.00cm,
+minimum width=5.4cm,
+fill=gray!5
+},
+arrow/.style={
+->,
+thick,
+draw=black!75
+},
+dashedarrow/.style={
+->,
+thick,
+dashed,
+draw=black!75
+}
 ]
 
 \node[block] (binary) at (0,0)
 {\shortstack{
-    \textbf{Clean binary evaluation subset}\\[1mm]
-    \scriptsize traceable positive and negative in-domain samples
+\textbf{Clean binary evaluation subset}\[1mm]
+\scriptsize traceable positive and negative in-domain samples
 }};
 
 \node[process] (generation) at (0,-2.2)
 {\shortstack{
-    \textbf{Controlled perturbation generation}\\[1mm]
-    \scriptsize documented transformation rules and access assumptions
+\textbf{Controlled perturbation generation}\[1mm]
+\scriptsize documented transformation rules and access assumptions
 }};
 
-\node[note] (ood) at (7.2,-2.2)
+\node[note] (ood) at (7.2,0)
 {\shortstack{
-    \textbf{Separate clean \gls{ood} branch}\\[1mm]
-    \scriptsize excluded from perturbation generation
+\textbf{Separate clean \gls{ood} branch}\[1mm]
+\scriptsize excluded from perturbation generation
 }};
 
 \node[branch] (adversarial) at (-4.2,-4.8)
 {\shortstack{
-    \textbf{Adversarial branch}\\[1mm]
-    \scriptsize model-dependent and model-agnostic perturbations
+\textbf{Adversarial branch}\[1mm]
+\scriptsize model-dependent attacks and model-agnostic conditions
 }};
 
 \node[branch] (antiforensic) at (4.2,-4.8)
 {\shortstack{
-    \textbf{Anti-forensic branch}\\[1mm]
-    \scriptsize re-encoding, resampling, filtering, and tonal transformations
+\textbf{Anti-forensic branch}\[1mm]
+\scriptsize re-encoding, resampling, filtering, and tonal transformations
 }};
 
 \node[output] (advartifacts) at (-4.2,-7.2)
 {\shortstack{
-    \textbf{Adversarial artifacts}\\[1mm]
-    \scriptsize associated with source samples and attack conditions
+\textbf{Adversarial artifacts}\[1mm]
+\scriptsize associated with source samples and attack conditions
 }};
 
 \node[output] (afartifacts) at (4.2,-7.2)
 {\shortstack{
-    \textbf{Anti-forensic artifacts}\\[1mm]
-    \scriptsize associated with source samples and transformation conditions
+\textbf{Anti-forensic artifacts}\[1mm]
+\scriptsize associated with source samples and transformation conditions
 }};
 
 \node[process] (bundle) at (0,-9.8)
 {\shortstack{
-    \textbf{Common evaluation bundle}\\[1mm]
-    \scriptsize traceable clean, adversarial, anti-forensic, and \gls{ood}
-    artifacts
+\textbf{Common evaluation bundle}\[1mm]
+\scriptsize clean samples, clean \gls{ood} inputs, adversarial artifacts,\
+\scriptsize and anti-forensic artifacts
 }};
 
 \draw[arrow] (binary) -- (generation);
-\draw[dashedarrow] (generation.east) -- (ood.west);
 
 \draw[arrow] (generation.south west) -- (adversarial.north);
 \draw[arrow] (generation.south east) -- (antiforensic.north);
@@ -1485,14 +1534,14 @@ branch remains separate.
 
 \draw[arrow] (advartifacts.south east) -- (bundle.north);
 \draw[arrow] (afartifacts.south west) -- (bundle.north);
+\draw[dashedarrow] (ood.south) |- (bundle.east);
 
 \end{tikzpicture}%
 }
 \caption[Perturbation generation workflow]{Perturbation generation workflow.
-The binary in-domain subset is processed through separate adversarial and
-anti-forensic branches. The resulting artifacts retain their association with
-the source samples and are integrated into the common evaluation bundle. The
-clean \gls{ood} branch remains separate}
+Adversarial and anti-forensic artifacts are derived exclusively from the binary
+subset and are integrated into the common evaluation bundle together with the
+clean binary samples and the separate clean \gls{ood} inputs}
 \label{fig:methodology-perturbation-workflow}
 \end{figure}
 
@@ -1504,7 +1553,7 @@ clean \gls{ood} branch remains separate}
 
 The adversarial component of the \gls{fairlab} protocol evaluates whether
 controlled input modifications can alter the behavior of automated image
-classifiers while preserving the relationship between each perturbed artifact
+classifiers while preserving the relationship between each adversarial artifact
 and its corresponding clean sample.
 
 Adversarial examples are generated exclusively from the binary in-domain
@@ -1513,17 +1562,18 @@ distributional mismatch rather than robustness to deliberate input
 manipulation, as established in
 Section~\ref{sec:methodology-split-generation}.
 
-The methodology distinguishes between model-dependent and model-agnostic
-adversarial conditions. Model-dependent attacks require access to information
-associated with a proxy model, such as gradients, confidence scores, internal
-representations, or decision behavior. Model-agnostic perturbations instead
-modify the image according to predefined rules without querying or optimizing
-against a specific classifier.
+The methodology distinguishes between model-dependent attacks and
+model-agnostic adversarial-style conditions. Model-dependent attacks are
+generated against a designated source model under explicit access assumptions.
+Depending on the attack, these assumptions may include access to gradients,
+decision-boundary information, internal model properties, or observable output
+scores. Model-agnostic conditions instead modify the image according to
+predefined rules without querying or optimizing against a specific classifier.
 
 The selected model-dependent attacks should provide complementary coverage of
 different adversarial mechanisms. Depending on the objectives of the study,
 these mechanisms may include single-step gradient perturbations, sparse or
-localized modifications, iterative optimization procedures, and
+localized score-based modifications, iterative optimization procedures, and
 decision-boundary-based attacks
 \cite{goodfellow2015explaining,su2019onepixel,zhao2024sigmazero,moosavi2016deepfool}.
 
@@ -1535,77 +1585,92 @@ evaluation
 \cite{madry2018towards,croce2020autoattack}.
 
 Instead, the attack set is selected to support the operational objectives of
-the thesis. The selected conditions must be computationally sustainable,
+the thesis. The selected conditions must be computationally feasible,
 reproducible, sufficiently heterogeneous, and suitable for evaluating both
-source-model vulnerability and transferability across different classification
-systems.
+direct source-model vulnerability and, where applicable, transfer behavior
+across different classification systems.
 
 Model-dependent adversarial examples are generated against the primary proxy
 target introduced in
 Section~\ref{sec:methodology-models-classification}. For each held-out sample,
-the generation process must use the fold-specific model instance that was
+the generation process must use the fold-specific model checkpoint that was
 trained without that sample. This requirement preserves the separation between
-training and evaluation and prevents leakage between the clean input and the
-model used to construct its adversarial variant.
+training and evaluation and prevents information leakage between the clean
+input and the model used to construct its adversarial variant.
 
 Each generated artifact must retain an explicit association with:
 
 \begin{itemize}
-    \item the original clean sample;
-    \item the corresponding experimental fold;
-    \item the true operational label;
-    \item the attack family;
-    \item the source model, when applicable;
-    \item the model checkpoint or configuration used for generation;
-    \item the attack parameters;
-    \item the resulting output artifact;
-    \item the information required to verify integrity and provenance.
+\item the original clean sample;
+\item the corresponding experimental fold;
+\item the reference operational class;
+\item the attack family or adversarial-style condition;
+\item the source model, when applicable;
+\item the model checkpoint or configuration used for generation, when
+applicable;
+\item the generation parameters;
+\item the resulting output artifact;
+\item the information required to verify integrity and provenance.
 \end{itemize}
 
 The methodology does not prescribe a specific manifest format, directory
 structure, serialization technology, or hashing algorithm. The adopted
 implementation must nevertheless preserve sufficient information to reproduce
-the generation process and verify the relationship between clean inputs,
-adversarial artifacts, and the corresponding proxy-model configuration.
+the generation process and verify the relationship among clean inputs,
+adversarial artifacts, and, where applicable, the corresponding proxy-model
+configuration.
 
-Model-agnostic adversarial-style perturbations may also be included when they
-serve a distinct experimental purpose. Such perturbations do not constitute
-white-box adversarial attacks because they are not optimized against a target
+Model-agnostic adversarial-style conditions may also be included when they serve
+a distinct experimental purpose. Such conditions do not constitute white-box or
+score-based adversarial attacks because they are not optimized against a source
 model. However, they may be evaluated within the adversarial branch when their
-purpose is to examine whether controlled and semantically preserving visual
-changes alter classifier behavior.
+purpose is to examine whether controlled visual changes intended to preserve
+the task-relevant semantic content alter classification behavior.
 
 This distinction must remain explicit throughout the analysis. Model-dependent
-attacks evaluate vulnerability under defined access assumptions. Model-agnostic
-adversarial-style perturbations instead evaluate sensitivity to controlled
-visual changes that can be reproduced consistently across models and software
-tools.
+attacks evaluate vulnerability under defined access assumptions and support
+direct and transfer evaluations. Model-agnostic adversarial-style conditions
+instead evaluate sensitivity to reproducible visual changes applied
+independently of the evaluated models and software systems.
 
-The output format should minimize unintended changes that are unrelated to the
-selected adversarial mechanism. When an encoding format introduces additional
-compression or representation effects, these effects must be documented and
+The output representation should minimize unintended changes unrelated to the
+selected adversarial mechanism. When the chosen encoding introduces additional
+compression or representation effects, those effects must be documented and
 considered during interpretation.
 
 Attack generation and robustness evaluation are treated as separate phases.
-Information produced during generation, including whether an attack altered the
-source model prediction, may be retained as technical metadata. However, such
-information is not treated as a final robustness result until the generated
-artifacts are evaluated through the common metric and comparison framework.
+Information produced during generation, including whether an attack changed
+the source-model prediction, may be retained as technical metadata. However,
+such information is not treated as a final robustness result until the
+generated artifacts are evaluated through the common metric and comparison
+framework.
 
-The adversarial artifacts are subsequently evaluated under three complementary
-conditions:
+Model-dependent adversarial artifacts are subsequently evaluated under three
+complementary conditions:
 
 \begin{enumerate}
-    \item against the proxy model used for their generation;
-    \item against different proxy architectures to assess cross-model
-    transferability;
-    \item against the selected black-box software systems to examine
-    operational transferability.
+\item \textit{direct source-model evaluation}, in which each artifact is
+evaluated against the fold-specific proxy-model checkpoint used for its
+generation;
+
+\item \textit{cross-model transfer evaluation}, in which the same artifact
+is evaluated against different proxy architectures;
+
+\item \textit{black-box transfer evaluation}, in which the same artifact is
+submitted to the selected black-box software systems to examine observable
+transfer behavior.
 \end{enumerate}
+
+Model-agnostic adversarial-style artifacts are evaluated across the proxy models
+and selected black-box software systems under the same manipulated condition.
+Because these artifacts are not generated against a designated source model,
+differences in system behavior are interpreted as response variation under a
+shared condition rather than as adversarial transferability.
 
 The specific attack algorithms, model configurations, parameter values, output
 formats, and traceability artifacts adopted in this thesis are reported in
 Chapter~\ref{chap:implementation}.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-forensic evaluation methodology}
@@ -1618,11 +1683,11 @@ plausible modifications of the image artifact.
 
 Unlike the model-dependent attacks described in
 Section~\ref{sec:methodology-adversarial-attacks}, anti-forensic
-transformations are not optimized against the gradient, loss function,
-confidence score, or decision boundary of a specific classifier. They are
-applied according to predefined image-processing rules and can therefore be
-evaluated consistently across different proxy models and black-box software
-systems.
+transformations are not optimized against the gradients, loss function,
+observable output scores, or decision boundary of a specific classifier. They
+are applied according to predefined image-processing rules and can therefore be
+evaluated consistently across different proxy models and selected black-box
+software systems.
 
 The term \textit{anti-forensic} is used in an experimental and operational
 sense. It does not necessarily imply malicious intent or deliberate evidence
@@ -1639,9 +1704,9 @@ conditions.
 
 The methodology considers transformation families that affect complementary
 properties of the image artifact. These include lossy re-encoding, spatial
-resampling, blurring, tonal redistribution, and contrast adjustment. The
-specific algorithms and parameter values used to instantiate these families
-are implementation choices documented in
+resampling, blurring, tonal-distribution modification, and contrast adjustment.
+The specific algorithms and parameter values used to instantiate these
+families are implementation choices documented in
 Chapter~\ref{chap:implementation}.
 
 Table~\ref{tab:methodology-anti-forensic-transformations} summarizes the
@@ -1652,38 +1717,38 @@ methodological roles of the principal transformation families.
 \caption{Methodological roles of the anti-forensic transformation families}
 \label{tab:methodology-anti-forensic-transformations}
 \begin{tabularx}{\textwidth}{@{}
-    >{\raggedright\arraybackslash}p{0.28\textwidth}
-    X
+>{\raggedright\arraybackslash}p{0.28\textwidth}
+X
 @{}}
 \toprule
 \textbf{Transformation family} &
-\textbf{Methodological role} \\
+\textbf{Methodological role} \
 \midrule
 
 Lossy re-encoding
 &
 Evaluates classification stability when the image representation is altered by
-compression artifacts or repeated encoding. \\
+compression artifacts or repeated encoding. \
 
 Spatial resampling and resizing
 &
 Examines sensitivity to resolution changes, interpolation, and repeated
-downsampling or restoration operations. \\
+downsampling or restoration operations. \
 
 Blurring and local-detail degradation
 &
 Assesses the dependence of automated classification on edges, textures, and
-other high-frequency visual information. \\
+other high-frequency visual information. \
 
 Tonal-distribution modification
 &
 Evaluates sensitivity to changes in the statistical distribution of image
-intensities. \\
+intensities. \
 
 Contrast adjustment
 &
 Examines whether normalization or enhancement of the intensity range alters the
-classification outcome. \\
+classification outcome. \
 
 \bottomrule
 \end{tabularx}
@@ -1693,30 +1758,32 @@ The transformations are applied exclusively to the binary in-domain subset.
 The clean \gls{ood} branch remains separate because it addresses
 distributional mismatch rather than robustness to image manipulation.
 
-Each transformation must be applied consistently across the selected
-experimental samples. The transformation rules and their parameter values must
-remain fixed within a given experimental condition unless a parameter-sensitivity
-analysis is explicitly included in the research design. This consistency
-supports comparison across models, folds, classes, and software systems.
+Each transformation must be applied through a consistent and documented
+procedure across the selected experimental samples. The transformation rules
+and their parameter values must remain fixed within a given experimental
+condition unless a parameter-sensitivity analysis is explicitly included in the
+research design. This consistency supports comparison across models, folds,
+classes, and software systems.
 
 The selected settings should introduce controlled and interpretable
-modifications without systematically destroying the semantic content required
-for the underlying task. The objective is not to make the images
-unrecognizable, but to examine whether operationally plausible changes can
-alter the behavior of automated classification systems.
+modifications while preserving sufficient task-relevant semantic content for
+meaningful evaluation. The objective is not to make the images unrecognizable,
+but to examine whether operationally plausible changes can alter the behavior
+of automated classification systems.
 
 The methodology does not require an exhaustive catalog of anti-forensic
 techniques. Instead, the selected transformation set should provide
 complementary coverage of encoding, spatial, filtering, tonal, and contrast
 effects. The selection should also consider reproducibility, computational
-sustainability, compatibility with the evaluated systems, and the possibility
-of applying the transformations consistently to the complete experimental
-subset.
+feasibility and scalability, compatibility with the evaluated systems, and the
+possibility of applying the transformations consistently to the complete
+experimental subset.
 
 For every generated artifact, the implementation must preserve the association
-with the corresponding clean sample, operational class, experimental fold, and
-transformation condition. It must also record the applied configuration and the
-information required to verify artifact identity and provenance.
+with the corresponding clean sample, reference operational class, experimental
+fold, and transformation condition. It must also record the applied
+configuration and the information required to verify artifact identity,
+integrity, and provenance.
 
 The methodology does not prescribe a specific directory structure, manifest
 format, database technology, or hashing algorithm. However, the adopted
@@ -1725,77 +1792,84 @@ clean image, the applied transformation, and the resulting artifact.
 
 Anti-forensic artifact generation and robustness evaluation are treated as
 separate phases. Successful generation and completion of technical integrity
-checks do not constitute evidence of robustness degradation. The impact of the
-transformations must instead be established through subsequent evaluation using
+checks demonstrate that the intended experimental artifacts were produced
+correctly, but do not establish robustness degradation. The impact of the
+transformations must instead be determined through subsequent evaluation using
 the common metrics and comparison framework.
 
 The generated artifacts are evaluated on both the proxy classification models
-and the selected black-box software systems. This common evaluation supports
-the comparison of controlled model behavior with the operational response of
-selected \gls{ai}-based software systems under the same anti-forensic
-conditions.
+and the selected black-box software systems. This common evaluation supports a
+structured comparison between controlled model behavior and the observable
+operational behavior of the selected software systems under the same
+anti-forensic conditions.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic evaluation bundle and blind-input design}
 \label{sec:methodology-forensic-evaluation-bundle}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The operational evaluation of external software systems requires the
-experimental artifacts to be transferred without exposing information that
-could reveal their class, provenance, perturbation condition, or expected
-ground truth. For this purpose, the \gls{fairlab} protocol introduces a
-\textit{forensic evaluation bundle}: a controlled and traceable collection of
-clean, \gls{ood}, adversarial, and anti-forensic artifacts prepared for
-black-box evaluation.
+The operational evaluation of selected black-box software systems requires the
+experimental inputs to be transferred without exposing descriptors that could
+reveal their reference class, provenance, perturbation condition, or expected
+operational assignment. For this purpose, the \gls{fairlab} protocol introduces
+a \textit{forensic evaluation bundle}: a controlled and traceable collection of
+clean binary samples, clean \gls{ood} inputs, adversarial artifacts, and
+anti-forensic artifacts prepared for black-box evaluation.
 
-The bundle does not alter the experimental ground truth or the generated
-artifacts. Its methodological function is to separate the inputs submitted to
-the evaluated software from the information required for subsequent
-normalization, verification, and analysis.
+The bundle does not alter the reference operational assignments, the clean
+samples, or the generated artifacts. Its methodological function is to separate
+the inputs submitted to the evaluated software systems from the information
+required for subsequent normalization, verification, and analysis.
 
 This separation supports two complementary views of the same experimental
 corpus:
 
 \begin{enumerate}
-    \item a \textit{blind input view}, containing only the files submitted to
-    the evaluated software;
+\item a \textit{blind input view}, containing only the files submitted to
+the evaluated software systems;
 
-    \item a \textit{control and audit view}, preserving the associations among
-    each submitted file, its source sample, operational class, experimental
-    family, perturbation condition, provenance, and integrity information.
+\item a \textit{control and audit view}, preserving the associations among
+each submitted file, its source sample, reference operational assignment,
+experimental family, perturbation condition, provenance, and integrity
+information.
 \end{enumerate}
 
-The blind input view must avoid semantic information in filenames, directory
-names, and paths. In particular, the submitted artifacts must not expose the
-operational class, fold assignment, attack family, transformation type, proxy
-model, or any other experimental descriptor.
+The blind input view must avoid experimental descriptors in filenames,
+directory names, and paths. In particular, the submitted files must not expose
+the reference operational class, fold assignment, attack family,
+transformation type, proxy model, or any other descriptor generated by the
+experimental pipeline.
 
-This requirement reduces the risk that either the software or the analyst may
-infer the nature of a sample from its organization rather than from its actual
-content. Neutral identifiers should therefore be assigned to the submitted
-files, while the mapping to the experimental ground truth must remain available
-only within the separate control records.
+This requirement reduces the risk that either the software system or the
+analyst may infer the experimental role of a sample from its organization
+rather than from the submitted image itself. Neutral identifiers should
+therefore be assigned to the files, while the mapping to the corresponding
+reference assignments and experimental conditions must remain available only
+within the separate control records. The blind-input design does not conceal
+the visual content or the effects of the applied perturbation, because these
+constitute the actual inputs under evaluation.
 
 The control and audit view must preserve sufficient information to reconstruct
-the identity and experimental role of every artifact. Relevant information
-includes:
+the identity and experimental role of every submitted file. Relevant
+information includes:
 
 \begin{itemize}
-    \item a neutral bundle identifier;
-    \item the corresponding source-image identifier;
-    \item the reference operational label;
-    \item the experimental family;
-    \item the attack or transformation condition, when applicable;
-    \item the fold or evaluation partition;
-    \item provenance information;
-    \item integrity information;
-    \item the path or identifier used in the blind input view.
+\item a neutral bundle identifier;
+\item the corresponding source-image identifier;
+\item the reference operational assignment;
+\item the experimental family;
+\item the attack or transformation condition, when applicable;
+\item the fold or evaluation partition;
+\item provenance information;
+\item integrity information;
+\item the path or identifier used in the blind input view.
 \end{itemize}
 
 The methodology does not prescribe a specific directory structure, manifest
 format, database technology, or naming convention. The adopted implementation
-must nevertheless ensure that the blind software input remains logically and
-physically separated from the experimental metadata.
+must nevertheless ensure that the blind software input remains operationally
+separated from the experimental metadata and control records.
 
 Table~\ref{tab:methodology-forensic-bundle-layout} summarizes the methodological
 components of the forensic evaluation bundle.
@@ -1807,48 +1881,51 @@ components of the forensic evaluation bundle.
 \begin{tabularx}{\textwidth}{@{}L{4.0cm}X@{}}
 \toprule
 \textbf{Component} &
-\textbf{Methodological function} \\
+\textbf{Methodological function} \
 \midrule
 
 Blind input view
 &
-Contains only neutrally identified artifacts submitted to the evaluated
-software. It must not expose classes, perturbation families, folds, model names,
-or other experimental descriptors. \\
+Contains only neutrally identified files submitted to the evaluated software
+systems. It must not expose reference classes, perturbation families, folds,
+model names, or other experimental descriptors through filenames, paths, or
+directory organization. \
 
 Control metadata
 &
-Preserve the mapping between each blind identifier and the corresponding source
-sample, ground truth, experimental condition, provenance, and integrity
-information. \\
+Preserves the mapping between each blind identifier and the corresponding
+source sample, reference operational assignment, experimental condition,
+provenance, and integrity information. \
 
 Structured audit view
 &
-Provides an internal organization of the experimental artifacts for technical
-verification and inspection. It is not submitted to the evaluated software. \\
+Provides an internal organization of the experimental inputs and derived
+artifacts for technical verification and inspection. It is not submitted to the
+evaluated software systems. \
 
 Integrity and consistency records
 &
-Document artifact identity, uniqueness, completeness, and correspondence with
-the source records produced during the preceding experimental phases. \\
+Document file identity, uniqueness, completeness, and correspondence with the
+source records produced during the preceding experimental phases. \
 
 Embedded-information audit
 &
-Examines whether image files contain metadata or descriptors that could reveal
-experimental information not removed by neutral filenames and paths. \\
+Examines whether image files contain metadata or other machine-readable fields
+that could reveal provenance, processing history, or experimental information
+not concealed through neutral filenames and paths. \
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Only the blind input view is submitted to the evaluated software. Control
-metadata and structured audit records remain external to the import process and
-are used only after the software outputs have been exported.
+Only the blind input view is submitted to the evaluated software systems.
+Control metadata and structured audit records remain external to the import
+process and are used after the software outputs have been exported.
 
-This separation also prevents the evaluated systems from receiving ground-truth
-information through the organization of the experimental corpus. The resulting
-software outputs can therefore be aligned with the control records only during
-the normalization and analysis phases.
+This separation also prevents the evaluated systems from receiving reference
+assignment information through the organization of the experimental corpus.
+The resulting outputs can therefore be aligned with the control records only
+during the normalization and analysis phases.
 
 The blindness of the bundle primarily concerns information channels directly
 controlled by the experimental pipeline, including filenames, paths, directory
@@ -1858,43 +1935,46 @@ software, provenance, or content descriptors
 \cite{xiang2021forensicmetadata,lee2023forensicmethodology,zheng2023exif}.
 
 For this reason, the bundle-construction process should include an audit of
-embedded metadata and other machine-readable information that could reveal the
-experimental condition. The audit should identify potentially informative
-fields without modifying the evaluated artifacts unless metadata removal is
-explicitly included in the research design.
+embedded metadata and other machine-readable information that could reveal
+provenance or experimental information. The audit should identify potentially
+informative fields without modifying the evaluated files unless metadata
+removal or normalization is explicitly included in the research design.
 
-The presence of embedded metadata must be treated as a controlled limitation of
-blindness rather than as a robustness result. Any relationship between such
-metadata and the observable outputs of the evaluated systems must be analyzed
-separately as a sensitivity condition.
+The presence of embedded metadata must be treated as a documented limitation of
+the blind-input design rather than as a robustness result. Any relationship
+between such metadata and the observable outputs of the evaluated systems must
+be investigated separately as a potential sensitivity condition.
 
 The bundle must include all experimental families required by the protocol and
 must preserve their expected composition. Completeness and uniqueness checks
-should verify that no required artifact is missing, duplicated, or incorrectly
-associated with the corresponding control record.
+should verify that no required input or derived artifact is missing, duplicated,
+or incorrectly associated with the corresponding control record.
 
 These controls establish the technical validity of the evaluation corpus but do
-not constitute evidence of classification performance. Quantitative bundle
-composition and integrity outcomes are documented in
-Chapter~\ref{chap:implementation}, whereas the observed software predictions
-are analyzed in Chapter~\ref{chap:results}.
+not constitute evidence of classification performance or operational
+robustness. Quantitative bundle composition and integrity outcomes are
+documented in Chapter~\ref{chap:implementation}, whereas the observed software
+outputs are analyzed in Chapter~\ref{chap:results}.
 
-The selected software systems are treated as black-box or near-black-box
-components. The methodology does not assume access to their internal
-architectures, training data, thresholds, confidence calibration, or
-proprietary decision logic. Evaluation is based exclusively on the artifacts
+The selected software systems are evaluated under black-box or near-black-box
+access conditions. The methodology does not assume access to their internal
+architectures, training data, decision thresholds, output-score calibration, or
+proprietary decision logic. Evaluation is based exclusively on the files
 submitted to the systems and on the outputs that can be observed or exported.
 
 After processing, the software outputs are normalized against the control
 metadata of the bundle. This normalization reconstructs the relationship
-between each blind identifier and its experimental ground truth, enabling
-consistent metric computation across heterogeneous software products.
+between each blind identifier and its reference operational assignment and
+experimental condition, enabling consistent metric computation across
+heterogeneous software systems.
 
 The forensic evaluation bundle therefore represents the controlled interface
-between the reproducible experimental pipeline and external software
-environments. It preserves operational blindness during import, traceability
-during normalization, and comparability during evaluation, without presenting
-the results as a general certification of the evaluated products
+between the reproducible experimental pipeline and the selected black-box
+software environments. It preserves descriptor-level blindness during import,
+traceability during normalization, and comparability during evaluation. The
+resulting assessment is specific to the evaluated versions, configurations,
+input corpus, and output mappings and must not be interpreted as a general
+validation or certification of the selected software systems
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 
@@ -1908,94 +1988,100 @@ systems that provide automated or \gls{ai}-assisted functionality for image
 classification, semantic retrieval, multimedia triage, or forensic review.
 
 Unlike the proxy classification models described in
-Section~\ref{sec:methodology-models-classification}, these systems are treated
-as black-box or near-black-box components. The evaluation does not assume access
-to their internal architecture, training data, model weights, decision
-thresholds, calibration procedures, or proprietary inference logic. It is based
-exclusively on the inputs submitted to the software and on the outputs that can
-be observed or exported.
+Section~\ref{sec:methodology-models-classification}, these systems are evaluated
+under black-box or near-black-box access conditions. The evaluation does not
+assume access to their internal architectures, training data, model weights,
+decision thresholds, calibration procedures, or proprietary inference logic.
+It is based exclusively on the inputs submitted to the software systems and on
+the outputs that can be observed or exported.
 
-The purpose of this phase is not to certify the evaluated products or to rank
-heterogeneous software systems in absolute terms. Instead, the protocol examines
-their observable operational behavior under controlled and reproducible
-conditions. The same clean, \gls{ood}, adversarial, and anti-forensic artifacts
-used in the controlled experimental pipeline are submitted to the selected
-software systems.
+The purpose of this phase is not to validate or certify the selected software
+systems or to rank heterogeneous systems in absolute terms. Instead, the
+protocol examines their observable operational behavior under controlled and
+reproducible conditions. The same clean binary samples, clean \gls{ood} inputs,
+adversarial artifacts, and anti-forensic artifacts used in the controlled
+experimental pipeline are submitted to the selected software systems.
 
 This design creates two complementary evaluation levels. Proxy models provide
-an inspectable environment for studying model behavior, attack generation, and
-transferability. Black-box software evaluation instead measures the behavior of
-operationally relevant systems whose internal decision processes are not fully
-accessible.
+an inspectable environment for studying controlled model behavior, adversarial
+artifact generation, and transferability. Black-box software evaluation instead
+measures the observable behavior of operationally relevant systems whose
+internal decision processes are not fully accessible.
 
 The evaluation begins with the blind input view of the forensic evaluation
 bundle described in
 Section~\ref{sec:methodology-forensic-evaluation-bundle}. Only neutrally
 identified image files are imported or indexed. Experimental metadata,
-structured audit records, source labels, fold assignments, perturbation names,
-and ground-truth information remain outside the software environment.
+structured audit records, reference operational assignments, fold allocations,
+perturbation names, and other experimental descriptors remain outside the
+software environment.
 
-This separation reduces the risk of path-induced and analyst-induced bias.
-Neither the software nor the analyst should be able to infer the expected class
-or experimental condition from filenames, directories, or associated control
-files during import and processing.
+This separation reduces the risk of descriptor-induced and analyst-induced
+bias. Neither the software system nor the analyst should be able to infer the
+expected operational assignment or evaluation condition from filenames,
+directories, or associated control records during import and processing. The
+visual content of the submitted images and the effects of any applied
+perturbations remain visible because they constitute the actual inputs under
+evaluation.
 
-The selected software may expose heterogeneous types of output. Depending on
-the product and its operational paradigm, observable outputs may include:
+The selected software systems may expose heterogeneous types of output.
+Depending on the system and its operational paradigm, observable outputs may
+include:
 
 \begin{itemize}
-    \item assigned categories or labels;
-    \item semantic tags or bookmarks;
-    \item retrieval results generated from textual or visual queries;
-    \item confidence scores or ranking values;
-    \item detected-item lists;
-    \item exported reports or structured records;
-    \item unmatched, ambiguous, or non-interpretable states.
+\item assigned categories or labels;
+\item semantic tags or bookmarks;
+\item retrieval results generated from textual or visual queries;
+\item system-specific output scores or ranking values;
+\item detected-item lists;
+\item exported reports or structured records;
+\item missing, ambiguous, unsupported, or non-interpretable output states.
 \end{itemize}
 
 These outputs do not necessarily correspond directly to the operational classes
 defined by the experimental protocol. A software system may use proprietary
 categories, broader semantic labels, hierarchical bookmarks, retrieval ranks,
-or product-specific confidence measures. Consequently, an explicit
-normalization procedure is required before quantitative comparison.
+or system-specific output scores. Consequently, an explicit normalization
+procedure is required before quantitative comparison.
 
 The normalization process consists of three main stages:
 
 \begin{enumerate}
-    \item matching each exported output to the corresponding blind bundle
-    artifact;
+\item matching each exported output to the corresponding blind bundle
+input;
 
-    \item interpreting the observable software output according to a documented
-    product-specific mapping rule;
+\item interpreting the observable software output according to a documented
+software-specific mapping rule;
 
-    \item recoding the result into a common set of operational prediction states
-    suitable for metric computation.
+\item recoding the result into a common set of operational prediction states
+suitable for metric computation.
 \end{enumerate}
 
-Artifact matching may rely on neutral bundle identifiers, filenames,
-cryptographic hashes, or other stable identifiers exposed by the software. The
-matching procedure must preserve the connection between the exported result and
-the corresponding ground-truth record without exposing that ground truth during
-software processing.
+Input matching may rely on neutral bundle identifiers, filenames,
+cryptographic hashes, or other stable identifiers exposed by the software
+system. The matching procedure must preserve the connection between each
+exported result and the corresponding control record without exposing the
+reference operational assignment during software processing.
 
-The product-specific mapping rule must be established before the final
-quantitative analysis. It should identify which observable categories, tags,
-bookmarks, or retrieval outcomes constitute evidence that the software flagged
-the target class.
+The software-specific mapping rule must be established and documented before
+the final quantitative analysis. It should identify which observable
+categories, tags, bookmarks, or retrieval outcomes constitute evidence that
+the software system flagged the target class.
 
 The absence of a target-related output must not be interpreted as an absolute
-semantic statement about the image. It indicates only that the software did not
-produce the relevant observable output under the tested configuration.
+semantic statement about the image. It indicates only that the software system
+did not produce the relevant observable output under the tested configuration.
 
 Similarly, outputs that cannot be mapped reliably must not be forced into a
 positive or negative prediction. The protocol therefore preserves an explicit
-unknown or unmapped state for missing, ambiguous, unsupported, or
+\texttt{unknown} state for missing, ambiguous, unsupported, unmapped, or
 non-interpretable outputs.
 
 This distinction is essential because unknown outputs and explicit negative
 predictions represent different observable states. They must remain separate in
-the normalized records, even when both are treated as missed detections in the
-operational-risk analysis of \texttt{weapon} samples. Conversely, treating
+the normalized records. When a documented risk-oriented analysis treats an
+unknown output on a \texttt{weapon} sample as a missed detection, the unknown
+state must nevertheless remain separately reportable. Conversely, treating
 every semantically related output as a positive detection may inflate
 false-positive counts. The normalization criteria must therefore remain
 conservative, explicit, and traceable.
@@ -2012,34 +2098,35 @@ normalization principles applied to heterogeneous black-box outputs.
 \begin{tabularx}{\textwidth}{@{}L{4.0cm}X@{}}
 \toprule
 \textbf{Observable output condition} &
-\textbf{Operational normalization principle} \\
+\textbf{Operational normalization principle} \
 \midrule
 
 Target-related category, tag, or bookmark
 &
 Recoded as a positive detection only when the exported output is explicitly
-associated with the target category defined by the experimental protocol. \\
+associated with the target category according to the documented mapping rule. \
 
 Semantic retrieval result
 &
 Recoded according to a predefined retrieval rule that specifies the accepted
-queries, configurations, and aggregation procedure. \\
+queries, configurations, and aggregation procedure. \
 
 No target-related output
 &
 Recorded as no target detection under the tested configuration. This state does
-not constitute independent semantic evidence that the target object is absent. \\
+not constitute independent semantic evidence that the target object is absent. \
 
 Ambiguous or broader semantic output
 &
-Preserved separately unless the mapping rule establishes a sufficiently precise
-relationship with the target class. \\
+Preserved as \texttt{unknown} unless the mapping rule establishes a sufficiently
+precise relationship with the target class. \
 
-Missing, unsupported, or non-interpretable output
+Missing, unsupported, unmapped, or non-interpretable output
 &
-Preserved as unknown or unmapped in the normalized records. For
-\texttt{weapon} samples, this state contributes to the operational
-missed-detection count while remaining separately reportable. \\
+Preserved as \texttt{unknown} in the normalized records. For
+\texttt{weapon} samples, this state may contribute to an operational
+missed-detection count under a documented risk-oriented rule while remaining
+separately reportable. \
 
 \bottomrule
 \end{tabularx}
@@ -2052,32 +2139,31 @@ selected and documented. When multiple reasonable configurations are available,
 a sensitivity analysis may be performed to determine how configuration changes
 affect detection coverage and false-positive behavior.
 
-The methodology does not prescribe specific products, versions, graphical
-interfaces, category names, semantic prompts, or threshold values. Such
-elements may change across software releases and operational environments. The
-concrete systems and configurations used in this thesis are documented in
+The methodology does not prescribe specific software systems, versions,
+graphical interfaces, category names, semantic prompts, or threshold values.
+Such elements may change across software releases and operational environments.
+The concrete systems and configurations used in this thesis are documented in
 Chapter~\ref{chap:implementation}.
 
 For every evaluated system, the protocol follows the same general workflow:
 
 \begin{enumerate}
-    \item import or index only the blind input artifacts;
+\item import or index only the blind evaluation inputs;
 
-    \item enable the relevant automated analysis or retrieval functionality;
+\item enable the relevant automated analysis or retrieval functionality;
 
-    \item process the complete evaluation bundle under a documented
-    configuration;
+\item process the complete blind input view under a documented
+configuration;
 
-    \item export all observable outputs required for subsequent matching and
-    interpretation;
+\item export all observable outputs required for subsequent matching and
+interpretation;
 
-    \item align the exported records with the experimental control metadata;
+\item align the exported records with the experimental control metadata;
 
-    \item normalize the proprietary outputs into common operational prediction
-    states;
+\item normalize the software-specific outputs into common operational
+prediction states;
 
-    \item compute comparable metrics while preserving unknown or unmapped
-    outcomes.
+\item compute comparable metrics while preserving unknown outcomes.
 \end{enumerate}
 
 Raw exports, normalization records, and aggregated metrics must remain separate.
@@ -2085,143 +2171,143 @@ The raw export preserves the software output as originally produced. The
 normalization record documents the matching and recoding decisions. The metric
 files contain only the quantitative results derived after normalization.
 
-This separation preserves a traceability chain among the submitted artifact,
-the observable software output, the applied mapping rule, and the resulting
-prediction state. It also enables normalization errors or ambiguous mappings to
-be reviewed without repeating the entire software execution.
+This separation preserves a traceability chain among the submitted bundle
+input, the observable software output, the applied mapping rule, and the
+resulting prediction state. It also enables normalization errors or ambiguous
+mappings to be reviewed without repeating the entire software execution.
 
-The output categories produced by commercial systems must not be interpreted as
-local explanations of their internal decision process. A tag, bookmark,
-classification, or retrieval result is treated only as an observable black-box
-output. The methodology does not infer which internal features, models, or
-decision mechanisms caused that output.
+The output categories produced by the selected black-box software systems must
+not be interpreted as local explanations of their internal decision processes.
+A tag, bookmark, classification, or retrieval result is treated only as an
+observable black-box output. The methodology does not infer which internal
+features, models, or decision mechanisms caused that output.
 
 The resulting evaluation is therefore anchored to externally verifiable
-behavior. It measures whether the evaluated systems produce operationally
-relevant outputs for the submitted artifacts without attributing internal
-properties that cannot be independently verified
+behavior. It measures whether the selected software systems produce
+operationally relevant outputs for the submitted inputs without attributing
+internal properties that cannot be independently verified
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 Figure~\ref{fig:methodology-forensic-tool-workflow} summarizes the general
 black-box evaluation workflow. The software systems receive only the blind
-bundle input. Experimental ground truth remains separate until the output
-matching and normalization stages.
+bundle input. Reference operational assignments and experimental metadata
+remain separate until the output-matching and normalization stages.
 
 \begin{figure}[H]
 \centering
 \resizebox{0.96\textwidth}{!}{%
 \begin{tikzpicture}[
-    >=latex,
-    font=\small,
-    block/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.20cm,
-        minimum width=6.8cm,
-        fill=gray!10
-    },
-    process/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.20cm,
-        minimum width=6.8cm,
-        fill=blue!8
-    },
-    output/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.20cm,
-        minimum width=6.8cm,
-        fill=green!10
-    },
-    note/.style={
-        rectangle,
-        rounded corners,
-        draw=black!70,
-        dashed,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=6.4cm,
-        fill=gray!5
-    },
-    arrow/.style={
-        ->,
-        thick,
-        draw=black!75
-    },
-    dashedarrow/.style={
-        ->,
-        thick,
-        dashed,
-        draw=black!75
-    }
+>=latex,
+font=\small,
+block/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.20cm,
+minimum width=6.8cm,
+fill=gray!10
+},
+process/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.20cm,
+minimum width=6.8cm,
+fill=blue!8
+},
+output/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.20cm,
+minimum width=6.8cm,
+fill=green!10
+},
+note/.style={
+rectangle,
+rounded corners,
+draw=black!70,
+dashed,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=6.4cm,
+fill=gray!5
+},
+arrow/.style={
+->,
+thick,
+draw=black!75
+},
+dashedarrow/.style={
+->,
+thick,
+dashed,
+draw=black!75
+}
 ]
 
 \node[block] (blind) at (0,0)
 {\shortstack{
-    \textbf{Blind evaluation input}\\[1mm]
-    \scriptsize neutrally identified image artifacts
+\textbf{Blind evaluation input}\[1mm]
+\scriptsize neutrally identified image files
 }};
 
 \node[process] (processing) at (0,-2.3)
 {\shortstack{
-    \textbf{Software-side processing}\\[1mm]
-    \scriptsize import, indexing, automated analysis, or semantic retrieval
+\textbf{Software-side processing}\[1mm]
+\scriptsize import, indexing, automated analysis, or semantic retrieval
 }};
 
 \node[output] (export) at (0,-4.6)
 {\shortstack{
-    \textbf{Observable output export}\\[1mm]
-    \scriptsize categories, tags, bookmarks, retrieval results, or reports
+\textbf{Observable output export}\[1mm]
+\scriptsize categories, tags, bookmarks, retrieval results, or reports
 }};
 
 \node[process] (matching) at (0,-6.9)
 {\shortstack{
-    \textbf{Artifact matching}\\[1mm]
-    \scriptsize alignment through neutral identifiers, filenames, or hashes
+\textbf{Input matching}\[1mm]
+\scriptsize alignment through neutral identifiers, filenames, or hashes
 }};
 
 \node[process] (normalization) at (0,-9.2)
 {\shortstack{
-    \textbf{Product-specific normalization}\\[1mm]
-    \scriptsize documented mapping to common operational prediction states
+\textbf{Software-specific normalization}\[1mm]
+\scriptsize documented mapping to common operational prediction states
 }};
 
 \node[output] (metrics) at (0,-11.5)
 {\shortstack{
-    \textbf{Comparative metric computation}\\[1mm]
-    \scriptsize positive, negative, unknown, and unmapped outcomes
+\textbf{Comparative metric computation}\[1mm]
+\scriptsize positive, negative, and unknown outcomes
 }};
 
 \node[note] (blindness) at (-8.0,0)
 {\shortstack{
-    \textbf{Blindness control}\\[1mm]
-    \scriptsize no ground truth or experimental descriptors\\
-    \scriptsize are exposed during software processing
+\textbf{Blindness control}\[1mm]
+\scriptsize no reference assignments or experimental descriptors\
+\scriptsize are exposed during software processing
 }};
 
 \node[note] (metadata) at (8.0,-6.9)
 {\shortstack{
-    \textbf{Separate control metadata}\\[1mm]
-    \scriptsize ground truth, provenance, experimental condition,\\
-    \scriptsize and integrity information
+\textbf{Separate control metadata}\[1mm]
+\scriptsize reference assignments, provenance, experimental condition,\
+\scriptsize and integrity information
 }};
 
 \node[note] (traceability) at (-8.0,-9.2)
 {\shortstack{
-    \textbf{Traceability requirement}\\[1mm]
-    \scriptsize raw exports, mapping decisions, and metrics\\
-    \scriptsize remain separate and auditable
+\textbf{Traceability requirement}\[1mm]
+\scriptsize raw exports, mapping decisions, and metrics\
+\scriptsize remain separate and auditable
 }};
 
 \draw[arrow] (blind) -- (processing);
@@ -2237,12 +2323,14 @@ matching and normalization stages.
 \end{tikzpicture}%
 }
 \caption[Black-box software evaluation workflow]{Black-box software evaluation
-workflow. Neutrally identified artifacts are processed without access to
-experimental ground truth. Observable outputs are subsequently matched to the
-control metadata, normalized through documented product-specific rules, and
-converted into common operational prediction states}
+workflow. Neutrally identified inputs are processed without access to reference
+operational assignments or experimental descriptors. Observable outputs are
+subsequently matched to the control metadata, normalized through documented
+software-specific rules, and converted into common operational prediction
+states}
 \label{fig:methodology-forensic-tool-workflow}
 \end{figure}
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Evaluation metrics}
@@ -2250,31 +2338,33 @@ converted into common operational prediction states}
 % ─────────────────────────────────────────────────────────────────────────────
 
 The \gls{fairlab} metric framework evaluates three complementary dimensions of
-operational robustness: binary classification performance, robustness under
-adversarial and anti-forensic conditions, and system behavior on \gls{ood}
-inputs. The same framework also supports the evaluation of black-box software
-systems after their heterogeneous outputs have been normalized into common
-operational prediction states.
+operational robustness: binary classification performance under clean
+conditions, robustness under adversarial and anti-forensic conditions, and
+system behavior on \gls{ood} inputs. The framework also supports the evaluation
+of selected black-box software systems after their heterogeneous outputs have
+been normalized into common operational prediction states.
 
 The objective is not limited to aggregate classification accuracy. In forensic
 visual triage, different error types may have different operational
-consequences. A false negative on investigatively relevant content may prevent
-an artifact from being prioritized for detailed review. A false positive may
-instead increase the volume of irrelevant material submitted to the analyst.
+consequences. A false negative on a \texttt{weapon} sample may prevent
+target-category content from being prioritized for detailed review. A false
+positive may instead increase the volume of non-target material submitted to
+the analyst.
 
 The evaluation framework therefore combines conventional classification
 metrics with condition-specific robustness indicators and operationally
-oriented error measures. Metrics are computed separately for clean,
-adversarial, anti-forensic, and \gls{ood} conditions before being integrated
-into the final comparative analysis.
+oriented error measures. Binary metrics are computed separately for clean,
+adversarial, and anti-forensic conditions. The \gls{ood} branch is evaluated
+through separate behavioral indicators and is not integrated into the binary
+confusion matrix.
 
 The protocol does not adopt \gls{auroc} as a central metric. Although
 score-based measures are widely used in supervised \gls{ml}, their consistent
 application requires comparable continuous outputs across the evaluated
-systems. The proxy models provide confidence scores, whereas commercial
-black-box systems may expose only categorical labels, semantic tags, bookmarks,
-retrieval results, or product-specific scores whose calibration cannot be
-verified.
+systems. The proxy models expose continuous prediction outputs, whereas the
+selected black-box software systems may provide only categorical labels,
+semantic tags, bookmarks, retrieval results, or system-specific scores whose
+meaning and calibration cannot be independently verified.
 
 The metric framework consequently prioritizes measures that can be derived
 consistently from both inspectable models and normalized black-box outputs. This
@@ -2287,48 +2377,42 @@ For the binary classification task, the principal metrics are accuracy,
 balanced accuracy, precision, recall, F1-score, and the confusion matrix.
 Class-specific interpretation is required because aggregate performance may
 conceal asymmetric error behavior between the \texttt{weapon} and
-\texttt{non\_weapon} classes.
+\texttt{non_weapon} classes.
 
-Let \(TP\), \(TN\), \(FP\), and \(FN\) denote the numbers of true positives,
+Let (TP), (TN), (FP), and (FN) denote the numbers of true positives,
 true negatives, false positives, and false negatives, respectively. Accuracy is
 defined as:
 
-\begin{equation}
-\mathrm{Accuracy}
-=
+\chapter*{\begin{equation}
+\mathrm{Accuracy}}
 \frac{TP + TN}{TP + TN + FP + FN}
 \end{equation}
 
 Recall for the positive \texttt{weapon} class is defined as:
 
-\begin{equation}
-\mathrm{Recall}_{\text{\texttt{weapon}}}
-=
+\chapter*{\begin{equation}
+\mathrm{Recall}_{\text{\texttt{weapon}}}}
 \frac{TP}{TP + FN}
 \end{equation}
 
 The corresponding false-negative rate is:
 
-\begin{equation}
-\mathrm{FNR}_{\text{\texttt{weapon}}}
-=
+\chapter*{\begin{equation}
+\mathrm{FNR}_{\text{\texttt{weapon}}}}
 \frac{FN}{TP + FN}
 \end{equation}
 
 The false-positive rate is:
 
-\begin{equation}
-\mathrm{FPR}
-=
+\chapter*{\begin{equation}
+\mathrm{FPR}}
 \frac{FP}{FP + TN}
 \end{equation}
 
-Balanced accuracy is used to account for the performance achieved on both
-operational classes:
+Balanced accuracy accounts for performance on both operational classes:
 
-\begin{equation}
-\mathrm{Balanced\ Accuracy}
-=
+\chapter*{\begin{equation}
+\mathrm{Balanced\ Accuracy}}
 \frac{1}{2}
 \left(
 \frac{TP}{TP + FN}
@@ -2339,100 +2423,138 @@ operational classes:
 
 Precision and F1-score are defined as:
 
-\begin{equation}
-\mathrm{Precision}
-=
+\chapter*{\begin{equation}
+\mathrm{Precision}}
 \frac{TP}{TP + FP}
 \end{equation}
 
-\begin{equation}
-\mathrm{F1}
-=
+\chapter*{\begin{equation}
+\mathrm{F1}}
 2
 \frac{
 \mathrm{Precision}
 \cdot
-\mathrm{Recall}_{\text{\texttt{weapon}}}
+\mathrm{Recall}\textit{{\text{\texttt{weapon}}}
 }{
 \mathrm{Precision}
 +
-\mathrm{Recall}_{\text{\texttt{weapon}}}
+\mathrm{Recall}}{\text{\texttt{weapon}}}
 }
 \end{equation}
 
 Robustness under manipulated conditions is evaluated by comparing the
-predictions obtained for each perturbed artifact with both the corresponding
-clean prediction and the reference operational label. This paired design makes
-it possible to distinguish ordinary classification errors from errors induced
-specifically by the applied perturbation.
+prediction obtained for each perturbed artifact with both the corresponding
+clean prediction and the reference operational class. This paired design makes
+it possible to distinguish errors already present under clean conditions from
+errors introduced after perturbation.
 
-For a given perturbation condition \(p\), the accuracy drop is defined as:
+For a given perturbation condition (p), the accuracy drop is defined as:
 
-\begin{equation}
-\Delta \mathrm{Accuracy}_{p}
-=
-\mathrm{Accuracy}_{\mathrm{clean}}
--
+\chapter*{\begin{equation}
+\Delta \mathrm{Accuracy}_{p}}
+\section*{\mathrm{Accuracy}_{\mathrm{clean}}}
 \mathrm{Accuracy}_{p}
 \end{equation}
 
-The induced error count measures the number of samples that are correctly
-classified in the clean condition but incorrectly classified after
-perturbation. The corresponding induced error rate is computed relative to the
-number of clean samples that were initially classified correctly.
+Positive values indicate degradation relative to the clean baseline. Zero or
+negative values indicate no measured degradation under the specific evaluated
+condition and must not be interpreted as evidence of general robustness.
+
+Let (\mathcal{C}_{\mathrm{clean}}) denote the set of samples classified
+correctly under the clean condition. The induced error rate for condition (p)
+is defined as:
+
+\chapter*{\begin{equation}
+\mathrm{InducedErrorRate}_{p}}
+\frac{
+\left|
+\left{
+i \in \mathcal{C}\textit{{\mathrm{clean}}
+:
+\hat{y}^{(p)}}{i} \neq y_{i}
+\right}
+\right|
+}{
+\left|
+\mathcal{C}_{\mathrm{clean}}
+\right|
+}
+\end{equation}
+
+The numerator is the induced error count. For model-dependent adversarial
+conditions, this rate may also be reported as the attack success rate because
+it measures the proportion of clean-correct samples rendered incorrect by the
+attack. Samples already misclassified under clean conditions do not contribute
+to this quantity.
 
 Particular attention is given to the transition:
 
 \begin{equation}
 \text{\texttt{weapon}}
 \rightarrow
-\text{\texttt{non\_weapon}}
+\text{\texttt{non_weapon}}
 \end{equation}
 
-because it represents the loss of a positive detection for investigatively
-relevant content. The reverse transition:
+because it represents the loss of a positive detection for target-category
+content. The reverse transition:
 
 \begin{equation}
-\text{\texttt{non\_weapon}}
+\text{\texttt{non_weapon}}
 \rightarrow
 \text{\texttt{weapon}}
 \end{equation}
 
-is also measured because it may increase the number of irrelevant artifacts
+is also measured because it may increase the volume of non-target content
 prioritized for human review.
 
 When continuous proxy-model outputs are available, the analysis also considers
-mean confidence, confidence variation, and the change in confidence assigned to
-the reference class. These measures complement label-based metrics by
-identifying cases in which a perturbation substantially weakens the model's
-decision without necessarily changing the predicted class.
+the mean maximum predicted-class probability and its variation relative to the
+corresponding clean condition. These quantities are used exclusively as
+diagnostic intra-model indicators. They are not interpreted as calibrated
+probabilities and must not be compared directly across different proxy
+architectures.
+
+For each proxy model and manipulated condition, the confidence shift is defined
+as:
+
+\chapter*{\begin{equation}
+\Delta c}
+\section*{c_{\mathrm{perturbed}}}
+c_{\mathrm{clean}},
+\end{equation}
+
+where (c) denotes the maximum predicted-class probability. The value does not
+necessarily correspond to the probability assigned to the reference operational
+class.
 
 The \gls{ood} evaluation remains conceptually separate from the binary
 classification task. The \gls{ood} samples are not treated as a third
-supervised class, and multiclass accuracy is therefore not computed for this
-branch.
+supervised class, and binary or multiclass accuracy is therefore not computed
+for this branch.
 
-Instead, the protocol measures how frequently \gls{ood} samples are assigned
-to the known operational classes. The principal indicators include:
+Instead, the protocol characterizes how frequently \gls{ood} inputs are
+assigned to the known operational classes. The principal indicators include:
 
 \begin{itemize}
-    \item the proportion of \gls{ood} samples classified as
-    \texttt{weapon};
+\item the proportion of \gls{ood} inputs assigned to
+\texttt{weapon};
 
-    \item the proportion of \gls{ood} samples classified as
-    \texttt{non\_weapon};
+\item the proportion of \gls{ood} inputs assigned to
+\texttt{non\_weapon};
 
-    \item the mean prediction confidence, when available;
+\item the mean maximum predicted-class probability for proxy models;
 
-    \item the proportion of \gls{ood} samples assigned an in-domain class with
-    confidence above a predefined threshold.
+\item the proportion of proxy-model predictions whose maximum probability
+exceeds a predefined high-confidence threshold;
+
+\item the proportion of unknown outputs, when such a state is exposed after
+normalization of black-box software outputs.
 \end{itemize}
 
 The \gls{ood} weapon flag rate is defined as:
 
-\begin{equation}
-\mathrm{WeaponFlagRate}_{\mathrm{OOD}}
-=
+\chapter*{\begin{equation}
+\mathrm{WeaponFlagRate}_{\mathrm{OOD}}}
 \frac{
 N_{\mathrm{OOD}\rightarrow\text{\texttt{weapon}}}
 }{
@@ -2440,52 +2562,62 @@ N_{\mathrm{OOD}}
 }
 \end{equation}
 
-This measure represents the tendency of a system to flag anomalous or
-distributionally different content as belonging to the investigatively
-relevant class. It does not represent conventional false-positive rate because
-the \gls{ood} samples do not belong to the supervised negative class.
+This measure describes the operational tendency of a system to map
+distributionally different inputs to the target class. It does not represent a
+conventional false-positive rate because the \gls{ood} inputs do not belong to
+the supervised negative class. It also does not, by itself, establish that an
+individual \gls{ood} assignment is semantically correct, incorrect, relevant,
+or irrelevant.
+
+Confidence-based \gls{ood} indicators are available only for the proxy models.
+They remain diagnostic intra-model quantities and are not compared as calibrated
+probabilities across architectures. The selected black-box software systems do
+not expose homogeneous confidence values suitable for equivalent analysis.
 
 The evaluation of black-box software systems is based on normalized observable
-outputs. Since the evaluated products may not expose conventional binary
-predictions, the metric protocol distinguishes among positive detection,
-absence of target detection, and unknown or unmapped output.
+outputs. The common normalization framework distinguishes among positive
+detection, no target detection, and \texttt{unknown}. The
+\texttt{unknown} state includes missing, ambiguous, unsupported, unmapped, or
+otherwise non-interpretable outputs.
 
-For samples whose reference class is \texttt{weapon}, any outcome that fails to
-surface the target category constitutes an operational miss. Such outcomes may
-include an explicit negative result, absence of detection, an uncategorized
-state, or an unknown or unmapped output. For operational-risk analysis, these
-outcomes are included in the missed-detection count. Unknown and unmapped
-outputs are also reported separately through the corresponding coverage metric,
-so that they remain distinguishable from explicit negative classifications in
-the normalized records.
+Only matched records with interpretable positive or negative normalized
+decisions contribute to the conventional binary confusion matrix. An unknown
+output must not be forced into either the positive or negative class.
 
-For samples whose reference class is \texttt{non\_weapon}, a target-related
-output constitutes a false positive. The corresponding false-positive rate
-quantifies the additional workload that may be introduced by irrelevant
-detections.
+For samples whose reference operational class is \texttt{weapon}, an
+interpretable no-target decision constitutes a false negative. In a separate
+risk-oriented analysis, an unknown output may also be counted as an operational
+miss because the target category was not surfaced. However, this supplementary
+count must remain distinct from the conventional false-negative rate, and the
+unknown outcomes must remain separately reportable.
 
-For the black-box systems, the protocol therefore considers:
+For samples whose reference operational class is \texttt{non_weapon}, an
+interpretable target-related output constitutes a false positive. Unknown
+outputs are not automatically treated as false positives because they do not
+represent an explicit target detection.
+
+For the selected black-box software systems, the protocol therefore considers:
 
 \begin{itemize}
-    \item matching rate between exported outputs and bundle artifacts;
-    \item true-positive and false-negative counts;
-    \item true-negative and false-positive counts;
-    \item weapon recall;
-    \item weapon false-negative rate;
-    \item false-positive rate;
-    \item balanced accuracy, where the normalized outputs permit its
-    computation;
-    \item unknown or unmapped output rate;
-    \item not-detected or uncategorized rate, where exposed by the software.
+\item matching rate between exported outputs and bundle inputs;
+\item true-positive and false-negative counts on interpretable records;
+\item true-negative and false-positive counts on interpretable records;
+\item weapon recall;
+\item weapon false-negative rate;
+\item false-positive rate;
+\item accuracy and balanced accuracy, where the normalized outputs permit
+their computation;
+\item unknown output count and rate;
+\item system-specific not-detected or uncategorized rates, where exposed;
+\item supplementary operational miss counts, where explicitly defined.
 \end{itemize}
 
 The matching rate is a technical coverage measure rather than a classification
-metric. It records the proportion of bundle artifacts for which a corresponding
-software output can be identified:
+metric. It records the proportion of submitted bundle inputs for which a
+corresponding software output can be identified:
 
-\begin{equation}
-\mathrm{MatchingRate}
-=
+\chapter*{\begin{equation}
+\mathrm{MatchingRate}}
 \frac{
 N_{\mathrm{matched}}
 }{
@@ -2493,21 +2625,22 @@ N_{\mathrm{submitted}}
 }
 \end{equation}
 
-Similarly, the unknown output rate is defined as:
+The unknown output rate is defined as:
 
-\begin{equation}
-\mathrm{UnknownRate}
-=
+\chapter*{\begin{equation}
+\mathrm{UnknownRate}}
 \frac{
-N_{\mathrm{unknown\ or\ unmapped}}
+N_{\mathrm{unknown}}
 }{
 N_{\mathrm{matched}}
 }
 \end{equation}
 
-These measures are reported because incomplete exports or non-interpretable
-outputs may affect the apparent performance of a black-box system. They must
-not be conflated with ordinary classification errors.
+Unmatched inputs are represented through the matching rate and are not included
+again in the numerator of the unknown rate. These technical coverage measures
+are reported because incomplete matching or non-interpretable outputs may
+affect the apparent performance of a black-box software system. They must not
+be conflated with ordinary classification errors.
 
 Table~\ref{tab:methodology-evaluation-metrics} summarizes the metric categories
 adopted in the protocol.
@@ -2519,228 +2652,239 @@ adopted in the protocol.
 \begin{tabularx}{\textwidth}{@{}L{4.0cm}X@{}}
 \toprule
 \textbf{Category} &
-\textbf{Metrics and operational meaning} \\
+\textbf{Metrics and operational meaning} \
 \midrule
 
 Binary classification
 &
 Accuracy, balanced accuracy, precision, recall, F1-score, and confusion matrix
-for the \texttt{weapon} and \texttt{non\_weapon} classes. \\
+for the \texttt{weapon} and \texttt{non_weapon} classes. \
 
 Robustness under manipulation
 &
-Clean accuracy, perturbed accuracy, accuracy drop, induced error count, induced
-error rate, prediction transitions, and confidence variation when available. \\
+Clean and perturbed accuracy, accuracy drop, induced error count and rate,
+prediction transitions, and intra-model confidence variation when available. \
 
 Critical operational errors
 &
 False negatives on \texttt{weapon} samples and false positives on
-\texttt{non\_weapon} samples, interpreted according to their different effects
-on forensic prioritization and review workload. \\
+\texttt{non_weapon} samples, interpreted according to their different effects
+on forensic prioritization and review workload. \
 
 \gls{ood} behavior
 &
-Weapon flag rate, in-domain prediction distribution, mean confidence, and
-high-confidence in-domain assignment rate. \\
+Weapon flag rate, in-domain assignment distribution, and proxy-model
+confidence indicators. The branch remains excluded from binary classification
+metrics. \
 
 Black-box software coverage
 &
-Matching rate, missing outputs, unknown or unmapped rate, and other
-product-specific non-interpretable states. \\
+Matching rate, unknown output count and rate, and system-specific missing,
+not-detected, or uncategorized states. \
 
 Black-box classification behavior
 &
 True positives, false negatives, false positives, true negatives, weapon recall,
-weapon false-negative rate, false-positive rate, and balanced accuracy where
-applicable. \\
+weapon false-negative rate, false-positive rate, accuracy, and balanced accuracy
+computed on interpretable normalized outputs where applicable. \
+
+Supplementary operational-risk analysis
+&
+Unknown outcomes on \texttt{weapon} samples may be included in a separately
+reported operational miss count without being recoded as conventional false
+negatives. \
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Figure~\ref{fig:methodology-metric-layers} summarizes the three analytical
-layers of the metric framework: binary classification and robustness,
-\gls{ood} behavior, and normalized black-box software evaluation.
+Figure~\ref{fig:methodology-metric-layers} summarizes the metric framework
+across the two complementary evaluation levels and the distinct binary,
+manipulated-input, \gls{ood}, and coverage analyses.
 
 \begin{figure}[H]
 \centering
-\resizebox{0.96\textwidth}{!}{%
+\resizebox{0.98\textwidth}{!}{%
 \begin{tikzpicture}[
-    >=latex,
-    font=\small,
-    block/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.2cm,
-        fill=gray!10
-    },
-    metric/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.25cm,
-        minimum width=6.8cm,
-        fill=blue!8
-    },
-    output/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.20cm,
-        minimum width=7.4cm,
-        fill=green!10
-    },
-    note/.style={
-        rectangle,
-        rounded corners,
-        draw=black!65,
-        dashed,
-        thick,
-        align=center,
-        minimum height=1.10cm,
-        minimum width=6.8cm,
-        fill=gray!5
-    },
-    arrow/.style={
-        ->,
-        thick,
-        draw=black!75
-    },
-    dashedarrow/.style={
-        ->,
-        thick,
-        dashed,
-        draw=black!75
-    }
+>=latex,
+font=\small,
+block/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.2cm,
+fill=gray!10
+},
+eval/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.20cm,
+minimum width=6.8cm,
+fill=blue!8
+},
+metric/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.20cm,
+minimum width=6.8cm,
+fill=yellow!12
+},
+output/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.20cm,
+minimum width=7.6cm,
+fill=green!10
+},
+arrow/.style={
+->,
+thick,
+draw=black!75
+}
 ]
 
 \node[block] (inputs) at (0,0)
 {\shortstack{
-    \textbf{Evaluation conditions}\\[1mm]
-    \scriptsize clean, adversarial, anti-forensic, and clean \gls{ood} inputs
+\textbf{Common evaluation inputs}\[1mm]
+\scriptsize clean binary samples, manipulated artifacts, and clean
+\gls{ood} inputs
 }};
 
-\node[metric] (binary) at (-4.5,-2.8)
+\node[eval] (proxy) at (-4.5,-2.7)
 {\shortstack{
-    \textbf{Binary classification and robustness}\\[1mm]
-    \scriptsize accuracy, recall, FNR, FPR, F1, confusion matrix,\\
-    \scriptsize prediction transitions, accuracy drop, and confidence changes
+\textbf{Proxy-model evaluation}\[1mm]
+\scriptsize binary predictions and intra-model confidence diagnostics
 }};
 
-\node[metric] (ood) at (4.5,-2.8)
+\node[eval] (blackbox) at (4.5,-2.7)
 {\shortstack{
-    \textbf{\gls{ood} behavior}\\[1mm]
-    \scriptsize in-domain prediction distribution, weapon flag rate,\\
-    \scriptsize confidence, and high-confidence assignments
+\textbf{Black-box software evaluation}\[1mm]
+\scriptsize normalized observable outputs and coverage states
 }};
 
-\node[metric] (blackbox) at (0,-5.8)
+\node[metric] (binary) at (-4.5,-5.5)
 {\shortstack{
-    \textbf{Normalized black-box outputs}\\[1mm]
-    \scriptsize TP, TN, FP, FN, matching rate,\\
-    \scriptsize unknown, unmapped, and uncategorized outcomes
+\textbf{Binary and robustness metrics}\[1mm]
+\scriptsize accuracy, recall, FNR, FPR, F1, accuracy drop,\
+\scriptsize induced errors, and prediction transitions
 }};
 
-\node[note] (comparability) at (0,-8.2)
+\node[metric] (oodcoverage) at (4.5,-5.5)
 {\shortstack{
-    \textbf{Operational comparability principle}\\[1mm]
-    \scriptsize primary metrics must remain computable across systems\\
-    \scriptsize that expose heterogeneous observable outputs
+\textbf{\gls{ood} and coverage indicators}\[1mm]
+\scriptsize weapon flag rate, in-domain assignments, matching rate,\
+\scriptsize unknown outcomes, and proxy-only confidence indicators
 }};
 
-\node[output] (interpretation) at (0,-10.7)
+\node[output] (interpretation) at (0,-8.4)
 {\shortstack{
-    \textbf{Operational robustness interpretation}\\[1mm]
-    \scriptsize clean performance, manipulation-induced degradation,\\
-    \scriptsize \gls{ood} risk, and black-box software behavior
+\textbf{Operational robustness interpretation}\[1mm]
+\scriptsize clean performance, manipulation-induced degradation,\
+\scriptsize \gls{ood} behavior, output coverage, and error direction
 }};
 
-\draw[arrow] (inputs.south west) -- (binary.north);
-\draw[arrow] (inputs.south east) -- (ood.north);
+\draw[arrow] (inputs.south west) -- (proxy.north);
+\draw[arrow] (inputs.south east) -- (blackbox.north);
 
-\draw[arrow] (binary.south east) -- (blackbox.north);
-\draw[arrow] (ood.south west) -- (blackbox.north);
+\draw[arrow] (proxy.south) -- (binary.north);
+\draw[arrow] (proxy.south east) -- (oodcoverage.north west);
 
-\draw[dashedarrow] (blackbox) -- (comparability);
-\draw[arrow] (comparability) -- (interpretation);
+\draw[arrow] (blackbox.south west) -- (binary.north east);
+\draw[arrow] (blackbox.south) -- (oodcoverage.north);
+
+\draw[arrow] (binary.south east) -- (interpretation.north);
+\draw[arrow] (oodcoverage.south west) -- (interpretation.north);
 
 \end{tikzpicture}%
 }
-\caption[Metric framework]{Metric framework. Binary classification and
-robustness, \gls{ood} behavior, and normalized black-box outputs are analyzed
-as distinct layers and integrated only during the final operational
-interpretation}
+\caption[Metric framework]{Metric framework. Condition-specific binary,
+robustness, \gls{ood}, and coverage indicators are computed across the
+proxy-model and black-box evaluation levels and integrated only during the
+operational interpretation}
 \label{fig:methodology-metric-layers}
 \end{figure}
 
 The metrics do not replace human review or establish that a software system is
-reliable in all forensic scenarios. Their function is to identify the
-conditions under which automated support may fail to surface relevant content,
-increase the review workload, or behave unpredictably on manipulated or
-distributionally different inputs.
+reliable across all forensic scenarios. Their function is to identify the
+conditions under which automated support may fail to surface target-category
+content, increase the review workload, or produce unstable or operationally
+consequential outputs on manipulated or distributionally different inputs.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability approach}
 \label{sec:methodology-explainability}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The \gls{xai} component of the \gls{fairlab} methodology serves a diagnostic
-and qualitative function. It complements quantitative robustness metrics by
-supporting the examination of selected cases in which the behavior of the
-proxy classification models is operationally or methodologically relevant.
+The \gls{xai} component of the \gls{fairlab} methodology serves an exclusively
+diagnostic and qualitative function. It complements quantitative robustness
+metrics by supporting the examination of selected cases in which the behavior
+of an inspectable proxy classification model is operationally or
+methodologically relevant.
 
 Explainability outputs are not treated as stand-alone evidence, definitive
 explanations of algorithmic decisions, or demonstrations of model reliability.
-Their purpose is to provide additional information about the image regions that
-contribute to a model prediction and to support the formulation of hypotheses
-regarding changes in model behavior across clean, adversarial, anti-forensic,
-and \gls{ood} conditions.
+Their purpose is to provide diagnostic information about the attribution
+patterns associated with a selected model output and to support the formulation
+of hypotheses regarding changes in model behavior across clean, adversarial,
+anti-forensic, and \gls{ood} conditions.
 
-The explainability analysis is restricted to fully inspectable proxy models.
-The selected technique must therefore be compatible with the architecture,
-weights, preprocessing procedure, and inference pipeline of the evaluated
-model. Depending on the adopted method, access may also be required to
-gradients, intermediate activations, or differentiable model components.
+In the present research design, the explainability analysis is restricted to
+one selected fully inspectable proxy model. The adopted technique must therefore
+be compatible with the model architecture, weights, preprocessing procedure,
+and inference pipeline. Depending on the selected method, access may also be
+required to gradients, intermediate activations, or other differentiable model
+components.
 
-The same internal analysis cannot be applied directly to proprietary
-black-box or near-black-box software systems. For these systems, internal model
-architectures, gradients, decision thresholds, and scoring procedures are not
-available. Comparisons with black-box software are therefore limited to
-observable outputs rather than internal attribution mechanisms.
+The same internal attribution analysis cannot be applied directly to the
+selected black-box or near-black-box software systems. Their internal model
+architectures, gradients, representations, decision thresholds, and scoring
+procedures are not accessible. Comparisons involving these systems are
+therefore limited to their observable and normalized outputs. Such outputs must
+not be interpreted as explanations of the internal decision processes that
+produced them.
 
 The explainability methodology adopts a case-study approach rather than an
 aggregate evaluation strategy. Representative samples are selected according to
 predefined diagnostic criteria. The objective is not to estimate model
-performance from a limited number of visualizations, but to investigate
-specific forms of behavior that cannot be fully characterized through aggregate
-metrics alone.
+performance from a limited number of visualizations, but to examine specific
+behaviors that cannot be fully characterized through aggregate metrics alone.
 
 Relevant case categories include:
 
 \begin{itemize}
-    \item samples correctly classified under clean conditions and
-    misclassified after perturbation;
+\item a correctly classified clean sample used as a qualitative reference;
 
-    \item operationally critical transitions from \texttt{weapon} to
-    \texttt{non\_weapon};
+\item a clean sample associated with an operationally relevant
+classification error;
 
-    \item \gls{ood} samples assigned to an in-domain class with high
-    confidence;
+\item a high-confidence \gls{ood} assignment to an in-domain operational
+class;
 
-    \item samples for which different proxy architectures produce divergent
-    predictions;
+\item a clean-correct sample rendered incorrect by an anti-forensic
+transformation;
 
-    \item samples for which proxy-model predictions differ from the normalized
-    outputs of the evaluated black-box software systems.
+\item a clean-correct sample rendered incorrect by a model-dependent
+adversarial perturbation, particularly when the resulting prediction
+retains high model confidence.
 \end{itemize}
+
+High-confidence criteria are applied only within the selected proxy model. They
+serve as diagnostic case-selection indicators and must not be interpreted as
+calibrated probabilities or compared directly with confidence values from other
+architectures or software systems.
 
 Table~\ref{tab:methodology-xai-case-selection} summarizes the diagnostic
 function of these case categories.
@@ -2752,33 +2896,37 @@ function of these case categories.
 \begin{tabularx}{\textwidth}{@{}L{4.4cm}X@{}}
 \toprule
 \textbf{Case category} &
-\textbf{Diagnostic function} \\
+\textbf{Diagnostic function} \
 \midrule
 
-Correct clean and incorrect perturbed sample
+Correctly classified clean reference
 &
-Examine whether the perturbation changes the image regions that contribute to
-the proxy model's decision. \\
+Provide a qualitative reference for examining whether the attribution pattern
+is associated with visually relevant regions under an unmanipulated condition.
+\
 
-\texttt{weapon}~$\rightarrow$~\texttt{non\_weapon}
+Clean classification error
 &
-Investigate operationally critical cases in which relevant content is no longer
-assigned to the positive class. \\
+Examine an error already present under the clean condition and determine
+whether the attribution pattern appears localized, diffuse, partial, or
+associated with contextual image regions. \
 
 High-confidence \gls{ood} assignment
 &
-Analyze cases in which distributionally different content is assigned to one of
-the binary classes with high confidence. \\
+Examine the attribution pattern associated with an in-domain assignment
+produced for a distributionally different input. The assignment is treated as
+an operational behavior rather than as an ordinary supervised error. \
 
-Divergence among proxy models
+Anti-forensic induced error
 &
-Compare how different architectures respond to the same clean or manipulated
-artifact. \\
+Examine whether an operationally plausible image transformation is associated
+with a change in the attribution pattern and the resulting predicted class. \
 
-Divergence between proxy models and black-box software
+Adversarially induced error
 &
-Support qualitative comparison between inspectable model behavior and
-normalized observable software outputs. \\
+Examine the attribution pattern associated with an incorrect prediction
+produced after a model-dependent adversarial perturbation, including cases in
+which the model output remains highly confident. \
 
 \bottomrule
 \end{tabularx}
@@ -2787,44 +2935,59 @@ normalized observable software outputs. \\
 Case selection must remain traceable to the corresponding prediction records,
 source samples, experimental conditions, and model configurations. Each
 explainability artifact should therefore be associated with the evaluated
-sample, the corresponding model, the predicted class, the reference class, and
-the condition under which the prediction was produced.
+sample, the model and checkpoint used for inference, the predicted class, the
+reference operational class, the evaluation condition, and the rationale for
+case selection.
 
-The methodology does not prescribe a single explainability technique.
-Gradient-based attribution, activation-based visualization, local surrogate
-methods, and feature-attribution approaches may all be considered, provided
-that their assumptions and limitations are compatible with the models and
-research questions under examination.
+The methodology does not prescribe a single explainability technique for every
+possible implementation of the protocol. Gradient-based attribution,
+activation-based visualization, local surrogate methods, and other
+feature-attribution approaches may be considered, provided that their
+assumptions and limitations are compatible with the selected model and the
+research questions under examination. The specific technique and configuration
+adopted in this thesis are reported in
+Chapter~\ref{chap:implementation}.
 
-The specific technique adopted in an implementation should satisfy four
-requirements:
+The adopted explainability procedure should satisfy the following requirements:
 
 \begin{itemize}
-    \item compatibility with the selected proxy models;
-    \item reproducibility across experimental runs;
-    \item consistent application across clean and manipulated samples;
-    \item production of outputs that can be interpreted without being presented
-    as definitive causal explanations.
+\item compatibility with the selected inspectable proxy model;
+\item explicit documentation of the attribution target and reference
+baseline, where required by the method;
+\item reproducibility of the attribution procedure;
+\item consistent application across the selected clean and manipulated
+cases;
+\item traceability to the model checkpoint, input sample, and prediction
+record;
+\item production of outputs that can be interpreted without being presented
+as definitive causal explanations.
 \end{itemize}
 
 Attribution maps and related visualizations must be interpreted cautiously.
-They identify associations between input regions and model outputs under the
-assumptions of the selected explainability method. They do not establish that
-the highlighted regions correspond to the actual internal reasoning of the
-model, nor do they demonstrate that the resulting prediction is correct,
+They characterize the relationship between input features and a selected model
+output under the assumptions of the adopted explainability method. They do not
+establish that the highlighted regions reproduce the model's internal
+reasoning, nor do they demonstrate that the resulting prediction is correct,
 reliable, or forensically valid.
 
+When the adopted method provides completeness, approximation, or convergence
+diagnostics, these quantities should be documented and considered during
+interpretation. They constitute validation aids rather than automatic evidence
+that an attribution is complete or reliable. No strict convergence claim should
+be made unless it is supported by the recorded diagnostic values and the
+adopted acceptance criterion.
+
 The explainability analysis must also remain distinct from the quantitative
-robustness assessment. Classification metrics measure the frequency and type of
-observed errors across the experimental corpus. Explainability instead supports
-the qualitative examination of selected examples and the interpretation of
-possible changes in feature attribution or spatial attention.
+robustness assessment. Classification metrics measure the frequency, magnitude,
+and direction of observed errors across the experimental corpus. Explainability
+instead supports the qualitative examination of selected examples and the
+interpretation of possible changes in attribution patterns.
 
 Within the \gls{fairlab} protocol, \gls{xai} therefore acts as a supporting
-diagnostic layer. It contributes to the interpretation of representative
-failure cases while preserving the distinction among technical attribution,
-experimental robustness evaluation, and the evidentiary assessment performed
-by a human forensic analyst.
+diagnostic layer. It contributes to the interpretation of representative model
+decisions and failure cases while preserving the distinction among technical
+attribution, experimental robustness evaluation, and the evidentiary assessment
+performed by a human forensic analyst.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -2839,35 +3002,36 @@ review, dataset freezing, partition generation, proxy-model training,
 perturbation generation, bundle construction, black-box software evaluation,
 metric computation, and \gls{xai} analysis.
 
-Consistent with established \gls{df} principles, each transformation of a
-digital artifact must be documented so that the relationship among the original
-file, any derived artifact, the corresponding model or software output, and the
-final experimental result can be reconstructed
+Consistent with established \gls{df} principles, each processing step that
+creates or modifies an experimental file must be documented so that the
+relationships among the original sample, any derived artifact, the
+corresponding model or software output, and the final experimental result can
+be reconstructed
 \cite{casey2011digital,nist2006guide,iso27037}.
 
 The traceability framework relies on stable identifiers, integrity information,
 structured provenance records, and explicit associations among experimental
-artifacts. Each sample must remain identifiable throughout its complete
-lifecycle, even when its filename, encoding, directory location, or visual
-content changes.
+inputs, derived artifacts, configurations, and outputs. Each sample must remain
+identifiable throughout its complete lifecycle, even when its filename,
+encoding, directory location, or visual representation changes.
 
 The methodology distinguishes among four complementary traceability elements:
 
 \begin{enumerate}
-    \item \textit{sample identity}, which establishes a stable reference to the
-    original image;
+\item \textit{sample identity}, which establishes a stable reference to the
+original image;
 
-    \item \textit{artifact lineage}, which records the relationship between an
-    original sample and any derived adversarial, anti-forensic, bundle, or
-    explainability artifact;
+\item \textit{artifact lineage}, which records the relationship between an
+original sample and any derived adversarial, anti-forensic, bundle, or
+explainability artifact;
 
-    \item \textit{experimental context}, which associates each artifact with
-    its class, partition, model configuration, perturbation condition, and
-    evaluation branch;
+\item \textit{experimental context}, which associates each input or derived
+artifact with its reference operational assignment, partition, model
+configuration, perturbation condition, and evaluation branch;
 
-    \item \textit{output provenance}, which connects model predictions,
-    software exports, normalization decisions, metrics, and qualitative case
-    studies to the corresponding input artifact.
+\item \textit{output provenance}, which connects model predictions,
+software exports, normalization decisions, metrics, and qualitative case
+studies to the corresponding evaluation input.
 \end{enumerate}
 
 Integrity verification should be based on cryptographic identifiers or other
@@ -2877,15 +3041,16 @@ mechanism must nevertheless be documented and applied consistently across the
 relevant stages of the pipeline.
 
 Additional identifiers may be retained when required for interoperability with
-external software systems. Such auxiliary identifiers must not replace the
-primary integrity mechanism unless their security and collision-resistance
-properties are appropriate for that role.
+selected black-box software systems. Such auxiliary identifiers must not
+replace the primary integrity mechanism unless their security and
+collision-resistance properties are appropriate for that role.
 
 Traceability records should be progressive. Each stage should preserve the
 identifiers inherited from the preceding stage and add only the information
-required to describe the newly created artifact or experimental condition. This
-approach enables the lifecycle of each sample to be reconstructed without
-relying exclusively on directory structure or filenames.
+required to describe the newly created artifact, configuration, or experimental
+condition. This approach enables the lifecycle of each sample to be
+reconstructed without relying exclusively on directory structures or
+filenames.
 
 Table~\ref{tab:methodology-traceability-artifacts} summarizes the principal
 categories of traceability records required by the methodology.
@@ -2897,63 +3062,65 @@ categories of traceability records required by the methodology.
 \begin{tabularx}{\textwidth}{@{}L{4.2cm}X@{}}
 \toprule
 \textbf{Record category} &
-\textbf{Role in traceability} \\
+\textbf{Role in traceability} \
 \midrule
 
 Technical preparation records
 &
 Document sample identity, provenance, technical validity, and integrity
-information for the candidate image pool. \\
+information for the candidate image pool. \
 
 Human-review records
 &
-Associate each candidate sample with its review status, operational label,
-exclusion decision, and supporting notes. \\
+Associate each candidate sample with its review status, operational assignment,
+exclusion disposition, and supporting notes. \
 
 Frozen-dataset records
 &
-Define the authoritative experimental corpus and establish the ground truth
-used in the subsequent phases. \\
+Define the stable experimental corpus and preserve the reference operational
+assignments used in the subsequent phases. \
 
 Partition records
 &
 Associate each sample with its binary or \gls{ood} evaluation branch and, where
-applicable, its experimental fold. \\
+applicable, its experimental fold. \
 
 Model records
 &
 Document model architecture, training configuration, class mapping, checkpoint
 identity, and the relationship between each checkpoint and its training
-partitions. \\
+partitions. \
 
 Derived-artifact records
 &
 Link adversarial and anti-forensic artifacts to the corresponding clean sample,
-generation condition, parameters, and model configuration when applicable. \\
+generation condition, parameters, and model configuration when applicable. \
 
 Evaluation-bundle records
 &
-Map neutral blind identifiers to the corresponding ground truth, source
-artifact, experimental condition, and integrity information. \\
+Map neutral blind identifiers to the corresponding source sample, reference
+operational assignment, experimental condition, and integrity information. \
 
 Prediction and normalization records
 &
 Connect proxy-model predictions and observable software outputs to the evaluated
-artifact and document any recoding or mapping decision. \\
+input and document any matching, recoding, or mapping decision. \
 
 Metric and explainability records
 &
 Associate quantitative results and qualitative case studies with the underlying
-samples, models, software configurations, and experimental conditions. \\
+samples, model checkpoints, software configurations, and experimental
+conditions. Explainability records refer only to the selected inspectable proxy
+model. \
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
 The minimum traceability chain must make it possible to move in both directions:
-from an original sample to its derived artifacts and experimental outputs, and
-from a reported result back to the exact input, configuration, and processing
-conditions that produced it.
+from an original sample to its evaluation inputs, derived artifacts, and
+experimental outputs, and from a reported result back to the exact input,
+configuration, and processing conditions that produced it.
 
 Figure~\ref{fig:methodology-traceability-chain} summarizes this general
 traceability chain.
@@ -2962,120 +3129,121 @@ traceability chain.
 \centering
 \resizebox{0.96\textwidth}{!}{%
 \begin{tikzpicture}[
-    >=latex,
-    font=\small,
-    block/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.2cm,
-        fill=gray!10
-    },
-    process/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.2cm,
-        fill=blue!8
-    },
-    output/.style={
-        rectangle,
-        rounded corners,
-        draw=black!75,
-        thick,
-        align=center,
-        minimum height=1.15cm,
-        minimum width=7.2cm,
-        fill=green!10
-    },
-    note/.style={
-        rectangle,
-        rounded corners,
-        draw=black!65,
-        dashed,
-        thick,
-        align=center,
-        minimum height=1.05cm,
-        minimum width=6.0cm,
-        fill=gray!5
-    },
-    arrow/.style={
-        ->,
-        thick,
-        draw=black!75
-    },
-    dashedarrow/.style={
-        ->,
-        thick,
-        dashed,
-        draw=black!75
-    }
+>=latex,
+font=\small,
+block/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.2cm,
+fill=gray!10
+},
+process/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.2cm,
+fill=blue!8
+},
+output/.style={
+rectangle,
+rounded corners,
+draw=black!75,
+thick,
+align=center,
+minimum height=1.15cm,
+minimum width=7.2cm,
+fill=green!10
+},
+note/.style={
+rectangle,
+rounded corners,
+draw=black!65,
+dashed,
+thick,
+align=center,
+minimum height=1.05cm,
+minimum width=6.0cm,
+fill=gray!5
+},
+arrow/.style={
+->,
+thick,
+draw=black!75
+},
+dashedarrow/.style={
+->,
+thick,
+dashed,
+draw=black!75
+}
 ]
 
 \node[block] (source) at (0,0)
 {\shortstack{
-    \textbf{Validated source sample}\\[1mm]
-    \scriptsize stable identity, provenance, and integrity information
+\textbf{Validated source sample}\[1mm]
+\scriptsize stable identity, provenance, and integrity information
 }};
 
 \node[process] (review) at (0,-2.1)
 {\shortstack{
-    \textbf{Human review and dataset freezing}\\[1mm]
-    \scriptsize documented operational label and authoritative ground truth
+\textbf{Human review and dataset freezing}\[1mm]
+\scriptsize documented reference operational assignment
 }};
 
 \node[process] (partition) at (0,-4.2)
 {\shortstack{
-    \textbf{Experimental partitioning}\\[1mm]
-    \scriptsize binary folds and separate clean \gls{ood} branch
+\textbf{Experimental partitioning}\[1mm]
+\scriptsize binary folds and separate clean \gls{ood} branch
 }};
 
-\node[process] (derived) at (0,-6.3)
+\node[process] (evaluationinputs) at (0,-6.3)
 {\shortstack{
-    \textbf{Derived experimental artifacts}\\[1mm]
-    \scriptsize adversarial and anti-forensic variants linked to clean inputs
+\textbf{Evaluation inputs and derived artifacts}\[1mm]
+\scriptsize clean binary samples, clean \gls{ood} inputs,\
+\scriptsize adversarial artifacts, and anti-forensic artifacts
 }};
 
 \node[process] (bundle) at (0,-8.4)
 {\shortstack{
-    \textbf{Blind evaluation bundle}\\[1mm]
-    \scriptsize neutral software input with separate control metadata
+\textbf{Blind evaluation bundle}\[1mm]
+\scriptsize neutral software input with separate control metadata
 }};
 
 \node[output] (predictions) at (0,-10.5)
 {\shortstack{
-    \textbf{Model and software outputs}\\[1mm]
-    \scriptsize predictions, exported results, and normalization decisions
+\textbf{Model and software outputs}\[1mm]
+\scriptsize predictions, exported results, and normalization decisions
 }};
 
 \node[output] (analysis) at (0,-12.6)
 {\shortstack{
-    \textbf{Metrics and qualitative analysis}\\[1mm]
-    \scriptsize robustness indicators, \gls{ood} behavior, and \gls{xai}
-    case studies
+\textbf{Metrics and qualitative analysis}\[1mm]
+\scriptsize robustness indicators, \gls{ood} behavior, and selected-model\
+\scriptsize \gls{xai} case studies
 }};
 
 \node[note] (controls) at (7.4,-8.4)
 {\shortstack{
-    \textbf{Cross-cutting controls}\\[1mm]
-    \scriptsize integrity verification, completeness checks,\\
-    \scriptsize configuration records, and uniqueness validation
+\textbf{Cross-cutting controls}\[1mm]
+\scriptsize integrity verification, completeness checks,\
+\scriptsize configuration records, and uniqueness validation
 }};
 
 \draw[arrow] (source) -- (review);
 \draw[arrow] (review) -- (partition);
-\draw[arrow] (partition) -- (derived);
-\draw[arrow] (derived) -- (bundle);
+\draw[arrow] (partition) -- (evaluationinputs);
+\draw[arrow] (evaluationinputs) -- (bundle);
 \draw[arrow] (bundle) -- (predictions);
 \draw[arrow] (predictions) -- (analysis);
 
-\draw[dashedarrow] (derived.east) -| (controls.north);
+\draw[dashedarrow] (evaluationinputs.east) -| (controls.north);
 \draw[dashedarrow] (bundle.east) -- (controls.west);
 \draw[dashedarrow] (predictions.east) -| (controls.south);
 
@@ -3083,18 +3251,18 @@ traceability chain.
 }
 \caption[Traceability chain across the FAIR-Lab protocol]{Traceability chain
 across the FAIR-Lab protocol. Stable identifiers, provenance information,
-integrity controls, and structured records preserve the relationship among
-source samples, derived artifacts, evaluation inputs, observable outputs, and
+integrity controls, and structured records preserve the relationships among
+source samples, evaluation inputs, derived artifacts, observable outputs, and
 final analyses}
 \label{fig:methodology-traceability-chain}
 \end{figure}
 
 Reproducibility requires more than the availability of source code. The
 experimental configuration must be documented in sufficient detail to recreate
-the relevant processing conditions. This documentation should include dataset
-version, partitioning strategy, randomization controls, model configuration,
-preprocessing rules, perturbation parameters, software version, enabled
-functionality, normalization rules, and metric definitions.
+the relevant processing conditions. This documentation should include the
+dataset version, partitioning strategy, randomization controls, model
+configuration, preprocessing rules, perturbation parameters, software version,
+enabled functionality, normalization rules, and metric definitions.
 
 Where randomness affects dataset partitioning, model initialization,
 optimization, perturbation generation, or case selection, the relevant random
@@ -3102,52 +3270,63 @@ state or deterministic procedure must be recorded. Deterministic execution is
 preferred when it does not conflict with the intended experimental design.
 
 Model artifacts must be associated with the training partitions and
-configuration that produced them. In fold-aware evaluation, the model used to
-process or perturb a held-out sample must not have been trained on that sample.
-This constraint reduces the risk of leakage and supports valid interpretation
-of the resulting robustness measurements.
+configuration that produced them. In fold-aware evaluation, the proxy-model
+checkpoint used to evaluate a held-out binary sample, or to generate a
+model-dependent adversarial artifact from that sample, must not have been
+trained on the sample itself. This constraint reduces the risk of information
+leakage and supports valid interpretation of the resulting robustness
+measurements.
 
 Generated adversarial and anti-forensic artifacts must preserve their
-relationship with the corresponding clean inputs. Model-dependent artifacts
-must additionally identify the relevant source model or checkpoint. This
-information is required to distinguish source-model evaluation from
-cross-model and black-box transfer evaluation.
+relationships with the corresponding clean inputs. Model-dependent adversarial
+artifacts must additionally identify the relevant source model and
+fold-specific checkpoint. This information is required to distinguish direct
+source-model evaluation from cross-model and black-box transfer evaluation.
 
-The blind evaluation of external software systems introduces an additional
-traceability requirement. Experimental metadata must remain separate from the
-software input during processing, but must remain available after export to
-support matching, normalization, and metric computation.
+Model-agnostic adversarial-style and anti-forensic artifacts do not originate
+from a designated source model. Their records must instead preserve the shared
+generation condition and applied configuration so that responses can be
+compared across proxy models and selected black-box software systems without
+describing the comparison as transferability.
+
+The blind evaluation of selected black-box software systems introduces an
+additional traceability requirement. Experimental metadata must remain separate
+from the software input during processing, but must remain available after
+export to support input matching, normalization, and metric computation.
 
 The separation between blind inputs and control metadata must itself be
-verifiable. The evaluation records should demonstrate that semantic class
-information, perturbation names, folds, model identifiers, and ground truth
-were not exposed through the controlled filenames or directory structure.
+verifiable. The evaluation records should demonstrate that reference
+operational assignments, perturbation names, fold allocations, model
+identifiers, and other controlled experimental descriptors were not exposed
+through filenames, paths, directory structures, or accompanying control files
+during software processing.
 
 Automated consistency controls should verify, where applicable:
 
 \begin{itemize}
-    \item correspondence between expected and generated artifacts;
-    \item uniqueness of stable and derived identifiers;
-    \item integrity of generated files;
-    \item absence of missing or unresolved paths;
-    \item consistency among source records, derived artifacts, and evaluation
-    outputs;
-    \item completeness of software exports and normalized predictions;
-    \item separation between blind inputs and experimental metadata.
+\item correspondence between expected and generated artifacts;
+\item uniqueness of stable and derived identifiers;
+\item integrity of generated files;
+\item absence of missing or unresolved paths;
+\item consistency among source records, derived artifacts, and evaluation
+outputs;
+\item completeness of software exports and normalized predictions;
+\item separation between blind inputs and experimental metadata.
 \end{itemize}
 
 These controls establish the technical coherence of the experimental workflow.
-They do not demonstrate classification correctness or robustness. Their purpose
-is to ensure that the reported results derive from the intended artifacts and
-configurations rather than from undocumented substitutions, incomplete runs, or
-incorrect associations.
+They do not demonstrate classification correctness or operational robustness.
+Their purpose is to ensure that the reported results derive from the intended
+inputs, artifacts, and configurations rather than from undocumented
+substitutions, incomplete runs, or incorrect associations.
 
 Traceability and reproducibility must also be considered within the limitations
-of black-box evaluation. Commercial software may change across versions, and
-its internal models, thresholds, or processing logic may remain unavailable.
-Accordingly, reproducibility in this context concerns the documented external
-configuration, submitted inputs, observable outputs, and normalization
-procedures rather than the inaccessible internal inference process.
+of black-box evaluation. Selected software systems may change across versions,
+and their internal models, thresholds, or processing logic may remain
+unavailable. Accordingly, reproducibility in this context concerns the
+documented external configuration, submitted inputs, observable outputs, and
+normalization procedures rather than the inaccessible internal inference
+process.
 
 The protocol therefore combines procedural reproducibility with artifact-level
 traceability. Procedural reproducibility documents how the experiment can be
@@ -3158,3 +3337,19 @@ to each reported result.
 The concrete implementation of these controls is documented in
 Chapter~\ref{chap:implementation}, whereas the corresponding experimental
 outcomes are reported in Chapter~\ref{chap:results}.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
