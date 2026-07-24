@@ -5,7 +5,7 @@
 
 
 This chapter documents the concrete implementation of the \gls{fairlab}
-methodology introduced in Chapter~\ref{chap}. It describes how the
+methodology introduced in Chapter~\ref{chap:methodology}. It describes how the
 experimental protocol was instantiated through the preparation and freezing of
 the image corpus, the generation of deterministic data partitions, the
 training of fold-aware proxy models, the generation of adversarial and
@@ -23,14 +23,14 @@ The distinction between implementation and experimental evidence is maintained
 throughout the chapter. The present chapter describes how the protocol was
 realized and which technical artifacts were produced, whereas the quantitative
 outcomes and their operational interpretation are reported separately in
-Chapter~\ref{chap}. This separation prevents implementation choices,
+Chapter~\ref{chap:results}. This separation prevents implementation choices,
 software configurations, and data-management procedures from being conflated
 with the measured robustness of the evaluated systems.
 
 A central implementation principle is that the two evaluation levels operate
-on the same frozen experimental corpus. The 1,000 clean binary images and the
+on the same frozen experimental corpus. The 1\,000 clean binary images and the
 500 clean \gls{ood} images define the common source population, while the
-10,000 adversarial and anti-forensic artifacts are derived exclusively from
+10\,000 adversarial and anti-forensic artifacts are derived exclusively from
 the binary subset. The proxy models process the manifest-linked experimental
 inputs and derived artifacts, whereas the selected black-box software systems
 receive byte-identical anonymized copies through the blind forensic evaluation
@@ -129,7 +129,7 @@ and
 \codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py}
 &
 Proxy-model predictions, evaluation metrics, and the blind and auditable
-11,500-file forensic evaluation bundle. \\
+11\,500-file forensic evaluation bundle. \\
 
 Explainability and black-box normalization
 &
@@ -243,7 +243,7 @@ Candidate discovery was restricted to files with the extensions
 opened and verified using the Pillow image-processing library. Images that
 could not be decoded or structurally verified were recorded as unreadable,
 whereas images with either dimension below 300 pixels were excluded under the
-\texttt{below_min_size} condition. Unexpected decoding failures were
+\texttt{below\_min\_size} condition. Unexpected decoding failures were
 preserved in the invalid-image report together with the corresponding
 exception type.
 
@@ -260,7 +260,7 @@ stored under different file names.
 Accepted images were assigned stable identifiers using the format:
 
 \begin{center}
-\texttt{img_00000001}
+\texttt{img\_00000001}
 \end{center}
 
 and copied to:
@@ -286,55 +286,51 @@ script.
 \setlength{\tabcolsep}{4pt}
 \caption{Technical preparation statistics by source collection}
 \label{tab:implementation-prepared-dataset-statistics}
-\begin{tabularx}{\textwidth}{@{}
-
-{\raggedright\arraybackslash}X
-rrrr
-@{}}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}X rrrr@{}}
 \toprule
 \textbf{Source collection} &
 \textbf{Candidates} &
 \textbf{Valid unique} &
 \textbf{Invalid} &
-\textbf{Duplicates} \
+\textbf{Duplicates} \\
 \midrule
 
-\texttt{01_kaggle_weapon}
+\texttt{01\_kaggle\_weapon}
 & 719
 & 462
 & 69
-& 188 \
+& 188 \\
 
-\texttt{02_deepfirearm}
+\texttt{02\_deepfirearm}
 & 15,755
 & 12,158
 & 2,565
-& 1,032 \
+& 1,032 \\
 
-\texttt{03_google_scraped}
+\texttt{03\_google\_scraped}
 & 903
 & 846
 & 52
-& 5 \
+& 5 \\
 
-\texttt{04_telegram_youtube}
+\texttt{04\_telegram\_youtube}
 & 973
 & 898
 & 19
-& 56 \
+& 56 \\
 
-\texttt{05_deepweb}
+\texttt{05\_deepweb}
 & 1,419
 & 957
 & 419
-& 43 \
+& 43 \\
 
 \midrule
 \textbf{Total}
-& \textbf{19,769}
-& \textbf{15,321}
-& \textbf{3,124}
-& \textbf{1,324} \
+& \textbf{19\,769}
+& \textbf{15\,321}
+& \textbf{3\,124}
+& \textbf{1\,324} \\
 
 \bottomrule
 \end{tabularx}
@@ -346,10 +342,10 @@ remaining after global exact-duplicate removal. Duplicate counts are attributed
 to the source collection in which the discarded occurrence was encountered.
 \end{table}
 
-The resulting prepared pool contained 15,321 technically valid and
-byte-distinct images from an initial set of 19,769 candidate files. A total of
-3,124 files were excluded because they were unreadable, structurally invalid,
-or below the minimum dimensional threshold, while 1,324 additional files were
+The resulting prepared pool contained 15\,321 technically valid and
+byte-distinct images from an initial set of 19\,769 candidate files. A total of
+3\,124 files were excluded because they were unreadable, structurally invalid,
+or below the minimum dimensional threshold, while 1\,324 additional files were
 discarded as exact duplicates.
 
 The preparation stage generated four principal audit records:
@@ -381,7 +377,7 @@ provenance without treating provenance as a semantic assignment.
 
 The output of this stage is therefore a technically validated and deduplicated
 candidate pool rather than the final experimental dataset. The reduction from
-15,321 prepared images to the frozen corpus used in the experiments was
+15\,321 prepared images to the frozen corpus used in the experiments was
 performed only after explicit human assessment of semantic suitability,
 operational assignment, visual interpretability, and corpus-composition
 requirements.
@@ -442,8 +438,8 @@ groups of fields maintained in the review manifest.
 
 Identity and provenance
 &
-\texttt{image_id}, \texttt{sha256}, \texttt{relative_path},
-\texttt{source_dataset}, \texttt{source_relative_path}
+\texttt{image\_id}, \texttt{sha256}, \texttt{relative\_path},
+\texttt{source\_dataset}, \texttt{source\_relative\_path}
 &
 Maintains the association among the review decision, the technically prepared
 file, and its original acquisition source. \\
@@ -459,7 +455,7 @@ mixing them with semantic decisions. \\
 Optional prelabel fields
 &
 \texttt{auto\_label}, \texttt{auto\_confidence},
-\texttt{weapon\_score}, \texttt{non\_weapon_score},
+\texttt{weapon\_score}, \texttt{non\_weapon\_score},
 \texttt{prelabel\_status}
 &
 Provides schema support for auxiliary prelabeling while keeping this
@@ -592,53 +588,53 @@ Table~\ref{tab:implementation-manual-review-artifacts}.
 \begin{tabularx}{\textwidth}{@{}p{0.43\textwidth} X@{}}
 \toprule
 \textbf{Record} &
-\textbf{Role} \
+\textbf{Role} \\
 \midrule
 
 \codepath{datasets/final/manifests/manual_selection_protocol_db.csv}
 &
 Persistent working database containing reviewed and pending candidate records.
-\
+\\
 
 \codepath{datasets/final/manifests/manual_selection_final_1500.csv}
 &
 Manifest containing the samples assigned to the three final experimental
-groups. \
+groups. \\
 
 \codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
 &
 Binary subset containing only the selected \texttt{weapon} and
 \texttt{non\_weapon} samples used for clean partitioning and perturbation
-generation. \
+generation. \\
 
 \codepath{datasets/final/manifests/manual_selection_removed.csv}
 &
 Separate record of samples explicitly assigned to the review-only
-\texttt{exclude} disposition. \
+\texttt{exclude} disposition. \\
 
 \codepath{datasets/final/reports/manual_selection_log.csv}
 &
-Chronological record of reviewer actions and assignment transitions. \
+Chronological record of reviewer actions and assignment transitions. \\
 
 \codepath{datasets/final/reports/manual_selection_state.json}
 &
-Saved interactive-session state used to resume the review. \
+Saved interactive-session state used to resume the review. \\
 
 \codepath{datasets/final/reports/manual_selection_summary.json}
 &
 Summary of group counts, pending and reviewed records, target completion, output
-locations, and final consistency checks. \
+locations, and final consistency checks. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The frozen working database contained 1,500 reviewed records and 13,821
+The frozen working database contained 1\,500 reviewed records and 13\,821
 records that remained pending. The complete technically prepared pool was
 therefore not reviewed exhaustively. Human assessment continued until the
 predefined targets of 500 \texttt{weapon}, 500 \texttt{non\_weapon}, and 500
 \texttt{ood} images had been reached and subsequently verified through the
-\texttt{review_selection} mode.
+\texttt{review\_selection} mode.
 
 The implemented review process therefore separates three distinct elements:
 technical file validity, semantic suitability for the experimental task, and
@@ -657,7 +653,7 @@ Section~\ref{subsec:implementation-dataset-freezing}.
 The manual selection process was concluded when the three predefined global
 targets had been reached. The final reviewed selection contained exactly 500
 \texttt{weapon} images, 500 \texttt{non\_weapon} images, and 500
-\texttt{ood} images, for a total of 1,500 samples. The remaining candidates
+\texttt{ood} images, for a total of 1\,500 samples. The remaining candidates
 were not included in the frozen dataset and remained available in the working
 review database without being implicitly assigned to any experimental group.
 
@@ -689,7 +685,7 @@ composition and the experimental role of each group.
 \toprule
 \textbf{Experimental group} &
 \textbf{Images} &
-\textbf{Role in the experimental pipeline} \
+\textbf{Role in the experimental pipeline} \\
 \midrule
 
 \texttt{weapon}
@@ -697,14 +693,14 @@ composition and the experimental role of each group.
 500
 &
 Positive class of the binary image-classification task and source of the
-target-category samples used for clean and perturbed evaluation. \
+target-category samples used for clean and perturbed evaluation. \\
 
 \texttt{non\_weapon}
 &
 500
 &
 Negative class of the binary task, consisting of realistic and interpretable
-content without objects belonging to the firearm-related target category. \
+content without objects belonging to the firearm-related target category. \\
 
 \texttt{ood}
 &
@@ -712,14 +708,14 @@ content without objects belonging to the firearm-related target category. \
 &
 Separate \gls{ood} evaluation branch used to characterize system behavior on
 borderline, anomalous, synthetic, source-degraded, or semantically out-of-task
-inputs. \
+inputs. \\
 
 \midrule
 \textbf{Total}
 &
-\textbf{1,500}
+\textbf{1\,500}
 &
-Frozen experimental corpus supporting the complete evaluation protocol. \
+Frozen experimental corpus supporting the complete evaluation protocol. \\
 
 \bottomrule
 \end{tabularx}
@@ -743,45 +739,45 @@ rigid source quotas.
 \textbf{\texttt{weapon}} &
 \textbf{\texttt{non\_weapon}} &
 \textbf{\texttt{ood}} &
-\textbf{Total} \
+\textbf{Total} \\
 \midrule
 
-\texttt{01_kaggle_weapon}
+\texttt{01\_kaggle\_weapon}
 & 100
 & 0
 & 100
-& 200 \
+& 200 \\
 
-\texttt{02_deepfirearm}
+\texttt{02\_deepfirearm}
 & 100
 & 0
 & 0
-& 100 \
+& 100 \\
 
-\texttt{03_google_scraped}
+\texttt{03\_google\_scraped}
 & 100
 & 30
 & 71
-& 201 \
+& 201 \\
 
-\texttt{04_telegram_youtube}
+\texttt{04\_telegram\_youtube}
 & 100
 & 57
 & 225
-& 382 \
+& 382 \\
 
-\texttt{05_deepweb}
+\texttt{05\_deepweb}
 & 100
 & 413
 & 104
-& 617 \
+& 617 \\
 
 \midrule
 \textbf{Total}
 & \textbf{500}
 & \textbf{500}
 & \textbf{500}
-& \textbf{1,500} \
+& \textbf{1\,500} \\
 
 \bottomrule
 \end{tabular}
@@ -789,7 +785,7 @@ rigid source quotas.
 
 The resulting source composition is non-uniform. In particular, 413 of the 500
 \texttt{non\_weapon} samples originate from
-\texttt{05_deepweb}. This distribution is preserved in the frozen manifest
+\texttt{05\_deepweb}. This distribution is preserved in the frozen manifest
 and is considered during the interpretation of the experimental results in
 Chapter~\ref{chap:results}.
 
@@ -802,7 +798,7 @@ official binary-subset manifest:
 \codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
 \end{center}
 
-The binary subset contains exactly 1,000 images, balanced between 500
+The binary subset contains exactly 1\,000 images, balanced between 500
 \texttt{weapon} and 500 \texttt{non\_weapon} samples. It provides the common
 source population for clean-fold construction, proxy-model training, clean
 binary evaluation, and adversarial and anti-forensic perturbation generation.
@@ -825,29 +821,29 @@ Table~\ref{tab:implementation-frozen-manifests}.
 \toprule
 \textbf{Manifest} &
 \textbf{Rows} &
-\textbf{Downstream role} \
+\textbf{Downstream role} \\
 \midrule
 
 \codepath{datasets/final/manifests/manual_selection_final_1500.csv}
 &
-1,500
+1\,500
 &
 Canonical definition of the complete frozen dataset, including the
-\texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood} groups. \
+\texttt{weapon}, \texttt{non\_weapon}, and \texttt{ood} groups. \\
 
 \codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
 &
-1,000
+1\,000
 &
 Balanced binary subset used for fold generation and as the source of clean
-samples and derived adversarial and anti-forensic artifacts. \
+samples and derived adversarial and anti-forensic artifacts. \\
 
 \codepath{datasets/final/manifests/manual_selection_removed.csv}
 &
 0
 &
 Reserved for candidates explicitly assigned to the review-only
-\texttt{exclude} disposition during the final review process. \
+\texttt{exclude} disposition during the final review process. \\
 
 \bottomrule
 \end{tabularx}
@@ -874,7 +870,7 @@ completion checks. In the frozen execution, both principal consistency
 conditions were satisfied:
 
 \begin{itemize}
-\item \texttt{final_1500_exact = true}, confirming the presence of
+\item \texttt{final\_1500\_exact = true}, confirming the presence of
 exactly 500 samples in each of the three final groups;
 
 \item \texttt{adversarial\_subset\_1000\_exact = true}, confirming that
@@ -971,39 +967,39 @@ source balance without relaxing the mandatory per-class quotas.
 \textbf{Fold} &
 \textbf{\texttt{weapon}} &
 \textbf{\texttt{non\_weapon}} &
-\textbf{Total} \
+\textbf{Total} \\
 \midrule
 
-\texttt{fold_1}
+\texttt{fold\_1}
 & 100
 & 100
-& 200 \
+& 200 \\
 
-\texttt{fold_2}
+\texttt{fold\_2}
 & 100
 & 100
-& 200 \
+& 200 \\
 
-\texttt{fold_3}
+\texttt{fold\_3}
 & 100
 & 100
-& 200 \
+& 200 \\
 
-\texttt{fold_4}
+\texttt{fold\_4}
 & 100
 & 100
-& 200 \
+& 200 \\
 
-\texttt{fold_5}
+\texttt{fold\_5}
 & 100
 & 100
-& 200 \
+& 200 \\
 
 \midrule
 \textbf{Total}
 & \textbf{500}
 & \textbf{500}
-& \textbf{1,000} \
+& \textbf{1\,000} \\
 
 \bottomrule
 \end{tabular}
@@ -1020,7 +1016,7 @@ structure:
 \codepath{datasets/splits/clean/fold_1/non_weapon/}
 \end{center}
 
-with the same structure repeated through \texttt{fold_5}. During each copy
+with the same structure repeated through \texttt{fold\_5}. During each copy
 operation, the implementation computed both \gls{sha256} and \gls{md5}
 digests. The copied \gls{sha256} value was compared with the digest stored in
 the frozen selection manifest, and any mismatch caused the pipeline to
@@ -1042,17 +1038,17 @@ source information, prepared path, generated split path, \gls{sha256} and
 experimental-condition descriptors. Clean records are explicitly marked with:
 
 \begin{center}
-\texttt{sample_type = clean}
+\texttt{sample\_type = clean}
 \end{center}
 
 \begin{center}
-\texttt{attack_family = none}
+\texttt{attack\_family = none}
 \end{center}
 
 and:
 
 \begin{center}
-\texttt{attack_name = clean}
+\texttt{attack\_name = clean}
 \end{center}
 
 The 500 \gls{ood} samples were not partitioned into folds. They were copied to
@@ -1070,8 +1066,8 @@ and documented through:
 
 This manifest retains the same identity, provenance, path, integrity, and
 file-level information used for the clean folds. The records are marked as
-\texttt{sample_type = ood}, assigned to the logical partition
-\texttt{ood_eval_set}, and kept outside the binary fold structure. This
+\texttt{sample\_type = ood}, assigned to the logical partition
+\texttt{ood\_eval\_set}, and kept outside the binary fold structure. This
 implementation preserves the methodological distinction between
 \gls{ood} evaluation and supervised binary classification.
 
@@ -1088,38 +1084,38 @@ Table~\ref{tab:implementation-split-artifacts}.
 \begin{tabularx}{\textwidth}{@{}p{0.45\textwidth} X@{}}
 \toprule
 \textbf{Output} &
-\textbf{Role} \
+\textbf{Role} \\
 \midrule
 
 \codepath{datasets/splits/clean/fold_1/} through
 \codepath{datasets/splits/clean/fold_5/}
 &
-Class-aware directories containing the 1,000 clean binary images assigned to
-the five deterministic folds. \
+Class-aware directories containing the 1\,000 clean binary images assigned to
+the five deterministic folds. \\
 
 \codepath{datasets/splits/ood/ood_eval_set/ood/}
 &
-Separate directory containing the 500 clean \gls{ood} inputs. \
+Separate directory containing the 500 clean \gls{ood} inputs. \\
 
 \codepath{datasets/splits/manifests/clean_folds_manifest.csv}
 &
 Canonical mapping among image identifiers, folds, binary reference
-assignments, provenance, copied paths, and integrity values. \
+assignments, provenance, copied paths, and integrity values. \\
 
 \codepath{datasets/splits/manifests/ood_eval_manifest.csv}
 &
-Canonical mapping for the separate \gls{ood} evaluation set. \
+Canonical mapping for the separate \gls{ood} evaluation set. \\
 
 \codepath{datasets/splits/manifests/split_generation_summary.json}
 &
 Machine-readable summary of the seed, number of folds, input and output paths,
-class and source counts, and final validation checks. \
+class and source counts, and final validation checks. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The final summary confirms that the partitioning stage produced 1,000 clean
+The final summary confirms that the partitioning stage produced 1\,000 clean
 binary records and 500 \gls{ood} records. It also confirms that the image
 identifiers and \gls{sha256} values are unique within the generated output
 branches and that each clean fold contains the required 100 samples per binary
@@ -1220,36 +1216,36 @@ architectures and the modifications introduced for the binary task.
 \toprule
 \textbf{Proxy model} &
 \textbf{Implementation} &
-\textbf{Binary adaptation} \
+\textbf{Binary adaptation} \\
 \midrule
 
 ResNet18
 &
 \texttt{torchvision.resnet18} initialized with
-\texttt{IMAGENET1K_V1} weights
+\texttt{IMAGENET1K\_V1} weights
 &
 The original fully connected output layer is replaced by a linear layer with
 two outputs. The residual convolutional architecture provides a conventional
-supervised baseline \cite{he2016deep}. \
+supervised baseline \cite{he2016deep}. \\
 
 EfficientNet-B0
 &
-\texttt{torchvision.efficientnet_b0} initialized with
-\texttt{IMAGENET1K_V1} weights
+\texttt{torchvision.efficientnet\_b0} initialized with
+\texttt{IMAGENET1K\_V1} weights
 &
 The final classifier layer is replaced by a linear layer with two outputs.
 This architecture serves as the primary proxy target for model-dependent
-adversarial generation \cite{tan2019efficientnet}. \
+adversarial generation \cite{tan2019efficientnet}. \\
 
 \gls{clip}
 &
-\texttt{open_clip} ViT-B/32 visual encoder initialized with the pretrained
+\texttt{open\_clip} ViT-B/32 visual encoder initialized with the pretrained
 \texttt{openai} weights
 &
 The visual encoder is kept frozen and connected to a trainable linear binary
 head. The resulting proxy classifies pretrained visual representations rather
 than using the original image--text similarity interface
-\cite{radford2021learning}. \
+\cite{radford2021learning}. \\
 
 \bottomrule
 \end{tabularx}
@@ -1258,25 +1254,25 @@ than using the original image--text similarity interface
 For ResNet18, the implementation replaces \texttt{model.fc} with:
 
 \begin{center}
-\texttt{Linear(model.fc.in_features, 2)}
+\texttt{Linear(model.fc.in\_features, 2)}
 \end{center}
 
 For EfficientNet-B0, the final element of
 \texttt{model.classifier} is replaced with:
 
 \begin{center}
-\texttt{Linear(in_features, 2)}
+\texttt{Linear(in\_features, 2)}
 \end{center}
 
 Random initialization is not accepted as a silent fallback for either
 convolutional architecture. The implementation explicitly requires the
-corresponding \texttt{IMAGENET1K_V1} weight definitions exposed by
+corresponding \texttt{IMAGENET1K\_V1} weight definitions exposed by
 Torchvision and terminates when they are unavailable. This safeguard prevents
 differences in the execution environment from changing the initialization
 strategy without being detected.
 
 The \gls{clip}-based proxy is constructed from the
-\texttt{open_clip.ViT-B-32} visual encoder initialized with the
+\texttt{open\_clip.ViT-B-32} visual encoder initialized with the
 \texttt{openai} weights. All parameters of the pretrained visual encoder are
 frozen. For each image, the encoder produces a visual feature vector, which is
 normalized to unit length before being passed to a trainable linear layer with
@@ -1302,8 +1298,8 @@ All proxy-model inputs are resized to:
 The training transformation applies the following sequence:
 
 \begin{enumerate}
-\item deterministic resizing to (224 \times 224) pixels;
-\item random horizontal flipping with probability (0.5);
+\item deterministic resizing to \(224 \times 224\) pixels;
+\item random horizontal flipping with probability \(0.5\);
 \item conversion to a PyTorch tensor;
 \item architecture-specific channel normalization.
 \end{enumerate}
@@ -1327,20 +1323,20 @@ Table~\ref{tab:implementation-proxy-normalization}.
 \toprule
 \textbf{Models} &
 \textbf{Channel means} &
-\textbf{Channel standard deviations} \
+\textbf{Channel standard deviations} \\
 \midrule
 
 ResNet18 and EfficientNet-B0
 &
-((0.485,\ 0.456,\ 0.406))
+\((0.485,\ 0.456,\ 0.406)\)
 &
-((0.229,\ 0.224,\ 0.225)) \
+\((0.229,\ 0.224,\ 0.225)\) \\
 
 \gls{clip} ViT-B/32
 &
-((0.48145466,\ 0.45782750,\ 0.40821073))
+\((0.48145466,\ 0.45782750,\ 0.40821073)\)
 &
-((0.26862954,\ 0.26130258,\ 0.27577711)) \
+\((0.26862954,\ 0.26130258,\ 0.27577711)\) \\
 
 \bottomrule
 \end{tabularx}
@@ -1376,7 +1372,7 @@ artifacts.
 
 For each run, the four non-held-out folds contained 800 images. The
 implementation created an internal stratified validation partition by reserving
-15% of these samples independently within each binary class. This produced:
+15\% of these samples independently within each binary class. This produced:
 
 \begin{itemize}
 \item 680 images for parameter optimization;
@@ -1403,56 +1399,56 @@ Table~\ref{tab:implementation-proxy-training-configuration}.
 \begin{tabularx}{0.92\textwidth}{@{}l X@{}}
 \toprule
 \textbf{Parameter} &
-\textbf{Value} \
+\textbf{Value} \\
 \midrule
 
 Training epochs
 &
-10 \
+10 \\
 
 CNN batch size
 &
-16 \
+16 \\
 
 \gls{clip} binary-head batch size
 &
-32 \
+32 \\
 
 Optimizer
 &
-AdamW \
+AdamW \\
 
 Learning rate
 &
-(1 \times 10^{-4}) \
+\(1 \times 10^{-4}\) \\
 
 Weight decay
 &
-(1 \times 10^{-4}) \
+\(1 \times 10^{-4}\) \\
 
 Loss function
 &
-Cross-entropy loss \
+Cross-entropy loss \\
 
 Internal validation ratio
 &
-0.15 \
+0.15 \\
 
 Random seed
 &
-42 \
+42 \\
 
 Input resolution
 &
-(224 \times 224) pixels \
+\(224 \times 224\) pixels \\
 
 Data-loader workers
 &
-2 \
+2 \\
 
 Checkpoint-selection criterion
 &
-Highest internal validation accuracy \
+Highest internal validation accuracy \\
 
 \bottomrule
 \end{tabularx}
@@ -1514,7 +1510,7 @@ retained. The held-out fold remains excluded from this selection process.
 The fold-aware checkpoints are stored according to the pattern:
 
 \begin{center}
-\codepath{models/checkpoints/<model_name>/.pt}
+\codepath{models/checkpoints/<model_name>/<fold>.pt}
 \end{center}
 
 The complete suite comprises 15 checkpoints:
@@ -1547,38 +1543,38 @@ principal outputs of the training stage.
 \begin{tabularx}{\textwidth}{@{}p{0.44\textwidth} X@{}}
 \toprule
 \textbf{Output} &
-\textbf{Role} \
+\textbf{Role} \\
 \midrule
 
 \codepath{models/checkpoints/resnet18/}
 &
-Five fold-specific ResNet18 checkpoint files. \
+Five fold-specific ResNet18 checkpoint files. \\
 
 \codepath{models/checkpoints/efficientnet_b0/}
 &
-Five fold-specific EfficientNet-B0 checkpoint files. \
+Five fold-specific EfficientNet-B0 checkpoint files. \\
 
 \codepath{models/checkpoints/clip/}
 &
 Five fold-specific binary-head checkpoints for the frozen
-\gls{clip} visual encoder. \
+\gls{clip} visual encoder. \\
 
 \codepath{models/reports/proxy_model_training_summary.csv}
 &
 Consolidated record of checkpoint paths and hashes, training, validation, and
 held-out sample counts, best validation accuracy, final-epoch statistics, and
-creation timestamps. \
+creation timestamps. \\
 
 \codepath{models/model_registry.json}
 &
 Canonical model registry containing architecture definitions, initialization
 weights, preprocessing conventions, checkpoint patterns, external-weight
-requirements, and fold-specific \gls{sha256} digests. \
+requirements, and fold-specific \gls{sha256} digests. \\
 
 \codepath{models/reports/train_all_proxy_models.log}
 &
 Execution log containing the epoch-level training and validation progression of
-the complete proxy-model suite. \
+the complete proxy-model suite. \\
 
 \bottomrule
 \end{tabularx}
@@ -1634,7 +1630,7 @@ The script consumes the canonical clean-fold manifest:
 \codepath{datasets/splits/manifests/clean_folds_manifest.csv}
 \end{center}
 
-and generates one perturbed artifact from each of the 1,000 clean binary
+and generates one perturbed artifact from each of the 1\,000 clean binary
 images for every selected perturbation condition. The frozen suite comprises
 four model-dependent adversarial attacks and one model-agnostic
 adversarial-style condition:
@@ -1661,7 +1657,7 @@ model-dependent attacks. For each input image, the generator reads the fold
 identifier from the clean manifest and loads the corresponding checkpoint:
 
 \begin{center}
-\codepath{models/checkpoints/efficientnet_b0/.pt}
+\codepath{models/checkpoints/efficientnet_b0/<fold>.pt}
 \end{center}
 
 Because each checkpoint was trained while excluding its associated fold, the
@@ -1693,7 +1689,7 @@ configuration of the five perturbation conditions.
 \textbf{Condition} &
 \textbf{Dependency} &
 \textbf{Frozen parameters} &
-\textbf{Format} \
+\textbf{Format} \\
 \midrule
 
 \gls{fgsm}
@@ -1701,55 +1697,55 @@ configuration of the five perturbation conditions.
 EfficientNet-B0, fold-aware white-box checkpoint
 &
 Untargeted perturbation with
-(\epsilon = 8/255 \approx 0.03137), applied in pixel space
-([0,1]) using the sign of the loss gradient
+\(\epsilon = 8/255 \approx 0.03137\), applied in pixel space
+\([0,1]\) using the sign of the loss gradient
 \cite{goodfellow2015explaining}.
 &
-PNG \
+PNG \\
 
 One Pixel
 &
 EfficientNet-B0, fold-aware score-based checkpoint access
 &
 Differential Evolution over five variables
-((x,y,R,G,B)); 50 maximum iterations; population-size multiplier 20,
+\((x,y,R,G,B)\); 50 maximum iterations; population-size multiplier 20,
 corresponding to an effective population of approximately 100 candidates;
 deterministic base seed 42; early termination after misclassification
 \cite{su2019onepixel}.
 &
-PNG \
+PNG \\
 
 Sigma-Zero
 &
 EfficientNet-B0, fold-aware white-box checkpoint
 &
-Reference untargeted implementation; 1,000 optimization steps;
-(\eta_0 = 1.0), (\sigma = 0.001), (\tau_0 = 0.3),
-threshold-adjustment factor (0.01), and infinity-norm gradient
+Reference untargeted implementation; 1\,000 optimization steps;
+\(\eta_0 = 1.0\), \(\sigma = 0.001\), \(\tau_0 = 0.3\),
+threshold-adjustment factor \(0.01\), and infinity-norm gradient
 normalization \cite{zhao2024sigmazero}.
 &
-PNG \
+PNG \\
 
 SuperDeepFool
 &
 EfficientNet-B0, fold-aware white-box checkpoint
 &
 Internal paper-based implementation of
-(\mathrm{SDF}(\infty,1)); 20 maximum outer iterations; 50 maximum
+\(\mathrm{SDF}(\infty,1)\); 20 maximum outer iterations; 50 maximum
 DeepFool iterations; one projection step; all output classes considered as
 candidates \cite{zhang2024superdeepfool}.
 &
-PNG \
+PNG \\
 
 Color Shift
 &
 Model-agnostic
 &
-Red-channel shift (+12), green-channel shift (0), blue-channel shift
-(-12), saturation factor (1.10), contrast factor (1.00), and JPEG
+Red-channel shift \(+12\), green-channel shift \(0\), blue-channel shift
+(-12), saturation factor \(1.10\), contrast factor \(1.00\), and JPEG
 quality 95.
 &
-JPEG \
+JPEG \\
 
 \bottomrule
 \end{tabularx}
@@ -1764,23 +1760,23 @@ to the corresponding pixel-space gradient. The adversarial tensor is then
 produced as:
 
 \begin{equation}
-\mathbf{x}\textit{{\mathrm{adv}}
-=
-\operatorname{clip}}{[0,1]}
-\left(
-\mathbf{x}
-+
-\epsilon,
-\operatorname{sign}
-\left(
-\nabla_{\mathbf{x}}
-\mathcal{L}(\mathbf{x},y)
-\right)
-\right),
+    \mathbf{x}_{\mathrm{adv}}
+    =
+    \operatorname{clip}_{[0,1]}
+    \left(
+        \mathbf{x}
+        +
+        \epsilon\,
+        \operatorname{sign}
+        \left(
+            \nabla_{\mathbf{x}}
+            \mathcal{L}(\mathbf{x},y)
+        \right)
+    \right),
 \end{equation}
 
-where (y) denotes the encoded reference operational assignment and
-(\epsilon = 8/255). The resulting tensor is converted back to an RGB image
+where \(y\) denotes the encoded reference operational assignment and
+\(\epsilon = 8/255\). The resulting tensor is converted back to an RGB image
 and stored as a lossless PNG file. The manifest records the clean and
 adversarial predictions, maximum predicted-class probabilities,
 reference-class probabilities, and pixel-space perturbation measurements.
@@ -1812,17 +1808,17 @@ version. The dependency is pinned to the inspected repository commit:
 \end{center}
 
 The reference function expects unnormalized pixel tensors in the interval
-([0,1]). A dedicated adapter therefore converts the FAIR-Lab
+\([0,1]\). A dedicated adapter therefore converts the FAIR-Lab
 model-normalized input back to pixel space and exposes a wrapper that reapplies
 the target-model normalization before forwarding the tensor to the
 fold-specific proxy model. The attack is untargeted and aims to identify a
 sparse adversarial perturbation by optimizing an approximation of the
-(\ell_0)-norm objective.
+\(\ell_0\)-norm objective.
 
 \paragraph{SuperDeepFool.}
 
 SuperDeepFool was implemented internally from the published
-(\mathrm{SDF}(\infty,1)) procedure rather than by copying or vendoring an
+\(\mathrm{SDF}(\infty,1)\) procedure rather than by copying or vendoring an
 external repository. The implementation first performs DeepFool-style
 iterations to identify an adversarial boundary point. It subsequently applies
 a SuperDeepFool projection based on the gradient difference between the
@@ -1841,32 +1837,32 @@ then adjusts saturation and contrast. No proxy model is queried during
 generation, and no attack-success value is assigned at this stage. The
 condition is stored as JPEG rather than PNG because controlled recompression is
 part of the frozen transformation configuration. The target-model field is set
-to \texttt{model_agnostic}, while checkpoint-related fields remain empty or
+to \texttt{model\_agnostic}, while checkpoint-related fields remain empty or
 are marked as not applicable.
 
 The model-dependent outputs are written under the structure:
 
 \begin{center}
-\codepath{attacks/adversarial/<attack_name>/efficientnet_b0///}
+\codepath{attacks/adversarial/<attack_name>/efficientnet_b0/<fold>/<label>/}
 \end{center}
 
 Color Shift outputs use the corresponding model-agnostic branch. Generated
 file names follow the pattern:
 
 \begin{center}
-\texttt{<image_id>__<attack_name>__<target_model>.}
+\texttt{<image\_id>\_\_<attack\_name>\_\_<target\_model>.<extension>}
 \end{center}
 
-Each condition produces 1,000 perturbed files, comprising 500
+Each condition produces 1\,000 perturbed files, comprising 500
 \texttt{weapon} and 500 \texttt{non\_weapon} samples distributed as 200 images
 per fold. The complete adversarial-generation stage therefore produces:
 
 \begin{equation}
 5\ \text{conditions}
 \times
-1,000\ \text{binary images}
+1\,000\ \text{binary images}
 =
-5,000\ \text{perturbed artifacts}.
+5\,000\ \text{perturbed artifacts}.
 \end{equation}
 
 The canonical generation records are listed in
@@ -1882,42 +1878,42 @@ Table~\ref{tab:implementation-adversarial-artifacts}.
 \begin{tabularx}{\textwidth}{@{}p{0.48\textwidth} X@{}}
 \toprule
 \textbf{Record} &
-\textbf{Role} \
+\textbf{Role} \\
 \midrule
 
 \codepath{attacks/manifests/adversarial_fgsm_efficientnet_b0_manifest.csv}
 &
-Sample-level traceability for the 1,000 \gls{fgsm} outputs. \
+Sample-level traceability for the 1\,000 \gls{fgsm} outputs. \\
 
 \codepath{attacks/manifests/adversarial_one_pixel_efficientnet_b0_manifest.csv}
 &
-Sample-level traceability for the 1,000 One Pixel outputs. \
+Sample-level traceability for the 1\,000 One Pixel outputs. \\
 
 \codepath{attacks/manifests/adversarial_sigma_zero_efficientnet_b0_manifest.csv}
 &
-Sample-level traceability for the 1,000 Sigma-Zero outputs. \
+Sample-level traceability for the 1\,000 Sigma-Zero outputs. \\
 
 \codepath{attacks/manifests/adversarial_superdeepfool_efficientnet_b0_manifest.csv}
 &
-Sample-level traceability for the 1,000 SuperDeepFool outputs. \
+Sample-level traceability for the 1\,000 SuperDeepFool outputs. \\
 
 \codepath{attacks/manifests/adversarial_color_shift_manifest.csv}
 &
-Sample-level traceability for the 1,000 model-agnostic Color Shift outputs. \
+Sample-level traceability for the 1\,000 model-agnostic Color Shift outputs. \\
 
-Associated \texttt{*_summary.json} files
+Associated \texttt{*\_summary.json} files
 &
 Run-level configuration, generated counts, fold and assignment distributions,
 target-model information, generation-time success accounting where applicable,
-and generation-consistency checks. \
+and generation-consistency checks. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
 Each manifest maps a generated artifact to its original image through
-\texttt{original_image_id} and assigns a stable
-\texttt{generated_image_id}. The records also preserve the fold, reference
+\texttt{original\_image\_id} and assigns a stable
+\texttt{generated\_image\_id}. The records also preserve the fold, reference
 operational assignment, source provenance, clean and perturbed paths,
 perturbation family, condition name, serialized parameters, model dependency,
 target model, checkpoint path, checkpoint \gls{sha256}, original and perturbed
@@ -1926,7 +1922,7 @@ hashes, output size, extension, and creation timestamp.
 For model-dependent attacks, the manifest additionally stores the clean and
 adversarial predictions, diagnostic proxy-model probabilities, correctness
 states, perturbation norms, convergence information, and a generation-time
-\texttt{attack_success} field. This field is set when the perturbed prediction
+\texttt{attack\_success} field. This field is set when the perturbed prediction
 differs from the reference operational assignment.
 
 The generation-time indicator must be distinguished from the comparative
@@ -1944,7 +1940,7 @@ traceability, whereas comparative quantitative results are reported in
 Chapter~\ref{chap:results}.
 
 The generation summaries confirm that every frozen condition produced the
-expected 1,000 outputs, with 200 samples per fold and 500 samples per binary
+expected 1\,000 outputs, with 200 samples per fold and 500 samples per binary
 reference assignment. They also verify the uniqueness of the generated
 identifiers and perturbed \gls{sha256} values. Existing attack directories and
 run-specific manifests are not overwritten unless the explicit
@@ -1973,7 +1969,7 @@ generation stage:
 \codepath{datasets/splits/manifests/clean_folds_manifest.csv}
 \end{center}
 
-Accordingly, each transformation is applied to the complete set of 1,000 clean
+Accordingly, each transformation is applied to the complete set of 1\,000 clean
 binary images, comprising 500 \texttt{weapon} and 500
 \texttt{non\_weapon} samples. The 500 \gls{ood} inputs remain outside this
 stage and are preserved in their clean form for the separate
@@ -2030,7 +2026,7 @@ configuration of the five conditions.
 \toprule
 \textbf{Transformation} &
 \textbf{Implementation and frozen parameters} &
-\textbf{Output encoding} \
+\textbf{Output encoding} \\
 \midrule
 
 \gls{jpegrecompression}
@@ -2038,36 +2034,36 @@ configuration of the five conditions.
 The RGB image is re-encoded without changing its spatial dimensions, using
 \gls{jpeg} quality 70.
 &
-JPEG, quality 70 \
+JPEG, quality 70 \\
 
 \gls{resampleresize}
 &
-The image is downsampled to 50% of its original width and height through
+The image is downsampled to 50\% of its original width and height through
 bicubic interpolation and subsequently restored to its original dimensions
 using the same interpolation method.
 &
-JPEG, quality 95 \
+JPEG, quality 95 \\
 
 \gls{gaussianblur}
 &
 A Gaussian blur filter with radius 1.5 is applied to the complete image.
 &
-JPEG, quality 95 \
+JPEG, quality 95 \\
 
 \gls{histogrammodification}
 &
 Per-channel histogram equalization is applied through the Pillow
 \texttt{ImageOps.equalize} operation.
 &
-JPEG, quality 95 \
+JPEG, quality 95 \\
 
 \gls{contraststretching}
 &
 Automatic contrast normalization is applied through
-\texttt{ImageOps.autocontrast}, using a cutoff of 1% at the intensity
+\texttt{ImageOps.autocontrast}, using a cutoff of 1\% at the intensity
 extremes.
 &
-JPEG, quality 95 \
+JPEG, quality 95 \\
 
 \bottomrule
 \end{tabularx}
@@ -2084,7 +2080,7 @@ by the other transformation families.
 
 \paragraph{\gls{resampleresize}.}
 
-For an image with dimensions (W \times H), the intermediate dimensions are
+For an image with dimensions \(W \times H\), the intermediate dimensions are
 computed as:
 
 \begin{equation}
@@ -2098,8 +2094,8 @@ H_{\mathrm{down}}
 \end{equation}
 
 The image is first resized to
-(W_{\mathrm{down}} \times H_{\mathrm{down}}) and then restored to
-(W \times H). Both operations use bicubic interpolation. The final output
+\(W_{\mathrm{down}} \times H_{\mathrm{down}}\) and then restored to
+\(W \times H\). Both operations use bicubic interpolation. The final output
 therefore retains the original spatial dimensions while incorporating the
 information loss introduced by the intermediate downsampling and reconstruction
 stages.
@@ -2131,13 +2127,13 @@ image dimensions and the source image's reference operational assignment.
 The transformed images are written according to the structure:
 
 \begin{center}
-\codepath{attacks/anti_forensic////}
+\codepath{attacks/anti_forensic/<transformation>/<fold>/<label>/}
 \end{center}
 
 Generated file names follow the pattern:
 
 \begin{center}
-\texttt{<image_id>__.jpg}
+\texttt{<image\_id>\_\_<transformation>.jpg}
 \end{center}
 
 The folder hierarchy retains both the deterministic fold assignment and the
@@ -2145,16 +2141,16 @@ binary reference assignment of the source image. No relabeling is performed
 during generation, and the transformation name is recorded separately from the
 reference operational assignment.
 
-Each of the five conditions produces 1,000 transformed files, distributed as
+Each of the five conditions produces 1\,000 transformed files, distributed as
 200 images per fold and 500 images per binary reference assignment. The
 complete anti-forensic stage therefore produces:
 
 \begin{equation}
 5\ \text{transformations}
 \times
-1,000\ \text{binary images}
+1\,000\ \text{binary images}
 =
-5,000\ \text{transformed artifacts}.
+5\,000\ \text{transformed artifacts}.
 \end{equation}
 
 The canonical sample-level generation record is stored as:
@@ -2186,7 +2182,7 @@ The summary records the input manifest, selected transformations, frozen
 parameters, global output count, per-transformation counts, per-fold
 distributions, per-assignment distributions, and final validation checks. The
 frozen execution confirms that all five transformations generated the expected
-1,000 outputs and that the complete stage produced exactly 5,000 transformed
+1\,000 outputs and that the complete stage produced exactly 5\,000 transformed
 artifacts.
 
 The final checks also confirm the uniqueness of the generated image identifiers
@@ -2241,7 +2237,7 @@ The builder consumes the following canonical inputs:
 \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}.
 \end{itemize}
 
-The resulting logical corpus contains 11,500 items. Its composition is
+The resulting logical corpus contains 11\,500 items. Its composition is
 reported in
 Table~\ref{tab:implementation-forensic-bundle-composition}.
 
@@ -2256,44 +2252,44 @@ Table~\ref{tab:implementation-forensic-bundle-composition}.
 \toprule
 \textbf{Bundle component} &
 \textbf{Files} &
-\textbf{Composition} \
+\textbf{Composition} \\
 \midrule
 
 Clean binary inputs
 &
-1,000
+1\,000
 &
 500 \texttt{weapon} and 500 \texttt{non\_weapon} images from the
-deterministic clean folds. \
+deterministic clean folds. \\
 
 Clean \gls{ood} inputs
 &
 500
 &
 The separate out-of-distribution evaluation branch, without experimentally
-applied adversarial or anti-forensic processing. \
+applied adversarial or anti-forensic processing. \\
 
 Adversarial inputs
 &
-5,000
+5\,000
 &
-Five conditions applied to the 1,000-image binary subset: \gls{fgsm},
-One Pixel, Sigma-Zero, SuperDeepFool, and Color Shift. \
+Five conditions applied to the 1\,000-image binary subset: \gls{fgsm},
+One Pixel, Sigma-Zero, SuperDeepFool, and Color Shift. \\
 
 Anti-forensic inputs
 &
-5,000
+5\,000
 &
-Five transformations applied to the 1,000-image binary subset:
+Five transformations applied to the 1\,000-image binary subset:
 \gls{jpegrecompression}, \gls{resampleresize}, \gls{gaussianblur},
-\gls{histogrammodification}, and \gls{contraststretching}. \
+\gls{histogrammodification}, and \gls{contraststretching}. \\
 
 \midrule
 \textbf{Total}
 &
-\textbf{11,500}
+\textbf{11\,500}
 &
-Complete logical corpus used for black-box software evaluation. \
+Complete logical corpus used for black-box software evaluation. \\
 
 \bottomrule
 \end{tabularx}
@@ -2308,7 +2304,7 @@ Across the complete bundle, the experimental-group distribution is:
 +
 500\ \texttt{ood}
 =
-11,500\ \text{items}.
+11\,500\ \text{items}.
 \end{equation}
 
 For each binary source image, the bundle includes the clean input and the ten
@@ -2335,7 +2331,7 @@ three distinct views.
 \toprule
 \textbf{Bundle view} &
 \textbf{Intended use} &
-\textbf{Content} \
+\textbf{Content} \\
 \midrule
 
 \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}
@@ -2343,7 +2339,7 @@ three distinct views.
 Black-box software input
 &
 Flat directory containing anonymized image files with no explicit semantic or
-experimental descriptors in their paths or file names. \
+experimental descriptors in their paths or file names. \\
 
 \codepath{datasets/forensic_evaluation_bundle/structured_audit_view/}
 &
@@ -2351,7 +2347,7 @@ Internal inspection and debugging
 &
 Structured copy preserving the clean, \gls{ood}, adversarial, and
 anti-forensic hierarchy, together with folds, reference assignments,
-perturbation names, and target-model information where applicable. \
+perturbation names, and target-model information where applicable. \\
 
 \codepath{datasets/forensic_evaluation_bundle/metadata/}
 &
@@ -2359,7 +2355,7 @@ Post-processing and traceability
 &
 Manifests, hash mappings, bundle summary, and embedded-metadata audit records
 used to reconstruct the reference assignments and experimental conditions after
-the black-box exports have been obtained. \
+the black-box exports have been obtained. \\
 
 \bottomrule
 \end{tabularx}
@@ -2383,26 +2379,26 @@ itself.
 Every bundle item was assigned a sequential identifier using the format:
 
 \begin{center}
-\texttt{bundle_000001}
+\texttt{bundle\_000001}
 \end{center}
 
 through:
 
 \begin{center}
-\texttt{bundle_011500}
+\texttt{bundle\_011500}
 \end{center}
 
 The blind file name contains only the bundle identifier and the original file
 extension, for example:
 
 \begin{center}
-\texttt{bundle_000001.jpg}
+\texttt{bundle\_000001.jpg}
 \end{center}
 
 or:
 
 \begin{center}
-\texttt{bundle_000002.png}
+\texttt{bundle\_000002.png}
 \end{center}
 
 The original extension is retained because the experimental conditions include
@@ -2432,10 +2428,10 @@ The canonical bundle mapping is stored as:
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
 \end{center}
 
-For each of the 11,500 logical items, the manifest records:
+For each of the 11\,500 logical items, the manifest records:
 
 \begin{itemize}
-\item the assigned \texttt{bundle_id} and blind input file name;
+\item the assigned \texttt{bundle\_id} and blind input file name;
 \item the sample type and perturbation family;
 \item the perturbation name and target proxy model, when applicable;
 \item the fold and reference operational assignment;
@@ -2471,7 +2467,7 @@ identifier.
 During materialization, each copied file is hashed and compared with the value
 recorded in its originating manifest. The bundle summary confirms that all
 manifest-recorded hashes correspond to the copied files. It also verifies that
-the 11,500 bundle identifiers and logical-item \gls{sha256} values are unique.
+the 11\,500 bundle identifiers and logical-item \gls{sha256} values are unique.
 
 The principal run-level record is:
 
@@ -2521,8 +2517,8 @@ Section~\ref{subsec:results-embedded-metadata-sensitivity}.
 
 The bundle can be generated in blind-only, structured-only, or combined mode.
 The frozen execution used the combined layout. It materialized the same
-11,500 logical items in both the blind and structured views, resulting in
-11,500 files per view. Rebuilding an existing bundle requires the explicit
+11\,500 logical items in both the blind and structured views, resulting in
+11\,500 files per view. Rebuilding an existing bundle requires the explicit
 \texttt{--force} option, which removes the previous bundle directory before
 materializing the new corpus.
 
@@ -2565,44 +2561,44 @@ Table~\ref{tab:implementation-magnet-configuration}.
 \begin{tabularx}{0.94\textwidth}{@{}l X@{}}
 \toprule
 \textbf{Configuration field} &
-\textbf{Frozen value} \
+\textbf{Frozen value} \\
 \midrule
 
 Platform
 &
-\gls{magnetaxiomtool} with \gls{magnetai} media analysis \
+\gls{magnetaxiomtool} with \gls{magnetai} media analysis \\
 
 Software version
 &
-\texttt{10.1.0.48673} \
+\texttt{10.1.0.48673} \\
 
 Run identifier
 &
-\texttt{FAIRLAB_AXIOM_RUN_02} \
+\texttt{FAIRLAB\_AXIOM\_RUN\_02} \\
 
 Imported directory
 &
-\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/} \
+\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/} \\
 
 Imported files
 &
-11,500 anonymized bundle images \
+11\,500 anonymized bundle images \\
 
 Processing mode
 &
-Full search with \gls{magnetai} media analysis enabled \
+Full search with \gls{magnetai} media analysis enabled \\
 
 Enabled media-analysis category
 &
-\texttt{Weapons} \
+\texttt{Weapons} \\
 
 Prediction-bearing export
 &
-\texttt{Pictures.csv} \
+\texttt{Pictures.csv} \\
 
 Observable decision field
 &
-\texttt{Tags} \
+\texttt{Tags} \\
 
 \bottomrule
 \end{tabularx}
@@ -2626,7 +2622,7 @@ the black-box evaluation. The screenshot documents activation of the
 Only the blind input directory was added to the case. Neither the bundle
 metadata nor the structured audit view was imported into
 \gls{magnetaxiomtool}. Consequently, the platform received file names of the
-form \texttt{bundle_XXXXXX}, together with the original image extensions, but
+form \texttt{bundle\_XXXXXX}, together with the original image extensions, but
 did not receive reference operational assignments, perturbation names, fold
 identifiers, proxy-model information, source provenance, or explicit
 \gls{ood} indicators through the imported directory structure or file names.
@@ -2644,7 +2640,7 @@ frozen run was:
 \begin{equation}
 \texttt{Possible weapons}
 \longrightarrow
-\texttt{weapon_detected = true},
+\texttt{weapon\_detected = true},
 \end{equation}
 
 whereas an empty \texttt{Tags} field was interpreted as:
@@ -2652,20 +2648,20 @@ whereas an empty \texttt{Tags} field was interpreted as:
 \begin{equation}
 \texttt{empty Tags}
 \longrightarrow
-\texttt{weapon_detected = false}.
+\texttt{weapon\_detected = false}.
 \end{equation}
 
 Within the common normalized output space, these values were subsequently
 mapped as follows:
 
 \begin{equation}
-\texttt{weapon_detected = true}
+\texttt{weapon\_detected = true}
 \longrightarrow
 \texttt{weapon},
 \end{equation}
 
 \begin{equation}
-\texttt{weapon_detected = false}
+\texttt{weapon\_detected = false}
 \longrightarrow
 \texttt{non\_weapon}.
 \end{equation}
@@ -2691,7 +2687,7 @@ The case export produced five principal files:
 \item \texttt{ExportSummary.json};
 \item \texttt{File System Information.csv};
 \item \texttt{Identifiers - Device.csv};
-\item \texttt{run_metadata.json}.
+\item \texttt{run\_metadata.json}.
 \end{itemize}
 
 Only \texttt{Pictures.csv} was used as the prediction-bearing record. The
@@ -2699,8 +2695,8 @@ remaining files were parsed for export auditing, case identification, version
 documentation, and execution traceability, but they did not contribute
 additional image-classification decisions.
 
-The prediction-bearing export contained exactly 11,500 rows, corresponding to
-the 11,500 files imported from the blind bundle. All exported image records
+The prediction-bearing export contained exactly 11\,500 rows, corresponding to
+the 11\,500 files imported from the blind bundle. All exported image records
 were associated with bundle entries, and no prediction row remained unmatched.
 This one-to-one coverage confirms that an observable exported decision state
 was available for every clean, \gls{ood}, adversarial, and anti-forensic input
@@ -2765,48 +2761,48 @@ Table~\ref{tab:implementation-griffeye-configuration}.
 \begin{tabularx}{0.94\textwidth}{@{}l X@{}}
 \toprule
 \textbf{Configuration field} &
-\textbf{Frozen value} \
+\textbf{Frozen value} \\
 \midrule
 
 Forensic platform
 &
-\gls{griffeye} x64 \
+\gls{griffeye} x64 \\
 
 Platform version
 &
-\texttt{26.2.108} \
+\texttt{26.2.108} \\
 
 Semantic-analysis module
 &
-\gls{t3kcore} \
+\gls{t3kcore} \\
 
 Module version
 &
-\texttt{1.18.0} \
+\texttt{1.18.0} \\
 
 Run identifier
 &
-\texttt{FAIRLAB_GRIFFEYE_T3_RUN_01} \
+\texttt{FAIRLAB\_GRIFFEYE\_T3\_RUN\_01} \\
 
 Imported directory
 &
-\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/} \
+\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/} \\
 
 Imported bundle files
 &
-11,500 \
+11\,500 \\
 
 Analysis functionality
 &
-Automatic \gls{t3kcore} semantic-bookmark generation \
+Automatic \gls{t3kcore} semantic-bookmark generation \\
 
 Prediction-bearing export
 &
-CSV media export \
+CSV media export \\
 
 Observable decision field
 &
-\texttt{Bookmarks} \
+\texttt{Bookmarks} \\
 
 \bottomrule
 \end{tabularx}
@@ -2829,7 +2825,7 @@ post-import processing}
 Only the blind input directory was supplied to the platform. The metadata
 directory and the structured audit view were excluded from the case input.
 Consequently, the system received anonymized file names of the form
-\texttt{bundle_XXXXXX}, without receiving reference operational assignments,
+\texttt{bundle\_XXXXXX}, without receiving reference operational assignments,
 perturbation families, perturbation names, fold identifiers, source datasets,
 proxy-model information, or explicit \gls{ood} indicators through the imported
 paths or file names.
@@ -2847,7 +2843,7 @@ bookmark:
 \begin{equation}
 \texttt{CORE/Violence/Firearm}
 \longrightarrow
-\texttt{weapon_detected = true}.
+\texttt{weapon\_detected = true}.
 \end{equation}
 
 When this bookmark was absent, the software-specific primary decision was:
@@ -2855,19 +2851,19 @@ When this bookmark was absent, the software-specific primary decision was:
 \begin{equation}
 \texttt{CORE/Violence/Firearm absent}
 \longrightarrow
-\texttt{weapon_detected = false}.
+\texttt{weapon\_detected = false}.
 \end{equation}
 
 The corresponding common normalized states were:
 
 \begin{equation}
-\texttt{weapon_detected = true}
+\texttt{weapon\_detected = true}
 \longrightarrow
 \texttt{weapon},
 \end{equation}
 
 \begin{equation}
-\texttt{weapon_detected = false}
+\texttt{weapon\_detected = false}
 \longrightarrow
 \texttt{non\_weapon}.
 \end{equation}
@@ -2896,7 +2892,7 @@ task. The secondary bookmarks were therefore retained in the normalized
 records for audit and qualitative analysis without contributing to the primary
 firearm-detection metrics.
 
-The complete CSV export contained 12,053 rows. A Griffeye case export may
+The complete CSV export contained 12\,053 rows. A Griffeye case export may
 include records that do not correspond to images in the blind input corpus,
 including evidence-workflow artifacts, unallocated-space entries, and
 file-system or system-generated records. Such rows were excluded before
@@ -2906,7 +2902,7 @@ The normalization implementation retained only records containing an
 identifier consistent with the blind bundle naming convention:
 
 \begin{center}
-\texttt{bundle_XXXXXX}
+\texttt{bundle\_XXXXXX}
 \end{center}
 
 Records associated with known non-bundle evidence artifacts, including
@@ -2916,7 +2912,7 @@ export record from being incorrectly associated with a genuine bundle item
 through an incidental hash or path value.
 
 A total of 553 non-bundle rows were excluded through this procedure. The
-remaining 11,500 records were matched to the complete forensic evaluation
+remaining 11\,500 records were matched to the complete forensic evaluation
 bundle, and no bundle item remained without an observable exported decision
 state. This complete coverage establishes the availability of a matched output
 for every bundle item but does not establish the correctness of the resulting
@@ -3010,32 +3006,32 @@ Table~\ref{tab:implementation-excire-configuration}.
 \textbf{Setting} &
 \textbf{Run identifier} &
 \textbf{Bundle rows} &
-\textbf{Normalized configuration name} \
+\textbf{Normalized configuration name} \\
 \midrule
 
 D20
 &
-\texttt{FAIRLAB_EXCIRE_D20_FIREARM_PROMPTS}
+\texttt{FAIRLAB\_EXCIRE\_D20\_FIREARM\_PROMPTS}
 &
-11,500
+11\,500
 &
-\texttt{excire_foto_2025_d20} \
+\texttt{excire\_foto\_2025\_d20} \\
 
 D50
 &
-\texttt{FAIRLAB_EXCIRE_D50_FIREARM_PROMPTS}
+\texttt{FAIRLAB\_EXCIRE\_D50\_FIREARM\_PROMPTS}
 &
-11,500
+11\,500
 &
-\texttt{excire_foto_2025_d50} \
+\texttt{excire\_foto\_2025\_d50} \\
 
 D80
 &
-\texttt{FAIRLAB_EXCIRE_D80_FIREARM_PROMPTS}
+\texttt{FAIRLAB\_EXCIRE\_D80\_FIREARM\_PROMPTS}
 &
-11,500
+11\,500
 &
-\texttt{excire_foto_2025_d80} \
+\texttt{excire\_foto\_2025\_d80} \\
 
 \bottomrule
 \end{tabularx}
@@ -3111,11 +3107,11 @@ Each prompt was executed separately under the three distance-limit settings
 The exports were named according to the pattern:
 
 \begin{center}
-\texttt{excire__distance.csv}
+\texttt{excire\_<prompt>\_distance<limit>.csv}
 \end{center}
 
 For file-system compatibility, the multiword prompt
-\texttt{assault rifle} was represented as \texttt{assault_rifle} in the
+\texttt{assault rifle} was represented as \texttt{assault\_rifle} in the
 export file name. The prompt and distance configuration can therefore be
 reconstructed deterministically from each export name.
 
@@ -3136,29 +3132,29 @@ was retrieved by at least one fixed prompt:
 =
 \texttt{true}
 \quad\Longrightarrow\quad
-\texttt{weapon_detected = true},
+\texttt{weapon\_detected = true},
 \end{equation}
 
-where (\mathcal{P}) denotes the frozen set of eight prompts.
+where \(\mathcal{P}\) denotes the frozen set of eight prompts.
 
 Images not retrieved by any prompt under the same distance configuration were
-completed against the canonical 11,500-item bundle and assigned:
+completed against the canonical 11\,500-item bundle and assigned:
 
 \begin{equation}
 \bigwedge_{p \in \mathcal{P}}
 \neg\operatorname{retrieved}(x,p)
 \quad\Longrightarrow\quad
-\texttt{weapon_detected = false}.
+\texttt{weapon\_detected = false}.
 \end{equation}
 
 The resulting normalized prediction was therefore:
 
 \begin{equation}
-\texttt{normalized_prediction}
+\texttt{normalized\_prediction}
 =
 \begin{cases}
 \texttt{weapon},
-& \text{if at least one fixed prompt retrieved the image},\
+& \text{if at least one fixed prompt retrieved the image},\\
 \texttt{non\_weapon},
 & \text{otherwise}.
 \end{cases}
@@ -3173,7 +3169,7 @@ as calibrated probabilities or as directly comparable confidence thresholds.
 The three distance settings were retained as separate system configurations
 throughout normalization and metric computation. Their retrieval results were
 not merged into a single combined Excire decision. Each setting therefore
-produced a complete table of 11,500 normalized predictions, allowing the
+produced a complete table of 11\,500 normalized predictions, allowing the
 observable behavior associated with each retrieval configuration to be
 analyzed independently.
 
@@ -3188,7 +3184,7 @@ the individual prompt memberships. Each row includes:
 \item one binary hit indicator for each of the eight prompts;
 \item the bundle identifier, hashes, sample type, experimental condition,
 fold, reference operational assignment, and source-image identifiers;
-\item the resulting \texttt{weapon_detected} and normalized-prediction
+\item the resulting \texttt{weapon\_detected} and normalized-prediction
 fields.
 \end{itemize}
 
@@ -3199,7 +3195,7 @@ several semantically related prompts.
 
 The three frozen runs produced separate prompt-level export sets. After union
 and completion against the canonical bundle, every configuration contained
-exactly one normalized prediction for each of the 11,500 bundle items, and no
+exactly one normalized prediction for each of the 11\,500 bundle items, and no
 bundle image remained unmatched. This complete matching establishes output
 coverage for every bundle item but does not establish the correctness of the
 derived binary decisions. The corresponding retrieval volumes and their
@@ -3228,11 +3224,11 @@ The corresponding normalized configurations and metric outputs are stored
 separately as:
 
 \begin{center}
-\texttt{excire_foto_2025_d20},
+\texttt{excire\_foto\_2025\_d20},
 \qquad
-\texttt{excire_foto_2025_d50},
+\texttt{excire\_foto\_2025\_d50},
 \qquad
-\texttt{excire_foto_2025_d80}.
+\texttt{excire\_foto\_2025\_d80}.
 \end{center}
 
 The common normalization procedure is described in
@@ -3265,52 +3261,52 @@ Table~\ref{tab:implementation-cellebrite-configuration}.
 \begin{tabularx}{0.94\textwidth}{@{}l X@{}}
 \toprule
 \textbf{Configuration field} &
-\textbf{Frozen value} \
+\textbf{Frozen value} \\
 \midrule
 
 Media-analysis platform
 &
-\gls{cellebriteinseyets} \
+\gls{cellebriteinseyets} \\
 
 Platform version
 &
-\texttt{10.9} \
+\texttt{10.9} \\
 
 Physical Analyzer version
 &
-\texttt{10.9.0.3029} \
+\texttt{10.9.0.3029} \\
 
 \gls{ufed} component version
 &
-\texttt{10.9.0.284} \
+\texttt{10.9.0.284} \\
 
 Run identifier
 &
-\texttt{FAIRLAB_CELLEBRITE_INSEYETS_RUN_01} \
+\texttt{FAIRLAB\_CELLEBRITE\_INSEYETS\_RUN\_01} \\
 
 Imported directory
 &
-\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/} \
+\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/} \\
 
 Imported bundle files
 &
-11,500 \
+11\,500 \\
 
 Analysis functionality
 &
-Media and image classifications \
+Media and image classifications \\
 
 Prediction-bearing export
 &
-Physical Analyzer XLSX report \
+Physical Analyzer XLSX report \\
 
 Prediction-bearing worksheet
 &
-\texttt{Immagini} \
+\texttt{Immagini} \\
 
 Observable decision field
 &
-\texttt{Classifications} \
+\texttt{Classifications} \\
 
 \bottomrule
 \end{tabularx}
@@ -3339,17 +3335,17 @@ each label optionally followed by a percentage value. Representative field
 structures include:
 
 \begin{center}
-\texttt{Armi (100%)}
+\texttt{Armi (100\%)}
 \end{center}
 
 \begin{center}
-\texttt{Pistola (100%); Armi (100%)}
+\texttt{Pistola (100\%); Armi (100\%)}
 \end{center}
 
 and:
 
 \begin{center}
-\texttt{Fucile (91%) | Oggetto tenuto in mano (78%)}
+\texttt{Fucile (91\%) | Oggetto tenuto in mano (78\%)}
 \end{center}
 
 The parser separates labels expressed through semicolons, vertical bars,
@@ -3370,49 +3366,49 @@ The frozen mapping assigns a positive decision when the observable
 Formally, the operational recoding is:
 
 \begin{equation}
-\left{
+\left\{
 \texttt{Armi},
 \texttt{Pistola},
 \texttt{Fucile}
-\right}
+\right\}
 \cap
 \mathcal{C}(x)
 \neq
 \varnothing
 \quad\Longrightarrow\quad
-\texttt{weapon_detected = true},
+\texttt{weapon\_detected = true},
 \end{equation}
 
-where (\mathcal{C}(x)) denotes the set of normalized classifications exported
-for image (x).
+where \(\mathcal{C}(x)\) denotes the set of normalized classifications exported
+for image \(x\).
 
 For every other successfully matched bundle record, the software-specific
 decision is:
 
 \begin{equation}
-\left{
+\left\{
 \texttt{Armi},
 \texttt{Pistola},
 \texttt{Fucile}
-\right}
+\right\}
 \cap
 \mathcal{C}(x)
 =
 \varnothing
 \quad\Longrightarrow\quad
-\texttt{weapon_detected = false}.
+\texttt{weapon\_detected = false}.
 \end{equation}
 
 The corresponding common normalized states are:
 
 \begin{equation}
-\texttt{weapon_detected = true}
+\texttt{weapon\_detected = true}
 \longrightarrow
 \texttt{weapon},
 \end{equation}
 
 \begin{equation}
-\texttt{weapon_detected = false}
+\texttt{weapon\_detected = false}
 \longrightarrow
 \texttt{non\_weapon}.
 \end{equation}
@@ -3429,7 +3425,7 @@ taxonomy, that the exported labels are mutually exclusive, or that the
 associated percentage values represent directly comparable model
 probabilities.
 
-The original report contained 11,829 image rows. Of these, 11,500 were
+The original report contained 11\,829 image rows. Of these, 11\,500 were
 matched to the complete forensic evaluation bundle, whereas 329 rows did not
 correspond to bundle items. The unmatched records were retained as an aggregate
 audit count and excluded from the quantitative robustness analysis. Complete
@@ -3442,7 +3438,7 @@ identifiers. For each successfully matched record, the normalized output
 retains:
 
 \begin{itemize}
-\item the \texttt{bundle_id} and input file name;
+\item the \texttt{bundle\_id} and input file name;
 \item the matching method and matched state;
 \item the available \gls{sha256} and \gls{md5} values;
 \item the clean, \gls{ood}, or perturbed sample type;
@@ -3524,23 +3520,23 @@ the three \gls{excirefoto2025} distance settings as distinct configurations.
 The resulting normalized configuration identifiers are:
 
 \begin{itemize}
-\item \texttt{magnet_axiom};
+\item \texttt{magnet\_axiom};
 \item \texttt{griffeye};
-\item \texttt{cellebrite_inseyets};
-\item \texttt{excire_foto_2025_d20};
-\item \texttt{excire_foto_2025_d50};
-\item \texttt{excire_foto_2025_d80}.
+\item \texttt{cellebrite\_inseyets};
+\item \texttt{excire\_foto\_2025\_d20};
+\item \texttt{excire\_foto\_2025\_d50};
+\item \texttt{excire\_foto\_2025\_d80}.
 \end{itemize}
 
-Each normalized configuration is evaluated against the same 11,500-item
+Each normalized configuration is evaluated against the same 11\,500-item
 bundle. The canonical normalized population therefore contains:
 
 \begin{equation}
 6\ \text{configurations}
 \times
-11,500\ \text{bundle items}
+11\,500\ \text{bundle items}
 =
-69,000\ \text{matched decisions}.
+69\,000\ \text{matched decisions}.
 \end{equation}
 
 \paragraph{Bundle indexing and record matching.}
@@ -3559,11 +3555,11 @@ according to the following priority:
 
 \begin{center}
 \texttt{SHA-256}
-(\succ)
+\(\succ\)
 \texttt{MD5}
-(\succ)
+\(\succ\)
 \texttt{exact file name}
-(\succ)
+\(\succ\)
 \texttt{file name embedded in an exported path or text field}.
 \end{center}
 
@@ -3588,7 +3584,7 @@ every image, including those absent from all prompt exports.
 \paragraph{Software-specific observable recoding.}
 
 The software-specific observable fields are converted into a common
-\texttt{weapon_detected} state according to the frozen rules summarized in
+\texttt{weapon\_detected} state according to the frozen rules summarized in
 Table~\ref{tab:implementation-normalization-mappings}.
 
 \begin{table}[H]
@@ -3602,7 +3598,7 @@ Table~\ref{tab:implementation-normalization-mappings}.
 \toprule
 \textbf{Configuration} &
 \textbf{Observable source} &
-\textbf{Positive operational mapping} \
+\textbf{Positive operational mapping} \\
 \midrule
 
 \gls{magnetaxiomtool}/\gls{magnetai}
@@ -3611,7 +3607,7 @@ Table~\ref{tab:implementation-normalization-mappings}.
 &
 The exported tag contains \texttt{Possible weapons}. Empty tags are interpreted
 as not flagged. Other nonempty values that do not match the frozen mapping are
-recorded as unmapped and assigned to the normalized \texttt{unknown} state. \
+recorded as unmapped and assigned to the normalized \texttt{unknown} state. \\
 
 \gls{griffeye}/\gls{t3kcore}
 &
@@ -3619,21 +3615,21 @@ CSV: \texttt{Bookmarks}
 &
 The automatically generated bookmark contains
 \texttt{CORE/Violence/Firearm}. Other weapon-related bookmarks are retained as
-secondary indicators but excluded from the primary decision. \
+secondary indicators but excluded from the primary decision. \\
 
 \gls{cellebriteinseyets}
 &
 XLSX, worksheet \texttt{Immagini}: \texttt{Classifications}
 &
 The normalized classification set contains at least one among
-\texttt{Armi}, \texttt{Pistola}, or \texttt{Fucile}. \
+\texttt{Armi}, \texttt{Pistola}, or \texttt{Fucile}. \\
 
 \gls{excirefoto2025} D20, D50, and D80
 &
 Eight prompt-level retrieval hit lists per configuration
 &
 The image is retrieved by at least one frozen firearm-oriented prompt under the
-corresponding distance setting. \
+corresponding distance setting. \\
 
 \bottomrule
 \end{tabularx}
@@ -3652,13 +3648,13 @@ The common software-specific detection state supports three values:
 The corresponding normalized prediction is assigned as:
 
 \begin{equation}
-\texttt{normalized_prediction}
+\texttt{normalized\_prediction}
 =
 \begin{cases}
 \texttt{weapon},
-& \text{if \texttt{weapon_detected = true}},\
+& \text{if \texttt{weapon\_detected = true}},\\
 \texttt{non\_weapon},
-& \text{if \texttt{weapon_detected = false}},\
+& \text{if \texttt{weapon\_detected = false}},\\
 \texttt{unknown},
 & \text{otherwise}.
 \end{cases}
@@ -3678,8 +3674,8 @@ the reference assignments and experimental metadata recovered from the bundle.
 Its principal fields include:
 
 \begin{itemize}
-\item \texttt{tool_name}, \texttt{bundle_id},
-\texttt{matched}, and \texttt{match_method};
+\item \texttt{tool\_name}, \texttt{bundle\_id},
+\texttt{matched}, and \texttt{match\_method};
 
 \item \texttt{sample\_type}, \texttt{attack\_family},
 \texttt{attack\_name}, and \texttt{attack\_target\_model};
@@ -3705,7 +3701,7 @@ when the reference operational assignment is \texttt{weapon} or
 \texttt{non\_weapon}.
 \end{itemize}
 
-The literal field name \texttt{final_label} is preserved because it belongs to
+The literal field name \texttt{final\_label} is preserved because it belongs to
 the implemented schema; semantically, its value represents the reference
 operational assignment inherited from the frozen bundle.
 
@@ -3721,7 +3717,7 @@ derived.
 For records whose reference assignment is \texttt{ood}, the binary correctness,
 false-negative, and false-positive fields are left undefined. An \gls{ood}
 input is not treated as either a positive or a negative reference instance. Its
-normalized \texttt{weapon_detected} state is preserved separately and is later
+normalized \texttt{weapon\_detected} state is preserved separately and is later
 used to compute the \gls{ood} weapon-flag rate.
 
 \paragraph{Deduplication and completeness.}
@@ -3755,20 +3751,20 @@ do not belong to the official forensic evaluation bundle. They remain
 documented through the export audit and separate unmatched-record outputs.
 
 After software-specific parsing and the preliminary exclusion of the 553
-non-bundle Griffeye records, the normalization workspace contained 69,329
-candidate records. This population comprised the expected 69,000 bundle-level
+non-bundle Griffeye records, the normalization workspace contained 69\,329
+candidate records. This population comprised the expected 69\,000 bundle-level
 decisions and 329 unmatched Cellebrite report records. Excluding the latter
-produced exactly 69,000 matched normalized decisions:
+produced exactly 69\,000 matched normalized decisions:
 
 \begin{equation}
-69,329
+69\,329
 -
 329
 =
-69,000.
+69\,000.
 \end{equation}
 
-This final count corresponds to complete coverage of the 11,500-item bundle
+This final count corresponds to complete coverage of the 11\,500-item bundle
 for all six normalized configurations. No matched bundle decision remained
 without a common normalized state after the frozen mappings were applied.
 Complete coverage establishes output availability and successful matching; it
@@ -3798,7 +3794,7 @@ public table is:
 \codepath{evaluation/forensic_tools/normalized_predictions.csv}
 \end{center}
 
-It contains all 69,000 normalized bundle-level decisions and is reconstructed
+It contains all 69\,000 normalized bundle-level decisions and is reconstructed
 from the four validated sanitized public extracts. It excludes the complete
 raw exports, local execution paths, unrelated forensic fields, and controlled
 case metadata.
@@ -3828,44 +3824,44 @@ in Table~\ref{tab:implementation-normalization-artifacts}.
 \begin{tabularx}{\textwidth}{@{}p{0.46\textwidth} X@{}}
 \toprule
 \textbf{Record} &
-\textbf{Role} \
+\textbf{Role} \\
 \midrule
 
 \codepath{evaluation/forensic_tools/tool_export_audit.csv}
 &
 Documents every inspected export file, prediction-bearing status, parsed-row
-count, excluded non-bundle rows, and parsing errors. \
+count, excluded non-bundle rows, and parsing errors. \\
 
 \codepath{evaluation/forensic_tools/tool_version_log.csv}
 &
 Records the frozen software versions, run identifiers, selected export
 directories, enabled analysis functionality, import path, export status, and
-normalization notes. \
+normalization notes. \\
 
 \codepath{evaluation/forensic_tools/normalization_summary.json}
 &
 Records the selected runs, raw and normalized row counts, output
 configurations, completeness checks, deduplication state, and validation of the
-generated metric outputs. \
+generated metric outputs. \\
 
 \codepath{forensic_tools/run_registry.json}
 &
 Provides the canonical registry of black-box software versions, run
 identifiers, observable fields, mappings, controlled raw-export locations, and
-public sanitized extracts. \
+public sanitized extracts. \\
 
 \codepath{forensic_tools/public_extracts_validation.json}
 &
 Verifies that the sanitized public extracts preserve the complete normalized
 decision population and reproduce the metrics derived from the controlled local
-prediction table. \
+prediction table. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
 The decision-level and metric-level validation confirms that the sanitized
-extracts preserve all 69,000 normalized decisions and reproduce all 186 frozen
+extracts preserve all 69\,000 normalized decisions and reproduce all 186 frozen
 black-box software metric rows without differences. The cryptographic hashes of
 the validated extracts are recorded in the corresponding validation record.
 
@@ -3965,18 +3961,18 @@ procedure used elsewhere in the pipeline. The file hashes are recomputed, and
 the corresponding fold-aware model adapter applies the architecture-specific
 preprocessing defined by the model implementation.
 
-The evaluation population contains 11,500 distinct experimental inputs:
+The evaluation population contains 11\,500 distinct experimental inputs:
 
 \begin{equation}
-1,000\ \text{clean binary inputs}
+1\,000\ \text{clean binary inputs}
 +
 500\ \text{OOD inputs}
 +
-5,000\ \text{adversarial artifacts}
+5\,000\ \text{adversarial artifacts}
 +
-5,000\ \text{anti-forensic artifacts}
+5\,000\ \text{anti-forensic artifacts}
 =
-11,500\ \text{inputs}.
+11\,500\ \text{inputs}.
 \end{equation}
 
 Clean and perturbed binary samples are each evaluated once by every proxy
@@ -3984,11 +3980,11 @@ architecture using the checkpoint associated with their assigned fold.
 Therefore, the prediction counts for these branches are:
 
 \begin{equation}
-1,000
+1\,000
 \times
 3
 =
-3,000
+3\,000
 \quad
 \text{clean prediction rows},
 \end{equation}
@@ -3996,11 +3992,11 @@ Therefore, the prediction counts for these branches are:
 and:
 
 \begin{equation}
-10,000
+10\,000
 \times
 3
 =
-30,000
+30\,000
 \quad
 \text{perturbed prediction rows}.
 \end{equation}
@@ -4016,7 +4012,7 @@ architecture:
 \times
 3
 =
-7,500
+7\,500
 \quad
 \text{OOD prediction rows}.
 \end{equation}
@@ -4024,21 +4020,21 @@ architecture:
 Consequently, the complete proxy-model prediction table contains:
 
 \begin{equation}
-3,000
+3\,000
 +
-30,000
+30\,000
 +
-7,500
+7\,500
 =
-40,500
+40\,500
 \quad
 \text{prediction rows}.
 \end{equation}
 
-The 2,500 \gls{ood} predictions associated with each architecture correspond
+The 2\,500 \gls{ood} predictions associated with each architecture correspond
 to 500 unique images evaluated through five different fold-specific
 checkpoints. They represent repeated checkpoint responses to the same
-\gls{ood} population and must not be interpreted as 2,500 distinct or
+\gls{ood} population and must not be interpreted as 2\,500 distinct or
 statistically independent out-of-distribution images.
 
 \paragraph{Binary metric computation.}
@@ -4048,7 +4044,7 @@ matrix using the fixed layout:
 
 \begin{equation}
 \begin{bmatrix}
-\mathrm{TN} & \mathrm{FP} \
+\mathrm{TN} & \mathrm{FP} \\
 \mathrm{FN} & \mathrm{TP}
 \end{bmatrix}.
 \end{equation}
@@ -4106,11 +4102,11 @@ Each perturbed prediction is associated with its corresponding clean prediction
 through the tuple:
 
 \begin{center}
-\texttt{evaluated_model},
+\texttt{evaluated\_model},
 \quad
-\texttt{evaluation_fold},
+\texttt{evaluation\_fold},
 \quad
-\texttt{original_image_id}.
+\texttt{original\_image\_id}.
 \end{center}
 
 The prediction table is enriched with the clean prediction, clean correctness
@@ -4122,7 +4118,7 @@ computes:
 
 \begin{itemize}
 \item clean accuracy and perturbed accuracy;
-\item the schema field \texttt{robust_accuracy}, whose stored value is
+\item the schema field \texttt{robust\_accuracy}, whose stored value is
 equivalent to the perturbed accuracy;
 \item accuracy drop;
 \item clean and perturbed macro F1-scores;
@@ -4133,30 +4129,30 @@ equivalent to the perturbed accuracy;
 \item directional error counts and rates.
 \end{itemize}
 
-The term \texttt{robust_accuracy} is retained because it is part of the
+The term \texttt{robust\_accuracy} is retained because it is part of the
 implemented comparative schema. It does not denote a separate quantity from
 the perturbed-condition accuracy.
 
-Let (\mathcal{C}_{\mathrm{clean}}) denote the set of samples correctly
+Let \(\mathcal{C}_{\mathrm{clean}}\) denote the set of samples correctly
 classified under the corresponding clean condition. The induced-error rate for
-perturbation condition (p) is implemented as:
+perturbation condition \(p\) is implemented as:
 
 \begin{equation}
-\mathrm{IER}\textit{{p}
-=
-\frac{
-\left|
-\left{
-i \in \mathcal{C}}{\mathrm{clean}}
-:
-\hat{y}^{(p)}\textit{{i} \neq y}{i}
-\right}
-\right|
-}{
-\left|
-\mathcal{C}_{\mathrm{clean}}
-\right|
-}.
+    \mathrm{IER}_{p}
+    =
+    \frac{
+        \left|
+        \left\{
+        i \in \mathcal{C}_{\mathrm{clean}}
+        :
+        \hat{y}^{(p)}_{i} \neq y_{i}
+        \right\}
+        \right|
+    }{
+        \left|
+        \mathcal{C}_{\mathrm{clean}}
+        \right|
+    }.
 \end{equation}
 
 Images already misclassified in the clean condition are excluded from this
@@ -4231,42 +4227,42 @@ in Table~\ref{tab:implementation-proxy-metric-artifacts}.
 \begin{tabularx}{\textwidth}{@{}p{0.47\textwidth} X@{}}
 \toprule
 \textbf{Output} &
-\textbf{Role} \
+\textbf{Role} \\
 \midrule
 
 \codepath{evaluation/proxy_models/proxy_model_predictions.csv}
 &
 Sample-level predictions, probabilities, fold associations, integrity values,
-clean-to-perturbed links, and evaluation errors. \
+clean-to-perturbed links, and evaluation errors. \\
 
 \codepath{results/metrics/proxy_model_clean_metrics.csv}
 &
-Architecture-level clean binary metrics. \
+Architecture-level clean binary metrics. \\
 
 \codepath{results/metrics/proxy_model_adversarial_metrics.csv}
 &
 Binary metrics grouped by evaluated architecture, adversarial-stage condition,
-and attack target model. \
+and attack target model. \\
 
 \codepath{results/metrics/proxy_model_anti_forensic_metrics.csv}
 &
 Binary metrics grouped by evaluated architecture and anti-forensic
-transformation. \
+transformation. \\
 
 \codepath{results/metrics/proxy_model_ood_metrics.csv}
 &
 Fold-aggregated \gls{ood} prediction, weapon-rate, mean-maximum-probability, and
-high-confidence statistics. \
+high-confidence statistics. \\
 
 \codepath{results/metrics/proxy_model_comparative_metrics.csv}
 &
 Clean-to-perturbed accuracy, F1-score, induced-error, directional-error, and
-maximum-probability-shift comparisons. \
+maximum-probability-shift comparisons. \\
 
 \codepath{results/metrics/proxy_model_evaluation_summary.json}
 &
 Models, output paths, row counts, evaluation-error count, metric-table counts,
-and canonical schema notes. \
+and canonical schema notes. \\
 
 \bottomrule
 \end{tabularx}
@@ -4316,7 +4312,7 @@ The confusion-matrix table contains one record for each of the 33 binary
 condition rows, while the final \gls{ood} table contains one record for each of
 the three proxy architectures.
 
-The frozen proxy-model evaluation completed all 40,500 prediction operations
+The frozen proxy-model evaluation completed all 40\,500 prediction operations
 without recorded inference errors.
 
 \paragraph{Black-box software metric computation.}
@@ -4324,7 +4320,7 @@ without recorded inference errors.
 Black-box software metrics are computed from the normalized decisions described
 in Section~\ref{subsec:implementation-normalization}. Only matched binary
 records with an interpretable \texttt{true} or \texttt{false}
-\texttt{weapon_detected} value contribute to the binary confusion matrix.
+\texttt{weapon\_detected} value contribute to the binary confusion matrix.
 Records assigned to \texttt{unknown} are excluded from the binary denominators
 and reported separately.
 
@@ -4481,7 +4477,7 @@ evaluation. The resulting model-input tensor is passed to the Captum
 implementation of \gls{ig}. The baseline is defined as:
 
 \begin{center}
-\texttt{zero_tensor_in_preprocessed_input_space}
+\texttt{zero\_tensor\_in\_preprocessed\_input\_space}
 \end{center}
 
 The baseline therefore corresponds to a zero-valued tensor in the normalized
@@ -4509,51 +4505,51 @@ in Table~\ref{tab:implementation-ig-configuration}.
 \begin{tabularx}{0.94\textwidth}{@{}l X@{}}
 \toprule
 \textbf{Configuration field} &
-\textbf{Frozen value} \
+\textbf{Frozen value} \\
 \midrule
 
 Proxy architecture
 &
-EfficientNet-B0 \
+EfficientNet-B0 \\
 
 Selection strategy
 &
-\texttt{chapter5_core} \
+\texttt{chapter5\_core} \\
 
 Attribution target
 &
-Predicted binary class \
+Predicted binary class \\
 
 Baseline
 &
-Zero tensor in preprocessed input space \
+Zero tensor in preprocessed input space \\
 
 Integration steps
 &
-32 \
+32 \\
 
 Input resolution
 &
-(224 \times 224) pixels \
+\(224 \times 224\) pixels \\
 
 High-confidence selection threshold
 &
-0.90 \
+0.90 \\
 
 Attribution-mask percentile
 &
 90th percentile, corresponding approximately to the highest-attribution
-10% of image locations \
+10\% of image locations \\
 
 Reviewer identifier
 &
-Pseudonymous identifier \texttt{reviewer_01} \
+Pseudonymous identifier \texttt{reviewer\_01} \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The identifiers \texttt{chapter5_core} and
+The identifiers \texttt{chapter5\_core} and
 \codepath{explainability/manifests/chapter5/} are retained as historical
 implementation names created before the final reorganization of the thesis
 chapters. They identify the frozen records and do not indicate that the
@@ -4563,7 +4559,7 @@ Section~\ref{sec:results-explainability}.
 
 \paragraph{Case-selection procedure.}
 
-The \texttt{chapter5_core} strategy organizes candidate predictions into five
+The \texttt{chapter5\_core} strategy organizes candidate predictions into five
 diagnostic buckets:
 
 \begin{enumerate}
@@ -4614,28 +4610,28 @@ Table~\ref{tab:implementation-xai-thesis-selection}.
 \begin{tabularx}{0.96\textwidth}{@{}l X@{}}
 \toprule
 \textbf{Case identifier} &
-\textbf{Diagnostic role} \
+\textbf{Diagnostic role} \\
 \midrule
 
-\texttt{xai_case_0001}
+\texttt{xai\_case\_0001}
 &
-Correctly classified clean \texttt{weapon} reference case. \
+Correctly classified clean \texttt{weapon} reference case. \\
 
-\texttt{xai_case_0006}
+\texttt{xai\_case\_0006}
 &
-Clean \texttt{weapon} false-negative case. \
+Clean \texttt{weapon} false-negative case. \\
 
-\texttt{xai_case_0009}
+\texttt{xai\_case\_0009}
 &
-High-confidence \gls{ood} assignment to the \texttt{weapon} class. \
+High-confidence \gls{ood} assignment to the \texttt{weapon} class. \\
 
-\texttt{xai_case_0010}
+\texttt{xai\_case\_0010}
 &
-Induced failure associated with Histogram Modification. \
+Induced failure associated with Histogram Modification. \\
 
-\texttt{xai_case_0015}
+\texttt{xai\_case\_0015}
 &
-High-confidence induced failure associated with Sigma-Zero. \
+High-confidence induced failure associated with Sigma-Zero. \\
 
 \bottomrule
 \end{tabularx}
@@ -4650,7 +4646,7 @@ Section~\ref{sec:results-explainability}.
 For each attribution target, the channel-wise attribution tensor is converted
 into a two-dimensional map by summing the absolute attribution magnitudes
 across the three input channels. The resulting map is min--max normalized to
-the interval ([0,1]).
+the interval \([0,1]\).
 
 Because absolute values are used, the visualizations represent attribution
 magnitude rather than contribution direction. They identify image regions
@@ -4674,7 +4670,7 @@ percentile;
 The heatmap uses the \texttt{inferno} color map. The overlay combines the
 resized input with the colorized heatmap using an attribution opacity of 0.45.
 The binary high-attribution mask is computed from the 90th percentile of the
-normalized map and therefore identifies approximately the 10% of image
+normalized map and therefore identifies approximately the 10\% of image
 locations with the highest attribution magnitudes. The exact proportion may
 vary when multiple locations share the percentile threshold.
 
@@ -4684,7 +4680,7 @@ The thesis retains four visual assets for each of the five selected cases:
 \item input image;
 \item standalone heatmap;
 \item heatmap overlay;
-\item top-10% attribution mask.
+\item top-10\% attribution mask.
 \end{enumerate}
 
 The resulting thesis-level visual corpus contains:
@@ -4721,7 +4717,7 @@ diagnostics. Starting from the requested number of integration steps, the
 procedure can double the integration resolution until the normalized
 convergence delta is at most 0.05 or the maximum of 256 steps is reached. A
 regenerated case is marked as \texttt{passed} only when the threshold is
-satisfied; otherwise, the state \texttt{threshold_not_met} is retained.
+satisfied; otherwise, the state \texttt{threshold\_not\_met} is retained.
 
 This adaptive functionality was introduced after the historical 32-step assets
 had been generated and was not used to produce the figures analyzed in this
@@ -4741,31 +4737,31 @@ Table~\ref{tab:implementation-xai-artifacts}.
 \begin{tabularx}{\textwidth}{@{}p{0.47\textwidth} X@{}}
 \toprule
 \textbf{Record} &
-\textbf{Role} \
+\textbf{Role} \\
 \midrule
 
 \codepath{explainability/manifests/chapter5/thesis_selection.csv}
 &
 Canonical mapping of the five cases, prediction metadata, attribution
-configuration, thesis image paths, and selection rationales. \
+configuration, thesis image paths, and selection rationales. \\
 
 \codepath{explainability/manifests/chapter5/candidate_selection_summary.json}
 &
-Candidate and manually selected counts for the five diagnostic buckets. \
+Candidate and manually selected counts for the five diagnostic buckets. \\
 
 \codepath{explainability/manifests/chapter5/run_summary.json}
 &
 Frozen model, strategy, baseline, target, integration-step count, percentile,
-selection counts, and public-distribution policy. \
+selection counts, and public-distribution policy. \\
 
 \codepath{explainability/manifests/chapter5/run_provenance.json}
 &
 Entry point, frozen implementation, prediction source, model registry,
-integrity controls, and convergence policy. \
+integrity controls, and convergence policy. \\
 
 \codepath{explainability/logs/chapter5_manual_selection.csv}
 &
-Human-in-the-loop case-selection log. \
+Human-in-the-loop case-selection log. \\
 
 \bottomrule
 \end{tabularx}
@@ -4820,27 +4816,27 @@ the proprietary software required to repeat the black-box processing.
 \paragraph{Stable identity and provenance chain.}
 
 The pipeline assigns stable identifiers at successive processing stages.
-Prepared source images receive an \texttt{image_id}; generated perturbations
-receive a \texttt{generated_image_id}; black-box inputs receive an anonymized
-\texttt{bundle_id}; and selected explainability cases receive a
-\texttt{case_id}. Model checkpoints are identified through the combination of
+Prepared source images receive an \texttt{image\_id}; generated perturbations
+receive a \texttt{generated\_image\_id}; black-box inputs receive an anonymized
+\texttt{bundle\_id}; and selected explainability cases receive a
+\texttt{case\_id}. Model checkpoints are identified through the combination of
 proxy architecture and held-out fold.
 
 The resulting provenance chain can be represented as:
 
 \begin{equation}
 \begin{split}
-\texttt{image_id}
+\texttt{image\_id}
 &\longrightarrow
-\texttt{generated_image_id}
+\texttt{generated\_image\_id}
 \longrightarrow
-\texttt{bundle_id} \
+\texttt{bundle\_id} \\
 &\longrightarrow
-\texttt{normalized_prediction}
+\texttt{normalized\_prediction}
 \longrightarrow
-\texttt{metric_row}
+\texttt{metric\_row}
 \longrightarrow
-\texttt{reporting_asset}.
+\texttt{reporting\_asset}.
 \end{split}
 \end{equation}
 
@@ -4870,44 +4866,44 @@ identity controls.
 \toprule
 \textbf{Identifier} &
 \textbf{Canonical context} &
-\textbf{Traceability role} \
+\textbf{Traceability role} \\
 \midrule
 
-\texttt{image_id}
+\texttt{image\_id}
 &
 Prepared and frozen dataset manifests
 &
 Identifies the reviewed source image across dataset preparation, freezing,
-partitioning, and clean evaluation. \
+partitioning, and clean evaluation. \\
 
-\texttt{generated_image_id}
+\texttt{generated\_image\_id}
 &
 Adversarial and anti-forensic manifests
 &
 Identifies a derived image artifact while preserving its association with the
-original source image and perturbation condition. \
+original source image and perturbation condition. \\
 
-\texttt{bundle_id}
+\texttt{bundle\_id}
 &
 Forensic evaluation bundle manifest
 &
 Provides a semantically neutral identifier for black-box import and subsequent
 reconnection to the reference operational assignment and experimental
-condition. \
+condition. \\
 
 Architecture and fold
 &
 Model registry and checkpoint paths
 &
 Identifies the fold-aware checkpoint used for training, inference,
-model-dependent perturbation generation, and explainability. \
+model-dependent perturbation generation, and explainability. \\
 
-\texttt{case_id}
+\texttt{case\_id}
 &
 Integrated Gradients selection manifest
 &
 Identifies a manually selected qualitative diagnostic case and its associated
-thesis assets. \
+thesis assets. \\
 
 \bottomrule
 \end{tabularx}
@@ -4965,7 +4961,7 @@ The complete-archive digest authenticates the downloaded ZIP file, whereas:
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}
 \end{center}
 
-supports verification of each of the 11,500 restored blind inputs
+supports verification of each of the 11\,500 restored blind inputs
 individually. This distinction prevents a valid archive-level digest from
 replacing verification of the expected file population after extraction.
 
@@ -5030,14 +5026,14 @@ inspecting every prediction.
 The principal invariants include:
 
 \begin{itemize}
-\item 1,500 records in the frozen dataset;
-\item 1,000 binary samples and 500 \gls{ood} inputs;
+\item 1\,500 records in the frozen dataset;
+\item 1\,000 binary samples and 500 \gls{ood} inputs;
 \item five folds containing 200 binary images each;
 \item 15 fold-aware proxy-model checkpoints;
-\item 5,000 adversarial and 5,000 anti-forensic artifacts;
-\item 11,500 unique forensic evaluation bundle items;
-\item 40,500 proxy-model prediction rows;
-\item 69,000 canonical sanitized black-box software decisions;
+\item 5\,000 adversarial and 5\,000 anti-forensic artifacts;
+\item 11\,500 unique forensic evaluation bundle items;
+\item 40\,500 proxy-model prediction rows;
+\item 69\,000 canonical sanitized black-box software decisions;
 \item 186 black-box software metric rows;
 \item five canonical thesis-level explainability cases and 20 associated
 thesis assets.
@@ -5062,7 +5058,7 @@ software families. These extracts are combined into the canonical table:
 \codepath{evaluation/forensic_tools/normalized_predictions.csv}
 \end{center}
 
-The table contains 69,000 sanitized sample-level decisions across the six
+The table contains 69\,000 sanitized sample-level decisions across the six
 normalized configurations. It excludes complete raw-export fields and local
 execution paths while preserving the decision-relevant observable values,
 bundle identifiers, experimental conditions, reference operational
@@ -5105,40 +5101,40 @@ summarized in Table~\ref{tab:implementation-validation-controls}.
 \begin{tabularx}{\textwidth}{@{}p{0.48\textwidth} X@{}}
 \toprule
 \textbf{Validation entry point} &
-\textbf{Principal checks} \
+\textbf{Principal checks} \\
 \midrule
 
 \codepath{forensic_tools/scripts/validate_public_extract_equivalence.py}
 &
 Decision-level equivalence between the sanitized black-box software extracts
-and the canonical 69,000-row table, together with metric-level equivalence
-across the 186 black-box software metric rows. \
+and the canonical 69\,000-row table, together with metric-level equivalence
+across the 186 black-box software metric rows. \\
 
 \codepath{results/scripts/23_validate_results_artifacts.py}
 &
 Black-box and proxy-model prediction counts, metric-table counts, \gls{ood}
 accounting, canonical hashes, reporting manifests, and metadata-sensitivity
-outputs. \
+outputs. \\
 
 \codepath{results/scripts/24_audit_reporting_asset_usage.py}
 &
 Consistency among reporting manifests, generated assets, and files referenced
-by the thesis. \
+by the thesis. \\
 
 \codepath{explainability/scripts/validate_chapter5_xai_artifacts.py}
 &
 Consistency of the five-case selection, thesis image paths, displayed
-prediction metadata, and \gls{xai} provenance. \
+prediction metadata, and \gls{xai} provenance. \\
 
 \codepath{tools/latex/audit_latex_images_used.py}
 &
 Missing, ambiguous, unused, and duplicate image references in the LaTeX
-project. \
+project. \\
 
 \codepath{tools/tasks.sh audit-all}
 &
 Aggregated JSON, Python syntax, text-guard, result, explainability, reporting,
-and LaTeX-image checks. \
+and LaTeX-image checks. \\
 
 \bottomrule
 \end{tabularx}
@@ -5174,7 +5170,7 @@ Table~\ref{tab:implementation-reproducibility-boundary}.
 \begin{tabularx}{\textwidth}{@{}p{0.18\textwidth} X@{}}
 \toprule
 \textbf{Layer} &
-\textbf{Supported activities} \
+\textbf{Supported activities} \\
 \midrule
 
 Public
@@ -5183,19 +5179,19 @@ Inspection of source code, manifests, checkpoints, prediction tables, metric
 tables, sanitized black-box software decisions, explainability metadata,
 reporting assets, validation utilities, and LaTeX sources; reconstruction of
 the canonical normalized black-box prediction table; and recomputation of
-metrics from publicly retained decisions. \
+metrics from publicly retained decisions. \\
 
 Controlled
 &
 Restoration of the heterogeneous raw-image sources; regeneration of the
-prepared and frozen image pipeline; restoration of the exact 11,500-file
+prepared and frozen image pipeline; restoration of the exact 11\,500-file
 black-box input bundle; proxy-model retraining; perturbation regeneration; and
-selected image-level validation, subject to approved data access. \
+selected image-level validation, subject to approved data access. \\
 
 Licensed
 &
 Reprocessing of the blind bundle through the proprietary software versions and
-compatible import/export environments used in the frozen evaluation. \
+compatible import/export environments used in the frozen evaluation. \\
 
 \bottomrule
 \end{tabularx}
@@ -5205,7 +5201,7 @@ Two distinct controlled archives support the controlled layer:
 
 \begin{itemize}
 \item
-\texttt{00_raw_datasets_bundle.zip}, used to restore the heterogeneous
+\texttt{00\_raw\_datasets\_bundle.zip}, used to restore the heterogeneous
 source collections and rerun the numbered image-processing pipeline;
 
 \item
