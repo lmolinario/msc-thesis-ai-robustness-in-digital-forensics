@@ -146,7 +146,8 @@ Evaluation on clean inputs constitutes the experimental baseline against which
 the behavior of the models under subsequent conditions must be interpreted,
 namely \gls{ood} samples, anti-forensic transformations, and adversarial
 perturbations. In this phase, the proxy models are evaluated on the official
-binary subset composed of 1000 images, balanced between 500 \texttt{weapon}
+binary subset composed of 1\,000 images, balanced between 500
+\texttt{weapon}
 samples and 500 \texttt{non\_weapon} samples. The positive class is defined as
 \texttt{weapon}, whereas the negative class is defined as
 \texttt{non\_weapon}; consequently, false negatives indicate
@@ -248,7 +249,7 @@ cost of a higher number of false positives.
 \begin{figure}[htbp]
 \centering
 
-\begin{minipage}{0.58\textwidth}
+\begin{minipage}{0.48\textwidth}
 \centering
 \small EfficientNet-B0
 
@@ -256,7 +257,7 @@ cost of a higher number of false positives.
 \includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_efficientnet_b0.pdf}
 \end{minipage}
 \hfill
-\begin{minipage}{0.58\textwidth}
+\begin{minipage}{0.48\textwidth}
 \centering
 \small ResNet18
 
@@ -401,10 +402,10 @@ sample is mapped to the \texttt{weapon} class, but also the confidence level
 with which that assignment is produced.
 
 From a forensic perspective, this result is relevant because it highlights a
-risk that differs from ordinary binary misclassification. An operational 	exttt{weapon} assignment
+risk that differs from ordinary binary misclassification. An operational \texttt{weapon} assignment
 on an out-of-distribution sample may generate an investigative flag that is not
 fully grounded or, conversely, may unduly strengthen the perceived relevance of
-ambiguous content. The case of ResNet18 and EfficientNet-B0 shows that a model
+ambiguous content. The behavior of ResNet18 and EfficientNet-B0 shows that a model
 may produce fewer \texttt{weapon} classifications on \gls{ood} samples, while
 assigning high confidence to those predictions. The case of \gls{clip}, by
 contrast, shows the opposite behavior: a greater tendency to classify samples
@@ -743,12 +744,13 @@ Section~\ref{subsec:implementation-normalization}.
 The adversarial variants were generated against fold-aware EfficientNet-B0
 checkpoints rather than against the proprietary systems. Their use in this
 section consequently represents a black-box transfer evaluation of the same
-artifacts, not a white-box attack against the commercial products.
+artifacts, not a white-box attack against the selected black-box software
+systems.
 
 The aggregate values are bundle-weighted because the binary population contains
 1\,000 clean images and 10\,000 perturbed variants. They describe observable
 behavior under the defined protocol and must not be interpreted as absolute
-product-quality estimates or as a general ranking among heterogeneous software
+system-quality estimates or as a general ranking among heterogeneous software
 systems.
 
 Table~\ref{tab:results-commercial-overview} reports the resulting summary for
@@ -829,7 +831,8 @@ Table~\ref{tab:results-commercial-overview} and
 Figure~\ref{fig:results-forensic-tools-global-comparison} must be interpreted
 with caution. The metrics describe the behavior observed after output
 normalization in the operational \texttt{weapon}/\texttt{non\_weapon} task,
-not the internal accuracy of the selected products in an absolute sense. The
+not the internal accuracy of the selected software systems in an absolute
+sense. The
 three \gls{excirefoto2025} configurations show the clearest threshold-dependent
 trade-off: \texttt{D20} limits false positives and \gls{ood} flags but increases
 missed detections, whereas \texttt{D80} maximizes recall while markedly
@@ -1962,7 +1965,7 @@ concerning robustness under adversarial perturbations and anti-forensic
 transformations, but it represents a residual operational limitation of bundle
 blindness.
 
-Two aspects are methodologically relevant. First, the presence of descriptive
+Two observations are operationally relevant. First, the presence of descriptive
 terms in the metadata does not automatically produce a positive classification
 by the black-box software systems: some \texttt{weapon} samples with
 weapon-related metadata are still not flagged by at least some of the evaluated
@@ -2179,7 +2182,7 @@ the highest clean accuracy among the proxy models, whereas
 selected software systems considered, although this result must be interpreted
 in light of the conservative mapping adopted for the
 \texttt{CORE/Violence/Firearm} bookmark. \gls{cellebriteinseyets}, however,
-shows slightly higher \texttt{weapon} recall in the adopted aggregate protocol.
+shows slightly higher \texttt{weapon} recall on the clean subset.
 Behavior on \gls{ood} inputs highlights an additional dimension of risk: even
 selected software systems with good clean accuracy exhibit non-zero weapon flag
 rates on content outside the task.
@@ -2187,17 +2190,24 @@ rates on content outside the task.
 EfficientNet-B0 and ResNet18 show OOD weapon rates of 0.370 and 0.438,
 respectively. However, their higher mean confidence on \gls{ood} inputs makes
 these assignments potentially more relevant in an automatic prioritization process.
-The selected software systems present more limited values: \gls{magnetai}
-reaches an OOD weapon flag rate of 0.360, \gls{excirefoto2025} under the
-\texttt{D50} configuration reaches 0.340, \gls{cellebriteinseyets} reaches
-0.292, and \gls{griffeye}/\gls{t3kcore} reaches 0.260. These results indicate
-a lower operational tendency of the selected software systems, under the
-adopted protocol, to absorb out-of-distribution samples into the
-\texttt{weapon} class. However, since the internal mechanisms, thresholds, and
-calibration of the selected software systems are not accessible, these values
-must not be interpreted as evidence of actual OOD recognition capability, but
-as observable behavior after black-box normalization and with respect to the
-adopted mapping rules.
+The four black-box reference configurations included in
+Table~\ref{tab:results-comparative-clean-ood} present lower values:
+\gls{magnetai} reaches an OOD weapon flag rate of 0.360,
+\gls{excirefoto2025} under the \texttt{D50} configuration reaches 0.340,
+\gls{cellebriteinseyets} reaches 0.292, and
+\gls{griffeye}/\gls{t3kcore} reaches 0.260. These values indicate a lower
+operational tendency, for the specific reference configurations used in the
+cross-system comparison, to absorb out-of-distribution samples into the
+\texttt{weapon} class.
+
+This finding is configuration-dependent and must not be generalized to every
+evaluated black-box configuration. In particular, the sensitivity analysis
+shows that \gls{excirefoto2025} under the \texttt{D80} setting reaches an OOD
+weapon flag rate of 0.522. Moreover, since the internal mechanisms, thresholds,
+and calibration of the selected software systems are not accessible, the
+reported values must not be interpreted as evidence of actual OOD recognition
+capability. They describe only the observable behavior obtained after
+black-box normalization and under the adopted mapping rules.
 
 \paragraph{Robustness with respect to anti-forensic transformations.}
 
@@ -2341,7 +2351,7 @@ criticality more attributable to false positive increase under
 
 Table~\ref{tab:results-comparative-adversarial} summarizes the adversarial
 robustness profile. Unlike anti-forensic transformations, adversarial
-perturbations are designed to stress the decision behavior of \gls{ai}-based
+perturbations are designed to alter the decision behavior of \gls{ai}-based
 systems. For this reason, they produce more heterogeneous and more
 model-dependent effects. The results highlight an important distinction between
 the white-box vulnerability of proxy models and the operational black-box
@@ -2513,8 +2523,9 @@ configuration, accuracy decreases to 0.742, while FNR improves to 0.074 and
 FPR increases to 0.442. Under the \texttt{D80} configuration, recall improves
 further, but FPR rises to 0.662. The same software system can therefore support
 different forensic priorities depending on the selected operating point:
-\texttt{D20} is more suitable for containing noise, \texttt{D80} for maximizing
-recall, and \texttt{D50} for balancing false negatives and false positives.
+\texttt{D20} prioritizes the containment of operational noise,
+\texttt{D80} prioritizes recall, and \texttt{D50} represents an intermediate
+trade-off between false negatives and false positives.
 
 The black-box nature of selected software systems also limits the types of
 conclusions that can be drawn. Unlike the proxy models, these systems do not
@@ -2524,8 +2535,8 @@ the operational level, through observable categories, exported tags, retrieval
 results, semantic bookmarks, matching rate, non-mappable outputs, false
 negatives, false positives, and behavior on \gls{ood} inputs. This limitation
 does not represent a weakness of the evaluation protocol; on the contrary, it
-reflects the real condition in which forensic analysts interact with
-\gls{ai}-assisted commercial software.
+reflects the real condition in which forensic analysts interact with selected
+proprietary \gls{ai}-assisted software systems.
 
 
 Figure~\ref{fig:results-operational-risk-summary} summarizes the main
@@ -2700,7 +2711,7 @@ of confidence alone in the presence of an attack. \\
 {fig:xai-case1-clean-correct}
 {Correct case on a clean input \texttt{xai\_case\_0001}. The EfficientNet-B0
 proxy model correctly classifies a \texttt{clean} image with manual label
-\texttt{weapon} as \texttt{weapon}.}
+\texttt{weapon} as \texttt{weapon}}
 {images/fig_xai_case1_clean_correct_input.png}
 {images/fig_xai_case1_clean_correct_heatmap.png}
 {images/fig_xai_case1_clean_correct_overlay.png}
@@ -2725,7 +2736,7 @@ reference case against which the subsequent failures can be compared.
 {fig:xai-case2-clean-false-negative}
 {False negative on a clean input \texttt{xai\_case\_0006}. A \texttt{clean}
 image with manual label \texttt{weapon} is classified as
-\texttt{non\_weapon}.}
+\texttt{non\_weapon}}
 {images/fig_xai_case2_clean_false_negative_input.png}
 {images/fig_xai_case2_clean_false_negative_heatmap.png}
 {images/fig_xai_case2_clean_false_negative_overlay.png}
@@ -2754,7 +2765,7 @@ filter or rank large volumes of images in an investigative context.
 \XAIcaseFigureMaskGrid
 {fig:xai-case3-ood-as-weapon}
 {\gls{ood} case \texttt{xai\_case\_0009}. An out-of-distribution sample is
-classified as \texttt{weapon} with high confidence.}
+classified as \texttt{weapon} with high confidence}
 {images/fig_xai_case3_ood_as_weapon_input.png}
 {images/fig_xai_case3_ood_as_weapon_heatmap.png}
 {images/fig_xai_case3_ood_as_weapon_overlay.png}
@@ -2785,7 +2796,7 @@ than mapping all inputs not belonging to the \texttt{weapon} class to the
 {fig:xai-case4-antiforensic-failure}
 {Anti-forensic false negative \texttt{xai\_case\_0010}. A \texttt{weapon} image
 subjected to \gls{histogrammodification} is classified as
-\texttt{non\_weapon}.}
+\texttt{non\_weapon}}
 {images/fig_xai_case4_antiforensic_failure_input.png}
 {images/fig_xai_case4_antiforensic_failure_heatmap.png}
 {images/fig_xai_case4_antiforensic_failure_overlay.png}
@@ -2817,7 +2828,7 @@ but as support to be critically verified.
 {fig:xai-case5-adversarial-high-confidence-failure}
 {High-confidence adversarial false positive \texttt{xai\_case\_0015}. A
 \texttt{non\_weapon} image perturbed using \gls{sigmazero} is classified as
-\texttt{weapon}.}
+\texttt{weapon}}
 {images/fig_xai_case5_adversarial_high_conf_failure_input.png}
 {images/fig_xai_case5_adversarial_high_conf_failure_heatmap.png}
 {images/fig_xai_case5_adversarial_high_conf_failure_overlay.png}
