@@ -203,12 +203,14 @@ the mean confidence of the predictions.
 EfficientNet-B0 achieves the highest nominal performance, with an accuracy of
 0.978, a macro-F1 of 0.978, and a mean confidence of 0.979. ResNet18 shows
 slightly lower but still high performance, with an accuracy of 0.964, a
-macro-F1 of 0.964, and a mean confidence of 0.974. \gls{clip} achieves an
-accuracy of 0.927 and a macro-F1 of 0.927, but exhibits a different
-operational profile from the two supervised models: recall on the
-\texttt{weapon} class is very high, at 0.988, whereas the \gls{fpr} is
-substantially higher, at 0.134. Moreover, the mean confidence of \gls{clip} is
-0.559, much lower than that observed for EfficientNet-B0 and ResNet18.
+macro-F1 of 0.964, and a mean confidence of 0.974. \gls{clip} achieves an accuracy of 0.927 and a macro-F1 of 0.927, but
+exhibits a different operational profile from the two fully fine-tuned CNN
+proxies. Recall on the \texttt{weapon} class is very high, at 0.988, whereas
+the \gls{fpr} is substantially higher, at 0.134. Its mean confidence is
+0.559. Because confidence scores are not calibrated across architectures,
+this value is interpreted only within the \gls{clip}-based proxy and not as
+directly commensurate with the scores produced by EfficientNet-B0 and
+ResNet18.
 
 This behavior should not be interpreted as the effect of zero-shot
 classification. In the adopted experimental protocol, \gls{clip} is used as a
@@ -218,9 +220,9 @@ observed tendency to produce high recall on the \texttt{weapon} class, at the
 cost of a higher \gls{fpr}, is therefore more appropriately interpreted as an
 effect of the pre-trained visual representation and of the calibration of the
 binary head with respect to the specific task, rather than as the result of a
-zero-shot mechanism. The lower mean confidence also suggests that the greater
-tendency to flag images as \texttt{weapon} does not necessarily correspond to
-high-confidence predictions.
+zero-shot mechanism. Within the \gls{clip}-based proxy, the observed score distribution indicates
+that the greater tendency to flag images as \texttt{weapon} does not generally
+coincide with scores near the maximum value.
 
 Table~\ref{tab:results-clean-confusion-matrices} reports the aggregate
 confusion matrices for each model, using the layout
@@ -352,7 +354,7 @@ ResNet18 & 2\,500 & 1\,094 & 1\,406 & 0.4376 & 0.8896 & 1\,617 & 0.6468 \\
 \textit{Pred. nw} indicates \texttt{non\_weapon} predictions;
 \textit{W-rate} indicates the proportion of \gls{ood} samples classified as
 \texttt{weapon}; \textit{Conf.} indicates mean confidence; \textit{HC-count}
-indicates the number of predictions with confidence of at least 0.9;
+indicates the number of predictions with confidence of at least 0.90;
 \textit{HC-rate} indicates the corresponding proportion over the total
 \gls{ood} predictions. The total of 2\,500 predictions per model is obtained by
 evaluating the 500 \gls{ood} images through each of the five fold-aware
@@ -361,8 +363,8 @@ checkpoints.
 
 The zero \textit{HC-rate} value for \gls{clip} does not indicate the absence of
 \texttt{weapon} classifications on \gls{ood} samples, but the absence of
-predictions with confidence greater than or equal to the high-confidence
-threshold fixed at 0.9. Indeed, \gls{clip} maps 83.56\% of the \gls{ood}
+predictions whose confidence is greater than or equal to the high-confidence
+threshold of 0.90. Indeed, \gls{clip} maps 83.56\% of the \gls{ood}
 predictions to the \texttt{weapon} class, but with a mean confidence of 0.5358.
 This behavior indicates a semantic tendency toward the \texttt{weapon} class
 that is not accompanied by high-confidence predictions.
@@ -387,11 +389,15 @@ proportions of \gls{ood} samples as \texttt{weapon}, at 0.3696 and 0.4376,
 respectively, but with much higher mean confidence values. In particular,
 ResNet18 reaches the highest high-confidence rate, at 0.6468, whereas
 EfficientNet-B0 reaches 0.5008.
+These raw confidence scores are reported side by side for descriptive purposes.
+Because they are not calibrated across architectures, they must not be
+interpreted as equivalent uncertainty measures or used to establish a
+cross-model confidence ranking.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{images/fig_ood_confidence_distribution.pdf}
-\caption{Distribution of predictive confidence on \gls{ood} samples for each proxy model. The plot highlights a distribution more concentrated around intermediate values for \gls{clip} than for the two supervised models}
+\caption{Distribution of predictive confidence on \gls{ood} samples for each proxy model. The plot highlights a distribution more concentrated around intermediate values for \gls{clip} than for the two fully fine-tuned CNN proxies}
 \label{fig:results-ood-confidence-distribution}
 \end{figure}
 
@@ -581,7 +587,7 @@ instead treated as a model-agnostic adversarial-style perturbation.
 
 Consistent with the convention defined in Section~\ref{sec:results-scope},
 performance drop is interpreted as the variation with respect to the clean
-baseline. In this section, negative or null values are not interpreted as
+baseline. In this section, zero or negative values are not interpreted as
 evidence of general adversarial robustness, but as effects specific to the
 transferability of the perturbations generated against the target model and to
 the distribution of the evaluated samples.
@@ -650,11 +656,18 @@ with an accuracy of 0.931 and a drop of 0.047. \gls{onepixel} and
 \gls{colorshift} produce marginal variations on EfficientNet-B0, equal to
 0.002 and 0.001, respectively.
 
-The comparison with ResNet18 and \gls{clip} shows that the transfer of attacks
-generated against EfficientNet-B0 does not produce equivalent degradation on
-the other models. ResNet18 undergoes the largest drop under \gls{fgsm}, equal
-to 0.046, while remaining substantially stable with respect to
-\gls{superdeepfool}, \gls{onepixel}, \gls{sigmazero}, and \gls{colorshift}.
+The comparison with ResNet18 and \gls{clip} shows that the model-dependent
+attacks generated against EfficientNet-B0 do not produce equivalent degradation
+on the other proxy architectures. ResNet18 undergoes the largest transferred
+drop under \gls{fgsm}, equal to 0.046, while remaining substantially stable
+under the transferred \gls{superdeepfool}, \gls{onepixel}, and
+\gls{sigmazero} variants. The model-agnostic \gls{colorshift} condition also
+produces only a marginal variation. \gls{clip} shows even more limited
+variations, with the maximum degradation equal to 0.013 under \gls{fgsm}. In
+some cases, such as \gls{sigmazero}, the perturbed accuracy of \gls{clip} and
+ResNet18 is slightly higher than the respective clean baseline; this effect is
+interpreted as a distribution-specific oscillation and not as evidence of
+general robustness.
 \gls{clip} shows even more limited variations, with the maximum degradation
 equal to 0.013 under \gls{fgsm}. In some cases, such as \gls{sigmazero}, the
 perturbed accuracy of \gls{clip} and ResNet18 is slightly higher than the
@@ -726,7 +739,6 @@ context.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-% ─────────────────────────────────────────────────────────────────────────────
 \section{Black-Box Software Results}
 \label{sec:results-commercial}
 % ─────────────────────────────────────────────────────────────────────────────
@@ -746,11 +758,13 @@ an interpretable black-box output, although non-bundle rows present in some raw
 exports were excluded during normalization as documented in
 Section~\ref{subsec:implementation-normalization}.
 
-The adversarial variants were generated against fold-aware EfficientNet-B0
-checkpoints rather than against the proprietary systems. Their use in this
-section consequently represents a black-box transfer evaluation of the same
-artifacts, not a white-box attack against the selected black-box software
-systems.
+The four model-dependent adversarial conditions were generated against
+fold-aware EfficientNet-B0 checkpoints, whereas \gls{colorshift} was applied
+as a model-agnostic condition. Evaluation of the model-dependent variants
+through the selected proprietary systems therefore constitutes a black-box
+transfer assessment. The \gls{colorshift} variants instead provide a
+model-agnostic comparison condition. Neither evaluation constitutes a
+white-box attack against the selected software systems.
 
 The aggregate values are bundle-weighted because the binary population contains
 1\,000 clean images and 10\,000 perturbed variants. They describe observable
@@ -1653,8 +1667,8 @@ class also increases, but the \gls{fpr} grows markedly as well: from 0.190 under
 \texttt{D20}, to 0.442 under \texttt{D50}, and up to 0.662 under \texttt{D80}.
 This behavior is operationally significant because, while a permissive
 configuration may appear preferable due to its lower risk of false negatives,
-it can generate a high volume of false positives, saturating human review and
-reducing the efficiency of the automatic filter.
+it can generate a high volume of false positives, substantially increasing the
+human-review workload and reducing the efficiency of the automatic filter.
 
 Overall, \gls{excirefoto2025} highlights the critical role of the retrieval
 threshold in black-box evaluation. A restrictive configuration reduces noise but
@@ -2139,7 +2153,7 @@ Proxy &
 0.927 &
 0.012 &
 0.836 &
-Lower clean accuracy than the supervised models, but a very limited FNR; the
+Lower clean accuracy than the two fully fine-tuned CNN proxies, but a very limited FNR; the
 main operational risk is the high weapon flag rate on OOD inputs. \\
 
 Magnet AXIOM and Magnet.AI &
@@ -2155,8 +2169,9 @@ Black-box software &
 0.944 &
 0.042 &
 0.340 &
-Intermediate semantic retrieval configuration, with a good compromise among
-recall on the \texttt{weapon} class, false positives, and OOD absorption. \\
+Intermediate semantic retrieval configuration, positioned between
+\texttt{D20} and \texttt{D80} with respect to recall, false-positive workload,
+and OOD absorption. \\
 
 Cellebrite Inseyets &
 Black-box software &
@@ -2391,15 +2406,17 @@ ResNet18 &
 0.955 / 0.009 &
 \gls{fgsm}; acc. 0.918; drop 0.046 &
 47 induced errors; 27 W$\rightarrow$NW and 20 NW$\rightarrow$W &
-More stable adversarial profile than EfficientNet-B0, but with residual
-degradation under \gls{fgsm}. \\
+Limited aggregate degradation; the model-dependent results reflect cross-model
+transfer, with residual degradation under \gls{fgsm}. The evaluation does not
+represent a direct white-box assessment of ResNet18. \\
 
 \gls{clip} &
 0.927 / 0.000 &
 \gls{fgsm}; acc. 0.914; drop 0.013 &
 23 induced errors; 8 W$\rightarrow$NW and 15 NW$\rightarrow$W &
-Limited degradation with respect to the tested perturbations; adversarial
-stability does not eliminate OOD risk. \\
+Limited aggregate degradation; the model-dependent results reflect cross-model
+transfer and do not demonstrate direct adversarial robustness. The distinct OOD
+risk also remains. \\
 
 Magnet AXIOM and Magnet.AI &
 0.923 / 0.027 &
@@ -2557,8 +2574,17 @@ methodological condition rather than an experimentally measured variable.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{images/fig_results_operational_risk_summary.pdf}
-    \caption[Operational risk summary across evaluated systems]{Operational risk summary across proxy models and selected black-box software systems. The figure reports quantitative indicators relevant to forensic image triage: clean false negative rate, bundle false positive rate on the interpretable binary bundle, out-of-distribution weapon flag rate, adversarial false negative rate, anti-forensic false negative rate, adversarial accuracy drop, and anti-forensic accuracy drop. The values are derived from the normalized experimental metrics reported in Chapter~\ref{chap:results}. Interpretability differences between inspectable proxy models and black-box software systems are discussed separately and are not encoded as a numerical score in the figure}
-    \label{fig:results-operational-risk-summary}
+   \caption[Operational risk summary across evaluated systems]{Operational risk
+        summary across proxy models and selected black-box software systems. The figure
+        reports quantitative indicators relevant to forensic image triage: clean false
+        negative rate, bundle false positive rate on the interpretable binary bundle,
+        out-of-distribution weapon flag rate, adversarial false negative rate,
+        anti-forensic false negative rate, adversarial accuracy drop, and anti-forensic
+        accuracy drop. The values are derived from the proxy-model metrics and the
+        normalized black-box metrics reported in Chapter~\ref{chap:results}.
+        Interpretability differences between inspectable proxy models and black-box
+        software systems are discussed separately and are not encoded as a numerical
+        score in the figure}    \label{fig:results-operational-risk-summary}
 
 \end{figure}
 
@@ -2593,7 +2619,7 @@ mechanisms for classification, tagging, retrieval, or semantic bookmark
 generation. Second, selected software systems show differentiated risk
 profiles: some privilege recall, others reduce false positives, and others
 depend strongly on the retrieval configuration or the adopted semantic mapping.
-Third, \gls{ood} behavior remains an autonomous risk: it may increase the
+Third, \gls{ood} behavior remains a distinct operational risk: it may increase the
 analyst's workload, produce misleading prioritization, and generate
 weapon-related flags on material that does not belong to the expected binary
 task.
@@ -2714,6 +2740,10 @@ of confidence alone in the presence of an attack. \\
 
 \bottomrule
 \end{tabularx}
+\vspace{0.4em}
+\footnotesize
+\textit{Note.} For \texttt{xai\_case\_0009}, \texttt{ood} denotes the separate
+out-of-distribution evaluation branch and not a third supervised class.
 \end{table}
 
 \XAIcaseFigureMaskGrid
@@ -2785,8 +2815,8 @@ classified as \texttt{weapon} with high confidence}
 \textbf{confidence}: 0.999}
 
 The third case, shown in Figure~\ref{fig:xai-case3-ood-as-weapon}, illustrates a
-risk that differs from an ordinary false positive. The sample is labeled as
-\texttt{ood}, but it is absorbed by the binary decision boundary and classified
+risk that differs from an ordinary false positive. The sample belongs to the separate \gls{ood} evaluation branch, but it is
+absorbed by the binary decision boundary and classified
 as \texttt{weapon} with high confidence. This behavior is particularly important
 because \gls{ood} inputs do not simply correspond to realistic negatives, but
 include borderline, anomalous, degraded, synthetic, or semantically
@@ -2884,7 +2914,7 @@ black-box software systems. In a \gls{df} pipeline, visualizations based on
 evaluation, and critical discussion of the results, while preserving the central
 role of the human analyst in the final assessment.
 
-% ─────────────────────────────────────────────────────────────────────────────
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Operational Interpretation and Experimental Limitations}
 \label{sec:results-limitations}
