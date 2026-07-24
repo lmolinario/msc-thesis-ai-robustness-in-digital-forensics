@@ -138,6 +138,8 @@ probabilities directly comparable across architectures. The selected black-box
 software systems do not expose homogeneous confidence measures; consequently,
 their comparison is based on normalized observable decisions rather than on
 numerical uncertainty scores.
+
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Clean Baseline Performance}
 \label{sec:results-clean-baseline}
 % ─────────────────────────────────────────────────────────────────────────────
@@ -357,7 +359,7 @@ evaluating the 500 \gls{ood} images through each of the five fold-aware
 checkpoints.
 \end{table}
 
-The null \textit{HC-rate} value for \gls{clip} does not indicate the absence of
+The zero \textit{HC-rate} value for \gls{clip} does not indicate the absence of
 \texttt{weapon} classifications on \gls{ood} samples, but the absence of
 predictions with confidence greater than or equal to the high-confidence
 threshold fixed at 0.9. Indeed, \gls{clip} maps 83.56\% of the \gls{ood}
@@ -567,12 +569,15 @@ but also the direction of the induced errors. Particular attention is given to
 represent potentially critical missed detections in an investigative triage
 workflow.
 
-The model-dependent attacks were generated against EfficientNet-B0. This choice
-reflects a white-box scenario in which the adversary has full access to a
-single target model; transferability to different architectures is therefore
-evaluated empirically, rather than assumed a
-priori~\cite{biggio2018wild,nowroozi2021survey,barni2018cf}. \gls{colorshift}
-is instead treated as a model-agnostic adversarial-style perturbation.
+The four model-dependent attacks were generated against fold-aware
+EfficientNet-B0 checkpoints. Their access assumptions were not identical:
+\gls{fgsm}, \gls{sigmazero}, and \gls{superdeepfool} used white-box
+checkpoint access, whereas \gls{onepixel} used score-based access to the same
+proxy target. Transferability to ResNet18, \gls{clip}, and the selected
+black-box software systems was evaluated empirically rather than assumed
+a priori
+\cite{biggio2018wild,nowroozi2021survey,barni2018cf}. \gls{colorshift} was
+instead treated as a model-agnostic adversarial-style perturbation.
 
 Consistent with the convention defined in Section~\ref{sec:results-scope},
 performance drop is interpreted as the variation with respect to the clean
@@ -813,8 +818,7 @@ the false negative rate and false positive rate computed on the interpretable
 binary bundle, including clean, adversarial, and anti-forensic samples and
 excluding \gls{ood} samples. \textit{OOD W-rate} indicates the proportion of
 \gls{ood} samples operationally mapped to the \texttt{weapon} class. The values
-are bundle-weighted and reflect the experimental composition of the bundle, not
-a general product validation.
+are bundle-weighted and reflect the experimental composition of the bundle, not a general validation of the selected software systems.
 \end{table}
 
 \begin{figure}[H]
@@ -1422,7 +1426,8 @@ risk of false negatives. \\
 0.042 &
 0.070 &
 0.340 &
-Intermediate: balanced compromise in the experimental context considered. \\
+Intermediate: trade-off between recall, false-positive workload, and
+\gls{ood} absorption. \\
 
 \texttt{D80} &
 0.915 &
@@ -1442,12 +1447,13 @@ The comparison among the three configurations shows that the
 but as an operational threshold that modifies the risk profile of the system.
 \texttt{D20} is more conservative and reduces the review workload arising from
 false positives, but may fail to retrieve relevant \texttt{weapon} content.
-\texttt{D50} represents, in the experimental context considered, the most
-balanced configuration for triage, since it maintains high recall on the
-\texttt{weapon} class without producing the level of noise observed under
-\texttt{D80}. The latter strongly reduces false negatives, but substantially
-increases false positives and maps more than half of the \gls{ood} inputs to
-the \texttt{weapon} class.
+\texttt{D50} serves as the intermediate reference configuration in the
+cross-system comparison. It provides higher recall than \texttt{D20} while
+producing substantially lower false-positive and \gls{ood} weapon-flag rates
+than \texttt{D80}. This choice identifies an intermediate operating point and
+does not imply that \texttt{D50} is optimal for every forensic workflow. The
+preferred configuration necessarily depends on the relative operational cost
+assigned to missed detections and additional human-review workload.
 
 \begin{table}[H]
 \centering
@@ -2040,10 +2046,9 @@ the variations in clean accuracy remain between -0.0009 and +0.0015, whereas
 the variations in the weapon flag rate on \gls{ood} samples remain below 0.006
 in absolute value. Therefore, the identified cases are retained in the benchmark
 and discussed as a documented operational limitation of bundle blindness, not
-as an invalidating factor for the experimental results. The residual presence
-of embedded metadata nevertheless suggests that, in future studies or
-operational validations, metadata neutralization should be included as a
-preventive control during the construction of the blind bundle.
+as an invalidating factor for the experimental results. The residual presence of embedded metadata therefore remains a documented
+limitation of the blind-bundle design and must be considered when interpreting
+the affected clean and \gls{ood} results.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Comparative Operational Robustness Analysis}
@@ -2188,8 +2193,9 @@ selected software systems with good clean accuracy exhibit non-zero weapon flag
 rates on content outside the task.
 
 EfficientNet-B0 and ResNet18 show OOD weapon rates of 0.370 and 0.438,
-respectively. However, their higher mean confidence on \gls{ood} inputs makes
-these assignments potentially more relevant in an automatic prioritization process.
+respectively. However, their higher mean confidence on \gls{ood} inputs may make these
+assignments more consequential when confidence is used as a criterion for
+automatic prioritization.
 The four black-box reference configurations included in
 Table~\ref{tab:results-comparative-clean-ood} present lower values:
 \gls{magnetai} reaches an OOD weapon flag rate of 0.360,
@@ -2353,9 +2359,10 @@ Table~\ref{tab:results-comparative-adversarial} summarizes the adversarial
 robustness profile. Unlike anti-forensic transformations, adversarial
 perturbations are designed to alter the decision behavior of \gls{ai}-based
 systems. For this reason, they produce more heterogeneous and more
-model-dependent effects. The results highlight an important distinction between
-the white-box vulnerability of proxy models and the operational black-box
-behavior of selected software systems.
+model-dependent effects. The results highlight an important distinction among source-model vulnerability
+under the defined access assumptions, cross-model transfer across the proxy
+architectures, and the operational black-box transfer behavior of the selected
+software systems.
 
 \begin{table}[H]
 \centering
@@ -2467,11 +2474,13 @@ adversarial condition.
 ResNet18 and \gls{clip} show a more stable profile in the present experimental
 setting. ResNet18 is most affected by \gls{fgsm}, but the drop remains much
 lower than that observed for EfficientNet-B0. \gls{clip} is even less degraded
-by the tested perturbations. However, this result must be interpreted with
-caution: the attacks were not primarily optimized against \gls{clip} as a
-white-box target, and \gls{clip} already exhibits a different criticality on
-\gls{ood} inputs. Therefore, the adversarial stability observed for \gls{clip}
-must not be generalized beyond the evaluated threat model.
+by the tested perturbations. However, this result must be interpreted with caution: the model-dependent
+attacks were generated against EfficientNet-B0 rather than against \gls{clip}.
+The observed behavior of \gls{clip} therefore represents cross-model transfer
+under the evaluated conditions, not direct source-model robustness.
+Furthermore, \gls{clip} exhibits a distinct criticality on \gls{ood} inputs.
+The observed adversarial stability must consequently not be generalized beyond
+the evaluated threat model.
 
 Selected software systems show a different pattern. \gls{magnetai} does not
 reproduce the catastrophic degradation observed for EfficientNet-B0 under
@@ -2786,11 +2795,10 @@ out-of-distribution cases with respect to the main task.
 The \gls{ig} visualization makes it possible to inspect whether the decision is
 associated with localized regions that the model interprets as compatible with
 features of the \texttt{weapon} class, or whether it emerges from more diffuse
-and less semantically stable correlations. From a methodological perspective,
-this case supports the choice to treat \texttt{ood} as an autonomous category in
-dataset construction and in the evaluation of operational robustness, rather
-than mapping all inputs not belonging to the \texttt{weapon} class to the
-\texttt{non\_weapon} class alone.
+and less semantically stable correlations. From a methodological perspective, this case supports the choice to preserve
+\texttt{ood} as a separate dataset and evaluation branch, rather than treating
+it as a third supervised class or merging all inputs outside the
+\texttt{weapon} class into the \texttt{non\_weapon} class.
 
 \XAIcaseFigureMaskGrid
 {fig:xai-case4-antiforensic-failure}
@@ -2810,10 +2818,10 @@ The fourth case, reported in
 Figure~\ref{fig:xai-case4-antiforensic-failure}, concerns an anti-forensic
 transformation based on \gls{histogrammodification}. The manual label remains
 \texttt{weapon}, but the model predicts \texttt{non\_weapon} with high
-confidence. The case is relevant because the transformation does not represent
-only an abstract adversarial perturbation optimized against a differentiable
-model, but a low-level visual manipulation that may affect tonal distribution,
-contrast, and the local perception of image structures.
+confidence. The case is relevant because the transformation is not an adversarial
+perturbation optimized against a differentiable model. It is instead a
+low-level visual manipulation that affects tonal distribution, contrast, and
+the local representation of image structures.
 
 The \gls{ig} map makes it possible to observe whether the histogram modification
 alters the regions that contribute to the model decision, reducing the weight
@@ -2956,16 +2964,16 @@ Several limitations define the scope of the findings.
 
     \item The embedded-metadata audit identified a small residual information
     channel in the blind bundle. The leave-out analysis indicates negligible
-    quantitative influence on the reported aggregate metrics, but future
-    evaluations should include metadata-neutralized and metadata-preserving
-    bundle variants as an explicit sensitivity control.
+    quantitative influence on the reported aggregate metrics. However, the frozen
+    protocol did not include a separate metadata-neutralized comparison bundle, and
+    the corresponding analysis therefore remains limited to the
+    metadata-preserving bundle used in the experiment.
 \end{itemize}
 
 These limitations do not invalidate the experimental findings; they delimit the
 conditions under which the conclusions are supported. The chapter therefore
-provides a protocol-specific assessment of operational robustness rather than a
-product certification, universal robustness ranking, or evidentiary validation
-of automated outputs.
+provides a protocol-specific assessment of operational robustness rather than a software-system certification, universal robustness ranking, or
+evidentiary validation of automated outputs.
 
 The practical implication is that automated image-analysis systems should be
 used as traceable triage support within a \textit{human-in-the-loop} workflow.
