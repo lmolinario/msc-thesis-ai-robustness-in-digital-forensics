@@ -49,7 +49,7 @@ and derived perturbed artifacts:
 \begin{aligned}
     N_{\mathrm{bundle}}
     &= 1\,000\ \text{clean binary inputs}
-    + 500\ \text{OOD inputs} \\
+    + 500\ \text{\glsentryshort{ood} inputs} \\
     &\quad + 5\,000\ \text{adversarial artifacts}
     + 5\,000\ \text{anti-forensic artifacts} \\
     &= 11\,500.
@@ -207,8 +207,7 @@ EfficientNet-B0 achieves the highest nominal performance, with an accuracy of
 0.978, a macro-F1 of 0.978, and a mean confidence of 0.979. ResNet18 shows
 slightly lower but still high performance, with an accuracy of 0.964, a
 macro-F1 of 0.964, and a mean confidence of 0.974. \gls{clip} achieves an accuracy of 0.927 and a macro-F1 of 0.927, but
-exhibits a different operational profile from the two fully fine-tuned CNN
-proxies. Recall on the \texttt{weapon} class is very high, at 0.988, whereas
+exhibits a different operational profile from the two fully fine-tuned \glspl{cnn}\nproxies. Recall on the \texttt{weapon} class is very high, at 0.988, whereas
 the \gls{fpr} is substantially higher, at 0.134. Its mean confidence is
 0.559. Because confidence scores are not calibrated across architectures,
 this value is interpreted only within the \gls{clip}-based proxy and not as
@@ -230,8 +229,8 @@ coincide with scores near the maximum value.
 
 Table~\ref{tab:results-clean-confusion-matrices} reports the aggregate
 confusion matrices for each model, using the layout
-\(\left[\left[\mathrm{TN},\mathrm{FP}\right],
-\left[\mathrm{FN},\mathrm{TP}\right]\right]\).
+\(\left[\left[\glsentryshort{tn},\glsentryshort{fp}\right],
+\left[\glsentryshort{fn},\glsentryshort{tp}\right]\right]\).
 
 \begin{table}[H]
 \centering
@@ -308,12 +307,12 @@ incorrect flagging of \texttt{non\_weapon} content, or high-score predictions
 on cases that still require human verification.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Out-of-Distribution Behavior}
+\section{\texorpdfstring{\gls{ood}}{Out-of-Distribution} Behavior}
 \label{sec:results-ood}
 % ─────────────────────────────────────────────────────────────────────────────
 
 The \gls{ood} evaluation examines how the three proxy architectures behave on
-the separate 500-image out-of-distribution branch. As established in
+the separate 500-image \gls{ood} branch. As established in
 Chapter~\ref{chap:methodology}, these images are not treated as a third
 supervised class and do not contribute to binary accuracy or confusion-matrix
 counts. The analysis instead measures the extent to which distributionally
@@ -790,13 +789,13 @@ false positive workload.
 \toprule
 \textbf{System} &
 \textbf{Matched} &
-\textbf{Clean FNR} &
+\textbf{Clean \acrshort{fnr}} &
 \textbf{Bundle Acc.} &
 \textbf{Bundle Bal.} &
 \textbf{Bundle R\textsubscript{w}} &
 \textbf{Bundle \acrshort{fnr}} &
 \textbf{Bundle \acrshort{fpr}} &
-\textbf{OOD W-rate} \\
+\textbf{\acrshort{ood} W-rate} \\
 \midrule
 \gls{magnetaxiomtool}/\gls{magnetai}
 & 11\,500 & 0.070 & 0.933 & 0.933 & 0.901 & 0.099 & 0.035 & 0.360 \\
@@ -823,14 +822,14 @@ false positive workload.
 \vspace{0.4em}
 \footnotesize
 \textit{Note.} \textit{Matched} indicates the number of files in the forensic
-evaluation bundle mapped to a normalized output. \textit{Clean FNR} indicates
+evaluation bundle mapped to a normalized output. \textit{Clean \acrshort{fnr}} indicates
 the false negative rate observed on the unperturbed baseline. \textit{Bundle
 Acc.} and \textit{Bundle Bal.} indicate accuracy and balanced accuracy on the
 complete 11\,000-item binary bundle; \textit{Bundle} \(R_w\) indicates recall
 for the \texttt{weapon} class. Bundle \gls{fnr} and bundle \gls{fpr} indicate
 the false negative rate and false positive rate computed on the interpretable
 binary bundle, including clean, adversarial, and anti-forensic samples and
-excluding \gls{ood} samples. \textit{OOD W-rate} indicates the proportion of
+excluding \gls{ood} samples. \textit{\acrshort{ood} W-rate} indicates the proportion of
 \gls{ood} samples operationally mapped to the \texttt{weapon} class. The values
 are bundle-weighted and reflect the experimental composition of the bundle,
 not a general validation of the selected software systems.
@@ -869,7 +868,7 @@ operational \texttt{weapon} class. These outputs are not binary errors, but they
 may increase human-review workload or affect prioritization of content outside
 the nominal binary task.
 
-\subsection{Magnet AXIOM and Magnet.AI Results}
+\subsection{\texorpdfstring{\gls{magnetaxiomtool}/\gls{magnetai}}{Magnet AXIOM/Magnet.AI} Results}
 \label{subsec:results-magnet}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -996,7 +995,7 @@ produce a more substantial increase in false negatives than plausible image
 degradation or manipulation transformations.
 
 The behavior on \gls{ood} images is relevant for the triage workflow.
-Out-of-distribution images do not belong to the binary
+\gls{ood} images do not belong to the binary
 \texttt{weapon}/\texttt{non\_weapon} task and therefore should not be
 interpreted as standard classification errors. The fact that 180 \gls{ood} images out of 500 received the
 \texttt{Possible weapons} tag describes the observable rate at which
@@ -1035,8 +1034,8 @@ anti-forensic transformations, \gls{gaussianblur} produces the highest
 \textbf{Recall} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{FN} &
-\textbf{FP} \\
+\textbf{\acrshort{fn}} &
+\textbf{\acrshort{fp}} \\
 \midrule
 
 Adversarial &
@@ -1154,7 +1153,7 @@ and flags a non-negligible proportion of \gls{ood} images as
 support rather than as a self-sufficient decision.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\subsection{Magnet Griffeye and T3K CORE Results}
+\subsection{\texorpdfstring{\gls{griffeye}/\gls{t3kcore}}{Magnet Griffeye/T3K CORE} Results}
 \label{subsec:results-griffeye}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1270,7 +1269,7 @@ not applicable. \\
 \end{table}
 
 The behavior on \gls{ood} samples is relevant because it highlights the tendency
-of the system to map out-of-distribution or semantically weapon-adjacent content
+of the system to map \gls{ood} or semantically weapon-adjacent content
 to the operational \texttt{weapon} class. In the case of
 \gls{griffeye}/\gls{t3kcore}, 130 \gls{ood} images out of 500 were flagged as
 \texttt{weapon}, with a weapon flag rate of 0.260. This value does not
@@ -1309,8 +1308,8 @@ whereas \gls{contraststretching} produces the highest \gls{fpr}, equal to
 \textbf{Recall} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{FN} &
-\textbf{FP} \\
+\textbf{\acrshort{fn}} &
+\textbf{\acrshort{fp}} \\
 \midrule
 
 Adversarial &
@@ -1385,11 +1384,11 @@ the observed profile depends on the internal architecture of the module,
 preprocessing, proprietary thresholds, bookmark generation criteria, or the
 specific characteristics of the evaluated export. Automatic outputs must
 therefore be treated as support for triage and not as a conclusive decision,
-especially in the presence of perturbed, out-of-distribution, or semantically
+especially in the presence of perturbed, \gls{ood}, or semantically
 ambiguous inputs.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\subsection{Excire Foto 2025 Results and Sensitivity Analysis}
+\subsection{\texorpdfstring{\gls{excirefoto2025}}{Excire Foto 2025} Results and Sensitivity Analysis}
 \label{subsec:results-excire}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1422,7 +1421,7 @@ cost of a substantial increase in false positives and in the weapon flag rate on
 \textbf{Clean R\textsubscript{w}} &
 \textbf{Clean \gls{fnr}} &
 \textbf{Clean \gls{fpr}} &
-\textbf{OOD W-rate} &
+\textbf{\acrshort{ood} W-rate} &
 \textbf{Operational profile} \\
 \midrule
 
@@ -1530,8 +1529,8 @@ configuration between the restrictive and permissive profiles.
 \textbf{Recall} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{FN} &
-\textbf{FP} \\
+\textbf{\acrshort{fn}} &
+\textbf{\acrshort{fp}} \\
 \midrule
 
 Adversarial &
@@ -1650,8 +1649,8 @@ behavior. Under these conditions, the system continues to retrieve many
 \textbf{Recall} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{FN} &
-\textbf{FP} \\
+\textbf{\acrshort{fn}} &
+\textbf{\acrshort{fp}} \\
 \midrule
 
 \texttt{D20} & 0.815 & 0.820 & 0.180 & 0.190 & 90 & 95 \\
@@ -1682,7 +1681,7 @@ the main reference, whereas \texttt{D20} and \texttt{D80} are interpreted as
 operational extremes of the sensitivity analysis.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\subsection{Cellebrite Inseyets Results}
+\subsection{\texorpdfstring{\gls{cellebriteinseyets}}{Cellebrite Inseyets} Results}
 \label{subsec:results-cellebrite}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1803,7 +1802,7 @@ not applicable. \\
 \end{table}
 
 The behavior on \gls{ood} samples is relevant because it highlights the
-tendency of the system to map out-of-distribution or semantically
+tendency of the system to map \gls{ood} or semantically
 weapon-adjacent content to the operational \texttt{weapon} class. In the case
 of \gls{cellebriteinseyets}, 146 \gls{ood} images out of 500 were flagged as
 \texttt{weapon}, with a weapon flag rate of 0.292. This value does not
@@ -1836,8 +1835,8 @@ whereas \gls{gaussianblur} produces the highest \gls{fpr}, equal to 0.056.
 \textbf{Recall} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{FN} &
-\textbf{FP} \\
+\textbf{\acrshort{fn}} &
+\textbf{\acrshort{fp}} \\
 \midrule
 
 Adversarial &
@@ -1962,7 +1961,7 @@ generally superior system.
 
 In this case as well, the automatic output must be treated as support for
 triage and not as a conclusive decision, especially in the presence of
-perturbed, out-of-distribution, or semantically ambiguous inputs.
+perturbed, \gls{ood}, or semantically ambiguous inputs.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Embedded Metadata Sensitivity Check}
@@ -2045,7 +2044,7 @@ Anti-forensic robustness &
 0.000\% &
 No case with sensitive hits belongs to the anti-forensic artifacts. \\
 
-OOD weapon flag rate &
+\gls{ood} weapon flag rate &
 4 &
 500 &
 0.800\% &
@@ -2098,11 +2097,11 @@ are computed over one normalized decision for each of the 500 images.
 Consequently, the proportions describe comparable operational tendencies but
 are not based on identical numbers of prediction events.
 
-\paragraph{Clean performance and out-of-distribution behavior.}
+\paragraph{Clean performance and \gls{ood} behavior.}
 
 Table~\ref{tab:results-comparative-clean-ood} summarizes clean performance and
 behavior on \gls{ood} inputs. Clean accuracy measures nominal performance on
-the binary task, whereas the OOD weapon rate measures how frequently images
+the binary task, whereas the \gls{ood} weapon rate measures how frequently images
 outside the expected distribution are nevertheless mapped to the operational
 \texttt{weapon} class. In a forensic workflow, these two dimensions must be
 read jointly: a system may achieve good accuracy on clean data while still mapping a substantial
@@ -2112,7 +2111,7 @@ state.
 
 \begin{table}[!htbp]
 \centering
-\caption{Clean performance and OOD behavior of proxy models and selected
+\caption{Clean performance and \gls{ood} behavior of proxy models and selected
 black-box software configurations}
 \label{tab:results-comparative-clean-ood}
 
@@ -2130,8 +2129,8 @@ c c c
 \textbf{System} &
 \textbf{Type} &
 \textbf{Clean acc.} &
-\textbf{Clean FNR} &
-\textbf{OOD W-rate} &
+\textbf{Clean \acrshort{fnr}} &
+\textbf{\acrshort{ood} W-rate} &
 \textbf{Operational interpretation} \\
 \midrule
 
@@ -2141,7 +2140,7 @@ Proxy &
 0.016 &
 0.370 &
 Highest clean accuracy among the proxy models, with a low false negative rate
-on the \texttt{weapon} class; however, a non-negligible proportion of OOD
+on the \texttt{weapon} class; however, a non-negligible proportion of \gls{ood}
 inputs is mapped to the \texttt{weapon} class. \\
 
 ResNet18 &
@@ -2149,8 +2148,8 @@ Proxy &
 0.964 &
 0.030 &
 0.438 &
-Solid clean baseline, but with a higher FNR than EfficientNet-B0 and a
-higher OOD weapon assignment rate. The model-specific score distribution
+Solid clean baseline, but with a higher \acrshort{fnr} than EfficientNet-B0 and a
+higher \gls{ood} weapon assignment rate. The model-specific score distribution
 provides additional diagnostic context for this behavior. \\
 
 \gls{clip} &
@@ -2158,41 +2157,41 @@ Proxy &
 0.927 &
 0.012 &
 0.836 &
-Lower clean accuracy than the two fully fine-tuned CNN proxies, but a very
-limited FNR; the main distinguishing behavior is the high OOD weapon assignment
+Lower clean accuracy than the two fully fine-tuned \glspl{cnn} proxies, but a very
+limited \acrshort{fnr}; the main distinguishing behavior is the high \gls{ood} weapon assignment
 rate. \\
 
-Magnet AXIOM and Magnet.AI &
+\gls{magnetaxiomtool}/\gls{magnetai} &
 Black-box software &
 0.950 &
 0.070 &
 0.360 &
 High clean accuracy under the adopted mapping, with a clean false negative rate
-of 0.070 and an OOD weapon assignment rate of 0.360. \\
+of 0.070 and an \gls{ood} weapon assignment rate of 0.360. \\
 
-Magnet Griffeye and T3K CORE &
+\gls{griffeye}/\gls{t3kcore} &
 Black-box software &
 0.978 &
 0.036 &
 0.260 &
-Highest clean accuracy and lowest OOD weapon assignment rate among the selected
+Highest clean accuracy and lowest \gls{ood} weapon assignment rate among the selected
 reference configurations, under the conservative firearm-bookmark mapping. \\
 
-Excire Foto 2025 D50 &
+\gls{excirefoto2025} \texttt{D50} &
 Black-box software &
 0.944 &
 0.042 &
 0.340 &
 Intermediate semantic-retrieval configuration, positioned between
 \texttt{D20} and \texttt{D80} with respect to recall, false-positive workload,
-and the OOD weapon assignment rate. \\
+and the \gls{ood} weapon assignment rate. \\
 
-Cellebrite Inseyets &
+\gls{cellebriteinseyets} &
 Black-box software &
 0.964 &
 0.032 &
 0.292 &
-High clean recall on the \texttt{weapon} class and an OOD weapon assignment
+High clean recall on the \texttt{weapon} class and an \gls{ood} weapon assignment
 rate lower than those of \gls{magnetai} and \gls{excirefoto2025} under
 \texttt{D50}. \\
 
@@ -2212,26 +2211,26 @@ Behavior on \gls{ood} inputs highlights an additional evaluation dimension:
 even selected software systems with good clean accuracy exhibit non-zero weapon flag
 rates on content outside the task.
 
-EfficientNet-B0 and ResNet18 show OOD weapon rates of 0.370 and 0.438,
+EfficientNet-B0 and ResNet18 show \gls{ood} weapon rates of 0.370 and 0.438,
 respectively. However, their higher mean confidence on \gls{ood} inputs may make these
 assignments more consequential when confidence is used as a criterion for
 automatic prioritization.
 The four black-box reference configurations included in
 Table~\ref{tab:results-comparative-clean-ood} present lower values:
-\gls{magnetai} reaches an OOD weapon flag rate of 0.360,
+\gls{magnetai} reaches an \gls{ood} weapon flag rate of 0.360,
 \gls{excirefoto2025} under the \texttt{D50} configuration reaches 0.340,
 \gls{cellebriteinseyets} reaches 0.292, and
 \gls{griffeye}/\gls{t3kcore} reaches 0.260. These values indicate a lower
 operational tendency, for the specific reference configurations used in the
-cross-system comparison, to map out-of-distribution samples to the
+cross-system comparison, to map \gls{ood} samples to the
 \texttt{weapon} class.
 
 This finding is configuration-dependent and must not be generalized to every
 evaluated black-box configuration. In particular, the sensitivity analysis
-shows that \gls{excirefoto2025} under the \texttt{D80} setting reaches an OOD
+shows that \gls{excirefoto2025} under the \texttt{D80} setting reaches an \gls{ood}
 weapon flag rate of 0.522. Moreover, since the internal mechanisms, thresholds,
 and calibration of the selected software systems are not accessible, the
-reported values must not be interpreted as evidence of actual OOD recognition
+reported values must not be interpreted as evidence of actual \gls{ood} recognition
 capability. They describe only the observable behavior obtained after
 black-box normalization and under the adopted mapping rules.
 
@@ -2279,35 +2278,35 @@ in both operational directions. \\
 0.928 / -0.001 &
 \gls{histogrammodification}; 13 induced errors &
 Limited number of induced errors &
-Limited degradation under the considered transformations; the distinct OOD
+Limited degradation under the considered transformations; the distinct \gls{ood}
 assignment behavior remains relevant to interpretation. \\
 
-Magnet AXIOM and Magnet.AI &
+\gls{magnetaxiomtool}/\gls{magnetai} &
 0.940 / 0.010 &
-\gls{gaussianblur}; FNR 0.120 &
-60 FN &
+\gls{gaussianblur}; \acrshort{fnr} 0.120 &
+60 \acrshort{fn} &
 Limited aggregate degradation, although some transformations increase false
 negatives on \texttt{weapon}, with potential consequences for triage. \\
 
-Magnet Griffeye and T3K CORE &
+\gls{griffeye}/\gls{t3kcore} &
 0.974 / 0.004 &
-\gls{histogrammodification}; acc. 0.963; FNR 0.068 &
-34 FN &
+\gls{histogrammodification}; acc. 0.963; \acrshort{fnr} 0.068 &
+34 \acrshort{fn} &
 Most selective normalized profile under the evaluated anti-forensic
 transformations, with a very limited \gls{fpr} but residual false negatives
 under tonal modifications. \\
 
-Excire Foto 2025 D50 &
+\gls{excirefoto2025} \texttt{D50} &
 0.941 / 0.003 &
-\gls{histogrammodification}; acc. 0.932; FPR 0.088 &
+\gls{histogrammodification}; acc. 0.932; \acrshort{fpr} 0.088 &
 Increase in false positives &
 Limited aggregate degradation under \texttt{D50}, with the principal change
 attributable to false-positive workload rather than missed detection of
 \texttt{weapon}. \\
 
-Cellebrite Inseyets &
+\gls{cellebriteinseyets} &
 0.960 / 0.004 &
-\gls{histogrammodification}; acc. 0.949; FNR 0.060 &
+\gls{histogrammodification}; acc. 0.949; \acrshort{fnr} 0.060 &
 Residual false negatives on \texttt{weapon} images &
 Limited aggregate degradation under the evaluated anti-forensic
 transformations, with residual errors under tonal modifications. \\
@@ -2321,8 +2320,8 @@ transformations, with residual errors under tonal modifications. \\
 five anti-forensic transformations considered. For selected software systems,
 values derive from the normalized outputs on the forensic evaluation bundle.
 The drop is defined in Section~\ref{sec:results-scope}. W$\rightarrow$NW
-indicates transitions from \texttt{weapon} to \texttt{non\_weapon}; FN
-indicates false negatives; FNR indicates false negative rate; FPR indicates
+indicates transitions from \texttt{weapon} to \texttt{non\_weapon}; \acrshort{fn}
+indicates false negatives; \acrshort{fnr} indicates false negative rate; \acrshort{fpr} indicates
 false positive rate.
 \end{table}
 
@@ -2421,36 +2420,36 @@ represent a direct white-box assessment of ResNet18. \\
 \gls{fgsm}; acc. 0.914; drop 0.013 &
 23 induced errors; 8 W$\rightarrow$NW and 15 NW$\rightarrow$W &
 Limited aggregate degradation; the model-dependent results reflect cross-model
-transfer and do not demonstrate direct adversarial robustness. The distinct OOD
+transfer and do not demonstrate direct adversarial robustness. The distinct \gls{ood}
 assignment behavior must be considered separately. \\
 
-Magnet AXIOM and Magnet.AI &
+\gls{magnetaxiomtool}/\gls{magnetai} &
 0.923 / 0.027 &
-\gls{fgsm}; acc. 0.867; FNR 0.192 &
-96 FN &
+\gls{fgsm}; acc. 0.867; \acrshort{fnr} 0.192 &
+96 \acrshort{fn} &
 Aggregate accuracy decreases by 0.027, while \gls{fgsm} substantially increases
 false negatives on the \texttt{weapon} class. \\
 
-Magnet Griffeye and T3K CORE &
+\gls{griffeye}/\gls{t3kcore} &
 0.969 / 0.009 &
-\gls{sigmazero}; acc. 0.959; FNR 0.074 &
-37 FN &
+\gls{sigmazero}; acc. 0.959; \acrshort{fnr} 0.074 &
+37 \acrshort{fn} &
 Highest aggregate normalized accuracy among the selected black-box
 configurations under adversarial artifacts; the low \gls{fpr} also reflects the
 conservative mapping, while residual degradation remains. \\
 
-Excire Foto 2025 D50 &
+\gls{excirefoto2025} \texttt{D50} &
 0.904 / 0.040 &
-\gls{sigmazero}; acc. 0.742; FPR 0.442 &
-221 FP &
+\gls{sigmazero}; acc. 0.742; \acrshort{fpr} 0.442 &
+221 \acrshort{fp} &
 The principal effect is an increase in firearm-prompt retrievals for
 \texttt{non\_weapon} samples rather than systematic concealment of
 \texttt{weapon} images. \\
 
-Cellebrite Inseyets &
+\gls{cellebriteinseyets} &
 0.955 / 0.009 &
-\gls{fgsm}; acc. 0.918; FNR 0.106 &
-53 FN &
+\gls{fgsm}; acc. 0.918; \acrshort{fnr} 0.106 &
+53 \acrshort{fn} &
 Limited aggregate degradation under the transferred adversarial artifacts,
 with an increase in false negatives especially under \gls{fgsm}. \\
 
@@ -2463,8 +2462,8 @@ with an increase in false negatives especially under \gls{fgsm}. \\
 five adversarial perturbations considered. For selected software systems,
 values derive from the normalized outputs on the forensic evaluation bundle.
 The drop is defined in Section~\ref{sec:results-scope}. W$\rightarrow$NW
-indicates transitions from \texttt{weapon} to \texttt{non\_weapon}; FN
-indicates false negatives; FNR indicates false negative rate; FPR indicates
+indicates transitions from \texttt{weapon} to \texttt{non\_weapon}; \acrshort{fn}
+indicates false negatives; \acrshort{fnr} indicates false negative rate; \acrshort{fpr} indicates
 false positive rate.
 \end{table}
 
@@ -2552,10 +2551,10 @@ represents an intermediate profile.
 
 This threshold dependence is particularly evident under \gls{sigmazero}. Under
 the \texttt{D20} configuration, \gls{excirefoto2025} achieves an accuracy of
-0.815, an FNR of 0.180, and an FPR of 0.190. Under the \texttt{D50}
-configuration, accuracy decreases to 0.742, while FNR improves to 0.074 and
-FPR increases to 0.442. Under the \texttt{D80} configuration, recall improves
-further, but FPR rises to 0.662. The same software system can therefore support
+0.815, an \acrshort{fnr} of 0.180, and an \acrshort{fpr} of 0.190. Under the \texttt{D50}
+configuration, accuracy decreases to 0.742, while \acrshort{fnr} improves to 0.074 and
+\acrshort{fpr} increases to 0.442. Under the \texttt{D80} configuration, recall improves
+further, but \acrshort{fpr} rises to 0.662. The same software system can therefore support
 different forensic priorities depending on the selected operating point:
 \texttt{D20} prioritizes the containment of operational noise,
 \texttt{D80} prioritizes recall, and \texttt{D50} represents an intermediate
@@ -2593,11 +2592,11 @@ configurations}
 
 \begin{flushleft}
 \footnotesize
-\textit{Note.} Clean FNR is computed on the unperturbed binary subset. Bundle
-FPR is computed on the complete binary bundle, including clean,
+\textit{Note.} Clean \acrshort{fnr} is computed on the unperturbed binary subset. Bundle
+\acrshort{fpr} is computed on the complete binary bundle, including clean,
 adversarial, and anti-forensic samples and excluding \gls{ood} samples.
-Adversarial FNR and anti-forensic FNR are aggregated across the corresponding
-perturbation families. OOD W-rate reports the proportion of \gls{ood} samples
+Adversarial \acrshort{fnr} and anti-forensic \acrshort{fnr} are aggregated across the corresponding
+perturbation families. \acrshort{ood} W-rate reports the proportion of \gls{ood} samples
 mapped to the operational \texttt{weapon} class. Accuracy drops are computed
 with respect to the clean baseline; slightly negative values are interpreted as
 negligible distribution-specific oscillations.
@@ -2631,7 +2630,7 @@ automation in forensic contexts. The evaluated systems can provide useful
 support for triage, prioritization, and large-scale review of multimedia
 content. However, their outputs must not be treated as conclusive evidence or
 as substitutes for expert validation. In particular, missed detections of
-\texttt{weapon} images, high-confidence OOD assignments, and threshold-dependent
+\texttt{weapon} images, high-confidence \gls{ood} assignments, and threshold-dependent
 errors must be explicitly documented when \gls{ai}-assisted software systems
 are used in forensic workflows. The \gls{fairlab} protocol responds to this
 need by combining frozen datasets, traceable manifests, hash-based
@@ -2747,7 +2746,7 @@ the maximum predicted-class probability as a stand-alone reliability indicator. 
 \vspace{0.4em}
 \footnotesize
 \textit{Note.} For \texttt{xai\_case\_0009}, \texttt{ood} denotes the separate
-out-of-distribution evaluation branch and not a third supervised class.
+\gls{ood} evaluation branch and not a third supervised class.
 \end{table}
 
 \XAIcaseFigureMaskGrid
@@ -2809,7 +2808,7 @@ filter or rank large volumes of images in an investigative context.
 
 \XAIcaseFigureMaskGrid
 {fig:xai-case3-ood-as-weapon}
-{\gls{ood} case \texttt{xai\_case\_0009}. An out-of-distribution input is
+{\gls{ood} case \texttt{xai\_case\_0009}. An \gls{ood} input is
 assigned to \texttt{weapon} with a high maximum predicted-class probability}
 {images/fig_xai_case3_ood_as_weapon_input.png}
 {images/fig_xai_case3_ood_as_weapon_heatmap.png}
@@ -2960,7 +2959,7 @@ Several limitations define the scope of the findings.
 \begin{itemize}
     \item The frozen dataset contains 1\,500 manually selected images and does
     not represent the full diversity of firearm-related, non-firearm, and
-    out-of-distribution imagery encountered in operational investigations.
+    \gls{ood} imagery encountered in operational investigations.
     Selection was performed by a single reviewer; no inter-rater agreement was
     measured.
 
