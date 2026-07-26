@@ -1,0 +1,125 @@
+name: One-time repository header update
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  apply-header:
+    if: github.event.issue.title == '[automation] Apply repository header'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install image dependencies
+        run: python -m pip install --quiet pillow requests
+
+      - name: Download the approved shared image
+        shell: python
+        run: |
+          import html
+          import json
+          import re
+          import sys
+          from io import BytesIO
+          from pathlib import Path
+          from urllib.parse import urljoin
+
+          import requests
+          from PIL import Image
+
+          share_url = "https://chatgpt.com/s/m_6a6631d3a7e481918cb62dc5074824d9"
+          headers = {
+              "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131 Safari/537.36",
+              "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+          }
+
+          response = requests.get(share_url, headers=headers, timeout=60)
+          response.raise_for_status()
+          page = response.text
+          decoded = html.unescape(page).replace("\\u0026", "&").replace("\\/", "/")
+
+          candidates = []
+          for pattern in (
+              r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)',
+              r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']',
+              r'<meta[^>]+name=["\']twitter:image["\'][^>]+content=["\']([^"\']+)',
+              r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+name=["\']twitter:image["\']',
+          ):
+              candidates.extend(re.findall(pattern, decoded, flags=re.I))
+
+          candidates.extend(re.findall(r'https://[^"\'<>\\\s]+', decoded))
+          try:
+              candidates.extend(re.findall(r'https://[^"\'<>\\\s]+', json.dumps(response.json())))
+          except Exception:
+              pass
+
+          preferred_tokens = (
+              "oaidalleapiprodscus",
+              "oaiusercontent",
+              "backend-api/files",
+              "blob.core.windows.net",
+              ".png",
+              ".webp",
+              ".jpg",
+              ".jpeg",
+          )
+
+          normalized = []
+          seen = set()
+          for value in candidates:
+              value = html.unescape(value).rstrip('\\,]}')
+              if value.startswith('/'):
+                  value = urljoin(share_url, value)
+              if value not in seen:
+                  seen.add(value)
+                  normalized.append(value)
+
+          normalized.sort(key=lambda value: not any(token in value.lower() for token in preferred_tokens))
+
+          destination = Path("docs/assets/repository_header.png")
+          destination.parent.mkdir(parents=True, exist_ok=True)
+
+          errors = []
+          for candidate in normalized:
+              try:
+                  image_response = requests.get(candidate, headers=headers, timeout=60)
+                  if image_response.status_code != 200:
+                      continue
+                  content_type = image_response.headers.get("content-type", "").lower()
+                  if "image/" not in content_type and not image_response.content.startswith(b"\\x89PNG\\r\\n\\x1a\\n"):
+                      continue
+                  image = Image.open(BytesIO(image_response.content)).convert("RGB")
+                  width, height = image.size
+                  if width < 1000 or height < 500:
+                      continue
+                  image.save(destination, format="PNG", optimize=True)
+                  print(f"Downloaded {width}x{height} image from {candidate}")
+                  break
+              except Exception as exc:
+                  errors.append(f"{candidate}: {exc}")
+          else:
+              print("Could not locate the generated image in the shared page.", file=sys.stderr)
+              print("\n".join(errors[-10:]), file=sys.stderr)
+              raise SystemExit(1)
+
+      - name: Commit the replacement and remove this one-time workflow
+        run: |
+          rm -f .github/workflows/one-time-apply-repository-header.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/assets/repository_header.png .github/workflows/one-time-apply-repository-header.yml
+          git commit -m "docs: replace repository header"
+          git push origin main
+
+      - name: Close trigger issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue close "${{ github.event.issue.number }}" --comment "Repository header replaced successfully."
