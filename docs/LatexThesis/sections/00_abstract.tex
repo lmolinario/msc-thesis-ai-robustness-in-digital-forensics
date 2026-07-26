@@ -2,78 +2,75 @@
 \label{chap:abstract}
 \thispagestyle{empty}
 
-The use of \gls{ai} systems in \gls{df} is significantly reshaping how digital
-data are analyzed, especially in contexts in which large volumes of images must
-be selected, classified, and brought to the attention of the forensic analyst.
-\gls{ai}-based tools can reduce the investigator's operational workload and
-accelerate the identification of potentially relevant content. However, their
-use in investigative scenarios raises critical issues of reliability,
-verifiability, and robustness, particularly when the analyzed inputs may be
-intentionally manipulated for adversarial or anti-forensic purposes.
+The increasing use of \gls{ai}-based systems in \gls{df} is changing how large
+collections of digital images are filtered, classified, and prioritized for
+human examination. These systems may reduce analyst workload and accelerate the
+identification of potentially relevant content. Their use in investigative
+workflows, however, requires evidence that their behavior remains sufficiently
+reliable when inputs are degraded, distributionally different, or deliberately
+manipulated.
 
 This thesis evaluates the operational robustness of \gls{ai}-based tools and
-models for the automated classification of images in forensic contexts. Rather
-than proposing a new classifier, it examines whether, and to what extent,
-systems based on \gls{ml} and \gls{dl} maintain reliable behavior when exposed
-to realistic, heterogeneous, and manipulated data. The study adopts a
-\gls{df} perspective, in which system error is not viewed merely as a decrease
-in performance, but as a potential operational risk affecting the
-identification, selection, and interpretation of relevant digital material.
+models for automated image classification and semantic retrieval in forensic
+contexts. Rather than proposing a new classifier, the study examines how
+transparent proxy models and selected black-box software systems behave under
+clean, \gls{ood}, adversarial, and anti-forensic conditions. The evaluation
+adopts a forensic perspective in which errors are interpreted not only as
+changes in aggregate performance, but also in terms of missed detections,
+additional review workload, configuration sensitivity, and the traceability of
+automated outputs.
 
-To this end, a reproducible experimental protocol, named \gls{fairlab}, was
-designed on the basis of a final frozen dataset composed of 1\,500 images,
-balanced across weapon, non-weapon, and \gls{ood} images. From
-this dataset, a binary subset of 1\,000 images was derived and used for the
-controlled generation of adversarial perturbations and anti-forensic transformations.
-The manipulations considered include adversarial attacks such as \gls{fgsm},
-\gls{sigmazero}, \gls{superdeepfool}, \gls{onepixel}, and \gls{colorshift}, as
-well as anti-forensic transformations such as \gls{jpegrecompression},
-\gls{resampleresize}, \gls{gaussianblur}, \gls{histogrammodification}, and
-\gls{contraststretching}. The resulting images were organized into a forensic
-evaluation bundle composed of 11\,500 files, enabling the assessment of both
-proxy models and the observable outputs of commercial black-box tools and \gls{ai}-based software systems.
+The evaluation is organized through \gls{fairlab}, a task-specific protocol
+designed to support procedural reproducibility and artifact-level auditability.
+The frozen dataset contains 1\,500 source images: 500 \texttt{weapon} images,
+500 \texttt{non\_weapon} images, and a separate 500-image \gls{ood} branch. The
+1\,000-image binary subset provides the common basis for generating 5\,000
+adversarial artifacts and 5\,000 anti-forensic artifacts. Together with the
+1\,000 clean binary inputs and 500 clean \gls{ood} inputs, these derived
+artifacts form an 11\,500-item forensic evaluation bundle.
 
-The experimental evaluation includes proxy models based on EfficientNet-B0,
-ResNet18, and \gls{clip}, together with the operational assessment of the tools
-actually integrated into the experimental protocol: Magnet AXIOM/Magnet.AI, Excire Foto
-2025, Cellebrite Inseyets/Physical Analyzer, and Magnet Griffeye/T3K CORE.
-Performance is analyzed by comparing behavior on \texttt{clean} data,
-\gls{ood} images, anti-forensically transformed images, and adversarial examples.
+The transparent evaluation level comprises EfficientNet-B0, ResNet18, and a
+\gls{clip}-based proxy with a supervised binary head. The operational level
+comprises \gls{magnetaxiomtool}/\gls{magnetai},
+\gls{griffeye}/\gls{t3kcore}, \gls{excirefoto2025}, and
+\gls{cellebriteinseyets}, evaluated through observable outputs and documented
+normalization rules. The perturbation suite includes the model-dependent
+\gls{fgsm}, \gls{onepixel}, \gls{sigmazero}, and \gls{superdeepfool} attacks,
+the model-agnostic adversarial-style \gls{colorshift} condition, and five
+anti-forensic transformations: \gls{jpegrecompression}, \gls{resampleresize},
+\gls{gaussianblur}, \gls{histogrammodification}, and
+\gls{contraststretching}.
 
-The analysis relies on operational metrics such as accuracy, \gls{fpr},
-\gls{fnr}, recall for the \texttt{weapon} class, and the distribution of
-confidence scores, with particular attention to cases in which relevant content
-is omitted, misclassified, or associated with non-negligible confidence levels.
-To support the qualitative interpretation of the results, the thesis also
-incorporates an \gls{xai} analysis based on \gls{ig}, aimed at identifying the
-image regions that contribute most to model decisions.
+The analysis considers accuracy, recall for the \texttt{weapon} class,
+\gls{fpr}, \gls{fnr}, directional error transitions, and robustness-related
+comparisons. Confidence-related indicators are used only for the transparent
+proxy models and are interpreted as intra-model diagnostics rather than as
+calibrated probabilities comparable across architectures. A qualitative
+\gls{xai} analysis based on \gls{ig} is limited to five representative
+EfficientNet-B0 cases and is used as supplementary diagnostic evidence.
 
-The results show that the attacks and transformations considered produce
-differential effects across the analyzed systems. Anti-forensic transformations lead to
-generally more limited, yet still operationally relevant, degradations,
-whereas some adversarial attacks produce more substantial performance
-reductions, especially in models that depend more heavily on the learned visual
-distribution. The analysis of \gls{ood} images highlights an additional
-forensic risk: systems that appear accurate on \texttt{clean} data may still
-produce incorrect classifications, or classifications associated with high
-confidence levels, when applied to ambiguous, synthetic, degraded, or
-semantically out-of-distribution content. These findings confirm that accuracy
-on controlled datasets alone is not sufficient to establish the operational
-reliability of an \gls{ai}-based system within an investigative workflow.
-More specifically, the results show that robustness varies significantly across
-architectures, attack and transformation families, and black-box tools, making a
-bundle-weighted and operational interpretation of commercial outputs necessary.
+The results show that high clean accuracy does not imply stable behavior under
+all evaluated conditions. The anti-forensic transformations generally produce
+limited aggregate degradation, although individual conditions introduce
+operationally relevant error transitions. Direct model-dependent attacks can
+produce substantially greater source-model degradation, while transfer to other
+proxy architectures and selected black-box systems remains heterogeneous.
+The separate \gls{ood} branch further shows that inputs outside the binary task
+may still be assigned to one of the two closed-set operational classes; these
+assignments describe observable behavior rather than supervised correctness.
+The black-box results also demonstrate that output semantics, normalization
+rules, and configuration choices materially affect the observed operational
+profile.
 
-The thesis concludes that \gls{ai}-based tools for the automated classification
-of images can provide useful support to \gls{df}, but should not be treated as
-autonomous sources of evidentiary assessment. Their use requires specific
-validation procedures, reproducible forensic benchmarks, documentation of error
-conditions, robustness analysis with respect to realistic manipulations, and
-the maintenance of a \textit{human-in-the-loop} model. The main contribution of this
-work lies in the definition and application of an experimental methodology
-oriented toward operational robustness, providing a transparent basis for
-evaluating the limitations, risks, and conditions of use of
-\gls{ai}-enhanced systems in \gls{df} scenarios.
+The thesis concludes that \gls{ai}-based image-analysis tools can support
+forensic triage but should not be treated as autonomous sources of evidentiary
+assessment. Their responsible use requires task-specific validation, documented
+software versions and configurations, explicit treatment of \gls{ood} inputs,
+traceable processing and mapping rules, robustness evaluation under relevant
+conditions, and continued expert review. The main contribution of the work is
+the definition and application of a unified operational-robustness protocol
+that connects transparent proxy-model analysis with the structured evaluation
+of selected black-box software systems on the same frozen experimental corpus.
 
 \vfill
 
