@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Validate the minimized Chapter 5 XAI public artifact."""
+"""Validate the minimized XAI public artifact used in the results chapter."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +11,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SELECTION = REPO_ROOT / "explainability/manifests/chapter5/thesis_selection.csv"
-THESIS_FILE = REPO_ROOT / "docs/LatexThesis/sections/05_experiments.tex"
+THESIS_FILE = REPO_ROOT / "docs/LatexThesis/sections/06_results.tex"
 EXPECTED_CASES = {
     "xai_case_0001": ("clean_correct_weapon", 1.0, "fig:xai-case1-clean-correct"),
     "xai_case_0006": ("clean_false_negative_weapon", 0.6920745372772217, "fig:xai-case2-clean-false-negative"),
@@ -104,7 +104,7 @@ def main() -> None:
             if not row.get("checkpoint_sha256") or not row.get("input_sha256"):
                 fail(f"Missing integrity hashes for {case_id}")
 
-    print("Chapter 5 XAI public-artifact validation passed.")
+    print("Results-chapter XAI public-artifact validation passed.")
     print(" - thesis cases: 5")
     print(" - thesis assets: 20")
     print(" - local path leakage: none")
