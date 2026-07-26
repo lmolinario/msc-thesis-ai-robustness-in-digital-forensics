@@ -1787,7 +1787,37 @@ The One Pixel implementation uses Differential Evolution to optimize the
 location and RGB value of a single modified pixel. Each optimization candidate
 contains five variables: horizontal coordinate, vertical coordinate, and the
 three color-channel values. The objective minimizes the probability assigned
-by the target proxy model to the reference operational class.
+by the target proxy model to the reference operational class. Consistent with
+the general formulation introduced in
+Section~\ref{subsec:background_attack_families}, each candidate can be
+represented by the parameter vector
+\(\boldsymbol{\theta}=(u,v,r,g,b)\), where \((u,v)\) identifies the modified
+pixel and \((r,g,b)\) specifies its replacement color. Let
+\(T(\mathbf{x};\boldsymbol{\theta})\) denote the image obtained by applying
+this modification. The implemented score-based optimization can be expressed
+as:
+
+\begin{equation}
+    \min_{\boldsymbol{\theta}}
+    p_y\!\left(T(\mathbf{x};\boldsymbol{\theta})\right)
+    \qquad
+    \text{subject to}
+    \qquad
+    \left|
+        \left\{
+            (i,j):
+            T(\mathbf{x};\boldsymbol{\theta})_{ij}
+            \neq
+            \mathbf{x}_{ij}
+        \right\}
+    \right|
+    \leq 1,
+\end{equation}
+
+where \(p_y(\cdot)\) is the probability assigned by the fold-specific target
+model to the reference operational class \(y\). The constraint is expressed
+over pixel locations rather than individual color components, since the three
+RGB values of the selected pixel may change jointly.
 
 A deterministic image-specific seed is derived from the base seed, condition
 name, and stable image identifier through \gls{sha256}. This mechanism avoids
@@ -1813,7 +1843,29 @@ model-normalized input back to pixel space and exposes a wrapper that reapplies
 the target-model normalization before forwarding the tensor to the
 fold-specific proxy model. The attack is untargeted and aims to identify a
 sparse adversarial perturbation by optimizing an approximation of the
-\(\ell_0\)-norm objective.
+\(\ell_0\)-norm objective. In implementation-oriented form, the underlying
+untargeted sparse-perturbation problem can be written as:
+
+\begin{equation}
+    \min_{\mathbf{x}_{\mathrm{adv}} \in [0,1]^d}
+    \left\|
+        \mathbf{x}_{\mathrm{adv}}-\mathbf{x}
+    \right\|_0
+    \qquad
+    \text{subject to}
+    \qquad
+    \operatorname*{arg\,max}_{k}
+    f_k(\mathbf{x}_{\mathrm{adv}})
+    \neq
+    y,
+\end{equation}
+
+where \(f_k(\cdot)\) denotes the logit associated with class \(k\), \(y\) is
+the reference operational class, and the \(\ell_0\) term counts the input
+components modified relative to the clean image. The frozen implementation
+approximates this discrete objective through the iterative optimization and
+threshold-adjustment procedure summarized in
+Table~\ref{tab:implementation-adversarial-parameters}.
 
 \paragraph{SuperDeepFool.}
 
@@ -1822,7 +1874,41 @@ SuperDeepFool was implemented internally from the published
 external repository. The implementation first performs DeepFool-style
 iterations to identify an adversarial boundary point. It subsequently applies
 a SuperDeepFool projection based on the gradient difference between the
-reference class and the boundary class.
+reference class and the boundary class. The corresponding
+untargeted minimum-perturbation objective for the frozen
+\(\mathrm{SDF}(\infty,1)\) configuration can be summarized as:
+
+\begin{equation}
+    \min_{\boldsymbol{\delta}}
+    \left\|
+        \boldsymbol{\delta}
+    \right\|_{\infty}
+    \qquad
+    \text{subject to}
+    \qquad
+    \operatorname*{arg\,max}_{k}
+    f_k(\mathbf{x}+\boldsymbol{\delta})
+    \neq
+    y,
+    \qquad
+    \mathbf{x}+\boldsymbol{\delta}
+    \in [0,1]^d.
+\end{equation}
+
+At an adversarial boundary point \(\mathbf{x}_{b}\), the projection stage uses
+the gradient difference between the boundary class \(k_b\) and the reference
+class \(y\):
+
+\begin{equation}
+    \mathbf{w}_{b}
+    =
+    \nabla_{\mathbf{x}} f_{k_b}(\mathbf{x}_{b})
+    -
+    \nabla_{\mathbf{x}} f_{y}(\mathbf{x}_{b}).
+\end{equation}
+
+This local gradient difference defines the orientation used by the projection
+step to seek a smaller \(\ell_{\infty}\)-bounded adversarial displacement.
 
 When the projection remains adversarial, the projected point is retained. When
 the projection returns to the original predicted class, the implementation
