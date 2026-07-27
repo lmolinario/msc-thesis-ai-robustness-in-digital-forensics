@@ -1,22 +1,24 @@
 name: Apply approved contextual citations
 
 on:
-  issues:
-    types: [opened]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   apply:
-    if: github.event.issue.title == 'Apply approved contextual thesis citations'
+    if: github.event.pull_request.head.ref == 'thesis/final-review-corrections'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out main
+      - name: Check out the revision branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Apply the approved contextual citations
         shell: bash
@@ -119,9 +121,8 @@ Table~\ref{tab:implementation-validation-controls}.''',
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B thesis/final-review-corrections
           git show 1e03b02ab8884e000980713052b866551558b51d:.github/workflows/repository-audit.yml > .github/workflows/repository-audit.yml
           rm -f .github/apply-approved-citations
           git add -A docs/LatexThesis .github/workflows/repository-audit.yml .github/apply-approved-citations
           git commit -m "docs(thesis): place remaining citations in context"
-          git push --force origin thesis/final-review-corrections
+          git push origin HEAD:thesis/final-review-corrections
