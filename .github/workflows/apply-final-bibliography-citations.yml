@@ -90,3 +90,5 @@ Table~\ref{tab:implementation-validation-controls}.'''
                   docs/LatexThesis/sections/05_implementation.tex
           git commit -m "docs(thesis): cite forensic standards and validation sources"
           git push origin HEAD:main
+
+# Triggered after initial workflow registration.
