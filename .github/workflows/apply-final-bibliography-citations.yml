@@ -90,4 +90,4 @@ Table~\ref{tab:implementation-validation-controls}.'''
                   docs/LatexThesis/sections/03_StateoftheArt.tex \
                   docs/LatexThesis/sections/05_implementation.tex
           git commit -m "docs(thesis): cite forensic standards and validation sources"
-          git push origin HEAD:main
+          git push --force-with-lease origin HEAD:thesis/final-review-corrections
