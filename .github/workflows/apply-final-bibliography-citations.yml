@@ -1,20 +1,20 @@
 name: Apply final bibliography citations
 
 on:
-  push:
+  pull_request:
     branches:
-      - thesis/final-review-corrections
-    paths:
-      - .github/workflows/apply-final-bibliography-citations.yml
+      - main
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   apply-citations:
+    if: github.head_ref == 'thesis/final-review-corrections'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out branch
+      - name: Check out revision branch
         uses: actions/checkout@v4
         with:
           ref: thesis/final-review-corrections
