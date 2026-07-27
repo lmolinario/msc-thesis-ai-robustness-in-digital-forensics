@@ -24,11 +24,11 @@ interpretation of automated outputs as central principles
 \section[Digitalization, Threats, and the Central Role of Digital Forensics]{Digitalization, Threats, and the Central Role of \glsentrylong{df}}
 % ─────────────────────────────────────────────────────────────────────────────
 The progressive digitalization of contemporary society has profoundly
-transformed how information is produced, stored, transmitted, and analyzed. Cloud infrastructures, distributed services, interconnected mobile
-devices, social platforms, and heterogeneous information systems now generate an
-increasing volume of digital data, which plays an increasingly significant role in
-everyday life as well as in professional, institutional, and judicial
-activities. This evolution has also significantly expanded the attack surface
+transformed how information is produced, stored, transmitted, and analyzed.
+Cloud infrastructures, distributed services, interconnected mobile devices,
+social platforms, and heterogeneous information systems now generate growing
+volumes of digital data. These data play a central role in everyday life and in
+professional, institutional, and judicial activities. This evolution has also significantly expanded the attack surface
 of information systems, increasing opportunities for exploitation by hostile
 actors and multiplying the possible points at which digital evidence may be
 compromised \cite{garfinkel2010digital,casey2011digital}.
@@ -332,11 +332,12 @@ the analyst.
 
 The third objective concerns measuring the impact of manipulations on the
 ability of systems to correctly recognize images belonging to forensic classes
-of interest. The analysis is not limited to variation in overall accuracy, but
-also considers the error patterns introduced, behavior with respect to
-out-of-distribution content, the confidence associated with erroneous
-decisions, and, from a diagnostic perspective, the qualitative interpretation
-of predictions through \gls{xai} techniques.
+of interest. The analysis is not limited to variations in overall accuracy. It
+also considers the introduced error patterns and behavior on
+out-of-distribution content. For the transparent proxy models, the analysis
+additionally examines confidence-related indicators associated with erroneous
+decisions and, from a diagnostic perspective, the qualitative interpretation
+of selected predictions through \gls{xai} techniques.
 
 The fourth objective is to relate the experimental evidence to an assessment of
 the operational reliability of automation within \gls{df} workflows. From this
@@ -360,6 +361,33 @@ evaluation protocol that makes it possible to assess the robustness of
 \gls{ai}-based systems in relation to their possible use in realistic
 investigative scenarios, while keeping human supervision central to the
 interpretation and validation of the results.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{Research Questions}
+\label{subsec:introduction-research-questions}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The experimental design addresses the following research questions:
+
+\begin{enumerate}
+    \item[\textbf{RQ1.}] To what extent do the transparent proxy models maintain
+    their clean-baseline performance under the separate \gls{ood}, adversarial,
+    and anti-forensic conditions?
+
+    \item[\textbf{RQ2.}] How do direct source-model attacks, cross-architecture
+    transfer, and the model-agnostic \gls{colorshift} condition differ in their
+    effects on the evaluated proxy models?
+
+    \item[\textbf{RQ3.}] How do the selected black-box software systems respond
+    to the same frozen experimental corpus, and how do observable output
+    semantics and configuration choices affect the resulting operational
+    profiles?
+
+    \item[\textbf{RQ4.}] Which error transitions, robustness degradations,
+    \gls{ood} assignment behaviors, and non-operational outputs are most
+    relevant to forensic triage and continued human review?
+\end{enumerate}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -513,18 +541,20 @@ controllability and the reliability of such tools in forensic contexts
 \cite{cpp1988,aiact2024,swgde_guidelines}.
 
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Structure of the Thesis}
 % ─────────────────────────────────────────────────────────────────────────────
-The thesis is organized into six chapters, following a progression that moves
-from the theoretical context and the state of the art to the experimental
-methodology, the analysis of the results, and the discussion of their
-operational implications.
+
+The thesis is organized into seven chapters, progressing from the theoretical
+and research context to the methodological protocol, its concrete
+implementation, the experimental results, and their operational interpretation.
 
 \textbf{Chapter~\ref{chap:introduction}} introduces the research problem, the
-objectives of the work, and the contribution of the thesis with respect to the
-operational robustness of proxy models and AI-based software systems employed in \gls{df} for the
-automated classification or semantic retrieval of images.
+objectives of the work, and the main contributions of the thesis concerning the
+operational robustness of transparent proxy models and selected black-box
+software systems used for automated image classification or semantic retrieval
+in \gls{df}.
 
 \textbf{Chapter~\ref{chap:background}} presents the theoretical foundations
 related to digital evidence, the use of \gls{ai} in forensic analysis,
@@ -532,21 +562,34 @@ automated image classification, \gls{advml}, anti-forensic techniques, and
 \gls{xai}.
 
 \textbf{Chapter~\ref{chap:state-of-the-art}} critically analyzes the relevant
-literature, identifying the gap concerning the integrated evaluation of the
-robustness of models and AI-based software systems in realistic forensic scenarios.
+literature and identifies the research gap concerning the integrated evaluation
+of transparent models and selected black-box software systems under realistic
+forensic conditions.
 
-\textbf{Chapter~\ref{chap:methodology}} describes the \gls{fairlab}
-experimental protocol, including dataset construction and validation, proxy
-models, the considered perturbations and transformations, the black-box
-evaluation of the selected software, the metrics, and the reproducibility
-controls.
+\textbf{Chapter~\ref{chap:methodology}} defines the \gls{fairlab}
+methodological protocol, including dataset construction and validation, the
+parallel proxy-model and black-box evaluation design, the considered
+adversarial and anti-forensic conditions, the evaluation metrics, and the
+principles governing traceability and reproducibility.
 
-\textbf{Chapter~\ref{chap:results}} presents the experimental results,
-discussing system behavior on unmanipulated images, out-of-distribution
-content, adversarial perturbations, anti-forensic transformations, and
-qualitative cases examined through \gls{xai}.
+\textbf{Chapter~\ref{chap:implementation}} documents the concrete
+implementation and frozen experimental setup. It describes the data structures,
+scripts, model configurations, parameter settings, software versions,
+perturbation-generation procedures, forensic evaluation bundle, black-box
+output-normalization procedures, explainability workflow, and technical
+validation controls.
+
+\textbf{Chapter~\ref{chap:results}} presents and interprets the experimental
+results for the clean baseline, the separate \gls{ood} branch, adversarial
+attacks, anti-forensic transformations, selected black-box software
+configurations, metadata sensitivity, and the qualitative cases examined
+through \gls{xai}.
 
 \textbf{Chapter~\ref{chap:conclusions}} synthesizes the main findings,
 discusses their implications for the controlled use of automation in forensic
-contexts, and identifies the limitations of the study as well as possible
+contexts, and identifies the limitations of the study and the corresponding
 directions for future research.
+The separate Appendix~\ref{app:repository-reproducibility-artifacts}
+documents the repository structure, the canonical experimental artifacts, the
+official pipeline sequence, integrity records, provenance information, and the
+boundaries of controlled reproducibility.
