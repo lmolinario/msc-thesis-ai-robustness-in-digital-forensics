@@ -1,23 +1,23 @@
 name: Apply final bibliography citations
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-    paths:
-      - .github/citation-trigger
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
 
 jobs:
   apply-citations:
+    if: github.head_ref == 'thesis/final-review-corrections' && github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out main
+      - name: Check out revision branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: thesis/final-review-corrections
           fetch-depth: 0
 
       - name: Insert bibliography citations
@@ -31,27 +31,30 @@ jobs:
           implementation = Path('docs/LatexThesis/sections/05_implementation.tex')
 
           b = background.read_text(encoding='utf-8')
-          old = r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide}.'''
-          new = r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.'''
-          assert b.count(old) == 1, f'Expected one ISO 27041 insertion point, found {b.count(old)}'
-          b = b.replace(old, new, 1)
-
-          old = r'''\cite{reith2002examining,nist2006guide,casey2011digital,carrier2005filesystem}.'''
-          new = r'''\cite{reith2002examining,nist2006guide,casey2011digital,carrier2005filesystem,iso27042,iso27043}.'''
-          assert b.count(old) == 1, f'Expected one ISO 27042/27043 insertion point, found {b.count(old)}'
-          b = b.replace(old, new, 1)
-
-          old = r'''classification problems, owing to their ability to construct robust decision
+          replacements = [
+              (
+                  r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide}.''',
+                  r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.'''
+              ),
+              (
+                  r'''\cite{reith2002examining,nist2006guide,casey2011digital,carrier2005filesystem}.''',
+                  r'''\cite{reith2002examining,nist2006guide,casey2011digital,carrier2005filesystem,iso27042,iso27043}.'''
+              ),
+              (
+                  r'''classification problems, owing to their ability to construct robust decision
 surfaces in high-dimensional spaces
-\cite{cortes1995support,bishop2006pattern}. However, the quality of the result'''
-          new = r'''classification problems, owing to their ability to construct robust decision
+\cite{cortes1995support,bishop2006pattern}. However, the quality of the result''',
+                  r'''classification problems, owing to their ability to construct robust decision
 surfaces in high-dimensional spaces
 \cite{cortes1995support,bishop2006pattern}. General-purpose libraries such as
 scikit-learn provide standardized implementations of classical supervised-learning
 workflows and evaluation utilities, supporting reproducible experimentation across
 conventional \gls{ml} pipelines \cite{pedregosa2011scikit}. However, the quality of the result'''
-          assert b.count(old) == 1, f'Expected one scikit-learn insertion point, found {b.count(old)}'
-          b = b.replace(old, new, 1)
+              ),
+          ]
+          for old, new in replacements:
+              assert b.count(old) == 1, f'Expected one background insertion point, found {b.count(old)}'
+              b = b.replace(old, new, 1)
           background.write_text(b, encoding='utf-8')
 
           s = state_of_art.read_text(encoding='utf-8')
@@ -90,4 +93,4 @@ Table~\ref{tab:implementation-validation-controls}.'''
                   docs/LatexThesis/sections/03_StateoftheArt.tex \
                   docs/LatexThesis/sections/05_implementation.tex
           git commit -m "docs(thesis): cite forensic standards and validation sources"
-          git push --force-with-lease origin HEAD:thesis/final-review-corrections
+          git push origin HEAD:thesis/final-review-corrections
