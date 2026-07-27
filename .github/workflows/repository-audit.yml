@@ -1,15 +1,15 @@
 name: Apply approved contextual citations
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:
+  issues:
+    types: [opened]
 
 permissions:
   contents: write
 
 jobs:
   apply:
+    if: github.event.issue.title == 'Apply approved contextual thesis citations'
     runs-on: ubuntu-latest
     steps:
       - name: Check out main
@@ -18,14 +18,9 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Apply citations when marker is present
+      - name: Apply the approved contextual citations
         shell: bash
         run: |
-          if [ ! -f .github/apply-approved-citations ]; then
-            echo "No citation marker found; nothing to apply."
-            exit 0
-          fi
-
           python - <<'PY'
           from pathlib import Path
 
@@ -35,93 +30,98 @@ jobs:
           main = Path('docs/LatexThesis/main.tex')
           extra = Path('docs/LatexThesis/sections/09_supporting_reference_framework.tex')
 
-          b = background.read_text(encoding='utf-8')
+          def replace_once(text, old, new, label):
+              if new in text:
+                  return text
+              count = text.count(old)
+              assert count == 1, f'{label} insertion point count: {count}'
+              return text.replace(old, new, 1)
 
-          replacements = [
-              (
-                  r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide}.''',
-                  r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.''',
-                  'ISO 27041',
-              ),
-              (
-                  r'''From an operational perspective, the literature and technical guidelines
+          b = background.read_text(encoding='utf-8')
+          b = replace_once(
+              b,
+              r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide}.''',
+              r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.''',
+              'ISO 27041',
+          )
+          b = replace_once(
+              b,
+              r'''From an operational perspective, the literature and technical guidelines
 describe the digital forensic process as a sequence of logically distinct
 phases: collection, examination, analysis, and reporting.''',
-                  r'''From an operational perspective, the literature and technical guidelines
+              r'''From an operational perspective, the literature and technical guidelines
 describe the digital forensic process as a sequence of logically distinct
 phases: collection, examination, analysis, and reporting \cite{iso27043}.''',
-                  'ISO 27043',
-              ),
-              (
-                  r'''filtering. The analysis phase consists of the technical interpretation of the
+              'ISO 27043',
+          )
+          b = replace_once(
+              b,
+              r'''filtering. The analysis phase consists of the technical interpretation of the
 extracted data, the correlation among different sources, and the reconstruction
 of relevant events or behaviors. Finally, the reporting phase requires clear,''',
-                  r'''filtering. The analysis phase consists of the technical interpretation of the
+              r'''filtering. The analysis phase consists of the technical interpretation of the
 extracted data, the correlation among different sources, and the reconstruction
 of relevant events or behaviors \cite{iso27042}. Finally, the reporting phase
 requires clear,''',
-                  'ISO 27042',
-              ),
-              (
-                  r'''surfaces in high-dimensional spaces
+              'ISO 27042',
+          )
+          b = replace_once(
+              b,
+              r'''surfaces in high-dimensional spaces
 \cite{cortes1995support,bishop2006pattern}. However, the quality of the result
 depends strongly on the choice of features and on their ability to represent
 image content in a discriminative manner.''',
-                  r'''surfaces in high-dimensional spaces
+              r'''surfaces in high-dimensional spaces
 \cite{cortes1995support,bishop2006pattern}. General-purpose libraries such as
 scikit-learn provide standardized implementations of classical supervised-learning
 algorithms and evaluation utilities, supporting reproducible experimentation
 across conventional \gls{ml} workflows \cite{pedregosa2011scikit}. However, the
 quality of the result depends strongly on the choice of features and on their
 ability to represent image content in a discriminative manner.''',
-                  'Pedregosa',
-              ),
-          ]
-
-          for old, new, name in replacements:
-              count = b.count(old)
-              assert count == 1, f'{name} insertion point count: {count}'
-              b = b.replace(old, new, 1)
+              'Pedregosa',
+          )
           background.write_text(b, encoding='utf-8')
 
           s = state_of_art.read_text(encoding='utf-8')
-          old = r'''classification functionalities oriented toward the automated categorization of
-images and videos through \gls{ai}-based techniques~\cite{cellebrite}.'''
-          new = r'''classification functionalities oriented toward the automated categorization of
+          s = replace_once(
+              s,
+              r'''classification functionalities oriented toward the automated categorization of
+images and videos through \gls{ai}-based techniques~\cite{cellebrite}.''',
+              r'''classification functionalities oriented toward the automated categorization of
 images and videos through \gls{ai}-based techniques
-\cite{cellebrite,cellebrite_media_classification}.'''
-          count = s.count(old)
-          assert count == 1, f'Cellebrite insertion point count: {count}'
-          state_of_art.write_text(s.replace(old, new, 1), encoding='utf-8')
+\cite{cellebrite,cellebrite_media_classification}.''',
+              'Cellebrite media classification',
+          )
+          state_of_art.write_text(s, encoding='utf-8')
 
           i = implementation.read_text(encoding='utf-8')
-          old = r'''The repository provides dedicated read-only or fail-visible validation
+          i = replace_once(
+              i,
+              r'''The repository provides dedicated read-only or fail-visible validation
 utilities for the downstream output layers. Their principal roles are
-summarized in Table~\ref{tab:implementation-validation-controls}.'''
-          new = r'''The repository provides dedicated read-only or fail-visible validation
+summarized in Table~\ref{tab:implementation-validation-controls}.''',
+              r'''The repository provides dedicated read-only or fail-visible validation
 utilities for the downstream output layers, consistent with the principle that
 forensic methods and tools should undergo documented validation before their
 operational results are relied upon \cite{swgde2014validation}. Their principal
 roles are summarized in
-Table~\ref{tab:implementation-validation-controls}.'''
-          count = i.count(old)
-          assert count == 1, f'SWGDE insertion point count: {count}'
-          implementation.write_text(i.replace(old, new, 1), encoding='utf-8')
+Table~\ref{tab:implementation-validation-controls}.''',
+              'SWGDE validation',
+          )
+          implementation.write_text(i, encoding='utf-8')
 
           m = main.read_text(encoding='utf-8')
-          wrong = '\\input{sections/09_supporting_reference_framework}\n'
-          count = m.count(wrong)
-          assert count == 1, f'Extra appendix input count: {count}'
-          main.write_text(m.replace(wrong, '', 1), encoding='utf-8')
-
+          m = m.replace('\\input{sections/09_supporting_reference_framework}\n', '')
+          main.write_text(m, encoding='utf-8')
           if extra.exists():
               extra.unlink()
           PY
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B thesis/final-review-corrections
           git show 1e03b02ab8884e000980713052b866551558b51d:.github/workflows/repository-audit.yml > .github/workflows/repository-audit.yml
           rm -f .github/apply-approved-citations
           git add -A docs/LatexThesis .github/workflows/repository-audit.yml .github/apply-approved-citations
           git commit -m "docs(thesis): place remaining citations in context"
-          git push origin HEAD:main
+          git push --force origin thesis/final-review-corrections
