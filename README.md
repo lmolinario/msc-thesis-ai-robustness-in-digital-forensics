@@ -32,7 +32,7 @@ The repository is a research artifact, not a general-purpose forensic classifier
 | Conditions | Clean, OOD, adversarial, anti-forensic |
 | Public prediction outputs | 69,000 sanitized commercial-tool decisions |
 | Main quantitative outputs | Proxy metrics, 186 commercial metric rows, reporting figures and tables |
-| XAI | Five Integrated Gradients case studies selected for Chapter 5 |
+| XAI | Five Integrated Gradients case studies selected for the thesis results chapter |
 | Data policy | Controlled access; raw corpora and the exact frozen 11,500-file input are distributed separately from `main` |
 | Integrity | Authoritative complete-ZIP and per-file SHA-256 records |
 

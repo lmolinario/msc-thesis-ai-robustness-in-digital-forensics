@@ -2381,6 +2381,120 @@ Complete logical corpus used for black-box software evaluation. \\
 \end{tabularx}
 \end{table}
 
+\begin{figure}[p]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+    >=latex,
+    font=\small,
+    box/.style={
+        rectangle,
+        rounded corners,
+        draw=black!75,
+        thick,
+        align=center,
+        text width=6.8cm,
+        minimum height=1.2cm
+    },
+    wide/.style={
+        box,
+        text width=10.6cm
+    },
+    arrow/.style={
+        ->,
+        thick,
+        draw=black!75
+    }
+]
+
+\node[wide, fill=gray!10] (source) at (0,0)
+{\textbf{Heterogeneous source image pool}\\
+Source images and initial provenance records};
+
+\node[wide, fill=blue!8] (review) at (0,-1.9)
+{\textbf{Human-in-the-loop validation}\\
+Technical validation, semantic review, cleaning, and dataset freezing};
+
+\node[wide, fill=green!10] (frozen) at (0,-3.8)
+{\textbf{Final frozen dataset: 1\,500 images}\\
+500 \texttt{weapon} + 500 \texttt{non\_weapon} + 500 clean \gls{ood}};
+
+\node[box, fill=yellow!12] (binary) at (-4.2,-6.3)
+{\textbf{Binary evaluation subset: 1\,000 images}\\
+500 \texttt{weapon} + 500 \texttt{non\_weapon}};
+
+\node[box, fill=yellow!12] (ood) at (4.2,-6.3)
+{\textbf{Separate clean \gls{ood} branch: 500 images}\\
+No adversarial or anti-forensic generation};
+
+\node[box, fill=orange!12] (perturb) at (-4.2,-8.8)
+{\textbf{Perturbation generation from the binary subset}\\
+5\,000 adversarial + 5\,000 anti-forensic artifacts};
+
+\node[wide, fill=blue!8] (bundle) at (0,-11.4)
+{\textbf{Forensic evaluation bundle: 11\,500 items}\\
+1\,000 clean binary + 500 clean \gls{ood} + 5\,000 adversarial
++ 5\,000 anti-forensic};
+
+\node[box, fill=orange!10] (proxy) at (-4.2,-14.1)
+{\textbf{Transparent proxy-model evaluation}\\
+EfficientNet-B0, ResNet18, and CLIP-based proxy};
+
+\node[box, fill=orange!10] (blackbox) at (4.2,-14.1)
+{\textbf{Black-box software evaluation}\\
+Magnet AXIOM/Magnet.AI; Magnet Griffeye/T3K CORE;\\
+Excire Foto 2025; Cellebrite Inseyets};
+
+\node[box, fill=green!10] (proxout) at (-4.2,-16.8)
+{\textbf{Proxy outputs}\\
+Predictions, metrics, directional errors, confidence-related indicators,
+and five-case Integrated Gradients analysis};
+
+\node[box, fill=green!10] (norm) at (4.2,-16.8)
+{\textbf{Black-box normalization}\\
+Observable exports matched to hidden control metadata and converted into
+documented operational decisions};
+
+\node[wide, fill=gray!10] (analysis) at (0,-19.5)
+{\textbf{Operational robustness analysis and traceability}\\
+Normalized metrics, configuration-sensitive interpretation, provenance,
+integrity controls, audit records, and human-review implications};
+
+\draw[arrow] (source) -- (review);
+\draw[arrow] (review) -- (frozen);
+\draw[arrow] (frozen.south west) -- (binary.north);
+\draw[arrow] (frozen.south east) -- (ood.north);
+\draw[arrow] (binary) -- (perturb);
+
+% Clean binary inputs enter the bundle directly.
+\draw[arrow] (binary.west) -- ++(-1.0,0) |- (bundle.west);
+
+% Perturbed binary artifacts enter the bundle.
+\draw[arrow] (perturb) |- (bundle.west);
+
+% The clean OOD branch enters the bundle without perturbation.
+\draw[arrow] (ood) |- (bundle.east);
+
+\draw[arrow] (bundle.south west) -- (proxy.north);
+\draw[arrow] (bundle.south east) -- (blackbox.north);
+\draw[arrow] (proxy) -- (proxout);
+\draw[arrow] (blackbox) -- (norm);
+\draw[arrow] (proxout.south east) -- (analysis.north);
+\draw[arrow] (norm.south west) -- (analysis.north);
+
+\end{tikzpicture}%
+}
+\caption[Concrete FAIRLab instantiation]{Concrete FAIRLab instantiation used
+in this thesis. The 1\,500-image frozen dataset is divided into a 1\,000-image
+binary branch and a separate 500-image clean \gls{ood} branch. Adversarial and
+anti-forensic artifacts are generated only from the binary subset. The resulting
+11\,500-item bundle supports parallel proxy-model and black-box software
+evaluation, followed by output normalization, metrics, qualitative
+explainability for EfficientNet-B0, and traceability controls}
+\label{fig:implementation-fairlab-instantiation}
+\end{figure}
+
+
 Across the complete bundle, the experimental-group distribution is:
 
 \begin{equation}
@@ -3368,7 +3482,7 @@ Physical Analyzer version
 
 Run identifier
 &
-\texttt{FAIRLAB\_CELLEBRITE\_INSEYETS\_RUN\_01} \\
+\codepath{FAIRLAB_CELLEBRITE_INSEYETS_RUN_01} \\
 
 Imported directory
 &
@@ -4050,15 +4164,13 @@ preprocessing defined by the model implementation.
 The evaluation population contains 11\,500 distinct experimental inputs:
 
 \begin{equation}
+\begin{aligned}
 1\,000\ \text{clean binary inputs}
-+
-500\ \text{OOD inputs}
-+
-5\,000\ \text{adversarial artifacts}
-+
-5\,000\ \text{anti-forensic artifacts}
-=
-11\,500\ \text{inputs}.
+&+ 500\ \text{OOD inputs} \\
+&+ 5\,000\ \text{adversarial artifacts} \\
+&+ 5\,000\ \text{anti-forensic artifacts} \\
+&= 11\,500\ \text{inputs}.
+\end{aligned}
 \end{equation}
 
 Clean and perturbed binary samples are each evaluated once by every proxy

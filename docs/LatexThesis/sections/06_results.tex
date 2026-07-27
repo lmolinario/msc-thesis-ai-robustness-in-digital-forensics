@@ -199,8 +199,8 @@ ResNet18 & 0.964 & 0.964 & 0.964 & 0.964 & 0.964 & 0.958 & 0.970 & 0.964 & 0.974
 \textit{Note.} \textit{Bal.} indicates balanced accuracy; \textit{M-P},
 \textit{M-R}, and \textit{M-F1} indicate macro-precision, macro-recall, and
 macro-F1, respectively; \(P_w\), \(R_w\), and \(F1_w\) indicate precision,
-recall, and F1-score for the \texttt{weapon} class; \textit{Conf.} indicates
-the mean confidence of the predictions.
+recall, and F1-score for the \texttt{weapon} class; \textit{Conf.} indicates the mean maximum predicted-class probability and is
+reported only as an intra-model diagnostic indicator.
 \end{table}
 
 EfficientNet-B0 achieves the highest nominal performance, with an accuracy of
@@ -338,9 +338,9 @@ an additional class.
 \begin{tabular}{@{}l r r r r r r r@{}}
 \toprule
 \textbf{Model} &
-\textbf{Tot.} &
-\textbf{Pred. w} &
-\textbf{Pred. nw} &
+\textbf{Total} &
+\textbf{\shortstack{Weapon\\predictions}} &
+\textbf{\shortstack{Non-weapon\\predictions}} &
 \textbf{W-rate} &
 \textbf{Conf.} &
 \textbf{HC-count} &
@@ -354,11 +354,9 @@ ResNet18 & 2\,500 & 1\,094 & 1\,406 & 0.4376 & 0.8896 & 1\,617 & 0.6468 \\
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} \textit{Pred. w} indicates \texttt{weapon} predictions;
-\textit{Pred. nw} indicates \texttt{non\_weapon} predictions;
-\textit{W-rate} indicates the proportion of \gls{ood} samples classified as
-\texttt{weapon}; \textit{Conf.} indicates the mean maximum predicted-class
-probability; \textit{HC-count}
+\textit{Note.} \textit{W-rate} indicates the proportion of \gls{ood}
+samples classified as \texttt{weapon}; \textit{Conf.} indicates the mean
+maximum predicted-class probability; \textit{HC-count}
 indicates the number of predictions with confidence of at least 0.90;
 \textit{HC-rate} indicates the corresponding proportion over the total
 \gls{ood} predictions. The total of 2\,500 predictions per model is obtained by
@@ -2213,9 +2211,11 @@ even selected software systems with good clean accuracy exhibit non-zero weapon 
 rates on content outside the task.
 
 EfficientNet-B0 and ResNet18 show \gls{ood} weapon rates of 0.370 and 0.438,
-respectively. However, their higher mean confidence on \gls{ood} inputs may make these
-assignments more consequential when confidence is used as a criterion for
-automatic prioritization.
+respectively. Within each architecture, high maximum predicted-class
+probabilities may make such assignments operationally consequential when the
+same model's score is used for automatic prioritization. These values remain
+model-specific diagnostic indicators and must not be compared across
+architectures as calibrated probabilities.
 The four black-box reference configurations included in
 Table~\ref{tab:results-comparative-clean-ood} present lower values:
 \gls{magnetai} reaches an \gls{ood} weapon flag rate of 0.360,
@@ -2395,7 +2395,7 @@ software systems.
 \begin{tabularx}{\textwidth}{@{}p{2.7cm} p{1.8cm} p{3.1cm} p{2.8cm} X@{}}
 \toprule
 \textbf{System} &
-\textbf{Adv. acc./drop} &
+\textbf{\shortstack{Adversarial\\accuracy/drop}} &
 \textbf{Most critical condition} &
 \textbf{Main error} &
 \textbf{Scoped interpretation} \\
