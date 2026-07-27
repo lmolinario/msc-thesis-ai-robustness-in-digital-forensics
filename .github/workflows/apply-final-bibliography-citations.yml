@@ -1,0 +1,92 @@
+name: Apply final bibliography citations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/apply-final-bibliography-citations.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-citations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Insert bibliography citations
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          background = Path('docs/LatexThesis/sections/02_background.tex')
+          state_of_art = Path('docs/LatexThesis/sections/03_StateoftheArt.tex')
+          implementation = Path('docs/LatexThesis/sections/05_implementation.tex')
+
+          b = background.read_text(encoding='utf-8')
+          old = r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide}.'''
+          new = r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.'''
+          assert b.count(old) == 1, f'Expected one ISO 27041 insertion point, found {b.count(old)}'
+          b = b.replace(old, new, 1)
+
+          old = r'''\cite{reith2002examining,nist2006guide,casey2011digital,carrier2005filesystem}.'''
+          new = r'''\cite{reith2002examining,nist2006guide,casey2011digital,carrier2005filesystem,iso27042,iso27043}.'''
+          assert b.count(old) == 1, f'Expected one ISO 27042/27043 insertion point, found {b.count(old)}'
+          b = b.replace(old, new, 1)
+
+          old = r'''classification problems, owing to their ability to construct robust decision
+surfaces in high-dimensional spaces
+\cite{cortes1995support,bishop2006pattern}. However, the quality of the result'''
+          new = r'''classification problems, owing to their ability to construct robust decision
+surfaces in high-dimensional spaces
+\cite{cortes1995support,bishop2006pattern}. General-purpose libraries such as
+scikit-learn provide standardized implementations of classical supervised-learning
+workflows and evaluation utilities, supporting reproducible experimentation across
+conventional \gls{ml} pipelines \cite{pedregosa2011scikit}. However, the quality of the result'''
+          assert b.count(old) == 1, f'Expected one scikit-learn insertion point, found {b.count(old)}'
+          b = b.replace(old, new, 1)
+          background.write_text(b, encoding='utf-8')
+
+          s = state_of_art.read_text(encoding='utf-8')
+          old = r'''classification functionalities oriented toward the automated categorization of
+images and videos through \gls{ai}-based techniques~\cite{cellebrite}.'''
+          new = r'''classification functionalities oriented toward the automated categorization of
+images and videos through \gls{ai}-based techniques
+\cite{cellebrite,cellebrite_media_classification}.'''
+          assert s.count(old) == 1, f'Expected one Cellebrite insertion point, found {s.count(old)}'
+          s = s.replace(old, new, 1)
+          state_of_art.write_text(s, encoding='utf-8')
+
+          i = implementation.read_text(encoding='utf-8')
+          old = r'''The repository provides dedicated read-only or fail-visible validation
+utilities for the downstream output layers. Their principal roles are
+summarized in Table~\ref{tab:implementation-validation-controls}.'''
+          new = r'''The repository provides dedicated read-only or fail-visible validation
+utilities for the downstream output layers, consistent with the principle that
+forensic methods and tools should be subjected to documented validation testing
+before their operational results are relied upon \cite{swgde2014validation}.
+Their principal roles are summarized in
+Table~\ref{tab:implementation-validation-controls}.'''
+          assert i.count(old) == 1, f'Expected one SWGDE insertion point, found {i.count(old)}'
+          i = i.replace(old, new, 1)
+          implementation.write_text(i, encoding='utf-8')
+          PY
+
+      - name: Commit citation update
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-final-bibliography-citations.yml
+          git add docs/LatexThesis/sections/02_background.tex \
+                  docs/LatexThesis/sections/03_StateoftheArt.tex \
+                  docs/LatexThesis/sections/05_implementation.tex
+          git commit -m "docs(thesis): cite forensic standards and validation sources"
+          git push origin HEAD:main
