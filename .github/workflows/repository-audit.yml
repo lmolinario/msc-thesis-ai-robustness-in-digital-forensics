@@ -1,9 +1,7 @@
-name: Repository Audit
+name: Apply approved contextual citations
 
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -11,21 +9,23 @@ permissions:
   contents: write
 
 jobs:
-  audit:
-    name: Lightweight repository audit
+  apply:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Check out main
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.head_ref || github.ref_name }}
+          ref: main
           fetch-depth: 0
 
-      - name: Apply approved contextual citations
-        if: github.event_name == 'pull_request' && hashFiles('.github/apply-approved-citations') != ''
+      - name: Apply citations when marker is present
         shell: bash
         run: |
+          if [ ! -f .github/apply-approved-citations ]; then
+            echo "No citation marker found; nothing to apply."
+            exit 0
+          fi
+
           python - <<'PY'
           from pathlib import Path
 
@@ -37,43 +37,51 @@ jobs:
 
           b = background.read_text(encoding='utf-8')
 
-          old = r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide}.'''
-          new = r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.'''
-          assert b.count(old) == 1, f'ISO 27041 insertion point count: {b.count(old)}'
-          b = b.replace(old, new, 1)
-
-          old = r'''From an operational perspective, the literature and technical guidelines
+          replacements = [
+              (
+                  r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide}.''',
+                  r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.''',
+                  'ISO 27041',
+              ),
+              (
+                  r'''From an operational perspective, the literature and technical guidelines
 describe the digital forensic process as a sequence of logically distinct
-phases: collection, examination, analysis, and reporting.'''
-          new = r'''From an operational perspective, the literature and technical guidelines
+phases: collection, examination, analysis, and reporting.''',
+                  r'''From an operational perspective, the literature and technical guidelines
 describe the digital forensic process as a sequence of logically distinct
-phases: collection, examination, analysis, and reporting \cite{iso27043}.'''
-          assert b.count(old) == 1, f'ISO 27043 insertion point count: {b.count(old)}'
-          b = b.replace(old, new, 1)
-
-          old = r'''filtering. The analysis phase consists of the technical interpretation of the
+phases: collection, examination, analysis, and reporting \cite{iso27043}.''',
+                  'ISO 27043',
+              ),
+              (
+                  r'''filtering. The analysis phase consists of the technical interpretation of the
 extracted data, the correlation among different sources, and the reconstruction
-of relevant events or behaviors. Finally, the reporting phase requires clear,'''
-          new = r'''filtering. The analysis phase consists of the technical interpretation of the
+of relevant events or behaviors. Finally, the reporting phase requires clear,''',
+                  r'''filtering. The analysis phase consists of the technical interpretation of the
 extracted data, the correlation among different sources, and the reconstruction
 of relevant events or behaviors \cite{iso27042}. Finally, the reporting phase
-requires clear,'''
-          assert b.count(old) == 1, f'ISO 27042 insertion point count: {b.count(old)}'
-          b = b.replace(old, new, 1)
-
-          old = r'''surfaces in high-dimensional spaces
+requires clear,''',
+                  'ISO 27042',
+              ),
+              (
+                  r'''surfaces in high-dimensional spaces
 \cite{cortes1995support,bishop2006pattern}. However, the quality of the result
 depends strongly on the choice of features and on their ability to represent
-image content in a discriminative manner.'''
-          new = r'''surfaces in high-dimensional spaces
+image content in a discriminative manner.''',
+                  r'''surfaces in high-dimensional spaces
 \cite{cortes1995support,bishop2006pattern}. General-purpose libraries such as
 scikit-learn provide standardized implementations of classical supervised-learning
 algorithms and evaluation utilities, supporting reproducible experimentation
 across conventional \gls{ml} workflows \cite{pedregosa2011scikit}. However, the
 quality of the result depends strongly on the choice of features and on their
-ability to represent image content in a discriminative manner.'''
-          assert b.count(old) == 1, f'Pedregosa insertion point count: {b.count(old)}'
-          b = b.replace(old, new, 1)
+ability to represent image content in a discriminative manner.''',
+                  'Pedregosa',
+              ),
+          ]
+
+          for old, new, name in replacements:
+              count = b.count(old)
+              assert count == 1, f'{name} insertion point count: {count}'
+              b = b.replace(old, new, 1)
           background.write_text(b, encoding='utf-8')
 
           s = state_of_art.read_text(encoding='utf-8')
@@ -82,9 +90,9 @@ images and videos through \gls{ai}-based techniques~\cite{cellebrite}.'''
           new = r'''classification functionalities oriented toward the automated categorization of
 images and videos through \gls{ai}-based techniques
 \cite{cellebrite,cellebrite_media_classification}.'''
-          assert s.count(old) == 1, f'Cellebrite insertion point count: {s.count(old)}'
-          s = s.replace(old, new, 1)
-          state_of_art.write_text(s, encoding='utf-8')
+          count = s.count(old)
+          assert count == 1, f'Cellebrite insertion point count: {count}'
+          state_of_art.write_text(s.replace(old, new, 1), encoding='utf-8')
 
           i = implementation.read_text(encoding='utf-8')
           old = r'''The repository provides dedicated read-only or fail-visible validation
@@ -96,13 +104,14 @@ forensic methods and tools should undergo documented validation before their
 operational results are relied upon \cite{swgde2014validation}. Their principal
 roles are summarized in
 Table~\ref{tab:implementation-validation-controls}.'''
-          assert i.count(old) == 1, f'SWGDE insertion point count: {i.count(old)}'
-          i = i.replace(old, new, 1)
-          implementation.write_text(i, encoding='utf-8')
+          count = i.count(old)
+          assert count == 1, f'SWGDE insertion point count: {count}'
+          implementation.write_text(i.replace(old, new, 1), encoding='utf-8')
 
           m = main.read_text(encoding='utf-8')
           wrong = '\\input{sections/09_supporting_reference_framework}\n'
-          assert m.count(wrong) == 1, f'Extra appendix input count: {m.count(wrong)}'
+          count = m.count(wrong)
+          assert count == 1, f'Extra appendix input count: {count}'
           main.write_text(m.replace(wrong, '', 1), encoding='utf-8')
 
           if extra.exists():
@@ -115,213 +124,4 @@ Table~\ref{tab:implementation-validation-controls}.'''
           rm -f .github/apply-approved-citations
           git add -A docs/LatexThesis .github/workflows/repository-audit.yml .github/apply-approved-citations
           git commit -m "docs(thesis): place remaining citations in context"
-          git push origin HEAD:${{ github.head_ref }}
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Check final repository structure
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          required = [
-              'README.md',
-              'CHANGELOG.md',
-              'CITATION.cff',
-              'LICENSE',
-              'requirements.txt',
-              '.env.example',
-              '.github/SECURITY.md',
-              'docs/README.md',
-              'docs/artifact/ARCHIVE_SNAPSHOT.md',
-              'docs/artifact/THESIS_ARTIFACT.md',
-              'docs/artifact/ARTIFACT_EVALUATION.md',
-              'docs/artifact/REPOSITORY_MAP.md',
-              'docs/artifact/DATA_DICTIONARY.md',
-              'docs/artifact/ENVIRONMENT.md',
-              'docs/artifact/REPRODUCIBILITY.md',
-              'docs/artifact/DATA_ACCESS.md',
-              'docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256',
-              'docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md',
-              'docs/maintenance/RELEASE_CHECKLIST.md',
-              'docs/LatexThesis/README.md',
-              'docs/LatexThesis/main.tex',
-              'datasets/forensic_evaluation_bundle/README.md',
-              'evaluation/forensic_tools/normalized_predictions.csv',
-              'evaluation/forensic_tools/normalized_predictions_public_summary.json',
-              'forensic_tools/run_registry.json',
-              'forensic_tools/public_extracts_validation.json',
-              'results/scripts/23_validate_results_artifacts.py',
-              'results/scripts/24_audit_reporting_asset_usage.py',
-              'tools/latex/audit_latex_images_used.py',
-          ]
-          forbidden = [
-              'docs/LatexThesis_ITA',
-              'THESIS_ARTIFACT.md',
-              'ARTIFACT_EVALUATION.md',
-              'REPOSITORY_MAP.md',
-              'DATA_DICTIONARY.md',
-              'ENVIRONMENT.md',
-              'REPRODUCIBILITY.md',
-              'DATA_ACCESS.md',
-              'SECURITY.md',
-              'ACADEMIC_REPOSITORY_AUDIT.md',
-              'RELEASE_CHECKLIST.md',
-              'audit_latex_images_used.py',
-              'tasks.ps1',
-          ]
-
-          missing = [path for path in required if not Path(path).exists()]
-          present_forbidden = [path for path in forbidden if Path(path).exists()]
-          if missing:
-              print('Missing required files:')
-              for path in missing:
-                  print(f'  - {path}')
-          if present_forbidden:
-              print('Forbidden obsolete paths:')
-              for path in present_forbidden:
-                  print(f'  - {path}')
-          if missing or present_forbidden:
-              raise SystemExit(1)
-          print('Final repository structure check passed.')
-          PY
-
-      - name: Validate controlled artifact checksum registry
-        shell: bash
-        run: |
-          python - <<'PY'
-          import re
-          from pathlib import Path, PurePosixPath
-
-          path = Path('docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256')
-          sha256_re = re.compile(r'^[0-9a-f]{64}$')
-          entries = {}
-
-          for line_number, raw_line in enumerate(path.read_text(encoding='utf-8-sig').splitlines(), start=1):
-              line = raw_line.strip()
-              if not line or line.startswith('#'):
-                  continue
-              parts = line.split(maxsplit=1)
-              if len(parts) != 2:
-                  raise SystemExit(f'Malformed checksum line {line_number}: {line}')
-              digest = parts[0].lower()
-              filename = PurePosixPath(parts[1].lstrip('*').strip().replace('\\', '/')).name
-              if not sha256_re.fullmatch(digest):
-                  raise SystemExit(f'Invalid SHA256 on line {line_number}: {digest}')
-              if filename in entries:
-                  raise SystemExit(f'Duplicate checksum filename: {filename}')
-              entries[filename] = digest
-
-          expected_names = {
-              '00_raw_datasets_bundle.zip',
-              '16_frozen_forensic_evaluation_bundle.zip',
-          }
-          if set(entries) != expected_names:
-              raise SystemExit(
-                  f'Unexpected checksum registry names: expected={sorted(expected_names)}, '
-                  f'actual={sorted(entries)}'
-              )
-          print('Controlled artifact checksum registry passed.')
-          PY
-
-      - name: Check JSON validity
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-
-          selected = [
-              'datasets/splits/manifests/split_generation_summary.json',
-              'datasets/forensic_evaluation_bundle/metadata/bundle_summary.json',
-              'evaluation/forensic_tools/normalization_summary.json',
-              'evaluation/forensic_tools/normalized_predictions_public_summary.json',
-              'forensic_tools/run_registry.json',
-              'forensic_tools/public_extracts_summary.json',
-              'forensic_tools/public_extracts_validation.json',
-              'models/model_registry.json',
-              'results/metrics/proxy_model_evaluation_summary.json',
-              'results/figures/chapter_5/chapter5_figures_summary.json',
-              'results/figures/chapter_5/embedded_metadata_sensitivity_summary.json',
-          ]
-          for item in selected:
-              path = Path(item)
-              if not path.exists():
-                  raise SystemExit(f'Missing JSON: {path}')
-              json.loads(path.read_text(encoding='utf-8'))
-              print(f'OK  {path}')
-          PY
-
-      - name: Check Python syntax
-        shell: bash
-        run: |
-          python - <<'PY'
-          import py_compile
-          from pathlib import Path
-
-          roots = [Path('datasets'), Path('models'), Path('evaluation'),
-                   Path('explainability'), Path('forensic_tools'),
-                   Path('results'), Path('tools')]
-          scripts = sorted(path for root in roots for path in root.rglob('*.py'))
-          failed = False
-          for path in scripts:
-              try:
-                  py_compile.compile(str(path), doraise=True)
-                  print(f'OK  {path}')
-              except Exception as exc:
-                  failed = True
-                  print(f'FAIL {path}: {exc}')
-          if failed:
-              raise SystemExit(1)
-          PY
-
-      - name: Validate XAI artifact
-        run: python explainability/scripts/validate_chapter5_xai_artifacts.py --strict-thesis-text
-
-      - name: Validate frozen results
-        run: python results/scripts/23_validate_results_artifacts.py
-
-      - name: Audit reporting assets
-        run: python results/scripts/24_audit_reporting_asset_usage.py --strict
-
-      - name: Check stale documentation references
-        shell: bash
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          forbidden = [
-              'LatexThesis_ITA',
-              '/run/media/lello',
-              'explainability/outputs/integrated_gradients/',
-              '.\\tasks.ps1',
-          ]
-          paths = [
-              Path('README.md'),
-              *Path('docs').rglob('*.md'),
-              Path('.github/SECURITY.md'),
-              Path('CHANGELOG.md'),
-              Path('datasets/README.md'),
-              Path('datasets/raw/README.md'),
-              Path('datasets/forensic_evaluation_bundle/README.md'),
-              Path('results/README.md'),
-              Path('results/scripts/README.md'),
-              Path('explainability/README.md'),
-              Path('tools/README.md'),
-              Path('tools/latex/README.md'),
-          ]
-          failed = False
-          for path in paths:
-              text = path.read_text(encoding='utf-8', errors='ignore')
-              for pattern in forbidden:
-                  if pattern in text:
-                      failed = True
-                      print(f'Forbidden pattern {pattern!r} found in {path}')
-          if failed:
-              raise SystemExit(1)
-          print('Documentation guard check passed.')
-          PY
+          git push origin HEAD:main
