@@ -132,7 +132,7 @@ local environment variables. Never commit private, signed, or temporary values.
 | 17 | `explainability/scripts/17_generate_integrated_gradients_case_studies.py` | Integrated Gradients generation |
 | 18 | `explainability/scripts/18_xai_interactive_launcher.py` | Human XAI review |
 | 19 | `evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py` | Commercial export normalization |
-| 20 | `results/scripts/20_generate_experimental_reporting_assets.py` | Chapter 5 reporting |
+| 20 | `results/scripts/20_generate_experimental_reporting_assets.py` | Thesis reporting assets for the experimental-results chapter |
 | 21 | `results/scripts/21_generate_embedded_metadata_sensitivity_check.py` | Metadata-sensitivity analysis |
 
 Public-artifact support utilities:

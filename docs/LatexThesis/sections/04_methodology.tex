@@ -46,7 +46,7 @@ Chapter~\ref{chap:results}.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Overview of the FAIR-Lab methodology}
+\section{Overview of the FAIRLab Methodology}
 \label{sec:methodology-fairlab-overview}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -271,8 +271,14 @@ draw=black!75
 
 \draw[arrow] (binary.south) -- (perturb.north);
 
-\draw[arrow] (ood.south) |- (bundle.east);
+% Direct path for the unmodified binary samples.
+\draw[arrow] (binary.west) -- ++(-1.0,0) |- (bundle.west);
+
+% Derived adversarial and anti-forensic artifacts.
 \draw[arrow] (perturb.south) |- (bundle.west);
+
+% Separate clean OOD branch.
+\draw[arrow] (ood.south) |- (bundle.east);
 
 \draw[arrow] (bundle.south west) -- (proxy.north);
 \draw[arrow] (bundle.south east) -- (tools.north);
@@ -282,7 +288,7 @@ draw=black!75
 
 \end{tikzpicture}%
 }
-\caption[FAIR-Lab experimental protocol]{FAIR-Lab experimental protocol. The
+\caption[FAIRLab experimental protocol]{FAIRLab experimental protocol. The
 frozen corpus is divided into a binary in-domain component and a separate clean
 \gls{ood} branch. Perturbations are applied only to the binary component, and
 the resulting common bundle is evaluated through complementary proxy-model and
@@ -292,7 +298,7 @@ black-box software analyses}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Research design and experimental assumptions}
+\section{Research Design and Experimental Assumptions}
 \label{sec:methodology-research-design}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -510,7 +516,7 @@ reasoning rules used to construct the frozen experimental corpus.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Dataset construction and source consolidation}
+\section{Dataset Construction and Source Consolidation}
 \label{sec:methodology-dataset-construction}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -749,7 +755,7 @@ or pre-existing annotations}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Review documentation and semantic decision records}
+\section{Review Documentation and Semantic Decision Records}
 \label{sec:methodology-review-manifest}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -792,7 +798,7 @@ reconstruct the transition from the initial candidate pool to the frozen
 experimental dataset.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Human-in-the-loop review and final dataset freezing}
+\section{Human-in-the-Loop Review and Final Dataset Freezing}
 \label{sec:methodology-human-review}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -869,7 +875,7 @@ experimental corpus.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Data partitioning and OOD evaluation strategy}
+\section{Data Partitioning and OOD Evaluation Strategy}
 \label{sec:methodology-split-generation}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1062,7 +1068,7 @@ folds for fold-aware training and held-out evaluation, while the clean
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Proxy-model evaluation framework}
+\section{Proxy-Model Evaluation Framework}
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1204,7 +1210,7 @@ adversarial artifacts, and anti-forensic artifacts.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Perturbation selection rationale and operational relevance}
+\section{Perturbation Selection Rationale and Operational Relevance}
 \label{sec:methodology-perturbation-selection-rationale}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1540,7 +1546,7 @@ clean binary samples and the separate clean \gls{ood} inputs}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Adversarial evaluation methodology}
+\section{Adversarial Evaluation Methodology}
 \label{sec:methodology-adversarial-attacks}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1666,7 +1672,7 @@ Chapter~\ref{chap:implementation}.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Anti-forensic evaluation methodology}
+\section{Anti-Forensic Evaluation Methodology}
 \label{sec:methodology-anti-forensic-transformations}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1798,7 +1804,7 @@ anti-forensic conditions.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Forensic evaluation bundle and blind-input design}
+\section{Forensic Evaluation Bundle and Blind-Input Design}
 \label{sec:methodology-forensic-evaluation-bundle}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1972,7 +1978,7 @@ validation or certification of the selected software systems
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Black-box software evaluation protocol}
+\section{Black-Box Software Evaluation Protocol}
 \label{sec:methodology-forensic-tools}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -2326,7 +2332,7 @@ states}
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Evaluation metrics}
+\section{Evaluation Metrics}
 \label{sec:methodology-evaluation-metrics}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -2832,7 +2838,7 @@ consequential outputs on manipulated or distributionally different inputs.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Explainability approach}
+\section{Explainability Approach}
 \label{sec:methodology-explainability}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -2999,7 +3005,7 @@ performed by a human forensic analyst.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Traceability and reproducibility controls}
+\section{Traceability and Reproducibility Controls}
 \label{sec:methodology-traceability-controls}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -3065,7 +3071,7 @@ categories of traceability records required by the methodology.
 
 \begin{table}[H]
 \centering
-\caption{Principal traceability records across the FAIR-Lab protocol}
+\caption{Principal traceability records across the FAIRLab protocol}
 \label{tab:methodology-traceability-artifacts}
 \begin{tabularx}{\textwidth}{@{}L{4.2cm}X@{}}
 \toprule
@@ -3257,8 +3263,8 @@ draw=black!75
 
 \end{tikzpicture}%
 }
-\caption[Traceability chain across the FAIR-Lab protocol]{Traceability chain
-across the FAIR-Lab protocol. Stable identifiers, provenance information,
+\caption[Traceability chain across the FAIRLab protocol]{Traceability chain
+across the FAIRLab protocol. Stable identifiers, provenance information,
 integrity controls, and structured records preserve the relationships among
 source samples, evaluation inputs, derived artifacts, observable outputs, and
 final analyses}
