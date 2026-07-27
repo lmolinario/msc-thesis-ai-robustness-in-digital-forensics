@@ -72,6 +72,51 @@ must remain traceable, reviewable, and subordinate to expert assessment
 \cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
 
 % ─────────────────────────────────────────────────────────────────────────────
+\section{Answers to the Research Questions}
+\label{sec:conclusions-research-questions}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\paragraph{\textbf{RQ1.}}
+The transparent proxy models achieve strong clean-baseline performance, but
+their behavior is not uniformly preserved across the separate \gls{ood},
+adversarial, and anti-forensic conditions. The largest degradation is observed
+under direct source-model adversarial evaluation, whereas the tested
+anti-forensic transformations generally produce smaller aggregate changes but
+still introduce operationally relevant directional errors. The \gls{ood}
+results additionally show that closed-set assignment behavior cannot be inferred
+from clean binary performance alone
+(Sections~\ref{sec:results-clean-baseline}--\ref{sec:results-adversarial}).
+
+\paragraph{\textbf{RQ2.}}
+Direct attacks generated against the fold-specific EfficientNet-B0 source
+models produce the most severe degradation on that architecture. Their effects
+on ResNet18 and \gls{clip} are more limited and heterogeneous, demonstrating
+that transfer must be measured rather than assumed. The model-agnostic
+\gls{colorshift} condition follows a separate experimental rationale and does
+not constitute a model-dependent source attack
+(Section~\ref{sec:results-adversarial}).
+
+\paragraph{\textbf{RQ3.}}
+The selected black-box software systems exhibit heterogeneous operational
+profiles that depend on their observable output semantics, enabled
+capabilities, normalization rules, versions, and configurations. The results do
+not support a universal ranking: more selective configurations may reduce
+false-positive workload while increasing missed detections, whereas more
+permissive configurations may produce the opposite trade-off
+(Section~\ref{sec:results-commercial}).
+
+\paragraph{\textbf{RQ4.}}
+The most relevant operational risks are missed \texttt{weapon} detections,
+additional false-positive review workload, forced assignments on the separate
+\gls{ood} branch, configuration sensitivity, and unknown or otherwise
+non-operational outputs where applicable. These findings support the continued
+use of expert review, documented configurations, traceable normalization rules,
+and task-specific validation rather than autonomous reliance on automated
+outputs
+(Sections~\ref{sec:results-comparative} and
+\ref{sec:results-limitations}).
+
+% ─────────────────────────────────────────────────────────────────────────────
 \section{Main Contributions}
 \label{sec:conclusions-contributions}
 % ─────────────────────────────────────────────────────────────────────────────
