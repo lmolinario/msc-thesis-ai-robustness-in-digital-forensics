@@ -1,24 +1,22 @@
 name: Apply approved contextual citations
 
 on:
-  pull_request_target:
-    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   apply:
-    if: github.event.pull_request.head.ref == 'thesis/final-review-corrections'
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the revision branch
+      - name: Check out main
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: main
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Apply the approved contextual citations
         shell: bash
@@ -40,24 +38,19 @@ jobs:
               return text.replace(old, new, 1)
 
           b = background.read_text(encoding='utf-8')
-          b = replace_once(
-              b,
+          b = replace_once(b,
               r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide}.''',
               r'''\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.''',
-              'ISO 27041',
-          )
-          b = replace_once(
-              b,
+              'ISO 27041')
+          b = replace_once(b,
               r'''From an operational perspective, the literature and technical guidelines
 describe the digital forensic process as a sequence of logically distinct
 phases: collection, examination, analysis, and reporting.''',
               r'''From an operational perspective, the literature and technical guidelines
 describe the digital forensic process as a sequence of logically distinct
 phases: collection, examination, analysis, and reporting \cite{iso27043}.''',
-              'ISO 27043',
-          )
-          b = replace_once(
-              b,
+              'ISO 27043')
+          b = replace_once(b,
               r'''filtering. The analysis phase consists of the technical interpretation of the
 extracted data, the correlation among different sources, and the reconstruction
 of relevant events or behaviors. Finally, the reporting phase requires clear,''',
@@ -65,10 +58,8 @@ of relevant events or behaviors. Finally, the reporting phase requires clear,'''
 extracted data, the correlation among different sources, and the reconstruction
 of relevant events or behaviors \cite{iso27042}. Finally, the reporting phase
 requires clear,''',
-              'ISO 27042',
-          )
-          b = replace_once(
-              b,
+              'ISO 27042')
+          b = replace_once(b,
               r'''surfaces in high-dimensional spaces
 \cite{cortes1995support,bishop2006pattern}. However, the quality of the result
 depends strongly on the choice of features and on their ability to represent
@@ -80,25 +71,21 @@ algorithms and evaluation utilities, supporting reproducible experimentation
 across conventional \gls{ml} workflows \cite{pedregosa2011scikit}. However, the
 quality of the result depends strongly on the choice of features and on their
 ability to represent image content in a discriminative manner.''',
-              'Pedregosa',
-          )
+              'Pedregosa')
           background.write_text(b, encoding='utf-8')
 
           s = state_of_art.read_text(encoding='utf-8')
-          s = replace_once(
-              s,
+          s = replace_once(s,
               r'''classification functionalities oriented toward the automated categorization of
 images and videos through \gls{ai}-based techniques~\cite{cellebrite}.''',
               r'''classification functionalities oriented toward the automated categorization of
 images and videos through \gls{ai}-based techniques
 \cite{cellebrite,cellebrite_media_classification}.''',
-              'Cellebrite media classification',
-          )
+              'Cellebrite media classification')
           state_of_art.write_text(s, encoding='utf-8')
 
           i = implementation.read_text(encoding='utf-8')
-          i = replace_once(
-              i,
+          i = replace_once(i,
               r'''The repository provides dedicated read-only or fail-visible validation
 utilities for the downstream output layers. Their principal roles are
 summarized in Table~\ref{tab:implementation-validation-controls}.''',
@@ -108,8 +95,7 @@ forensic methods and tools should undergo documented validation before their
 operational results are relied upon \cite{swgde2014validation}. Their principal
 roles are summarized in
 Table~\ref{tab:implementation-validation-controls}.''',
-              'SWGDE validation',
-          )
+              'SWGDE validation')
           implementation.write_text(i, encoding='utf-8')
 
           m = main.read_text(encoding='utf-8')
@@ -121,8 +107,9 @@ Table~\ref{tab:implementation-validation-controls}.''',
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B thesis/final-review-corrections
           git show 1e03b02ab8884e000980713052b866551558b51d:.github/workflows/repository-audit.yml > .github/workflows/repository-audit.yml
           rm -f .github/apply-approved-citations
           git add -A docs/LatexThesis .github/workflows/repository-audit.yml .github/apply-approved-citations
           git commit -m "docs(thesis): place remaining citations in context"
-          git push origin HEAD:thesis/final-review-corrections
+          git push --force origin thesis/final-review-corrections
