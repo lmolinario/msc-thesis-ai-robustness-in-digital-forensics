@@ -2393,81 +2393,43 @@ support may fail to surface target-category content, increase review workload,
 or produce unstable outputs on manipulated or distributionally different
 inputs.
 
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability Approach}
 \label{sec:methodology-explainability}
 % ─────────────────────────────────────────────────────────────────────────────
 
 The \gls{xai} component of the \gls{fairlab} methodology serves an exclusively
-diagnostic and qualitative function. It complements quantitative robustness
-metrics by supporting the examination of selected cases in which the behavior
-of an inspectable proxy classification model is operationally or
-methodologically relevant.
+diagnostic and qualitative function. It complements the quantitative robustness
+metrics by supporting the examination of selected cases involving an
+inspectable proxy classification model. Explainability outputs are not treated
+as stand-alone evidence, definitive explanations of algorithmic decisions, or
+demonstrations of model reliability. They are used to characterize attribution
+patterns and formulate hypotheses regarding changes in model behavior across
+clean, adversarial, anti-forensic, and \gls{ood} conditions.
 
-Explainability outputs are not treated as stand-alone evidence, definitive
-explanations of algorithmic decisions, or demonstrations of model reliability.
-Their purpose is to provide diagnostic information about the attribution
-patterns associated with a selected model output and to support the formulation
-of hypotheses regarding changes in model behavior across clean, adversarial,
-anti-forensic, and \gls{ood} conditions.
+The explainability analysis is restricted to one selected fully inspectable
+proxy model. The adopted technique must be compatible with its architecture,
+weights, preprocessing procedure, and inference pipeline and may require access
+to gradients, intermediate activations, or other internal components. The same
+internal attribution analysis cannot be applied to the selected black-box or
+near-black-box software systems because their architectures, representations,
+decision thresholds, and scoring procedures are not accessible. Their
+observable outputs must not be interpreted as explanations of the internal
+processes that produced them.
 
-In the present research design, the explainability analysis is restricted to
-one selected fully inspectable proxy model. The adopted technique must therefore
-be compatible with the model architecture, weights, preprocessing procedure,
-and inference pipeline. Depending on the selected method, access may also be
-required to gradients, intermediate activations, or other differentiable model
-components.
+The methodology adopts a case-study approach rather than an aggregate
+explainability evaluation. Representative samples are selected according to
+predefined diagnostic criteria to examine behaviors that cannot be fully
+characterized through corpus-level metrics. The selected cases are not used to
+estimate general model performance.
 
-The same internal attribution analysis cannot be applied directly to the
-selected black-box or near-black-box software systems. Their internal model
-architectures, gradients, representations, decision thresholds, and scoring
-procedures are not accessible. Comparisons involving these systems are
-therefore limited to their observable and normalized outputs. Such outputs must
-not be interpreted as explanations of the internal decision processes that
-produced them.
+High-confidence criteria are applied only within the selected proxy model and
+serve exclusively as case-selection indicators. They must not be interpreted
+as calibrated probabilities or compared directly with confidence values from
+other architectures or software systems.
 
-The explainability methodology adopts a case-study approach rather than an
-aggregate evaluation strategy. Representative samples are selected according to
-predefined diagnostic criteria. The objective is not to estimate model
-performance from a limited number of visualizations, but to examine specific
-behaviors that cannot be fully characterized through aggregate metrics alone.
-
-Relevant case categories include:
-
-\begin{itemize}
-\item a correctly classified clean sample used as a qualitative reference;
-
-\item a clean sample associated with an operationally relevant
-classification error;
-
-\item a high-confidence \gls{ood} assignment to an in-domain operational
-class;
-
-\item a clean-correct sample rendered incorrect by an anti-forensic
-transformation;
-
-\item a clean-correct sample rendered incorrect by a model-dependent
-adversarial perturbation, particularly when the resulting prediction
-retains high model confidence.
-\end{itemize}
-
-High-confidence criteria are applied only within the selected proxy model. They
-serve as diagnostic case-selection indicators and must not be interpreted as
-calibrated probabilities or compared directly with confidence values from other
-architectures or software systems.
-
-Table~\ref{tab:methodology-xai-case-selection} summarizes the diagnostic
-function of these case categories.
+Table~\ref{tab:methodology-xai-case-selection} summarizes the five case
+categories and their diagnostic functions.
 
 \begin{table}[H]
 \centering
@@ -2476,98 +2438,97 @@ function of these case categories.
 \begin{tabularx}{\textwidth}{@{}L{4.4cm}X@{}}
 \toprule
 \textbf{Case category} &
-\textbf{Diagnostic function} \\
+\textbf{Diagnostic function} \
 \midrule
 
 Correctly classified clean reference
 &
-Provide a qualitative reference for examining whether the attribution pattern
-is associated with visually relevant regions under an unmanipulated condition.
-\\
+Provides a qualitative reference for examining whether the attribution pattern
+is associated with visually relevant regions under an unmanipulated condition. \
 
 Clean classification error
 &
-Examine an error already present under the clean condition and determine
-whether the attribution pattern appears localized, diffuse, partial, or
-associated with contextual image regions. \\
+Examines an error already present under the clean condition and whether the
+attribution pattern appears localized, diffuse, partial, or associated with
+contextual image regions. \
 
 High-confidence \gls{ood} assignment
 &
-Examine the attribution pattern associated with an in-domain assignment
+Examines the attribution pattern associated with an in-domain assignment
 produced for a distributionally different input. The assignment is treated as
-an operational behavior rather than as an ordinary supervised error. \\
+an operational behavior rather than as an ordinary supervised error. \
 
 Anti-forensic induced error
 &
-Examine whether an operationally plausible image transformation is associated
-with a change in the attribution pattern and the resulting predicted class. \\
+Examines whether an operationally plausible image transformation is associated
+with a change in the attribution pattern and the resulting predicted class. \
 
 Adversarially induced error
 &
-Examine the attribution pattern associated with an incorrect prediction
+Examines the attribution pattern associated with an incorrect prediction
 produced after a model-dependent adversarial perturbation, including cases in
-which the model output remains highly confident. \\
+which the model output remains highly confident. \
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Case selection must remain traceable to the corresponding prediction records,
-source samples, experimental conditions, and model configurations. Each
-explainability artifact should therefore be associated with the evaluated
-sample, the model and checkpoint used for inference, the predicted class, the
-reference operational class, the evaluation condition, and the rationale for
-case selection.
+Case selection and the resulting explainability artifacts must remain
+traceable to the corresponding source sample, prediction record, evaluation
+condition, model configuration, and checkpoint. Each record must also preserve
+the predicted class, reference operational class, and rationale for case
+selection, consistently with the controls defined in
+Section~\ref{sec:methodology-traceability-controls}.
 
-The methodology does not prescribe a single explainability technique for every
-possible implementation of the protocol. Gradient-based attribution,
-activation-based visualization, local surrogate methods, and other
-feature-attribution approaches may be considered, provided that their
-assumptions and limitations are compatible with the selected model and the
-research questions under examination. The specific technique and configuration
-adopted in this thesis are reported in
-Chapter~\ref{chap:implementation}.
+The methodology does not prescribe a single explainability technique for all
+implementations. Gradient-based attribution, activation-based visualization,
+local surrogate methods, or other feature-attribution approaches may be used
+when their assumptions and limitations are compatible with the selected model
+and research questions. The specific technique and configuration adopted in
+this thesis are documented in Chapter~\ref{chap:implementation}.
 
-The adopted explainability procedure should satisfy the following requirements:
+The adopted procedure should satisfy the following requirements:
 
 \begin{itemize}
 \item compatibility with the selected inspectable proxy model;
-\item explicit documentation of the attribution target and reference
-baseline, where required by the method;
+\item explicit documentation of the attribution target and reference baseline,
+where required by the method;
 \item reproducibility of the attribution procedure;
-\item consistent application across the selected clean and manipulated
-cases;
-\item traceability to the model checkpoint, input sample, and prediction
-record;
-\item production of outputs that can be interpreted without being presented
-as definitive causal explanations.
+\item consistent application across the selected clean and manipulated cases;
+\item traceability to the model checkpoint, input sample, and prediction record;
+\item production of outputs that are not presented as definitive causal
+explanations.
 \end{itemize}
 
-Attribution maps and related visualizations must be interpreted cautiously.
-They characterize the relationship between input features and a selected model
-output under the assumptions of the adopted explainability method. They do not
-establish that the highlighted regions reproduce the model's internal
-reasoning, nor do they demonstrate that the resulting prediction is correct,
-reliable, or forensically valid.
+Attribution maps and related visualizations characterize relationships between
+input features and a selected model output under the assumptions of the adopted
+method. They do not establish that highlighted regions reproduce the model's
+internal reasoning or demonstrate that a prediction is correct, reliable, or
+forensically valid.
 
-When the adopted method provides completeness, approximation, or convergence
-diagnostics, these quantities should be documented and considered during
-interpretation. They constitute validation aids rather than automatic evidence
-that an attribution is complete or reliable. No strict convergence claim should
-be made unless it is supported by the recorded diagnostic values and the
-adopted acceptance criterion.
+When the selected method provides completeness, approximation, or convergence
+diagnostics, these quantities must be recorded and considered during
+interpretation. They act as validation aids and do not automatically establish
+that an attribution is complete or reliable. A strict convergence claim may be
+made only when supported by the recorded diagnostic values and an explicitly
+defined acceptance criterion.
 
-The explainability analysis must also remain distinct from the quantitative
-robustness assessment. Classification metrics measure the frequency, magnitude,
-and direction of observed errors across the experimental corpus. Explainability
-instead supports the qualitative examination of selected examples and the
-interpretation of possible changes in attribution patterns.
+Explainability remains distinct from the quantitative robustness assessment.
+Classification metrics characterize the frequency, magnitude, and direction of
+errors across the experimental corpus, whereas \gls{xai} supports the
+qualitative examination of selected decisions and failure cases. Within the
+\gls{fairlab} protocol, it therefore acts as a supporting diagnostic layer
+while preserving the distinction among technical attribution, experimental
+robustness evaluation, and evidentiary assessment by a human forensic analyst.
 
-Within the \gls{fairlab} protocol, \gls{xai} therefore acts as a supporting
-diagnostic layer. It contributes to the interpretation of representative model
-decisions and failure cases while preserving the distinction among technical
-attribution, experimental robustness evaluation, and the evidentiary assessment
-performed by a human forensic analyst.
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
