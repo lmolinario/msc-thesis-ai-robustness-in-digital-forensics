@@ -3,69 +3,46 @@
 \label{chap:implementation}
 % ─────────────────────────────────────────────────────────────────────────────
 
-
 This chapter documents the concrete implementation of the \gls{fairlab}
-methodology introduced in Chapter~\ref{chap:methodology}. It describes how the
-experimental protocol was instantiated through the preparation and freezing of
-the image corpus, the generation of deterministic data partitions, the
-training of fold-aware proxy models, the generation of adversarial and
-anti-forensic artifacts, and the construction of the forensic evaluation
-bundle.
+methodology introduced in Chapter~\ref{chap:methodology}. It describes the
+preparation and freezing of the image corpus, deterministic data partitioning,
+fold-aware proxy-model training, adversarial and anti-forensic artifact
+generation, construction of the forensic evaluation bundle, normalization of
+black-box software outputs, explainability analysis, and the controls used to
+preserve artifact identity, provenance, integrity, and reproducibility.
 
-The chapter also reports the configurations adopted for the selected black-box
-software systems, the procedures used to match and normalize their observable
-outputs, and the technical controls introduced to preserve artifact identity,
-provenance, integrity, and reproducibility. The implementation of the
-explainability workflow and the generation of the consolidated evaluation
-artifacts are documented as components of the same experimental pipeline.
+The chapter reports how the protocol was instantiated and which technical
+artifacts were produced. Quantitative outcomes and their operational
+interpretation are reported separately in Chapter~\ref{chap:results}, preventing
+implementation choices, software configurations, and data-management
+procedures from being conflated with measured robustness.
 
-The distinction between implementation and experimental evidence is maintained
-throughout the chapter. The present chapter describes how the protocol was
-realized and which technical artifacts were produced, whereas the quantitative
-outcomes and their operational interpretation are reported separately in
-Chapter~\ref{chap:results}. This separation prevents implementation choices,
-software configurations, and data-management procedures from being conflated
-with the measured robustness of the evaluated systems.
-
-A central implementation principle is that the two evaluation levels operate
-on the same frozen experimental corpus. The 1\,000 clean binary images and the
-500 clean \gls{ood} images define the common source population, while the
-10\,000 adversarial and anti-forensic artifacts are derived exclusively from
-the binary subset. The proxy models process the manifest-linked experimental
+Both evaluation levels operate on the same frozen source population. The
+1\,000 clean binary images and 500 clean \gls{ood} images constitute the source
+corpus, while 10\,000 adversarial and anti-forensic artifacts are derived
+exclusively from the binary subset. The proxy models process manifest-linked
 inputs and derived artifacts, whereas the selected black-box software systems
-receive byte-identical anonymized copies through the blind forensic evaluation
-bundle. The equivalence between these two views is verified through
-\gls{sha256} digests. Consequently, the parallel comparison is based on the
-same samples and experimental conditions rather than on independently assembled
-datasets.
+receive neutrally identified, byte-identical copies through the forensic
+evaluation bundle. Equivalence between these views is verified through
+\gls{sha256} digests.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Experimental Workflow and Implementation Environment}
 \label{sec:implementation-overview}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The experimental protocol was implemented as a staged and traceable pipeline
-covering source acquisition, dataset preparation, human-in-the-loop review,
-data partitioning, proxy-model training, perturbation generation, proxy-model
-evaluation, forensic bundle construction, black-box output normalization,
-explainability analysis, and final reporting. Each stage produces explicit
-intermediate records or artifacts that become inputs to the subsequent stage.
-These outputs include manifests, model checkpoints, prediction tables,
-integrity digests, validation reports, and consolidated metric files.
-
-The implementation is organized as a numbered sequence of scripts. This
-organization makes the execution order explicit and reduces ambiguity regarding
-the provenance of the generated outputs. The numbered pipeline begins with the
-controlled restoration or acquisition of the source corpora and continues
-through dataset preparation, human review, model training, perturbation
-generation, proxy-model evaluation, bundle construction, explainability
-analysis, black-box normalization, and reporting. Additional validation
-utilities operate on the frozen outputs without modifying the canonical
+The experimental workflow was implemented as a staged pipeline in which each
+phase produces explicit records or artifacts used by subsequent phases. The
+core numbered execution sequence comprises scripts \texttt{00}--\texttt{21},
+covering controlled data restoration, acquisition, dataset preparation, human
+review, partitioning, model training, perturbation generation, evaluation,
+bundle construction, explainability, black-box normalization, and reporting.
+Scripts \texttt{22}--\texttt{24} provide public-artifact support, frozen-result
+validation, and reporting-asset auditing without modifying the canonical
 experimental inputs, derived artifacts, or result records.
 
 Table~\ref{tab:implementation-workflow-entry-points} summarizes the main
-implementation phases, their primary entry points, and the corresponding
-technical outputs.
+implementation phases, their entry points, and their technical outputs.
 
 \begin{table}[H]
 \centering
@@ -141,60 +118,65 @@ and
 Attribution maps, human-reviewed case selections, normalized black-box
 predictions, matching reports, and software-version records. \\
 
-Reporting and validation
+Experimental reporting and sensitivity analysis
 &
-Scripts \texttt{20}--\texttt{24} under
+\codepath{results/scripts/20_generate_experimental_reporting_assets.py}
+and
+\codepath{results/scripts/21_generate_embedded_metadata_sensitivity_check.py}
+&
+Thesis-ready tables and figures, consolidated reporting assets, and
+embedded-metadata sensitivity outputs. \\
+
+Validation and public-artifact audit
+&
+Scripts \texttt{22}--\texttt{24} under
 \codepath{results/scripts/}
 &
-Thesis-ready tables and figures, embedded-metadata sensitivity outputs,
-frozen-result validation reports, and reporting-asset audits. \\
+Optional privacy-reduced sensitivity outputs, frozen-result validation reports,
+and reporting-asset usage audits. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
 At the repository level, the implementation is divided into functional
-components. Dataset preparation and bundle construction are maintained under
-\codepath{datasets/}; perturbation manifests are stored under
-\codepath{attacks/}; proxy architectures, checkpoints, and training records are
-maintained under \codepath{models/}; prediction generation and black-box output
-normalization are organized under \codepath{evaluation/}; explainability
-artifacts are maintained under \codepath{explainability/}; and consolidated
-metrics, reporting assets, and validation utilities are stored under
-\codepath{results/}. The authoritative thesis source is maintained separately
-under \codepath{docs/LatexThesis/}.
+components. Dataset preparation, split generation, and bundle construction are
+maintained under \codepath{datasets/}; perturbation manifests and reports under
+\codepath{attacks/}; proxy architectures, checkpoints, and training records
+under \codepath{models/}; proxy predictions and normalized black-box outputs
+under \codepath{evaluation/}; commercial-tool documentation and sanitized
+extracts under \codepath{forensic_tools/}; explainability scripts and artifacts
+under \codepath{explainability/}; and consolidated metrics, reporting assets,
+and validators under \codepath{results/}. The authoritative thesis source is
+maintained under \codepath{docs/LatexThesis/}.
 
-The software implementation was managed through Python virtual environments.
-The workflow was executed in Windows and Linux environments, including Windows
-PowerShell and Kali Linux, depending on the requirements of each stage. The
-black-box evaluations additionally required compatible licensed installations
-of the selected software systems. The Python dependency set is declared in the
-repository-level \codepath{requirements.txt} file and includes the libraries
-used for numerical processing, image manipulation, proxy-model training and
-inference, adversarial generation, explainability, visualization, and source
-acquisition. The deep-learning implementation is based on PyTorch and
-Torchvision, with \texttt{open\_clip\_torch} used for the \gls{clip}-based
-proxy model and Captum used for the Integrated Gradients workflow.
+The implementation was managed through Python virtual environments and executed
+across Windows PowerShell and Linux/Kali environments according to the
+requirements of each stage. Black-box processing additionally required licensed
+installations of the selected software systems. The repository-level
+\codepath{requirements.txt} file defines the Python dependency set, including
+the libraries used for data processing, image manipulation, proxy-model
+training and inference, adversarial generation, source acquisition,
+visualization, and explainability. PyTorch and Torchvision provide the
+deep-learning framework, \texttt{open\_clip\_torch} supports the
+\gls{clip}-based proxy model, and Captum supports the \gls{ig} workflow.
 
-The code supports both CPU and CUDA-enabled execution, with device selection
-depending on the computational requirements of the individual stage and the
-available execution environment. Lightweight operations, including manifest
-inspection, output normalization, metric validation, and reporting audits, can
-be performed without dedicated acceleration. Proxy-model training, iterative
-adversarial generation, and explainability regeneration constitute the most
-computationally demanding stages.
+The code supports CPU and CUDA-enabled execution. Manifest inspection, output
+normalization, metric validation, and reporting audits can be performed without
+dedicated acceleration, whereas proxy-model training, iterative adversarial
+generation, and explainability regeneration constitute the most computationally
+demanding stages.
 
 The repository is distributed as a research artifact rather than as a
 self-contained software package or a byte-identical operating-system image.
-Accordingly, procedural reproducibility and artifact-level auditability are
-supported through numbered scripts, frozen manifests, fold-aware checkpoints,
-prediction tables, explicit parameters, integrity hashes, validation reports,
-and controlled experimental artifacts. The public repository retains the
-material required for structural inspection, metric recomputation, and audit,
-whereas the complete image corpora, the exact frozen black-box input bundle, and
-the complete proprietary software exports remain subject to controlled access.
-This boundary supports auditability and partial experimental reproduction
-without redistributing restricted, licensed, or otherwise non-public material.
+Procedural reproducibility and artifact-level auditability are supported
+through numbered scripts, frozen manifests, fold-aware checkpoints, prediction
+tables, explicit parameters, integrity digests, validation reports, and
+controlled experimental artifacts. The public repository provides the material
+required for structural inspection, metric recomputation, reporting validation,
+and audit, while the complete image corpora, exact frozen black-box input
+bundle, and complete proprietary software exports remain subject to controlled
+access.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
