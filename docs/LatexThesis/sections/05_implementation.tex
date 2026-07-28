@@ -2013,29 +2013,19 @@ The transformed artifacts are subsequently incorporated into the forensic
 evaluation bundle described in
 Section~\ref{sec:implementation-forensic-bundle}.
 
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Forensic Evaluation Bundle Construction}
 \label{sec:implementation-forensic-bundle}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The forensic evaluation bundle was constructed through:
-
-\begin{center}
-\codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py}
-\end{center}
-
-The bundle constitutes the operational interface between the controlled
-experimental pipeline and the black-box evaluation of the selected software
-systems. It consolidates the clean binary images, the clean \gls{ood} branch,
-the adversarial artifacts, and the anti-forensic artifacts into a single
-logical corpus while preserving the identity, provenance, experimental
-condition, and cryptographic integrity of every item.
+The forensic evaluation bundle was constructed through
+\codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py}. It
+constitutes the operational interface between the controlled experimental
+pipeline and the black-box evaluation of the selected software systems. The
+builder consolidates clean binary inputs, clean \gls{ood} inputs, adversarial
+artifacts, and anti-forensic artifacts while preserving the identity,
+provenance, experimental condition, and cryptographic integrity of every
+logical item.
 
 The builder consumes the following canonical inputs:
 
@@ -2053,8 +2043,7 @@ The builder consumes the following canonical inputs:
 \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}.
 \end{itemize}
 
-The resulting logical corpus contains 11\,500 items. Its composition is
-reported in
+The frozen execution produced the 11\,500-item logical corpus reported in
 Table~\ref{tab:implementation-forensic-bundle-composition}.
 
 \begin{table}[H]
@@ -2082,8 +2071,8 @@ Clean \gls{ood} inputs
 &
 500
 &
-The separate out-of-distribution evaluation branch, without experimentally
-applied adversarial or anti-forensic processing. \\
+Separate out-of-distribution evaluation inputs without experimentally applied
+adversarial or anti-forensic processing. \\
 
 Adversarial inputs
 &
@@ -2172,7 +2161,7 @@ EfficientNet-B0, ResNet18, and CLIP-based proxy};
 
 \node[box, fill=orange!10] (blackbox) at (4.2,-14.1)
 {\textbf{Black-box software evaluation}\\
-Magnet AXIOM/Magnet.AI; Magnet Griffeye/T3K CORE;\\
+Magnet AXIOM/Magnet.AI; Griffeye/T3K CORE;\\
 Excire Foto 2025; Cellebrite Inseyets};
 
 \node[box, fill=green!10] (proxout) at (-4.2,-16.8)
@@ -2224,31 +2213,28 @@ explainability for EfficientNet-B0, and traceability controls}
 \label{fig:implementation-fairlab-instantiation}
 \end{figure}
 
-
 Across the complete bundle, the experimental-group distribution is:
 
 \begin{equation}
-5,500\ \texttt{weapon}
+5\,500\ \texttt{weapon}
 +
-5,500\ \texttt{non\_weapon}
+5\,500\ \texttt{non\_weapon}
 +
 500\ \texttt{ood}
 =
 11\,500\ \text{items}.
 \end{equation}
 
-For each binary source image, the bundle includes the clean input and the ten
-corresponding perturbed artifacts. The \gls{ood} inputs appear only once
-because they are evaluated in their clean state and are excluded from the
-perturbation-generation stages.
+For each binary source image, the bundle contains the clean input and its ten
+corresponding perturbed artifacts. Each \gls{ood} input appears once because
+the \gls{ood} branch is evaluated in its clean state and is excluded from
+perturbation generation.
 
 A central implementation requirement was the separation between the files
-provided to the selected black-box software systems and the metadata required
-for subsequent normalization. Directory names and file names containing binary
-reference assignments, perturbation names, fold identifiers, target proxy-model
-names, or \gls{ood} indicators could reveal experimental descriptors to the
-software or the human analyst. The bundle was therefore materialized through
-three distinct views.
+provided to the black-box software systems and the control metadata required
+for subsequent normalization. The bundle was therefore materialized through
+the three views reported in
+Table~\ref{tab:implementation-forensic-bundle-views}.
 
 \begin{table}[H]
 \centering
@@ -2268,8 +2254,9 @@ three distinct views.
 &
 Black-box software input
 &
-Flat directory containing anonymized image files with no explicit semantic or
-experimental descriptors in their paths or file names. \\
+Flat directory containing neutrally identified files with no explicit
+reference assignments, perturbation names, fold identifiers, target-model
+names, or \gls{ood} indicators in their paths or file names. \\
 
 \codepath{datasets/forensic_evaluation_bundle/structured_audit_view/}
 &
@@ -2284,179 +2271,154 @@ perturbation names, and target-model information where applicable. \\
 Post-processing and traceability
 &
 Manifests, hash mappings, bundle summary, and embedded-metadata audit records
-used to reconstruct the reference assignments and experimental conditions after
-the black-box exports have been obtained. \\
+used to reconstruct reference assignments and experimental conditions after the
+black-box exports have been obtained. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Only the following flat directory was imported into the selected black-box
-software systems:
-
-\begin{center}
+Only
 \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}
-\end{center}
+was imported into the selected black-box software systems. The metadata and
+structured audit views were excluded from the imported corpus.
 
-The metadata and structured audit directories were excluded from the imported
-corpus. This separation prevents the evaluated systems from accessing
-experiment-specific directory structures and prevents the analyst from
-inferring the expected assignment or perturbation condition directly from the
-file path during the initial evaluation. It does not conceal the visual content
-of the image or any perturbation effect that is perceptible from the image
-itself.
+This separation prevents experiment-specific descriptors from being disclosed
+directly through the imported directory hierarchy or file names and limits the
+analyst's access to the hidden control mapping during the initial evaluation.
+It does not conceal the visual content of an image, perceptible perturbation
+effects, or information that may remain embedded within the image file itself.
 
-Every bundle item was assigned a sequential identifier using the format:
+Every logical item was assigned a sequential identifier from
+\texttt{bundle\_000001} through \texttt{bundle\_011500}. Blind file names
+contain only this identifier and the source file's format extension, as in
+\texttt{bundle\_000001.jpg} or \texttt{bundle\_000002.png}.
 
-\begin{center}
-\texttt{bundle\_000001}
-\end{center}
+The identifiers are neutral and deterministic rather than semantically
+descriptive. The bundle builder does not claim to randomize the logical item
+ordering; blindness is achieved through neutral naming, flat-path
+materialization, exclusion of the internal mapping, and separation of control
+metadata from the imported directory.
 
-through:
+The source file format is retained, with the corresponding extension
+normalized to lowercase. The builder performs no conversion, resizing,
+recompression, or metadata sanitization. Files are copied without modifying
+their byte content.
 
-\begin{center}
-\texttt{bundle\_011500}
-\end{center}
+Blind file names are checked against a list of forbidden semantic and
+experimental tokens, including binary assignment values, \gls{ood}
+indicators, perturbation names, fold identifiers, and proxy-model names. The
+file stem must also correspond exactly to the assigned bundle identifier.
 
-The blind file name contains only the bundle identifier and the original file
-extension, for example:
+The structured audit view reproduces the experimental hierarchy separately.
+Clean inputs are organized by fold and reference assignment; \gls{ood} inputs
+are maintained under the dedicated evaluation branch; adversarial artifacts are
+organized by condition, target model, fold, and reference assignment; and
+anti-forensic artifacts are organized by transformation, fold, and reference
+assignment. This view supports internal verification and must not be imported
+into the black-box software systems.
 
-\begin{center}
-\texttt{bundle\_000001.jpg}
-\end{center}
-
-or:
-
-\begin{center}
-\texttt{bundle\_000002.png}
-\end{center}
-
-The original extension is retained because the experimental conditions include
-both JPEG-encoded and lossless PNG artifacts. No conversion, rescaling,
-recompression, or metadata sanitization is performed by the bundle builder.
-Files are copied without modifying their byte content.
-
-The implementation explicitly checks blind file names against a collection of
-forbidden semantic and experimental tokens. These tokens include the binary
-assignment values, \gls{ood} indicators, perturbation names, fold identifiers,
-and proxy-model names. Blind-path validation also requires the file stem to
-correspond exactly to the assigned bundle identifier.
-
-The structured audit view is maintained separately and reproduces the
-experimental hierarchy. Clean inputs are organized by fold and reference
-assignment; \gls{ood} inputs are maintained under the separate evaluation
-branch; adversarial artifacts are organized by condition, target model, fold,
-and reference assignment; and anti-forensic artifacts are organized by
-transformation, fold, and reference assignment. Structured file names include
-both the bundle identifier and the corresponding generated-image identifier.
-This view supports internal verification but must not be used as input to the
-black-box software systems.
-
-The canonical bundle mapping is stored as:
-
-\begin{center}
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
-\end{center}
-
-For each of the 11\,500 logical items, the manifest records:
+The canonical mapping is stored in
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}.
+For each logical item, it records:
 
 \begin{itemize}
 \item the assigned \texttt{bundle\_id} and blind input file name;
-\item the sample type and perturbation family;
-\item the perturbation name and target proxy model, when applicable;
+\item the sample type, perturbation family, and perturbation name;
+\item the target proxy model, when applicable;
 \item the fold and reference operational assignment;
 \item the source dataset;
 \item the original and generated image identifiers;
-\item the source manifest and source file path;
+\item the originating manifest and source file path;
 \item the blind and structured bundle paths;
-\item the original, manifest-recorded, and copied-file hashes;
-\item the hash-verification result;
-\item the output size, extension, layout, and creation timestamp.
+\item the original, manifest-recorded, and materialized-file hashes;
+\item the hash-comparison result;
+\item the file size, extension, layout, and creation timestamp.
 \end{itemize}
 
-This mapping permits a black-box result associated only with an anonymized file
-name to be reconnected, after export, to its source image, reference operational
-assignment, fold, and experimental condition. The mapping is withheld during
-the blind analysis and used only during the normalization stage described in
+This mapping reconnects a black-box result associated with a neutral file name
+to its source image, reference assignment, fold, and experimental condition.
+It is withheld during the blind evaluation and used during output normalization
+as described in
 Section~\ref{subsec:implementation-normalization}.
 
-A reduced hash-oriented mapping is also stored as:
+A reduced hash-oriented mapping is stored in
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}.
+Despite its name, the file contains both \gls{sha256} and \gls{md5} values. It
+associates these digests with the bundle identifier, blind file name, sample
+type, perturbation information, reference assignment, and source identifiers.
+SHA-256 remains the primary integrity identifier, whereas MD5 supports matching
+against software exports that expose MD5-oriented fields.
 
-\begin{center}
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}
-\end{center}
+During materialization, the copied file is hashed and compared with the value
+recorded in its originating manifest. The frozen summary confirms that all
+available manifest-recorded SHA-256 values correspond to the materialized
+files. It also confirms uniqueness of the 11\,500 bundle identifiers and
+materialized-file SHA-256 values.
 
-Despite its file name, this record contains both \gls{sha256} and \gls{md5}
-values. It associates the cryptographic digests with the bundle identifier,
-blind file name, sample type, perturbation information, reference operational
-assignment, and original and generated image identifiers. The auxiliary
-\gls{md5} value supports matching against software systems that expose
-MD5-oriented export fields, while \gls{sha256} remains the primary integrity
-identifier.
-
-During materialization, each copied file is hashed and compared with the value
-recorded in its originating manifest. The bundle summary confirms that all
-manifest-recorded hashes correspond to the copied files. It also verifies that
-the 11\,500 bundle identifiers and logical-item \gls{sha256} values are unique.
-
-The principal run-level record is:
-
-\begin{center}
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_summary.json}
-\end{center}
-
-The summary records the bundle layout, output locations, counts by sample type,
-perturbation family, perturbation name, and reference operational assignment,
-together with the following validation conditions:
+The principal run-level record is
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_summary.json}.
+It records the selected layout, output locations, and counts by sample type,
+perturbation family, perturbation name, and reference assignment. Four
+validation conditions are computed directly:
 
 \begin{itemize}
-\item uniqueness of all bundle identifiers;
-\item uniqueness of all logical-item \gls{sha256} values;
-\item agreement between copied-file and manifest-recorded hashes;
-\item absence of forbidden semantic and experimental tokens from blind
-paths;
-\item separation of internal metadata from the black-box input directory.
+\item uniqueness of the bundle identifiers;
+\item uniqueness of the materialized-file \gls{sha256} values;
+\item agreement between manifest-recorded and materialized-file SHA-256 values
+whenever a manifest digest is available;
+\item absence of forbidden semantic and experimental tokens from blind paths.
 \end{itemize}
 
-All five checks were satisfied by the frozen bundle.
+The summary additionally records the structural condition that the metadata
+directory is separate from the black-box input directory. All computed checks
+were satisfied by the frozen bundle, whose layout was materialized in combined
+mode.
 
-An additional audit examines metadata embedded within the image files
-themselves. The audit is implemented as a non-destructive inspection and
-produces:
+An additional non-destructive audit examines metadata embedded within the blind
+input files. The audit produces:
 
-\begin{center}
-\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv}
-\end{center}
+\begin{itemize}
+\item
+\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv};
 
-and:
+\item
+\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit_summary.json}.
+\end{itemize}
 
-\begin{center}
-\codepath{datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit_summary.json}
-\end{center}
+For each blind input, the audit inspects readable image-information fields and
+EXIF entries and searches their keys and values for terms that may reveal
+reference assignments, perturbation conditions, fold identifiers, model names,
+weapon-related descriptors, or other potentially informative content.
 
-For each blind input, the procedure inspects readable image-information fields
-and EXIF entries and searches them for terms that could expose binary
-assignments, perturbation conditions, fold identifiers, model names, or other
-experiment-revealing descriptors. The audit does not remove or rewrite
-metadata because doing so would change the files supplied to the selected
-black-box software systems. Its purpose is to document this potential
-information channel and support a separate sensitivity assessment. The audit
-does not by itself establish that any evaluated system accessed or used the
-identified metadata. The corresponding findings are reported in
-Section~\ref{subsec:results-embedded-metadata-sensitivity}.
+The audit does not remove or rewrite metadata, because doing so would alter the
+files supplied to the selected black-box systems. Its purpose is to document a
+potential residual information channel and support the separate sensitivity
+analysis reported in
+Section~\ref{subsec:results-embedded-metadata-sensitivity}. The presence of a
+matched term does not by itself demonstrate that a black-box system accessed,
+interpreted, or used the corresponding metadata.
 
-The bundle can be generated in blind-only, structured-only, or combined mode.
-The frozen execution used the combined layout. It materialized the same
-11\,500 logical items in both the blind and structured views, resulting in
-11\,500 files per view. Rebuilding an existing bundle requires the explicit
-\texttt{--force} option, which removes the previous bundle directory before
-materializing the new corpus.
+The bundle builder supports blind-only, structured-only, and combined layouts.
+The frozen execution used the combined layout and materialized the same 11\,500
+logical items in both operational views, producing 11\,500 blind files and
+11\,500 structured audit copies. Rebuilding an existing bundle requires the
+explicit \texttt{--force} option, which removes the existing bundle directory
+before materialization.
 
 The completed bundle provides a stable and auditable input population for the
-selected black-box software systems. The concrete versions, import procedures,
-classification categories, retrieval configurations, and export formats adopted
-for those systems are documented in
+selected black-box software systems. Their concrete versions, import
+procedures, classification categories, retrieval configurations, and export
+formats are documented in
 Section~\ref{sec:implementation-forensic-tools}.
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
