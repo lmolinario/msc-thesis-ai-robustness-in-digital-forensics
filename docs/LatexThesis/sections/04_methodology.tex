@@ -1293,14 +1293,6 @@ clean binary samples and the separate clean \gls{ood} inputs}
 \label{fig:methodology-perturbation-workflow}
 \end{figure}
 
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial Evaluation Methodology}
 \label{sec:methodology-adversarial-attacks}
@@ -1308,123 +1300,86 @@ clean binary samples and the separate clean \gls{ood} inputs}
 
 The adversarial component of the \gls{fairlab} protocol evaluates whether
 controlled input modifications can alter the behavior of automated image
-classifiers while preserving the relationship between each adversarial artifact
-and its corresponding clean sample.
-
-Adversarial examples are generated exclusively from the binary in-domain
-subset. The clean \gls{ood} branch remains excluded because it addresses
-distributional mismatch rather than robustness to deliberate input
-manipulation, as established in
+classifiers while preserving the relationship between each generated artifact
+and its corresponding clean sample. Adversarial artifacts are generated
+exclusively from the binary in-domain subset; the clean \gls{ood} branch
+remains excluded because it addresses distributional mismatch rather than
+robustness to deliberate input manipulation, as established in
 Section~\ref{sec:methodology-split-generation}.
 
-The methodology distinguishes between model-dependent attacks and
-model-agnostic adversarial-style conditions. Model-dependent attacks are
-generated against a designated source model under explicit access assumptions.
-Depending on the attack, these assumptions may include access to gradients,
-decision-boundary information, internal model properties, or observable output
-scores. Model-agnostic conditions instead modify the image according to
-predefined rules without querying or optimizing against a specific classifier.
+Consistently with
+Section~\ref{sec:methodology-perturbation-selection-rationale}, the methodology
+distinguishes model-dependent attacks from model-agnostic adversarial-style
+conditions. Model-dependent attacks are generated against a designated source
+model under explicit access assumptions that may include gradients, internal
+model properties, decision-boundary information, or observable output scores.
+Model-agnostic conditions instead apply predefined modifications without
+querying or optimizing against a specific classifier.
 
 The selected model-dependent attacks should provide complementary coverage of
-different adversarial mechanisms. Depending on the objectives of the study,
-these mechanisms may include single-step gradient perturbations, sparse or
-localized score-based modifications, iterative optimization procedures, and
-decision-boundary-based attacks
+different adversarial mechanisms, including single-step gradient
+perturbations, sparse or localized score-based modifications, iterative
+optimization procedures, and decision-boundary-based attacks
 \cite{goodfellow2015explaining,su2019onepixel,zhao2024sigmazero,moosavi2016deepfool}.
-
-The protocol does not aim to provide an exhaustive benchmark of adversarial
-robustness or a comprehensive comparison of all available attack algorithms.
-Such an objective would require extensive parameter sweeps and standardized
-attack suites specifically designed for adversarial machine-learning
-evaluation
-\cite{madry2018towards,croce2020autoattack}.
-
-Instead, the attack set is selected to support the operational objectives of
-the thesis. The selected conditions must be computationally feasible,
-reproducible, sufficiently heterogeneous, and suitable for evaluating both
-direct source-model vulnerability and, where applicable, transfer behavior
-across different classification systems.
+The protocol does not aim to provide an exhaustive adversarial-robustness
+benchmark or a comprehensive comparison of all available attack algorithms,
+which would require extensive parameter sweeps and standardized attack suites
+\cite{madry2018towards,croce2020autoattack}. Instead, the attack set is selected
+to be computationally feasible, reproducible, sufficiently heterogeneous, and
+suitable for direct vulnerability and transferability analyses.
 
 Model-dependent adversarial examples are generated against the primary proxy
-target introduced in
+target defined in
 Section~\ref{sec:methodology-models-classification}. For each held-out sample,
-the generation process must use the fold-specific model checkpoint that was
-trained without that sample. This requirement preserves the separation between
-training and evaluation and prevents information leakage between the clean
-input and the model used to construct its adversarial variant.
+generation must use the corresponding fold-specific checkpoint trained without
+that sample. This requirement preserves the separation between model fitting,
+attack generation, and evaluation and prevents information leakage.
 
 Each generated artifact must retain an explicit association with:
 
 \begin{itemize}
-\item the original clean sample;
-\item the corresponding experimental fold;
-\item the reference operational class;
-\item the attack family or adversarial-style condition;
-\item the source model, when applicable;
-\item the model checkpoint or configuration used for generation, when
-applicable;
-\item the generation parameters;
-\item the resulting output artifact;
-\item the information required to verify integrity and provenance.
+\item the original clean sample, reference operational class, and experimental
+fold;
+\item the attack family or model-agnostic condition;
+\item the source model, checkpoint, and access assumption, when applicable;
+\item the generation parameters and resulting output artifact;
+\item the information required to reconstruct the generation condition;
+\item the information required to verify identity, integrity, and provenance.
 \end{itemize}
 
-The methodology does not prescribe a specific manifest format, directory
-structure, serialization technology, or hashing algorithm. The adopted
-implementation must nevertheless preserve sufficient information to reproduce
-the generation process and verify the relationship among clean inputs,
-adversarial artifacts, and, where applicable, the corresponding proxy-model
-configuration.
-
-Model-agnostic adversarial-style conditions may also be included when they serve
-a distinct experimental purpose. Such conditions do not constitute white-box or
-score-based adversarial attacks because they are not optimized against a source
-model. However, they may be evaluated within the adversarial branch when their
-purpose is to examine whether controlled visual changes intended to preserve
-the task-relevant semantic content alter classification behavior.
-
-This distinction must remain explicit throughout the analysis. Model-dependent
-attacks evaluate vulnerability under defined access assumptions and support
-direct and transfer evaluations. Model-agnostic adversarial-style conditions
-instead evaluate sensitivity to reproducible visual changes applied
-independently of the evaluated models and software systems.
-
-The output representation should minimize unintended changes unrelated to the
-selected adversarial mechanism. When the chosen encoding introduces additional
-compression or representation effects, those effects must be documented and
-considered during interpretation.
+The output representation should minimize changes unrelated to the selected
+adversarial mechanism. Any additional compression, encoding, or representation
+effect introduced during artifact generation must be documented and considered
+when interpreting the resulting classification behavior.
 
 Attack generation and robustness evaluation are treated as separate phases.
-Information produced during generation, including whether an attack changed
-the source-model prediction, may be retained as technical metadata. However,
-such information is not treated as a final robustness result until the
-generated artifacts are evaluated through the common metric and comparison
-framework.
+Generation metadata may record whether an attack changed the prediction of the
+source model, but such an outcome does not by itself constitute a final
+robustness result. The generated artifact must subsequently be evaluated
+through the common metric and comparison framework.
 
-Model-dependent adversarial artifacts are subsequently evaluated under three
-complementary conditions:
+Model-dependent artifacts are assessed through the direct source-model,
+cross-model transfer, and black-box transfer conditions defined in
+Section~\ref{sec:methodology-models-classification}. The black-box condition
+measures only observable transfer behavior and does not imply access to the
+internal properties of the selected software systems.
 
-\begin{enumerate}
-\item \textit{direct source-model evaluation}, in which each artifact is
-evaluated against the fold-specific proxy-model checkpoint used for its
-generation;
-
-\item \textit{cross-model transfer evaluation}, in which the same artifact
-is evaluated against different proxy architectures;
-
-\item \textit{black-box transfer evaluation}, in which the same artifact is
-submitted to the selected black-box software systems to examine observable
-transfer behavior.
-\end{enumerate}
-
-Model-agnostic adversarial-style artifacts are evaluated across the proxy models
-and selected black-box software systems under the same manipulated condition.
-Because these artifacts are not generated against a designated source model,
-differences in system behavior are interpreted as response variation under a
-shared condition rather than as adversarial transferability.
+Model-agnostic adversarial-style artifacts are evaluated across the proxy
+models and selected black-box software systems under the same manipulated
+condition. Because they are generated independently of a designated source
+model, differences in system behavior are interpreted as response variation
+under a shared condition rather than as adversarial transferability.
 
 The specific attack algorithms, model configurations, parameter values, output
-formats, and traceability artifacts adopted in this thesis are reported in
-Chapter~\ref{chap:implementation}.
+representations, and traceability artifacts adopted in this thesis are
+documented in Chapter~\ref{chap:implementation}.
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
