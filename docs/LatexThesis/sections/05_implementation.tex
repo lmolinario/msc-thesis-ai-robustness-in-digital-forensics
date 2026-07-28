@@ -1580,12 +1580,12 @@ by
 \(T(\mathbf{x};\boldsymbol{\theta})\) denote the corresponding transformed
 image. The implemented score-based objective is:
 
-\begin{equation}
-\min_{\boldsymbol{\theta}}
+\[
+\begin{aligned}
+\min_{\boldsymbol{\theta}}\quad &
 p_y\!\left(T(\mathbf{x};\boldsymbol{\theta})\right)
-\qquad
-\text{subject to}
-\qquad
+\\
+\text{subject to}\quad &
 \left|
 \left\{
 (i,j):
@@ -1594,8 +1594,9 @@ T(\mathbf{x};\boldsymbol{\theta})_{ij}
 \mathbf{x}_{ij}
 \right\}
 \right|
-\leq 1,
-\end{equation}
+\leq 1.
+\end{aligned}
+\]
 
 where \(p_y(\cdot)\) is the probability assigned by the fold-specific target
 model to the reference class \(y\). The constraint applies to pixel locations,
@@ -1620,19 +1621,20 @@ the EfficientNet-B0 checkpoint so that model normalization is reapplied before
 logit computation. The untargeted sparse-perturbation objective can be
 summarized as:
 
-\begin{equation}
-\min_{\mathbf{x}_{\mathrm{adv}} \in [0,1]^d}
+\[
+\begin{aligned}
+\min_{\mathbf{x}_{\mathrm{adv}} \in [0,1]^d}\quad &
 \left\|
 \mathbf{x}_{\mathrm{adv}}-\mathbf{x}
 \right\|_0
-\qquad
-\text{subject to}
-\qquad
+\\
+\text{subject to}\quad &
 \operatorname*{arg\,max}_{k}
 f_k(\mathbf{x}_{\mathrm{adv}})
 \neq
-y,
-\end{equation}
+y.
+\end{aligned}
+\]
 
 where \(f_k(\cdot)\) is the logit associated with class \(k\). The discrete
 objective is approximated through the iterative optimization and adaptive
@@ -1649,22 +1651,24 @@ the gradient difference between the boundary and reference classes.
 
 The frozen untargeted objective is:
 
-\begin{equation}
-\min_{\boldsymbol{\delta}}
+\[
+\begin{aligned}
+\min_{\boldsymbol{\delta}}\quad &
 \left\|
 \boldsymbol{\delta}
 \right\|_{\infty}
-\qquad
-\text{subject to}
-\qquad
+\\
+\text{subject to}\quad &
 \operatorname*{arg\,max}_{k}
 f_k(\mathbf{x}+\boldsymbol{\delta})
 \neq
 y,
-\qquad
+\\
+&
 \mathbf{x}+\boldsymbol{\delta}
 \in [0,1]^d.
-\end{equation}
+\end{aligned}
+\]
 
 At a boundary point \(\mathbf{x}_{b}\), the projection uses:
 
