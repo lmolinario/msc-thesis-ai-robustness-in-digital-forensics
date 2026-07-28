@@ -811,78 +811,46 @@ folds and the separate \gls{ood} evaluation manifest is described in
 Section~\ref{subsec:implementation-split-generation}.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Dataset Partitioning and Fold Generation}
 \label{subsec:implementation-split-generation}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The frozen manifests were converted into the operational dataset partitions by:
+The frozen dataset was converted into operational evaluation partitions by
+\codepath{datasets/scripts/splits/11_generate_clean_and_ood_splits.py}. The
+script consumes the complete frozen manifest
+\codepath{datasets/final/manifests/manual_selection_final_1500.csv} and the
+balanced binary manifest
+\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}.
 
-\begin{center}
-\codepath{datasets/scripts/splits/11_generate_clean_and_ood_splits.py}
-\end{center}
+Before generating any output, the script verifies the presence of the required
+fields, accepted reference assignments, expected sample counts, uniqueness of
+the image identifiers and \gls{sha256} digests within each input manifest, and
+availability of the corresponding prepared image files. The complete manifest
+must contain exactly 500 \texttt{weapon}, 500 \texttt{non\_weapon}, and 500
+\texttt{ood} records, while the binary manifest must contain exactly 500
+samples from each supervised class. Execution terminates when any validation
+condition is not satisfied.
 
-The script consumes the two canonical manifests produced by the manual review
-stage:
+The 1\,000-image binary subset was partitioned into five deterministic folds
+using \texttt{seed = 42}. Each fold contains exactly 200 images, comprising
+100 \texttt{weapon} and 100 \texttt{non\_weapon} samples. Class balance is
+enforced as a hard constraint, whereas source balance is optimized as a
+secondary objective because the source distributions of the two classes are
+not uniform.
 
-\begin{center}
-\codepath{datasets/final/manifests/manual_selection_final_1500.csv}
-\end{center}
+Fold assignment is performed independently within each class--source stratum.
+The records in each stratum are shuffled using a deterministic pseudo-random
+generator initialized from the global seed, class assignment, and source
+identifier. Each sample is then assigned to a fold that has not reached its
+class quota. Among eligible folds, the implementation selects the fold with the
+lowest existing count for the same class and source, followed by the lowest
+current class occupancy and the fold identifier as deterministic tie-breaking
+criteria.
 
-and:
-
-\begin{center}
-\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
-\end{center}
-
-Before generating any output, the implementation validates the required
-manifest fields, the expected number of samples, the accepted assignment
-values, the uniqueness of the image identifiers and \gls{sha256} values, and
-the availability of the corresponding prepared image files. The complete
-manifest must contain exactly 500 \texttt{weapon}, 500
-\texttt{non\_weapon}, and 500 \texttt{ood} records, whereas the binary subset
-must contain exactly 500 samples for each of the two supervised classes.
-Generation is interrupted when any of these conditions is not satisfied.
-
-The binary subset was partitioned into five deterministic folds using the fixed
-seed:
-
-\begin{center}
-\texttt{seed = 42}
-\end{center}
-
-Each fold contains exactly 200 images, comprising 100 \texttt{weapon} and 100
-\texttt{non\_weapon} samples. Class balance is enforced as a hard constraint,
-whereas source balance is treated as a secondary optimization objective. This
-distinction is necessary because the source distributions of the two classes
-are not identical and cannot always be divided uniformly across all folds.
-
-The fold-assignment procedure operates independently for each class--source
-stratum. The records belonging to a specific stratum are shuffled using a
-deterministic pseudo-random generator derived from the global seed, class
-assignment, and source identifier. Each image is then assigned to an eligible
-fold that has not reached its class quota. Among the eligible folds, priority
-is given to the fold containing the lowest current number of samples from the
-same source and class. The current overall class occupancy and the fold
-identifier are used as secondary tie-breaking criteria.
-
-This procedure guarantees the class distribution reported in
-Table~\ref{tab:implementation-clean-fold-composition} while approximating
-source balance without relaxing the mandatory per-class quotas.
+This procedure enforces the class distribution reported in
+Table~\ref{tab:implementation-clean-fold-composition} while approximating source
+balance without relaxing the mandatory class quotas.
 
 \begin{table}[H]
 \centering
@@ -934,74 +902,44 @@ source balance without relaxing the mandatory per-class quotas.
 \end{tabular}
 \end{table}
 
-The corresponding image files were copied to the following class-aware
-structure:
+The corresponding files were copied to class-aware directories following the
+pattern
+\codepath{datasets/splits/clean/fold_<n>/<class>/}, where
+\texttt{<n>} ranges from \texttt{1} to \texttt{5} and
+\texttt{<class>} is either \texttt{weapon} or
+\texttt{non\_weapon}.
 
-\begin{center}
-\codepath{datasets/splits/clean/fold_1/weapon/}
-\end{center}
+During each copy operation, the script computes both \gls{sha256} and
+\gls{md5} digests. The copied SHA-256 value is compared with the digest stored
+in the frozen manifest, and any mismatch terminates execution. SHA-256 remains
+the primary integrity control, whereas MD5 is retained as an auxiliary
+interoperability identifier because it may be exposed by forensic software
+exports and hash-based workflows.
 
-\begin{center}
-\codepath{datasets/splits/clean/fold_1/non_weapon/}
-\end{center}
+The clean partition is documented in
+\codepath{datasets/splits/manifests/clean_folds_manifest.csv}. For each sample,
+the manifest records its image identifier, assigned fold, reference operational
+assignment, source dataset and source group, original source information,
+prepared path, split path, SHA-256 and MD5 values, file size, extension, and
+experimental-condition descriptors. Clean records are marked with
+\texttt{sample\_type = clean},
+\texttt{attack\_family = none}, and
+\texttt{attack\_name = clean}.
 
-with the same structure repeated through \texttt{fold\_5}. During each copy
-operation, the implementation computed both \gls{sha256} and \gls{md5}
-digests. The copied \gls{sha256} value was compared with the digest stored in
-the frozen selection manifest, and any mismatch caused the pipeline to
-terminate. \gls{sha256} therefore remains the primary integrity control,
-whereas \gls{md5} is retained only as an auxiliary interoperability identifier
-because it is commonly exposed by forensic software exports and hash-based
-workflows.
-
-The canonical record of the clean partition is:
-
-\begin{center}
-\codepath{datasets/splits/manifests/clean_folds_manifest.csv}
-\end{center}
-
-For each sample, this manifest records the image identifier, assigned fold,
-reference operational assignment, source dataset and source group, original
-source information, prepared path, generated split path, \gls{sha256} and
-\gls{md5} values, file size, extension, sample type, and
-experimental-condition descriptors. Clean records are explicitly marked with:
-
-\begin{center}
-\texttt{sample\_type = clean}
-\end{center}
-
-\begin{center}
-\texttt{attack\_family = none}
-\end{center}
-
-and:
-
-\begin{center}
-\texttt{attack\_name = clean}
-\end{center}
-
-The 500 \gls{ood} samples were not partitioned into folds. They were copied to
-a single, separate evaluation branch:
-
-\begin{center}
+The 500 \gls{ood} samples are not assigned to the binary folds. They are copied
+to
 \codepath{datasets/splits/ood/ood_eval_set/ood/}
-\end{center}
+and documented in
+\codepath{datasets/splits/manifests/ood_eval_manifest.csv}. These records
+preserve the same identity, provenance, path, integrity, and file-level
+information used for the clean partitions. They are assigned to the logical
+partition \texttt{ood\_eval\_set} and marked with
+\texttt{sample\_type = ood},
+\texttt{attack\_family = none}, and
+\texttt{attack\_name = ood}.
 
-and documented through:
-
-\begin{center}
-\codepath{datasets/splits/manifests/ood_eval_manifest.csv}
-\end{center}
-
-This manifest retains the same identity, provenance, path, integrity, and
-file-level information used for the clean folds. The records are marked as
-\texttt{sample\_type = ood}, assigned to the logical partition
-\texttt{ood\_eval\_set}, and kept outside the binary fold structure. This
-implementation preserves the methodological distinction between
-\gls{ood} evaluation and supervised binary classification.
-
-The output structure is summarized in
-Table~\ref{tab:implementation-split-artifacts}.
+Table~\ref{tab:implementation-split-artifacts} summarizes the outputs produced
+by the partition-generation stage.
 
 \begin{table}[H]
 \centering
@@ -1044,23 +982,38 @@ class and source counts, and final validation checks. \\
 \end{tabularx}
 \end{table}
 
-The final summary confirms that the partitioning stage produced 1\,000 clean
-binary records and 500 \gls{ood} records. It also confirms that the image
-identifiers and \gls{sha256} values are unique within the generated output
-branches and that each clean fold contains the required 100 samples per binary
-class.
+The final summary records 1\,000 clean binary samples and 500 \gls{ood}
+samples. It confirms that every fold contains exactly 100 samples from each
+binary class and that the image identifiers and SHA-256 digests are unique
+within the clean and \gls{ood} output branches.
 
 Existing split directories and manifests are not overwritten by default. A
 complete rebuild requires the explicit \texttt{--force} option, which removes
-the previous split outputs before regeneration. This safeguard reduces the risk
-of unintentionally mixing outputs generated from different versions of the
-frozen dataset.
+the previous outputs before regeneration. This safeguard prevents artifacts
+generated from different versions of the frozen dataset from being combined
+unintentionally.
 
-The generated folds provide the common partitioning structure used for the
+The resulting folds define the common partitioning structure used by the
 fold-aware proxy-model implementation described in
 Section~\ref{sec:implementation-proxy-models}. The separate \gls{ood} branch
-remains available for its dedicated behavior evaluation without participating
-in binary model training or perturbation generation.
+remains outside binary model training and perturbation generation and is
+retained for its dedicated behavioral evaluation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
