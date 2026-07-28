@@ -1566,9 +1566,9 @@ pixel space before applying the perturbation:
 
 where \(y\) is the encoded reference operational assignment and
 \(\epsilon = 8/255\). The adversarial tensor is converted to RGB and stored as
-a lossless PNG file. The generation record includes clean and adversarial
-predictions, predicted-class confidence, reference-class probability, and
-pixel-space perturbation measurements.
+a lossless PNG file. The generation record includes clean and adversarial predictions, maximum
+predicted-class probability, reference-class probability, and pixel-space
+perturbation measurements.
 
 \paragraph{One Pixel.}
 
@@ -1611,8 +1611,8 @@ limit is exported.
 
 Sigma-Zero was integrated through the reference implementation exposed by the
 \texttt{adversarial-library} project, pinned to commit
-\texttt{b14f81a3e1c414a573b969b402c99e65bfe2ca33}. The FAIRLab adapter invokes
-the reference function directly rather than reimplementing it.
+\nolinkurl{b14f81a3e1c414a573b969b402c99e65bfe2ca33}. The FAIRLab adapter
+invokes the reference function directly rather than reimplementing it.
 
 The reference function operates on unnormalized tensors in \([0,1]\). The
 adapter therefore converts the model-normalized input to pixel space and wraps
@@ -1694,11 +1694,8 @@ marked as not applicable.
 Model-dependent outputs follow the pattern
 \codepath{attacks/adversarial/<attack_name>/<target_model>/<fold>/<label>/}.
 Color Shift uses the same structure with
-\texttt{target\_model = model\_agnostic}. Generated filenames follow:
-
-\[
-\texttt{<image\_id>\_\_<attack\_name>\_\_<target\_model>.<extension>}.
-\]
+\texttt{target\_model = model\_agnostic}. Generated filenames follow the pattern
+\codepath{<image_id>__<attack_name>__<target_model>.<extension>}.
 
 Each condition produces 1\,000 artifacts, comprising 500
 \texttt{weapon} and 500 \texttt{non\_weapon} samples, with 200 artifacts per
@@ -1933,9 +1930,7 @@ Generated files follow the directory structure
 \codepath{attacks/anti_forensic/<transformation>/<fold>/<label>/} and the
 filename pattern:
 
-\[
-\texttt{<image\_id>\_\_<transformation>.jpg}.
-\]
+\codepath{<image_id>__<transformation>.jpg}.
 
 The hierarchy preserves the deterministic fold and binary reference assignment
 of the source image. The transformation name remains separate from the
@@ -2417,6 +2412,20 @@ Section~\ref{sec:implementation-forensic-tools}.
 \section{Black-Box Software Configuration and Output Normalization}
 \label{sec:implementation-forensic-tools}
 % ─────────────────────────────────────────────────────────────────────────────
+All four software systems were evaluated using only
+\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}.
+Neither the bundle metadata nor the structured audit view was included in the
+software input. The evaluated systems therefore received neutrally identified
+files following the \texttt{bundle\_XXXXXX} convention, without reference
+operational assignments, perturbation families or conditions, fold
+identifiers, proxy-model information, source provenance, or explicit
+\gls{ood} indicators in the imported paths or file names.
+
+This blind-input design concealed experiment-specific descriptors encoded in
+the bundle hierarchy. It did not conceal image content, visually perceptible
+perturbation effects, or information potentially embedded within the image
+files.
+
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Magnet AXIOM and Magnet.AI}
 \label{subsec:implementation-magnet}
@@ -2501,13 +2510,6 @@ the black-box evaluation. The screenshot documents activation of the
 \label{fig:implementation-axiom-magnetai-setup}
 \end{figure}
 
-Only the blind input directory was added to the case. Neither the bundle
-metadata nor the structured audit view was imported into
-\gls{magnetaxiomtool}. The platform therefore received file names of the form
-\texttt{bundle\_XXXXXX}, together with the original image-format extensions,
-but did not receive reference operational assignments, perturbation names,
-fold identifiers, proxy-model information, source provenance, or explicit
-\gls{ood} indicators through the imported paths or file names.
 
 This blind-input design concealed experiment-specific descriptors encoded in
 the bundle hierarchy. It did not conceal image content, visually perceptible
@@ -2700,13 +2702,6 @@ post-import processing}
 \label{fig:implementation-griffeye-t3kcore-setup}
 \end{figure}
 
-Only the blind input directory was supplied to the platform. The bundle
-metadata and structured audit view were excluded from the case input.
-Consequently, the system received neutrally identified files named according
-to the \texttt{bundle\_XXXXXX} convention, without reference operational
-assignments, perturbation families, perturbation names, fold identifiers,
-source datasets, proxy-model information, or explicit \gls{ood} indicators in
-the imported paths or file names.
 
 This blind-input design concealed experiment-specific descriptors encoded in
 the bundle hierarchy. It did not conceal image content, visually perceptible
@@ -3162,13 +3157,6 @@ Non-bundle rows
 \end{tabularx}
 \end{table}
 
-Only the blind bundle directory was included in the analysis. Neither the
-bundle metadata nor the structured audit view was supplied to the software.
-Consequently, \gls{cellebriteinseyets} processed neutrally identified files
-named according to the \texttt{bundle\_XXXXXX} convention, without receiving
-reference operational assignments, perturbation families, perturbation names,
-fold identifiers, proxy-model information, source provenance, or explicit
-\gls{ood} indicators through the imported paths or file names.
 
 This blind-input design concealed experiment-specific descriptors encoded in
 the bundle hierarchy. It did not conceal image content, visually perceptible
