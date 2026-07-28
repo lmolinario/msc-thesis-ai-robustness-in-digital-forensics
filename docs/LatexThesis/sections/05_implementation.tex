@@ -2413,19 +2413,10 @@ formats are documented in
 Section~\ref{sec:implementation-forensic-tools}.
 
 
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Black-Box Software Configuration and Output Normalization}
 \label{sec:implementation-forensic-tools}
 % ─────────────────────────────────────────────────────────────────────────────
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Magnet AXIOM and Magnet.AI}
 \label{subsec:implementation-magnet}
@@ -2434,13 +2425,12 @@ Section~\ref{sec:implementation-forensic-tools}.
 \gls{magnetaxiomtool} was evaluated through the image-categorization
 functionality provided by \gls{magnetai}. The platform was treated as a
 black-box software system: the experimental procedure relied exclusively on
-the categories and tags observable through the user interface and the exported
-case records. No access was available to the underlying model architecture,
-training data, feature representations, decision thresholds, numerical
-confidence scores, or internal inference logic.
+categories and tags observable through the user interface and exported case
+records. The underlying model architecture, training data, feature
+representations, decision thresholds, confidence calibration, and internal
+inference logic were not accessible.
 
-The frozen evaluation was performed using the software version and case
-configuration reported in
+The frozen software and case configuration is reported in
 Table~\ref{tab:implementation-magnet-configuration}.
 
 \begin{table}[H]
@@ -2474,7 +2464,7 @@ Imported directory
 
 Imported files
 &
-11\,500 anonymized bundle images \\
+11\,500 neutrally identified bundle images \\
 
 Processing mode
 &
@@ -2497,7 +2487,7 @@ Observable decision field
 \end{table}
 
 Figure~\ref{fig:implementation-axiom-magnetai-setup} documents the concrete
-media-analysis configuration used for the frozen AXIOM run.
+media-analysis configuration adopted for the frozen AXIOM run.
 
 \begin{figure}[H]
 \centering
@@ -2513,64 +2503,60 @@ the black-box evaluation. The screenshot documents activation of the
 
 Only the blind input directory was added to the case. Neither the bundle
 metadata nor the structured audit view was imported into
-\gls{magnetaxiomtool}. Consequently, the platform received file names of the
-form \texttt{bundle\_XXXXXX}, together with the original image extensions, but
-did not receive reference operational assignments, perturbation names, fold
-identifiers, proxy-model information, source provenance, or explicit
-\gls{ood} indicators through the imported directory structure or file names.
+\gls{magnetaxiomtool}. The platform therefore received file names of the form
+\texttt{bundle\_XXXXXX}, together with the original image-format extensions,
+but did not receive reference operational assignments, perturbation names,
+fold identifiers, proxy-model information, source provenance, or explicit
+\gls{ood} indicators through the imported paths or file names.
 
 This blind-input design concealed experiment-specific descriptors encoded in
-paths and file names. It did not conceal the visual content of the images or
-perturbation effects that were directly perceptible from the inputs.
+the bundle hierarchy. It did not conceal image content, visually perceptible
+perturbation effects, or information potentially embedded within the image
+files.
 
-A full search was executed with the \gls{magnetai} media-analysis functionality
-enabled and the \texttt{Weapons} category selected. The observable
-classification was represented in the \texttt{Tags} field of the exported
-\texttt{Pictures.csv} file. The software-specific mapping adopted for the
-frozen run was:
+A full search was executed with \gls{magnetai} media analysis enabled and the
+\texttt{Weapons} category selected. Image-level observable decisions were
+obtained from the \texttt{Tags} field of the exported
+\texttt{Pictures.csv} file.
 
-\begin{equation}
-\texttt{Possible weapons}
-\longrightarrow
-\texttt{weapon\_detected = true},
-\end{equation}
+The canonical positive output was the \texttt{Possible weapons} tag. The
+normalization implementation also includes a compatibility rule for nonempty
+tag values containing the terms \texttt{weapon} or \texttt{weapons}. Empty tag
+fields are treated as unflagged images, whereas nonempty tag values that do not
+satisfy a weapon-oriented rule are preserved as unmapped outputs:
 
-whereas an empty \texttt{Tags} field was interpreted as:
+\[
+\texttt{weapon\_detected}
+=
+\begin{cases}
+\texttt{true},
+&
+\text{if \texttt{Tags} satisfies the weapon-oriented rule},
+\\
+\texttt{false},
+&
+\text{if \texttt{Tags} is empty},
+\\
+\texttt{unknown},
+&
+\text{otherwise}.
+\end{cases}
+\]
 
-\begin{equation}
-\texttt{empty Tags}
-\longrightarrow
-\texttt{weapon\_detected = false}.
-\end{equation}
+Within the common normalized output space,
+\texttt{weapon\_detected = true} is mapped to \texttt{weapon},
+\texttt{weapon\_detected = false} is mapped to
+\texttt{non\_weapon}, and an unmapped value remains
+\texttt{unknown}. The defensive unknown state prevents an unrelated or
+previously unseen nonempty tag from being interpreted automatically as evidence
+of the absence of a weapon.
 
-Within the common normalized output space, these values were subsequently
-mapped as follows:
-
-\begin{equation}
-\texttt{weapon\_detected = true}
-\longrightarrow
-\texttt{weapon},
-\end{equation}
-
-\begin{equation}
-\texttt{weapon\_detected = false}
-\longrightarrow
-\texttt{non\_weapon}.
-\end{equation}
-
-This recoding represents an operational interpretation of an observable
-software output for the binary experimental task. It must not be interpreted
-as a reconstruction of the internal \gls{magnetai} decision boundary or as
-evidence that the exported tag corresponds to a calibrated probability. The
-platform did not expose a numerical confidence value suitable for direct
-comparison with the proxy-model probabilities.
-
-The normalization implementation also preserves nonempty tag values that do
-not match the defined weapon-oriented rule. These values are recorded as
-unmapped software outputs and assigned to the common normalized
-\texttt{unknown} state rather than being silently forced into the negative
-class. This defensive rule prevents an unrelated or previously unseen tag from
-being interpreted automatically as evidence of the absence of a weapon.
+This recoding represents an operational interpretation of observable software
+output for the binary experimental task. It does not reconstruct the internal
+\gls{magnetai} decision boundary and does not imply that the exported tag
+corresponds to a calibrated probability or a known internal threshold. The
+platform did not expose a numerical confidence value suitable for comparison
+with proxy-model probabilities.
 
 The case export produced five principal files:
 
@@ -2582,44 +2568,44 @@ The case export produced five principal files:
 \item \texttt{run\_metadata.json}.
 \end{itemize}
 
-Only \texttt{Pictures.csv} was used as the prediction-bearing record. The
-remaining files were parsed for export auditing, case identification, version
-documentation, and execution traceability, but they did not contribute
-additional image-classification decisions.
+Only \texttt{Pictures.csv} was treated as a prediction-bearing record. The
+remaining files were retained for export auditing, case identification,
+software-version documentation, and execution traceability, but did not
+contribute additional image-classification decisions.
 
 The prediction-bearing export contained exactly 11\,500 rows, corresponding to
-the 11\,500 files imported from the blind bundle. All exported image records
-were associated with bundle entries, and no prediction row remained unmatched.
-This one-to-one coverage confirms that an observable exported decision state
-was available for every clean, \gls{ood}, adversarial, and anti-forensic input
-included in the case. It does not, by itself, establish the correctness or
-semantic completeness of those decisions.
+the 11\,500 files imported from the blind bundle. Every exported image record
+was associated with one bundle entry, and no prediction row remained
+unmatched. This one-to-one coverage confirms that an observable decision state
+was available for every clean, \gls{ood}, adversarial, and anti-forensic input.
+It does not establish the correctness or semantic completeness of the exported
+decisions.
 
 The raw AXIOM export included information beyond the fields required for the
 experimental classification task, including file-system timestamps, paths,
-hashes, EXIF-derived values, device-related identifiers, and case-export
-metadata. The complete raw export was therefore retained as a controlled-access
-record rather than distributed through the public repository. Its expected
-local location is:
+cryptographic hashes, EXIF-derived values, device-related identifiers, and
+case-export metadata. The complete raw export was therefore retained as a
+controlled-access artifact and excluded from the public repository. Its
+expected local location is
+\codepath{forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02/}.
 
-\begin{center}
-\codepath{forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02/}
-\end{center}
+The public repository retains the corresponding sanitized prediction extract:
 
-The public repository instead retains the sanitized prediction extract, run
-registry, software-version log, export audit, normalized prediction records,
-and derived metric files required to inspect the adopted mapping and verify the
-reported evaluation. The corresponding public extract is:
+\[
+\codepath{forensic_tools/magnet_axiom/public_extracts/%
+magnet_axiom_predictions_extract.csv}.
+\]
 
-\begin{center}
-\codepath{forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv}
-\end{center}
+This extract contains one decision record for each of the 11\,500 bundle items.
+The repository additionally preserves the run registry, software-version log,
+export audit, canonical normalized predictions, and derived metric artifacts
+required to inspect the adopted mapping and verify the reported evaluation.
 
-The exported file name, hash fields, and observable tag were subsequently
-matched against the canonical bundle metadata through the common normalization
+The exported file name, available hash fields, and observable tag were matched
+against the canonical bundle metadata through the common normalization
 procedure described in
-Section~\ref{subsec:implementation-normalization}. The resulting quantitative
-behavior is reported separately in
+Section~\ref{subsec:implementation-normalization}. The quantitative results
+obtained from the normalized Magnet AXIOM output are reported in
 Section~\ref{subsec:results-magnet}.
 
 
