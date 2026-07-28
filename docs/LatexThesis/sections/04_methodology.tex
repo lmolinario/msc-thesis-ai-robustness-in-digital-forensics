@@ -413,38 +413,30 @@ Sections~\ref{sec:methodology-dataset-construction},
 derived from explicit and traceable review criteria rather than inherited
 directly from source labels, filenames, or directory structures.
 
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Dataset Construction and Source Consolidation}
 \label{sec:methodology-dataset-construction}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Dataset construction follows a sequence of logically distinct phases that
-separate source collection, technical validation, semantic review, and final
-dataset freezing. This separation is methodologically relevant because the
-technical validity of an image file does not imply its semantic suitability for
-the forensic classification task.
+Dataset construction separates source collection, technical validation,
+semantic review, and final dataset freezing. This distinction is
+methodologically necessary because the technical validity of an image file
+does not establish its semantic suitability for the forensic classification
+task.
 
-The process begins with the consolidation of heterogeneous image sources. The
-objective is not to construct a visually homogeneous collection, but to obtain
-a sufficiently varied candidate pool that captures part of the diversity
-encountered in contemporary digital investigations. The methodology may
-therefore incorporate public datasets, specialized repositories, openly
-accessible web content, \gls{osint}-oriented collections, and material obtained
-from less structured or non-indexed online environments.
+The process begins with the consolidation of heterogeneous image sources into
+a candidate pool. The objective is not to create a visually homogeneous
+collection, but to capture part of the variability encountered in contemporary
+digital investigations. Depending on the investigated domain and data
+availability, the candidate pool may include public datasets, specialized
+repositories, open-web content, \gls{osint}-oriented collections, and material
+obtained from less structured or non-indexed online environments.
 
-The number, organization, and relative size of the sources are not prescribed
-by the methodology. They may vary according to the investigated domain, the
-availability of suitable material, and the constraints governing data
-acquisition. What is required is that the provenance of each candidate sample
-remain identifiable throughout the subsequent preparation and review phases.
-
-Table~\ref{tab:methodology-raw-sources} summarizes the general methodological
-roles of the source categories considered in the protocol.
+The composition and relative contribution of these sources may vary, but the
+provenance of each candidate sample must remain identifiable throughout the
+preparation and review process.
+Table~\ref{tab:methodology-raw-sources} summarizes the methodological roles of
+the source categories considered in the protocol.
 
 \begin{table}[H]
 \centering
@@ -492,60 +484,34 @@ the evaluation of less standardized acquisition contexts. \\
 \end{tabularx}
 \end{table}
 
-After source consolidation, the candidate images undergo technical preparation.
-This phase verifies that each file can be processed reliably before any semantic
-decision is made. Typical controls include file readability, structural
-validity, dimensional suitability, duplicate detection, and the generation of a
-stable sample identifier.
+After source consolidation, candidate images undergo technical validation
+before any semantic assignment is made. The validation process verifies that
+each file can be processed reliably and may include readability, structural
+validity, dimensional suitability, duplicate detection, and stable sample
+identification. The resulting records must preserve sufficient information to
+associate each retained sample with its provenance, technical-validation
+outcome, and integrity information.
 
-The exact validation criteria may be adapted to the characteristics of the
-dataset and the requirements of the experimental environment. For example,
-minimum dimensional requirements may differ depending on the classification
-models or software systems being evaluated. The methodology therefore specifies
-the purpose of the controls without imposing a particular script, programming
-language, storage format, or directory structure.
+Source location, directory structure, filename, and pre-existing annotations
+may be retained as contextual or audit information, but they must not be
+treated as definitive reference assignments. Final semantic membership must
+instead be determined through the operational criteria defined in
+Section~\ref{sec:methodology-research-design}. This separation limits the
+propagation of source-specific assumptions and labeling errors into the frozen
+experimental dataset.
 
-For every retained sample, the preparation phase must preserve sufficient
-provenance and technical information to reconstruct its origin and processing
-history. Relevant records may include a stable identifier, the original
-location, the source category, technical file properties, an integrity digest,
-and the outcome of the validation checks. These records may be stored using
-tabular files, structured documents, databases, or tool-specific formats,
-provided that traceability and consistency are maintained.
+The relative size of the original source collections must also be considered
+during sample selection. A large or highly asymmetric source must not
+automatically dominate the final corpus. Composition decisions should instead
+reflect the experimental objectives, the required class structure, and the
+need to preserve meaningful source diversity.
 
-Technical preparation does not determine the final semantic assignment. In
-particular, the source location, directory name, file name, or any pre-existing
-annotation must not be treated as a definitive reference assignment. These
-elements may be retained as descriptive or audit variables, but semantic
-assignment must be based on the explicit operational criteria defined for the
-experiment.
-
-This distinction reduces the risk of propagating labeling errors, collection
-biases, or source-specific assumptions into the final dataset. It also preserves
-a clear separation between sample provenance and experimentally validated class
-membership.
-
-The candidate pool is subsequently subjected to human-in-the-loop review.
-During this phase, each sample is assessed according to the inclusion,
-exclusion, and class-assignment criteria defined in
-Section~\ref{sec:methodology-research-design}. The review process also enables
-ambiguous, unsuitable, or technically valid but semantically inappropriate
-samples to be documented and excluded.
-
-The relative contribution of each source to the candidate pool does not
-automatically determine its contribution to the frozen dataset. Highly
-asymmetric source collections may otherwise cause the final corpus to be
-dominated by a single repository or acquisition method. Sampling and
-composition-control decisions must therefore be based on the objectives of the
-experimental design, the required class composition, and the need to preserve
-meaningful source diversity.
-
-Figure~\ref{fig:methodology-dataset-source-consolidation} summarizes the general
-dataset-construction process. Heterogeneous sources are consolidated into a
-candidate pool, subjected to technical validation, and then reviewed according
-to explicit semantic criteria. Final class assignments are produced only after
-human validation and are not inherited from the original organization of the
-source material.
+Following technical validation, the candidate pool is submitted to the
+documented semantic-review process described in
+Sections~\ref{sec:methodology-review-manifest} and
+\ref{sec:methodology-human-review}. Figure~\ref{fig:methodology-dataset-source-consolidation}
+summarizes the transition from heterogeneous sources to the frozen
+experimental dataset.
 
 \begin{figure}[H]
 \centering
@@ -655,6 +621,9 @@ Final class assignments are not inherited from source directories, filenames,
 or pre-existing annotations}
 \label{fig:methodology-dataset-source-consolidation}
 \end{figure}
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
