@@ -1175,23 +1175,22 @@ Section~\ref{subsec:implementation-training}.
 
 
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Training Configuration and Fold-Aware Checkpoints}
 \label{subsec:implementation-training}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The proxy models were trained according to a fold-aware leave-one-fold-out
-protocol. For each architecture and each target fold, the target fold was
-reserved as the held-out evaluation partition, while the remaining four folds
-were used to construct the training and internal validation sets. Consequently,
-no checkpoint was trained on the same fold on which it was subsequently
-evaluated or used to generate fold-matched model-dependent adversarial
-artifacts.
+The proxy models were trained through a fold-aware leave-one-fold-out
+procedure. For each architecture and target fold, the target fold was reserved
+as the held-out evaluation partition, while the remaining four folds were used
+to construct the training and internal validation sets. No checkpoint was
+therefore trained on the fold on which it was subsequently evaluated or used
+for fold-matched model-dependent adversarial generation.
 
-For each run, the four non-held-out folds contained 800 images. The
-implementation created an internal stratified validation partition by reserving
-15\% of these samples independently within each binary class. This produced:
+For each architecture--fold run, the four non-held-out folds contained 800
+images. A deterministic stratified split reserved 15\% of these records for
+internal validation, independently within each binary class. The resulting
+partitions contained:
 
 \begin{itemize}
 \item 680 images for parameter optimization;
@@ -1199,21 +1198,22 @@ implementation created an internal stratified validation partition by reserving
 \item 200 images in the untouched held-out fold.
 \end{itemize}
 
-The split between training and internal validation data was generated
-deterministically using seed 42. Records were first separated by class,
-shuffled within each class, and then recombined, thereby preserving the balance
-between \texttt{weapon} and \texttt{non\_weapon}. The held-out fold was not
-involved in parameter optimization or checkpoint selection.
+The training--validation split was generated using seed 42. Records were
+separated by class, shuffled deterministically within each class, and
+recombined, preserving equal representation of \texttt{weapon} and
+\texttt{non\_weapon}. The held-out fold was not used for parameter updates or
+checkpoint selection.
 
-The frozen training configuration is summarized in
-Table~\ref{tab:implementation-proxy-training-configuration}.
+Table~\ref{tab:implementation-proxy-training-configuration} summarizes the
+training configuration implemented by
+\codepath{models/scripts/12_train_proxy_models.py}.
 
 \begin{table}[H]
 \centering
 \small
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{5pt}
-\caption{Frozen proxy-model training configuration}
+\caption{Proxy-model training configuration}
 \label{tab:implementation-proxy-training-configuration}
 \begin{tabularx}{0.92\textwidth}{@{}l X@{}}
 \toprule
@@ -1225,13 +1225,11 @@ Training epochs
 &
 10 \\
 
-CNN batch size
+Batch-size configuration
 &
-16 \\
-
-\gls{clip} binary-head batch size
-&
-32 \\
+16 as the command-line default; 32 in the dedicated interactive
+\gls{clip}-only profile. The effective value used for each run is preserved in
+the checkpoint training configuration. \\
 
 Optimizer
 &
@@ -1247,7 +1245,7 @@ Weight decay
 
 Loss function
 &
-Cross-entropy loss \\
+Unweighted cross-entropy loss \\
 
 Internal validation ratio
 &
@@ -1267,7 +1265,8 @@ Data-loader workers
 
 Checkpoint-selection criterion
 &
-Highest internal validation accuracy \\
+Highest internal validation accuracy; the latest epoch is retained when the
+same maximum value occurs more than once. \\
 
 \bottomrule
 \end{tabularx}
@@ -1275,23 +1274,26 @@ Highest internal validation accuracy \\
 
 ResNet18 and EfficientNet-B0 were fine-tuned from their ImageNet-initialized
 weights. Both the convolutional backbones and the newly introduced binary
-classification layers were optimized. The implementation also provides a
-\texttt{--freeze-backbone} option for diagnostic or alternative runs, but this
-option is not part of the frozen CNN training configuration. For the
-\gls{clip}-based proxy, the pretrained visual encoder was always frozen, and
-only the binary linear head was optimized.
+classification layers were optimized. The script also exposes a
+\texttt{--freeze-backbone} option for alternative or diagnostic runs, but this
+option is not part of the frozen CNN configuration.
 
-The training objective was implemented using unweighted cross-entropy loss. No
-class weighting was applied because every fold and each derived
-training--validation partition remained balanced between the two binary
-classes. Parameter updates were performed using the AdamW optimizer with the
-fixed learning-rate and weight-decay values reported above.
+For the \gls{clip}-based proxy, the pretrained visual encoder remained frozen
+and only the binary linear head was optimized. The effective training
+configuration, including the batch size and backbone-freezing state, is stored
+inside each fold-specific checkpoint.
 
-Before training begins, the script validates the complete clean-fold manifest.
-The validation procedure verifies:
+The objective function was implemented using unweighted cross-entropy loss.
+Class weighting was not applied because the training and validation partitions
+remained balanced between the two supervised classes. Parameter updates used
+AdamW with the learning-rate and weight-decay values reported in
+Table~\ref{tab:implementation-proxy-training-configuration}.
+
+Before training, the script validates the complete clean-fold manifest by
+checking:
 
 \begin{itemize}
-\item the presence of the required manifest columns;
+\item the presence of the required columns;
 \item the exclusive use of the two accepted binary assignments;
 \item the presence of all five expected folds;
 \item the exact count of 100 images per class and fold;
@@ -1301,38 +1303,34 @@ The validation procedure verifies:
 \gls{sha256} digest.
 \end{itemize}
 
-Training is interrupted when a source image is missing or when its digest does
-not match the value recorded in the split manifest. This prevents a checkpoint
-from being silently produced from a dataset state that differs from the frozen
-partition definition.
+Execution terminates when an image is missing or its digest does not match the
+split manifest, preventing a checkpoint from being produced from a dataset
+state inconsistent with the frozen partition definition.
 
-Reproducibility controls are applied to the principal pseudo-random sources.
-The fixed seed is propagated to the Python standard-library generator, NumPy,
-PyTorch, and all available CUDA devices. The implementation disables cuDNN
-benchmark-based algorithm selection and requests deterministic cuDNN behavior.
+The fixed seed is propagated to the Python standard-library pseudo-random
+generator, NumPy, PyTorch, and all available CUDA devices. The implementation
+disables cuDNN benchmark-based algorithm selection and requests deterministic
+cuDNN behavior. These controls reduce variation from the principal
+pseudo-random sources, although exact numerical reproduction may still depend
+on the software and hardware environment.
 
-The execution device may be selected explicitly as \texttt{cpu} or
-\texttt{cuda}, or resolved automatically according to CUDA availability. The
-software and hardware environment is documented separately as part of the
-reproducibility context. Device selection does not alter the frozen fold
-assignments or declared training configuration, although the execution
-environment remains relevant to the exact numerical reproduction of the
-training process.
+The execution device may be selected as \texttt{cpu} or \texttt{cuda}, or
+resolved automatically according to CUDA availability. Device selection does
+not modify the frozen folds or declared optimization parameters. The preserved
+complete-suite execution log records CPU-based training for the reported
+checkpoints.
 
-During each epoch, the implementation records training loss, training accuracy,
-validation loss, and validation accuracy. The checkpoint is updated whenever
-the current validation accuracy is greater than or equal to the best value
-observed during the preceding epochs. Consequently, when the same best
-validation accuracy occurs in multiple epochs, the latest qualifying epoch is
-retained. The held-out fold remains excluded from this selection process.
+During each epoch, the script records training loss, training accuracy,
+validation loss, and validation accuracy. All 10 epochs are executed; no early
+stopping is applied. The checkpoint is overwritten whenever the current
+validation accuracy is greater than or equal to the best value observed during
+the preceding epochs. When the same maximum accuracy occurs in multiple
+epochs, the latest qualifying checkpoint is retained. The held-out fold remains
+excluded from this selection procedure.
 
-The fold-aware checkpoints are stored according to the pattern:
-
-\begin{center}
-\codepath{models/checkpoints/<model_name>/<fold>.pt}
-\end{center}
-
-The complete suite comprises 15 checkpoints:
+Fold-specific checkpoints are stored according to the pattern
+\codepath{models/checkpoints/<model_name>/<fold>.pt}. The complete suite
+contains:
 
 \begin{equation}
 3\ \text{proxy architectures}
@@ -1343,11 +1341,12 @@ The complete suite comprises 15 checkpoints:
 \end{equation}
 
 For ResNet18 and EfficientNet-B0, each checkpoint contains the trained model
-state, binary assignment mapping, held-out-fold identifier, input size,
-training configuration, creation timestamp, and epoch-level metric history. For
-the \gls{clip}-based proxy, each checkpoint stores the trained binary-head
-parameters and records the external ViT-B/32 architecture and pretrained-weight
-identifier required to reconstruct the frozen visual encoder.
+state, class mapping, held-out-fold identifier, input size, training
+configuration, creation timestamp, and metric history available when the
+checkpoint was saved. For the \gls{clip}-based proxy, the checkpoint stores the
+trained binary-head parameters and identifies the external ViT-B/32
+architecture and pretrained weights required to reconstruct the frozen visual
+encoder.
 
 Table~\ref{tab:implementation-proxy-checkpoint-artifacts} summarizes the
 principal outputs of the training stage.
@@ -1367,11 +1366,11 @@ principal outputs of the training stage.
 
 \codepath{models/checkpoints/resnet18/}
 &
-Five fold-specific ResNet18 checkpoint files. \\
+Five fold-specific ResNet18 checkpoints. \\
 
 \codepath{models/checkpoints/efficientnet_b0/}
 &
-Five fold-specific EfficientNet-B0 checkpoint files. \\
+Five fold-specific EfficientNet-B0 checkpoints. \\
 
 \codepath{models/checkpoints/clip/}
 &
@@ -1380,51 +1379,46 @@ Five fold-specific binary-head checkpoints for the frozen
 
 \codepath{models/reports/proxy_model_training_summary.csv}
 &
-Consolidated record of checkpoint paths and hashes, training, validation, and
+Consolidated record of checkpoint paths and digests, training, validation, and
 held-out sample counts, best validation accuracy, final-epoch statistics, and
 creation timestamps. \\
 
 \codepath{models/model_registry.json}
 &
-Canonical model registry containing architecture definitions, initialization
-weights, preprocessing conventions, checkpoint patterns, external-weight
-requirements, and fold-specific \gls{sha256} digests. \\
+Canonical registry of architecture definitions, initialization weights,
+preprocessing conventions, checkpoint patterns, external-weight requirements,
+and fold-specific \gls{sha256} digests. \\
 
 \codepath{models/reports/train_all_proxy_models.log}
 &
-Execution log containing the epoch-level training and validation progression of
-the complete proxy-model suite. \\
+Raw execution log containing the epoch-level training and validation progression
+of the complete proxy-model suite. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The frozen training report contains one record for each architecture--fold
-combination and confirms the use of 680 training images, 120 internal-validation
-images, and 200 held-out images in all 15 runs. The report is updated through an
-upsert operation: rerunning a specific architecture--fold combination replaces
-only the corresponding record while retaining the remaining entries.
+The training summary contains one record for each of the 15
+architecture--fold combinations. Every record reports 680 training images, 120
+internal-validation images, and 200 held-out images. The report is maintained
+through an upsert operation: rerunning one architecture--fold combination
+replaces its corresponding row while preserving the remaining records.
 
-After a checkpoint is written, its \gls{sha256} digest is computed and stored
-both in the training summary and in:
+After each checkpoint is written, its \gls{sha256} digest is computed and
+stored in both the training summary and
+\codepath{models/model_registry.json}. The registry therefore provides the
+canonical association among architecture, held-out fold, checkpoint path,
+initialization convention, preprocessing scheme, external-weight requirements,
+and checkpoint digest. The checkpoint files are distributed through Git LFS,
+while their cryptographic identifiers remain directly available in the
+repository metadata.
 
-\begin{center}
-\codepath{models/model_registry.json}
-\end{center}
-
-The registry therefore provides the canonical mapping among model architecture,
-held-out fold, checkpoint path, initialization convention, preprocessing
-scheme, external-weight requirements, and checkpoint digest. The checkpoint
-files are managed through Git LFS, while their cryptographic identifiers remain
-directly available in the repository metadata.
-
-This fold-aware implementation ensures that each clean binary image is
-evaluated by the checkpoint for which its assigned fold was excluded from
-training. The same association is preserved during model-dependent adversarial
-generation, preventing an adversarial artifact from being generated using a
-checkpoint that was trained on the corresponding clean sample. The concrete
-perturbation implementations are described in
-Section~\ref{sec:implementation-perturbations}.
+This fold-aware implementation ensures that every clean binary sample is
+evaluated by a checkpoint trained without its assigned fold. The same
+association is preserved during model-dependent adversarial generation,
+preventing an artifact from being generated against a checkpoint trained on its
+corresponding clean sample. The concrete perturbation implementations are
+described in Section~\ref{sec:implementation-perturbations}.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
