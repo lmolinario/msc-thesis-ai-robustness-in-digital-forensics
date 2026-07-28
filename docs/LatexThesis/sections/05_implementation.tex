@@ -179,87 +179,68 @@ bundle, and complete proprietary software exports remain subject to controlled
 access.
 
 
+
+
+
+
+
+
+
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Dataset Preparation and Organization}
 \label{sec:implementation-dataset}
 % ─────────────────────────────────────────────────────────────────────────────
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Technical Preparation and Source Consolidation}
 \label{subsec:implementation-dataset-preparation}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The initial image pool was assembled from five heterogeneous source
-collections maintained under \codepath{datasets/raw/}. These collections were
-organized according to acquisition provenance rather than final experimental
-assignment. The source structure comprised a public Kaggle-based collection,
-the specialized DeepFirearm corpus, open-web images, content obtained from
-Telegram and YouTube, and material collected from non-indexed web sources. This
-organization preserved the origin of each sample while preventing source names,
-directory structures, or pre-existing labels from being inherited automatically
-as reference operational assignments.
+The initial candidate pool was assembled from five source collections maintained
+under \codepath{datasets/raw/}: a public Kaggle-based collection, the
+specialized DeepFirearm corpus, open-web images, content acquired from Telegram
+and YouTube, and material collected from non-indexed web sources. The
+collections remained organized according to acquisition provenance, while
+source names, directory structures, and inherited labels were retained only as
+provenance information and were not used as final operational assignments.
 
-The technical preparation stage was implemented by:
-
-\begin{center}
-\codepath{datasets/scripts/prepared/08_build_prepared_dataset.py}
-\end{center}
-
-The script scans the supported source directories in a fixed order and
-constructs a unified candidate pool under:
-
-\begin{center}
-\codepath{datasets/prepared/final_pool/}
-\end{center}
-
-This stage is deliberately limited to technical preparation. It does not
-perform semantic annotation, assign the final labels
-\texttt{weapon}, \texttt{non\_weapon}, or \texttt{ood}, or determine whether
-an image is suitable for inclusion in the frozen experimental dataset. These
-decisions are deferred to the human-in-the-loop review process described in
+Technical preparation was performed by
+\codepath{datasets/scripts/prepared/08_build_prepared_dataset.py}. The script
+processes the five configured source directories in a fixed order, recursively
+enumerates supported image files, and constructs the unified candidate pool
+under \codepath{datasets/prepared/final_pool/}. It does not perform semantic
+annotation or final sample selection, which are handled by the human review
+procedure described in
 Section~\ref{subsec:implementation-human-review}.
 
 Candidate discovery was restricted to files with the extensions
 \texttt{.jpg}, \texttt{.jpeg}, \texttt{.png}, \texttt{.bmp},
-\texttt{.webp}, \texttt{.tif}, and \texttt{.tiff}. Each candidate file was
-opened and verified using the Pillow image-processing library. Images that
-could not be decoded or structurally verified were recorded as unreadable,
-whereas images with either dimension below 300 pixels were excluded under the
-\texttt{below\_min\_size} condition. Unexpected decoding failures were
-preserved in the invalid-image report together with the corresponding
-exception type.
+\texttt{.webp}, \texttt{.tif}, and \texttt{.tiff}. Each file was opened and
+structurally verified using Pillow. Images that could not be decoded or
+verified were recorded as \texttt{unreadable\_image}, whereas images whose
+width or height was below 300 pixels were excluded under the
+\texttt{below\_min\_size} condition. Unexpected failures were recorded with
+the corresponding exception type.
 
 For every technically valid image, the script computed a \gls{sha256} digest
-over the original file bytes. Exact-duplicate detection was then performed
-globally across all source collections rather than independently within each
-source. When the same digest occurred more than once, the first instance
-encountered according to the deterministic scan order was retained, and each
-subsequent occurrence was recorded as a discarded duplicate. This procedure
-prevented the same byte-identical image from appearing multiple times in the
-prepared pool, including when it had been collected from different sources or
-stored under different file names.
+over the original file bytes. Exact-duplicate detection was performed globally
+across all five source collections. Because the source directories and their
+contents were processed deterministically, the first occurrence of each digest
+was retained, while every subsequent occurrence was recorded as a discarded
+duplicate and linked to the retained sample.
 
-Accepted images were assigned stable identifiers using the format:
-
-\begin{center}
-\texttt{img\_00000001}
-\end{center}
-
-and copied to:
-
-\begin{center}
-\codepath{datasets/prepared/final_pool/images/}
-\end{center}
-
-The original file extension was preserved, and no resizing, recompression, or
-format conversion was applied during this stage. After each copy operation, the
-destination file was hashed again and compared with the digest of the source
-file. A mismatch caused the pipeline to terminate, thereby preventing a
-modified, corrupted, or incomplete copy from entering the prepared pool.
+Accepted images were assigned stable identifiers following the format
+\texttt{img\_00000001} and copied to
+\codepath{datasets/prepared/final_pool/images/}. The original file extension
+was preserved, and no resizing, recompression, or format conversion was
+performed. After each copy operation, the destination file was hashed again and
+compared with the source digest. A mismatch caused execution to terminate,
+preventing modified, corrupted, or incomplete copies from entering the prepared
+pool.
 
 Table~\ref{tab:implementation-prepared-dataset-statistics} reports the
-technical preparation statistics produced by the final execution of the
-script.
+statistics produced by the final execution of the preparation script.
 
 \begin{table}[H]
 \centering
@@ -284,10 +265,10 @@ script.
 & 188 \\
 
 \texttt{02\_deepfirearm}
-& 15,755
-& 12,158
-& 2,565
-& 1,032 \\
+& 15\,755
+& 12\,158
+& 2\,565
+& 1\,032 \\
 
 \texttt{03\_google\_scraped}
 & 903
@@ -302,7 +283,7 @@ script.
 & 56 \\
 
 \texttt{05\_deepweb}
-& 1,419
+& 1\,419
 & 957
 & 419
 & 43 \\
@@ -325,25 +306,24 @@ to the source collection in which the discarded occurrence was encountered.
 \end{table}
 
 The resulting prepared pool contained 15\,321 technically valid and
-byte-distinct images from an initial set of 19\,769 candidate files. A total of
-3\,124 files were excluded because they were unreadable, structurally invalid,
-or below the minimum dimensional threshold, while 1\,324 additional files were
-discarded as exact duplicates.
+byte-distinct images from 19\,769 candidate files. Of the remaining files,
+3\,124 were excluded because they were unreadable, structurally invalid, or
+below the minimum dimensional threshold, and 1\,324 were discarded as exact
+duplicates.
 
 The preparation stage generated four principal audit records:
 
 \begin{itemize}
 \item \codepath{datasets/prepared/final_pool/metadata.csv}, containing one
-row for each retained image;
+record for each retained image;
 
 \item
 \codepath{datasets/prepared/final_pool/reports/invalid_images.csv},
-documenting technically excluded files and their corresponding exclusion
-reasons;
+documenting technically excluded files and their exclusion reasons;
 
 \item
 \codepath{datasets/prepared/final_pool/reports/duplicates_discarded.csv},
-linking each discarded duplicate to the retained image and its
+linking each discarded duplicate to the retained sample and its
 \gls{sha256} digest;
 
 \item
@@ -352,17 +332,23 @@ containing global and source-specific preparation statistics.
 \end{itemize}
 
 For each retained image, \texttt{metadata.csv} records the stable image
-identifier, prepared file name and path, source group, source dataset, original
-relative path and file name, \gls{sha256} digest, image dimensions, file size,
-extension, and technical-validity state. This structure preserves candidate-pool
-provenance without treating provenance as a semantic assignment.
+identifier, prepared filename and relative path, source group, source dataset,
+original relative path and filename, \gls{sha256} digest, dimensions, file
+size, extension, and technical-validity state. These fields preserve the
+relationship between the prepared sample and its acquisition source.
 
-The output of this stage is therefore a technically validated and deduplicated
-candidate pool rather than the final experimental dataset. The reduction from
-15\,321 prepared images to the frozen corpus used in the experiments was
-performed only after explicit human assessment of semantic suitability,
-operational assignment, visual interpretability, and corpus-composition
-requirements.
+The output of this stage is a technically validated and globally deduplicated
+candidate pool, not the final experimental dataset. Reduction of the
+15\,321-image prepared pool to the frozen experimental corpus was performed
+only through the human review and final-selection procedure described in the
+following subsection.
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
