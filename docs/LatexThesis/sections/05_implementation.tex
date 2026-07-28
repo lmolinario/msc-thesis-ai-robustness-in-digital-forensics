@@ -999,23 +999,6 @@ Section~\ref{sec:implementation-proxy-models}. The separate \gls{ood} branch
 remains outside binary model training and perturbation generation and is
 retained for its dedicated behavioral evaluation.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Proxy-Model Implementation}
 \label{sec:implementation-proxy-models}
@@ -1026,66 +1009,33 @@ retained for its dedicated behavioral evaluation.
 \label{subsec:implementation-architectures}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The controlled proxy-model layer was implemented through three fully
-inspectable classification models: ResNet18, EfficientNet-B0, and a
-\gls{clip}-based visual classifier. Consistent with the definition introduced
-in Chapter~\ref{chap:methodology}, these proxy models serve as experimental
-reference models for studying controlled classification behavior, robustness
-degradation, transferability, confidence patterns, error direction, and, for
-the selected model, feature attribution.
+The proxy-model layer was implemented through three fully inspectable binary
+classifiers: ResNet18, EfficientNet-B0, and a \gls{clip}-based classifier built
+on a ViT-B/32 visual encoder. The two convolutional architectures were adapted
+through supervised fine-tuning, whereas the \gls{clip} proxy uses frozen
+pretrained visual representations and a trainable binary head. This
+implementation provides three controlled architectural references without
+assuming equivalence with the selected black-box software systems.
 
-The proxy models are not replicas, functionally equivalent substitutes,
-reverse-engineered reconstructions, or architectural reproductions of the
-selected black-box software systems. Instead, they provide a controlled and
-inspectable environment in which model architectures, preprocessing procedures,
-training configurations, logits, probabilities, gradients, checkpoints, and
-attribution outputs can be accessed directly.
+All three models use the same class-to-index mapping:
 
-The three architectures were selected to provide complementary experimental
-references rather than to identify a universally superior classification
-model. ResNet18 represents a conventional residual convolutional baseline,
-whereas EfficientNet-B0 provides an efficiency-oriented convolutional
-architecture based on a different design and scaling strategy. The
-\gls{clip}-based proxy introduces a distinct representation paradigm through a
-large-scale pretrained Vision Transformer whose visual encoder is kept frozen
-and adapted to the binary task through a supervised linear classification
-head.
-
-This combination supports comparison between two convolutional architectures
-adapted to the binary task and a proxy based on frozen pretrained visual
-representations. It also enables analysis of whether model-dependent
-adversarial artifacts generated against EfficientNet-B0 transfer to
-architecturally different proxy models. The selection was therefore intended
-to provide controlled architectural diversity within a reproducible and fully
-inspectable evaluation layer rather than to reproduce the internal models of
-the selected black-box software systems.
-
-All three proxy models implement the same binary classification mapping:
-
-\begin{equation}
-\texttt{non\_weapon} \rightarrow 0,
+\[
+\texttt{non\_weapon} \mapsto 0,
 \qquad
-\texttt{weapon} \rightarrow 1.
-\end{equation}
+\texttt{weapon} \mapsto 1.
+\]
 
-The separate \gls{ood} branch is not represented as a third supervised output
-and is excluded from proxy-model training. Its inputs are processed only during
-the dedicated \gls{ood} evaluation stage.
+The \gls{ood} branch is not represented as a third output and is excluded from
+proxy-model training. Its images are processed only during the dedicated
+\gls{ood} evaluation stage.
 
-The model suite was implemented in:
+The model suite is implemented in
+\codepath{models/scripts/12_train_proxy_models.py}, while its frozen
+architecture definitions, checkpoint locations, and checkpoint digests are
+recorded in \codepath{models/model_registry.json}.
 
-\begin{center}
-\codepath{models/scripts/12_train_proxy_models.py}
-\end{center}
-
-and its frozen architecture definitions are recorded in:
-
-\begin{center}
-\codepath{models/model_registry.json}
-\end{center}
-
-Table~\ref{tab:implementation-proxy-architectures} summarizes the three
-architectures and the modifications introduced for the binary task.
+Table~\ref{tab:implementation-proxy-architectures} summarizes the implemented
+architectures and their adaptation to the binary task.
 
 \begin{table}[H]
 \centering
@@ -1106,93 +1056,72 @@ ResNet18
 \texttt{torchvision.resnet18} initialized with
 \texttt{IMAGENET1K\_V1} weights
 &
-The original fully connected output layer is replaced by a linear layer with
-two outputs. The residual convolutional architecture provides a conventional
-supervised baseline \cite{he2016deep}. \\
+The original fully connected layer is replaced by
+\texttt{Linear(in\_features, 2)}. The residual convolutional architecture
+provides the conventional supervised baseline \cite{he2016deep}. \\
 
 EfficientNet-B0
 &
 \texttt{torchvision.efficientnet\_b0} initialized with
 \texttt{IMAGENET1K\_V1} weights
 &
-The final classifier layer is replaced by a linear layer with two outputs.
-This architecture serves as the primary proxy target for model-dependent
-adversarial generation \cite{tan2019efficientnet}. \\
+The final classifier element is replaced by
+\texttt{Linear(in\_features, 2)}. This architecture serves as the primary
+proxy target for model-dependent adversarial generation
+\cite{tan2019efficientnet}. \\
 
 \gls{clip}
 &
 \texttt{open\_clip} ViT-B/32 visual encoder initialized with the pretrained
 \texttt{openai} weights
 &
-The visual encoder is kept frozen and connected to a trainable linear binary
-head. The resulting proxy classifies pretrained visual representations rather
-than using the original image--text similarity interface
+The visual encoder is frozen and connected to a trainable linear head with two
+outputs. The resulting proxy classifies pretrained visual representations
+rather than using the original image--text similarity interface
 \cite{radford2021learning}. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-For ResNet18, the implementation replaces \texttt{model.fc} with:
-
-\begin{center}
-\texttt{Linear(model.fc.in\_features, 2)}
-\end{center}
-
-For EfficientNet-B0, the final element of
-\texttt{model.classifier} is replaced with:
-
-\begin{center}
-\texttt{Linear(in\_features, 2)}
-\end{center}
-
-Random initialization is not accepted as a silent fallback for either
-convolutional architecture. The implementation explicitly requires the
+For ResNet18 and EfficientNet-B0, the implementation explicitly requires the
 corresponding \texttt{IMAGENET1K\_V1} weight definitions exposed by
-Torchvision and terminates when they are unavailable. This safeguard prevents
-differences in the execution environment from changing the initialization
-strategy without being detected.
+Torchvision. Training terminates if these definitions are unavailable rather
+than silently falling back to random initialization.
 
 The \gls{clip}-based proxy is constructed from the
-\texttt{open\_clip.ViT-B-32} visual encoder initialized with the
-\texttt{openai} weights. All parameters of the pretrained visual encoder are
-frozen. For each image, the encoder produces a visual feature vector, which is
-normalized to unit length before being passed to a trainable linear layer with
-two outputs.
+\texttt{open\_clip} ViT-B/32 visual encoder with the
+\texttt{openai} pretrained weights. All encoder parameters are frozen. For
+each image, the encoder produces a visual feature vector that is normalized to
+unit length and passed to a trainable linear layer with two outputs.
 
-The fold-specific \gls{clip} checkpoints therefore contain the binary-head
-parameters rather than an independent copy of the complete pretrained visual
-encoder. Reconstruction of the full proxy requires the external ViT-B/32 base
-weights identified in the model registry.
+The fold-specific \gls{clip} checkpoints store the parameters of the binary
+head rather than a complete copy of the pretrained visual encoder.
+Reconstructing the full proxy therefore requires the external ViT-B/32 model
+and pretrained weights identified in the model registry.
 
-A common image-loading procedure was applied across the three architectures.
-Each file is opened using Pillow, corrected according to its embedded
-orientation information through an EXIF transpose operation, and converted to
-a three-channel RGB representation. The resulting image is then processed
-through the preprocessing pipeline associated with the selected architecture.
+A common image-loading procedure is used for all three architectures. Each file
+is opened with Pillow, corrected according to its embedded orientation through
+an EXIF transpose operation, and converted to a three-channel RGB
+representation before architecture-specific preprocessing is applied.
 
-All proxy-model inputs are resized to:
-
-\begin{center}
-\texttt{224 $\times$ 224 pixels}
-\end{center}
-
-The training transformation applies the following sequence:
+All inputs are resized deterministically to \(224 \times 224\) pixels. The
+training transformation applies:
 
 \begin{enumerate}
-\item deterministic resizing to \(224 \times 224\) pixels;
+\item resizing to \(224 \times 224\) pixels;
 \item random horizontal flipping with probability \(0.5\);
 \item conversion to a PyTorch tensor;
 \item architecture-specific channel normalization.
 \end{enumerate}
 
-The validation and evaluation transformation uses the same resizing,
-tensor-conversion, and normalization operations but does not apply random
-horizontal flipping. No additional random cropping, rotation, color
-augmentation, or geometric distortion is introduced by the training script.
+The validation and evaluation transformations apply the same resizing,
+tensor-conversion, and normalization operations without random horizontal
+flipping. The implementation does not introduce random cropping, rotation,
+color augmentation, or additional geometric distortion.
 
-The normalization parameters are reported in
-Table~\ref{tab:implementation-proxy-normalization}.
+Table~\ref{tab:implementation-proxy-normalization} reports the channel
+normalization values used by the implemented models.
 
 \begin{table}[H]
 \centering
@@ -1224,19 +1153,27 @@ ResNet18 and EfficientNet-B0
 \end{tabularx}
 \end{table}
 
-The same architecture-specific normalization is reused when loading validation
-and evaluation images. This consistency is necessary because the convolutional
-proxy models and the \gls{clip} visual encoder were initialized under different
-input-distribution assumptions. Applying a single shared normalization scheme
-would therefore alter the effective input received by at least one
-architecture.
+The same architecture-specific normalization is reused for validation and
+evaluation. A shared normalization scheme is not applied because the
+ImageNet-initialized convolutional models and the \gls{clip} visual encoder
+were pretrained under different input-normalization conventions.
 
-The three proxy-model implementations expose two output logits corresponding
-to the fixed binary mapping. Prediction probabilities used by the evaluation
-pipeline are computed from these logits and are not embedded in the dataset,
-manifest, or preprocessing stages. Training configuration, held-out-fold
-handling, checkpoint selection, and model-integrity controls are described in
+Each proxy exposes two output logits corresponding to the fixed binary mapping.
+Prediction probabilities are derived from these logits by the evaluation
+pipeline and are not stored in the dataset or preprocessing manifests.
+Training, held-out-fold handling, checkpoint selection, and model-integrity
+controls are described in
 Section~\ref{subsec:implementation-training}.
+
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
