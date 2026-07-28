@@ -901,187 +901,361 @@ conditions, while also revealing specific clean-correct samples whose
 operational assignments change. These outputs remain triage indicators and
 must be subject to systematic human verification.
 
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial Robustness}
 \label{sec:results-adversarial}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The adversarial evaluation measures the response of the transparent proxy
-models to perturbations designed to alter classifier behavior
+The adversarial evaluation examines the response of the transparent proxy
+models to perturbations generated to alter classifier behavior
 \cite{szegedy2014intriguing,goodfellow2015explaining,biggio2018wild}. These
-attacks are not examined as an autonomous \gls{advml} objective, but as
-controlled experimental conditions for assessing the operational reliability
-of \gls{ai}-based image-classification systems in forensic contexts.
+conditions are used to assess operational robustness in a controlled forensic
+evaluation rather than to construct an independent \gls{advml} benchmark.
 
-The analysis therefore considers not only the reduction in aggregate accuracy,
-but also the direction of the induced errors. Particular attention is given to
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon} transitions because they
-represent potentially critical missed detections in an investigative triage
-workflow.
+Four model-dependent attacks were generated against the fold-specific
+EfficientNet-B0 checkpoints. \gls{fgsm}, \gls{sigmazero}, and
+\gls{superdeepfool} used white-box checkpoint access, whereas
+\gls{onepixel} used score-based access to the same target architecture.
+Evaluation of these artifacts on EfficientNet-B0 constitutes direct-target
+assessment.
 
-The four model-dependent attacks were generated against fold-aware
-EfficientNet-B0 checkpoints. Their access assumptions were not identical:
-\gls{fgsm}, \gls{sigmazero}, and \gls{superdeepfool} used white-box
-checkpoint access, whereas \gls{onepixel} used score-based access to the same
-proxy target. Transferability to ResNet18, \gls{clip}, and the selected
-black-box software systems was evaluated empirically rather than assumed
-a priori
-\cite{biggio2018wild,nowroozi2021survey,barni2018cf}. \gls{colorshift} was
-instead treated as a model-agnostic adversarial-style perturbation.
+The same artifacts were subsequently evaluated on ResNet18 and the
+\gls{clip}-based proxy to measure empirical transfer behavior. Their effects on
+these architectures must therefore not be interpreted as white-box attacks
+against ResNet18 or \gls{clip}
+\cite{biggio2018wild,nowroozi2021survey,barni2018cf}.
 
-Consistent with the convention defined in Section~\ref{sec:results-scope},
-performance drop is interpreted as the variation with respect to the clean
-baseline. In this section, zero or negative values are not interpreted as
-evidence of general adversarial robustness, but as effects specific to the
-transferability of the perturbations generated against the target model and to
-the distribution of the evaluated samples.
+\gls{colorshift} is treated separately as a deterministic, model-agnostic
+adversarial-style condition. It does not use model parameters, gradients,
+scores, or checkpoints and is therefore not associated with a target-model
+attack success rate.
 
-Table~\ref{tab:results-adversarial-robustness} reports, for each adversarial
-perturbation, the perturbed accuracy and the accuracy drop with respect to the
-clean baseline.
+For every architecture and condition, accuracy drop is defined as:
+
+\begin{equation}
+\Delta_{\mathrm{acc}}
+=
+\mathrm{Acc}_{\mathrm{clean}}
+-
+\mathrm{Acc}_{\mathrm{perturbed}}.
+\end{equation}
+
+Positive values indicate lower aggregate accuracy under the perturbed
+condition. Zero indicates unchanged aggregate accuracy, whereas negative
+values indicate a condition-specific increase.
+
+As in the anti-forensic analysis, zero or negative accuracy drop does not imply
+that no new errors were introduced. Newly incorrect decisions may be offset by
+clean-condition errors that become correct under the perturbed distribution.
+
+For the four model-dependent attacks, attack success rate is computed over the
+clean-correct population:
+
+\begin{equation}
+\mathrm{ASR}
+=
+\frac{
+N\!\left(
+\widehat{y}_{\mathrm{clean}}=y
+\land
+\widehat{y}_{\mathrm{perturbed}}\neq y
+\right)
+}{
+N\!\left(
+\widehat{y}_{\mathrm{clean}}=y
+\right)
+}.
+\end{equation}
+
+This definition differs from the generation-time success indicator recorded
+while creating the artifacts. The results reported here use matched clean and
+perturbed predictions and exclude samples already misclassified in their clean
+form from the ASR denominator.
+
+Table~\ref{tab:results-adversarial-robustness} reports perturbed accuracy and
+accuracy drop for the five evaluated conditions.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3.3pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Perturbed accuracy and accuracy drop under adversarial perturbations}
+\caption{Accuracy and accuracy drop under adversarial and adversarial-style
+conditions}
 \label{tab:results-adversarial-robustness}
 \begin{tabular}{@{}l r r r r r r@{}}
 \toprule
-\textbf{Perturbation} &
-\textbf{\gls{clip} acc.} & \textbf{Drop} &
-\textbf{EffNet acc.} & \textbf{Drop} &
-\textbf{ResNet acc.} & \textbf{Drop} \\
+\textbf{Condition} &
+\textbf{\gls{clip} acc.} &
+\textbf{Drop} &
+\textbf{EffNet acc.} &
+\textbf{Drop} &
+\textbf{ResNet acc.} &
+\textbf{Drop} \\
 \midrule
-\gls{fgsm} & 0.914 & 0.013 & 0.575 & 0.403 & 0.918 & 0.046 \\
-\gls{superdeepfool} & 0.926 & 0.001 & 0.931 & 0.047 & 0.964 & 0.000 \\
-\gls{sigmazero} & 0.944 & -0.017 & 0.015 & 0.963 & 0.968 & -0.004 \\
-\gls{onepixel} & 0.928 & -0.001 & 0.976 & 0.002 & 0.963 & 0.001 \\
-\gls{colorshift} & 0.925 & 0.002 & 0.977 & 0.001 & 0.963 & 0.001 \\
+
+\gls{fgsm}
+& 0.914
+& 0.013
+& 0.575
+& 0.403
+& 0.918
+& 0.046 \\
+
+\gls{superdeepfool}
+& 0.926
+& 0.001
+& 0.931
+& 0.047
+& 0.964
+& 0.000 \\
+
+\gls{sigmazero}
+& 0.944
+& -0.017
+& 0.015
+& 0.963
+& 0.968
+& -0.004 \\
+
+\gls{onepixel}
+& 0.928
+& -0.001
+& 0.976
+& 0.002
+& 0.963
+& 0.001 \\
+
+\gls{colorshift}
+& 0.925
+& 0.002
+& 0.977
+& 0.001
+& 0.963
+& 0.001 \\
+
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} The drop is defined in Section~\ref{sec:results-scope};
-positive values indicate degradation with respect to the clean baseline,
-whereas negative values indicate a slight increase under the specific evaluated
-distribution.
+\textit{Note.} The first four conditions were generated against fold-specific
+EfficientNet-B0 checkpoints. Their evaluation on ResNet18 and the
+\acrshort{clip}-based proxy measures transfer behavior. Color Shift is
+model-agnostic. Drop is computed as clean accuracy minus perturbed accuracy;
+negative values indicate a condition-specific aggregate increase and do not
+establish the absence of newly induced errors.
 \end{table}
 
-Figure~\ref{fig:results-adversarial-accuracy-drop-heatmap} visualizes the same
-evaluation as a heatmap. The concentration of the highest values in the
-EfficientNet-B0 column reflects the fact that the model-dependent attacks were
-generated against this model.
+Figure~\ref{fig:results-adversarial-accuracy-drop-heatmap} visualizes the
+accuracy-drop distribution. The concentration of the largest values in the
+EfficientNet-B0 column reflects the fact that the four model-dependent attacks
+were generated against this architecture.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth]{images/fig_adversarial_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop of the proxy models under adversarial and adversarial-style perturbations}
+\includegraphics[width=0.88\textwidth]
+{images/fig_adversarial_accuracy_drop_heatmap.pdf}
+\caption{Accuracy drop of the proxy models under adversarial and
+adversarial-style conditions}
 \label{fig:results-adversarial-accuracy-drop-heatmap}
 \end{figure}
 
-The most critical result involves EfficientNet-B0 under \gls{sigmazero}, where
-accuracy decreases from 0.978 to 0.015, with an accuracy drop of 0.963.
-This value indicates near-total failure under the evaluated white-box
-condition, in which the attack is directly optimized against fold-aware
-EfficientNet-B0 checkpoints. The result is bounded to that target-model
-configuration, but it demonstrates that the highest clean-baseline accuracy
-among the proxy models does not imply stability against perturbations optimized
-for the same model.
+The most severe result is observed for EfficientNet-B0 under
+\gls{sigmazero}. Accuracy decreases from 0.978 to 0.015, corresponding to a
+drop of 0.963. Among the 978 samples classified correctly in their clean form,
+963 become incorrect, yielding an ASR of 0.9847.
 
-\gls{fgsm}, also generated against EfficientNet-B0, produces a relevant
-degradation, reducing accuracy to 0.575 and yielding an accuracy drop of 0.403.
-\gls{superdeepfool} instead produces a more limited effect on the same model,
-with an accuracy of 0.931 and a drop of 0.047. \gls{onepixel} and
-\gls{colorshift} produce marginal variations on EfficientNet-B0, equal to
-0.002 and 0.001, respectively.
+The directional transitions are nearly balanced: 489 clean-correct
+\texttt{weapon} samples become \texttt{non\_weapon}, while 474
+clean-correct \texttt{non\_weapon} samples become \texttt{weapon}. The result
+therefore represents a near-total collapse of the direct-target classifier
+rather than a degradation confined to one class.
 
-The comparison with ResNet18 and \gls{clip} shows that the model-dependent
-attacks generated against EfficientNet-B0 do not produce equivalent degradation
-on the other proxy architectures. ResNet18 undergoes the largest transferred
-drop under \gls{fgsm}, equal to 0.046, while remaining substantially stable
-under the transferred \gls{superdeepfool}, \gls{onepixel}, and
-\gls{sigmazero} variants. The model-agnostic \gls{colorshift} condition also
-produces only a marginal variation. \gls{clip} shows even more limited
-variations, with the maximum degradation equal to 0.013 under \gls{fgsm}. In
-some cases, such as \gls{sigmazero}, the perturbed accuracy of \gls{clip} and
-ResNet18 is slightly higher than the respective clean baseline; this effect is
-interpreted as a distribution-specific oscillation and not as evidence of
-general robustness.
+The operational consequence is twofold. The 489
+\texttt{weapon}-to-\texttt{non\_weapon} transitions correspond to newly
+missed firearm-oriented images, while the 474 transitions in the opposite
+direction substantially increase irrelevant review workload.
 
+\gls{fgsm} also produces severe direct-target degradation. EfficientNet-B0
+accuracy decreases to 0.575, corresponding to a drop of 0.403. The attack
+induces 406 errors among clean-correct samples and reaches an ASR of 0.4151.
 
-Table~\ref{tab:results-adversarial-operational-errors} reports additional
-operational indicators for the most relevant adversarial conditions. These
-values make it possible to distinguish the accuracy drop from the direction of
-the induced errors, with particular attention to
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon} transitions.
+In this case, the directional distribution is strongly asymmetric. Of the 406
+induced errors, 321 are \texttt{weapon}-to-\texttt{non\_weapon}
+transitions, whereas 85 occur in the opposite direction. FGSM therefore
+produces a particularly relevant missed-target risk in addition to its
+aggregate performance degradation.
+
+\gls{superdeepfool} has a smaller direct-target effect. EfficientNet-B0
+accuracy decreases to 0.931, producing a drop of 0.047 and an ASR of 0.0481.
+All 47 induced errors occur from \texttt{non\_weapon} to \texttt{weapon};
+no clean-correct \texttt{weapon} image becomes \texttt{non\_weapon} under
+this condition.
+
+This distinction is operationally important. The aggregate accuracy drop
+indicates reduced correctness, but the observed direct-target failure mode
+increases false-positive review workload without introducing additional missed
+firearm-oriented images among the clean-correct target samples.
+
+\gls{onepixel} produces only two direct-target induced errors on
+EfficientNet-B0, one in each direction, corresponding to an ASR of 0.0020.
+Its perturbed accuracy is 0.976, only 0.002 below the clean baseline. Under the
+frozen parameters, this score-based condition is therefore substantially less
+effective against the target architecture than Sigma-Zero, FGSM, or
+SuperDeepFool.
+
+Table~\ref{tab:results-adversarial-operational-errors} summarizes the most
+relevant direct-target and transferred model-dependent conditions.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Operational indicators for the most relevant adversarial perturbations}
+\caption{Operational indicators for selected model-dependent adversarial
+conditions}
 \label{tab:results-adversarial-operational-errors}
 \begin{tabular}{@{}l l r r r r r@{}}
 \toprule
 \textbf{Model} &
-\textbf{Perturbation} &
-\textbf{Induced errors} &
+\textbf{Attack} &
+\textbf{Induced} &
 \textbf{ASR} &
-\textbf{Confidence shift} &
+\textbf{Max-P shift} &
 \textbf{W\(\rightarrow\)NW} &
 \textbf{NW\(\rightarrow\)W} \\
 \midrule
-EfficientNet-B0 & \gls{sigmazero} & 963 & 0.9847 & -0.2578 & 489 & 474 \\
-EfficientNet-B0 & \gls{fgsm} & 406 & 0.4151 & -0.1246 & 321 & 85 \\
-EfficientNet-B0 & \gls{superdeepfool} & 47 & 0.0481 & -0.3063 & 0 & 47 \\
-ResNet18 & \gls{fgsm} & 47 & 0.0488 & -0.0230 & 27 & 20 \\
-\acrshort{clip} & \gls{fgsm} & 23 & 0.0248 & -0.0043 & 8 & 15 \\
+
+EfficientNet-B0
+& \gls{sigmazero}
+& 963
+& 0.9847
+& -0.2578
+& 489
+& 474 \\
+
+EfficientNet-B0
+& \gls{fgsm}
+& 406
+& 0.4151
+& -0.1246
+& 321
+& 85 \\
+
+EfficientNet-B0
+& \gls{superdeepfool}
+& 47
+& 0.0481
+& -0.3063
+& 0
+& 47 \\
+
+ResNet18
+& \gls{fgsm}
+& 47
+& 0.0488
+& -0.0230
+& 27
+& 20 \\
+
+\acrshort{clip}
+& \gls{fgsm}
+& 23
+& 0.0248
+& -0.0043
+& 8
+& 15 \\
+
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} \textit{Induced errors} indicates the number of errors introduced
-with respect to correct clean predictions; \textit{ASR} indicates the attack
-success rate computed with respect to samples correctly classified under clean
-conditions; \textit{Confidence shift} indicates the mean variation in
-confidence with respect to the clean condition; W\(\rightarrow\)NW indicates
-transitions from \texttt{weapon} to \texttt{non\_weapon}; NW\(\rightarrow\)W
-indicates transitions from \texttt{non\_weapon} to \texttt{weapon}.
+\textit{Note.} \textit{Induced} is the number of clean-correct samples rendered
+incorrect by the perturbed condition. \textit{ASR} uses the clean-correct
+denominator. \textit{Max-P shift} is the mean perturbed maximum
+predicted-class probability minus the corresponding clean value.
+W\(\rightarrow\)NW denotes \texttt{weapon}-to-\texttt{non\_weapon}
+transitions; NW\(\rightarrow\)W denotes the opposite direction.
 \end{table}
 
-The analysis of the induced errors confirms the operational criticality of the
-EfficientNet-B0 scenario under \gls{sigmazero}: 963 errors are introduced with
-respect to correct clean predictions, including 489
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon} transitions. This
-directional count complements accuracy by identifying how many
-clean-correct target-category samples become false negatives under the
-perturbation.
-\gls{fgsm} also produces a significant effect on EfficientNet-B0, with 406
-induced errors and 321 \texttt{weapon}\(\rightarrow\)\texttt{non\_weapon}
-transitions. For ResNet18 and \gls{clip}, the transferred effects are more
-limited, but not absent.
+The maximum-probability shift must be interpreted independently of the
+direction and number of induced errors. For example, SuperDeepFool produces the
+largest negative shift among the selected EfficientNet-B0 conditions, at
+\(-0.3063\), but induces substantially fewer errors than Sigma-Zero or FGSM.
+Moreover, all of its induced errors occur in the false-positive direction.
 
-From a forensic perspective, the EfficientNet-B0 results under
-\gls{sigmazero} and \gls{fgsm} show that high clean accuracy can coexist with
-severe degradation under deliberately manipulated inputs optimized against the
-same model. This
-reinforces the need not to interpret the output of an \gls{ai}-based classifier
-as autonomous evidence, but as triage support that must be subjected to
-verification, traceability, and evaluation within the overall investigative
-context.
+The shift is computed from the maximum predicted-class probability before and
+after perturbation. The maximizing class may differ between the clean and
+perturbed predictions. Consequently, the value does not measure the probability
+change of a fixed class and does not constitute a calibrated uncertainty
+estimate.
+
+The transfer assessment shows that perturbations optimized against
+EfficientNet-B0 do not produce equivalent effects on the other proxy
+architectures. The largest transferred degradation occurs under FGSM.
+ResNet18 accuracy decreases from 0.964 to 0.918, corresponding to a drop of
+0.046, 47 induced errors, and an ASR of 0.0488. Twenty-seven of these errors are
+\texttt{weapon}-to-\texttt{non\_weapon} transitions.
+
+For the \gls{clip}-based proxy, FGSM decreases accuracy from 0.927 to 0.914,
+corresponding to a drop of 0.013. It induces 23 errors and reaches an ASR of
+0.0248. Eight transitions occur from \texttt{weapon} to
+\texttt{non\_weapon}, while 15 occur in the opposite direction.
+
+Transferred Sigma-Zero artifacts do not reproduce the direct-target collapse.
+ResNet18 accuracy increases by 0.004 and the \gls{clip}-based proxy accuracy
+increases by 0.017. These aggregate increases nevertheless coexist with three
+induced errors for ResNet18 and eight for \gls{clip}. The result again confirms
+that aggregate improvement does not establish sample-level invariance.
+
+Transferred SuperDeepFool and One Pixel artifacts produce limited effects.
+SuperDeepFool induces no errors among clean-correct ResNet18 samples and three
+among clean-correct \gls{clip} samples. One Pixel induces one error for
+ResNet18 and none for \gls{clip} under the frozen evaluation.
+
+Color Shift produces only marginal aggregate changes across the three
+architectures. Because it is model-agnostic, its clean-correct-to-incorrect
+transitions are interpreted as induced errors rather than attack or transfer
+success. Its role is to provide a common adversarial-style comparison condition
+rather than evidence of white-box vulnerability.
+
+The adversarial results therefore identify a strong dependence on the
+relationship between the perturbation-generation model and the evaluated
+architecture. EfficientNet-B0 achieves the highest clean accuracy but undergoes
+the most severe degradation when the attacks are optimized directly against
+its fold-specific checkpoints. The same artifacts transfer only partially to
+ResNet18 and the \gls{clip}-based proxy.
+
+This limited transferability must not be interpreted as general robustness of
+the non-target architectures. It establishes only that the frozen
+EfficientNet-B0-oriented perturbations were less effective against the other
+proxy models. A direct attack generated against ResNet18 or the
+\gls{clip}-based proxy could produce a different result and was outside the
+experimental scope.
+
+From a forensic perspective, the findings demonstrate that high clean accuracy
+does not ensure operational stability under deliberately manipulated inputs.
+They also show that aggregate degradation alone is insufficient: the same
+accuracy drop may represent newly missed target images, increased false-positive
+workload, or a combination of both.
+
+The output of an \gls{ai}-based classification model must therefore remain a
+triage indicator rather than autonomous evidence. Its use requires systematic
+human verification, traceable processing, explicit knowledge of the evaluated
+threat model, and awareness that robustness conclusions are bounded to the
+tested architectures, perturbations, parameters, and access assumptions.
+
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
