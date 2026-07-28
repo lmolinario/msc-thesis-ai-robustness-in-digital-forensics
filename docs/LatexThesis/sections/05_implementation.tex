@@ -3304,18 +3304,6 @@ Section~\ref{subsec:implementation-normalization}. The resulting behavior of
 Section~\ref{subsec:results-cellebrite}.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Output Matching and Normalization}
 \label{subsec:implementation-normalization}
@@ -3323,36 +3311,31 @@ Section~\ref{subsec:results-cellebrite}.
 
 The heterogeneous outputs produced by the selected black-box software systems
 were converted into a common sample-level representation through the canonical
-normalization entry point:
+entry point
+\codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}.
+The entry point acts as a controlled-output wrapper around the preserved
+normalization implementation. It adds overwrite protection, field
+minimization, explicit preservation of unmatched records, complete version
+metadata, strict JSON serialization, and optional generation of separate
+per-configuration prediction files.
 
-\begin{center}
-\codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}
-\end{center}
-
-The implementation reads the controlled-access raw exports associated with the
-frozen runs and matches their observable records against the canonical forensic
-evaluation bundle. The primary normalization inputs are:
-
-\begin{center}
+The normalization implementation reads the controlled-access exports associated
+with the frozen runs and associates their observable records with the forensic
+evaluation bundle. Its primary bundle inputs are
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
-\end{center}
+and
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}.
 
-and:
+These records provide the association among neutrally identified software-input
+files, cryptographic hashes, reference operational assignments, folds, sample
+types, perturbation conditions, source-image identifiers, and generated-image
+identifiers. Reference assignments and experimental metadata are joined to the
+observable software outputs only after export and were not supplied to the
+evaluated systems during their analysis.
 
-\begin{center}
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}
-\end{center}
-
-These records provide the mapping among anonymized software-input files,
-cryptographic hashes, reference operational assignments, folds, sample types,
-perturbation conditions, source-image identifiers, and generated-image
-identifiers. The reference assignments and experimental metadata are joined to
-the observable software outputs only during this post-export stage and are not
-provided to the evaluated systems during analysis.
-
-The normalization pipeline processes four software families while retaining
-the three \gls{excirefoto2025} distance settings as distinct configurations.
-The resulting normalized configuration identifiers are:
+The normalization pipeline processes four software families while retaining the
+three \gls{excirefoto2025} semantic-distance settings as distinct operational
+configurations:
 
 \begin{itemize}
 \item \texttt{magnet\_axiom};
@@ -3363,8 +3346,8 @@ The resulting normalized configuration identifiers are:
 \item \texttt{excire\_foto\_2025\_d80}.
 \end{itemize}
 
-Each normalized configuration is evaluated against the same 11\,500-item
-bundle. The canonical normalized population therefore contains:
+Each configuration is evaluated against the same 11\,500-item bundle. The
+complete normalized population therefore contains:
 
 \begin{equation}
 6\ \text{configurations}
@@ -3382,45 +3365,47 @@ indexes:
 \begin{enumerate}
 \item a \gls{sha256}-based index;
 \item an \gls{md5}-based index;
-\item an anonymized file-name index.
+\item a neutral file-name index.
 \end{enumerate}
 
 For conventional row-oriented exports, each parsed software record is matched
 according to the following priority:
 
-\begin{center}
+\[
 \texttt{SHA-256}
-\(\succ\)
+\succ
 \texttt{MD5}
-\(\succ\)
+\succ
 \texttt{exact file name}
-\(\succ\)
+\succ
 \texttt{file name embedded in an exported path or text field}.
-\end{center}
+\]
 
-The matching method is preserved explicitly in the normalized record. This
-allows subsequent verification of whether an association was established
-through the primary cryptographic identifier or through a fallback identifier
-exposed by the software export.
+The selected matching method is retained in the normalized record. This permits
+subsequent verification of whether an association was established through the
+primary cryptographic identifier or through a fallback identifier exposed by
+the software export.
 
 Hash values are normalized before comparison by removing separators and
-non-hexadecimal formatting characters. File-system paths are reduced to their
-base file names before lookup so that differences between Windows paths and
-repository-relative directory structures do not prevent association with the
-blind bundle.
+non-hexadecimal formatting characters. Exported paths are reduced to their base
+file names before lookup so that differences between Windows paths and
+repository-relative paths do not prevent association with the neutral bundle
+files.
 
-The \gls{excirefoto2025} workflow requires a distinct matching procedure
-because its exports contain only the images retrieved by each semantic query.
-The anonymized file names listed in the eight prompt-level hit lists are first
-mapped to bundle items. The union of those hits is then completed against the
-full bundle manifest, thereby producing an explicit operational decision for
-every image, including those absent from all prompt exports.
+The Griffeye export is filtered before matching to exclude unallocated-space,
+system-file, and other non-bundle records. The Excire workflow instead requires
+a bundle-completion procedure because its exports contain only the images
+retrieved by each semantic query. Neutral file names found in the eight
+prompt-level hit lists are associated with bundle items, and the union of the
+retrieval results is subsequently completed against the full bundle manifest.
+This produces an explicit operational decision for every bundle item, including
+images absent from all prompt exports.
 
 \paragraph{Software-specific observable recoding.}
 
-The software-specific observable fields are converted into a common
-\texttt{weapon\_detected} state according to the frozen rules summarized in
-Table~\ref{tab:implementation-normalization-mappings}.
+The observable fields exposed by the software systems are converted into a
+common \texttt{weapon\_detected} state according to the frozen rules summarized
+in Table~\ref{tab:implementation-normalization-mappings}.
 
 \begin{table}[H]
 \centering
@@ -3429,225 +3414,205 @@ Table~\ref{tab:implementation-normalization-mappings}.
 \setlength{\tabcolsep}{4pt}
 \caption{Frozen mappings from observable software outputs to normalized decisions}
 \label{tab:implementation-normalization-mappings}
-\begin{tabularx}{\textwidth}{@{}p{0.21\textwidth} p{0.20\textwidth} X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.21\textwidth} p{0.21\textwidth} X@{}}
 \toprule
 \textbf{Configuration} &
 \textbf{Observable source} &
-\textbf{Positive operational mapping} \\
+\textbf{Operational mapping} \\
 \midrule
 
 \gls{magnetaxiomtool}/\gls{magnetai}
 &
 \texttt{Pictures.csv}: \texttt{Tags}
 &
-The exported tag contains \texttt{Possible weapons}. Empty tags are interpreted
-as not flagged. Other nonempty values that do not match the frozen mapping are
-recorded as unmapped and assigned to the normalized \texttt{unknown} state. \\
+\texttt{Possible weapons}, or a compatible nonempty weapon-oriented tag, is
+mapped to \texttt{true}. An empty tag is mapped to \texttt{false}; an
+unrecognized nonempty tag is mapped to \texttt{unknown}. \\
 
 \gls{griffeye}/\gls{t3kcore}
 &
 CSV: \texttt{Bookmarks}
 &
-The automatically generated bookmark contains
-\texttt{CORE/Violence/Firearm}. Other weapon-related bookmarks are retained as
-secondary indicators but excluded from the primary decision. \\
+The automatically generated bookmark
+\texttt{CORE/Violence/Firearm} is mapped to \texttt{true}; its absence is
+mapped to \texttt{false}. Other weapon-related bookmarks remain secondary
+semantic indicators. \\
 
 \gls{cellebriteinseyets}
 &
 XLSX, worksheet \texttt{Immagini}: \texttt{Classifications}
 &
-The normalized classification set contains at least one among
-\texttt{Armi}, \texttt{Pistola}, or \texttt{Fucile}. \\
+A classification set containing at least one among \texttt{Armi},
+\texttt{Pistola}, or \texttt{Fucile} is mapped to \texttt{true}; all other
+matched bundle records are mapped to \texttt{false}. \\
 
 \gls{excirefoto2025} D20, D50, and D80
 &
 Eight prompt-level retrieval hit lists per configuration
 &
-The image is retrieved by at least one frozen firearm-oriented prompt under the
-corresponding distance setting. \\
+Retrieval by at least one frozen firearm-oriented prompt under the corresponding
+distance setting is mapped to \texttt{true}; absence from all eight lists is
+mapped to \texttt{false}. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The common software-specific detection state supports three values:
+The resulting common prediction is assigned as:
 
-\begin{center}
-\texttt{true},
-\qquad
-\texttt{false},
-\qquad
-\texttt{unknown}.
-\end{center}
-
-The corresponding normalized prediction is assigned as:
-
-\begin{equation}
+\[
 \texttt{normalized\_prediction}
 =
 \begin{cases}
 \texttt{weapon},
-& \text{if \texttt{weapon\_detected = true}},\\
+&
+\text{if \texttt{weapon\_detected = true}},
+\\
 \texttt{non\_weapon},
-& \text{if \texttt{weapon\_detected = false}},\\
+&
+\text{if \texttt{weapon\_detected = false}},
+\\
 \texttt{unknown},
-& \text{otherwise}.
+&
+\text{otherwise}.
 \end{cases}
-\end{equation}
+\]
 
-The \texttt{unknown} state prevents an unsupported or unrecognized exported
-value from being silently interpreted as a negative result. In this schema,
-\texttt{unmapped} describes the outcome of a software-specific parsing rule,
-whereas \texttt{unknown} is the corresponding common normalized state. All
-official frozen configurations nevertheless produced a normalized decision
-state for every matched bundle item.
+The \texttt{unknown} state prevents an unsupported or unrecognized observable
+value from being interpreted silently as a negative result.
+\texttt{Unmapped} describes the outcome of a software-specific parsing rule,
+whereas \texttt{unknown} is the corresponding value in the common normalized
+schema. The frozen official configurations produced no unknown decisions in the
+final 69\,000-row population.
 
-\paragraph{Common normalized schema.}
+\paragraph{Controlled normalized schema.}
 
-The normalized representation separates software-observable information from
-the reference assignments and experimental metadata recovered from the bundle.
-Its principal fields include:
+During controlled local execution, the normalized representation separates
+software-observable information from the reference assignments and experimental
+metadata recovered from the bundle. Its principal fields include:
 
 \begin{itemize}
 \item \texttt{tool\_name}, \texttt{bundle\_id},
 \texttt{matched}, and \texttt{match\_method};
-
 \item \texttt{sample\_type}, \texttt{attack\_family},
 \texttt{attack\_name}, and \texttt{attack\_target\_model};
-
 \item \texttt{fold}, \texttt{final\_label}, and
 \texttt{source\_dataset};
-
 \item \texttt{original\_image\_id} and
 \texttt{generated\_image\_id};
-
-\item the anonymized input file name and available \gls{sha256} and
+\item the neutral input file name and available \gls{sha256} and
 \gls{md5} values;
-
-\item the original exported label, tag, classification, bookmark, or
-prompt-membership information;
-
+\item the original exported tag, classification, bookmark, or prompt-membership
+information;
 \item \texttt{weapon\_detected},
 \texttt{normalized\_prediction}, and
 \texttt{mapping\_reason};
-
-\item binary correctness, false-negative, and false-positive indicators
-when the reference operational assignment is \texttt{weapon} or
+\item binary correctness, false-negative, and false-positive indicators when
+the reference operational assignment is \texttt{weapon} or
 \texttt{non\_weapon}.
 \end{itemize}
 
-The literal field name \texttt{final\_label} is preserved because it belongs to
-the implemented schema; semantically, its value represents the reference
+The literal field name \texttt{final\_label} is retained because it belongs to
+the implemented schema. Semantically, its value represents the reference
 operational assignment inherited from the frozen bundle.
 
-Software-specific information is retained in additional fields rather than
+Software-specific information is preserved in dedicated fields rather than
 being discarded after binary recoding. These fields include the original AXIOM
-tags, Cellebrite classifications, Excire distance limit and per-prompt hit
-indicators, and the primary and secondary Griffeye bookmarks.
+tags, Cellebrite classifications, Excire distance limit and per-prompt
+membership indicators, and the primary and secondary Griffeye bookmarks.
 
-The schema therefore supports structured cross-system comparison without
-discarding the observable evidence from which each normalized decision was
-derived.
-
-For records whose reference assignment is \texttt{ood}, the binary correctness,
-false-negative, and false-positive fields are left undefined. An \gls{ood}
-input is not treated as either a positive or a negative reference instance. Its
-normalized \texttt{weapon\_detected} state is preserved separately and is later
-used to compute the \gls{ood} weapon-flag rate.
+For records whose reference operational assignment is \texttt{ood}, the binary
+correctness, false-negative, and false-positive fields remain undefined. An
+\gls{ood} input is not treated as either a positive or negative binary reference
+instance. Its normalized detection state is preserved separately for
+calculation of the \gls{ood} weapon-flag rate.
 
 \paragraph{Deduplication and completeness.}
 
-Some software exports may contain more than one record associated with the same
-bundle item. The normalizer therefore supports deterministic consolidation to
-one row per normalized configuration and bundle identifier.
-
-When several matched rows refer to the same pair, the consolidated decision is
-selected according to the following conservative rule:
+The normalizer supports deterministic consolidation to one row for each
+normalized-configuration and bundle-identifier pair. When multiple matched
+records refer to the same pair, the consolidated decision follows this
+precedence:
 
 \begin{enumerate}
 \item if at least one row contains a positive decision, the consolidated
-result is positive;
-
-\item otherwise, if at least one row contains an explicit negative
-decision, the consolidated result is negative;
-
-\item otherwise, the consolidated result is \texttt{unknown}.
+decision is \texttt{true};
+\item otherwise, if at least one row contains an explicit negative decision,
+the consolidated decision is \texttt{false};
+\item otherwise, the consolidated decision is \texttt{unknown}.
 \end{enumerate}
 
-The consolidation procedure retains the combined export-file references, row
-numbers, observable labels, mapping reasons, and raw-row count. When an
-explicit software-specific numerical value is available, the maximum exported
-value may be preserved as part of the original observable record. Such values
-are not converted into a common calibrated confidence measure, and no
-confidence value is fabricated for systems that do not expose one.
+The consolidation procedure preserves the combined export references, row
+numbers, observable labels, mapping reasons, and contributing-row count. When
+multiple numerical values are exposed by the same software for the consolidated
+records, the maximum value may be retained as part of the original observable
+information. It is not converted into a cross-system calibrated confidence
+measure, and no numerical confidence is fabricated for systems that do not
+expose one.
 
-Unmatched records are excluded from the canonical prediction table because they
-do not belong to the official forensic evaluation bundle. They remain
-documented through the export audit and separate unmatched-record outputs.
+Unmatched records are excluded from the canonical matched population because
+they do not correspond to official bundle items. They are preserved separately
+in the controlled local output and summarized in the public normalization
+report.
 
-After software-specific parsing and the preliminary exclusion of the 553
-non-bundle Griffeye records, the normalization workspace contained 69\,329
-candidate records. This population comprised the expected 69\,000 bundle-level
-decisions and 329 unmatched Cellebrite report records. Excluding the latter
-produced exactly 69\,000 matched normalized decisions:
+After the preliminary exclusion of the 553 non-bundle Griffeye records, the
+normalization workspace contained 69\,329 candidate records. This population
+comprised 69\,000 matched bundle-level decisions and 329 unmatched Cellebrite
+report records:
 
 \begin{equation}
 69\,329
 -
 329
 =
-69\,000.
+69\,000\ \text{matched decisions}.
 \end{equation}
 
-This final count corresponds to complete coverage of the 11\,500-item bundle
-for all six normalized configurations. No matched bundle decision remained
-without a common normalized state after the frozen mappings were applied.
-Complete coverage establishes output availability and successful matching; it
-does not establish classification correctness.
+Deduplication was enabled in the frozen execution. The matched population
+already contained one decision for every configuration--bundle pair, and its
+size therefore remained 69\,000 rows after consolidation. Every configuration
+covered all 11\,500 bundle items, and no matched decision remained in the
+\texttt{unknown} state.
 
-\paragraph{Audit and output records.}
+Complete coverage establishes the availability of an observable and matched
+decision for every bundle item. It does not establish classification
+correctness.
 
-The normalization stage maintains two distinct representations. The controlled
-normalization workspace preserves the complete matching, provenance, audit, and
-software-specific fields required to reconstruct the transformation from raw
-software exports to normalized decisions. Its per-configuration outputs follow
-the pattern:
+\paragraph{Controlled and public output records.}
 
-\begin{center}
+The controlled normalization execution produces:
+
+\begin{itemize}
+\item the complete normalized prediction workspace;
+\item the separate unmatched-record table;
+\item the export audit;
+\item the software-version log;
+\item the normalization summary;
+\item the per-configuration and aggregate metric tables.
+\end{itemize}
+
+Separate files following the pattern
 \codepath{evaluation/forensic_tools/<tool_name>_normalized_predictions.csv}
-\end{center}
+are optional and are generated only when the
+\texttt{--write-per-tool-files} option is supplied. They are not produced by
+the default canonical execution.
 
-Unmatched export records are maintained separately from the canonical matched
-population.
+For public distribution, four minimized software-specific extracts are built
+from the validated local normalization output. These extracts retain neutral
+bundle identifiers, experimental-condition fields, the observable signal needed
+to audit each software-specific mapping, and the resulting normalized decision.
+They exclude raw local paths, unrelated case fields, device identifiers, and
+other proprietary-export-derived metadata.
 
-The public research artifact retains a reduced and sanitized canonical
-representation containing the fields required to audit the observable decision
-mappings and reproduce the reported black-box software metrics. The canonical
-public table is:
+The repository-facing canonical table
+\codepath{evaluation/forensic_tools/normalized_predictions.csv} is subsequently
+reconstructed from these four validated extracts through
+\codepath{forensic_tools/scripts/build_canonical_normalized_predictions.py}.
+It contains all 69\,000 normalized decisions but does not reproduce the complete
+controlled local workspace.
 
-\begin{center}
-\codepath{evaluation/forensic_tools/normalized_predictions.csv}
-\end{center}
-
-It contains all 69\,000 normalized bundle-level decisions and is reconstructed
-from the four validated sanitized public extracts. It excludes the complete
-raw exports, local execution paths, unrelated forensic fields, and controlled
-case metadata.
-
-The publicly retained schemas documenting the prediction-level formats are:
-
-\begin{center}
-\codepath{evaluation/forensic_tools/normalized_predictions.schema.csv}
-\end{center}
-
-and:
-
-\begin{center}
-\codepath{evaluation/forensic_tools/unmatched_predictions.schema.csv}
-\end{center}
-
-The normalization stage also produces the audit and validation records listed
-in Table~\ref{tab:implementation-normalization-artifacts}.
+Table~\ref{tab:implementation-normalization-artifacts} summarizes the principal
+normalization, audit, and public-validation records.
 
 \begin{table}[H]
 \centering
@@ -3656,55 +3621,96 @@ in Table~\ref{tab:implementation-normalization-artifacts}.
 \setlength{\tabcolsep}{4pt}
 \caption{Principal normalization, audit, and validation records}
 \label{tab:implementation-normalization-artifacts}
-\begin{tabularx}{\textwidth}{@{}p{0.46\textwidth} X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.47\textwidth} X@{}}
 \toprule
 \textbf{Record} &
 \textbf{Role} \\
 \midrule
 
+\codepath{evaluation/forensic_tools/normalized_predictions.csv}
+&
+Canonical sanitized table containing 69\,000 matched decisions reconstructed
+from the four validated public extracts. \\
+
+\codepath{evaluation/forensic_tools/unmatched_predictions.csv}
+&
+Controlled local record of export rows that could not be associated with
+official bundle items; the frozen run contains 329 Cellebrite records. \\
+
 \codepath{evaluation/forensic_tools/tool_export_audit.csv}
 &
-Documents every inspected export file, prediction-bearing status, parsed-row
-count, excluded non-bundle rows, and parsing errors. \\
+Documents inspected export files, prediction-bearing status, parsed-row counts,
+excluded non-bundle records, and parsing errors. \\
 
 \codepath{evaluation/forensic_tools/tool_version_log.csv}
 &
-Records the frozen software versions, run identifiers, selected export
-directories, enabled analysis functionality, import path, export status, and
-normalization notes. \\
+Records software versions, run identifiers, selected export directories,
+enabled functionality, import path, export status, and normalization notes. \\
 
 \codepath{evaluation/forensic_tools/normalization_summary.json}
 &
-Records the selected runs, raw and normalized row counts, output
-configurations, completeness checks, deduplication state, and validation of the
-generated metric outputs. \\
+Records selected runs, raw and normalized row counts, unmatched-record counts,
+output configurations, deduplication state, and metric-output validation. \\
 
-\codepath{forensic_tools/run_registry.json}
+\codepath{evaluation/forensic_tools/normalized_predictions_public_summary.json}
 &
-Provides the canonical registry of black-box software versions, run
-identifiers, observable fields, mappings, controlled raw-export locations, and
-public sanitized extracts. \\
+Documents the canonical sanitized table, its row count, schema, source extracts,
+and \gls{sha256} digest. \\
+
+Four software-specific files under
+\codepath{forensic_tools/*/public_extracts/}
+&
+Minimized observable-signal and decision records used to reconstruct the
+canonical sanitized table. \\
 
 \codepath{forensic_tools/public_extracts_validation.json}
 &
-Verifies that the sanitized public extracts preserve the complete normalized
-decision population and reproduce the metrics derived from the controlled local
-prediction table. \\
+Verifies decision-level and metric-level equivalence between the sanitized
+public extracts and the controlled local normalization results. \\
+
+\codepath{forensic_tools/run_registry.json}
+&
+Provides the canonical registry of software versions, run identifiers,
+observable fields, mappings, controlled raw-export locations, and public
+extracts. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The decision-level and metric-level validation confirms that the sanitized
-extracts preserve all 69\,000 normalized decisions and reproduce all 186 frozen
-black-box software metric rows without differences. The cryptographic hashes of
-the validated extracts are recorded in the corresponding validation record.
+The public schemas
+\codepath{evaluation/forensic_tools/normalized_predictions.schema.csv} and
+\codepath{evaluation/forensic_tools/unmatched_predictions.schema.csv}
+document the prediction-level formats independently of the controlled local
+records.
 
-This distribution boundary preserves the reproducibility and auditability of
-the reported normalized decisions while avoiding unnecessary publication of
-complete proprietary software exports or local case metadata. The computation
-of the corresponding binary and \gls{ood} metrics is described in
+The validation process confirms that the public extracts preserve all 69\,000
+normalized decisions and reproduce all 186 frozen black-box software metric
+rows without differences. The corresponding extract hashes are recorded in the
+validation artifact.
+
+Canonical outputs are protected against accidental replacement. Existing
+normalization predictions, unmatched records, and metric outputs require the
+explicit \texttt{--force} option before regeneration. A partial software
+selection cannot write to the canonical output directories; partial or
+diagnostic runs must use alternative output locations.
+
+This distribution boundary preserves auditability and reproducibility while
+avoiding publication of complete proprietary software exports, unrelated
+forensic fields, local execution paths, and controlled case metadata. The
+computation of the corresponding binary and \gls{ood} metrics is described in
 Section~\ref{subsec:implementation-metrics}.
+
+
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
