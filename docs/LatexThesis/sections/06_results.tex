@@ -631,148 +631,283 @@ be treated as stand-alone evidence, supervised correctness, or calibrated
 uncertainty, and both remain subject to human verification
 \cite{guo2017calibration,nist2023airmf}.
 
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-Forensic Robustness}
 \label{sec:results-antiforensic}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The anti-forensic evaluation measures the stability of the proxy models with
-respect to model-agnostic transformations that may arise in operationally
-plausible scenarios. Unlike adversarial attacks, these transformations do not
-require access to the target model and are not necessarily designed to maximize
-classification error. Rather, they simulate common alterations of the visual
-content or of the image file, such as recompression, resizing, blurring,
-modification of the tonal distribution, and contrast
-normalization~\cite{stamm2010anti,yaacoub2021digital,hendrycks2019benchmarking}.
+The anti-forensic evaluation examines the stability of the proxy models under
+five deterministic, model-agnostic image transformations. These conditions do
+not require access to model parameters, gradients, logits, or decision
+thresholds. They represent operations compatible with ordinary image
+circulation and processing, although the same transformations may also be
+applied intentionally to alter observable image characteristics
+\cite{stamm2010anti,yaacoub2021digital,hendrycks2019benchmarking}.
 
-Consistent with the convention defined in Section~\ref{sec:results-scope},
-performance drop is interpreted as the variation with respect to the clean
-baseline. Positive values indicate a reduction in performance, whereas zero or
-negative values are treated as stability or distribution-specific oscillations,
-not as evidence of general robustness.
+The evaluated conditions comprise JPEG recompression, downsampling followed by
+resizing to the original dimensions, Gaussian blurring, histogram
+modification, and contrast stretching. Their operational relevance derives
+from the fact that they may occur during compression, platform-mediated
+sharing, editing, conversion, or deliberate anti-forensic manipulation.
 
-Table~\ref{tab:results-antiforensic-robustness} reports, for each
-transformation, the perturbed accuracy and the accuracy drop with respect to the
-clean baseline.
+For each architecture and transformation, performance is compared with the
+corresponding clean baseline. Accuracy drop is defined as:
+
+\begin{equation}
+\Delta_{\mathrm{acc}}
+=
+\mathrm{Acc}_{\mathrm{clean}}
+-
+\mathrm{Acc}_{\mathrm{transformed}}.
+\end{equation}
+
+Positive values indicate lower aggregate accuracy under the transformed
+condition. A value of zero indicates unchanged aggregate accuracy, whereas a
+negative value indicates higher accuracy on the specific transformed
+population.
+
+A zero or negative accuracy drop must not be interpreted as evidence that the
+transformation introduced no adverse decisions. Aggregate accuracy may remain
+unchanged or increase when some clean-condition errors are corrected while
+other initially correct samples become incorrect. For this reason, accuracy
+drop is examined together with the induced-error count, induced-error rate, and
+direction of the clean-correct-to-incorrect transitions.
+
+Table~\ref{tab:results-antiforensic-robustness} reports transformed accuracy and
+accuracy drop for all architecture--transformation combinations.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3.3pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Perturbed accuracy and accuracy drop under anti-forensic transformations}
+\caption{Accuracy and accuracy drop under anti-forensic transformations}
 \label{tab:results-antiforensic-robustness}
 \begin{tabular}{@{}l r r r r r r@{}}
 \toprule
 \textbf{Transformation} &
-\textbf{\gls{clip} acc.} & \textbf{Drop} &
-\textbf{EffNet acc.} & \textbf{Drop} &
-\textbf{ResNet acc.} & \textbf{Drop} \\
+\textbf{\gls{clip} acc.} &
+\textbf{Drop} &
+\textbf{EffNet acc.} &
+\textbf{Drop} &
+\textbf{ResNet acc.} &
+\textbf{Drop} \\
 \midrule
-\gls{jpegrecompression} & 0.925 & 0.002 & 0.976 & 0.002 & 0.964 & 0.000 \\
-\gls{resampleresize} & 0.929 & -0.002 & 0.976 & 0.002 & 0.963 & 0.001 \\
-\gls{gaussianblur} & 0.934 & -0.007 & 0.965 & 0.013 & 0.959 & 0.005 \\
-\gls{histogrammodification} & 0.925 & 0.002 & 0.973 & 0.005 & 0.934 & 0.030 \\
-\gls{contraststretching} & 0.927 & 0.000 & 0.974 & 0.004 & 0.963 & 0.001 \\
+
+\gls{jpegrecompression}
+& 0.925
+& 0.002
+& 0.976
+& 0.002
+& 0.964
+& 0.000 \\
+
+\gls{resampleresize}
+& 0.929
+& -0.002
+& 0.976
+& 0.002
+& 0.963
+& 0.001 \\
+
+\gls{gaussianblur}
+& 0.934
+& -0.007
+& 0.965
+& 0.013
+& 0.959
+& 0.005 \\
+
+\gls{histogrammodification}
+& 0.925
+& 0.002
+& 0.973
+& 0.005
+& 0.934
+& 0.030 \\
+
+\gls{contraststretching}
+& 0.927
+& 0.000
+& 0.974
+& 0.004
+& 0.963
+& 0.001 \\
+
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} The drop is defined in Section~\ref{sec:results-scope};
-positive values indicate degradation with respect to the clean baseline,
-whereas negative values indicate a slight increase under the specific evaluated
-distribution.
+\textit{Note.} Drop is computed as clean accuracy minus transformed accuracy.
+Positive values indicate aggregate degradation, zero indicates unchanged
+aggregate accuracy, and negative values indicate a condition-specific increase.
+None of these values alone establishes the absence or presence of newly induced
+errors.
 \end{table}
 
-Figure~\ref{fig:results-antiforensic-accuracy-drop-heatmap} visualizes the same
-evaluation as a heatmap, highlighting the distribution of the drop across models
-and transformations.
+Figure~\ref{fig:results-antiforensic-accuracy-drop-heatmap} presents the same
+comparison as a heatmap.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.88\textwidth]{images/fig_anti_forensic_accuracy_drop_heatmap.pdf}
+\includegraphics[width=0.88\textwidth]
+{images/fig_anti_forensic_accuracy_drop_heatmap.pdf}
 \caption{Accuracy drop of the proxy models under anti-forensic transformations}
 \label{fig:results-antiforensic-accuracy-drop-heatmap}
 \end{figure}
 
-The results show that the anti-forensic transformations produce overall limited
-effects on the three transparent proxy models defined in
-Section~\ref{subsec:implementation-architectures}, especially when compared
-with the adversarial perturbations discussed in
-Section~\ref{sec:results-adversarial}.
-EfficientNet-B0 maintains high performance under all conditions, but is more
-sensitive to \gls{gaussianblur}, with an accuracy of 0.965 and a drop of 0.013.
-ResNet18, by contrast, shows the greatest degradation under
-\gls{histogrammodification}, with an accuracy of 0.934 and a drop of 0.030.
-\gls{clip} remains substantially stable, with very limited drops and, in some
-cases, slight increases in accuracy with respect to the clean baseline.
+The aggregate results indicate that the five transformations produce smaller
+accuracy variations than the strongest model-dependent adversarial attacks
+examined in Section~\ref{sec:results-adversarial}. This relative difference
+does not make the anti-forensic effects operationally negligible. Even limited
+aggregate degradation may correspond to newly missed target-category images.
 
-Table~\ref{tab:results-antiforensic-operational-errors} reports additional
-operational indicators for the most relevant anti-forensic conditions. These
-values make it possible to distinguish the simple accuracy drop from the nature
-of the induced errors, with particular attention to
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon} transitions, which represent
-the most critical case in a forensic triage workflow.
+EfficientNet-B0 remains above 0.965 accuracy under every transformation.
+Gaussian Blur produces its largest degradation, reducing accuracy from 0.978
+to 0.965 and yielding an accuracy drop of 0.013. Histogram Modification is the
+second most influential condition for this model, with an accuracy of 0.973 and
+a drop of 0.005.
+
+ResNet18 is most affected by Histogram Modification. Its accuracy decreases
+from 0.964 to 0.934, corresponding to the largest anti-forensic accuracy drop
+observed across the three architectures, at 0.030. Gaussian Blur produces a
+smaller reduction to 0.959, corresponding to a drop of 0.005. JPEG
+Recompression leaves aggregate accuracy unchanged at 0.964.
+
+The \gls{clip}-based proxy exhibits small aggregate variations across the five
+conditions. JPEG Recompression and Histogram Modification reduce accuracy by
+0.002, Contrast Stretching leaves it unchanged, and Resample Resize increases
+it by 0.002. Gaussian Blur increases aggregate accuracy from 0.927 to 0.934.
+
+These limited or negative accuracy drops must be interpreted cautiously. They
+do not demonstrate that the \gls{clip}-based proxy is unaffected by the
+transformations. A transformed population can contain both newly introduced
+errors and corrected clean-condition errors, with the latter compensating for
+the former in the aggregate accuracy.
+
+Table~\ref{tab:results-antiforensic-operational-errors} reports the most
+operationally relevant condition for each architecture. The selected conditions
+capture the largest aggregate degradation or, where aggregate drops are tied or
+limited, the greatest newly induced error burden.
 
 \begin{table}[H]
 \centering
 \scriptsize
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Operational indicators for the most relevant anti-forensic transformations}
+\caption{Operational indicators for representative anti-forensic conditions}
 \label{tab:results-antiforensic-operational-errors}
-\begin{tabular}{@{}l l r r r r@{}}
+\begin{tabular}{@{}l l r r r r r@{}}
 \toprule
 \textbf{Model} &
 \textbf{Transformation} &
-\textbf{Induced errors} &
-\textbf{Confidence shift} &
+\textbf{Induced} &
+\textbf{IER} &
+\textbf{Max-P shift} &
 \textbf{W\(\rightarrow\)NW} &
 \textbf{NW\(\rightarrow\)W} \\
 \midrule
-EfficientNet-B0 & \gls{gaussianblur} & 17 & -0.0099 & 17 & 0 \\
-ResNet18 & \gls{histogrammodification} & 39 & -0.0157 & 23 & 16 \\
-\acrshort{clip} & \gls{histogrammodification} & 13 & -0.0037 & 6 & 7 \\
+
+EfficientNet-B0
+& \gls{gaussianblur}
+& 17
+& 0.0174
+& -0.0099
+& 17
+& 0 \\
+
+ResNet18
+& \gls{histogrammodification}
+& 39
+& 0.0405
+& -0.0157
+& 23
+& 16 \\
+
+\acrshort{clip}
+& \gls{histogrammodification}
+& 13
+& 0.0140
+& -0.0037
+& 6
+& 7 \\
+
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} \textit{Induced errors} indicates the number of errors introduced
-with respect to correct clean predictions; \textit{Confidence shift} indicates
-the mean variation in confidence with respect to the clean condition;
-W\(\rightarrow\)NW indicates transitions from \texttt{weapon} to
-\texttt{non\_weapon}; NW\(\rightarrow\)W indicates transitions from
-\texttt{non\_weapon} to \texttt{weapon}.
+\textit{Note.} \textit{Induced} is the number of clean-correct samples rendered
+incorrect by the transformation. \textit{IER} is the induced-error rate over
+the clean-correct denominator. \textit{Max-P shift} is the mean transformed
+maximum predicted-class probability minus the corresponding clean value.
+W\(\rightarrow\)NW denotes \texttt{weapon}-to-\texttt{non\_weapon}
+transitions; NW\(\rightarrow\)W denotes the opposite direction.
 \end{table}
 
-The most critical transformation for EfficientNet-B0 is \gls{gaussianblur},
-which introduces 17 errors with respect to correct clean predictions, all in the
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon} direction. For ResNet18, the
-most relevant condition is \gls{histogrammodification}, which introduces 39
-errors, 23 of which occur in the
-\texttt{weapon}\(\rightarrow\)\texttt{non\_weapon} direction and 16 in the
-opposite direction. For \gls{clip}, the effects remain more limited, although
-\gls{histogrammodification} still introduces 13 errors with respect to the clean
-baseline, distributed across both error directions.
+For EfficientNet-B0, Gaussian Blur introduces 17 errors among samples that were
+correctly classified in their clean form. All 17 transitions occur from
+\texttt{weapon} to \texttt{non\_weapon}, producing an induced-error rate of
+0.0174. The direction of these transitions is operationally more consequential
+than the aggregate drop alone because every newly induced error corresponds to
+a missed firearm-oriented sample.
 
-From an operational perspective, these results should not be considered
-negligible merely because the drops are lower than those observed under
-adversarial conditions. Anti-forensic transformations are compatible with ordinary image circulation,
-compression, modification, and re-sharing, although the same operations may
-also be applied intentionally. In a \gls{df} workflow, even a limited reduction
-in performance may matter when it affects target-category samples or combines
-with low image quality, ambiguous context, or the absence of systematic human
-verification.
+For ResNet18, Histogram Modification introduces 39 errors and produces the
+highest anti-forensic induced-error rate, at 0.0405. Of these transitions, 23
+occur from \texttt{weapon} to \texttt{non\_weapon}, while 16 occur from
+\texttt{non\_weapon} to \texttt{weapon}. The condition therefore increases
+both missed-target risk and false-positive review workload.
+
+For the \gls{clip}-based proxy, Histogram Modification introduces 13 errors
+among clean-correct samples, corresponding to an induced-error rate of 0.0140.
+Six transitions occur from \texttt{weapon} to \texttt{non\_weapon}, and seven
+occur in the opposite direction. Although the aggregate accuracy drop is only
+0.002, the transition analysis confirms that the transformed condition is not
+behaviorally identical to the clean baseline.
+
+The maximum-probability shifts for the three representative cases are negative,
+but their magnitudes are limited. These values indicate a reduction in the
+mean maximum predicted-class probability relative to the corresponding clean
+predictions. They do not constitute calibrated uncertainty estimates and
+cannot be compared directly across architectures.
+
+The results also demonstrate why aggregate accuracy and induced-error rate
+must remain separate. For example, Gaussian Blur increases the aggregate
+accuracy of the \gls{clip}-based proxy by 0.007 while still inducing four new
+errors among clean-correct samples. The aggregate improvement therefore
+reflects the net balance between newly introduced errors and previously
+incorrect decisions that become correct, rather than the absence of
+transformation sensitivity.
+
+From an operational perspective, the anti-forensic results identify
+architecture- and transformation-specific failure modes rather than a uniform
+degradation pattern. Gaussian Blur primarily affects EfficientNet-B0 through
+new \texttt{weapon}-to-\texttt{non\_weapon} transitions, whereas Histogram
+Modification produces the largest effects for ResNet18 and the most relevant
+transition burden for the \gls{clip}-based proxy.
+
+These findings are important because the evaluated transformations do not
+require model access and may arise during routine handling, conversion,
+compression, editing, or re-sharing. In a forensic workflow, even modest
+aggregate variation may become consequential when it produces missed
+target-category images, increases irrelevant review volume, or interacts with
+low visual quality and ambiguous context.
+
+The anti-forensic evaluation therefore does not support a general claim that
+the proxy architectures are robust to ordinary image transformations. It shows
+that their aggregate accuracy is comparatively stable under the frozen
+conditions, while also revealing specific clean-correct samples whose
+operational assignments change. These outputs remain triage indicators and
+must be subject to systematic human verification.
+
+
+
+
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial Robustness}
