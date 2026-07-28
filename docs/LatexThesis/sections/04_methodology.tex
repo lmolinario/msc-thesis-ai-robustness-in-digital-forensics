@@ -761,7 +761,7 @@ proxy-model training, and is not treated as a third supervised class. No
 experimental adversarial perturbation or anti-forensic transformation is
 applied to these samples. This separation allows the study to examine how
 automated systems assign inputs that do not constitute ordinary
-\texttt{weapon} or \texttt{non_weapon} instances without conflating
+\texttt{weapon} or \texttt{non\_weapon} instances without conflating
 distributional mismatch with deliberate or incidental input manipulation.
 
 The partitioning records must associate each sample with its evaluation branch
@@ -991,88 +991,64 @@ samples, clean \gls{ood} inputs, adversarial artifacts, and anti-forensic
 artifacts enables comparative assessment without assuming architectural or
 functional equivalence.
 
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Perturbation Selection Rationale and Operational Relevance}
 \label{sec:methodology-perturbation-selection-rationale}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The perturbation framework is designed to evaluate classification behavior
-under controlled input modifications that differ in access assumptions,
-computational cost, perceptual impact, and operational plausibility. The
-selection process is therefore not based exclusively on the theoretical
-strength of individual attacks. It also considers whether the resulting
-experimental conditions are reproducible and relevant to realistic
-\gls{df} workflows.
+The perturbation framework evaluates classification behavior under controlled
+input modifications selected according to their access assumptions,
+computational cost, perceptual impact, reproducibility, and operational
+plausibility. These criteria are particularly relevant to forensic visual
+triage, where automated systems may process large image collections under
+operational time constraints. Computationally intensive perturbations remain
+useful for controlled vulnerability analysis, but may be less representative
+of manipulations that can be applied rapidly and at scale.
 
-In forensic visual triage, automated systems may be required to process large
-image collections within operational time constraints. Computational cost is
-therefore methodologically relevant. A perturbation that requires extensive
-optimization for each image may be useful for controlled vulnerability
-analysis, but may be less representative of manipulations that can be applied
-rapidly and at scale.
-
-The methodology distinguishes among three broad categories of input
-modification:
+The methodology distinguishes among three categories of input modification:
 
 \begin{enumerate}
 \item \textit{model-dependent adversarial attacks}, which are generated
 against a designated source model under explicit white-box or score-based
 access assumptions;
 
-\item \textit{model-agnostic adversarial-style conditions}, which alter the
-image according to predefined rules without being optimized against a
-specific classifier;
+\item \textit{model-agnostic adversarial-style conditions}, which modify an
+image according to predefined rules without being optimized against a specific
+classifier;
 
 \item \textit{anti-forensic transformations}, which emulate plausible
 modifications of the image artifact or its visual representation.
 \end{enumerate}
 
-Model-dependent adversarial attacks provide controlled tests of classifier
-vulnerability under explicit access assumptions. Depending on the selected
-algorithm, they may involve a single gradient computation, an iterative
-procedure, an optimization process, a decision-boundary search, or repeated
-queries to observable model scores.
+Model-dependent attacks provide controlled tests of classifier vulnerability
+and may support direct and transferability analyses. Although they do not
+necessarily represent the most probable manipulations in ordinary forensic
+scenarios, they demonstrate how classification behavior may change when an
+actor exploits information obtained from, or interaction with, a designated
+source model.
 
-These attacks are included primarily to investigate sensitivity, attack
-effectiveness, and transferability. They do not necessarily represent the most
-probable manipulation in an ordinary forensic scenario. Their operational
-relevance instead lies in demonstrating how classification behavior may change
-when an actor deliberately exploits information obtained from, or interaction
-with, the designated source model.
+Model-agnostic adversarial-style conditions require neither access to internal
+model properties nor interaction with observable scores. Their application
+across proxy architectures and black-box software systems therefore supports
+comparison under a shared manipulated condition rather than transferability
+analysis from a designated source model.
 
-Model-agnostic adversarial-style conditions do not require access to the
-internal properties or observable scores of a specific classifier. They modify
-image characteristics according to predefined rules and can therefore be
-generated independently of the evaluated systems. Their application across
-multiple proxy architectures and black-box software systems supports comparison
-under a shared manipulated condition rather than transferability analysis from
-a designated source model.
-
-Anti-forensic transformations emulate common or plausible image-processing
-operations that may occur deliberately or incidentally before forensic
-acquisition or analysis. Relevant transformation families include lossy
-re-encoding, resampling, resizing, filtering, tonal modification, and contrast
-adjustment.
-
-Such transformations are generally inexpensive and suitable for batch
-processing. They are therefore operationally relevant because they may be
-applied to large collections without requiring access to the evaluated
-classifier. They may also arise from ordinary image-handling processes,
-including editing, forwarding, recompression, platform-mediated conversion, or
-content normalization.
+Anti-forensic transformations emulate image-processing operations that may
+occur deliberately or incidentally before forensic acquisition or analysis.
+They generally require no access to the evaluated classifier and may support
+efficient batch processing, making them relevant to both deliberate
+manipulation and ordinary image-handling workflows.
 
 The perturbation set should provide complementary experimental coverage rather
-than several near-duplicate variants of the same manipulation. Selection should
-therefore consider the following criteria:
+than multiple near-duplicate variants of the same mechanism. Selection should
+therefore consider:
 
 \begin{itemize}
 \item diversity of access assumptions;
 \item diversity of algorithmic mechanisms;
 \item computational feasibility and scalability;
 \item reproducibility across experimental runs;
-\item preservation or degradation of semantic content;
+\item preservation of sufficient task-relevant semantic content;
 \item operational plausibility;
 \item suitability for cross-system comparison and, where applicable,
 transferability analysis;
@@ -1151,42 +1127,31 @@ image properties. \\
 \end{tabularx}
 \end{table}
 
-The cost levels reported in
+The cost levels in
 Table~\ref{tab:methodology-attack-cost-operational-relevance} constitute a
 qualitative methodological assessment rather than measured execution times.
-Actual runtime depends on the algorithm, hardware, software libraries, image
-dimensions, degree of parallelization, and implementation choices.
+Actual cost depends on the algorithm, hardware, image dimensions,
+parallelization, software libraries, and implementation choices. Direct
+transformations and single-step attacks generally require less computation,
+whereas iterative, optimization-based, and score-based attacks may require
+repeated inference, queries, or gradient computation. The concrete attacks,
+transformations, parameters, and execution configurations adopted in this
+thesis are documented in Chapter~\ref{chap:implementation}.
 
-The qualitative distinction is based on the general algorithmic properties of
-the perturbations. Direct transformations generally support efficient batch
-processing. Single-step white-box attacks require limited model interaction,
-whereas score-based, iterative, and optimization-based attacks may require
-repeated inference, model queries, or gradient computation.
+Perturbations are generated exclusively from the binary in-domain subset. The
+clean \gls{ood} branch remains outside this process because it addresses
+distributional mismatch rather than robustness to input manipulation, as
+established in Section~\ref{sec:methodology-split-generation}.
 
-This distinction enables computational feasibility and operational plausibility
-to be considered without introducing timing measurements that were not
-collected systematically. The concrete attacks, transformations, parameter
-values, and execution configurations adopted in this thesis are reported in
-Chapter~\ref{chap:implementation}.
+Each generated artifact must remain associated with its source image,
+perturbation category, configuration, and evaluation condition. For
+model-dependent attacks, this association must also preserve the source-model
+checkpoint and the corresponding access assumption. These records support
+reproducibility and allow the same artifacts to be evaluated across proxy
+models and selected black-box software systems.
 
-Adversarial and anti-forensic perturbations are generated exclusively from the
-binary in-domain subset. The clean \gls{ood} set remains outside this process
-because it addresses distributional mismatch rather than robustness to input
-manipulation.
-
-Each generated artifact must remain associated with its source image, the
-applied perturbation family, the relevant configuration, and the evaluation
-condition. For model-dependent adversarial attacks, the record must also
-preserve the identity of the source-model checkpoint and the corresponding
-access assumption. This association supports reproducibility and ensures that
-the same artifacts can be evaluated across the proxy models and the selected
-black-box software systems.
-
-Figure~\ref{fig:methodology-perturbation-workflow} summarizes the general
-perturbation workflow. The clean binary subset is processed through separate
-adversarial and anti-forensic branches. The resulting artifacts are then
-integrated into the common evaluation bundle, together with the unmodified
-binary samples and the separate clean \gls{ood} inputs.
+Figure~\ref{fig:methodology-perturbation-workflow} summarizes the resulting
+workflow.
 
 \begin{figure}[H]
 \centering
@@ -1327,6 +1292,13 @@ subset and are integrated into the common evaluation bundle together with the
 clean binary samples and the separate clean \gls{ood} inputs}
 \label{fig:methodology-perturbation-workflow}
 \end{figure}
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
