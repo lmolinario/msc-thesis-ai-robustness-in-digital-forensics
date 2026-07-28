@@ -2828,8 +2828,6 @@ observed for \gls{griffeye} and \gls{t3kcore} is reported in
 Section~\ref{subsec:results-griffeye}.
 
 
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Excire Foto 2025}
 \label{subsec:implementation-excire}
@@ -2838,14 +2836,14 @@ Section~\ref{subsec:results-griffeye}.
 \gls{excirefoto2025} was evaluated as a standalone, general-purpose,
 \gls{ai}-assisted semantic image-retrieval system used within a controlled
 forensic evaluation context. It was not treated as a native forensic suite or
-as an internally binary firearm classifier. Its observable behavior was instead
+as an internally binary firearm classifier. Its observable behavior was
 assessed through the images returned by controlled text-based semantic queries.
 
 The internal architecture, training corpus, embedding space, similarity
 function, retrieval thresholds, and confidence-calibration procedure were not
 accessible. The software was therefore treated as a black-box retrieval
-system. The experimental decision was derived exclusively from membership in
-the exported semantic-search result sets.
+system, and the experimental decision was derived exclusively from membership
+in the exported semantic-search result sets.
 
 The frozen software and retrieval configurations are summarized in
 Table~\ref{tab:implementation-excire-configuration}.
@@ -2854,20 +2852,23 @@ Table~\ref{tab:implementation-excire-configuration}.
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{3.5pt}
 \caption{Frozen Excire Foto 2025 configurations}
 \label{tab:implementation-excire-configuration}
-\begin{tabularx}{\textwidth}{@{}p{0.12\textwidth} p{0.40\textwidth} r X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.07\textwidth} p{0.32\textwidth} r r X@{}}
 \toprule
 \textbf{Setting} &
 \textbf{Run identifier} &
+\textbf{Raw hits} &
 \textbf{Bundle rows} &
-\textbf{Normalized configuration name} \\
+\textbf{Normalized configuration} \\
 \midrule
 
 D20
 &
 \texttt{FAIRLAB\_EXCIRE\_D20\_FIREARM\_PROMPTS}
+&
+20\,329
 &
 11\,500
 &
@@ -2877,6 +2878,8 @@ D50
 &
 \texttt{FAIRLAB\_EXCIRE\_D50\_FIREARM\_PROMPTS}
 &
+32\,076
+&
 11\,500
 &
 \texttt{excire\_foto\_2025\_d50} \\
@@ -2884,6 +2887,8 @@ D50
 D80
 &
 \texttt{FAIRLAB\_EXCIRE\_D80\_FIREARM\_PROMPTS}
+&
+43\,736
 &
 11\,500
 &
@@ -2894,8 +2899,10 @@ D80
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} All three configurations were executed with
-\gls{excirefoto2025} version \texttt{4.1.5}.
+\textit{Note.} All configurations were executed with
+\gls{excirefoto2025} version \texttt{4.1.5}. Raw hits are prompt-level
+memberships summed across the eight exported hit lists and are not counts of
+unique retrieved images.
 \end{table}
 
 Figure~\ref{fig:implementation-excire-operational-view} documents the semantic
@@ -2912,25 +2919,22 @@ text-prompt retrieval interface used to obtain the observable outputs}
 \label{fig:implementation-excire-operational-view}
 \end{figure}
 
-Only the blind input directory:
-
-\begin{center}
+Only
 \codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}
-\end{center}
-
 was indexed by the software. The bundle metadata and structured audit view were
-not included in the searchable image collection. Consequently, the semantic
-queries operated on anonymized file names and did not receive reference
-operational assignments, perturbation names, folds, proxy-model identifiers,
-source provenance, or explicit \gls{ood} indicators through the indexed paths
-or file names.
+not included in the searchable image collection. The semantic queries
+therefore operated on neutrally identified bundle files and did not receive
+reference operational assignments, perturbation names, fold identifiers,
+proxy-model information, source provenance, or explicit \gls{ood} indicators
+through the indexed paths or file names.
 
 This blind-input design concealed experiment-specific descriptors encoded in
-the file-system structure. It did not conceal the visual content of the images
-or perturbation effects directly perceptible from the inputs.
+the file-system hierarchy. It did not conceal image content, visually
+perceptible perturbation effects, or information potentially embedded within
+the image files.
 
-The same fixed set of eight firearm-oriented English prompts was used for each
-semantic-distance configuration:
+The same frozen set of eight firearm-oriented English prompts was used for
+each semantic-distance configuration:
 
 \begin{enumerate}
 \item \texttt{firearm};
@@ -2944,153 +2948,139 @@ semantic-distance configuration:
 \end{enumerate}
 
 The prompt set was defined before the frozen evaluations and was not modified
-on the basis of the observed results. In particular, the broader term
-\texttt{weapon} was not included because the experimental positive class was
-firearm-oriented rather than a general category encompassing all possible
-weapons.
+on the basis of the observed retrieval results. The broader term
+\texttt{weapon} was intentionally excluded because the experimental positive
+class was firearm-oriented rather than a general category encompassing all
+types of weapons.
 
-Each prompt was executed separately under the three distance-limit settings
-20, 50, and 80. This procedure produced 24 prompt-level exports:
+Each prompt was executed separately under the semantic-distance limits 20, 50,
+and 80. This procedure produced:
 
 \begin{equation}
 8\ \text{fixed prompts}
 \times
 3\ \text{distance settings}
 =
-24\ \text{export files}.
+24\ \text{prompt-level export files}.
 \end{equation}
 
-The exports were named according to the pattern:
+The export names follow the pattern
+\texttt{excire\_<prompt>\_distance<limit>.csv}. For file-system
+compatibility, the multiword prompt \texttt{assault rifle} is represented as
+\texttt{assault\_rifle} in the corresponding file name. The prompt and
+distance configuration can therefore be reconstructed deterministically from
+each export name.
 
-\begin{center}
-\texttt{excire\_<prompt>\_distance<limit>.csv}
-\end{center}
-
-For file-system compatibility, the multiword prompt
-\texttt{assault rifle} was represented as \texttt{assault\_rifle} in the
-export file name. The prompt and distance configuration can therefore be
-reconstructed deterministically from each export name.
-
-The Excire exports are retrieval hit lists rather than complete classification
+The Excire outputs are retrieval hit lists rather than complete classification
 tables. Each file contains the paths of the images returned for one prompt
 under one distance setting, generally as a headerless list with one path per
-line. An image may occur in multiple prompt exports when it is retrieved by
-more than one query. Conversely, an image absent from an individual export does
-not produce an explicit negative row in that file.
+line. An image may occur in multiple files when it is retrieved by more than
+one prompt. Consequently, the raw hit totals reported in
+Table~\ref{tab:implementation-excire-configuration} represent prompt-level
+memberships and may exceed the number of unique positive images.
 
-For each distance configuration, the eight hit lists were combined through a
-set-union rule. An image was assigned a positive operational decision when it
-was retrieved by at least one fixed prompt:
+The normalizer reads each hit list deterministically, removes surrounding
+quotation marks, ignores an optional path-oriented header, extracts the file
+name from each exported path, and matches it against the neutral file names in
+the canonical bundle manifest. The original local directory component does not
+contribute to the experimental decision.
 
-\begin{equation}
-\bigvee_{p \in \mathcal{P}}
-\operatorname{retrieved}(x,p)
-=
-\texttt{true}
-\quad\Longrightarrow\quad
-\texttt{weapon\_detected = true},
-\end{equation}
+For a bundle image \(x\), semantic-distance setting \(d\), and frozen prompt
+set \(\mathcal{P}\), the operational rule is:
 
-where \(\mathcal{P}\) denotes the frozen set of eight prompts.
-
-Images not retrieved by any prompt under the same distance configuration were
-completed against the canonical 11\,500-item bundle and assigned:
-
-\begin{equation}
-\bigwedge_{p \in \mathcal{P}}
-\neg\operatorname{retrieved}(x,p)
-\quad\Longrightarrow\quad
-\texttt{weapon\_detected = false}.
-\end{equation}
-
-The resulting normalized prediction was therefore:
-
-\begin{equation}
-\texttt{normalized\_prediction}
+\[
+\texttt{weapon\_detected}(x;d)
 =
 \begin{cases}
-\texttt{weapon},
-& \text{if at least one fixed prompt retrieved the image},\\
-\texttt{non\_weapon},
-& \text{otherwise}.
+\texttt{true},
+&
+\text{if }
+\exists p \in \mathcal{P}:
+\operatorname{retrieved}(x,p,d),
+\\
+\texttt{false},
+&
+\text{otherwise}.
 \end{cases}
-\end{equation}
+\]
+
+The corresponding common normalized prediction is \texttt{weapon} when
+\texttt{weapon\_detected = true} and \texttt{non\_weapon} otherwise.
+Images absent from all eight hit lists under the same distance setting are
+completed against the canonical 11\,500-item bundle as operational negative
+decisions.
 
 This rule is an operational recoding of semantic-retrieval membership. It does
 not imply that \gls{excirefoto2025} internally performs binary
-\texttt{weapon}/\texttt{non\_weapon} classification. Similarly, the distance
-settings are software-specific retrieval parameters and must not be interpreted
-as calibrated probabilities or as directly comparable confidence thresholds.
+\texttt{weapon}/\texttt{non\_weapon} classification. Similarly, the
+software-specific distance limits must not be interpreted as calibrated
+probabilities, numerical confidence values, or thresholds directly comparable
+with those of another system.
 
-The three distance settings were retained as separate system configurations
+The D20, D50, and D80 settings were retained as separate system configurations
 throughout normalization and metric computation. Their retrieval results were
-not merged into a single combined Excire decision. Each setting therefore
-produced a complete table of 11\,500 normalized predictions, allowing the
-observable behavior associated with each retrieval configuration to be
-analyzed independently.
+not combined into a single Excire decision. Each setting produced one complete
+table containing exactly 11\,500 normalized predictions.
 
-For auditability, the normalized records preserve both the union decision and
-the individual prompt memberships. Each row includes:
+For auditability, each normalized record preserves:
 
 \begin{itemize}
 \item the semantic-distance limit;
 \item the complete frozen prompt set;
-\item the number of prompts that retrieved the image;
-\item the list of prompts producing a hit;
-\item one binary hit indicator for each of the eight prompts;
-\item the bundle identifier, hashes, sample type, experimental condition,
-fold, reference operational assignment, and source-image identifiers;
+\item the number and names of prompts that retrieved the image;
+\item one binary membership indicator for each of the eight prompts;
+\item the bundle identifier and neutral input file name;
+\item the \gls{sha256} and \gls{md5} values;
+\item the sample type, perturbation family, condition, fold, reference
+operational assignment, source dataset, and source-image identifiers;
 \item the resulting \texttt{weapon\_detected} and normalized-prediction
 fields.
 \end{itemize}
 
-This representation preserves distinctions that would be lost by retaining
-only the final binary decision. Two images may, for example, both be normalized
-as positive even though one was retrieved by a single prompt and the other by
-several semantically related prompts.
+Preserving the individual prompt memberships prevents the union operation from
+discarding relevant retrieval information. Two images may receive the same
+positive normalized decision even when one is retrieved by a single prompt and
+the other by several semantically related prompts.
 
-The three frozen runs produced separate prompt-level export sets. After union
-and completion against the canonical bundle, every configuration contained
+After the union and bundle-completion procedures, every configuration contained
 exactly one normalized prediction for each of the 11\,500 bundle items, and no
-bundle image remained unmatched. This complete matching establishes output
-coverage for every bundle item but does not establish the correctness of the
-derived binary decisions. The corresponding retrieval volumes and their
-sensitivity to the distance setting are reported in
-Section~\ref{subsec:results-excire}.
-
-The raw export directories are expected locally under:
-
-\begin{center}
-\codepath{forensic_tools/excire_foto_2025/raw_exports/}
-\end{center}
+bundle item remained unmatched. The three configurations therefore produced
+34\,500 normalized Excire records in total. Complete matching establishes
+output coverage but does not establish the correctness of the resulting
+operational decisions.
 
 The 24 original CSV files contained local Windows paths in addition to the
-anonymized bundle file names. They were therefore retained under the
-controlled-access policy rather than distributed through the public repository.
+neutral bundle file names. They were therefore retained as controlled-access
+artifacts and excluded from the public repository. Their expected local
+location is
+\codepath{forensic_tools/excire_foto_2025/raw_exports/}.
 
-The public repository preserves a sanitized extract containing bundle
-identifiers, distance configurations, prompt-membership information, and
-normalized decision fields:
+The public repository retains the sanitized extract
+\codepath{forensic_tools/excire_foto_2025/public_extracts/%
+excire_prompt_hits_extract.csv}.
+It contains the bundle identifiers, semantic-distance configurations,
+prompt-membership information, and normalized decision fields for the three
+complete 11\,500-item configurations.
 
-\begin{center}
-\codepath{forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv}
-\end{center}
-
-The corresponding normalized configurations and metric outputs are stored
-separately as:
-
-\begin{center}
-\texttt{excire\_foto\_2025\_d20},
-\qquad
-\texttt{excire\_foto\_2025\_d50},
-\qquad
-\texttt{excire\_foto\_2025\_d80}.
-\end{center}
+The run registry, software-version log, export audit, canonical normalized
+prediction table, public-extract validation, and metric artifacts provide the
+remaining records required to inspect the adopted mapping and verify the
+equivalence between the controlled raw exports and the sanitized public
+representation.
 
 The common normalization procedure is described in
 Section~\ref{subsec:implementation-normalization}. The sensitivity of the
 observed retrieval behavior to the three semantic-distance settings is reported
 in Section~\ref{subsec:results-excire}.
+
+
+
+
+
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Cellebrite Inseyets}
