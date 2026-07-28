@@ -712,92 +712,64 @@ systems, perturbations, and metrics from undocumented changes in the evaluated
 corpus.
 
 
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Data Partitioning and OOD Evaluation Strategy}
 \label{sec:methodology-split-generation}
 % ─────────────────────────────────────────────────────────────────────────────
 
 After dataset freezing, the experimental corpus is divided into two distinct
-branches: an in-domain binary subset and a separate \gls{ood} evaluation set.
-This separation reflects the different methodological purposes of the two
-components. The binary subset supports model training, clean evaluation, and
-robustness testing, whereas the \gls{ood} set is used to examine system behavior
-on borderline, semantically atypical, or distributionally different inputs.
+branches: an in-domain binary subset and a separate clean \gls{ood} evaluation
+set. The binary subset supports proxy-model training, clean evaluation, and
+robustness testing, whereas the \gls{ood} branch examines system behavior on
+borderline, semantically atypical, or distributionally different inputs.
 
 The binary subset is organized into mutually exclusive experimental
-partitions, hereafter referred to as folds. The number and size of these folds
-depend on the available dataset, the class distribution, and the requirements
-of the experimental design. The methodology therefore does not prescribe a
-fixed number of folds or a specific directory organization.
-
-Regardless of the adopted configuration, the partitioning procedure must
-satisfy four requirements. First, each sample must belong to only one fold.
-Second, the class distribution should remain sufficiently consistent across
-folds whenever the dataset permits stratified partitioning. Third, sample
-identity and provenance must remain traceable. Fourth, the allocation procedure
-must be deterministic or otherwise documented in sufficient detail to allow the
-partitions to be regenerated.
+partitions, hereafter referred to as folds. Their number and size may vary
+according to the available dataset, class distribution, and experimental
+requirements. Regardless of the adopted configuration, each sample must belong
+to only one fold, class distributions should remain sufficiently consistent
+whenever stratification is feasible, sample identity and provenance must remain
+traceable, and the allocation procedure must be deterministic or documented in
+sufficient detail to permit regeneration.
 
 Within this protocol, folds are not introduced primarily as a conventional
 cross-validation mechanism for hyperparameter selection or general performance
 estimation. Instead, they define controlled experimental holdout units. For
-each target fold, the proxy classification model is trained on the remaining
-folds and evaluated on the held-out samples.
+each target fold, the corresponding proxy-model instance is trained on the
+remaining folds and evaluated on the held-out samples, thereby preventing
+overlap between model fitting and clean or robustness evaluation.
 
-This fold-aware organization prevents overlap between the samples used for
-model fitting and those used for clean and robustness evaluation. It also
-preserves a consistent association between each held-out sample, the
-corresponding proxy-model checkpoint, and any model-dependent adversarial
-artifact generated from that sample. Model-agnostic anti-forensic
-transformations remain associated with the originating sample and its assigned
-fold but do not depend on a specific model checkpoint.
+The fold-aware organization also preserves the relationship among each
+held-out sample, the corresponding proxy-model checkpoint, and any
+model-dependent adversarial artifact generated from that sample. Such an
+artifact must be produced using a checkpoint that was not trained on its source
+sample. Model-agnostic adversarial-style conditions and anti-forensic
+transformations remain associated with the originating sample and its fold but
+do not depend on a specific checkpoint.
 
-The specific number of folds is an implementation choice rather than a general
-methodological requirement. A study may adopt a different number of partitions
-provided that the resulting organization preserves separation, traceability,
-and sufficient representation of the relevant classes.
+The clean \gls{ood} set remains outside the binary folds, is not used for
+proxy-model training, and is not treated as a third supervised class. No
+experimental adversarial perturbation or anti-forensic transformation is
+applied to these samples. This separation allows the study to examine how
+automated systems assign inputs that do not constitute ordinary
+\texttt{weapon} or \texttt{non_weapon} instances without conflating
+distributional mismatch with deliberate or incidental input manipulation.
 
-The \gls{ood} samples are kept outside the binary folds. They are not used to
-train the proxy classification models and are not treated as a third supervised
-class. They are also excluded from the generation of adversarial and
-anti-forensic variants because they address a different experimental question.
+The partitioning records must associate each sample with its evaluation branch
+and, where applicable, its fold and corresponding proxy-model checkpoint. They
+must also preserve the relationship between each original image and any
+derived experimental artifact, consistently with the traceability requirements
+defined in Section~\ref{sec:methodology-traceability}.
 
-More specifically, the \gls{ood} evaluation examines how an automated system
-assigns content that should not be treated as an ordinary
-\texttt{weapon} or \texttt{non\_weapon} sample relative to the known
-operational classes. The branch is kept clean in the methodological sense that
-no experimental adversarial perturbation or anti-forensic transformation is
-applied to its samples. This separation prevents distributional mismatch from
-being conflated with deliberate or incidental input manipulation.
-
-The partitioning procedure must produce structured records that associate each
-sample with its evaluation branch and, when applicable, its fold. These records
-should preserve sample identity, provenance, operational assignment, integrity
-information, and the relationship between the original image and any derived
-experimental artifact. The methodology does not impose a specific file format,
-hashing algorithm, or storage technology.
-
-Figure~\ref{fig:methodology-split-to-proxy-training} summarizes the general
-partitioning strategy. The frozen dataset is separated into a binary in-domain
-branch and a clean \gls{ood} branch. The binary samples are organized into
-mutually exclusive folds used for fold-aware training and held-out evaluation,
-whereas the \gls{ood} samples remain outside the training and perturbation
-generation processes.
+Figure~\ref{fig:methodology-split-to-proxy-training} summarizes the resulting
+partitioning strategy.
 
 \begin{figure}[H]
 \centering
 \resizebox{0.94\textwidth}{!}{%
 \begin{tikzpicture}[
->=latex,
+
+=latex,
 font=\small,
 block/.style={
 rectangle,
@@ -855,43 +827,43 @@ draw=black!75
 
 \node[block] (frozen) at (0,0)
 {\shortstack{
-\textbf{Frozen experimental dataset}\\[1mm]
+\textbf{Frozen experimental dataset}\[1mm]
 \scriptsize stable, validated, and traceable corpus
 }};
 
 \node[process] (binary) at (-4.2,-2.6)
 {\shortstack{
-\textbf{Binary in-domain subset}\\[1mm]
+\textbf{Binary in-domain subset}\[1mm]
 \scriptsize positive and negative operational classes
 }};
 
 \node[note] (ood) at (4.2,-2.6)
 {\shortstack{
-\textbf{Clean \gls{ood} evaluation set}\\[1mm]
+\textbf{Clean \gls{ood} evaluation set}\[1mm]
 \scriptsize separate from model training and perturbation generation
 }};
 
 \node[process] (folds) at (-4.2,-5.2)
 {\shortstack{
-\textbf{Mutually exclusive experimental folds}\\[1mm]
+\textbf{Mutually exclusive experimental folds}\[1mm]
 \scriptsize traceable and sufficiently class-consistent partitions
 }};
 
 \node[process] (training) at (-4.2,-7.8)
 {\shortstack{
-\textbf{Fold-aware proxy-model evaluation}\\[1mm]
+\textbf{Fold-aware proxy-model evaluation}\[1mm]
 \scriptsize train on the remaining folds and evaluate on the held-out fold
 }};
 
 \node[output] (binaryevaluation) at (-4.2,-10.4)
 {\shortstack{
-\textbf{Binary robustness evaluation}\\[1mm]
+\textbf{Binary robustness evaluation}\[1mm]
 \scriptsize clean, adversarial, and anti-forensic conditions
 }};
 
 \node[output] (oodevaluation) at (4.2,-10.4)
 {\shortstack{
-\textbf{\gls{ood} behavior evaluation}\\[1mm]
+\textbf{\gls{ood} behavior evaluation}\[1mm]
 \scriptsize analysis of assignments relative to known operational classes
 }};
 
@@ -912,6 +884,15 @@ folds for fold-aware training and held-out evaluation, while the clean
 \gls{ood} branch remains outside model training and perturbation generation}
 \label{fig:methodology-split-to-proxy-training}
 \end{figure}
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
