@@ -1525,75 +1525,106 @@ forensic workflow, the consequences of each error direction, and the continued
 availability of human verification.
 
 
-
-
-
-
-
-
-
-
-
 \subsection{\texorpdfstring{\gls{magnetaxiomtool}/\gls{magnetai}}{Magnet AXIOM/Magnet.AI} Results}
 \label{subsec:results-magnet}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The observable mapping and normalization adopted for
+The observable output mapping and normalization procedure adopted for
 \gls{magnetaxiomtool}/\gls{magnetai} are documented in
 Section~\ref{subsec:implementation-magnet}. The present subsection reports the
-resulting normalized performance and its operational implications.
+resulting normalized behavior without making assumptions about the inaccessible
+internal classifier, decision threshold, or training data.
 
-As indicated in Section~\ref{sec:results-commercial}, matching between the
-software export and the forensic evaluation bundle is complete for all
-evaluated profiles. For \gls{magnetai}, the binary metrics are therefore
-computed on the 11\,000 images belonging to the operational classes
-\texttt{weapon} and \texttt{non\_weapon}; the 500 \gls{ood} images are analyzed
-separately through the weapon flag rate.
+All 11\,500 bundle files were associated with one normalized output. Binary
+metrics are computed on the 11\,000 items whose reference operational
+assignment is \texttt{weapon} or \texttt{non\_weapon}. The separate 500-image
+\gls{ood} branch is analyzed through the proportion of inputs receiving a
+weapon-oriented assignment.
 
-Table~\ref{tab:results-magnet-global-metrics} reports the overall metrics of
-\gls{magnetai} on the binary \texttt{weapon}/\texttt{non\_weapon} task. The
-module achieves an accuracy of 0.933 and a precision of 0.963 on the
-\texttt{weapon} class. However, recall on the \texttt{weapon} class is 0.901,
-with a \gls{fnr} of 0.099: 542 \texttt{weapon} samples were not assigned the
-\texttt{Possible weapons} tag.
+Under the frozen mapping, the exported \texttt{Possible weapons} tag is treated
+as the primary positive observable output. Absence of the tag is mapped to
+\texttt{non\_weapon}, while the defensive normalization rules described in
+Section~\ref{subsec:implementation-magnet} preserve any unsupported nonempty
+state as \texttt{unknown}. No such unknown state occurs in the canonical
+11\,500-item result population.
+
+Table~\ref{tab:results-magnet-global-metrics} reports the bundle-weighted
+binary metrics.
 
 \begin{table}[H]
 \centering
-\caption{Overall performance of \gls{magnetai} on the binary \texttt{weapon}/\texttt{non\_weapon} task}
+\caption{Bundle-weighted performance of \gls{magnetai} on the binary
+\texttt{weapon}/\texttt{non\_weapon} task}
 \label{tab:results-magnet-global-metrics}
 \small
-\begin{tabular}{lr}
+\begin{tabular}{@{}l r@{}}
 \toprule
-\textbf{Metric} & \textbf{Value} \\
+\textbf{Metric} &
+\textbf{Value} \\
 \midrule
-Accuracy & 0.933 \\
-Balanced accuracy & 0.933 \\
-Precision \texttt{weapon} & 0.963 \\
-Recall \texttt{weapon} & 0.901 \\
-F1 \texttt{weapon} & 0.931 \\
-False negative rate & 0.099 \\
-False positive rate & 0.035 \\
-True positives & 4\,958 \\
-True negatives & 5\,309 \\
-False positives & 191 \\
-False negatives & 542 \\
+
+Accuracy
+& 0.933 \\
+
+Balanced accuracy
+& 0.933 \\
+
+Precision \texttt{weapon}
+& 0.963 \\
+
+Recall \texttt{weapon}
+& 0.901 \\
+
+F1-score \texttt{weapon}
+& 0.931 \\
+
+False negative rate
+& 0.099 \\
+
+False positive rate
+& 0.035 \\
+
+True positives
+& 4\,958 \\
+
+True negatives
+& 5\,309 \\
+
+False positives
+& 191 \\
+
+False negatives
+& 542 \\
+
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} The metrics are computed on the 11\,000 images belonging to the
-binary \texttt{weapon}/\texttt{non\_weapon} task. The aggregate value does not
-correspond to the arithmetic mean between clean and perturbed conditions,
-because the binary bundle includes 1\,000 clean inputs and 10\,000 perturbed
-artifacts.
+\textit{Note.} The metrics are computed on the 11\,000-item binary bundle,
+comprising 1\,000 clean inputs and 10\,000 perturbed artifacts. The values are
+therefore bundle-weighted and do not represent an arithmetic mean across
+experimental conditions.
 \end{table}
 
-The note in Table~\ref{tab:results-magnet-global-metrics} highlights that the
-aggregate value is influenced by the composition of the bundle, in which
-perturbed images are numerically predominant over clean samples. The overall
-metrics must therefore be read together with the disaggregation by experimental
-condition reported in Table~\ref{tab:results-magnet-condition-metrics}.
+Within the frozen binary bundle, \gls{magnetai} achieves an accuracy and
+balanced accuracy of 0.933. Precision for the \texttt{weapon} class is 0.963,
+indicating that most files assigned the positive operational state are
+reference \texttt{weapon} samples.
+
+Weapon recall is lower, at 0.901, corresponding to an \gls{fnr} of 0.099.
+Across the 5\,500 reference \texttt{weapon} items in the binary bundle, 542 do
+not receive the positive observable tag. The \gls{fpr} is 0.035, corresponding
+to 191 \texttt{non\_weapon} items assigned to the operational
+\texttt{weapon} class.
+
+These aggregate values must be interpreted in relation to the composition of
+the bundle. Perturbed artifacts outnumber clean inputs by ten to one.
+Consequently, the overall metrics primarily describe behavior across the
+combined perturbed population rather than nominal clean-condition performance.
+
+Table~\ref{tab:results-magnet-condition-metrics} separates the clean,
+perturbed, adversarial-family, anti-forensic-family, and \gls{ood} results.
 
 \begin{table}[H]
 \centering
@@ -1607,87 +1638,125 @@ condition reported in Table~\ref{tab:results-magnet-condition-metrics}.
 \textbf{Recall weapon} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{Operational note} \\
+\textbf{Operational interpretation} \\
 \midrule
 
-Clean &
-0.950 &
-0.930 &
-0.070 &
-0.030 &
-Black-box baseline on 1\,000 unperturbed images. \\
+Clean
+&
+0.950
+&
+0.930
+&
+0.070
+&
+0.030
+&
+Baseline behavior on 1\,000 unperturbed binary inputs. \\
 
-Perturbed &
-0.932 &
-0.899 &
-0.101 &
-0.035 &
-Values computed on 10\,000 perturbed images: 5\,000 adversarial and 5\,000
-anti-forensic. The main degradation concerns the increase in false negatives on
-the \texttt{weapon} class. \\
+Perturbed
+&
+0.932
+&
+0.899
+&
+0.101
+&
+0.035
+&
+Aggregate behavior on 10\,000 artifacts: 5\,000 adversarial or
+adversarial-style variants and 5\,000 anti-forensic variants. \\
 
-Adversarial &
-0.923 &
-0.884 &
-0.116 &
-0.038 &
-Aggregate performance across the five adversarial perturbations considered. \\
+Adversarial family
+&
+0.923
+&
+0.884
+&
+0.116
+&
+0.038
+&
+Aggregate transfer behavior across four EfficientNet-B0-oriented attacks and
+the model-agnostic Color Shift condition. \\
 
-Anti-forensic &
-0.940 &
-0.913 &
-0.087 &
-0.032 &
-Aggregate performance across the five anti-forensic transformations considered. \\
+Anti-forensic family
+&
+0.940
+&
+0.913
+&
+0.087
+&
+0.032
+&
+Aggregate behavior across the five model-agnostic anti-forensic
+transformations. \\
 
-\gls{ood} &
--- &
--- &
--- &
--- &
-Weapon flag rate equal to 0.360: 180 \gls{ood} images out of 500 were flagged
-as \texttt{Possible weapons}. Standard binary metrics are not applicable. \\
+\gls{ood}
+&
+--
+&
+--
+&
+--
+&
+--
+&
+A total of 180 of the 500 \gls{ood} inputs receive the
+\texttt{Possible weapons} tag, corresponding to a weapon assignment rate of
+0.360. Binary correctness metrics are not applicable. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The disaggregation by condition shows that adversarial perturbations produce a
-more pronounced impact than anti-forensic transformations. The aggregate
-\gls{fnr} under adversarial conditions is 0.116, compared with 0.087 for
-anti-forensic transformations. This result indicates that, in the case of
-\gls{magnetai}, perturbations designed to interfere with classifier behavior
-produce a more substantial increase in false negatives than plausible image
-degradation or manipulation transformations.
+The clean baseline yields an accuracy of 0.950, a weapon recall of 0.930, an
+\gls{fnr} of 0.070, and an \gls{fpr} of 0.030. This corresponds to 35 missed
+\texttt{weapon} images and 15 false-positive assignments among the 1\,000
+unperturbed inputs.
 
-The behavior on \gls{ood} images is relevant for the triage workflow.
-\gls{ood} images do not belong to the binary
-\texttt{weapon}/\texttt{non\_weapon} task and therefore should not be
-interpreted as standard classification errors. The fact that 180 \gls{ood} images out of 500 received the
-\texttt{Possible weapons} tag describes the observable rate at which
-inputs outside the binary reference task generated a weapon-oriented flag. This
-rate may affect review workload, but it is not interpreted as supervised
-correctness or as a judgment about the investigative relevance of individual
-samples.
+Across the complete perturbed population, accuracy decreases to 0.932 and
+weapon recall decreases to 0.899. The \gls{fnr} consequently increases to
+0.101, while the \gls{fpr} increases more moderately to 0.035. The principal
+aggregate change therefore concerns a greater proportion of missed
+firearm-oriented inputs.
 
-Unlike the proxy models, \gls{magnetai} does not export numerical confidence
-values associated with individual predictions. The observable classification is
-based exclusively on the presence or absence of the \texttt{Possible weapons}
-tag, without a quantitative indication of the confidence level associated with
-the output. This characteristic prevents confidence-based comparison with the proxy
-models and limits uncertainty analysis to the exported categorical decision.
+The adversarial-family population produces a stronger effect than the
+anti-forensic population under the frozen protocol. Its accuracy is 0.923,
+weapon recall is 0.884, and \gls{fnr} is 0.116. The anti-forensic population
+retains an accuracy of 0.940, weapon recall of 0.913, and \gls{fnr} of 0.087.
 
-Table~\ref{tab:results-magnet-attack-metrics} reports the behavior of
-\gls{magnetai} with respect to all perturbations considered in the forensic
-evaluation bundle. The condition-level detail shows an increase in false
-negatives especially under \gls{fgsm}, with an accuracy of 0.867, recall on the
-\texttt{weapon} class equal to 0.808, and a \gls{fnr} of 0.192. Among the
-anti-forensic transformations, \gls{gaussianblur} produces the highest
-\gls{fnr}, equal to 0.120.
+This comparison does not establish that Magnet.AI was directly attacked in a
+white-box setting. The four model-dependent adversarial artifacts were
+generated against fold-specific EfficientNet-B0 checkpoints and were only
+subsequently processed by Magnet.AI. Their effects therefore measure empirical
+transfer behavior. Color Shift and the anti-forensic transformations are
+model-agnostic conditions.
+
+The separate \gls{ood} result is also operationally relevant. Of the 500
+inputs outside the binary reference task, 180 receive the
+\texttt{Possible weapons} tag. The resulting rate of 0.360 is not a supervised
+false-positive rate because these inputs have no \texttt{weapon} or
+\texttt{non\_weapon} reference assignment.
+
+Nevertheless, these assignments may increase the quantity of unrelated
+material prioritized for analyst review. The result describes the observable
+closed-set behavior of the frozen configuration and does not establish the
+investigative relevance of the individual \gls{ood} images.
+
+Unlike the proxy models, \gls{magnetai} does not expose a homogeneous numerical
+probability or uncertainty value for the adopted image-level output. The
+analysis is therefore limited to the observable categorical tag and cannot
+include probability-distribution, calibration, or maximum-probability
+comparisons with the proxy architectures.
+
+Table~\ref{tab:results-magnet-attack-metrics} reports the condition-level
+behavior for all ten perturbed populations.
 
 \begin{table}[H]
 \centering
-\caption{Performance of \gls{magnetai} under adversarial and anti-forensic conditions}
+\caption{Performance of \gls{magnetai} under adversarial, adversarial-style,
+and anti-forensic conditions}
 \label{tab:results-magnet-attack-metrics}
 \scriptsize
 \renewcommand{\arraystretch}{1.12}
@@ -1704,119 +1773,231 @@ anti-forensic transformations, \gls{gaussianblur} produces the highest
 \textbf{\acrshort{fp}} \\
 \midrule
 
-Adversarial &
-\gls{colorshift} &
-0.951 &
-0.934 &
-0.066 &
-0.032 &
-33 &
+Adversarial-style
+&
+\gls{colorshift}
+&
+0.951
+&
+0.934
+&
+0.066
+&
+0.032
+&
+33
+&
 16 \\
 
-Adversarial &
-\gls{fgsm} &
-0.867 &
-0.808 &
-0.192 &
-0.074 &
-96 &
+Adversarial transfer
+&
+\gls{fgsm}
+&
+0.867
+&
+0.808
+&
+0.192
+&
+0.074
+&
+96
+&
 37 \\
 
-Adversarial &
-\gls{onepixel} &
-0.950 &
-0.930 &
-0.070 &
-0.030 &
-35 &
+Adversarial transfer
+&
+\gls{onepixel}
+&
+0.950
+&
+0.930
+&
+0.070
+&
+0.030
+&
+35
+&
 15 \\
 
-Adversarial &
-\gls{sigmazero} &
-0.916 &
-0.856 &
-0.144 &
-0.024 &
-72 &
+Adversarial transfer
+&
+\gls{sigmazero}
+&
+0.916
+&
+0.856
+&
+0.144
+&
+0.024
+&
+72
+&
 12 \\
 
-Adversarial &
-\gls{superdeepfool} &
-0.932 &
-0.894 &
-0.106 &
-0.030 &
-53 &
+Adversarial transfer
+&
+\gls{superdeepfool}
+&
+0.932
+&
+0.894
+&
+0.106
+&
+0.030
+&
+53
+&
 15 \\
 
 \midrule
 
-Anti-forensic &
-\gls{contraststretching} &
-0.951 &
-0.930 &
-0.070 &
-0.028 &
-35 &
+Anti-forensic
+&
+\gls{contraststretching}
+&
+0.951
+&
+0.930
+&
+0.070
+&
+0.028
+&
+35
+&
 14 \\
 
-Anti-forensic &
-\gls{gaussianblur} &
-0.927 &
-0.880 &
-0.120 &
-0.026 &
-60 &
+Anti-forensic
+&
+\gls{gaussianblur}
+&
+0.927
+&
+0.880
+&
+0.120
+&
+0.026
+&
+60
+&
 13 \\
 
-Anti-forensic &
-\gls{histogrammodification} &
-0.936 &
-0.920 &
-0.080 &
-0.048 &
-40 &
+Anti-forensic
+&
+\gls{histogrammodification}
+&
+0.936
+&
+0.920
+&
+0.080
+&
+0.048
+&
+40
+&
 24 \\
 
-Anti-forensic &
-\gls{jpegrecompression} &
-0.944 &
-0.928 &
-0.072 &
-0.040 &
-36 &
+Anti-forensic
+&
+\gls{jpegrecompression}
+&
+0.944
+&
+0.928
+&
+0.072
+&
+0.040
+&
+36
+&
 20 \\
 
-Anti-forensic &
-\gls{resampleresize} &
-0.943 &
-0.906 &
-0.094 &
-0.020 &
-47 &
+Anti-forensic
+&
+\gls{resampleresize}
+&
+0.943
+&
+0.906
+&
+0.094
+&
+0.020
+&
+47
+&
 10 \\
 
 \bottomrule
 \end{tabular}
 \end{table}
 
-Overall, \gls{magnetai} shows good accuracy under clean conditions, equal to
-0.950, with a low \gls{fpr} of 0.030. However, the \gls{fnr} of 0.070 indicates
-that even in the absence of perturbations, a non-negligible proportion of
-\texttt{weapon} images is not flagged. This value increases in the presence of
-some adversarial perturbations, with a significant operational impact for
-triage. From this perspective, the most important figure is not accuracy
-reduction alone, but the increase in false negatives: in a triage scenario, a
-\texttt{weapon} image not flagged by the automatic module may receive lower
-priority for human review.
+Among the transferred model-dependent adversarial conditions, \gls{fgsm}
+produces the most substantial degradation. Accuracy decreases to 0.867 and
+weapon recall to 0.808, while the \gls{fnr} increases to 0.192. This
+corresponds to 96 missed \texttt{weapon} items and 37 false-positive
+assignments in the 1\,000-item FGSM population.
 
-These results describe the observable operational behavior of \gls{magnetai}
-under the adopted protocol, not its internal algorithmic robustness. The module
-maintains good overall performance and high precision on the \texttt{weapon}
-class, but produces false negatives under both clean and perturbed conditions
-and flags a non-negligible proportion of \gls{ood} images as
-\texttt{Possible weapons}. Its output should therefore be interpreted as triage
-support rather than as a self-sufficient decision.
+Transferred Sigma-Zero artifacts produce the second-highest missed-target
+burden. Accuracy is 0.916, weapon recall is 0.856, and the \gls{fnr} is 0.144,
+corresponding to 72 false negatives. SuperDeepFool produces an \gls{fnr} of
+0.106 and 53 false negatives.
+
+One Pixel produces the same aggregate confusion-matrix values as the clean
+baseline: accuracy 0.950, \gls{fnr} 0.070, and \gls{fpr} 0.030. This result is
+specific to the frozen transferred artifacts and does not establish general
+invariance to score-based attacks generated directly against Magnet.AI.
+
+The model-agnostic Color Shift condition produces an accuracy of 0.951 and an
+\gls{fnr} of 0.066, values close to the clean baseline. Because it was not
+optimized against a model, its effect is interpreted as condition-specific
+behavior rather than adversarial transfer success.
+
+Among the anti-forensic transformations, Gaussian Blur produces the largest
+missed-target effect. Weapon recall decreases to 0.880 and the \gls{fnr}
+increases to 0.120, corresponding to 60 false negatives. Histogram
+Modification produces a lower \gls{fnr}, at 0.080, but the highest
+anti-forensic \gls{fpr}, at 0.048, corresponding to 24 false positives.
+
+The remaining transformations produce smaller changes but do not preserve the
+same operational profile. JPEG Recompression yields 36 false negatives and 20
+false positives, while Resample Resize yields 47 false negatives and 10 false
+positives. Contrast Stretching remains close to the clean baseline.
+
+The results therefore identify failure modes that are not captured by overall
+accuracy alone. FGSM transfer and Gaussian Blur primarily increase the
+proportion of firearm-oriented inputs not receiving the positive tag, whereas
+Histogram Modification produces a comparatively greater increase in
+false-positive review workload.
+
+These findings describe the normalized observable behavior of the frozen
+\gls{magnetaxiomtool}/\gls{magnetai} configuration. They do not reveal the
+internal model architecture, establish a general vulnerability of the
+commercial platform, or support extrapolation to other software versions,
+categories, thresholds, or media-analysis configurations.
+
+The \texttt{Possible weapons} tag must therefore remain a triage aid rather
+than a self-sufficient evidentiary conclusion. Its operational use requires
+human verification, awareness of the false-negative risk under both clean and
+perturbed conditions, and traceable documentation of the software version,
+configuration, imported population, and output-normalization rule.
+
+
+
+
+
+
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{\texorpdfstring{\gls{griffeye}/\gls{t3kcore}}{Magnet Griffeye/T3K CORE} Results}
