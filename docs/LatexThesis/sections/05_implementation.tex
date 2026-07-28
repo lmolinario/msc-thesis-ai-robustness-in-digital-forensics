@@ -3702,49 +3702,30 @@ computation of the corresponding binary and \gls{ood} metrics is described in
 Section~\ref{subsec:implementation-metrics}.
 
 
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Metric Computation and Explainability Implementation}
 \label{sec:implementation-analysis}
 % ─────────────────────────────────────────────────────────────────────────────
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Metric Computation and Evaluation Artifacts}
 \label{subsec:implementation-metrics}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The proxy-model outputs and the normalized black-box software decisions were
-evaluated through two separate computational pipelines. This separation
-preserves the distinction between fully accessible model predictions and the
-operational decisions reconstructed from observable software exports.
+Proxy-model outputs and normalized black-box software decisions were processed
+through two separate computational pipelines. This separation preserves the
+distinction between predictions obtained from fully accessible models and
+operational decisions reconstructed from observable commercial-software
+exports.
 
-Proxy-model predictions and metrics were generated through:
+Proxy-model predictions and metrics were generated through
+\codepath{evaluation/scripts/15_evaluate_proxy_models.py}. Black-box software
+metrics were generated as part of the normalization pipeline implemented
+through
+\codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}.
 
-\begin{center}
-\codepath{evaluation/scripts/15_evaluate_proxy_models.py}
-\end{center}
+Both pipelines use the same binary reference classes:
 
-Black-box software metrics were generated as part of the normalization pipeline
-implemented through:
-
-\begin{center}
-\codepath{evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py}
-\end{center}
-
-Although the two pipelines process different forms of observable information,
-they use the same positive and negative reference classes:
-
-\begin{equation}
+\[
 \text{positive class}
 =
 \texttt{weapon},
@@ -3752,7 +3733,7 @@ they use the same positive and negative reference classes:
 \text{negative class}
 =
 \texttt{non\_weapon}.
-\end{equation}
+\]
 
 The \gls{ood} branch is handled separately and does not contribute to the
 denominators of binary accuracy, precision, recall, F1-score, \gls{fpr}, or
@@ -3765,24 +3746,42 @@ The proxy-model evaluation pipeline consumes:
 \begin{itemize}
 \item the clean-fold manifest;
 \item the separate \gls{ood} evaluation manifest;
-\item the adversarial-generation manifests;
+\item the five canonical adversarial-generation manifests;
 \item the anti-forensic transformation manifest;
 \item the 15 fold-specific proxy-model checkpoints.
 \end{itemize}
 
-Each clean or perturbed binary sample is evaluated by the checkpoint associated
-with its assigned fold. This ensures that the model used for prediction was
-trained while excluding the fold containing the corresponding source image.
+The public evaluation entry point wraps the preserved implementation with
+additional integrity controls. Before inference, it verifies that the loaded
+population contains exactly 1\,000 clean binary inputs, 500 \gls{ood} inputs,
+5\,000 adversarial artifacts, and 5\,000 anti-forensic artifacts. Manifest
+discovery is restricted to the five frozen adversarial conditions rather than
+accepting every file matching a generic naming pattern.
+
+The wrapper verifies the existence and manifest-recorded \gls{sha256} value of
+every evaluated image. It also recomputes and validates the \gls{sha256} digest
+of each of the 15 checkpoints against
+\codepath{models/model_registry.json}. Missing inputs, digest mismatches, or
+inference errors terminate the canonical execution.
+
+A run using fewer than all three architectures, a limited input population, or
+a single-fold \gls{ood} mode cannot write to the canonical output locations.
+Such partial executions require an explicit diagnostic output directory.
+
+Each clean or perturbed binary sample is evaluated using the checkpoint
+associated with its assigned fold. Consequently, the checkpoint used for
+prediction was trained while excluding the fold containing the corresponding
+source image.
 
 For each evaluated input, the implementation records:
 
 \begin{itemize}
 \item the evaluated architecture and fold-specific checkpoint;
 \item the clean, \gls{ood}, or perturbed sample type;
-\item the perturbation family, condition, and target model;
+\item the perturbation family, condition, and attack target model;
 \item the original and generated image identifiers;
 \item the assigned fold and reference operational assignment;
-\item the image path and actual \gls{sha256} and \gls{md5} values;
+\item the image path and recomputed \gls{sha256} and \gls{md5} values;
 \item the predicted class;
 \item the maximum predicted-class probability;
 \item the probabilities assigned to \texttt{weapon} and
@@ -3791,41 +3790,33 @@ For each evaluated input, the implementation records:
 \item the correctness state and any evaluation error.
 \end{itemize}
 
-The complete prediction-level record is:
-
-\begin{center}
-\codepath{evaluation/proxy_models/proxy_model_predictions.csv}
-\end{center}
-
-Before inference, every file is opened through the same EXIF-aware RGB-loading
-procedure used elsewhere in the pipeline. The file hashes are recomputed, and
-the corresponding fold-aware model adapter applies the architecture-specific
-preprocessing defined by the model implementation.
+The complete prediction-level record is stored in
+\codepath{evaluation/proxy_models/proxy_model_predictions.csv}. Before
+inference, every image is opened through the EXIF-aware RGB-loading procedure
+used elsewhere in the pipeline, and the fold-aware adapter applies the
+architecture-specific preprocessing defined by the model implementation.
 
 The evaluation population contains 11\,500 distinct experimental inputs:
 
 \begin{equation}
 \begin{aligned}
 1\,000\ \text{clean binary inputs}
-&+ 500\ \text{OOD inputs} \\
+&+ 500\ \text{\gls{ood} inputs} \\
 &+ 5\,000\ \text{adversarial artifacts} \\
 &+ 5\,000\ \text{anti-forensic artifacts} \\
 &= 11\,500\ \text{inputs}.
 \end{aligned}
 \end{equation}
 
-Clean and perturbed binary samples are each evaluated once by every proxy
-architecture using the checkpoint associated with their assigned fold.
-Therefore, the prediction counts for these branches are:
+Clean and perturbed binary samples are evaluated once by each of the three
+proxy architectures, using the checkpoint associated with their assigned fold:
 
 \begin{equation}
 1\,000
 \times
 3
 =
-3\,000
-\quad
-\text{clean prediction rows},
+3\,000\ \text{clean prediction rows},
 \end{equation}
 
 and:
@@ -3835,9 +3826,7 @@ and:
 \times
 3
 =
-30\,000
-\quad
-\text{perturbed prediction rows}.
+30\,000\ \text{perturbed prediction rows}.
 \end{equation}
 
 The \gls{ood} branch follows a different protocol. Each of the 500 unique
@@ -3851,12 +3840,10 @@ architecture:
 \times
 3
 =
-7\,500
-\quad
-\text{OOD prediction rows}.
+7\,500\ \text{\gls{ood} prediction rows}.
 \end{equation}
 
-Consequently, the complete proxy-model prediction table contains:
+The complete proxy-model prediction table therefore contains:
 
 \begin{equation}
 3\,000
@@ -3865,23 +3852,21 @@ Consequently, the complete proxy-model prediction table contains:
 +
 7\,500
 =
-40\,500
-\quad
-\text{prediction rows}.
+40\,500\ \text{prediction rows}.
 \end{equation}
 
-The 2\,500 \gls{ood} predictions associated with each architecture correspond
-to 500 unique images evaluated through five different fold-specific
-checkpoints. They represent repeated checkpoint responses to the same
-\gls{ood} population and must not be interpreted as 2\,500 distinct or
-statistically independent out-of-distribution images.
+The 2\,500 \gls{ood} responses associated with each architecture correspond to
+500 unique images processed by five different fold-specific checkpoints. They
+must not be interpreted as 2\,500 distinct or statistically independent
+out-of-distribution samples.
 
 \paragraph{Binary metric computation.}
 
-For each binary evaluation group, the implementation derives the confusion
-matrix using the fixed layout:
+For each binary evaluation group, the confusion matrix uses the fixed layout:
 
 \begin{equation}
+\mathbf{C}
+=
 \begin{bmatrix}
 \mathrm{TN} & \mathrm{FP} \\
 \mathrm{FN} & \mathrm{TP}
@@ -3916,92 +3901,90 @@ The \gls{fpr} and \gls{fnr} are implemented as:
 {\mathrm{FN}+\mathrm{TP}}.
 \end{equation}
 
-Clean proxy-model metrics are grouped by architecture. Adversarial-stage
-metrics are grouped by evaluated architecture, perturbation condition, and
-attack target model. This grouping includes the four model-dependent
-adversarial attacks and the model-agnostic Color Shift condition.
-Anti-forensic metrics are grouped by evaluated architecture and transformation
-condition.
+Clean metrics are grouped by proxy architecture. Adversarial-stage metrics are
+grouped by evaluated architecture, perturbation condition, and attack target
+model. Anti-forensic metrics are grouped by evaluated architecture and
+transformation condition.
 
 The attack-target field is retained because the model-dependent adversarial
 artifacts were generated against fold-aware EfficientNet-B0 checkpoints but
 were subsequently evaluated by all three proxy architectures. This distinction
 supports separate analysis of direct target-model behavior and cross-model
-transfer. Color Shift remains explicitly marked as model-agnostic and is not
-interpreted as a transfer attack.
+transfer. Color Shift remains marked as model-agnostic and is not interpreted
+as a transfer attack.
 
-The maximum predicted-class probabilities are retained as intra-model
-diagnostic values. They are not assumed to be calibrated across architectures
-and are not used as directly comparable confidence measures between ResNet18,
-EfficientNet-B0, and the \gls{clip}-based proxy.
+The maximum predicted-class probabilities stored by the evaluation pipeline are
+used only as intra-model diagnostic values. They are not assumed to be
+calibrated across architectures and are not used as directly comparable
+confidence measures between ResNet18, EfficientNet-B0, and the
+\gls{clip}-based proxy.
 
 \paragraph{Clean-to-perturbed comparison.}
 
 Each perturbed prediction is associated with its corresponding clean prediction
 through the tuple:
 
-\begin{center}
+\[
+\left(
 \texttt{evaluated\_model},
-\quad
 \texttt{evaluation\_fold},
-\quad
-\texttt{original\_image\_id}.
-\end{center}
+\texttt{original\_image\_id}
+\right).
+\]
 
-The prediction table is enriched with the clean prediction, clean correctness
-state, clean class probabilities, clean maximum probability, and probability
-difference relative to the perturbed input.
+The perturbed prediction record is enriched with the clean prediction, clean
+correctness state, clean class probabilities, clean maximum predicted-class
+probability, and probability difference relative to the perturbed input.
 
-For each proxy model and perturbation condition, the comparative layer
+For each proxy architecture and perturbation condition, the comparative layer
 computes:
 
 \begin{itemize}
-\item clean accuracy and perturbed accuracy;
-\item the schema field \texttt{robust\_accuracy}, whose stored value is
-equivalent to the perturbed accuracy;
+\item clean and perturbed accuracy;
+\item the schema field \texttt{robust\_accuracy};
 \item accuracy drop;
 \item clean and perturbed macro F1-scores;
 \item macro F1-score drop;
-\item induced-error count and induced-error rate;
-\item attack success rate for model-dependent adversarial attacks;
+\item induced-error count and rate;
+\item the schema field \texttt{attack\_success\_rate};
 \item mean maximum-probability shift;
 \item directional error counts and rates.
 \end{itemize}
 
-The term \texttt{robust\_accuracy} is retained because it is part of the
-implemented comparative schema. It does not denote a separate quantity from
-the perturbed-condition accuracy.
+The stored value of \texttt{robust\_accuracy} is identical to the
+perturbed-condition accuracy and does not represent an additional metric.
 
 Let \(\mathcal{C}_{\mathrm{clean}}\) denote the set of samples correctly
 classified under the corresponding clean condition. The induced-error rate for
-perturbation condition \(p\) is implemented as:
+perturbation condition \(p\) is:
 
 \begin{equation}
-    \mathrm{IER}_{p}
-    =
-    \frac{
-        \left|
-        \left\{
-        i \in \mathcal{C}_{\mathrm{clean}}
-        :
-        \hat{y}^{(p)}_{i} \neq y_{i}
-        \right\}
-        \right|
-    }{
-        \left|
-        \mathcal{C}_{\mathrm{clean}}
-        \right|
-    }.
+\mathrm{IER}_{p}
+=
+\frac{
+\left|
+\left\{
+i \in \mathcal{C}_{\mathrm{clean}}
+:
+\hat{y}^{(p)}_{i} \neq y_{i}
+\right\}
+\right|
+}{
+\left|
+\mathcal{C}_{\mathrm{clean}}
+\right|
+}.
 \end{equation}
 
-Images already misclassified in the clean condition are excluded from this
+Samples already misclassified in the clean condition are excluded from the
 denominator because they cannot represent newly induced errors.
 
-For the four model-dependent adversarial attacks, this clean-correct transition
-rate is also reported as the attack success rate. For Color Shift and the five
-anti-forensic transformations, the same transition is reported as an
-induced-error rate and is not interpreted as adversarial attack success or
-transfer success.
+The implementation stores this clean-correct transition rate in the
+\texttt{attack\_success\_rate} schema field for every perturbation group. It is
+interpreted as attack success rate only for FGSM, One Pixel, Sigma-Zero, and
+SuperDeepFool. For Color Shift and the five anti-forensic transformations, the
+same numerical transition is reported and interpreted as an induced-error rate,
+not as adversarial or transfer success.
 
 The maximum-probability shift is computed as:
 
@@ -4013,10 +3996,11 @@ c_{\mathrm{perturbed}}
 c_{\mathrm{clean}},
 \end{equation}
 
-and averaged within each model--condition group. This quantity compares the
-maximum predicted-class probability before and after perturbation. It does not
-necessarily compare the probability assigned to the same class when the
-predicted class changes, and it is used only as an intra-model diagnostic.
+and averaged within each architecture--condition group. This quantity compares
+the maximum probability assigned to the predicted class before and after
+perturbation. If the predicted class changes, it does not compare the
+probability assigned to the same semantic class. It is therefore retained only
+as an intra-model diagnostic.
 
 \paragraph{Proxy-model \gls{ood} metrics.}
 
@@ -4029,11 +4013,11 @@ The resulting records contain:
 \item the number of predictions assigned to \texttt{non\_weapon};
 \item the mean maximum predicted-class probability;
 \item the high-confidence threshold;
-\item the number and rate of predictions whose maximum probability meets
-or exceeds that threshold.
+\item the number and rate of responses whose maximum probability meets or
+exceeds that threshold.
 \end{itemize}
 
-The frozen high-confidence threshold is:
+The frozen threshold is:
 
 \begin{equation}
 \tau_{\mathrm{high}}
@@ -4041,20 +4025,20 @@ The frozen high-confidence threshold is:
 0.90.
 \end{equation}
 
-The high-confidence count includes predictions assigned to either binary class.
-It characterizes confident closed-set assignment of an \gls{ood} input. The
-predicted-weapon rate instead characterizes the operational tendency to flag
-\gls{ood} content as firearm-related.
+The high-confidence count includes responses assigned to either binary class
+and characterizes confident closed-set assignment of an \gls{ood} input. The
+predicted-weapon rate instead characterizes the tendency to flag \gls{ood}
+content as firearm-related.
 
 Neither quantity represents supervised correctness because the \gls{ood}
 branch has no positive or negative binary reference assignment. The associated
 probabilities remain architecture-specific diagnostic outputs and are not
 treated as calibrated across proxy models.
 
-\paragraph{Proxy-model metric outputs.}
+\paragraph{Proxy-model evaluation artifacts.}
 
-The proxy-model evaluation stage produces the records and metric outputs listed
-in Table~\ref{tab:implementation-proxy-metric-artifacts}.
+Table~\ref{tab:implementation-proxy-metric-artifacts} lists the principal
+prediction and metric records generated by the proxy-model evaluation stage.
 
 \begin{table}[H]
 \centering
@@ -4090,8 +4074,8 @@ transformation. \\
 
 \codepath{results/metrics/proxy_model_ood_metrics.csv}
 &
-Fold-aggregated \gls{ood} prediction, weapon-rate, mean-maximum-probability, and
-high-confidence statistics. \\
+Fold-aggregated \gls{ood} prediction, weapon-rate,
+mean-maximum-probability, and high-confidence statistics. \\
 
 \codepath{results/metrics/proxy_model_comparative_metrics.csv}
 &
@@ -4101,27 +4085,22 @@ maximum-probability-shift comparisons. \\
 \codepath{results/metrics/proxy_model_evaluation_summary.json}
 &
 Models, output paths, row counts, evaluation-error count, metric-table counts,
-and canonical schema notes. \\
+and schema notes. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The same stage generates four schema-stable reporting tables:
+The stage also generates four schema-stable reporting tables:
 
 \begin{itemize}
-\item
-\codepath{results/metrics/final_core_metrics.csv};
-\item
-\codepath{results/metrics/final_robustness_metrics.csv};
-\item
-\codepath{results/metrics/final_confusion_matrices.csv};
-\item
-\codepath{results/metrics/final_ood_metrics.csv}.
+\item \codepath{results/metrics/final_core_metrics.csv};
+\item \codepath{results/metrics/final_robustness_metrics.csv};
+\item \codepath{results/metrics/final_confusion_matrices.csv};
+\item \codepath{results/metrics/final_ood_metrics.csv}.
 \end{itemize}
 
-The core table consolidates the clean and condition-level binary metrics into a
-common schema. It contains 33 rows:
+The core table contains 33 binary-condition rows:
 
 \begin{equation}
 3\ \text{clean architecture rows}
@@ -4134,25 +4113,22 @@ common schema. It contains 33 rows:
 \end{equation}
 
 The 15 adversarial-stage rows comprise three evaluated architectures under the
-four model-dependent adversarial attacks and the model-agnostic Color Shift
-condition.
+four model-dependent attacks and the model-agnostic Color Shift condition.
 
-The robustness table contains 30 clean-to-perturbed comparisons:
+The robustness table contains:
 
 \begin{equation}
 3\ \text{architectures}
 \times
 10\ \text{perturbation conditions}
 =
-30\ \text{rows}.
+30\ \text{clean-to-perturbed comparison rows}.
 \end{equation}
 
 The confusion-matrix table contains one record for each of the 33 binary
 condition rows, while the final \gls{ood} table contains one record for each of
-the three proxy architectures.
-
-The frozen proxy-model evaluation completed all 40\,500 prediction operations
-without recorded inference errors.
+the three proxy architectures. The frozen evaluation completed all 40\,500
+prediction operations without recorded inference errors.
 
 \paragraph{Black-box software metric computation.}
 
@@ -4160,103 +4136,100 @@ Black-box software metrics are computed from the normalized decisions described
 in Section~\ref{subsec:implementation-normalization}. Only matched binary
 records with an interpretable \texttt{true} or \texttt{false}
 \texttt{weapon\_detected} value contribute to the binary confusion matrix.
-Records assigned to \texttt{unknown} are excluded from the binary denominators
-and reported separately.
+Records assigned to \texttt{unknown} are excluded from binary denominators and
+reported separately.
 
-The implementation computes:
+The black-box metric layer computes:
 
 \begin{itemize}
-\item accuracy;
-\item balanced accuracy;
+\item accuracy and balanced accuracy;
 \item \texttt{weapon} precision, recall, and F1-score;
 \item \texttt{non\_weapon} specificity;
 \item \gls{fpr} and \gls{fnr};
 \item \gls{tp}, \gls{tn}, \gls{fp}, and \gls{fn} counts;
-\item the count and rate of \texttt{unknown} normalized decisions;
-\item the number and rate of \gls{ood} inputs flagged as
-\texttt{weapon};
+\item the count and rate of unknown decisions;
+\item the number and rate of \gls{ood} inputs flagged as \texttt{weapon};
 \item the number of \gls{ood} inputs not flagged or assigned to
 \texttt{unknown}.
 \end{itemize}
 
 Binary metrics are computed only for records whose reference operational
 assignment is \texttt{weapon} or \texttt{non\_weapon}. The \gls{ood}
-weapon-flag rate instead uses the complete matched \gls{ood} population of the
-corresponding configuration as its operational denominator. This rate
-characterizes observable flagging behavior and is not interpreted as supervised
-accuracy or error.
+weapon-flag rate uses the complete matched \gls{ood} population of the
+corresponding configuration as its denominator. This rate characterizes
+observable flagging behavior and is not interpreted as supervised accuracy or
+error.
 
-The metrics are generated at several aggregation scopes:
+Metrics are generated at the following aggregation scopes:
 
 \begin{itemize}
-\item the complete normalized configuration;
+\item complete normalized configuration;
 \item sample type;
 \item perturbation family;
 \item individual perturbation condition;
 \item combined sample-type and perturbation-condition scope.
 \end{itemize}
 
-Each of the six normalized configurations produces 31 metric rows. The
-consolidated black-box software metric table therefore contains:
+Each of the six normalized configurations produces 31 metric rows:
 
 \begin{equation}
 6
 \times
 31
 =
-186
-\quad
-\text{metric rows}.
+186\ \text{black-box software metric rows}.
 \end{equation}
 
-The canonical black-box software metric source is:
+The canonical consolidated record is
+\codepath{results/metrics/forensic_tools_metrics.csv}. Corresponding
+per-configuration files follow the pattern
+\codepath{results/metrics/<tool_name>_metrics.csv}.
 
-\begin{center}
-\codepath{results/metrics/forensic_tools_metrics.csv}
-\end{center}
-
-The corresponding per-configuration files are filtered views of this
-consolidated record:
-
-\begin{center}
-\codepath{results/metrics/<tool_name>_metrics.csv}
-\end{center}
-
-The normalizer validates that every per-configuration file contains the
-expected number of rows and that the consolidated table was generated from the
-same in-memory metric records. The frozen validation confirmed consistency
+The normalizer verifies that every per-configuration file contains the expected
+number of rows and that the consolidated record was generated from the same
+in-memory metric population. The frozen validation confirmed consistency
 across all 186 rows.
 
 \paragraph{Canonical reporting layer.}
 
-The source CSV and JSON metric records remain canonical for numerical reporting.
-Figures and thesis-ready tables are generated from these frozen records rather
-than edited manually.
+CSV and JSON metric records remain the canonical sources for numerical
+reporting. Figures and thesis-ready tabular extracts are generated from these
+records rather than edited manually.
 
-The main downstream reporting entry point is:
+The downstream reporting entry point is
+\codepath{results/scripts/20_generate_experimental_reporting_assets.py}. It
+reads the consolidated proxy-model and black-box metric files and generates
+presentation-layer assets without recreating datasets, perturbations,
+predictions, or metrics.
 
-\begin{center}
-\codepath{results/scripts/20_generate_experimental_reporting_assets.py}
-\end{center}
-
-This script transforms the canonical metric tables into presentation-layer
-figures and tabular extracts. The resulting visualization files do not replace
-the source metrics and must be regenerated whenever a canonical metric record
-changes.
+The frozen reporting execution generated PDF and PNG outputs at 300 dpi,
+together with a manifest and summary under
+\codepath{results/figures/chapter_5/}. It produced 24 unique figure or table
+identifiers and 41 materialized files.
 
 The complete metric layer therefore preserves three distinct levels:
 
 \begin{enumerate}
-\item sample-level proxy-model predictions or normalized black-box
-software decisions;
-\item condition-level and comparative metric tables;
+\item sample-level proxy-model predictions or normalized black-box software
+decisions;
+\item condition-level and comparative metric records;
 \item presentation-layer figures and thesis-ready tables.
 \end{enumerate}
 
-Maintaining this separation allows every value reported in
-Chapter~\ref{chap:results} to be traced back to the corresponding prediction
-record, frozen input manifest, fold-specific model checkpoint, or observable
+Maintaining this separation allows each value reported in
+Chapter~\ref{chap:results} to be traced back to its corresponding prediction
+record, frozen input manifest, fold-specific checkpoint, or observable
 black-box software output.
+
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
