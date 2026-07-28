@@ -49,13 +49,14 @@ component supports clean and perturbed evaluation, whereas a separate clean
 generation, as detailed in
 Section~\ref{sec:methodology-split-generation}. The clean binary samples,
 clean \gls{ood} inputs, adversarial artifacts, and anti-forensic artifacts are
-combined into a common evaluation bundle, enabling comparison under aligned
+combined into the forensic evaluation bundle, enabling comparison under aligned
 experimental conditions.
 
 Quantitative metrics characterize classification performance, robustness
 degradation, error direction, and \gls{ood} behavior. Explainability provides
-qualitative diagnostic evidence for selected cases involving an inspectable
-proxy model and is not extended to the selected black-box systems.
+qualitative diagnostic information for selected cases
+involving an inspectable proxy model and is not extended to the selected
+black-box systems.
 Traceability controls preserve the relationships among source samples, derived
 artifacts, experimental conditions, observable outputs, and reported results.
 
@@ -184,7 +185,7 @@ draw=black!75
 % -------------------------------------------------------------------------
 \node[process] (bundle) at (0,-11.3)
 {\shortstack{
-\textbf{Common evaluation bundle}\\[1mm]
+\textbf{Forensic evaluation bundle}\\[1mm]
 \scriptsize clean binary samples, clean \gls{ood} inputs,\\
 \scriptsize adversarial artifacts, and anti-forensic artifacts
 }};
@@ -1267,7 +1268,7 @@ draw=black!75
 
 \node[process] (bundle) at (0,-9.8)
 {\shortstack{
-\textbf{Common evaluation bundle}\\[1mm]
+\textbf{Forensic evaluation bundle}\\[1mm]
 \scriptsize clean samples, clean \gls{ood} inputs, adversarial artifacts,\\
 \scriptsize and anti-forensic artifacts
 }};
@@ -1288,7 +1289,7 @@ draw=black!75
 }
 \caption[Perturbation generation workflow]{Perturbation generation workflow.
 Adversarial and anti-forensic artifacts are derived exclusively from the binary
-subset and are integrated into the common evaluation bundle together with the
+subset and are integrated into the forensic evaluation bundle together with the
 clean binary samples and the separate clean \gls{ood} inputs}
 \label{fig:methodology-perturbation-workflow}
 \end{figure}
