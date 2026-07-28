@@ -894,147 +894,103 @@ folds for fold-aware training and held-out evaluation, while the clean
 \label{fig:methodology-split-to-proxy-training}
 \end{figure}
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Proxy-Model Evaluation Framework}
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The controlled component of the methodology relies on a set of fully
-inspectable classification models, hereafter referred to as
-\textit{proxy classification models}. In this thesis, proxy models are fully
-inspectable experimental reference models used to study controlled
-classification behavior, robustness degradation, transferability, confidence
-patterns, and error direction under reproducible conditions.
+The controlled component of the methodology relies on fully inspectable
+classification models, hereafter referred to as \textit{proxy classification
+models}. These models provide experimental references for analyzing
+classification behavior, robustness degradation, confidence patterns, error
+direction, and transferability under reproducible conditions. They are not
+replicas, functionally equivalent substitutes, reverse-engineered
+reconstructions, or architectural reproductions of the selected black-box
+software systems.
 
-Proxy classification models are not replicas, functionally equivalent
-substitutes, reverse-engineered reconstructions, or architectural reproductions
-of the selected black-box software systems. Their role is to provide an
-experimental environment in which model architecture, training procedure,
-class mapping, checkpoints, and decision behavior can be inspected and
-controlled.
-
-The proxy-model framework supports three methodological objectives. First, it
+The proxy-model framework serves three methodological objectives. First, it
 provides a transparent reference for measuring classification performance and
 robustness degradation. Second, it enables the generation of model-dependent
-adversarial examples under explicitly defined access assumptions, including
-white-box and score-based conditions. Third, it supports the analysis of whether
-perturbations generated against one controlled model transfer to other proxy
-architectures or to selected black-box software systems.
+adversarial examples under explicit white-box or score-based access
+assumptions. Third, it supports the evaluation of whether perturbations
+generated against one controlled model transfer to other proxy architectures
+or to the selected black-box software systems.
 
 The proxy models implement the binary classification task defined in
-Section~\ref{sec:methodology-research-design}. The two operational classes are
-\texttt{non\_weapon} and \texttt{weapon}. Their numerical encoding is an
-implementation choice and does not constitute a methodological requirement,
-provided that the mapping remains explicit and consistent throughout training,
-evaluation, and metric computation.
-
-The \gls{ood} branch is excluded from proxy-model training and is not treated as
-a third supervised class. It remains reserved for the separate evaluation of
-system behavior on borderline, semantically atypical, or distributionally
-different content, as described in
-Section~\ref{sec:methodology-split-generation}. This separation prevents binary
-robustness from being conflated with system behavior on samples outside the
-operational distribution.
+Section~\ref{sec:methodology-research-design}. The mapping between
+\texttt{weapon}, \texttt{non\_weapon}, and their numerical encodings must
+remain explicit and consistent throughout training, evaluation, and metric
+computation. The clean \gls{ood} branch is excluded from training and is not
+treated as a third supervised class, as established in
+Section~\ref{sec:methodology-split-generation}.
 
 The methodology does not prescribe specific model architectures. Instead, the
 controlled evaluation should include models with complementary algorithmic
-characteristics. Depending on the experimental context, these may include
-conventional convolutional architectures, efficiency-oriented architectures,
-and models based on large-scale pretrained visual representations.
+characteristics, such as conventional convolutional architectures,
+efficiency-oriented architectures, or models based on large-scale pretrained
+visual representations. The architecture, initialization strategy,
+preprocessing procedure, class mapping, optimization method, training
+configuration, and resulting checkpoints must be documented. The concrete
+architectures and configurations adopted in this thesis are reported in
+Chapter~\ref{chap:implementation}.
 
-The selected models should be sufficiently documented to support reproducible
-training and evaluation. Relevant information includes the architecture,
-initialization strategy, preprocessing procedure, class mapping, optimization
-method, training configuration, and identity of the resulting checkpoints. The
-concrete architectures and configurations adopted in this thesis are reported
-in Chapter~\ref{chap:implementation}.
-
-Proxy-model training follows the fold-aware strategy introduced in
+Proxy-model training follows the fold-aware strategy defined in
 Section~\ref{sec:methodology-split-generation}. For each target fold, the
 corresponding model instance is trained exclusively on the remaining folds and
-evaluated on the held-out samples. This organization preserves the separation
-between model fitting and experimental evaluation.
-
-The same separation must be maintained during model-dependent perturbation
-generation. An adversarial artifact associated with a held-out sample must be
-generated using a model checkpoint that was not trained on that sample. This
-requirement reduces the risk of information leakage and preserves the validity
-of the subsequent robustness analysis.
-
-Training conditions should remain consistent across folds for a given model
-configuration. This consistency ensures that observed differences among folds
-are attributable primarily to the evaluated samples rather than to unintended
-changes in the optimization procedure. Any variation in architecture,
-preprocessing, initialization, or training parameters must be explicitly
+evaluated on the held-out samples. Training conditions must remain consistent
+across folds for a given model configuration, and any variation in
+architecture, preprocessing, initialization, or optimization must be
 documented.
 
-For model-dependent adversarial attacks, the protocol designates one controlled
-model as the \textit{primary proxy target}. This model acts as the source system
-against which adversarial examples are generated under the access assumptions
-required by each attack. White-box attacks may use gradients, decision
-boundaries, or other internal model information, whereas score-based attacks
-rely on observable model scores without requiring direct access to gradients.
-The choice of the primary proxy target is an implementation decision and does
-not imply that the selected architecture is universally more accurate, more
-representative, or more robust than the alternatives.
+The same separation applies to model-dependent perturbation generation. An
+adversarial artifact associated with a held-out sample must be generated using
+a fold-specific checkpoint that was not trained on that sample. This
+requirement prevents information leakage between model fitting, adversarial
+generation, and robustness evaluation.
 
-The use of a primary proxy target limits unnecessary multiplication of
-experimental variants. Rather than optimizing every model-dependent attack
-separately against every architecture, the protocol generates a coherent
-adversarial test set against one documented source model. The resulting
-artifacts are then evaluated on the remaining proxy models to examine
-cross-model transferability.
+For model-dependent adversarial attacks, one controlled model is designated as
+the \textit{primary proxy target}. This model provides the source system against
+which adversarial examples are generated under the access assumptions required
+by each attack. White-box attacks may use gradients, decision-boundary
+information, or other internal properties, whereas score-based attacks rely on
+observable model scores without requiring direct gradient access. Selection of
+the primary proxy target is an implementation decision and does not imply that
+the chosen architecture is universally more accurate, representative, or
+robust than the alternatives.
 
-For model-dependent adversarial artifacts, this procedure distinguishes three
-evaluation conditions:
+Using a single documented primary target limits unnecessary multiplication of
+experimental variants and produces a coherent adversarial test set. The
+resulting model-dependent artifacts are evaluated under three conditions:
 
 \begin{enumerate}
-\item \textit{direct source-model evaluation}, in which adversarial
-artifacts are assessed against the proxy-model checkpoint used to generate
+\item \textit{direct source-model evaluation}, in which adversarial artifacts
+are assessed against the fold-specific proxy-model checkpoint used to generate
 them under the corresponding access assumptions;
 
 \item \textit{cross-model transfer evaluation}, in which the same artifacts
 are assessed against different proxy architectures;
 
-\item \textit{black-box transfer evaluation}, in which the same artifacts
-are submitted to the selected black-box software systems.
+\item \textit{black-box transfer evaluation}, in which the same artifacts are
+submitted to the selected black-box software systems.
 \end{enumerate}
 
-Anti-forensic transformations follow a different rationale. They are applied
-directly to the image according to controlled transformation rules and are not
-optimized against the gradients, scores, or decision boundary of a specific
-model. Their evaluation therefore concerns the stability of classification
-behavior under operationally relevant image modifications rather than the
-success of an optimization procedure against a designated source model.
+Model-agnostic adversarial-style conditions and anti-forensic transformations
+are generated independently of a designated source model. Their evaluation
+across proxy architectures and black-box systems therefore measures response
+stability under shared manipulated conditions rather than transferability from
+a source model. The corresponding access assumptions and operational rationale
+are detailed in
+Section~\ref{sec:methodology-perturbation-selection-rationale}.
 
-Model-agnostic adversarial-style conditions must also be distinguished from
-transfer attacks. Because they are generated without reference to a source
-model, their evaluation across different proxy models and black-box software
-systems measures response stability under a shared manipulated condition rather
-than adversarial transferability.
+The proxy-model and black-box evaluation levels must remain analytically
+distinct. Proxy models are inspectable and configurable components whose
+training conditions, checkpoints, and internal behavior are available for
+controlled analysis. The selected software systems are evaluated only through
+their observable inputs and outputs. Exposing both levels to the same clean
+samples, clean \gls{ood} inputs, adversarial artifacts, and anti-forensic
+artifacts enables comparative assessment without assuming architectural or
+functional equivalence.
 
-The distinction among white-box, score-based, and model-agnostic conditions is
-methodologically important. Model-dependent adversarial attacks evaluate
-vulnerability under explicit access assumptions. Model-agnostic adversarial-
-style conditions and anti-forensic transformations instead assess whether
-controlled changes to image encoding, dimensions, visual quality, or appearance
-alter the observable classification outcome.
-
-Finally, the proxy-model framework must remain separate from the operational
-evaluation of the selected black-box software systems. Proxy models are
-inspectable and configurable components for which training conditions and model
-artifacts are known. The selected software systems are evaluated under
-black-box or near-black-box access conditions, without assuming access to their
-internal architectures, training data, calibration procedures, or decision
-logic.
-
-This separation enables the methodology to combine experimental control with
-operational relevance. Proxy models support the controlled analysis of how
-documented architectures respond under reproducible conditions, while black-box
-evaluation measures the observable behavior of operationally relevant software
-systems when exposed to the same clean samples, clean \gls{ood} inputs,
-adversarial artifacts, and anti-forensic artifacts.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
