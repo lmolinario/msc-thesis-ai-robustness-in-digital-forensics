@@ -2511,10 +2511,6 @@ the black-box evaluation. The screenshot documents activation of the
 \end{figure}
 
 
-This blind-input design concealed experiment-specific descriptors encoded in
-the bundle hierarchy. It did not conceal image content, visually perceptible
-perturbation effects, or information potentially embedded within the image
-files.
 
 A full search was executed with \gls{magnetai} media analysis enabled and the
 \texttt{Weapons} category selected. Image-level observable decisions were
@@ -2914,20 +2910,6 @@ text-prompt retrieval interface used to obtain the observable outputs}
 \label{fig:implementation-excire-operational-view}
 \end{figure}
 
-Only
-\codepath{datasets/forensic_evaluation_bundle/blind_tool_input/files/}
-was indexed by the software. The bundle metadata and structured audit view were
-not included in the searchable image collection. The semantic queries
-therefore operated on neutrally identified bundle files and did not receive
-reference operational assignments, perturbation names, fold identifiers,
-proxy-model information, source provenance, or explicit \gls{ood} indicators
-through the indexed paths or file names.
-
-This blind-input design concealed experiment-specific descriptors encoded in
-the file-system hierarchy. It did not conceal image content, visually
-perceptible perturbation effects, or information potentially embedded within
-the image files.
-
 The same frozen set of eight firearm-oriented English prompts was used for
 each semantic-distance configuration:
 
@@ -3157,11 +3139,6 @@ Non-bundle rows
 \end{tabularx}
 \end{table}
 
-
-This blind-input design concealed experiment-specific descriptors encoded in
-the bundle hierarchy. It did not conceal image content, visually perceptible
-perturbation effects, or information potentially embedded within the image
-files.
 
 The prediction-bearing record was an XLSX report exported through Physical
 Analyzer. The normalization procedure reads the \texttt{Immagini} worksheet
