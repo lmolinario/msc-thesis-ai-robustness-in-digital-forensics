@@ -182,35 +182,29 @@ homogeneous numerical uncertainty measures; consequently, their comparison is
 based on normalized observable decisions rather than cross-system confidence
 scores.
 
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Clean Baseline Performance}
 \label{sec:results-clean-baseline}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Evaluation on clean inputs constitutes the experimental baseline against which
-the behavior of the models under subsequent conditions must be interpreted,
-namely \gls{ood} samples, anti-forensic transformations, and adversarial
-perturbations. In this phase, the proxy models are evaluated on the official
-binary subset composed of 1\,000 images, balanced between 500
-\texttt{weapon}
-samples and 500 \texttt{non\_weapon} samples. The positive class is defined as
-\texttt{weapon}, whereas the negative class is defined as
-\texttt{non\_weapon}; consequently, false negatives indicate
-\texttt{weapon} samples classified as \texttt{non\_weapon}, while false
-positives indicate \texttt{non\_weapon} samples classified as \texttt{weapon}.
+Evaluation on clean inputs establishes the nominal baseline against which
+behavior under \gls{ood}, adversarial, and anti-forensic conditions is
+subsequently assessed. The three proxy architectures were evaluated on the
+frozen binary subset of 1\,000 images, comprising 500
+\texttt{weapon} and 500 \texttt{non\_weapon} samples.
 
-Table~\ref{tab:results-clean-baseline-metrics} reports the main performance
-metrics of the three proxy models on the clean binary subset. In addition to
-accuracy, balanced accuracy, and macro-averaged metrics, the table also reports
-the mean maximum predicted-class probability, retained as an intra-model
-diagnostic of the score distribution under the clean condition.
+The positive class is \texttt{weapon}, and the negative class is
+\texttt{non\_weapon}. A false negative therefore corresponds to a
+\texttt{weapon} image classified as \texttt{non\_weapon}, whereas a false
+positive corresponds to a \texttt{non\_weapon} image classified as
+\texttt{weapon}.
+
+Table~\ref{tab:results-clean-baseline-metrics} reports the principal clean
+binary metrics. In addition to accuracy, balanced accuracy, macro-averaged
+metrics, and class-specific performance for \texttt{weapon}, the table includes
+the mean maximum predicted-class probability. This value is retained only as
+an architecture-specific diagnostic of the output distribution and is not
+interpreted as a calibrated confidence measure.
 
 \begin{table}[H]
 \centering
@@ -230,13 +224,50 @@ diagnostic of the score distribution under the clean condition.
 \textbf{P\textsubscript{w}} &
 \textbf{R\textsubscript{w}} &
 \textbf{F1\textsubscript{w}} &
-\textbf{Conf.} &
+\textbf{Max-P} &
 \textbf{\acrshort{fpr}} &
 \textbf{\acrshort{fnr}} \\
 \midrule
-EfficientNet-B0 & 0.978 & 0.978 & 0.978 & 0.978 & 0.978 & 0.972 & 0.984 & 0.978 & 0.979 & 0.028 & 0.016 \\
-ResNet18 & 0.964 & 0.964 & 0.964 & 0.964 & 0.964 & 0.958 & 0.970 & 0.964 & 0.974 & 0.042 & 0.030 \\
-\acrshort{clip} & 0.927 & 0.927 & 0.933 & 0.927 & 0.927 & 0.881 & 0.988 & 0.931 & 0.559 & 0.134 & 0.012 \\
+
+EfficientNet-B0
+& 0.978
+& 0.978
+& 0.978
+& 0.978
+& 0.978
+& 0.972
+& 0.984
+& 0.978
+& 0.979
+& 0.028
+& 0.016 \\
+
+ResNet18
+& 0.964
+& 0.964
+& 0.964
+& 0.964
+& 0.964
+& 0.958
+& 0.970
+& 0.964
+& 0.974
+& 0.042
+& 0.030 \\
+
+\acrshort{clip}
+& 0.927
+& 0.927
+& 0.933
+& 0.927
+& 0.927
+& 0.881
+& 0.988
+& 0.931
+& 0.559
+& 0.134
+& 0.012 \\
+
 \bottomrule
 \end{tabularx}
 
@@ -245,39 +276,54 @@ ResNet18 & 0.964 & 0.964 & 0.964 & 0.964 & 0.964 & 0.958 & 0.970 & 0.964 & 0.974
 \textit{Note.} \textit{Bal.} indicates balanced accuracy; \textit{M-P},
 \textit{M-R}, and \textit{M-F1} indicate macro-precision, macro-recall, and
 macro-F1, respectively; \(P_w\), \(R_w\), and \(F1_w\) indicate precision,
-recall, and F1-score for the \texttt{weapon} class; \textit{Conf.} indicates the mean maximum predicted-class probability and is
-reported only as an intra-model diagnostic indicator.
+recall, and F1-score for the \texttt{weapon} class. \textit{Max-P} indicates
+the mean maximum predicted-class probability and is reported only as an
+intra-model diagnostic indicator.
 \end{table}
 
-EfficientNet-B0 achieves the highest nominal performance, with an accuracy of
-0.978, a macro-F1 of 0.978, and a mean confidence of 0.979. ResNet18 shows
-slightly lower but still high performance, with an accuracy of 0.964, a
-macro-F1 of 0.964, and a mean confidence of 0.974. \gls{clip} achieves an accuracy of 0.927 and a macro-F1 of 0.927, but
-exhibits a different operational profile from the two fully fine-tuned \glspl{cnn}
-proxies. Recall on the \texttt{weapon} class is very high, at 0.988, whereas
-the \gls{fpr} is substantially higher, at 0.134. Its mean confidence is
-0.559. Because confidence scores are not calibrated across architectures,
-this value is interpreted only within the \gls{clip}-based proxy and not as
-directly commensurate with the scores produced by EfficientNet-B0 and
+EfficientNet-B0 achieves the strongest overall clean-condition performance,
+with an accuracy and macro-F1 of 0.978. Its \texttt{weapon} recall is 0.984,
+corresponding to an \gls{fnr} of 0.016, while its \gls{fpr} is 0.028. Its mean
+maximum predicted-class probability is 0.979.
+
+ResNet18 shows slightly lower but still high clean-condition performance, with
+an accuracy and macro-F1 of 0.964. Its \texttt{weapon} recall is 0.970, its
+\gls{fnr} is 0.030, and its \gls{fpr} is 0.042. The corresponding mean maximum
+predicted-class probability is 0.974.
+
+The \gls{clip}-based proxy exhibits a different operational profile. Its
+overall accuracy and macro-F1 are 0.927, lower than those of the two
+fully fine-tuned \glspl{cnn}. However, it achieves the highest
+\texttt{weapon} recall, at 0.988, and the lowest \gls{fnr}, at 0.012. This
+reduction in missed \texttt{weapon} samples is accompanied by an
+\gls{fpr} of 0.134, substantially higher than those of EfficientNet-B0 and
 ResNet18.
 
-This behavior should not be interpreted as the effect of zero-shot
-classification. In the adopted experimental protocol, \gls{clip} is used as a
-pre-trained and frozen visual encoder, adapted to the
-\texttt{weapon}/\texttt{non\_weapon} task through a supervised binary head. The
-observed tendency to produce high recall on the \texttt{weapon} class, at the
-cost of a higher \gls{fpr}, is therefore more appropriately interpreted as an
-effect of the pretrained visual representation and of the learned decision
-profile of the supervised binary head, rather than as the result of a zero-shot
-mechanism. Within the \gls{clip}-based proxy, the observed score distribution
-indicates
-that the greater tendency to flag images as \texttt{weapon} does not generally
-coincide with scores near the maximum value.
+The mean maximum predicted-class probability of the \gls{clip}-based proxy is
+0.559. This value must not be compared directly with the corresponding values
+of the convolutional architectures because the probability outputs are not
+calibrated across models. Within the \gls{clip}-based proxy, it indicates that
+the strong tendency to assign inputs to the \texttt{weapon} class does not
+generally coincide with maximum probabilities close to one.
+
+This behavior is not the result of zero-shot classification. In the adopted
+implementation, \gls{clip} serves as a pretrained and frozen visual encoder
+connected to a supervised binary classification head trained on the same
+frozen binary task. Its error profile must therefore be attributed to the
+combination of the pretrained visual representation and the learned binary
+decision head rather than to the original image--text similarity interface.
 
 Table~\ref{tab:results-clean-confusion-matrices} reports the aggregate
-confusion matrices for each model, using the layout
-\(\left[\left[\glsentryshort{tn},\glsentryshort{fp}\right],
-\left[\glsentryshort{fn},\glsentryshort{tp}\right]\right]\).
+confusion-matrix components for the three proxy models. The layout is:
+
+\[
+\mathbf{C}
+=
+\begin{bmatrix}
+\glsentryshort{tn} & \glsentryshort{fp} \\
+\glsentryshort{fn} & \glsentryshort{tp}
+\end{bmatrix}.
+\]
 
 \begin{table}[H]
 \centering
@@ -285,21 +331,41 @@ confusion matrices for each model, using the layout
 \label{tab:results-clean-confusion-matrices}
 \begin{tabular}{@{}l r r r r@{}}
 \toprule
-\textbf{Model} & \textbf{\gls{tn}} & \textbf{\gls{fp}} & \textbf{\gls{fn}} & \textbf{\gls{tp}} \\
+\textbf{Model} &
+\textbf{\gls{tn}} &
+\textbf{\gls{fp}} &
+\textbf{\gls{fn}} &
+\textbf{\gls{tp}} \\
 \midrule
-EfficientNet-B0 & 486 & 14 & 8 & 492 \\
-ResNet18 & 479 & 21 & 15 & 485 \\
-\gls{clip} & 433 & 67 & 6 & 494 \\
+
+EfficientNet-B0
+& 486
+& 14
+& 8
+& 492 \\
+
+ResNet18
+& 479
+& 21
+& 15
+& 485 \\
+
+\gls{clip}
+& 433
+& 67
+& 6
+& 494 \\
+
 \bottomrule
 \end{tabular}
 \end{table}
 
-The same error distribution is visualized in
-Figure~\ref{fig:results-clean-confusion-matrices}, which highlights the
-different operational profiles of the three models: EfficientNet-B0 minimizes
-the total number of errors, ResNet18 maintains an intermediate behavior,
-whereas \gls{clip} reduces false negatives on the \texttt{weapon} class at the
-cost of a higher number of false positives.
+The same error distributions are visualized in
+Figure~\ref{fig:results-clean-confusion-matrices}. EfficientNet-B0 minimizes
+the total number of errors, producing 22 incorrect decisions. ResNet18 produces
+36 errors and maintains an intermediate profile. The \gls{clip}-based proxy
+produces 73 errors, but only six of them are false negatives; the remaining 67
+are false positives.
 
 \begin{figure}[htbp]
 \centering
@@ -309,7 +375,8 @@ cost of a higher number of false positives.
 \small EfficientNet-B0
 
 \vspace{0.2em}
-\includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_efficientnet_b0.pdf}
+\includegraphics[width=\linewidth]
+{images/fig_clean_confusion_matrix_efficientnet_b0.pdf}
 \end{minipage}
 \hfill
 \begin{minipage}{0.48\textwidth}
@@ -317,7 +384,8 @@ cost of a higher number of false positives.
 \small ResNet18
 
 \vspace{0.2em}
-\includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_resnet18.pdf}
+\includegraphics[width=\linewidth]
+{images/fig_clean_confusion_matrix_resnet18.pdf}
 \end{minipage}
 
 \vspace{0.8em}
@@ -327,31 +395,42 @@ cost of a higher number of false positives.
 \small \acrshort{clip}
 
 \vspace{0.2em}
-\includegraphics[width=\linewidth]{images/fig_clean_confusion_matrix_clip.pdf}
+\includegraphics[width=\linewidth]
+{images/fig_clean_confusion_matrix_clip.pdf}
 \end{minipage}
 
-\caption{Clean confusion matrices of the three proxy models on the binary subset}
+\caption{Clean confusion matrices of the three proxy models on the binary
+subset}
 \label{fig:results-clean-confusion-matrices}
 \end{figure}
 
-From a forensic perspective, the most critical figure is the number of false
-negatives on the \texttt{weapon} class. EfficientNet-B0 produces 8 false
-negatives, ResNet18 produces 15, whereas \gls{clip} produces 6. However,
-\gls{clip} also produces 67 false positives, a substantially higher value than
-the 14 produced by EfficientNet-B0 and the 21 produced by ResNet18.
-Consequently, the clean comparison cannot be interpreted only in terms of
-overall accuracy, but must also consider the balance among recall for the
-target category, false-positive workload, and the model-specific score
-distribution.
+From a forensic-triage perspective, the most consequential distinction concerns
+the direction of the errors. EfficientNet-B0 provides the strongest overall
+balance, with eight false negatives and 14 false positives. ResNet18 produces
+15 false negatives and 21 false positives. The \gls{clip}-based proxy reduces
+false negatives to six but increases false positives to 67.
 
-Overall, the clean baseline shows that the proxy models achieve high
-performance under nominal conditions. However, the differences among accuracy,
-\gls{fpr}, \gls{fnr}, and mean confidence already highlight, even in the
-absence of perturbations, an aspect that is relevant for forensic triage:
-models with similar accuracy may produce different operational error profiles,
-especially when the error concerns failure to flag \texttt{weapon} content,
-incorrect flagging of \texttt{non\_weapon} content, or high-score predictions
-on cases that still require human verification.
+The clean comparison therefore cannot be interpreted solely through aggregate
+accuracy. A lower false-negative rate may reduce the risk of failing to flag
+firearm-oriented content, but a higher false-positive rate increases the volume
+of irrelevant material presented for human review. Conversely, minimizing the
+review workload must not be achieved by accepting an operationally
+unacceptable number of missed target images.
+
+Overall, all three proxy architectures achieve high performance under clean
+conditions, but they expose distinct operational tradeoffs among target-class
+recall, false-negative risk, false-positive workload, and model-specific output
+distributions. These differences provide the necessary baseline for evaluating
+whether the same profiles remain stable under \gls{ood}, adversarial, and
+anti-forensic conditions.
+
+
+
+
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{\texorpdfstring{\gls{ood}}{Out-of-Distribution} Behavior}
