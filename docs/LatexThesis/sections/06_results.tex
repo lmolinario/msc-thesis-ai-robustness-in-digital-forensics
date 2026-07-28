@@ -12,27 +12,29 @@ triage in forensic contexts.
 
 A central feature of the evaluation is the parallel analysis of two
 complementary system levels. The first comprises the transparent proxy models
-defined in Section~\ref{subsec:implementation-architectures}, for which model
-predictions, confidence values, confusion matrices, and internal attribution
-information are available. The second comprises the selected black-box software
-systems, whose behavior is assessed exclusively through observable and
-normalized outputs.
+defined in Section~\ref{subsec:implementation-architectures}, for which
+predictions, maximum predicted-class probabilities, confusion matrices, and
+internal attribution information are available. The second comprises the
+selected black-box software systems, whose behavior is assessed exclusively
+through observable and normalized outputs.
 
-Both evaluation levels operate on the same frozen experimental corpus. The
-1\,000 clean binary images and 500 clean \gls{ood} images provide the common
-source population, whereas the 10\,000 adversarial and anti-forensic variants
-are derived exclusively from the binary subset. The resulting comparison is
+Both evaluation levels operate on the same frozen source population. The
+1\,000 clean binary images and 500 clean \gls{ood} images constitute the common
+source corpus, whereas 10\,000 adversarial and anti-forensic artifacts are
+derived exclusively from the binary subset. The resulting comparison is
 therefore based on the same underlying samples and experimental conditions,
 while preserving the distinction between transparent model evaluation and
 operational black-box assessment.
 
 The purpose of the chapter is not to construct an absolute ranking among
 heterogeneous systems or to reduce the study to a conventional
-\gls{advml} benchmark. The results are interpreted from a forensic perspective,
-with particular attention to false negatives on the firearm-oriented target
-category, false positives on \texttt{non\_weapon} content, closed-set
-assignments of \gls{ood} inputs, degradation under manipulated conditions, and
-the continued need for human review
+\gls{advml} benchmark. The systems differ in architecture, output semantics,
+configuration, operational scope, and degree of transparency. Their results
+are therefore interpreted from a forensic perspective, with particular
+attention to false negatives on the firearm-oriented target category, false
+positives on \texttt{non\_weapon} content, closed-set assignments of
+\gls{ood} inputs, degradation under manipulated conditions, and the continued
+need for human review
 \cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -42,28 +44,45 @@ the continued need for human review
 
 The experimental results cover the complete population generated through the
 frozen implementation described in Chapter~\ref{chap:implementation}. The
-common corpus contains 11\,500 logical bundle items, comprising clean inputs
-and derived perturbed artifacts:
+common corpus contains 11\,500 logical experimental inputs, comprising clean
+images and derived perturbed artifacts:
 
 \begin{equation}
 \begin{aligned}
-    N_{\mathrm{bundle}}
-    &= 1\,000\ \text{clean binary inputs}
-    + 500\ \text{\glsentryshort{ood} inputs} \\
-    &\quad + 5\,000\ \text{adversarial artifacts}
-    + 5\,000\ \text{anti-forensic artifacts} \\
-    &= 11\,500.
+N_{\mathrm{bundle}}
+&=
+1\,000\ \text{clean binary inputs}
++
+500\ \text{\glsentryshort{ood} inputs}
+\\
+&\quad
++
+5\,000\ \text{adversarial artifacts}
++
+5\,000\ \text{anti-forensic artifacts}
+\\
+&=
+11\,500.
 \end{aligned}
 \end{equation}
 
-The proxy-model and black-box evaluations use different output representations
-but cover the same experimental conditions. Each clean binary input or
-perturbed binary artifact is evaluated by all three proxy architectures through
-its assigned
-fold-aware checkpoint. Each \gls{ood} image is evaluated by all five
-fold-specific checkpoints of every proxy architecture. The selected black-box
-software configurations instead produce one normalized decision for each item
-in the 11\,500-file forensic evaluation bundle.
+The proxy-model and black-box evaluations use different output
+representations but cover the same experimental conditions. Each clean binary
+input or perturbed binary artifact is evaluated by all three proxy
+architectures through the checkpoint associated with its assigned fold.
+
+The \gls{ood} branch follows a different proxy-model evaluation protocol. Each
+of the 500 unique \gls{ood} images is evaluated by all five fold-specific
+checkpoints of each architecture. The resulting 7\,500 prediction rows
+therefore represent repeated checkpoint responses to 500 unique images and
+must not be interpreted as 7\,500 independent \gls{ood} samples.
+
+The black-box evaluation comprises four software families and six normalized
+operational configurations. Magnet AXIOM/Magnet.AI, Griffeye/T3K CORE, and
+Cellebrite Inseyets each contribute one configuration, whereas the D20, D50,
+and D80 Excire Foto 2025 settings are retained as three separate
+configurations. Each configuration produces one normalized decision for every
+item in the 11\,500-file forensic evaluation bundle.
 
 Table~\ref{tab:results-evaluation-completeness} summarizes the completeness of
 the result population.
@@ -82,38 +101,52 @@ the result population.
 \textbf{Coverage} \\
 \midrule
 
-Proxy-model predictions &
-40\,500 &
-3\,000 clean predictions, 7\,500 \gls{ood} predictions, and 30\,000
-predictions on adversarial and anti-forensic variants; no recorded inference
-errors. \\
+Proxy-model predictions
+&
+40\,500
+&
+3\,000 clean predictions, 7\,500 fold-specific \gls{ood} responses, and
+30\,000 predictions on adversarial and anti-forensic artifacts; no recorded
+inference errors. \\
 
-Normalized black-box decisions &
-69\,000 &
+Normalized black-box decisions
+&
+69\,000
+&
 Six normalized configurations evaluated on all 11\,500 bundle items, with no
 missing bundle-level decision. \\
 
-Proxy binary condition metrics &
-33 &
+Proxy binary-condition metrics
+&
+33
+&
 Three clean architecture-level rows and 30 architecture--perturbation
 combinations. \\
 
-Proxy robustness comparisons &
-30 &
+Proxy robustness comparisons
+&
+30
+&
 Clean-to-perturbed comparisons for three architectures and ten perturbation
 conditions. \\
 
-Proxy \gls{ood} summaries &
-3 &
+Proxy \gls{ood} summaries
+&
+3
+&
 One fold-aggregated \gls{ood} record for each proxy architecture. \\
 
-Black-box software metrics &
-186 &
+Black-box software metrics
+&
+186
+&
 Thirty-one aggregation records for each of the six normalized black-box
 configurations. \\
 
-Explainability cases &
-5 &
+Explainability cases
+&
+5
+&
 One representative case for each predefined diagnostic category, associated
 with 20 thesis-level visual assets. \\
 
@@ -122,26 +155,39 @@ with 20 thesis-level visual assets. \\
 \end{table}
 
 Binary accuracy, precision, recall, F1-score, \gls{fpr}, and \gls{fnr} are
-computed exclusively on \texttt{weapon} and \texttt{non\_weapon} samples.
-The \gls{ood} branch remains separate and is analyzed through the proportion of
-inputs assigned to the \texttt{weapon} class and, for proxy models, through
-confidence-related indicators.
+computed exclusively on samples whose reference operational assignment is
+\texttt{weapon} or \texttt{non\_weapon}. The \gls{ood} branch remains
+separate and is analyzed through the proportion of inputs assigned to the
+\texttt{weapon} class and, for the proxy models, through architecture-specific
+maximum-probability indicators.
 
 Accuracy drop, induced-error counts, directional error transitions, and the
 confusion-matrix layout follow the definitions established in
-Section~\ref{sec:methodology-evaluation-metrics}. Attack success rate is
-reported only for the four model-dependent adversarial attacks and uses the
-clean-correct denominator defined in the methodology. Positive accuracy-drop
-values indicate degradation relative to the clean baseline, whereas negative
-values indicate a condition-specific increase that must not be interpreted as
-evidence of general robustness.
+Section~\ref{sec:methodology-evaluation-metrics}. Positive accuracy-drop values
+indicate degradation relative to the clean baseline, whereas negative values
+indicate a condition-specific increase in accuracy that must not be interpreted
+as evidence of general robustness.
 
-Confidence values are available only for the transparent proxy models. They are
-used as intra-model diagnostic indicators and are not interpreted as calibrated
-probabilities directly comparable across architectures. The selected black-box
-software systems do not expose homogeneous confidence measures; consequently,
-their comparison is based on normalized observable decisions rather than on
-numerical uncertainty scores.
+The clean-correct-to-incorrect transition rate is interpreted as attack success
+rate only for the four model-dependent adversarial attacks: \gls{fgsm}, One
+Pixel, Sigma-Zero, and SuperDeepFool. For Color Shift and the five
+anti-forensic transformations, the same numerical transition is interpreted as
+an induced-error rate rather than as adversarial or transfer success.
+
+Maximum predicted-class probabilities are available only for the transparent
+proxy models. They are retained as intra-model diagnostic indicators and are
+not interpreted as calibrated probabilities directly comparable across
+architectures. The selected black-box software systems do not expose
+homogeneous numerical uncertainty measures; consequently, their comparison is
+based on normalized observable decisions rather than cross-system confidence
+scores.
+
+
+
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Clean Baseline Performance}
