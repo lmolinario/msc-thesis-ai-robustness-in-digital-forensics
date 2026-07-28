@@ -2470,10 +2470,10 @@ integrity controls, audit records, and human-review implications};
 \draw[arrow] (binary.west) -- ++(-1.0,0) |- (bundle.west);
 
 % Perturbed binary artifacts enter the bundle.
-\draw[arrow] (perturb) |- (bundle.west);
+\draw[arrow] (perturb.south east) -- (bundle.north);
 
 % The clean OOD branch enters the bundle without perturbation.
-\draw[arrow] (ood) |- (bundle.east);
+\draw[arrow] (ood.south west) -- (bundle.north);
 
 \draw[arrow] (bundle.south west) -- (proxy.north);
 \draw[arrow] (bundle.south east) -- (blackbox.north);

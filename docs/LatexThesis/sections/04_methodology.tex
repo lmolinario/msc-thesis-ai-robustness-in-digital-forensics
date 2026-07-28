@@ -272,8 +272,8 @@ draw=black!75
 \draw[arrow] (binary.south) -- (perturb.north);
 
 % Direct path for the unmodified binary samples.
-\draw[arrow] (binary.west) -- ++(-1.0,0) |- (bundle.west);
-
+%\draw[arrow] (binary.west) -- ++(-1.0,0) |- (bundle.west);
+\draw[arrow] (binary.east) -- ++(1.0,0) -| (bundle.north);
 % Derived adversarial and anti-forensic artifacts.
 \draw[arrow] (perturb.south) |- (bundle.west);
 
@@ -295,6 +295,8 @@ the resulting common bundle is evaluated through complementary proxy-model and
 black-box software analyses}
 \label{fig:methodology-fairlab-overview}
 \end{figure}
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -1533,7 +1535,7 @@ draw=black!75
 
 \draw[arrow] (advartifacts.south east) -- (bundle.north);
 \draw[arrow] (afartifacts.south west) -- (bundle.north);
-\draw[dashedarrow] (ood.south) |- (bundle.east);
+\draw[dashedarrow] ([xshift=1.9cm]ood.south) |- (bundle.east);
 
 \end{tikzpicture}%
 }
