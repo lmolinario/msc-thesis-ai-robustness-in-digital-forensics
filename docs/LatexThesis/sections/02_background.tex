@@ -28,7 +28,7 @@ automatically acquire the status of evidence: they must be collected,
 documented, and interpreted through procedures that are controllable,
 repeatable, and compatible with the requirements of integrity, authenticity,
 and traceability demanded by forensic investigation
-\cite{casey2011digital,garfinkel2010digital,nist2006guide}.
+\cite{casey2011digital,garfinkel2010digital,nist2006guide,iso27041}.
 
 Digital evidence presents distinctive characteristics compared with
 traditional physical evidence. It is intangible, easily replicable, often
@@ -56,14 +56,15 @@ investigative or judicial setting
 
 From an operational perspective, the literature and technical guidelines
 describe the digital forensic process as a sequence of logically distinct
-phases: collection, examination, analysis, and reporting. The collection phase
+phases: collection, examination, analysis, and reporting \cite{iso27043}. The collection phase
 concerns the identification and acquisition of relevant digital sources, with
 particular attention to preserving the state of the evidence. The examination
 phase includes the extraction and organization of potentially relevant data,
 for example through file system analysis, artifact recovery, indexing, and
 filtering. The analysis phase consists of the technical interpretation of the
 extracted data, the correlation among different sources, and the reconstruction
-of relevant events or behaviors. Finally, the reporting phase requires clear,
+of relevant events or behaviors \cite{iso27042}. Finally, the reporting phase
+requires clear,
 verifiable, and understandable documentation of the activities performed, the
 tools used, the results obtained, and the limitations encountered
 \cite{reith2002examining,nist2006guide,casey2011digital,carrier2005filesystem}.
@@ -479,9 +480,12 @@ while a classifier learns a decision rule in the feature space. Models such as
 \gls{svm} have long represented an effective solution for supervised
 classification problems, owing to their ability to construct robust decision
 surfaces in high-dimensional spaces
-\cite{cortes1995support,bishop2006pattern}. However, the quality of the result
-depends strongly on the choice of features and on their ability to represent
-image content in a discriminative manner.
+\cite{cortes1995support,bishop2006pattern}. General-purpose libraries such as
+scikit-learn provide standardized implementations of classical supervised-learning
+algorithms and evaluation utilities, supporting reproducible experimentation
+across conventional \gls{ml} workflows \cite{pedregosa2011scikit}. However, the
+quality of the result depends strongly on the choice of features and on their
+ability to represent image content in a discriminative manner.
 
 \gls{dl} has profoundly changed this paradigm by introducing models capable of
 automatically learning hierarchical representations of data. In \gls{cnn} architectures,
