@@ -68,3 +68,8 @@ makeindex -s main.ist -t main.alg -o main.acr main.acn
 biber main
 pdflatex main.tex
 pdflatex main.tex
+
+
+
+latexmk -C
+latexmk -pdf -interaction=nonstopmode -file-line-error main.tex
