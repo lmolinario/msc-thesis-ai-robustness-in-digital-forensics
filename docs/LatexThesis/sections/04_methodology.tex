@@ -1926,16 +1926,6 @@ states}
 \end{figure}
 
 
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Evaluation Metrics}
 \label{sec:methodology-evaluation-metrics}
@@ -1944,48 +1934,30 @@ states}
 The \gls{fairlab} metric framework evaluates three complementary dimensions of
 operational robustness: binary classification performance under clean
 conditions, robustness under adversarial and anti-forensic conditions, and
-system behavior on \gls{ood} inputs. The framework also supports the evaluation
-of selected black-box software systems after their heterogeneous outputs have
-been normalized into common operational prediction states.
+system behavior on clean \gls{ood} inputs. It also supports the evaluation of
+black-box software systems after their heterogeneous outputs have been
+normalized into common operational prediction states.
 
-The objective is not limited to aggregate classification accuracy. In forensic
-visual triage, different error types may have different operational
-consequences. A false negative on a \texttt{weapon} sample may prevent
-target-category content from being prioritized for detailed review. A false
-positive may instead increase the volume of non-target material submitted to
-the analyst.
+Aggregate accuracy alone is insufficient for operational interpretation.
+Binary metrics are therefore computed separately for clean, adversarial, and
+anti-forensic conditions and interpreted according to class and error
+direction. The \gls{ood} branch is evaluated through separate behavioral
+indicators and is not incorporated into the binary confusion matrix.
 
-The evaluation framework therefore combines conventional classification
-metrics with condition-specific robustness indicators and operationally
-oriented error measures. Binary metrics are computed separately for clean,
-adversarial, and anti-forensic conditions. The \gls{ood} branch is evaluated
-through separate behavioral indicators and is not integrated into the binary
-confusion matrix.
+The protocol does not adopt \gls{auroc} as a central cross-system metric.
+Although score-based measures are applicable to proxy models, the selected
+black-box systems may expose only categories, semantic tags, bookmarks,
+retrieval results, or system-specific scores whose meaning and calibration
+cannot be independently verified. The framework therefore prioritizes measures
+that can be derived consistently from both inspectable models and normalized
+black-box outputs, without implying a theoretical limitation of \gls{auroc} or
+other score-based metrics.
 
-The protocol does not adopt \gls{auroc} as a central metric. Although
-score-based measures are widely used in supervised \gls{ml}, their consistent
-application requires comparable continuous outputs across the evaluated
-systems. The proxy models expose continuous prediction outputs, whereas the
-selected black-box software systems may provide only categorical labels,
-semantic tags, bookmarks, retrieval results, or system-specific scores whose
-meaning and calibration cannot be independently verified.
-
-The metric framework consequently prioritizes measures that can be derived
-consistently from both inspectable models and normalized black-box outputs. This
-choice does not imply a theoretical limitation of \gls{auroc} or other
-score-based metrics. It reflects the operational requirement to compare
-heterogeneous systems without assuming that their output scores have equivalent
-meaning or calibration.
-
-For the binary classification task, the principal metrics are accuracy,
-balanced accuracy, precision, recall, F1-score, and the confusion matrix.
-Class-specific interpretation is required because aggregate performance may
-conceal asymmetric error behavior between the \texttt{weapon} and
-\texttt{non\_weapon} classes.
-
-Let \(TP\), \(TN\), \(FP\), and \(FN\) denote the numbers of true positives,
-true negatives, false positives, and false negatives, respectively. Accuracy is
-defined as:
+For the binary task, the principal metrics are accuracy, balanced accuracy,
+precision, recall, F1-score, false-negative rate, false-positive rate, and the
+confusion matrix. Let \(TP\), \(TN\), \(FP\), and \(FN\) denote the numbers of
+true positives, true negatives, false positives, and false negatives,
+respectively. Accuracy is defined as:
 
 \begin{equation}
 \mathrm{Accuracy}
@@ -2053,13 +2025,12 @@ Precision and F1-score are defined as:
 }
 \end{equation}
 
-Robustness under manipulated conditions is evaluated by comparing the
-prediction obtained for each perturbed artifact with both the corresponding
-clean prediction and the reference operational class. This paired design makes
-it possible to distinguish errors already present under clean conditions from
-errors introduced after perturbation.
+Robustness under manipulated conditions is evaluated through a paired
+comparison between each perturbed artifact, its corresponding clean sample,
+and the reference operational class. This design distinguishes errors already
+present under clean conditions from those induced by a perturbation.
 
-For a given perturbation condition \(p\), the accuracy drop is defined as:
+For a perturbation condition \(p\), the accuracy drop is defined as:
 
 \begin{equation}
 \Delta \mathrm{Accuracy}_{p}
@@ -2070,8 +2041,8 @@ For a given perturbation condition \(p\), the accuracy drop is defined as:
 \end{equation}
 
 Positive values indicate degradation relative to the clean baseline. Zero or
-negative values indicate no measured degradation under the specific evaluated
-condition and must not be interpreted as evidence of general robustness.
+negative values indicate no measured degradation under the evaluated condition
+and must not be interpreted as evidence of general robustness.
 
 Let \(\mathcal{C}_{\mathrm{clean}}\) denote the set of samples classified
 correctly under the clean condition. The induced error rate for condition \(p\)
@@ -2095,38 +2066,37 @@ i \in \mathcal{C}_{\mathrm{clean}}
 }
 \end{equation}
 
-The numerator is the induced error count. For model-dependent adversarial
-conditions, this rate may also be reported as the attack success rate because
-it measures the proportion of clean-correct samples rendered incorrect by the
-attack. Samples already misclassified under clean conditions do not contribute
-to this quantity.
+The numerator represents the induced error count. For model-dependent
+adversarial conditions, this rate may also be reported as the attack success
+rate because it measures the proportion of clean-correct samples rendered
+incorrect by the attack. Samples already misclassified under clean conditions
+do not contribute to this quantity.
 
 Particular attention is given to the transition:
 
-\begin{equation}
+\[
 \text{\texttt{weapon}}
 \rightarrow
 \text{\texttt{non\_weapon}}
-\end{equation}
+\]
 
 because it represents the loss of a positive detection for target-category
 content. The reverse transition:
 
-\begin{equation}
+\[
 \text{\texttt{non\_weapon}}
 \rightarrow
 \text{\texttt{weapon}}
-\end{equation}
+\]
 
 is also measured because it may increase the volume of non-target content
 prioritized for human review.
 
 When continuous proxy-model outputs are available, the analysis also considers
 the mean maximum predicted-class probability and its variation relative to the
-corresponding clean condition. These quantities are used exclusively as
-diagnostic intra-model indicators. They are not interpreted as calibrated
-probabilities and must not be compared directly across different proxy
-architectures.
+corresponding clean condition. These quantities are diagnostic intra-model
+indicators and must not be interpreted as calibrated probabilities or compared
+directly across proxy architectures.
 
 For each proxy model and manipulated condition, the confidence shift is defined
 as:
@@ -2136,35 +2106,28 @@ as:
 =
 c_{\mathrm{perturbed}}
 -
-c_{\mathrm{clean}},
+c_{\mathrm{clean}}
 \end{equation}
 
-where \(c\) denotes the maximum predicted-class probability. The value does not
-necessarily correspond to the probability assigned to the reference operational
-class.
+where \(c\) denotes the maximum predicted-class probability. This value does
+not necessarily correspond to the probability assigned to the reference
+operational class.
 
-The \gls{ood} evaluation remains conceptually separate from the binary
-classification task. The \gls{ood} samples are not treated as a third
-supervised class, and binary or multiclass accuracy is therefore not computed
-for this branch.
-
-Instead, the protocol characterizes how frequently \gls{ood} inputs are
-assigned to the known operational classes. The principal indicators include:
+The \gls{ood} evaluation remains conceptually separate from the binary task.
+Since \gls{ood} samples are not treated as a third supervised class, binary or
+multiclass accuracy is not computed for this branch. Instead, the protocol
+characterizes how frequently these inputs are assigned to the known
+operational classes through:
 
 \begin{itemize}
-\item the proportion of \gls{ood} inputs assigned to
-\texttt{weapon};
-
+\item the proportion of \gls{ood} inputs assigned to \texttt{weapon};
 \item the proportion of \gls{ood} inputs assigned to
 \texttt{non\_weapon};
-
 \item the mean maximum predicted-class probability for proxy models;
-
 \item the proportion of proxy-model predictions whose maximum probability
 exceeds a predefined high-confidence threshold;
-
-\item the proportion of unknown outputs, when such a state is exposed after
-normalization of black-box software outputs.
+\item the proportion of unknown outputs exposed after normalization of
+black-box software outputs.
 \end{itemize}
 
 The \gls{ood} weapon flag rate is defined as:
@@ -2180,40 +2143,31 @@ N_{\mathrm{OOD}}
 \end{equation}
 
 This measure describes the operational tendency of a system to map
-distributionally different inputs to the target class. It does not represent a
-conventional false-positive rate because the \gls{ood} inputs do not belong to
-the supervised negative class. It also does not, by itself, establish that an
-individual \gls{ood} assignment is semantically correct, incorrect, relevant,
-or irrelevant.
+distributionally different inputs to the target class. It is not a conventional
+false-positive rate because \gls{ood} inputs do not belong to the supervised
+negative class, nor does it establish that an individual assignment is
+semantically correct, incorrect, relevant, or irrelevant.
 
-Confidence-based \gls{ood} indicators are available only for the proxy models.
-They remain diagnostic intra-model quantities and are not compared as calibrated
-probabilities across architectures. The selected black-box software systems do
-not expose homogeneous confidence values suitable for equivalent analysis.
+Confidence-based \gls{ood} indicators are available only for proxy models.
+They remain diagnostic intra-model quantities because the selected black-box
+systems do not expose homogeneous confidence values suitable for an equivalent
+cross-system analysis.
 
-The evaluation of black-box software systems is based on normalized observable
-outputs. The common normalization framework distinguishes among positive
-detection, no target detection, and \texttt{unknown}. The
-\texttt{unknown} state includes missing, ambiguous, unsupported, unmapped, or
-otherwise non-interpretable outputs.
+Black-box evaluation is based on the normalized states defined in
+Section~\ref{sec:methodology-forensic-tools}: positive detection, no target
+detection, and \texttt{unknown}. Only matched records with interpretable
+positive or negative decisions contribute to the conventional binary confusion
+matrix; unknown outputs must not be forced into either class.
 
-Only matched records with interpretable positive or negative normalized
-decisions contribute to the conventional binary confusion matrix. An unknown
-output must not be forced into either the positive or negative class.
+For a \texttt{weapon} sample, an interpretable no-target decision constitutes a
+false negative. An unknown output may also contribute to a separately reported
+operational miss count under a documented risk-oriented rule, but it must not
+be recoded as a conventional false negative. For a
+\texttt{non\_weapon} sample, an interpretable target-related output constitutes
+a false positive, whereas an unknown output is not automatically treated as
+one because it does not represent an explicit target detection.
 
-For samples whose reference operational class is \texttt{weapon}, an
-interpretable no-target decision constitutes a false negative. In a separate
-risk-oriented analysis, an unknown output may also be counted as an operational
-miss because the target category was not surfaced. However, this supplementary
-count must remain distinct from the conventional false-negative rate, and the
-unknown outcomes must remain separately reportable.
-
-For samples whose reference operational class is \texttt{non\_weapon}, an
-interpretable target-related output constitutes a false positive. Unknown
-outputs are not automatically treated as false positives because they do not
-represent an explicit target detection.
-
-For the selected black-box software systems, the protocol therefore considers:
+For the selected black-box software systems, the protocol considers:
 
 \begin{itemize}
 \item matching rate between exported outputs and bundle inputs;
@@ -2230,7 +2184,7 @@ their computation;
 \end{itemize}
 
 The matching rate is a technical coverage measure rather than a classification
-metric. It records the proportion of submitted bundle inputs for which a
+metric. It represents the proportion of submitted bundle inputs for which a
 corresponding software output can be identified:
 
 \begin{equation}
@@ -2256,10 +2210,10 @@ N_{\mathrm{matched}}
 \end{equation}
 
 Unmatched inputs are represented through the matching rate and are not included
-again in the numerator of the unknown rate. These technical coverage measures
-are reported because incomplete matching or non-interpretable outputs may
-affect the apparent performance of a black-box software system. They must not
-be conflated with ordinary classification errors.
+again in the numerator of the unknown rate. These coverage measures are
+reported because incomplete matching and non-interpretable outputs may affect
+apparent black-box performance, but they must not be conflated with ordinary
+classification errors.
 
 Table~\ref{tab:methodology-evaluation-metrics} summarizes the metric categories
 adopted in the protocol.
@@ -2292,9 +2246,8 @@ on forensic prioritization and review workload. \\
 
 \gls{ood} behavior
 &
-Weapon flag rate, in-domain assignment distribution, and proxy-model
-confidence indicators. The branch remains excluded from binary classification
-metrics. \\
+Weapon flag rate, in-domain assignment distribution, and proxy-model confidence
+indicators. The branch remains excluded from binary classification metrics. \\
 
 Black-box software coverage
 &
@@ -2318,8 +2271,7 @@ negatives. \\
 \end{table}
 
 Figure~\ref{fig:methodology-metric-layers} summarizes the metric framework
-across the two complementary evaluation levels and the distinct binary,
-manipulated-input, \gls{ood}, and coverage analyses.
+across the proxy-model and black-box evaluation levels.
 
 \begin{figure}[H]
 \centering
@@ -2377,8 +2329,8 @@ draw=black!75
 \node[block] (inputs) at (0,0)
 {\shortstack{
 \textbf{Common evaluation inputs}\\[1mm]
-\scriptsize clean binary samples, manipulated artifacts, and clean
-\gls{ood} inputs
+\scriptsize clean binary samples, manipulated artifacts,\\
+\scriptsize and clean \gls{ood} inputs
 }};
 
 \node[eval] (proxy) at (-4.5,-2.7)
@@ -2435,11 +2387,20 @@ operational interpretation}
 \label{fig:methodology-metric-layers}
 \end{figure}
 
-The metrics do not replace human review or establish that a software system is
-reliable across all forensic scenarios. Their function is to identify the
-conditions under which automated support may fail to surface target-category
-content, increase the review workload, or produce unstable or operationally
-consequential outputs on manipulated or distributionally different inputs.
+These metrics do not replace human review or establish reliability across all
+forensic scenarios. Their purpose is to identify conditions in which automated
+support may fail to surface target-category content, increase review workload,
+or produce unstable outputs on manipulated or distributionally different
+inputs.
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
