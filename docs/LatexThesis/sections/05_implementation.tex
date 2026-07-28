@@ -2608,22 +2608,22 @@ Section~\ref{subsec:implementation-normalization}. The quantitative results
 obtained from the normalized Magnet AXIOM output are reported in
 Section~\ref{subsec:results-magnet}.
 
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Magnet Griffeye and T3K CORE}
 \label{subsec:implementation-griffeye}
 % ─────────────────────────────────────────────────────────────────────────────
 
-\gls{griffeye} was evaluated together with the \gls{t3kcore} semantic-analysis
-module as a black-box forensic media-triage system. The experimental procedure
-relied exclusively on automatically generated semantic bookmarks observable in
-the software export. No manual bookmark addition, removal, correction, or
-reassignment was permitted during the frozen evaluation.
+\gls{griffeye} was evaluated together with the \gls{t3kcore}
+semantic-analysis module as a black-box forensic media-triage and
+semantic-bookmarking system. The experimental procedure relied exclusively on
+automatically generated semantic bookmarks observable in the software export.
+No manual bookmark addition, removal, correction, or reassignment was permitted
+during the frozen evaluation.
 
 The internal architecture, training data, feature representations, model
 parameters, category thresholds, and confidence-calibration procedures of
 \gls{t3kcore} were not accessible. The system was therefore evaluated through
-the operational decisions derived from the exported bookmark field rather than
+operational decisions derived from the exported bookmark field rather than
 through assumptions concerning its internal model behavior.
 
 The frozen software and case configuration is reported in
@@ -2668,7 +2668,7 @@ Imported directory
 
 Imported bundle files
 &
-11\,500 \\
+11\,500 neutrally identified images \\
 
 Analysis functionality
 &
@@ -2700,59 +2700,52 @@ post-import processing}
 \label{fig:implementation-griffeye-t3kcore-setup}
 \end{figure}
 
-Only the blind input directory was supplied to the platform. The metadata
-directory and the structured audit view were excluded from the case input.
-Consequently, the system received anonymized file names of the form
-\texttt{bundle\_XXXXXX}, without receiving reference operational assignments,
-perturbation families, perturbation names, fold identifiers, source datasets,
-proxy-model information, or explicit \gls{ood} indicators through the imported
-paths or file names.
+Only the blind input directory was supplied to the platform. The bundle
+metadata and structured audit view were excluded from the case input.
+Consequently, the system received neutrally identified files named according
+to the \texttt{bundle\_XXXXXX} convention, without reference operational
+assignments, perturbation families, perturbation names, fold identifiers,
+source datasets, proxy-model information, or explicit \gls{ood} indicators in
+the imported paths or file names.
 
 This blind-input design concealed experiment-specific descriptors encoded in
-the bundle structure. It did not conceal the visual content of the images or
-perturbation effects that were directly perceptible from the inputs.
+the bundle hierarchy. It did not conceal image content, visually perceptible
+perturbation effects, or information potentially embedded within the image
+files.
 
-After media ingestion, \gls{t3kcore} was used to generate semantic bookmarks
-automatically. The exported \texttt{Bookmarks} field could contain one or more
-hierarchical labels assigned by the module. The primary operational mapping
+After media ingestion, \gls{t3kcore} automatically generated semantic
+bookmarks. The exported \texttt{Bookmarks} field could contain one or more
+hierarchical labels assigned by the module. The primary operational rule
 adopted in this thesis was deliberately restricted to the firearm-specific
 bookmark:
 
-\begin{equation}
-\texttt{CORE/Violence/Firearm}
-\longrightarrow
-\texttt{weapon\_detected = true}.
-\end{equation}
+\[
+\texttt{weapon\_detected}
+=
+\begin{cases}
+\texttt{true},
+&
+\text{if \texttt{CORE/Violence/Firearm} is present},
+\\
+\texttt{false},
+&
+\text{otherwise}.
+\end{cases}
+\]
 
-When this bookmark was absent, the software-specific primary decision was:
-
-\begin{equation}
-\texttt{CORE/Violence/Firearm absent}
-\longrightarrow
-\texttt{weapon\_detected = false}.
-\end{equation}
-
-The corresponding common normalized states were:
-
-\begin{equation}
-\texttt{weapon\_detected = true}
-\longrightarrow
-\texttt{weapon},
-\end{equation}
-
-\begin{equation}
-\texttt{weapon\_detected = false}
-\longrightarrow
+Within the common normalized output space,
+\texttt{weapon\_detected = true} is mapped to \texttt{weapon}, whereas
+\texttt{weapon\_detected = false} is mapped to
 \texttt{non\_weapon}.
-\end{equation}
 
 This mapping aligns an observable software output with the firearm-oriented
 binary task defined by the experimental protocol. It does not imply that the
 \texttt{Firearm} bookmark corresponds to a calibrated probability, a known
-internal threshold, or the complete semantic representation produced by
-\gls{t3kcore}.
+internal threshold, or the complete semantic representation generated by
+\gls{t3kcore}. No numerical confidence value suitable for comparison with
+proxy-model probabilities was exposed through the adopted export.
 
-Several additional weapon-related bookmarks were preserved as secondary
+The following automatically generated bookmarks were preserved as secondary
 semantic indicators:
 
 \begin{itemize}
@@ -2763,60 +2756,49 @@ semantic indicators:
 \end{itemize}
 
 These bookmarks were intentionally excluded from the primary binary mapping.
-The target category of the study concerns firearm-oriented imagery, and
-combining firearm, bladed-weapon, explosive-weapon, archery, and general
-military categories into a single positive decision would alter the operational
-task. The secondary bookmarks were therefore retained in the normalized
-records for audit and qualitative analysis without contributing to the primary
-firearm-detection metrics.
+The positive operational class used in this study concerns firearm-oriented
+imagery. Combining firearm, bladed-weapon, explosive-weapon, archery, and
+general military categories into a single positive state would alter the
+experimental task. The secondary bookmarks were therefore retained for audit
+and qualitative analysis without contributing to the primary firearm-detection
+metrics.
 
-The complete CSV export contained 12\,053 rows. A Griffeye case export may
+The complete CSV export contained 12\,053 rows. Griffeye case exports may
 include records that do not correspond to images in the blind input corpus,
-including evidence-workflow artifacts, unallocated-space entries, and
-file-system or system-generated records. Such rows were excluded before
-prediction matching.
+such as evidence-workflow artifacts, unallocated-space entries, and
+system-generated or file-system records.
 
-The normalization implementation retained only records containing an
-identifier consistent with the blind bundle naming convention:
+Before matching, the normalization implementation retained only records
+containing an identifier consistent with the
+\texttt{bundle\_XXXXXX} naming convention. Records associated with known
+non-bundle artifacts, including unallocated-space and system-file entries, were
+excluded before hash- or file-name-based matching. Applying this filter before
+matching prevents an unrelated case record from being associated with a
+genuine bundle item through an incidental hash or path value.
 
-\begin{center}
-\texttt{bundle\_XXXXXX}
-\end{center}
-
-Records associated with known non-bundle evidence artifacts, including
-unallocated-space and system-file entries, were rejected before hash- or
-file-name-based matching. This preliminary filtering prevents a non-bundle
-export record from being incorrectly associated with a genuine bundle item
-through an incidental hash or path value.
-
-A total of 553 non-bundle rows were excluded through this procedure. The
-remaining 11\,500 records were matched to the complete forensic evaluation
-bundle, and no bundle item remained without an observable exported decision
-state. This complete coverage establishes the availability of a matched output
-for every bundle item but does not establish the correctness of the resulting
+This preliminary procedure excluded 553 non-bundle rows. The remaining
+11\,500 records were associated with the complete forensic evaluation bundle,
+and no bundle item remained without an observable exported decision state.
+Complete coverage establishes the availability of a matched output for every
+bundle item but does not establish the correctness of the corresponding
 semantic decisions.
 
-The matching procedure used the common normalization indexes constructed from:
-
-\begin{center}
+The matching procedure used the indexes constructed from
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
-\end{center}
-
-and:
-
-\begin{center}
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}
-\end{center}
-
+and
+\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}.
 When available, \gls{sha256} was used as the primary matching identifier,
-followed by \gls{md5} and the anonymized input file name. The normalized row
-retains the matching method together with the bundle identifier, reference
-operational assignment, sample type, perturbation condition, fold, original
-image identifier, and generated image identifier.
+followed by \gls{md5} and the neutral bundle file name. The implementation
+could also recover a bundle identifier embedded within an exported path or text
+field when an exact filename field was not directly available.
+
+Each normalized record preserves the matching method, bundle identifier,
+reference operational assignment, sample type, perturbation condition, fold,
+source dataset, original image identifier, and generated image identifier.
 
 Only the automatically generated \texttt{Bookmarks} field was used to derive
-the prediction. Other case-management fields, manually assigned categories, or
-descriptive columns were not treated as model outputs. This restriction
+the prediction. Other case-management fields, manually assigned categories,
+and descriptive columns were not treated as model outputs. This restriction
 prevents analyst-generated annotations from being conflated with the observable
 behavior of \gls{t3kcore}.
 
@@ -2824,33 +2806,29 @@ The original Griffeye export contained additional information not required for
 the firearm-bookmark analysis, including multiple cryptographic hashes,
 PhotoDNA-related values, file paths, timestamps, EXIF-derived fields,
 face-detection information, case-management attributes, file-system records,
-and content-related forensic columns. The complete raw export was consequently
-retained as a controlled-access record rather than distributed through the
-public repository.
+and other forensic columns. The complete raw export was therefore retained as
+a controlled-access artifact and excluded from the public repository. Its
+expected local location is
+\codepath{forensic_tools/griffeye/raw_exports/FAIRLAB_GRIFFEYE_T3_RUN_01/}.
 
-Its expected local location is:
-
-\begin{center}
-\codepath{forensic_tools/griffeye/raw_exports/FAIRLAB_GRIFFEYE_T3_RUN_01/}
-\end{center}
-
-The public repository instead retains a sanitized extract containing the
-anonymized bundle identifiers, the primary firearm bookmark, selected secondary
-weapon-related bookmarks, and the corresponding normalized decision fields:
-
-\begin{center}
-\codepath{forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv}
-\end{center}
+The public repository retains the sanitized prediction extract
+\codepath{forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv}.
+It contains the neutral bundle identifiers, the primary firearm bookmark,
+selected secondary weapon-related bookmarks, and the corresponding normalized
+decision fields for all 11\,500 bundle items.
 
 The run registry, software-version log, export audit, normalized prediction
-table, and metric outputs provide the remaining documentation required to
-inspect the adopted mapping and verify the correspondence between the
-controlled raw export and the sanitized decision representation.
+table, public-extract validation, and metric artifacts provide the remaining
+records required to inspect the adopted mapping and verify the equivalence
+between the controlled raw export and the sanitized public representation.
 
 The common normalization and output-matching implementation is described in
-Section~\ref{subsec:implementation-normalization}, whereas the experimental
-behavior observed for \gls{griffeye} and \gls{t3kcore} is reported in
+Section~\ref{subsec:implementation-normalization}. The experimental behavior
+observed for \gls{griffeye} and \gls{t3kcore} is reported in
 Section~\ref{subsec:results-griffeye}.
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Excire Foto 2025}
