@@ -1,121 +1,74 @@
-
 % ─────────────────────────────────────────────────────────────────────────────
 \chapter{Methodology}
 \label{chap:methodology}
 % ─────────────────────────────────────────────────────────────────────────────
 
-This chapter presents the methodology adopted to evaluate the operational
+This chapter defines the methodology adopted to evaluate the operational
 robustness of \gls{ai}-based tools for automated image classification in
-forensic contexts. The methodology addresses the gap identified in
-Chapter~\ref{chap:state-of-the-art}, namely the limited availability of
-reproducible evaluation protocols that combine controlled experimental
+forensic contexts. It addresses the gap identified in
+Chapter~\ref{chap:state-of-the-art} by formalizing the \gls{fairlab} framework
+as a reproducible and auditable protocol that combines controlled experimental
 conditions with operationally relevant forensic scenarios.
 
-Rather than describing a specific software implementation, the chapter
-formalizes a general experimental protocol that can be adapted to different
-datasets, classification architectures, storage formats, and software tools.
-The protocol integrates dataset construction, human validation, controlled
-classification experiments, adversarial attacks, anti-forensic transformations,
-black-box software evaluation, quantitative metrics, explainability, and
-traceability within the \gls{fairlab} framework.
-
-A central methodological principle of the thesis is the use of a common frozen
-experimental corpus across two complementary evaluation levels. The first level
-uses fully inspectable experimental reference models, hereafter referred to as
-proxy models. The second level applies the same experimental samples and
-derived artifacts to selected \gls{ai}-based software systems evaluated under
-black-box or near-black-box access conditions. This parallel design supports a
-structured comparison between experimentally controlled model behavior and the
-observable operational behavior of the selected software systems, without
-assuming access to their internal architectures or decision processes.
-
-The chapter first introduces the overall \gls{fairlab} framework and the
-experimental assumptions underlying the case study. It then describes the
-general procedures for dataset construction, human-in-the-loop validation,
-dataset freezing, data partitioning, and separate \gls{ood} evaluation. The
-subsequent sections define the proxy-model evaluation paradigm, the rationale
-for adversarial and anti-forensic testing, the black-box evaluation protocol,
-the adopted metrics, the explainability strategy, and the principles governing
-traceability and reproducibility.
-
-Implementation-specific choices, including concrete data structures, scripts,
-model architectures, parameter values, software versions, and tool
-configurations, are reported in Chapter~\ref{chap:implementation}.
-Quantitative outcomes and their interpretation are presented separately in
-Chapter~\ref{chap:results}.
-
+The chapter presents the overall framework and research assumptions, followed
+by the procedures for dataset construction, human-in-the-loop validation,
+dataset freezing and partitioning, proxy-model and black-box software
+evaluation, perturbation testing, metric computation, explainability, and
+traceability. Implementation-specific data structures, scripts, architectures,
+parameters, software versions, and configurations are documented in
+Chapter~\ref{chap:implementation}; quantitative outcomes and their
+interpretation are reported in Chapter~\ref{chap:results}.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Overview of the FAIRLab Methodology}
 \label{sec:methodology-fairlab-overview}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The methodology is organized around the \gls{fairlab} experimental protocol,
-which provides a structured framework for evaluating the robustness of
-automated image-classification systems under clean, out-of-distribution,
-adversarial, and anti-forensic conditions. Its purpose is to make the evaluation
-process reproducible and auditable while remaining sufficiently general to
-accommodate different datasets, classification models, software systems, and
-implementation technologies.
+The \gls{fairlab} protocol provides a structured framework for evaluating
+automated image-classification systems under clean, \gls{ood}, adversarial,
+and anti-forensic conditions. Its scope extends beyond clean classification
+accuracy because automated outputs may affect evidence prioritization and the
+allocation of human analytical resources. Operational robustness is therefore
+examined in relation to missed relevant content, additional review workload,
+and unstable behavior on inputs that differ from the expected operational
+distribution.
 
-The protocol extends beyond a conventional assessment of classification
-accuracy. In forensic workflows, automated classification may influence the
-prioritization of digital evidence and the allocation of human analytical
-resources. Robustness must therefore be assessed not only as a technical
-property of a classifier, but also in terms of its potential operational
-consequences. These include the risk of overlooking relevant content,
-increasing the analytical workload through false positives, or assigning
-confident in-domain labels to out-of-distribution inputs.
-
-The \gls{fairlab} protocol integrates two complementary evaluation levels. The
-first is a controlled evaluation based on the proxy classification models
-formalized in Section~\ref{sec:methodology-models-classification}. These fully
-inspectable models provide a reproducible experimental reference without being
-treated as replicas or functionally equivalent substitutes for proprietary
-systems.
-
-The second level consists of the operational evaluation of selected
+The protocol integrates two complementary evaluation levels. The first uses
+fully inspectable proxy classification models as controlled experimental
+references; these models are not treated as replicas or functionally equivalent
+substitutes for proprietary systems. The second evaluates selected
 \gls{ai}-based software systems under black-box or near-black-box access
-conditions. At this level, the systems are assessed exclusively through their
-observable inputs and outputs. No assumptions are made regarding their internal
-model architectures, training data, confidence calibration, or decision logic.
-This distinction is particularly relevant for proprietary systems whose
-internal components are only partially documented or are not accessible to the
-evaluator \cite{sanna2024preliminary,sanna2025pixelperfect}.
+conditions, using only their observable inputs and outputs and making no
+assumptions about inaccessible architectures, training data, calibration
+procedures, or decision logic
+\cite{sanna2024preliminary,sanna2025pixelperfect}.
 
-Both evaluation levels rely on the same frozen experimental corpus. This shared
-foundation ensures that differences between the controlled models and the
-selected black-box software systems are not caused by inconsistencies in the
-evaluated data. The corpus includes a binary in-domain component used for clean
-and perturbed evaluation, together with a separate \gls{ood} branch. The latter
-is not treated as a third supervised class. Instead, it is used to examine
-whether out-of-distribution, borderline, synthetic, or otherwise
-distributionally different inputs are assigned to the operational classes of
-the binary task.
+Both levels rely on the same frozen experimental corpus. Its binary in-domain
+component supports clean and perturbed evaluation, whereas a separate clean
+\gls{ood} branch is evaluated outside model training and perturbation
+generation, as detailed in
+Section~\ref{sec:methodology-split-generation}. The clean binary samples,
+clean \gls{ood} inputs, adversarial artifacts, and anti-forensic artifacts are
+combined into a common evaluation bundle, enabling comparison under aligned
+experimental conditions.
 
-Adversarial attacks and anti-forensic transformations are applied only to the
-binary evaluation component. The clean \gls{ood} branch is preserved separately
-so that distributional mismatch is not conflated with deliberate or incidental
-input manipulation. The resulting clean samples, clean \gls{ood} inputs,
-adversarial artifacts, and anti-forensic artifacts form a common evaluation
-bundle. This bundle supports both the controlled analysis of the proxy
-classification models and the operational analysis of the selected black-box
-software systems.
+Quantitative metrics characterize classification performance, robustness
+degradation, error direction, and \gls{ood} behavior. Explainability provides
+qualitative diagnostic evidence for selected cases involving an inspectable
+proxy model and is not extended to the selected black-box systems.
+Traceability controls preserve the relationships among source samples, derived
+artifacts, experimental conditions, observable outputs, and reported results.
 
-The protocol also incorporates quantitative evaluation, explainability, and
-traceability. Quantitative metrics characterize classification performance and
-robustness degradation. Explainability methods support the qualitative
-examination of representative decisions and failure cases for a selected
-inspectable proxy model; they are not extended to the selected black-box
-software systems. Traceability controls preserve the relationships among source
-samples, derived artifacts, experimental conditions, and observed outputs.
+The protocol specifies the methodological requirements and information that
+must be preserved without prescribing particular model architectures, software
+products, file formats, directory structures, databases, hashing algorithms,
+or explainability techniques. These choices belong to the concrete
+implementation documented in Chapter~\ref{chap:implementation}.
+Figure~\ref{fig:methodology-fairlab-overview} summarizes the resulting
+workflow.
 
-Figure~\ref{fig:methodology-fairlab-overview} summarizes the resulting workflow.
-It shows the construction and validation of the frozen dataset, the separation
-between the binary and \gls{ood} branches, the generation of perturbations, and
-the two complementary evaluation levels. Implementation-specific quantities,
-architectures, and software configurations are intentionally omitted because
-they represent one concrete instantiation of the general methodology.
+
+
 
 \begin{figure}[H]
 \centering
@@ -295,6 +248,7 @@ the resulting common bundle is evaluated through complementary proxy-model and
 black-box software analyses}
 \label{fig:methodology-fairlab-overview}
 \end{figure}
+
 
 
 
