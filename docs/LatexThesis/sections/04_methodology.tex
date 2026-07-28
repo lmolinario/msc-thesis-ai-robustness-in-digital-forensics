@@ -622,52 +622,51 @@ or pre-existing annotations}
 \label{fig:methodology-dataset-source-consolidation}
 \end{figure}
 
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Review Documentation and Semantic Decision Records}
 \label{sec:methodology-review-manifest}
 % ─────────────────────────────────────────────────────────────────────────────
 
 Following technical validation, each candidate sample is associated with a
-structured review record. This record establishes the connection between the
-technical preparation of the candidate pool and the subsequent
-human-in-the-loop semantic assessment.
+structured review record that connects its technical preparation to the
+subsequent human-in-the-loop semantic assessment. The record must preserve two
+distinct categories of information: sample identity, provenance, technical
+validity, and integrity information; and the semantic decision produced during
+manual review, including review status, operational assignment, exclusion
+disposition, explanatory notes, and any information required to document
+ambiguous or \gls{ood} cases.
 
-The review documentation must preserve two distinct categories of information.
-The first concerns sample identity, provenance, and technical validity. The
-second concerns the semantic decisions produced during manual review, including
-the review status, operational assignment, exclusion disposition, reviewer
-notes, and any information required to document ambiguous or \gls{ood} cases.
+Regardless of its technical representation, the review record must maintain a
+stable association among the candidate sample, its provenance, the documented
+semantic decision, and any experimental artifact subsequently derived from it.
+This association enables the decision process and the transition from the
+candidate pool to the frozen experimental dataset to be reconstructed.
 
-The methodology does not prescribe a specific representation for these records.
-They may be implemented through tabular files, structured documents, relational
-databases, or proprietary data-management systems. Regardless of the adopted
-technology, the representation must provide a stable association among each
-sample, its provenance, the corresponding review decision, and any subsequent
-experimental artifact derived from it.
-
-Any auxiliary labels inherited from the source material or generated through
-automated preprocessing may be retained as contextual information. However,
-they must not replace the explicit semantic judgment produced during
-human-in-the-loop review. The final operational assignment is determined
-exclusively according to the criteria defined in
+Labels inherited from source material or generated through automated
+preprocessing may be retained as contextual information, but they must not
+replace the explicit semantic judgment produced during human-in-the-loop
+review. Final operational assignments are determined exclusively according to
+the criteria defined in
 Section~\ref{sec:methodology-research-design}.
 
-Maintaining review information separately from purely technical validation
-records preserves the distinction between file suitability and semantic
-relevance. A technically valid image may still be unsuitable for either class
-of the binary task. Conversely, an ambiguous or borderline image may be
-methodologically valuable within the separate \gls{ood} evaluation branch.
+The separation between technical-validation information and semantic decision
+records preserves the distinction between file suitability and relevance to
+the experimental task. The resulting documentation supports the consistent
+application of the assignment criteria, preserves the rationale for inclusion,
+exclusion, and class-assignment decisions, and provides the traceability
+required for the review and dataset-freezing procedure described in
+Section~\ref{sec:methodology-human-review}.
 
-The resulting review documentation therefore serves three purposes. First, it
-supports the consistent application of the operational assignment criteria.
-Second, it preserves the rationale underlying inclusion, exclusion, and
-class-assignment decisions. Third, it provides the traceability required to
-reconstruct the transition from the initial candidate pool to the frozen
-experimental dataset.
+
+
+
+
+
+
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Human-in-the-Loop Review and Final Dataset Freezing}
