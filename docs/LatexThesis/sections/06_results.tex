@@ -1247,69 +1247,107 @@ human verification, traceable processing, explicit knowledge of the evaluated
 threat model, and awareness that robustness conclusions are bounded to the
 tested architectures, perturbations, parameters, and access assumptions.
 
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Black-Box Software Results}
 \label{sec:results-commercial}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The implementation-specific configurations, observable fields, output mappings,
-and normalization procedures adopted for the selected software systems are
-documented in Section~\ref{sec:implementation-forensic-tools}. The present
-section reports only the resulting normalized behavior.
+The implementation-specific configurations, observable output fields,
+operational mappings, and normalization procedures adopted for the selected
+black-box software systems are documented in
+Section~\ref{sec:implementation-forensic-tools}. The present section reports
+the resulting normalized behavior without making assumptions about inaccessible
+internal architectures, training data, thresholds, or confidence-calibration
+procedures.
 
-The analysis comprises four software families and six normalized
-configurations: \gls{magnetaxiomtool}/\gls{magnetai},
-\gls{griffeye}/\gls{t3kcore}, \gls{excirefoto2025} under the
-\texttt{D20}, \texttt{D50}, and \texttt{D80} settings, and
-\gls{cellebriteinseyets}. Every configuration produced one valid normalized
-decision state for each of the 11\,500 bundle items. Therefore, no bundle item remained without a matched
-normalized output, although non-bundle rows present in some raw
-exports were excluded during normalization as documented in
+The analysis comprises four software families and six normalized operational
+configurations:
+
+\begin{itemize}
+\item \gls{magnetaxiomtool}/\gls{magnetai};
+\item \gls{griffeye}/\gls{t3kcore};
+\item \gls{excirefoto2025} under the \texttt{D20}, \texttt{D50}, and
+\texttt{D80} semantic-distance settings;
+\item \gls{cellebriteinseyets}.
+\end{itemize}
+
+Each configuration produced one normalized decision for every item in the
+11\,500-file forensic evaluation bundle. The complete black-box population
+therefore contains:
+
+\begin{equation}
+6\ \text{normalized configurations}
+\times
+11\,500\ \text{bundle items}
+=
+69\,000\ \text{matched decisions}.
+\end{equation}
+
+No bundle item remained without a matched normalized decision, and the
+canonical public population contains no \texttt{unknown} outputs. Non-bundle
+records present in some controlled raw exports were excluded during
+normalization, as described in
 Section~\ref{subsec:implementation-normalization}.
 
+The 11\,500 matched decisions associated with each configuration comprise two
+analytically distinct populations:
+
+\begin{itemize}
+\item 11\,000 binary items with a reference operational assignment of
+\texttt{weapon} or \texttt{non\_weapon};
+
+\item 500 \gls{ood} inputs, analyzed separately through their observable
+weapon assignment rate.
+\end{itemize}
+
+Accuracy, balanced accuracy, precision, recall, \gls{fnr}, and \gls{fpr} are
+computed only on the 11\,000 interpretable binary items. The \gls{ood} inputs
+are excluded from those metrics because they have no binary reference
+assignment.
+
+The binary aggregate is itself bundle-weighted rather than
+condition-balanced. It contains 1\,000 clean inputs and 10\,000 perturbed
+artifacts:
+
+\begin{equation}
+N_{\mathrm{binary}}
+=
+1\,000\ \text{clean inputs}
++
+5\,000\ \text{adversarial artifacts}
++
+5\,000\ \text{anti-forensic artifacts}
+=
+11\,000.
+\end{equation}
+
+Consequently, the bundle-level metrics are influenced primarily by behavior on
+the perturbed population. They must not be interpreted as the arithmetic mean
+of clean, adversarial, and anti-forensic performance, nor as estimates of the
+frequency with which these conditions would occur in an operational case.
+
 The four model-dependent adversarial conditions were generated against
-fold-aware EfficientNet-B0 checkpoints, whereas \gls{colorshift} was applied
-as a model-agnostic condition. Evaluation of the model-dependent variants
-through the selected black-box software systems therefore constitutes a
-transfer assessment. The \gls{colorshift} variants instead provide a
-model-agnostic comparison condition. Neither evaluation constitutes a
-white-box attack against the selected software systems.
+fold-specific EfficientNet-B0 checkpoints. Their evaluation through the
+selected black-box software systems therefore constitutes an empirical transfer
+assessment. It does not constitute a white-box attack against any commercial
+system. \gls{colorshift} instead provides a deterministic model-agnostic
+comparison condition.
 
-The aggregate values are bundle-weighted because the binary population contains
-1\,000 clean binary inputs and 10\,000 perturbed artifacts. They describe
-observable
-behavior under the defined protocol and must not be interpreted as absolute
-system-quality estimates or as a general ranking among heterogeneous software
-systems.
-
-Table~\ref{tab:results-commercial-overview} reports the resulting summary for
-the six normalized configurations. The three
-\gls{excirefoto2025} rows are retained separately because the distance setting
-substantially changes the operational balance between missed detections and
-false positive workload.
+Table~\ref{tab:results-commercial-overview} summarizes the normalized results
+for the six configurations.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{2.6pt}
-\caption{Bundle-weighted summary of the black-box evaluation of selected software systems}
+\caption{Bundle-weighted summary of the selected black-box software
+configurations}
 \label{tab:results-commercial-overview}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{@{}l r r r r r r r r@{}}
 \toprule
-\textbf{System} &
+\textbf{Configuration} &
 \textbf{Matched} &
 \textbf{Clean \acrshort{fnr}} &
 \textbf{Bundle Acc.} &
@@ -1319,23 +1357,66 @@ false positive workload.
 \textbf{Bundle \acrshort{fpr}} &
 \textbf{\acrshort{ood} W-rate} \\
 \midrule
+
 \gls{magnetaxiomtool}/\gls{magnetai}
-& 11\,500 & 0.070 & 0.933 & 0.933 & 0.901 & 0.099 & 0.035 & 0.360 \\
+& 11\,500
+& 0.070
+& 0.933
+& 0.933
+& 0.901
+& 0.099
+& 0.035
+& 0.360 \\
 
 \gls{griffeye}/\gls{t3kcore}
-& 11\,500 & 0.036 & 0.972 & 0.972 & 0.951 & 0.049 & 0.007 & 0.260 \\
+& 11\,500
+& 0.036
+& 0.972
+& 0.972
+& 0.951
+& 0.049
+& 0.007
+& 0.260 \\
 
 \gls{excirefoto2025} \texttt{D20}
-& 11\,500 & 0.120 & 0.911 & 0.911 & 0.857 & 0.143 & 0.036 & 0.238 \\
+& 11\,500
+& 0.120
+& 0.911
+& 0.911
+& 0.857
+& 0.143
+& 0.036
+& 0.238 \\
 
 \gls{excirefoto2025} \texttt{D50}
-& 11\,500 & 0.042 & 0.925 & 0.925 & 0.949 & 0.051 & 0.099 & 0.340 \\
+& 11\,500
+& 0.042
+& 0.925
+& 0.925
+& 0.949
+& 0.051
+& 0.099
+& 0.340 \\
 
 \gls{excirefoto2025} \texttt{D80}
-& 11\,500 & 0.014 & 0.887 & 0.887 & 0.981 & 0.019 & 0.207 & 0.522 \\
+& 11\,500
+& 0.014
+& 0.887
+& 0.887
+& 0.981
+& 0.019
+& 0.207
+& 0.522 \\
 
 \gls{cellebriteinseyets}
-& 11\,500 & 0.032 & 0.958 & 0.958 & 0.958 & 0.042 & 0.042 & 0.292 \\
+& 11\,500
+& 0.032
+& 0.958
+& 0.958
+& 0.958
+& 0.042
+& 0.042
+& 0.292 \\
 
 \bottomrule
 \end{tabular}%
@@ -1343,52 +1424,115 @@ false positive workload.
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} \textit{Matched} indicates the number of files in the forensic
-evaluation bundle mapped to a normalized output. \textit{Clean \acrshort{fnr}} indicates
-the false negative rate observed on the unperturbed baseline. \textit{Bundle
-Acc.} and \textit{Bundle Bal.} indicate accuracy and balanced accuracy on the
-complete 11\,000-item binary bundle; \textit{Bundle} \(R_w\) indicates recall
-for the \texttt{weapon} class. Bundle \gls{fnr} and bundle \gls{fpr} indicate
-the false negative rate and false positive rate computed on the interpretable
-binary bundle, including clean, adversarial, and anti-forensic samples and
-excluding \gls{ood} samples. \textit{\acrshort{ood} W-rate} indicates the proportion of
-\gls{ood} samples operationally mapped to the \texttt{weapon} class. The values
-are bundle-weighted and reflect the experimental composition of the bundle,
-not a general validation of the selected software systems.
+\textit{Note.} \textit{Matched} indicates the complete 11\,500-item bundle
+population associated with each normalized configuration. Clean
+\acrshort{fnr} is computed on the 1\,000 unperturbed binary inputs. Bundle
+accuracy, balanced accuracy, weapon recall, \acrshort{fnr}, and \acrshort{fpr}
+are computed on the 11\,000-item binary population, comprising clean,
+adversarial, and anti-forensic samples and excluding \gls{ood} inputs.
+\textit{\acrshort{ood} W-rate} indicates the proportion of the 500
+\gls{ood} inputs assigned to \texttt{weapon}. The bundle-level values reflect
+the frozen experimental composition and do not constitute general validation
+or an absolute ranking of the selected software systems.
 \end{table}
+
+Figure~\ref{fig:results-forensic-tools-global-comparison} visualizes the same
+bundle-weighted metrics.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=1\textwidth]{images/fig_forensic_tools_global_metrics_comparison.pdf}
-\caption{Bundle-weighted normalized metrics of the selected black-box software configurations}
+\includegraphics[width=\textwidth]
+{images/fig_forensic_tools_global_metrics_comparison.pdf}
+\caption{Bundle-weighted normalized metrics of the selected black-box software
+configurations}
 \label{fig:results-forensic-tools-global-comparison}
 \end{figure}
 
-Table~\ref{tab:results-commercial-overview} and
-Figure~\ref{fig:results-forensic-tools-global-comparison} must be interpreted
-with caution. The metrics describe the behavior observed after output
-normalization in the operational \texttt{weapon}/\texttt{non\_weapon} task,
-not the internal accuracy of the selected software systems in an absolute
-sense. The
-three \gls{excirefoto2025} configurations show the clearest threshold-dependent
-trade-off: \texttt{D20} limits false positives and \gls{ood} flags but increases
-missed detections, whereas \texttt{D80} maximizes recall while markedly
-increasing operational noise. \texttt{D50} provides the intermediate reference
-used in the comparative analysis.
+The aggregate comparison identifies distinct operational profiles, but it must
+not be interpreted as a direct ranking of intrinsic system quality. The
+evaluated software systems differ in intended use, internal taxonomy,
+observable output semantics, configuration, and decision mechanism.
+Furthermore, the binary bundle contains repeated manipulated versions derived
+from the same 1\,000 source images rather than 11\,000 independent real-world
+cases.
+
+Within the frozen protocol, \gls{griffeye}/\gls{t3kcore} exhibits the highest
+bundle-level accuracy, at 0.972, and the lowest \gls{fpr}, at 0.007. Its
+weapon recall is 0.951, corresponding to a bundle \gls{fnr} of 0.049.
+
+\gls{cellebriteinseyets} presents a comparatively balanced profile. Its bundle
+accuracy is 0.958, weapon recall is 0.958, \gls{fnr} is 0.042, and
+\gls{fpr} is 0.042.
+
+\gls{magnetaxiomtool}/\gls{magnetai} achieves a bundle accuracy of 0.933 and
+an \gls{fpr} of 0.035. Its weapon recall is lower, at 0.901, corresponding to
+a bundle \gls{fnr} of 0.099. Its clean \gls{fnr}, at 0.070, is lower than the
+bundle-weighted value, indicating a larger missed-target proportion across the
+combined perturbed population.
+
+The three \gls{excirefoto2025} configurations expose the clearest
+configuration-dependent tradeoff. At \texttt{D20}, the system produces a
+relatively low \gls{fpr} of 0.036 and the lowest \gls{ood} weapon assignment
+rate, at 0.238, but its weapon recall is 0.857 and its \gls{fnr} is 0.143.
+
+At \texttt{D50}, weapon recall increases to 0.949 and the \gls{fnr} decreases
+to 0.051. This improvement is accompanied by an \gls{fpr} of 0.099 and an
+\gls{ood} weapon assignment rate of 0.340.
+
+At \texttt{D80}, weapon recall reaches 0.981 and the \gls{fnr} decreases to
+0.019, the lowest among the six configurations. However, the \gls{fpr}
+increases to 0.207, and the \gls{ood} weapon assignment rate reaches 0.522.
+The broader retrieval setting therefore minimizes missed firearm-oriented
+content at the cost of a substantially larger false-positive review burden.
+
+The Excire results demonstrate why a configuration with lower \gls{fnr} is not
+automatically preferable in every operational context. Increasing retrieval
+coverage can reduce missed detections while simultaneously increasing the
+quantity of \texttt{non\_weapon} and \gls{ood} material routed to the
+firearm-oriented review category.
+
+Figure~\ref{fig:results-forensic-tools-ood-weapon-flag-rate} reports the
+observable weapon assignment rate on the separate \gls{ood} branch.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.90\textwidth]{images/fig_forensic_tools_ood_weapon_flag_rate.pdf}
-\caption{Weapon flag rate of the selected black-box software systems on
-\gls{ood} samples}
+\includegraphics[width=0.90\textwidth]
+{images/fig_forensic_tools_ood_weapon_flag_rate.pdf}
+\caption{Weapon assignment rate of the selected black-box software
+configurations on \gls{ood} inputs}
 \label{fig:results-forensic-tools-ood-weapon-flag-rate}
 \end{figure}
 
-Figure~\ref{fig:results-forensic-tools-ood-weapon-flag-rate} shows that every
-selected configuration maps a non-zero proportion of \gls{ood} inputs to the
-operational \texttt{weapon} class. These outputs are not binary errors, but they
-may increase human-review workload or affect prioritization of content outside
-the nominal binary task.
+Every configuration assigns a non-zero proportion of the 500 \gls{ood} inputs
+to the operational \texttt{weapon} class. These assignments are not false
+positives in the supervised binary sense because the \gls{ood} inputs have no
+\texttt{weapon} or \texttt{non\_weapon} reference assignment.
+
+Nevertheless, the assignments remain operationally relevant. They may increase
+the amount of unrelated material prioritized for analyst review and may alter
+the ordering of content outside the nominal binary task. The lowest observed
+rate is 0.238 for Excire \texttt{D20}, whereas the highest is 0.522 for
+Excire \texttt{D80}. The other configurations fall between these values:
+0.260 for Griffeye/T3K CORE, 0.292 for Cellebrite Inseyets, 0.340 for Excire
+\texttt{D50}, and 0.360 for Magnet AXIOM/Magnet.AI.
+
+The overview therefore identifies no single configuration that simultaneously
+minimizes false negatives, false positives, and \gls{ood} weapon assignments.
+The selected systems expose different tradeoffs between missed-target risk and
+human-review workload. Their operational suitability cannot be inferred from a
+single aggregate metric and must be evaluated in relation to the intended
+forensic workflow, the consequences of each error direction, and the continued
+availability of human verification.
+
+
+
+
+
+
+
+
+
+
 
 \subsection{\texorpdfstring{\gls{magnetaxiomtool}/\gls{magnetai}}{Magnet AXIOM/Magnet.AI} Results}
 \label{subsec:results-magnet}
