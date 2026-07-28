@@ -581,46 +581,28 @@ dataset composition and the consistency controls applied to its canonical
 manifests are described in
 Section~\ref{subsec:implementation-dataset-freezing}.
 
-
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Final Dataset Composition and Freezing}
 \label{subsec:implementation-dataset-freezing}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The manual selection process was concluded when the three predefined global
-targets had been reached. The final reviewed selection contained exactly 500
+The manual selection process concluded when the three enforced global targets
+had been reached. The final reviewed corpus contained exactly 500
 \texttt{weapon} images, 500 \texttt{non\_weapon} images, and 500
-\texttt{ood} images, for a total of 1\,500 samples. The remaining candidates
-were not included in the frozen dataset and remained available in the working
-review database without being implicitly assigned to any experimental group.
+\texttt{ood} images, for a total of 1\,500 samples. Candidates not assigned to
+one of these groups remained pending in the working review database and were
+not implicitly included in the experimental corpus.
 
-The canonical manifest of the frozen dataset is:
-
-\begin{center}
-\codepath{datasets/final/manifests/manual_selection_final_1500.csv}
-\end{center}
-
-This file defines the composition and reference operational assignments of the
-frozen experimental corpus for all subsequent stages. Each row preserves the
-stable image identifier, repository-relative prepared path, source dataset and
-source group, \gls{sha256} digest, final human assignment, review state,
-reviewer identifier, review timestamp, and source priority. The final manifest
-is sorted deterministically by final assignment, source dataset, and image
-identifier.
+The canonical definition of the frozen dataset is stored in
+\codepath{datasets/final/manifests/manual_selection_final_1500.csv}. Each row
+preserves the stable image identifier, repository-relative prepared path,
+source dataset and source group, \gls{sha256} digest, final human assignment,
+review state, reviewer identifier, review timestamp, and source priority. The
+records are sorted deterministically by final assignment, source dataset, and
+image identifier.
 
 Table~\ref{tab:implementation-frozen-dataset-composition} reports the final
-composition and the experimental role of each group.
+composition and downstream role of each experimental group.
 
 \begin{table}[H]
 \centering
@@ -647,7 +629,7 @@ target-category samples used for clean and perturbed evaluation. \\
 &
 500
 &
-Negative class of the binary task, consisting of realistic and interpretable
+Negative class of the binary task, comprising realistic and interpretable
 content without objects belonging to the firearm-related target category. \\
 
 \texttt{ood}
@@ -670,9 +652,9 @@ Frozen experimental corpus supporting the complete evaluation protocol. \\
 \end{table}
 
 Table~\ref{tab:implementation-final-source-distribution} reports the
-source-level composition of the frozen dataset. The distribution reflects the
-outcome of the semantically driven review process and was not produced through
-rigid source quotas.
+source-level composition of the frozen corpus. The observed distribution
+results from the target-driven semantic review process and was not generated
+through rigid source quotas.
 
 \begin{table}[H]
 \centering
@@ -731,32 +713,27 @@ rigid source quotas.
 \end{tabular}
 \end{table}
 
-The resulting source composition is non-uniform. In particular, 413 of the 500
+The source distribution is non-uniform. In particular, 413 of the 500
 \texttt{non\_weapon} samples originate from
-\texttt{05\_deepweb}. This distribution is preserved in the frozen manifest
-and is considered during the interpretation of the experimental results in
+\texttt{05\_deepweb}. This composition is preserved explicitly in the frozen
+records and is considered when interpreting the experimental results in
 Chapter~\ref{chap:results}.
 
-The \texttt{ood} group was preserved as a distinct evaluation branch and was
-not converted into a third supervised class of the binary task. Consequently,
-only the \texttt{weapon} and \texttt{non\_weapon} samples were exported to the
-official binary-subset manifest:
+The \texttt{ood} group remains a separate evaluation branch and is not used as
+a third supervised class. The review application therefore also exports
+\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv},
+which contains only the 500 \texttt{weapon} and 500
+\texttt{non\_weapon} samples.
 
-\begin{center}
-\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
-\end{center}
-
-The binary subset contains exactly 1\,000 images, balanced between 500
-\texttt{weapon} and 500 \texttt{non\_weapon} samples. It provides the common
-source population for clean-fold construction, proxy-model training, clean
-binary evaluation, and adversarial and anti-forensic perturbation generation.
-The 500 \gls{ood} samples are excluded from proxy-model training and
-perturbation generation. They are retained as clean inputs and evaluated
-separately by both the proxy architectures and the selected black-box software
+This balanced 1\,000-image subset provides the source population for clean-fold
+generation, proxy-model training, clean binary evaluation, and adversarial and
+anti-forensic artifact generation. The 500 \gls{ood} samples are excluded from
+training and perturbation generation and remain available as clean evaluation
+inputs for both the proxy architectures and the selected black-box software
 systems.
 
-The distinction among the exported manifests is summarized in
-Table~\ref{tab:implementation-frozen-manifests}.
+Table~\ref{tab:implementation-frozen-manifests} summarizes the canonical
+manifests produced by the freezing stage.
 
 \begin{table}[H]
 \centering
@@ -783,65 +760,69 @@ Canonical definition of the complete frozen dataset, including the
 &
 1\,000
 &
-Balanced binary subset used for fold generation and as the source of clean
-samples and derived adversarial and anti-forensic artifacts. \\
+Balanced binary subset used for fold generation, proxy-model training, clean
+evaluation, and generation of adversarial and anti-forensic artifacts. \\
 
 \codepath{datasets/final/manifests/manual_selection_removed.csv}
 &
 0
 &
-Reserved for candidates explicitly assigned to the review-only
-\texttt{exclude} disposition during the final review process. \\
+Record reserved for candidates assigned to the review-only
+\texttt{exclude} disposition. No sample received this disposition in the
+frozen execution. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The review application generated the final manifests directly from the
-persistent selection database. Records assigned to \texttt{weapon},
-\texttt{non\_weapon}, or \texttt{ood} were exported to the complete frozen
-manifest, whereas the binary subset was obtained by retaining only the two
-binary-class assignments. No independent relabeling or automatic semantic
-transformation was performed between these exports. The binary-subset manifest
-is therefore a strict subset of the complete frozen manifest, and its reference
-assignments remain identical to the corresponding human-reviewed decisions.
+The application generates these manifests directly from the persistent
+selection database. Records assigned to \texttt{weapon},
+\texttt{non\_weapon}, or \texttt{ood} are exported to the complete manifest,
+while the binary manifest is obtained by retaining only the two binary-class
+assignments. No additional relabeling or automated semantic transformation is
+performed between the two exports. The binary manifest is therefore a strict
+subset of the complete manifest, and its reference assignments remain identical
+to the corresponding human-reviewed decisions.
 
-The final summary report is stored as:
+The final state is documented in
+\codepath{datasets/final/reports/manual_selection_summary.json}. The report
+records the output locations, group counts, reviewed and pending records,
+remaining targets, source-level advisory targets, and final consistency
+checks. In the frozen execution,
+\texttt{final\_1500\_exact} and
+\texttt{adversarial\_subset\_1000\_exact} were both set to
+\texttt{true}, confirming the expected sizes of the complete corpus and binary
+subset.
 
-\begin{center}
-\codepath{datasets/final/reports/manual_selection_summary.json}
-\end{center}
-
-The report records the output locations, final counts, remaining group targets,
-number of reviewed and pending records, source-level advisory targets, and
-completion checks. In the frozen execution, both principal consistency
-conditions were satisfied:
-
-\begin{itemize}
-\item \texttt{final\_1500\_exact = true}, confirming the presence of
-exactly 500 samples in each of the three final groups;
-
-\item \texttt{adversarial\_subset\_1000\_exact = true}, confirming that
-the binary-subset manifest contains exactly 1\,000 samples.
-\end{itemize}
-
-Freezing was implemented at the manifest level. Once the exact targets and
+Freezing was implemented at the manifest level. After the target counts and
 consistency checks had been satisfied, the exported manifests became the
-canonical inputs for the downstream pipeline. Subsequent scripts consume the
-recorded image identifiers, paths, assignments, source information, and
-\gls{sha256} values without modifying the human review decisions. Any
-replacement or correction of a selected image therefore requires regeneration
-of the dependent partitions, perturbations, bundle records, predictions, and
-metrics rather than an undocumented modification of an isolated downstream
-artifact.
+canonical inputs for all downstream stages. Subsequent scripts consume their
+image identifiers, paths, assignments, source information, and
+\gls{sha256} digests without modifying the human-reviewed decisions.
 
-This approach separates dataset definition from subsequent experimental
-processing. The frozen manifests establish which images belong to the study and
-their reference operational assignments, whereas subsequent stages determine
-how those images are partitioned, transformed, evaluated, and matched to
-observable software outputs. The deterministic construction of the clean folds
-and the separate \gls{ood} evaluation manifest are described in
+Any replacement, removal, or reassignment of a frozen sample therefore requires
+regeneration of all dependent partitions, derived artifacts, bundle records,
+predictions, and metrics. An isolated downstream modification would no longer
+correspond to the canonical dataset definition.
+
+The frozen manifests define which images belong to the experiment and their
+reference operational assignments. The deterministic generation of the binary
+folds and the separate \gls{ood} evaluation manifest is described in
 Section~\ref{subsec:implementation-split-generation}.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
