@@ -2438,7 +2438,7 @@ categories and their diagnostic functions.
 \begin{tabularx}{\textwidth}{@{}L{4.4cm}X@{}}
 \toprule
 \textbf{Case category} &
-\textbf{Diagnostic function} \
+\textbf{Diagnostic function} \\
 \midrule
 
 Correctly classified clean reference
@@ -2450,24 +2450,24 @@ Clean classification error
 &
 Examines an error already present under the clean condition and whether the
 attribution pattern appears localized, diffuse, partial, or associated with
-contextual image regions. \
+contextual image regions. \\
 
 High-confidence \gls{ood} assignment
 &
 Examines the attribution pattern associated with an in-domain assignment
 produced for a distributionally different input. The assignment is treated as
-an operational behavior rather than as an ordinary supervised error. \
+an operational behavior rather than as an ordinary supervised error. \\
 
 Anti-forensic induced error
 &
 Examines whether an operationally plausible image transformation is associated
-with a change in the attribution pattern and the resulting predicted class. \
+with a change in the attribution pattern and the resulting predicted class. \\
 
 Adversarially induced error
 &
 Examines the attribution pattern associated with an incorrect prediction
 produced after a model-dependent adversarial perturbation, including cases in
-which the model output remains highly confident. \
+which the model output remains highly confident. \\
 
 \bottomrule
 \end{tabularx}
@@ -2522,41 +2522,26 @@ while preserving the distinction among technical attribution, experimental
 robustness evaluation, and evidentiary assessment by a human forensic analyst.
 
 
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Traceability and Reproducibility Controls}
 \label{sec:methodology-traceability-controls}
 % ─────────────────────────────────────────────────────────────────────────────
 
 Traceability is a cross-cutting requirement of the entire \gls{fairlab}
-protocol. It applies not only to dataset construction, but to every stage of the
-experimental workflow, including technical preparation, human-in-the-loop
-review, dataset freezing, partition generation, proxy-model training,
-perturbation generation, bundle construction, black-box software evaluation,
-metric computation, and \gls{xai} analysis.
+protocol. It applies to technical preparation, human-in-the-loop review,
+dataset freezing, partition generation, proxy-model training, perturbation
+generation, bundle construction, black-box software evaluation, metric
+computation, and \gls{xai} analysis.
 
-Consistent with established \gls{df} principles, each processing step that
+Consistent with established \gls{df} principles, every processing step that
 creates or modifies an experimental file must be documented so that the
-relationships among the original sample, any derived artifact, the
-corresponding model or software output, and the final experimental result can
-be reconstructed
-\cite{casey2011digital,nist2006guide,iso27037}.
+relationships among the original sample, derived artifacts, model or software
+outputs, and final experimental results can be reconstructed
+\cite{casey2011digital,nist2006guide,iso27037}. Each sample must remain
+identifiable throughout its lifecycle even when its filename, encoding,
+directory location, or visual representation changes.
 
-The traceability framework relies on stable identifiers, integrity information,
-structured provenance records, and explicit associations among experimental
-inputs, derived artifacts, configurations, and outputs. Each sample must remain
-identifiable throughout its complete lifecycle, even when its filename,
-encoding, directory location, or visual representation changes.
-
-The methodology distinguishes among four complementary traceability elements:
+The traceability framework distinguishes four complementary elements:
 
 \begin{enumerate}
 \item \textit{sample identity}, which establishes a stable reference to the
@@ -2570,28 +2555,24 @@ explainability artifact;
 artifact with its reference operational assignment, partition, model
 configuration, perturbation condition, and evaluation branch;
 
-\item \textit{output provenance}, which connects model predictions,
-software exports, normalization decisions, metrics, and qualitative case
-studies to the corresponding evaluation input.
+\item \textit{output provenance}, which connects model predictions, software
+exports, normalization decisions, metrics, and qualitative case studies to the
+corresponding evaluation input.
 \end{enumerate}
 
-Integrity verification should be based on cryptographic identifiers or other
-mechanisms capable of detecting unintended changes to the experimental files.
-The methodology does not prescribe a specific hashing algorithm. The selected
-mechanism must nevertheless be documented and applied consistently across the
-relevant stages of the pipeline.
+Integrity verification should rely on cryptographic identifiers or other
+mechanisms capable of detecting unintended changes to experimental files. The
+selected mechanism must be documented and applied consistently. Additional
+identifiers may be retained for interoperability with black-box software
+systems, but they must not replace the primary integrity mechanism unless they
+provide appropriate security and collision-resistance properties.
 
-Additional identifiers may be retained when required for interoperability with
-selected black-box software systems. Such auxiliary identifiers must not
-replace the primary integrity mechanism unless their security and
-collision-resistance properties are appropriate for that role.
-
-Traceability records should be progressive. Each stage should preserve the
-identifiers inherited from the preceding stage and add only the information
-required to describe the newly created artifact, configuration, or experimental
-condition. This approach enables the lifecycle of each sample to be
-reconstructed without relying exclusively on directory structures or
-filenames.
+Traceability records should be progressive: each stage preserves the
+identifiers inherited from the preceding stage and adds only the information
+required to describe the newly created artifact, configuration, or
+experimental condition. This approach allows the lifecycle of a sample to be
+reconstructed without relying exclusively on filenames or directory
+structures.
 
 Table~\ref{tab:methodology-traceability-artifacts} summarizes the principal
 categories of traceability records required by the methodology.
@@ -2619,7 +2600,7 @@ exclusion disposition, and supporting notes. \\
 Frozen-dataset records
 &
 Define the stable experimental corpus and preserve the reference operational
-assignments used in the subsequent phases. \\
+assignments used in subsequent phases. \\
 
 Partition records
 &
@@ -2658,12 +2639,12 @@ model. \\
 \end{tabularx}
 \end{table}
 
-The minimum traceability chain must make it possible to move in both directions:
-from an original sample to its evaluation inputs, derived artifacts, and
+The minimum traceability chain must support navigation in both directions: from
+an original sample to its evaluation inputs, derived artifacts, and
 experimental outputs, and from a reported result back to the exact input,
 configuration, and processing conditions that produced it.
 
-Figure~\ref{fig:methodology-traceability-chain} summarizes this general
+Figure~\ref{fig:methodology-traceability-chain} summarizes this bidirectional
 traceability chain.
 
 \begin{figure}[H]
@@ -2798,49 +2779,32 @@ final analyses}
 \label{fig:methodology-traceability-chain}
 \end{figure}
 
-Reproducibility requires more than the availability of source code. The
-experimental configuration must be documented in sufficient detail to recreate
-the relevant processing conditions. This documentation should include the
-dataset version, partitioning strategy, randomization controls, model
-configuration, preprocessing rules, perturbation parameters, software version,
-enabled functionality, normalization rules, and metric definitions.
+Reproducibility requires more than source-code availability. The experimental
+configuration must be documented in sufficient detail to recreate the relevant
+processing conditions, including the dataset version, partitioning strategy,
+randomization controls, model configuration, preprocessing rules, perturbation
+parameters, software version and enabled functionality, normalization rules,
+and metric definitions. When randomness affects partitioning, model
+initialization, optimization, perturbation generation, or case selection, the
+corresponding random state or deterministic procedure must be recorded.
 
-Where randomness affects dataset partitioning, model initialization,
-optimization, perturbation generation, or case selection, the relevant random
-state or deterministic procedure must be recorded. Deterministic execution is
-preferred when it does not conflict with the intended experimental design.
+Model and artifact records must preserve the associations required by the
+fold-aware and perturbation-generation procedures. In particular, each
+checkpoint must remain linked to its training partitions, and a checkpoint
+used to evaluate or perturb a held-out sample must not have been trained on
+that sample. Model-dependent adversarial artifacts must identify their source
+model and checkpoint, whereas model-agnostic adversarial-style and
+anti-forensic artifacts must preserve the shared generation condition and
+applied configuration. These records support the distinction among direct
+source-model evaluation, transfer evaluation, and comparison under shared
+model-agnostic conditions.
 
-Model artifacts must be associated with the training partitions and
-configuration that produced them. In fold-aware evaluation, the proxy-model
-checkpoint used to evaluate a held-out binary sample, or to generate a
-model-dependent adversarial artifact from that sample, must not have been
-trained on the sample itself. This constraint reduces the risk of information
-leakage and supports valid interpretation of the resulting robustness
-measurements.
-
-Generated adversarial and anti-forensic artifacts must preserve their
-relationships with the corresponding clean inputs. Model-dependent adversarial
-artifacts must additionally identify the relevant source model and
-fold-specific checkpoint. This information is required to distinguish direct
-source-model evaluation from cross-model and black-box transfer evaluation.
-
-Model-agnostic adversarial-style and anti-forensic artifacts do not originate
-from a designated source model. Their records must instead preserve the shared
-generation condition and applied configuration so that responses can be
-compared across proxy models and selected black-box software systems without
-describing the comparison as transferability.
-
-The blind evaluation of selected black-box software systems introduces an
-additional traceability requirement. Experimental metadata must remain separate
-from the software input during processing, but must remain available after
-export to support input matching, normalization, and metric computation.
-
-The separation between blind inputs and control metadata must itself be
-verifiable. The evaluation records should demonstrate that reference
-operational assignments, perturbation names, fold allocations, model
-identifiers, and other controlled experimental descriptors were not exposed
-through filenames, paths, directory structures, or accompanying control files
-during software processing.
+Black-box evaluation introduces an additional separation requirement. Reference
+assignments, perturbation descriptors, folds, model identifiers, and other
+controlled experimental metadata must remain outside the software input during
+processing while remaining available after export for matching, normalization,
+and metric computation. The evaluation records must make this separation
+verifiable.
 
 Automated consistency controls should verify, where applicable:
 
@@ -2855,37 +2819,24 @@ outputs;
 \item separation between blind inputs and experimental metadata.
 \end{itemize}
 
-These controls establish the technical coherence of the experimental workflow.
-They do not demonstrate classification correctness or operational robustness.
-Their purpose is to ensure that the reported results derive from the intended
+These controls establish the technical coherence of the experimental workflow;
+they do not demonstrate classification correctness or operational robustness.
+Their purpose is to ensure that reported results derive from the intended
 inputs, artifacts, and configurations rather than from undocumented
 substitutions, incomplete runs, or incorrect associations.
 
-Traceability and reproducibility must also be considered within the limitations
-of black-box evaluation. Selected software systems may change across versions,
-and their internal models, thresholds, or processing logic may remain
-unavailable. Accordingly, reproducibility in this context concerns the
-documented external configuration, submitted inputs, observable outputs, and
-normalization procedures rather than the inaccessible internal inference
-process.
-
-The protocol therefore combines procedural reproducibility with artifact-level
-traceability. Procedural reproducibility documents how the experiment can be
-repeated, whereas artifact-level traceability makes it possible to verify which
-specific inputs, models, software configurations, and derived files contributed
-to each reported result.
+For black-box systems, reproducibility concerns the documented external
+configuration, submitted inputs, observable outputs, and normalization
+procedures rather than inaccessible internal models, thresholds, or inference
+logic. The protocol therefore combines \textit{procedural reproducibility},
+which documents how the experiment can be repeated, with
+\textit{artifact-level traceability}, which identifies the exact inputs,
+models, software configurations, and derived files contributing to each
+reported result.
 
 The concrete implementation of these controls is documented in
 Chapter~\ref{chap:implementation}, whereas the corresponding experimental
 outcomes are reported in Chapter~\ref{chap:results}.
-
-
-
-
-
-
-
-
 
 
 
