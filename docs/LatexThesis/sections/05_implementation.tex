@@ -3074,14 +3074,6 @@ observed retrieval behavior to the three semantic-distance settings is reported
 in Section~\ref{subsec:results-excire}.
 
 
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Cellebrite Inseyets}
 \label{subsec:implementation-cellebrite}
@@ -3090,9 +3082,9 @@ in Section~\ref{subsec:results-excire}.
 \gls{cellebriteinseyets} was evaluated as a black-box
 \gls{ai}-assisted media-analysis system. The experimental analysis relied
 exclusively on the classifications observable in the report exported through
-Cellebrite Physical Analyzer. No access was available to the internal model
-architecture, training data, feature representations, category thresholds,
-confidence-calibration procedure, or undocumented decision logic.
+Cellebrite Physical Analyzer. The internal model architecture, training data,
+feature representations, category thresholds, confidence-calibration
+procedure, and undocumented decision logic were not accessible.
 
 The frozen software and case configuration is reported in
 Table~\ref{tab:implementation-cellebrite-configuration}.
@@ -3128,7 +3120,7 @@ Physical Analyzer version
 
 Run identifier
 &
-\codepath{FAIRLAB_CELLEBRITE_INSEYETS_RUN_01} \\
+\texttt{FAIRLAB\_CELLEBRITE\_INSEYETS\_RUN\_01} \\
 
 Imported directory
 &
@@ -3136,7 +3128,7 @@ Imported directory
 
 Imported bundle files
 &
-11\,500 \\
+11\,500 neutrally identified images \\
 
 Analysis functionality
 &
@@ -3154,21 +3146,34 @@ Observable decision field
 &
 \texttt{Classifications} \\
 
+Raw report rows
+&
+11\,829 \\
+
+Matched bundle rows
+&
+11\,500 \\
+
+Non-bundle rows
+&
+329 \\
+
 \bottomrule
 \end{tabularx}
 \end{table}
 
 Only the blind bundle directory was included in the analysis. Neither the
-internal metadata directory nor the structured audit view was supplied to the
-software. Consequently, \gls{cellebriteinseyets} processed anonymized file
-names without receiving reference operational assignments, perturbation
-families, perturbation names, fold identifiers, proxy-model information, source
-provenance, or explicit \gls{ood} indicators through the imported paths or file
-names.
+bundle metadata nor the structured audit view was supplied to the software.
+Consequently, \gls{cellebriteinseyets} processed neutrally identified files
+named according to the \texttt{bundle\_XXXXXX} convention, without receiving
+reference operational assignments, perturbation families, perturbation names,
+fold identifiers, proxy-model information, source provenance, or explicit
+\gls{ood} indicators through the imported paths or file names.
 
 This blind-input design concealed experiment-specific descriptors encoded in
-the bundle structure. It did not conceal the visual content of the images or
-perturbation effects directly perceptible from the inputs.
+the bundle hierarchy. It did not conceal image content, visually perceptible
+perturbation effects, or information potentially embedded within the image
+files.
 
 The prediction-bearing record was an XLSX report exported through Physical
 Analyzer. The normalization procedure reads the \texttt{Immagini} worksheet
@@ -3178,153 +3183,137 @@ audit purposes and are not interpreted as additional model decisions.
 
 A single image may be associated with multiple exported classifications, with
 each label optionally followed by a percentage value. Representative field
-structures include:
-
-\begin{center}
-\texttt{Armi (100\%)}
-\end{center}
-
-\begin{center}
-\texttt{Pistola (100\%); Armi (100\%)}
-\end{center}
-
-and:
-
-\begin{center}
-\texttt{Fucile (91\%) | Oggetto tenuto in mano (78\%)}
-\end{center}
+values include \texttt{Armi (100\%)},
+\texttt{Pistola (100\%); Armi (100\%)}, and
+\texttt{Fucile (91\%) | Oggetto tenuto in mano (78\%)}.
 
 The parser separates labels expressed through semicolons, vertical bars,
-commas, or line breaks and removes the parenthesized percentage values before
-applying the operational mapping. The percentages are preserved only as part of
-the raw observable output. They are not treated as calibrated probabilities and
-do not influence the binary decision.
+commas, or line breaks. Parenthesized percentage values are removed before the
+operational mapping is applied. The original observable classification string,
+including its percentages, is retained for auditability. These values are not
+treated as calibrated probabilities and do not influence the binary decision.
 
-The frozen mapping assigns a positive decision when the observable
-\texttt{Classifications} field contains at least one of the following labels:
+Let \(\mathcal{C}(x)\) denote the set of normalized classification labels
+exported for image \(x\), and let:
 
-\begin{itemize}
-\item \texttt{Armi};
-\item \texttt{Pistola};
-\item \texttt{Fucile}.
-\end{itemize}
-
-Formally, the operational recoding is:
-
-\begin{equation}
+\[
+\mathcal{W}_{\mathrm{Cellebrite}}
+=
 \left\{
 \texttt{Armi},
 \texttt{Pistola},
 \texttt{Fucile}
-\right\}
+\right\}.
+\]
+
+The frozen operational mapping is:
+
+\[
+\texttt{weapon\_detected}(x)
+=
+\begin{cases}
+\texttt{true},
+&
+\text{if }
+\mathcal{W}_{\mathrm{Cellebrite}}
 \cap
 \mathcal{C}(x)
 \neq
-\varnothing
-\quad\Longrightarrow\quad
-\texttt{weapon\_detected = true},
-\end{equation}
+\varnothing,
+\\
+\texttt{false},
+&
+\text{otherwise}.
+\end{cases}
+\]
 
-where \(\mathcal{C}(x)\) denotes the set of normalized classifications exported
-for image \(x\).
-
-For every other successfully matched bundle record, the software-specific
-decision is:
-
-\begin{equation}
-\left\{
-\texttt{Armi},
-\texttt{Pistola},
-\texttt{Fucile}
-\right\}
-\cap
-\mathcal{C}(x)
-=
-\varnothing
-\quad\Longrightarrow\quad
-\texttt{weapon\_detected = false}.
-\end{equation}
-
-The corresponding common normalized states are:
-
-\begin{equation}
-\texttt{weapon\_detected = true}
-\longrightarrow
-\texttt{weapon},
-\end{equation}
-
-\begin{equation}
-\texttt{weapon\_detected = false}
-\longrightarrow
+Within the common normalized output space,
+\texttt{weapon\_detected = true} is mapped to \texttt{weapon}, whereas
+\texttt{weapon\_detected = false} is mapped to
 \texttt{non\_weapon}.
-\end{equation}
 
 The inclusion of \texttt{Pistola} and \texttt{Fucile} alongside the broader
-\texttt{Armi} label defines the extended mapping used for the frozen thesis
-evaluation. This prevents firearm-specific positive classifications from being
-discarded merely because the broader \texttt{Armi} category is absent from the
+\texttt{Armi} label defines the extended mapping used for the frozen
+evaluation. This rule prevents firearm-specific positive classifications from
+being discarded when the broader \texttt{Armi} category is absent from the
 same exported field.
 
-This rule is an operational recoding of an observable software output. It does
+The mapping is an operational recoding of observable software output. It does
 not imply that \gls{cellebriteinseyets} internally implements the same binary
-taxonomy, that the exported labels are mutually exclusive, or that the
-associated percentage values represent directly comparable model
-probabilities.
+taxonomy, that the exported labels are mutually exclusive, or that their
+associated percentage values correspond to probabilities comparable across
+images, categories, or software systems.
 
 The original report contained 11\,829 image rows. Of these, 11\,500 were
-matched to the complete forensic evaluation bundle, whereas 329 rows did not
-correspond to bundle items. The unmatched records were retained as an aggregate
-audit count and excluded from the quantitative robustness analysis. Complete
-bundle coverage confirms that a matched exported decision was available for
-every experimental item but does not establish classification correctness.
+matched to the complete forensic evaluation bundle, whereas 329 did not
+correspond to bundle items. The non-bundle records were preserved in the local
+unmatched-output artifact and summarized by tool in the public normalization
+report. They were excluded from the canonical bundle-level prediction table
+and from the quantitative robustness analysis.
+
+The resulting canonical Cellebrite output contains one matched decision for
+each of the 11\,500 bundle items. Complete bundle coverage confirms that an
+observable exported decision was available for every experimental item but
+does not establish classification correctness.
 
 The matching procedure associates report records with the canonical bundle
-through available cryptographic hashes, anonymized file names, and bundle
-identifiers. For each successfully matched record, the normalized output
-retains:
+using available \gls{sha256} values, followed by \gls{md5}, the exact neutral
+bundle file name, or a bundle file name embedded within an exported path or
+text field. The matching method is preserved in each normalized record.
+
+For every successfully matched record, the normalized representation retains:
 
 \begin{itemize}
-\item the \texttt{bundle\_id} and input file name;
-\item the matching method and matched state;
+\item the \texttt{bundle\_id}, neutral input file name, matching method, and
+matched state;
 \item the available \gls{sha256} and \gls{md5} values;
 \item the clean, \gls{ood}, or perturbed sample type;
 \item the perturbation family and condition;
 \item the fold and reference operational assignment;
-\item the original and generated image identifiers;
-\item the original \texttt{Classifications} value;
+\item the source dataset and original and generated image identifiers;
+\item the original observable \texttt{Classifications} value;
 \item the normalized binary decision and mapping reason.
 \end{itemize}
 
 The complete XLSX report also contained file-system, evidence, and case-export
 information not required for the classification mapping. Because these fields
 may expose local paths or case-specific metadata, the raw report is managed as
-a controlled-access record rather than distributed through the public
-repository.
+a controlled-access artifact and is excluded from the public repository. Its
+expected local location is
+\codepath{forensic_tools/cellebrite_inseyets/raw_exports/%
+FAIRLAB_CELLEBRITE_INSEYETS_RUN_01/}.
 
-Its expected local location is:
+The public repository retains the sanitized prediction extract
+\codepath{forensic_tools/cellebrite_inseyets/public_extracts/%
+cellebrite_classifications_extract.csv}.
+It contains the neutral bundle identifiers, experimental-condition fields,
+observable classification values, and normalized decision fields for all
+11\,500 matched bundle items. Local paths and the 329 non-bundle report rows are
+not included in this public extract.
 
-\begin{center}
-\codepath{forensic_tools/cellebrite_inseyets/raw_exports/FAIRLAB_CELLEBRITE_INSEYETS_RUN_01/}
-\end{center}
-
-The public repository instead retains a sanitized extract containing the
-anonymized bundle identifiers, the observable classification values, and the
-normalized decision fields:
-
-\begin{center}
-\codepath{forensic_tools/cellebrite_inseyets/public_extracts/cellebrite_classifications_extract.csv}
-\end{center}
-
-The run registry, software-version log, export audit, normalized prediction
-table, and metric outputs document the frozen software configuration and the
-correspondence between the controlled raw report and the sanitized decision
-representation.
+The run registry, software-version log, export audit, normalization summary,
+public-extract validation, canonical normalized prediction table, and metric
+artifacts provide the remaining records required to inspect the frozen
+configuration and verify the equivalence between the controlled raw report and
+the sanitized public representation.
 
 The common matching, normalization, completeness, and deduplication procedures
 applied across the selected black-box software systems are described in
 Section~\ref{subsec:implementation-normalization}. The resulting behavior of
 \gls{cellebriteinseyets} is reported in
 Section~\ref{subsec:results-cellebrite}.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
