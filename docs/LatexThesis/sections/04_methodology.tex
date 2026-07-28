@@ -712,6 +712,15 @@ systems, perturbations, and metrics from undocumented changes in the evaluated
 corpus.
 
 
+
+
+
+
+
+
+
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Data Partitioning and OOD Evaluation Strategy}
 \label{sec:methodology-split-generation}
@@ -764,12 +773,12 @@ defined in Section~\ref{sec:methodology-traceability}.
 Figure~\ref{fig:methodology-split-to-proxy-training} summarizes the resulting
 partitioning strategy.
 
+
 \begin{figure}[H]
 \centering
 \resizebox{0.94\textwidth}{!}{%
 \begin{tikzpicture}[
-
-=latex,
+>=latex,
 font=\small,
 block/.style={
 rectangle,
@@ -827,43 +836,43 @@ draw=black!75
 
 \node[block] (frozen) at (0,0)
 {\shortstack{
-\textbf{Frozen experimental dataset}\[1mm]
+\textbf{Frozen experimental dataset}\\[1mm]
 \scriptsize stable, validated, and traceable corpus
 }};
 
 \node[process] (binary) at (-4.2,-2.6)
 {\shortstack{
-\textbf{Binary in-domain subset}\[1mm]
+\textbf{Binary in-domain subset}\\[1mm]
 \scriptsize positive and negative operational classes
 }};
 
 \node[note] (ood) at (4.2,-2.6)
 {\shortstack{
-\textbf{Clean \gls{ood} evaluation set}\[1mm]
+\textbf{Clean \gls{ood} evaluation set}\\[1mm]
 \scriptsize separate from model training and perturbation generation
 }};
 
 \node[process] (folds) at (-4.2,-5.2)
 {\shortstack{
-\textbf{Mutually exclusive experimental folds}\[1mm]
+\textbf{Mutually exclusive experimental folds}\\[1mm]
 \scriptsize traceable and sufficiently class-consistent partitions
 }};
 
 \node[process] (training) at (-4.2,-7.8)
 {\shortstack{
-\textbf{Fold-aware proxy-model evaluation}\[1mm]
+\textbf{Fold-aware proxy-model evaluation}\\[1mm]
 \scriptsize train on the remaining folds and evaluate on the held-out fold
 }};
 
 \node[output] (binaryevaluation) at (-4.2,-10.4)
 {\shortstack{
-\textbf{Binary robustness evaluation}\[1mm]
+\textbf{Binary robustness evaluation}\\[1mm]
 \scriptsize clean, adversarial, and anti-forensic conditions
 }};
 
 \node[output] (oodevaluation) at (4.2,-10.4)
 {\shortstack{
-\textbf{\gls{ood} behavior evaluation}\[1mm]
+\textbf{\gls{ood} behavior evaluation}\\[1mm]
 \scriptsize analysis of assignments relative to known operational classes
 }};
 
@@ -884,15 +893,6 @@ folds for fold-aware training and held-out evaluation, while the clean
 \gls{ood} branch remains outside model training and perturbation generation}
 \label{fig:methodology-split-to-proxy-training}
 \end{figure}
-
-
-
-
-
-
-
-
-
 
 
 % ─────────────────────────────────────────────────────────────────────────────
