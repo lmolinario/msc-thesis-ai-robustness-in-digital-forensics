@@ -424,131 +424,220 @@ distributions. These differences provide the necessary baseline for evaluating
 whether the same profiles remain stable under \gls{ood}, adversarial, and
 anti-forensic conditions.
 
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{\texorpdfstring{\gls{ood}}{Out-of-Distribution} Behavior}
 \label{sec:results-ood}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The \gls{ood} evaluation examines how the three proxy architectures behave on
-the separate 500-image \gls{ood} branch. As established in
+The \gls{ood} evaluation examines the behavior of the three proxy architectures
+on the separate 500-image \gls{ood} branch. As established in
 Chapter~\ref{chap:methodology}, these images are not treated as a third
-supervised class and do not contribute to binary accuracy or confusion-matrix
-counts. The analysis instead measures the extent to which distributionally
-different inputs are assigned to one of the two closed-set operational classes
+supervised class and do not contribute to binary accuracy, precision, recall,
+or confusion-matrix counts.
+
+The analysis instead characterizes how inputs outside the frozen binary
+distribution are forced into one of the two available closed-set operational
+classes
 \cite{hendrycks2017baseline,liang2018odin,fort2021exploring}.
 
-For each architecture, the results aggregate 2\,500 predictions obtained by
-evaluating the 500 \gls{ood} images through all five fold-specific checkpoints.
-The \emph{weapon rate} represents the proportion of these predictions assigned
-to \texttt{weapon}; the \emph{high-confidence rate} represents the proportion
-whose maximum predicted-class probability is at least 0.90. These indicators
-describe operational assignment behavior rather than supervised correctness on
-an additional class.
+Each of the 500 unique \gls{ood} images was evaluated by all five
+fold-specific checkpoints of each proxy architecture:
+
+\begin{equation}
+500\ \text{unique \glsentryshort{ood} images}
+\times
+5\ \text{fold-specific checkpoints}
+=
+2\,500\ \text{responses per architecture}.
+\end{equation}
+
+The resulting responses are not independent images. They represent five
+fold-specific model outputs for each unique \gls{ood} input. The reported
+counts and rates therefore characterize checkpoint-response behavior rather
+than unique-image-level classification frequency.
+
+Two principal indicators are considered:
+
+\begin{itemize}
+\item the \emph{weapon assignment rate}, defined as the proportion of the
+2\,500 responses assigned to \texttt{weapon};
+
+\item the \emph{high-maximum-probability rate}, defined as the proportion of
+responses whose maximum predicted-class probability is at least 0.90.
+\end{itemize}
+
+Neither indicator represents supervised correctness because the \gls{ood}
+inputs have no binary reference assignment.
+
+Table~\ref{tab:results-ood-behavior} reports the fold-aggregated results.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Behavior of the proxy models on \gls{ood} samples}
+\caption{Fold-aggregated behavior of the proxy models on \gls{ood} inputs}
 \label{tab:results-ood-behavior}
 \begin{tabular}{@{}l r r r r r r r@{}}
 \toprule
 \textbf{Model} &
-\textbf{Total} &
-\textbf{\shortstack{Weapon\\predictions}} &
-\textbf{\shortstack{Non-weapon\\predictions}} &
+\textbf{Responses} &
+\textbf{\shortstack{Weapon\\responses}} &
+\textbf{\shortstack{Non-weapon\\responses}} &
 \textbf{W-rate} &
-\textbf{Conf.} &
-\textbf{HC-count} &
-\textbf{HC-rate} \\
+\textbf{Max-P} &
+\textbf{HP-count} &
+\textbf{HP-rate} \\
 \midrule
-EfficientNet-B0 & 2\,500 & 924 & 1\,576 & 0.3696 & 0.8505 & 1\,252 & 0.5008 \\
-ResNet18 & 2\,500 & 1\,094 & 1\,406 & 0.4376 & 0.8896 & 1\,617 & 0.6468 \\
-\acrshort{clip} & 2\,500 & 2\,089 & 411 & 0.8356 & 0.5358 & 0 & 0.0000 \\
+
+EfficientNet-B0
+& 2\,500
+& 924
+& 1\,576
+& 0.3696
+& 0.8505
+& 1\,252
+& 0.5008 \\
+
+ResNet18
+& 2\,500
+& 1\,094
+& 1\,406
+& 0.4376
+& 0.8896
+& 1\,617
+& 0.6468 \\
+
+\acrshort{clip}
+& 2\,500
+& 2\,089
+& 411
+& 0.8356
+& 0.5358
+& 0
+& 0.0000 \\
+
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} \textit{W-rate} indicates the proportion of \gls{ood}
-samples classified as \texttt{weapon}; \textit{Conf.} indicates the mean
-maximum predicted-class probability; \textit{HC-count}
-indicates the number of predictions with confidence of at least 0.90;
-\textit{HC-rate} indicates the corresponding proportion over the total
-\gls{ood} predictions. The total of 2\,500 predictions per model is obtained by
-evaluating the 500 \gls{ood} images through each of the five fold-aware
-checkpoints.
+\textit{Note.} \textit{W-rate} indicates the proportion of fold-specific
+responses assigned to \texttt{weapon}; \textit{Max-P} indicates the mean
+maximum predicted-class probability; \textit{HP-count} indicates the number of
+responses whose maximum probability is at least 0.90; and \textit{HP-rate}
+indicates the corresponding proportion over the 2\,500 responses. Each total
+comprises five checkpoint responses for each of the 500 unique \gls{ood}
+images.
 \end{table}
 
-The zero \textit{HC-rate} value for \gls{clip} does not indicate the absence of
-\texttt{weapon} classifications on \gls{ood} samples, but the absence of
-predictions whose confidence is greater than or equal to the high-confidence
-threshold of 0.90. Indeed, \gls{clip} maps 83.56\% of the \gls{ood}
-predictions to the \texttt{weapon} class, but with a mean confidence of 0.5358.
-This behavior indicates a strong closed-set assignment tendency toward the
-\texttt{weapon} class without predictions reaching the predefined
-high-confidence threshold.
+The \gls{clip}-based proxy exhibits the strongest tendency to assign
+\gls{ood} inputs to the firearm-oriented class. It produces 2\,089
+\texttt{weapon} responses, corresponding to a weapon assignment rate of
+0.8356. However, its mean maximum predicted-class probability is only 0.5358,
+and none of its 2\,500 responses reaches the threshold of 0.90.
 
-Figure~\ref{fig:results-ood-weapon-rate-confidence} visualizes the comparison
-among weapon rate, mean confidence, and high-confidence rate, whereas
-Figure~\ref{fig:results-ood-confidence-distribution} shows the distribution
-of maximum predicted-class probability on \gls{ood} inputs.
+The zero high-maximum-probability rate must therefore not be interpreted as an
+absence of \texttt{weapon} assignments. Instead, the \gls{clip}-based proxy
+frequently selects \texttt{weapon} while producing output probabilities close
+to the central region of the binary output range. This combination indicates a
+strong directional assignment tendency without high maximum-probability
+responses under the adopted threshold.
+
+EfficientNet-B0 and ResNet18 assign lower proportions of the \gls{ood}
+responses to \texttt{weapon}. EfficientNet-B0 produces 924 such responses,
+corresponding to a rate of 0.3696, whereas ResNet18 produces 1\,094, for a rate
+of 0.4376.
+
+Their model-specific output distributions nevertheless contain substantially
+more responses above the 0.90 threshold. EfficientNet-B0 produces 1\,252
+high-maximum-probability responses, corresponding to a rate of 0.5008.
+ResNet18 produces 1\,617, corresponding to the highest rate among the three
+architectures, at 0.6468.
+
+Figure~\ref{fig:results-ood-weapon-rate-confidence} compares the weapon
+assignment rate, mean maximum predicted-class probability, and
+high-maximum-probability rate.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{images/fig_ood_weapon_rate_and_confidence.pdf}
-\caption{Weapon assignment rate and maximum predicted-class probability on
-\gls{ood} inputs}
+\includegraphics[width=0.95\textwidth]
+{images/fig_ood_weapon_rate_and_confidence.pdf}
+\caption{Weapon assignment rate and maximum predicted-class probability
+indicators on \gls{ood} inputs}
 \label{fig:results-ood-weapon-rate-confidence}
 \end{figure}
 
-The results show three distinct operational profiles. \gls{clip} classifies a
-very high proportion of \gls{ood} samples as \texttt{weapon}, at 0.8356, but
-does so with moderate mean confidence, at 0.5358, and with no predictions above
-the high-confidence threshold. EfficientNet-B0 and ResNet18 classify lower
-proportions of \gls{ood} samples as \texttt{weapon}, at 0.3696 and 0.4376,
-respectively, but with much higher mean confidence values. In particular,
-ResNet18 reaches the highest high-confidence rate, at 0.6468, whereas
-EfficientNet-B0 reaches 0.5008.
-These raw confidence scores are reported side by side for descriptive purposes.
-Because they are not calibrated across architectures, they must not be
-interpreted as equivalent uncertainty measures or used to establish a
-cross-model confidence ranking.
+The figure highlights that weapon assignment frequency and maximum-probability
+behavior represent distinct dimensions of the closed-set response. The
+\gls{clip}-based proxy exhibits the highest weapon assignment rate but the
+lowest mean maximum probability and no responses above the 0.90 threshold.
+ResNet18 exhibits the highest high-maximum-probability rate despite assigning
+fewer responses to \texttt{weapon}. EfficientNet-B0 presents an intermediate
+profile for both indicators.
+
+These values are architecture-specific and must not be used to construct a
+cross-model probability or uncertainty ranking. The output probabilities were
+not calibrated across architectures, and the same numerical value may not
+represent the same degree of uncertainty for EfficientNet-B0, ResNet18, and the
+\gls{clip}-based proxy.
+
+Figure~\ref{fig:results-ood-confidence-distribution} presents the complete
+distribution of maximum predicted-class probabilities for the three
+architectures.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{images/fig_ood_confidence_distribution.pdf}
-\caption{Distribution of maximum predicted-class probability on \gls{ood} inputs for each proxy model}
+\includegraphics[width=0.95\textwidth]
+{images/fig_ood_confidence_distribution.pdf}
+\caption{Distribution of maximum predicted-class probabilities on
+\gls{ood} inputs for each proxy architecture}
 \label{fig:results-ood-confidence-distribution}
 \end{figure}
 
-Figure~\ref{fig:results-ood-confidence-distribution} shows that the confidence
-distribution of \gls{clip} is more concentrated toward intermediate values,
-whereas EfficientNet-B0 and ResNet18 exhibit distributions that are more
-polarized toward high-confidence values. This finding highlights a different closed-set response profile: the weapon
-assignment rate and the associated model-specific score distribution describe
-distinct aspects of behavior on \gls{ood} inputs.
+The distributional view confirms that the responses of the \gls{clip}-based
+proxy remain below the predefined 0.90 threshold, whereas EfficientNet-B0 and
+ResNet18 produce substantial populations above it. This difference does not
+establish that one architecture is intrinsically more reliable on
+out-of-distribution content. It characterizes the architecture-specific score
+profiles produced when all inputs must be assigned to one of two closed-set
+classes.
 
-From a forensic perspective, this behavior differs from ordinary binary
-misclassification because the \gls{ood} inputs have no positive or negative
-binary reference assignment. A \texttt{weapon} output on this branch may still
-increase review workload or affect prioritization, but it is reported here as
-an observable closed-set assignment rather than as a supervised error. ResNet18
-and EfficientNet-B0 produce lower weapon assignment rates than \gls{clip}, while
-their maximum predicted-class probabilities are more frequently above the
-predefined threshold. These architecture-specific scores must not be treated as
-stand-alone evidence or compared as calibrated uncertainty measures; they remain
-diagnostic information subject to human verification
+From a forensic perspective, a \texttt{weapon} assignment on the \gls{ood}
+branch is not a false positive in the supervised binary sense. The input has no
+\texttt{weapon} or \texttt{non\_weapon} reference assignment. Nevertheless,
+such an output may still affect triage by increasing the quantity of unrelated
+material prioritized for review.
+
+Conversely, a high maximum predicted-class probability on an \gls{ood} input
+does not demonstrate that the assignment is semantically valid. It indicates
+only that the corresponding proxy architecture produced a strongly peaked
+closed-set output for material outside the frozen binary evaluation
+distribution.
+
+The \gls{ood} results therefore identify two operationally relevant but
+separate behaviors:
+
+\begin{itemize}
+\item the tendency to route distributionally different material toward the
+firearm-oriented review category;
+
+\item the tendency to produce high maximum predicted-class probabilities for
+forced closed-set assignments.
+\end{itemize}
+
+Both behaviors can influence prioritization and analyst workload. Neither can
+be treated as stand-alone evidence, supervised correctness, or calibrated
+uncertainty, and both remain subject to human verification
 \cite{guo2017calibration,nist2023airmf}.
+
+
+
+
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-Forensic Robustness}
