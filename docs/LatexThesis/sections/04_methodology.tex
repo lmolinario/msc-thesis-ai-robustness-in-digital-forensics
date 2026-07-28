@@ -657,92 +657,68 @@ exclusion, and class-assignment decisions, and provides the traceability
 required for the review and dataset-freezing procedure described in
 Section~\ref{sec:methodology-human-review}.
 
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Human-in-the-Loop Review and Final Dataset Freezing}
 \label{sec:methodology-human-review}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The candidate pool is subsequently subjected to a documented
-\textit{human-in-the-loop} review. The purpose of this phase is to determine
-whether each technically valid image is semantically suitable for the
-experimental task and, when applicable, to assign the corresponding operational
-designation.
-
-Each candidate sample may be assigned to the positive class
-\texttt{weapon}, the in-domain negative class \texttt{non\_weapon}, the
-separate \gls{ood} branch, or the review-only \texttt{exclude} disposition.
-The assignment is performed according to the operational criteria defined in
-Section~\ref{sec:methodology-research-design}. These criteria must be applied
-consistently throughout the review process and must not depend exclusively on
-source directories, filenames, inherited annotations, or automated pre-labels.
+The technically validated candidate pool is subjected to a documented
+\textit{human-in-the-loop} review to determine the semantic suitability of each
+sample and assign the corresponding operational designation. The criteria
+defined in Section~\ref{sec:methodology-research-design} must be applied
+consistently and independently of source directories, filenames, inherited
+annotations, or automated pre-labels.
 
 The review follows a conservative decision rule. Samples are included in the
 binary task only when they can be assigned to either \texttt{weapon} or
 \texttt{non\_weapon} with sufficient semantic clarity. Borderline, anomalous,
-synthetic, replica-like, or otherwise distributionally different content is
-retained within the separate \gls{ood} branch rather than being forced into one
-of the binary classes. The branch may also include images affected by
-degradation already present in the source material. Such images remain distinct
-from the adversarial and anti-forensic artifacts generated during subsequent
-experimental phases. Unusable or semantically irrelevant samples are excluded.
+synthetic, replica-like, degraded, or otherwise distributionally different
+content is retained within the separate \gls{ood} branch rather than being
+forced into either binary class. Unusable or semantically irrelevant samples
+are assigned to the review-only \texttt{exclude} disposition.
 
-The resulting assignments are operational designations defined for the
-experimental protocol. They must not be interpreted as definitive
-determinations of the legal, material, or evidentiary nature of the depicted
-objects. This distinction is particularly important for visually ambiguous
-cases, for which assignment to the \gls{ood} branch represents a deliberate
-methodological decision.
+These assignments are operational designations defined for the experimental
+protocol and must not be interpreted as definitive legal, material, or
+evidentiary determinations regarding the depicted content. In particular,
+assignment to the \gls{ood} branch represents a methodological decision for
+cases that do not constitute clear instances of either binary class.
 
-The review process must preserve sufficient information to reconstruct each
-decision. Relevant records include the identity of the reviewed sample, the
-assigned disposition, any explanatory notes, the review status, and the
-information required to associate the decision with the original source and
-subsequent experimental artifacts. The methodology does not prescribe a
-specific review interface, database, or storage format, provided that the
-decision process remains consistent, inspectable, and traceable.
+Each review decision must remain reconstructable through the semantic decision
+records defined in Section~\ref{sec:methodology-review-manifest}. These records
+preserve the association among the reviewed sample, its provenance, the
+assigned disposition, any explanatory notes, and the experimental artifacts
+subsequently derived from it.
 
-Once all candidate samples have been reviewed, the selected corpus is subjected
-to dataset freezing. Freezing establishes a stable reference dataset whose
-composition must remain unchanged throughout the subsequent evaluation phases.
-Any correction or modification introduced after freezing must therefore be
-explicitly documented and treated as a new version of the experimental corpus.
+After all candidate samples have been reviewed, the selected corpus is frozen.
+Dataset freezing establishes a stable reference corpus whose composition
+remains unchanged throughout the subsequent evaluation phases. Any correction
+or modification introduced after freezing must be explicitly documented and
+treated as a new version of the experimental dataset.
 
-The frozen dataset provides the common basis for both the controlled evaluation
-of the proxy classification models and the black-box evaluation of the selected
-\gls{ai}-based software systems. This shared foundation ensures that differences
-between the two evaluation levels are not caused by inconsistencies in dataset
-composition.
+The frozen dataset provides the common source corpus for the controlled
+proxy-model evaluation and the black-box evaluation of the selected
+\gls{ai}-based software systems. Its subsequent separation into the binary
+evaluation subset and the clean \gls{ood} branch is defined in
+Section~\ref{sec:methodology-split-generation}.
 
-The binary evaluation subset is derived from the frozen corpus by retaining
-only the \texttt{weapon} and \texttt{non\_weapon} samples. This subset supports
-clean evaluation and the generation of adversarial and anti-forensic variants.
-The \gls{ood} samples remain separate because they address a different
-experimental question: how an automated system assigns anomalous, borderline,
-or distributionally different inputs relative to the known operational classes.
+The number of reviewers and the review workflow may vary across
+implementations. When the protocol is conducted by a single reviewer, the
+absence of inter-annotator agreement must be acknowledged as a limitation.
+Explicit assignment criteria, structured decision records, and dataset
+freezing support procedural auditability and reproducibility, but do not
+eliminate the subjectivity inherent in semantic assessment. Dataset freezing
+therefore acts as a methodological control that distinguishes changes in
+systems, perturbations, and metrics from undocumented changes in the evaluated
+corpus.
 
-The number of reviewers and the specific review workflow depend on the
-implementation context. When the protocol is conducted by a single reviewer,
-the absence of inter-annotator agreement must be acknowledged as a limitation.
-Explicit decision criteria, structured review records, and a frozen dataset
-nevertheless make the process auditable and support reproducibility at the
-procedural level. They do not, by themselves, eliminate the subjectivity
-associated with semantic assessment.
 
-Dataset freezing is therefore not merely an organizational step. It is a
-methodological control that separates changes in the evaluated systems,
-perturbations, and metrics from undocumented changes in the underlying
-experimental corpus.
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
