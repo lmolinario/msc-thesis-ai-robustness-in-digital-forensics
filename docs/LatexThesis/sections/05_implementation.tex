@@ -4221,91 +4221,78 @@ Chapter~\ref{chap:results} to be traced back to its corresponding prediction
 record, frozen input manifest, fold-specific checkpoint, or observable
 black-box software output.
 
-
-
-
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Integrated Gradients Implementation}
 \label{subsec:implementation-explainability}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The explainability layer was implemented through \gls{ig}, following the method
+The explainability layer was implemented using \gls{ig}, following the method
 introduced by Sundararajan et al.~\cite{Sundararajan2017}. The canonical entry
-point is:
+point is
+\codepath{explainability/scripts/17_generate_integrated_gradients_case_studies.py},
+which wraps the preserved implementation in
+\codepath{explainability/scripts/_17_generate_integrated_gradients_case_studies_impl.py}.
 
-\begin{center}
-\codepath{explainability/scripts/17_generate_integrated_gradients_case_studies.py}
-\end{center}
-
-The entry point wraps the frozen implementation stored in:
-
-\begin{center}
-\codepath{explainability/scripts/_17_generate_integrated_gradients_case_studies_impl.py}
-\end{center}
+The wrapper adds headless-safe execution, checkpoint and input-integrity
+verification, adaptive convergence diagnostics, pseudonymous reviewer
+identifiers, and run-specific output cleanup. Interactive manual review uses a
+graphical backend, whereas noninteractive attribution generation uses a
+headless-safe backend.
 
 The \gls{xai} workflow is restricted to transparent proxy models. It is not
 used to explain \gls{magnetai}, \gls{t3kcore},
 \gls{excirefoto2025}, or \gls{cellebriteinseyets}, because the gradients,
-internal representations, and model parameters required by the attribution
-method are not accessible for these selected black-box software systems.
+internal representations, and model parameters required by \gls{ig} are not
+accessible for these black-box software systems.
 
-The prediction-level source used for case selection is:
+The prediction-level source used for case selection is
+\codepath{evaluation/proxy_models/proxy_model_predictions.csv}. This record
+provides the prediction, maximum predicted-class probability, fold, reference
+operational assignment, perturbation condition, clean-to-perturbed association,
+and input path required to identify diagnostically relevant cases.
 
-\begin{center}
-\codepath{evaluation/proxy_models/proxy_model_predictions.csv}
-\end{center}
+The frozen thesis workflow applies \gls{ig} exclusively to EfficientNet-B0,
+which was also the primary proxy target used for model-dependent adversarial
+generation. The corresponding attribution maps must therefore be interpreted
+as evidence concerning the transparent EfficientNet-B0 proxy rather than as
+explanations of the selected black-box software systems.
 
-This record provides the model prediction, maximum predicted-class probability,
-fold assignment, reference operational assignment, perturbation condition,
-clean-to-perturbed association, and input path required to identify
-diagnostically relevant cases. The frozen thesis workflow applies \gls{ig} only
-to EfficientNet-B0, which was also the primary proxy target used for
-model-dependent adversarial generation.
+For each selected case, the implementation loads the checkpoint associated with
+the input's assigned fold. The hardened entry point computes the checkpoint
+\gls{sha256} digest and compares it with the canonical value recorded in
+\codepath{models/model_registry.json}. Generation terminates when the
+checkpoint is missing, when no expected digest is available, or when the
+computed and recorded digests differ.
 
-For each selected case, the fold-specific checkpoint associated with the input
-image is loaded. The hardened entry point computes the checkpoint
-\gls{sha256} digest and compares it with the canonical value recorded in:
+The input-image SHA-256 value is also verified whenever an expected digest is
+available in the prediction or perturbation metadata. The image is then opened
+through the common EXIF-aware RGB-loading procedure and processed using the
+same EfficientNet-B0 transformation applied during proxy-model evaluation.
 
-\begin{center}
-\codepath{models/model_registry.json}
-\end{center}
+The resulting model-input tensor is passed to the Captum implementation of
+\gls{ig}. The baseline is generated as a tensor of zeros having the same shape
+as the preprocessed input:
 
-Generation is interrupted when the checkpoint is missing, when its digest is
-not present in the registry, or when the actual and expected digests differ.
-The input-image \gls{sha256} value is also validated whenever an expected hash
-is available in the prediction or perturbation metadata.
+\[
+\mathbf{x}'
+=
+\mathbf{0}
+\qquad
+\text{in normalized model-input space}.
+\]
 
-The image is opened through the common EXIF-aware RGB-loading procedure and
-processed using the same EfficientNet-B0 transformation applied during
-evaluation. The resulting model-input tensor is passed to the Captum
-implementation of \gls{ig}. The baseline is defined as:
+This baseline does not represent an independently stored reference image and
+must not be interpreted as a black RGB image in the original pixel space.
 
-\begin{center}
-\texttt{zero\_tensor\_in\_preprocessed\_input\_space}
-\end{center}
+The frozen thesis cases use the proxy model's predicted class as the attribution
+target. This configuration produces an attribution map for the output actually
+selected by the model, including incorrect binary predictions and
+\gls{ood} assignments. The implementation also supports attribution to the
+reference binary class or to both binary outputs, but these alternatives were
+not used for the retained thesis assets.
 
-The baseline therefore corresponds to a zero-valued tensor in the normalized
-model-input representation rather than to an independently stored reference
-image.
-
-The attribution target used for the frozen thesis cases is the class predicted
-by the proxy model. Predicted-class attribution was adopted so that each
-visualization represents the input sensitivity associated with the decision
-actually produced by the model, including incorrect binary predictions and
-\gls{ood} assignments. The workflow can also generate attributions for the
-reference operational class or for both binary targets, but these alternatives
-were not used for the frozen thesis selection.
-
-The historical thesis assets were generated using the configuration reported
-in Table~\ref{tab:implementation-ig-configuration}.
+Table~\ref{tab:implementation-ig-configuration} summarizes the frozen
+configuration used to generate the historical thesis figures.
 
 \begin{table}[H]
 \centering
@@ -4334,9 +4321,9 @@ Predicted binary class \\
 
 Baseline
 &
-Zero tensor in preprocessed input space \\
+Zero tensor in normalized, preprocessed input space \\
 
-Integration steps
+Historical integration steps
 &
 32 \\
 
@@ -4350,12 +4337,16 @@ High-confidence selection threshold
 
 Attribution-mask percentile
 &
-90th percentile, corresponding approximately to the highest-attribution
-10\% of image locations \\
+90th percentile, corresponding approximately to the image locations with the
+highest 10\% of attribution magnitudes \\
 
 Reviewer identifier
 &
 Pseudonymous identifier \texttt{reviewer\_01} \\
+
+Historical convergence-validation status
+&
+\texttt{pending\_adaptive\_regeneration} \\
 
 \bottomrule
 \end{tabularx}
@@ -4365,132 +4356,161 @@ The identifiers \texttt{chapter5\_core} and
 \codepath{explainability/manifests/chapter5/} are retained as historical
 implementation names created before the final reorganization of the thesis
 chapters. They identify the frozen records and do not indicate that the
-corresponding qualitative results are reported in the present chapter. The
-resulting attribution analyses are discussed in
+qualitative results are reported in Chapter~5. The resulting attribution
+analyses are discussed in
 Section~\ref{sec:results-explainability}.
 
 \paragraph{Case-selection procedure.}
 
-The \texttt{chapter5\_core} strategy organizes candidate predictions into five
+The \texttt{chapter5\_core} strategy organizes prediction records into five
 diagnostic buckets:
 
 \begin{enumerate}
 \item a correctly classified clean \texttt{weapon} image;
 \item a clean \texttt{weapon} false negative;
-\item a high-confidence \gls{ood} input assigned to the
-\texttt{weapon} class;
-\item a clean-correct image rendered incorrect by an anti-forensic
-transformation;
-\item a clean-correct image rendered incorrect with high maximum
-predicted-class probability by a model-dependent adversarial attack.
+\item a high-confidence \gls{ood} input assigned to \texttt{weapon};
+\item an image correctly classified in its clean state and rendered incorrect
+by an anti-forensic transformation;
+\item an image correctly classified in its clean state and rendered incorrect
+with high maximum predicted-class probability by an adversarial condition.
 \end{enumerate}
 
-Candidates within each bucket are ordered deterministically according to the
-maximum predicted-class probability, fold, and input path.
-Perturbation-induced failures are additionally ranked according to a predefined
-diagnostic priority: \texttt{weapon}-to-\texttt{non\_weapon} transitions are
-considered first, followed by
-\texttt{non\_weapon}-to-\texttt{weapon} transitions and other induced
-misclassifications.
+Candidates are ordered deterministically using the maximum predicted-class
+probability, fold, and image path. For perturbation-induced failures, the
+ranking prioritizes \texttt{weapon}-to-\texttt{non\_weapon} transitions,
+followed by \texttt{non\_weapon}-to-\texttt{weapon} transitions and other
+clean-correct-to-incorrect transitions.
 
-The automatic filtering stage identified the candidate records satisfying each
-diagnostic criterion. Three cases were initially retained from each bucket for
-human review, producing a 15-case intermediate selection. The reviewer
-inspected the candidate images through an interactive interface displaying the
-input, fold, reference operational assignment, predicted class, maximum
-predicted-class probability, perturbation condition, and selection rationale.
-Selection and deselection actions were logged together with their timestamps,
-ranks, case identifiers, and pseudonymous reviewer identifier.
+The frozen selection summary records 1\,175 candidate records across the five
+buckets. Human review retained three cases per bucket, producing a 15-case
+intermediate selection. The reviewer inspected the image together with its
+fold, reference operational assignment, prediction, maximum predicted-class
+probability, perturbation condition, and selection rationale.
 
-One representative case per bucket was subsequently retained for the
-thesis-level qualitative analysis. The canonical five-case mapping is:
+Selection and deselection actions were logged together with timestamps, ranks,
+case identifiers, and the pseudonymous reviewer identifier. A subsequent
+thesis-level reduction retained one representative case for each diagnostic
+bucket.
 
-\begin{center}
-\codepath{explainability/manifests/chapter5/thesis_selection.csv}
-\end{center}
-
-The selected cases are summarized in
-Table~\ref{tab:implementation-xai-thesis-selection}.
+Table~\ref{tab:implementation-xai-thesis-selection} summarizes both the
+candidate population and the final five-case selection.
 
 \begin{table}[H]
 \centering
-\small
+\scriptsize
 \renewcommand{\arraystretch}{1.15}
-\setlength{\tabcolsep}{5pt}
-\caption{Canonical Integrated Gradients case selection}
+\setlength{\tabcolsep}{4pt}
+\caption{Canonical Integrated Gradients case-selection process}
 \label{tab:implementation-xai-thesis-selection}
-\begin{tabularx}{0.96\textwidth}{@{}l X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.25\textwidth} r r X@{}}
 \toprule
-\textbf{Case identifier} &
-\textbf{Diagnostic role} \\
+\textbf{Diagnostic bucket} &
+\textbf{Candidates} &
+\textbf{Reviewed selection} &
+\textbf{Final thesis case and role} \\
 \midrule
 
-\texttt{xai\_case\_0001}
+Clean correct weapon
 &
-Correctly classified clean \texttt{weapon} reference case. \\
+492
+&
+3
+&
+\texttt{xai\_case\_0001}: correctly classified clean
+\texttt{weapon} reference case. \\
 
-\texttt{xai\_case\_0006}
+Clean weapon false negative
 &
-Clean \texttt{weapon} false-negative case. \\
+8
+&
+3
+&
+\texttt{xai\_case\_0006}: clean \texttt{weapon} input classified as
+\texttt{non\_weapon}. \\
 
-\texttt{xai\_case\_0009}
+High-confidence OOD as weapon
 &
-High-confidence \gls{ood} assignment to the \texttt{weapon} class. \\
+139
+&
+3
+&
+\texttt{xai\_case\_0009}: high-confidence \gls{ood} assignment to
+\texttt{weapon}. \\
 
-\texttt{xai\_case\_0010}
+Anti-forensic failure
 &
-Induced failure associated with Histogram Modification. \\
+36
+&
+3
+&
+\texttt{xai\_case\_0010}: clean-correct image rendered incorrect by
+Histogram Modification. \\
 
-\texttt{xai\_case\_0015}
+Adversarial high-confidence failure
 &
-High-confidence induced failure associated with Sigma-Zero. \\
+500
+&
+3
+&
+\texttt{xai\_case\_0015}: high-confidence induced failure associated with
+Sigma-Zero. \\
+
+\midrule
+\textbf{Total}
+&
+\textbf{1\,175}
+&
+\textbf{15}
+&
+\textbf{Five final cases, one per diagnostic bucket.} \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-These categories define the diagnostic roles of the selected cases. Their
-interpretation and the corresponding attribution patterns are reported in
-Section~\ref{sec:results-explainability}.
+These categories define the intended diagnostic roles of the cases. Their
+visual interpretation and the corresponding attribution patterns are reported
+in Section~\ref{sec:results-explainability}.
 
 \paragraph{Attribution processing and visual outputs.}
 
-For each attribution target, the channel-wise attribution tensor is converted
-into a two-dimensional map by summing the absolute attribution magnitudes
-across the three input channels. The resulting map is min--max normalized to
-the interval \([0,1]\).
+For each target, the channel-wise attribution tensor is converted into a
+two-dimensional map by summing the absolute attribution magnitudes across the
+three input channels. The resulting map is min--max normalized to the interval
+\([0,1]\).
 
-Because absolute values are used, the visualizations represent attribution
-magnitude rather than contribution direction. They identify image regions
-associated with larger attribution magnitudes for the selected model output
-along the baseline-to-input path, but they do not distinguish positive evidence
-from negative evidence.
+Because absolute values are used, the visualization represents attribution
+magnitude rather than contribution direction. It identifies regions associated
+with larger attribution magnitudes for the selected model output along the
+baseline-to-input path, but it does not distinguish positive evidence from
+negative evidence.
 
-The implementation produces the following diagnostic outputs for each case:
+The implementation produces the following diagnostic files for each case:
 
 \begin{itemize}
 \item the resized RGB input image;
 \item a colorized attribution heatmap;
 \item an overlay combining the input and heatmap;
 \item a normalized grayscale attribution mask;
-\item a binary mask containing pixels at or above the selected attribution
-percentile;
+\item a binary high-attribution mask;
 \item a side-by-side diagnostic comparison;
 \item a histogram of normalized attribution values.
 \end{itemize}
 
 The heatmap uses the \texttt{inferno} color map. The overlay combines the
-resized input with the colorized heatmap using an attribution opacity of 0.45.
-The binary high-attribution mask is computed from the 90th percentile of the
-normalized map and therefore identifies approximately the 10\% of image
-locations with the highest attribution magnitudes. The exact proportion may
-vary when multiple locations share the percentile threshold.
+resized input and colorized map using an attribution opacity of 0.45. The
+binary high-attribution mask retains pixels whose normalized magnitude is at or
+above the 90th-percentile threshold.
 
-The thesis retains four visual assets for each of the five selected cases:
+This threshold identifies approximately the 10\% of image locations with the
+largest attribution magnitudes. The exact proportion may differ when multiple
+locations share the percentile value.
+
+Four visual assets are retained in the thesis for each selected case:
 
 \begin{enumerate}
 \item input image;
-\item standalone heatmap;
+\item standalone attribution heatmap;
 \item heatmap overlay;
 \item top-10\% attribution mask.
 \end{enumerate}
@@ -4505,39 +4525,63 @@ The resulting thesis-level visual corpus contains:
 20\ \text{images}.
 \end{equation}
 
-The thesis-ready copies are stored under:
-
-\begin{center}
-\codepath{docs/LatexThesis/images/}
-\end{center}
-
-The complete generated diagnostic tree under
-\codepath{explainability/outputs/} remains a local output and is not
-distributed through the public repository.
+The thesis-ready files are stored under
+\codepath{docs/LatexThesis/images/}. The complete generated diagnostic tree
+under
+\codepath{explainability/outputs/integrated_gradients/} remains a local output
+and is not distributed through the public repository.
 
 \paragraph{Convergence diagnostics.}
 
-The historical thesis images were generated using 32 integration steps. The
-corresponding convergence deltas are retained in the canonical selection
-manifest. These historical assets were not generated under the adaptive
-acceptance rule introduced later in the hardened entry point. They are
-therefore interpreted as qualitative diagnostic visualizations, and no strict
-numerical convergence claim is made for them.
+The historical thesis assets were generated using 32 integration steps. Their
+raw Captum convergence deltas are retained in
+\codepath{explainability/manifests/chapter5/thesis_selection.csv}. These
+historical outputs were not generated under the adaptive acceptance rule
+subsequently introduced by the hardened entry point.
 
-The hardened entry point additionally supports adaptive convergence
-diagnostics. Starting from the requested number of integration steps, the
-procedure can double the integration resolution until the normalized
-convergence delta is at most 0.05 or the maximum of 256 steps is reached. A
-regenerated case is marked as \texttt{passed} only when the threshold is
-satisfied; otherwise, the state \texttt{threshold\_not\_met} is retained.
+The hardened procedure evaluates the normalized convergence delta:
 
-This adaptive functionality was introduced after the historical 32-step assets
-had been generated and was not used to produce the figures analyzed in this
-thesis. It is therefore documented as an available validation control rather
-than as a property of the retained thesis assets.
+\begin{equation}
+\delta_{\mathrm{norm}}
+=
+\frac{
+\left|\delta_{\mathrm{IG}}\right|
+}{
+\max\left(
+\left|
+f_t(\mathbf{x})-f_t(\mathbf{x}')
+\right|,
+10^{-12}
+\right)
+},
+\end{equation}
 
-The canonical \gls{xai} metadata and provenance records are listed in
-Table~\ref{tab:implementation-xai-artifacts}.
+where \(f_t\) is the target-class output, \(\mathbf{x}\) is the preprocessed
+input, and \(\mathbf{x}'\) is the baseline.
+
+Starting from the requested integration resolution, the procedure doubles the
+number of steps until either:
+
+\[
+\delta_{\mathrm{norm}}
+\leq
+0.05,
+\]
+
+or the maximum of 256 integration steps is reached. A regenerated case is
+marked as \texttt{passed} only when the threshold is satisfied; otherwise, the
+state \texttt{threshold\_not\_met} is retained.
+
+Adaptive regeneration had not been completed for the five historical thesis
+assets at the time of artifact freezing. Their validation state is therefore
+recorded as \texttt{pending\_adaptive\_regeneration}. The figures are
+interpreted exclusively as qualitative diagnostic visualizations, and no
+strict numerical convergence or completeness claim is made for them.
+
+\paragraph{Selection and provenance records.}
+
+Table~\ref{tab:implementation-xai-artifacts} lists the canonical records
+retained for the explainability workflow.
 
 \begin{table}[H]
 \centering
@@ -4546,7 +4590,7 @@ Table~\ref{tab:implementation-xai-artifacts}.
 \setlength{\tabcolsep}{4pt}
 \caption{Canonical Integrated Gradients selection and provenance records}
 \label{tab:implementation-xai-artifacts}
-\begin{tabularx}{\textwidth}{@{}p{0.47\textwidth} X@{}}
+\begin{tabularx}{\textwidth}{@{}p{0.48\textwidth} X@{}}
 \toprule
 \textbf{Record} &
 \textbf{Role} \\
@@ -4554,41 +4598,55 @@ Table~\ref{tab:implementation-xai-artifacts}.
 
 \codepath{explainability/manifests/chapter5/thesis_selection.csv}
 &
-Canonical mapping of the five cases, prediction metadata, attribution
-configuration, thesis image paths, and selection rationales. \\
+Canonical mapping of the five cases, prediction metadata, historical
+attribution configuration, thesis image paths, raw convergence deltas,
+validation status, and selection rationales. \\
 
 \codepath{explainability/manifests/chapter5/candidate_selection_summary.json}
 &
-Candidate and manually selected counts for the five diagnostic buckets. \\
+Candidate counts, reviewed selections, bucket distribution, and final five-case
+mapping. \\
 
 \codepath{explainability/manifests/chapter5/run_summary.json}
 &
-Frozen model, strategy, baseline, target, integration-step count, percentile,
-selection counts, and public-distribution policy. \\
+Frozen model, strategy, baseline, attribution target, historical integration
+steps, percentile, selection counts, and public-distribution policy. \\
 
 \codepath{explainability/manifests/chapter5/run_provenance.json}
 &
-Entry point, frozen implementation, prediction source, model registry,
-integrity controls, and convergence policy. \\
+Entry point, preserved implementation, prediction source, historical snapshot,
+model registry, integrity controls, and adaptive-convergence policy. \\
 
 \codepath{explainability/logs/chapter5_manual_selection.csv}
 &
-Human-in-the-loop case-selection log. \\
+Human-in-the-loop case-selection actions recorded under a pseudonymous reviewer
+identifier. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The \gls{xai} layer is intentionally qualitative and diagnostic. The generated
-maps are not semantic segmentations, causal demonstrations, calibrated
-reliability estimates, or explanations of the selected black-box software
-systems. They provide evidence concerning the attribution behavior of the
-transparent EfficientNet-B0 proxy under the selected cases and complement,
+The explainability layer is intentionally qualitative and diagnostic. The
+generated maps are not semantic segmentations, causal demonstrations,
+calibrated reliability estimates, or explanations of the selected black-box
+software systems. They provide evidence concerning the attribution behavior of
+the transparent EfficientNet-B0 proxy for the selected cases and complement,
 rather than replace, the quantitative robustness metrics.
 
 The integrity and provenance controls shared across the complete experimental
 pipeline are consolidated in
 Section~\ref{sec:implementation-traceability}.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
