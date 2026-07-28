@@ -1789,75 +1789,42 @@ not overwritten unless the explicit \texttt{--force} option is supplied.
 The model-agnostic anti-forensic transformations are described in
 Section~\ref{subsec:implementation-antiforensic}.
 
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Anti-Forensic Transformation Implementation}
 \label{subsec:implementation-antiforensic}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The anti-forensic transformation stage was implemented through:
+Anti-forensic artifact generation was implemented through
+\codepath{datasets/scripts/attacks/13_generate_anti_forensic_attacks.py}, using
+\codepath{datasets/splits/manifests/clean_folds_manifest.csv} as the canonical
+input. Each transformation was applied to all 1\,000 clean binary images,
+comprising 500 \texttt{weapon} and 500 \texttt{non\_weapon} samples. The 500
+clean \gls{ood} inputs remained outside this stage.
 
-\begin{center}
-\codepath{datasets/scripts/attacks/13_generate_anti_forensic_attacks.py}
-\end{center}
+The frozen suite comprises five deterministic and model-agnostic
+transformations: \gls{jpegrecompression}, \gls{resampleresize},
+\gls{gaussianblur}, \gls{histogrammodification}, and
+\gls{contraststretching}. These conditions do not access model gradients,
+logits, probabilities, or checkpoints. The reference operational assignment of
+each source image is propagated unchanged to the corresponding transformed
+artifact.
 
-The script consumes the same canonical binary manifest used by the adversarial
-generation stage:
+Before generation, the script verifies the required manifest fields, accepted
+binary assignments, and uniqueness of image identifiers. It also checks the
+existence of every clean input and recomputes its \gls{sha256} and \gls{md5}
+digests. Missing files or mismatches between the recorded and computed values
+terminate execution. SHA-256 remains the primary integrity control, whereas
+MD5 is retained as an auxiliary interoperability identifier.
 
-\begin{center}
-\codepath{datasets/splits/manifests/clean_folds_manifest.csv}
-\end{center}
-
-Accordingly, each transformation is applied to the complete set of 1\,000 clean
-binary images, comprising 500 \texttt{weapon} and 500
-\texttt{non\_weapon} samples. The 500 \gls{ood} inputs remain outside this
-stage and are preserved in their clean form for the separate
-out-of-distribution evaluation.
-
-The frozen anti-forensic suite comprises five deterministic and model-agnostic
-transformations:
-
-\begin{itemize}
-\item \gls{jpegrecompression};
-\item \gls{resampleresize};
-\item \gls{gaussianblur};
-\item \gls{histogrammodification};
-\item \gls{contraststretching}.
-\end{itemize}
-
-These transformations do not require access to model gradients, logits,
-probabilities, or checkpoints. They implement common image post-processing
-operations that modify compression characteristics, spatial detail, local
-intensity distributions, or global contrast. The selected configurations were
-intended to retain sufficient task-relevant semantic content for meaningful
-evaluation. The reference operational assignment of each source image is
-propagated unchanged to the corresponding transformed artifact and is not
-reassessed during generation.
-
-Before generation, the script validates the required manifest fields, the
-exclusive use of the two accepted binary reference assignments, and the
-uniqueness of the image identifiers. It also verifies the existence of every
-clean input and recomputes its \gls{sha256} and \gls{md5} values. Generation is
-interrupted when an input file is missing or when either recorded digest does
-not correspond to the file being processed. \gls{sha256} remains the primary
-integrity control, whereas \gls{md5} is retained as an auxiliary
-interoperability identifier.
-
-Each source image is opened using Pillow, corrected according to its embedded
-orientation information through an EXIF transpose operation, and converted to
-a three-channel RGB representation. The transformation-specific operation is
-then applied, and the resulting image is stored as a \gls{jpeg} file. The
-dedicated recompression condition uses quality 70. The remaining transformations
-are serialized at quality 95 to limit, without eliminating, additional
-compression effects beyond those introduced by the principal transformation.
+Each source image is opened with Pillow, corrected according to its embedded
+orientation through an EXIF transpose operation, and converted to RGB before
+the transformation-specific operation is applied. All generated artifacts are
+stored as \gls{jpeg} files. The dedicated recompression condition uses quality
+70, while the remaining transformations use quality 95 to limit additional
+encoding effects beyond the principal operation.
 
 Table~\ref{tab:implementation-antiforensic-parameters} reports the frozen
-configuration of the five conditions.
+configuration of the five transformations.
 
 \begin{table}[H]
 \centering
@@ -1882,9 +1849,9 @@ JPEG, quality 70 \\
 
 \gls{resampleresize}
 &
-The image is downsampled to 50\% of its original width and height through
-bicubic interpolation and subsequently restored to its original dimensions
-using the same interpolation method.
+The image is downsampled to 50\% of its original width and height using bicubic
+interpolation and then restored to its original dimensions using the same
+interpolation method.
 &
 JPEG, quality 95 \\
 
@@ -1904,8 +1871,7 @@ JPEG, quality 95 \\
 \gls{contraststretching}
 &
 Automatic contrast normalization is applied through
-\texttt{ImageOps.autocontrast}, using a cutoff of 1\% at the intensity
-extremes.
+\texttt{ImageOps.autocontrast}, using a cutoff of 1\%.
 &
 JPEG, quality 95 \\
 
@@ -1915,17 +1881,15 @@ JPEG, quality 95 \\
 
 \paragraph{\gls{jpegrecompression}.}
 
-The recompression condition does not introduce an explicit spatial or tonal
-transformation before serialization. Instead, the RGB representation is
-re-encoded as a \gls{jpeg} image with quality 70. This condition implements a
-controlled moderate lossy-recompression scenario involving quantization and
-block-based coding artifacts, without applying the additional operations used
-by the other transformation families.
+The recompression condition does not apply an explicit spatial or tonal
+operation before serialization. The RGB image is re-encoded at JPEG quality 70,
+introducing a controlled lossy-compression condition through quantization and
+block-based encoding effects.
 
 \paragraph{\gls{resampleresize}.}
 
-For an image with dimensions \(W \times H\), the intermediate dimensions are
-computed as:
+For an image with original dimensions \(W \times H\), the intermediate
+dimensions are computed as:
 
 \begin{equation}
 W_{\mathrm{down}}
@@ -1939,55 +1903,47 @@ H_{\mathrm{down}}
 
 The image is first resized to
 \(W_{\mathrm{down}} \times H_{\mathrm{down}}\) and then restored to
-\(W \times H\). Both operations use bicubic interpolation. The final output
+\(W \times H\). Both operations use bicubic interpolation. The output
 therefore retains the original spatial dimensions while incorporating the
-information loss introduced by the intermediate downsampling and reconstruction
-stages.
+information loss introduced by the intermediate downsampling and
+reconstruction.
 
 \paragraph{\gls{gaussianblur}.}
 
-The Gaussian blur condition applies a radius of 1.5 to suppress high-frequency
-spatial detail. The image dimensions and RGB representation remain unchanged
-before final JPEG serialization. The transformation is deterministic and does
-not depend on the reference operational assignment, assigned fold, or
-proxy-model output.
+The Gaussian Blur condition applies a radius of 1.5 to suppress high-frequency
+spatial detail. Image dimensions remain unchanged before final JPEG
+serialization.
 
 \paragraph{\gls{histogrammodification}.}
 
-Histogram Modification is implemented through per-channel histogram
-equalization. The operation redistributes the available intensity values to
-alter the tonal distribution of the image. No manually selected thresholds or
-image-specific model outputs are used. The same deterministic operation is
-applied to every sample in the binary subset.
+Histogram Modification is implemented through
+\texttt{ImageOps.equalize}, which performs histogram equalization on the RGB
+image channels. The same deterministic operation is applied to every sample,
+without image-specific thresholds or model-derived information.
 
 \paragraph{\gls{contraststretching}.}
 
-Contrast Stretching is implemented through automatic contrast normalization.
-The transformation is applied using \texttt{ImageOps.autocontrast} with a
-cutoff percentage of 1.0 before remapping the remaining intensity range. This
-operation modifies the global tonal distribution while retaining the original
-image dimensions and the source image's reference operational assignment.
+Contrast Stretching is implemented through
+\texttt{ImageOps.autocontrast} with a cutoff value of 1.0. The operation
+remaps the remaining intensity range after excluding the configured proportion
+of extreme values, modifying global contrast while retaining the original
+image dimensions.
 
-The transformed images are written according to the structure:
+Generated files follow the directory structure
+\codepath{attacks/anti_forensic/<transformation>/<fold>/<label>/} and the
+filename pattern:
 
-\begin{center}
-\codepath{attacks/anti_forensic/<transformation>/<fold>/<label>/}
-\end{center}
+\[
+\texttt{<image\_id>\_\_<transformation>.jpg}.
+\]
 
-Generated file names follow the pattern:
+The hierarchy preserves the deterministic fold and binary reference assignment
+of the source image. The transformation name remains separate from the
+reference assignment, and no relabeling is performed during generation.
 
-\begin{center}
-\texttt{<image\_id>\_\_<transformation>.jpg}
-\end{center}
-
-The folder hierarchy retains both the deterministic fold assignment and the
-binary reference assignment of the source image. No relabeling is performed
-during generation, and the transformation name is recorded separately from the
-reference operational assignment.
-
-Each of the five conditions produces 1\,000 transformed files, distributed as
-200 images per fold and 500 images per binary reference assignment. The
-complete anti-forensic stage therefore produces:
+Each transformation produces 1\,000 files, comprising 500
+\texttt{weapon} and 500 \texttt{non\_weapon} artifacts, with 200 files per
+fold. The complete stage therefore produces:
 
 \begin{equation}
 5\ \text{transformations}
@@ -1997,54 +1953,70 @@ complete anti-forensic stage therefore produces:
 5\,000\ \text{transformed artifacts}.
 \end{equation}
 
-The canonical sample-level generation record is stored as:
+Table~\ref{tab:implementation-antiforensic-artifacts} summarizes the canonical
+records produced by the generation stage.
 
-\begin{center}
+\begin{table}[H]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{4pt}
+\caption{Canonical records produced by anti-forensic transformation generation}
+\label{tab:implementation-antiforensic-artifacts}
+\begin{tabularx}{\textwidth}{@{}p{0.48\textwidth} X@{}}
+\toprule
+\textbf{Record} &
+\textbf{Role} \\
+\midrule
+
 \codepath{attacks/manifests/anti_forensic_attacks_manifest.csv}
-\end{center}
+&
+Sample-level mapping among each transformed artifact, its source image,
+reference assignment, fold, provenance, transformation parameters, paths,
+digests, size, extension, and creation timestamp. \\
 
-For each transformed artifact, the manifest records:
-
-\begin{itemize}
-\item the generated and original image identifiers;
-\item the fold and reference operational assignment;
-\item the original source provenance;
-\item the clean and transformed repository-relative paths;
-\item the anti-forensic family and transformation name;
-\item the serialized transformation parameters;
-\item the original and transformed \gls{sha256} and \gls{md5} values;
-\item the output file size, extension, and creation timestamp.
-\end{itemize}
-
-The corresponding run-level generation record is stored as:
-
-\begin{center}
 \codepath{attacks/manifests/anti_forensic_generation_summary.json}
-\end{center}
+&
+Run-level record of the input manifest, selected transformations, frozen
+parameters, output counts, fold and assignment distributions, and consistency
+checks. \\
 
-The summary records the input manifest, selected transformations, frozen
-parameters, global output count, per-transformation counts, per-fold
-distributions, per-assignment distributions, and final validation checks. The
-frozen execution confirms that all five transformations generated the expected
-1\,000 outputs and that the complete stage produced exactly 5\,000 transformed
-artifacts.
+\bottomrule
+\end{tabularx}
+\end{table}
 
-The final checks also confirm the uniqueness of the generated image identifiers
-and transformed \gls{sha256} values. Existing transformation directories are
-not retained during an explicitly forced rebuild; only the selected output
-directories are removed and regenerated. Without the \texttt{--force} option,
-the presence of an existing selected transformation directory causes the script
-to terminate, reducing the risk of silently mixing outputs generated under
-different configurations.
+For each artifact, the sample-level manifest records the generated and original
+image identifiers, fold, reference assignment, source provenance, clean and
+transformed paths, transformation name, serialized parameters, original and
+transformed SHA-256 and MD5 values, file size, extension, and creation
+timestamp.
 
-Although the implementation supports an optional direct proxy-model evaluation
-mode, the canonical outputs of this stage are the transformed images, the
-sample-level manifest, and the generation summary described above. Consolidated
-proxy-model evaluation is performed separately through the common evaluation
-pipeline documented in Section~\ref{subsec:implementation-metrics}. The
-transformed images are also incorporated into the black-box input corpus through
-the forensic evaluation bundle described in
+The generation summary confirms that all five transformations produced the
+expected 1\,000 outputs, for a total of 5\,000 artifacts. It also confirms 200
+outputs per fold and 500 outputs per binary reference assignment for every
+condition, together with uniqueness of the generated identifiers and
+transformed \gls{sha256} values.
+
+The script supports optional immediate evaluation of generated artifacts against
+an EfficientNet-B0 checkpoint and an evaluation-only mode for an existing
+anti-forensic manifest. These modes are auxiliary to the generation stage. The
+canonical comparative proxy-model evaluation is performed separately through
+the common evaluation pipeline described in
+Section~\ref{subsec:implementation-metrics}.
+
+Existing selected transformation directories are not overwritten by default.
+When \texttt{--force} is supplied, only the selected directories are removed
+and regenerated. This behavior reduces the risk of combining artifacts produced
+under different configurations.
+
+The transformed artifacts are subsequently incorporated into the forensic
+evaluation bundle described in
 Section~\ref{sec:implementation-forensic-bundle}.
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
