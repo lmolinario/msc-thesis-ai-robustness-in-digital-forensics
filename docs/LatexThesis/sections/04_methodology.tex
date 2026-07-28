@@ -249,59 +249,29 @@ black-box software analyses}
 \label{fig:methodology-fairlab-overview}
 \end{figure}
 
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Research Design and Experimental Assumptions}
 \label{sec:methodology-research-design}
 % ─────────────────────────────────────────────────────────────────────────────
 
 The experimental design adopts forensic visual triage as its reference
-scenario. In this setting, an automated classification system supports the
-analyst in the preliminary identification and prioritization of potentially
-relevant images.
+scenario, in which automated classification supports the preliminary
+identification and prioritization of potentially relevant images. The case
+study defines a controlled firearm-related classification task rather than
+attempting to cover the entire domain of weapon detection. This restricted
+scope provides a clear target category while retaining sufficient visual
+variability for robustness assessment. The adopted designations are operational
+categories established for the experiment and must not be interpreted as legal
+qualifications or universal semantic classes.
 
-The case study is based on a binary classification task and a separate
-\gls{ood} evaluation branch. The binary task distinguishes between the
-operational labels \texttt{weapon} and \texttt{non\_weapon}. The \gls{ood}
-designation identifies samples reserved for a separate analysis of
-distributional mismatch. These designations must not be interpreted as legal
-qualifications of the depicted content or as universal semantic categories.
-They are operational definitions established specifically for the experimental
-protocol adopted in this thesis.
-
-The study does not attempt to cover the entire domain of weapon detection.
-Instead, it defines a controlled, firearm-related case study that is
-operationally relevant to the evaluation of automated visual triage systems.
-This restricted scope provides a clear target category while preserving
-sufficient visual variability for robustness assessment.
-
-Within the binary task, \texttt{weapon} represents the positive class. It
-includes images in which a clearly recognizable object belonging to the
-firearm-related target category is visible. The \texttt{non\_weapon} class
-represents the in-domain negative class. It includes realistic and interpretable
-images that do not contain the target object while remaining compatible with
-the visual domain of the experimental collection.
-
-The \gls{ood} branch includes images that should not be treated as ordinary
-positive or negative instances. These samples may be ambiguous, anomalous,
-synthetic, borderline, drawn from a different visual distribution, or affected
-by degradation already present in the source material. The \gls{ood} branch is
-therefore not modeled as a third supervised class within the binary task.
-
-In the forensic triage scenario considered in this thesis, false negatives on
-the \texttt{weapon} class are particularly critical. They may reduce the
-likelihood that potentially relevant material is selected for detailed human
-review. False positives also have operational consequences because they may
-increase the number of irrelevant images requiring manual examination.
-
-The assignment criteria were formalized before the experimental corpus was
-frozen. The same criteria governed human-in-the-loop validation, sample
+The binary task distinguishes between \texttt{weapon}, defined as the positive
+class, and \texttt{non\_weapon}, defined as the in-domain negative class. A
+separate \gls{ood} branch is reserved for distributional evaluation and is not
+modeled as a third supervised class. The assignment criteria were formalized
+before dataset freezing and govern human-in-the-loop validation, sample
 selection, and the documentation of inclusion and exclusion decisions.
-Table~\ref{tab:methodology-operational-classes} summarizes the resulting
-operational definitions.
+Table~\ref{tab:methodology-operational-classes} summarizes these operational
+definitions.
 
 \begin{table}[H]
 \centering
@@ -423,52 +393,29 @@ adopted during human-in-the-loop review}
 \label{fig:methodology-class-examples}
 \end{figure}
 
-The \texttt{exclude} designation does not represent an additional analytical
-category. It functions exclusively as a quality-control disposition during
-human-in-the-loop review. It enables unsuitable samples to be documented and
-kept separate from the images included in the frozen experimental corpus.
+The \texttt{exclude} designation is used exclusively as a quality-control
+disposition during human review and does not constitute an additional
+analytical branch. Likewise, the \gls{ood} branch is not a homogeneous semantic
+class or a subclass of \texttt{non\_weapon}. It contains borderline,
+anomalous, degraded, synthetic, or otherwise distributionally different inputs
+that do not constitute clean instances of either binary class. Since
+classifiers may produce high-confidence predictions outside their training
+distribution \cite{hendrycks2017baseline,fort2021exploring}, these inputs must
+be assessed separately from ordinary binary errors. Their exclusion from model
+training and perturbation generation is formalized in
+Section~\ref{sec:methodology-split-generation}.
 
-The inclusion of an explicit \gls{ood} branch addresses a distinct
-methodological requirement. Operational classification systems are not exposed
-only to clean images that are semantically aligned with the expected classes.
-They may also process ambiguous, degraded, synthetic, irrelevant, or
-distributionally different content. Research on \gls{ood} detection has shown
-that classifiers may produce high-confidence predictions for inputs outside
-their training distribution
-\cite{hendrycks2017baseline,fort2021exploring}. It is therefore necessary to
-distinguish errors involving the known binary classes from predictions produced
-for samples that should not be treated as ordinary positive or negative
-instances.
+These operational definitions provide the semantic basis for the dataset
+construction, review-documentation, and freezing procedures described in
+Sections~\ref{sec:methodology-dataset-construction},
+\ref{sec:methodology-review-manifest}, and
+\ref{sec:methodology-human-review}. They ensure that final assignments are
+derived from explicit and traceable review criteria rather than inherited
+directly from source labels, filenames, or directory structures.
 
-The \gls{ood} branch must not be interpreted as a homogeneous semantic class or
-as a subclass of \texttt{non\_weapon}. It is a methodological collection of
-distributionally different and borderline cases used to assess how an automated
-system assigns such inputs relative to the known operational classes. For this
-reason, \gls{ood} samples remain separate from the binary subset. They are not
-subjected to the adversarial attacks or anti-forensic transformations generated
-for the \texttt{weapon}/\texttt{non\_weapon} task.
 
-The methodology further distinguishes among classification performance,
-robustness, and operational evaluation. Within the binary task, classification
-performance concerns the ability of a system to assign the expected label to
-an image. Robustness concerns the stability of that behavior when the input is
-degraded, altered, or deliberately manipulated. Operational evaluation concerns
-the consequences of the observed output for the forensic workflow.
 
-These consequences include false negatives that may prevent relevant images
-from being prioritized, false positives that increase the analytical workload,
-and in-domain assignments produced for \gls{ood} samples. This distinction
-prevents performance on clean data from being interpreted as a sufficient
-guarantee of operational robustness under investigative conditions.
 
-Finally, the protocol adopts a documented human-in-the-loop approach. Manual
-review is not treated as an external or residual component of the experiment.
-It is an integral part of dataset construction and validation. In a forensic
-context, class assignment cannot depend exclusively on automated labels or on
-the original organization of the source material. Inclusion, exclusion, and
-class-assignment criteria must be explicit, traceable, and consistent with the
-operational task. This approach preserves both the final selection and the
-reasoning rules used to construct the frozen experimental corpus.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
