@@ -1374,14 +1374,6 @@ The specific attack algorithms, model configurations, parameter values, output
 representations, and traceability artifacts adopted in this thesis are
 documented in Chapter~\ref{chap:implementation}.
 
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Anti-Forensic Evaluation Methodology}
 \label{sec:methodology-anti-forensic-transformations}
@@ -1389,129 +1381,122 @@ documented in Chapter~\ref{chap:implementation}.
 
 The anti-forensic component of the \gls{fairlab} protocol evaluates the
 stability of automated image classification under controlled and operationally
-plausible modifications of the image artifact.
+plausible modifications of the image artifact. Unlike the model-dependent
+attacks described in
+Section~\ref{sec:methodology-adversarial-attacks}, these transformations are
+not optimized against the gradients, loss function, observable scores, or
+decision boundary of a specific classifier. They are applied through
+predefined image-processing rules and can therefore be evaluated consistently
+across proxy models and selected black-box software systems.
 
-Unlike the model-dependent attacks described in
-Section~\ref{sec:methodology-adversarial-attacks}, anti-forensic
-transformations are not optimized against the gradients, loss function,
-observable output scores, or decision boundary of a specific classifier. They
-are applied according to predefined image-processing rules and can therefore be
-evaluated consistently across different proxy models and selected black-box
-software systems.
-
-The term \textit{anti-forensic} is used in an experimental and operational
-sense. It does not necessarily imply malicious intent or deliberate evidence
-concealment. Instead, it identifies transformations that may alter, degrade, or
-destabilize automated analysis by modifying the visual, statistical, or
-encoding-related characteristics of an image.
-
-Such transformations may be introduced deliberately, but they may also arise
-from ordinary image-handling processes. Examples include repeated saving,
-format conversion, platform-mediated recompression, resizing, forwarding,
-filtering, enhancement, or normalization. Their effects are therefore relevant
-to both deliberate anti-forensic scenarios and incidental preprocessing
-conditions.
+The term \textit{anti-forensic} is used here in an experimental and operational
+sense and does not necessarily imply malicious intent or deliberate evidence
+concealment. It identifies transformations that may alter or destabilize
+automated analysis by modifying the visual, statistical, spatial, or
+encoding-related properties of an image. Such modifications may be introduced
+deliberately or arise from ordinary processes such as repeated saving, format
+conversion, platform-mediated recompression, resizing, forwarding, filtering,
+enhancement, or normalization.
 
 The methodology considers transformation families that affect complementary
-properties of the image artifact. These include lossy re-encoding, spatial
-resampling, blurring, tonal-distribution modification, and contrast adjustment.
-The specific algorithms and parameter values used to instantiate these
-families are implementation choices documented in
+properties of the image artifact: lossy re-encoding, spatial resampling and
+resizing, blurring and local-detail degradation, tonal-distribution
+modification, and contrast adjustment. The specific algorithms and parameter
+values adopted in this thesis are documented in
 Chapter~\ref{chap:implementation}.
-
 Table~\ref{tab:methodology-anti-forensic-transformations} summarizes the
-methodological roles of the principal transformation families.
+methodological role of each family.
 
 \begin{table}[H]
 \centering
 \caption{Methodological roles of the anti-forensic transformation families}
 \label{tab:methodology-anti-forensic-transformations}
 \begin{tabularx}{\textwidth}{@{}
->{\raggedright\arraybackslash}p{0.28\textwidth}
+
+{\raggedright\arraybackslash}p{0.28\textwidth}
 X
 @{}}
 \toprule
 \textbf{Transformation family} &
-\textbf{Methodological role} \\
+\textbf{Methodological role} \
 \midrule
 
 Lossy re-encoding
 &
 Evaluates classification stability when the image representation is altered by
-compression artifacts or repeated encoding. \\
+compression artifacts or repeated encoding. \
 
 Spatial resampling and resizing
 &
 Examines sensitivity to resolution changes, interpolation, and repeated
-downsampling or restoration operations. \\
+downsampling or restoration operations. \
 
 Blurring and local-detail degradation
 &
 Assesses the dependence of automated classification on edges, textures, and
-other high-frequency visual information. \\
+other high-frequency visual information. \
 
 Tonal-distribution modification
 &
 Evaluates sensitivity to changes in the statistical distribution of image
-intensities. \\
+intensities. \
 
 Contrast adjustment
 &
 Examines whether normalization or enhancement of the intensity range alters the
-classification outcome. \\
+classification outcome. \
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
 The transformations are applied exclusively to the binary in-domain subset.
-The clean \gls{ood} branch remains separate because it addresses
-distributional mismatch rather than robustness to image manipulation.
+The clean \gls{ood} branch remains outside this process because it addresses
+distributional mismatch rather than robustness to image manipulation, as
+established in Section~\ref{sec:methodology-split-generation}.
 
-Each transformation must be applied through a consistent and documented
-procedure across the selected experimental samples. The transformation rules
-and their parameter values must remain fixed within a given experimental
-condition unless a parameter-sensitivity analysis is explicitly included in the
-research design. This consistency supports comparison across models, folds,
+Within each experimental condition, transformation rules and parameter values
+must remain fixed and be applied consistently across the selected samples,
+unless parameter-sensitivity analysis is explicitly included in the research
+design. This requirement supports comparison across models, folds, operational
 classes, and software systems.
 
-The selected settings should introduce controlled and interpretable
+The selected settings should produce controlled and interpretable
 modifications while preserving sufficient task-relevant semantic content for
-meaningful evaluation. The objective is not to make the images unrecognizable,
-but to examine whether operationally plausible changes can alter the behavior
-of automated classification systems.
-
-The methodology does not require an exhaustive catalog of anti-forensic
-techniques. Instead, the selected transformation set should provide
+meaningful evaluation. The objective is not to make the images
+unrecognizable, but to determine whether operationally plausible changes can
+alter automated classification behavior. The transformation set need not
+provide an exhaustive catalog of anti-forensic techniques, but should offer
 complementary coverage of encoding, spatial, filtering, tonal, and contrast
-effects. The selection should also consider reproducibility, computational
-feasibility and scalability, compatibility with the evaluated systems, and the
-possibility of applying the transformations consistently to the complete
-experimental subset.
+effects while remaining reproducible, computationally feasible, scalable, and
+compatible with the evaluated systems.
 
-For every generated artifact, the implementation must preserve the association
-with the corresponding clean sample, reference operational class, experimental
-fold, and transformation condition. It must also record the applied
-configuration and the information required to verify artifact identity,
-integrity, and provenance.
+Each generated artifact must remain associated with its clean source image,
+reference operational class, experimental fold, transformation family,
+applied configuration, and resulting output. The corresponding records must
+also preserve the information required to reconstruct the transformation and
+verify artifact identity, integrity, and provenance.
 
-The methodology does not prescribe a specific directory structure, manifest
-format, database technology, or hashing algorithm. However, the adopted
-implementation must make it possible to reconstruct the relationship among the
-clean image, the applied transformation, and the resulting artifact.
-
-Anti-forensic artifact generation and robustness evaluation are treated as
-separate phases. Successful generation and completion of technical integrity
-checks demonstrate that the intended experimental artifacts were produced
-correctly, but do not establish robustness degradation. The impact of the
-transformations must instead be determined through subsequent evaluation using
-the common metrics and comparison framework.
+Artifact generation and robustness evaluation are treated as separate phases.
+Successful generation and completion of technical integrity checks establish
+that the intended artifacts were produced correctly, but do not demonstrate
+robustness degradation. Their impact must be determined through subsequent
+evaluation using the common metric and comparison framework.
 
 The generated artifacts are evaluated on both the proxy classification models
 and the selected black-box software systems. This common evaluation supports a
 structured comparison between controlled model behavior and the observable
 operational behavior of the selected software systems under the same
 anti-forensic conditions.
+
+
+
+
+
+
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
