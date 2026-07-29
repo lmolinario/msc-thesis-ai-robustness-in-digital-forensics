@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Synchronize displayed Chapter 5 XAI confidence values with the canonical manifest."""
+"""Synchronize results-chapter XAI Max-P values with the canonical manifest."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +11,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SELECTION = REPO_ROOT / "explainability/manifests/chapter5/thesis_selection.csv"
-TEX_FILE = REPO_ROOT / "docs/LatexThesis/sections/05_experiments.tex"
+TEX_FILE = REPO_ROOT / "docs/LatexThesis/sections/06_results.tex"
 FIGURE_LABELS = {
     "xai_case_0001": "fig:xai-case1-clean-correct",
     "xai_case_0006": "fig:xai-case2-clean-false-negative",
@@ -38,12 +38,12 @@ def expected_values() -> dict[str, str]:
     return values
 
 
-def figure_confidence_pattern(figure_label: str) -> re.Pattern[str]:
+def figure_max_probability_pattern(figure_label: str) -> re.Pattern[str]:
     return re.compile(
         rf"(\\XAIcaseFigureMaskGrid\s*"
         rf"\{{{re.escape(figure_label)}\}}"
         rf"(?:(?!\\XAIcaseFigureMaskGrid).)*?"
-        rf"\\textbf\{{confidence\}}\s*:\s*)"
+        rf"\\textbf\{{(?:confidence|Max-P)\}}\s*:\s*)"
         rf"([0-9]+(?:\.[0-9]+)?)"
         rf"(\s*\}})",
         re.DOTALL,
@@ -56,11 +56,11 @@ def synchronize(path: Path, expected: dict[str, str], write: bool) -> list[str]:
     changes: list[str] = []
 
     for case_id, figure_label in FIGURE_LABELS.items():
-        pattern = figure_confidence_pattern(figure_label)
+        pattern = figure_max_probability_pattern(figure_label)
         matches = list(pattern.finditer(updated))
         if len(matches) != 1:
             raise RuntimeError(
-                f"Expected one XAI figure metadata confidence for {case_id} "
+                f"Expected one XAI figure metadata Max-P value for {case_id} "
                 f"in {path}, found {len(matches)}"
             )
 
@@ -86,9 +86,9 @@ def main() -> None:
             print(f"{TEX_FILE.relative_to(REPO_ROOT)} | {change}")
         if not write:
             raise SystemExit(1)
-        print(f"Updated {len(changes)} Chapter 5 XAI metadata field(s).")
+        print(f"Updated {len(changes)} results-chapter XAI metadata field(s).")
     else:
-        print("Chapter 5 XAI metadata is synchronized.")
+        print("Results-chapter XAI metadata is synchronized.")
 
 
 if __name__ == "__main__":
