@@ -36,7 +36,7 @@ The experimental design combined two complementary evaluation levels. The
 first comprised three transparent proxy models: EfficientNet-B0, ResNet18, and
 a \gls{clip}-based model consisting of a frozen visual encoder and a supervised
 binary classification head. These models provided access to predicted classes,
-maximum predicted-class probability indicators, confusion matrices,
+maximum predicted-class probabilities, confusion matrices,
 clean-to-perturbed error transitions, and internal gradients.
 
 The second evaluation level comprised
@@ -187,8 +187,8 @@ profile is inseparable from the conservative decision to treat only the
 \texttt{CORE/Violence/Firearm} bookmark as a primary positive result.
 
 \gls{cellebriteinseyets} produces a comparatively balanced profile, with
-bundle accuracy, weapon recall, and weapon precision of approximately 0.958
-and similar overall false-negative and false-positive rates.
+bundle accuracy, weapon recall, and weapon precision all close to 0.958,
+together with similar overall false-negative and false-positive rates.
 
 \gls{magnetaxiomtool}/\gls{magnetai} achieves a bundle accuracy of 0.933 and
 an \gls{fnr} of 0.099. Its condition-level results show increased
@@ -600,8 +600,9 @@ of 1.000.
 
 The \gls{ood} case instead documents a closed-set assignment outside the
 supervised binary task and must not be described as an ordinary false positive.
-The attribution maps explain only the selected EfficientNet-B0 output under the
-adopted attribution target, baseline, and integration procedure.
+The attribution maps represent attribution magnitudes only for the selected
+EfficientNet-B0 output under the adopted attribution target, baseline, and
+integration procedure.
 
 Overall, the findings show that validation on clean data is not equivalent to
 validation under operational conditions. Robustness assessment must jointly
@@ -983,8 +984,8 @@ subcategories, more varied realistic negatives, and visual material obtained
 from different devices, acquisition procedures, messaging platforms, social
 networks, and media-processing pipelines.
 
-The binary class distribution should also be varied. The balanced
-500/\allowbreak500 population used in this thesis supports controlled comparison
+The binary class distribution should also be varied. The balanced binary population
+of 500 images per class used in this thesis supports controlled comparison
 of false negatives and false positives but does not represent the prevalence
 expected in operational evidence collections. Evaluations conducted under
 different class ratios would make it possible to measure how prevalence affects
