@@ -285,13 +285,9 @@ conditions.
 
 Second, the work establishes a common frozen experimental basis for the
 parallel evaluation of transparent proxy models and selected black-box software
-systems. The source population contains three equally sized branches:
-
-\begin{itemize}
-\item 500 \texttt{weapon} images;
-\item 500 \texttt{non\_weapon} images;
-\item 500 images reserved for the separate \gls{ood} analysis.
-\end{itemize}
+systems. The source population contains three equally sized branches,
+comprising 500 \texttt{weapon} images, 500 \texttt{non\_weapon} images, and
+500 images reserved for the separate \gls{ood} analysis.
 
 The 1\,000-image binary subset was used to generate five adversarial or
 adversarial-style artifact populations and five anti-forensic artifact
@@ -314,18 +310,15 @@ confusion matrices, matched clean-to-perturbed transitions, and internal
 gradients.
 
 The selected black-box systems instead expose heterogeneous operational
-outputs:
+outputs. For \gls{magnetaxiomtool}/\gls{magnetai}, the observable output is the
+\texttt{Possible weapons} tag, whereas
+\gls{griffeye}/\gls{t3kcore} exposes the
+\texttt{CORE/Violence/Firearm} bookmark.
 
-\begin{itemize}
-\item the \texttt{Possible weapons} tag for
-\gls{magnetaxiomtool}/\gls{magnetai};
-\item the \texttt{CORE/Violence/Firearm} bookmark for
-\gls{griffeye}/\gls{t3kcore};
-\item membership in the union of eight firearm-oriented semantic-query result
-sets for \gls{excirefoto2025};
-\item the exported \texttt{Armi}, \texttt{Pistola}, and \texttt{Fucile}
-classification labels for \gls{cellebriteinseyets}.
-\end{itemize}
+The operational output adopted for \gls{excirefoto2025} is membership in the
+union of eight firearm-oriented semantic-query result sets. For
+\gls{cellebriteinseyets}, the evaluation uses the exported \texttt{Armi},
+\texttt{Pistola}, and \texttt{Fucile} classification labels.
 
 These outputs were normalized into a common operational
 \texttt{weapon}/\texttt{non\_weapon} representation while keeping the
@@ -355,18 +348,16 @@ where complete source data or proprietary software exports cannot be publicly
 redistributed.
 
 The operational analysis does not reduce robustness to a single aggregate
-score. It examines:
+score. It examines false negatives affecting firearm-oriented content, false
+positives increasing human-review workload, and directional
+clean-to-perturbed error transitions.
 
-\begin{itemize}
-\item false negatives affecting firearm-oriented content;
-\item false positives increasing human-review workload;
-\item directional clean-to-perturbed error transitions;
-\item closed-set weapon assignments on the separate \gls{ood} branch;
-\item configuration-dependent changes in recall and selectivity;
-\item direct-target and transfer behavior under adversarial conditions;
-\item residual metadata sensitivity;
-\item the continued need for human verification.
-\end{itemize}
+The analysis also considers closed-set weapon assignments on the separate
+\gls{ood} branch, configuration-dependent changes in recall and selectivity,
+and the distinction between direct-target and transfer behavior under
+adversarial conditions. Residual metadata sensitivity and the continued need
+for human verification are incorporated into the resulting operational
+interpretation.
 
 A complementary qualitative \gls{xai} analysis was conducted using
 \gls{ig} on five purposively selected EfficientNet-B0 cases. The resulting
@@ -885,17 +876,15 @@ The common \texttt{weapon}/\texttt{non\_weapon} representation is an explicit
 operational recoding of observable outputs. It does not establish that the
 selected systems implement equivalent internal binary classification tasks.
 
-The results depend on:
+The results depend on the \texttt{Possible weapons} tag adopted for
+\gls{magnetai} and on the conservative
+\texttt{CORE/Violence/Firearm} bookmark mapping used for
+\gls{griffeye}/\gls{t3kcore}.
 
-\begin{itemize}
-\item the \texttt{Possible weapons} tag for Magnet.AI;
-\item the conservative \texttt{CORE/Violence/Firearm} bookmark mapping for
-Griffeye/T3K CORE;
-\item the eight firearm-oriented query sets and \texttt{Distance limit} for
-Excire Foto 2025;
-\item the exported \texttt{Armi}, \texttt{Pistola}, and \texttt{Fucile}
-labels for Cellebrite Inseyets.
-\end{itemize}
+They also depend on the eight firearm-oriented query sets and the
+\texttt{Distance limit} adopted for \gls{excirefoto2025}, as well as on the
+exported \texttt{Armi}, \texttt{Pistola}, and \texttt{Fucile} labels used for
+\gls{cellebriteinseyets}.
 
 Alternative defensible mappings would define different operating tasks and may
 produce different error profiles.
@@ -948,16 +937,13 @@ obligations, and case-specific evidentiary context.
 \end{itemize}
 
 These limitations delimit the claims supported by the experiment. The thesis
-provides a protocol-specific assessment of operational robustness rather than:
+provides a protocol-specific assessment of operational robustness. It does not
+certify any software product, establish a universal ranking of the evaluated
+systems, or constitute a complete adversarial-security assessment.
 
-\begin{itemize}
-\item certification of any software product;
-\item a universal ranking of the evaluated systems;
-\item a complete adversarial-security assessment;
-\item validation of a production-grade firearm detector;
-\item evidentiary validation of automated classifications;
-\item authorization for autonomous operational deployment.
-\end{itemize}
+The study also does not validate a production-grade firearm detector, provide
+evidentiary validation of automated classifications, or authorize autonomous
+operational deployment.
 
 The findings must therefore be interpreted as evidence about the observable
 behavior of the frozen systems, configurations, mappings, dataset, and threat
@@ -1217,19 +1203,15 @@ assignments may also route \gls{ood} material toward an operational category
 without providing evidence of binary correctness.
 
 These findings do not preclude the use of \gls{ai}-assisted software in
-forensic workflows. They define the conditions under which such use is more
-defensible:
+forensic workflows. Such use becomes more defensible when supported by
+task-specific validation on representative data and by an explicit definition
+of the evaluated threat model.
 
-\begin{itemize}
-\item task-specific validation on representative data;
-\item explicit definition of the evaluated threat model;
-\item documentation of software and model versions;
-\item configuration and mapping management;
-\item separate analysis of \gls{ood} behavior;
-\item preservation of source-to-output traceability;
-\item visibility of false negatives and false positives;
-\item systematic human verification.
-\end{itemize}
+Software and model versions must be documented, while configurations and
+output mappings must be actively managed. The process must also preserve
+source-to-output traceability, analyze \gls{ood} behavior separately, maintain
+the visibility of false negatives and false positives, and include systematic
+human verification.
 
 Automated classifications, tags, bookmarks, and semantic retrieval results
 remain triage indicators. They may support the organization and prioritization
