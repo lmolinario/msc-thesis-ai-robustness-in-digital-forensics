@@ -456,15 +456,11 @@ fold-specific model outputs for each unique \gls{ood} input. The reported
 counts and rates therefore characterize checkpoint-response behavior rather
 than unique-image-level classification frequency.
 
-Two principal indicators are considered:
-
-\begin{itemize}
-\item the \emph{weapon assignment rate}, defined as the proportion of the
-2\,500 responses assigned to \texttt{weapon};
-
-\item the \emph{high-maximum-probability rate}, defined as the proportion of
-responses whose maximum predicted-class probability is at least 0.90.
-\end{itemize}
+Two principal indicators are considered. The \emph{weapon assignment rate}
+corresponds to the proportion of the 2\,500 responses assigned to
+\texttt{weapon}. The \emph{high-maximum-probability rate} instead represents
+the proportion of responses whose maximum predicted-class probability is at
+least 0.90.
 
 Neither indicator represents supervised correctness because the \gls{ood}
 inputs have no binary reference assignment.
@@ -616,15 +612,10 @@ closed-set output for material outside the frozen binary evaluation
 distribution.
 
 The \gls{ood} results therefore identify two operationally relevant but
-separate behaviors:
-
-\begin{itemize}
-\item the tendency to route distributionally different material toward the
-firearm-oriented review category;
-
-\item the tendency to produce high maximum predicted-class probabilities for
-forced closed-set assignments.
-\end{itemize}
+separate behaviors. The first is the tendency to route distributionally
+different material toward the firearm-oriented review category. The second is
+the tendency to produce high maximum predicted-class probabilities for forced
+closed-set assignments.
 
 Both behaviors can influence prioritization and analyst workload. Neither can
 be treated as stand-alone evidence, supervised correctness, or calibrated
@@ -1261,15 +1252,12 @@ internal architectures, training data, thresholds, or confidence-calibration
 procedures.
 
 The analysis comprises four software families and six normalized operational
-configurations:
-
-\begin{itemize}
-\item \gls{magnetaxiomtool}/\gls{magnetai};
-\item \gls{griffeye}/\gls{t3kcore};
-\item \gls{excirefoto2025} under the \texttt{D20}, \texttt{D50}, and
-\texttt{D80} semantic-distance settings;
-\item \gls{cellebriteinseyets}.
-\end{itemize}
+configurations. These include
+\gls{magnetaxiomtool}/\gls{magnetai},
+\gls{griffeye}/\gls{t3kcore},
+\gls{excirefoto2025} under the \texttt{D20}, \texttt{D50}, and
+\texttt{D80} semantic-distance settings, and
+\gls{cellebriteinseyets}.
 
 Each configuration produced one normalized decision for every item in the
 11\,500-file forensic evaluation bundle. The complete black-box population
@@ -1290,15 +1278,10 @@ normalization, as described in
 Section~\ref{subsec:implementation-normalization}.
 
 The 11\,500 matched decisions associated with each configuration comprise two
-analytically distinct populations:
-
-\begin{itemize}
-\item 11\,000 binary items with a reference operational assignment of
-\texttt{weapon} or \texttt{non\_weapon};
-
-\item 500 \gls{ood} inputs, analyzed separately through their observable
-weapon assignment rate.
-\end{itemize}
+analytically distinct populations. The first consists of 11\,000 binary items
+with a reference operational assignment of \texttt{weapon} or
+\texttt{non\_weapon}. The second consists of 500 \gls{ood} inputs, which are
+analyzed separately through their observable weapon assignment rate.
 
 Accuracy, balanced accuracy, precision, recall, \gls{fnr}, and \gls{fpr} are
 computed only on the 11\,000 interpretable binary items. The \gls{ood} inputs
@@ -2485,16 +2468,10 @@ queries under each distance setting. An image was mapped to the operational
 the eight queries. Consequently, the reported decisions represent the union of
 the observable prompt-hit sets rather than an internal binary classifier output.
 
-The three configurations differ only in the frozen semantic-distance setting:
-
-\begin{itemize}
-\item \texttt{D20} represents the most restrictive evaluated retrieval
-configuration;
-
-\item \texttt{D50} represents the intermediate configuration;
-
-\item \texttt{D80} represents the most permissive evaluated configuration.
-\end{itemize}
+The three configurations differ only in the frozen semantic-distance setting.
+Within the evaluated range, \texttt{D20} represents the most restrictive
+retrieval configuration, \texttt{D50} represents the intermediate
+configuration, and \texttt{D80} represents the most permissive configuration.
 
 The terms restrictive, intermediate, and permissive describe only the relative
 behavior of the three evaluated settings. They do not reveal the internal
@@ -4709,13 +4686,9 @@ reference operational assignment is \texttt{non\_weapon}, whereas the
 perturbed input is assigned to \texttt{weapon} with a maximum predicted-class
 probability of 1.000.
 
-The result separates three quantities that must not be conflated:
-
-\begin{itemize}
-\item the predicted class;
-\item the maximum predicted-class probability;
-\item the operational reliability of the prediction.
-\end{itemize}
+The result requires a clear distinction among the predicted class, the maximum
+predicted-class probability, and the operational reliability of the
+prediction. These three quantities must not be conflated.
 
 For this case, the first two quantities indicate a strongly peaked
 \texttt{weapon} output, while the reference assignment establishes that the
@@ -5019,16 +4992,13 @@ checkpoints, and proprietary software outputs.
 
 These limitations define the conditions under which the experimental
 conclusions are supported. The chapter provides a protocol-specific assessment
-of operational robustness rather than:
+of operational robustness. It does not certify any evaluated software product,
+establish a universal ranking of models or commercial systems, or constitute a
+complete adversarial-security assessment.
 
-\begin{itemize}
-\item certification of any evaluated software product;
-\item a universal ranking of models or commercial systems;
-\item a complete adversarial-security assessment;
-\item validation of a production-grade firearm detector;
-\item evidentiary validation of automated classifications;
-\item authorization for autonomous operational deployment.
-\end{itemize}
+The analysis also does not validate a production-grade firearm detector,
+provide evidentiary validation of automated classifications, or authorize
+autonomous operational deployment.
 
 The practical implication is that automated image-analysis systems should be
 used as traceable triage support within a \textit{human-in-the-loop} forensic
