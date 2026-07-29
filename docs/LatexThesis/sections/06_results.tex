@@ -2468,41 +2468,51 @@ than an autonomous evidentiary conclusion. Its use requires human verification
 and traceable documentation of the software version, enabled processing
 modules, imported population, and normalization rule.
 
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{\texorpdfstring{\gls{excirefoto2025}}{Excire Foto 2025} Results and Sensitivity Analysis}
 \label{subsec:results-excire}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The semantic-retrieval mapping and the three frozen distance settings are
-documented in Section~\ref{subsec:implementation-excire}. The present
-subsection analyzes the resulting sensitivity of the normalized decisions to
-the \texttt{D20}, \texttt{D50}, and \texttt{D80} configurations.
+The semantic-retrieval mapping and the three frozen
+\texttt{Distance limit} settings are documented in
+Section~\ref{subsec:implementation-excire}. The present subsection examines how
+the normalized operational behavior changes across the \texttt{D20},
+\texttt{D50}, and \texttt{D80} configurations.
 
-To evaluate the sensitivity of the operational behavior to the retrieval
-threshold, three configurations of the \texttt{Distance limit} parameter were
-considered: \texttt{D20}, \texttt{D50}, and \texttt{D80}. The \texttt{D20}
-configuration represents a restrictive setting, oriented toward reducing false
-positives and semantically weak retrievals; \texttt{D50} constitutes the
-intermediate configuration of the sensitivity analysis; \texttt{D80} instead
-represents a permissive setting, oriented toward maximizing recall but at the
-cost of a substantial increase in false positives and in the weapon flag rate on
-\gls{ood} samples.
+The software was evaluated using the same eight firearm-oriented semantic
+queries under each distance setting. An image was mapped to the operational
+\texttt{weapon} state when it appeared in the result set of at least one of
+the eight queries. Consequently, the reported decisions represent the union of
+the observable prompt-hit sets rather than an internal binary classifier output.
+
+The three configurations differ only in the frozen semantic-distance setting:
+
+\begin{itemize}
+\item \texttt{D20} represents the most restrictive evaluated retrieval
+configuration;
+
+\item \texttt{D50} represents the intermediate configuration;
+
+\item \texttt{D80} represents the most permissive evaluated configuration.
+\end{itemize}
+
+The terms restrictive, intermediate, and permissive describe only the relative
+behavior of the three evaluated settings. They do not reveal the internal
+scoring function, semantic embedding space, or decision mechanism used by the
+software.
+
+Table~\ref{tab:results-excire-sensitivity} reports clean binary performance and
+\gls{ood} weapon assignment behavior for the three configurations.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{4pt}
-\caption{Sensitivity analysis of \gls{excirefoto2025} with respect to the \texttt{Distance limit} parameter}
+\caption{Sensitivity of \gls{excirefoto2025} to the
+\texttt{Distance limit} setting}
 \label{tab:results-excire-sensitivity}
-\begin{tabularx}{0.95\textwidth}{@{}l r r r r r X@{}}
+\begin{tabularx}{0.96\textwidth}{@{}l r r r r r X@{}}
 \toprule
 \textbf{Setting} &
 \textbf{Clean Acc.} &
@@ -2513,98 +2523,236 @@ cost of a substantial increase in false positives and in the weapon flag rate on
 \textbf{Operational profile} \\
 \midrule
 
-\texttt{D20} &
-0.927 &
-0.880 &
-0.120 &
-0.026 &
-0.238 &
-Restrictive: low operational noise and lower \gls{ood} weapon assignment rate, but higher
-risk of false negatives. \\
+\texttt{D20}
+&
+0.927
+&
+0.880
+&
+0.120
+&
+0.026
+&
+0.238
+&
+Restrictive profile with the lowest clean false-positive rate and the lowest
+\gls{ood} weapon assignment rate, but the highest clean missed-target rate. \\
 
-\texttt{D50} &
-0.944 &
-0.958 &
-0.042 &
-0.070 &
-0.340 &
-Intermediate: trade-off between recall, false-positive workload, and
-\gls{ood} weapon assignment rate. \\
+\texttt{D50}
+&
+0.944
+&
+0.958
+&
+0.042
+&
+0.070
+&
+0.340
+&
+Intermediate profile balancing target recall, false-positive workload, and
+\gls{ood} weapon assignments. \\
 
-\texttt{D80} &
-0.915 &
-0.986 &
-0.014 &
-0.156 &
-0.522 &
-Permissive: very high recall, but marked increase in false positives and
-\gls{ood} flags. \\
+\texttt{D80}
+&
+0.915
+&
+0.986
+&
+0.014
+&
+0.156
+&
+0.522
+&
+Permissive profile with the highest clean target recall, accompanied by a
+substantial increase in false-positive and \gls{ood} assignments. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The comparison among the three configurations shows that the
-\texttt{Distance limit} parameter does not act merely as a technical variable,
-but as an operational parameter that modifies the observed recall--workload
-trade-off.
-\texttt{D20} is more conservative and reduces the review workload arising from
-false positives, but may fail to retrieve relevant \texttt{weapon} content.
-\texttt{D50} serves as the intermediate reference configuration in the
-cross-system comparison. It provides higher recall than \texttt{D20} while
-producing substantially lower false-positive and \gls{ood} weapon-flag rates
-than \texttt{D80}. This choice identifies an intermediate operating point and
-does not imply that \texttt{D50} is optimal for every forensic workflow. The
-preferred configuration necessarily depends on the relative operational cost
-assigned to missed detections and additional human-review workload.
+The three settings expose a clear operational tradeoff. Under clean
+conditions, \texttt{D20} produces the lowest \gls{fpr}, at 0.026, but its
+weapon recall is 0.880, corresponding to an \gls{fnr} of 0.120. The
+configuration therefore limits irrelevant retrievals at the cost of missing a
+larger proportion of firearm-oriented images.
+
+At \texttt{D50}, weapon recall increases to 0.958 and the \gls{fnr}
+decreases to 0.042. The \gls{fpr} increases to 0.070. This setting provides
+the highest clean accuracy among the three configurations, at 0.944, but this
+value does not independently establish the most appropriate operating point
+for every forensic workflow.
+
+At \texttt{D80}, weapon recall reaches 0.986 and the clean \gls{fnr}
+decreases to 0.014. Only seven of the 500 clean reference
+\texttt{weapon} images are not retrieved by any of the eight firearm-oriented
+queries. This reduction in missed detections is accompanied by 78 false-positive
+assignments and an \gls{fpr} of 0.156.
+
+The same progressive expansion is visible on the separate \gls{ood} branch.
+The weapon assignment rate increases from 0.238 at \texttt{D20}, corresponding
+to 119 of the 500 \gls{ood} inputs, to 0.340 at \texttt{D50}, corresponding
+to 170 inputs, and to 0.522 at \texttt{D80}, corresponding to 261 inputs.
+
+These \gls{ood} assignments are not false positives in the supervised binary
+sense because the images have no \texttt{weapon} or
+\texttt{non\_weapon} reference assignment. Nevertheless, their increase
+indicates that the more permissive settings route a larger proportion of
+material outside the nominal binary task toward the firearm-oriented review
+category.
+
+The \texttt{Distance limit} setting must therefore be treated as an operational
+configuration parameter rather than a purely technical detail. A restrictive
+setting reduces false-positive review workload but increases missed-target
+risk. A permissive setting reduces missed detections but increases the volume
+of \texttt{non\_weapon} and \gls{ood} material returned for human review.
+
+Table~\ref{tab:results-excire-perturbed-summary} reports aggregate behavior for
+the adversarial and anti-forensic populations.
 
 \begin{table}[H]
 \centering
-\caption{Aggregate performance of \gls{excirefoto2025} under perturbed conditions}
+\caption{Aggregate performance of \gls{excirefoto2025} on perturbed
+populations}
 \label{tab:results-excire-perturbed-summary}
 \small
-\begin{tabular}{l l r r r r}
+\begin{tabular}{@{}l l r r r r@{}}
 \toprule
 \textbf{Setting} &
-\textbf{Condition} &
+\textbf{Family} &
 \textbf{Accuracy} &
 \textbf{Recall weapon} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} \\
 \midrule
 
-\texttt{D20} & Anti-forensic & 0.927 & 0.875 & 0.125 & 0.022 \\
-\texttt{D50} & Anti-forensic & 0.941 & 0.957 & 0.043 & 0.074 \\
-\texttt{D80} & Anti-forensic & 0.908 & 0.984 & 0.016 & 0.169 \\
+\texttt{D20}
+&
+Adversarial
+&
+0.892
+&
+0.834
+&
+0.166
+&
+0.051 \\
+
+\texttt{D20}
+&
+Anti-forensic
+&
+0.927
+&
+0.875
+&
+0.125
+&
+0.022 \\
 
 \midrule
 
-\texttt{D20} & Adversarial & 0.892 & 0.834 & 0.166 & 0.051 \\
-\texttt{D50} & Adversarial & 0.904 & 0.938 & 0.062 & 0.130 \\
-\texttt{D80} & Adversarial & 0.861 & 0.977 & 0.023 & 0.256 \\
+\texttt{D50}
+&
+Adversarial
+&
+0.904
+&
+0.938
+&
+0.062
+&
+0.130 \\
+
+\texttt{D50}
+&
+Anti-forensic
+&
+0.941
+&
+0.957
+&
+0.043
+&
+0.074 \\
+
+\midrule
+
+\texttt{D80}
+&
+Adversarial
+&
+0.861
+&
+0.977
+&
+0.023
+&
+0.256 \\
+
+\texttt{D80}
+&
+Anti-forensic
+&
+0.908
+&
+0.984
+&
+0.016
+&
+0.169 \\
 
 \bottomrule
 \end{tabular}
+
+\vspace{0.4em}
+\footnotesize
+\textit{Note.} The adversarial family comprises four model-dependent artifact
+populations generated against EfficientNet-B0 and the model-agnostic Color
+Shift condition. Their evaluation through Excire constitutes transfer or
+condition-level assessment, not a white-box attack against the software.
 \end{table}
 
-The aggregate results under perturbed conditions show that, for
-\gls{excirefoto2025}, anti-forensic transformations produce a more limited
-impact than adversarial perturbations. However, in this case as well, the
-operational profile changes substantially as the threshold varies:
-\texttt{D20} maintains the lowest \gls{fpr} but exhibits the highest \gls{fnr},
-\texttt{D80} almost completely reduces false negatives but increases
-operational noise, whereas \texttt{D50} maintains an intermediate compromise
-between recall and selectivity.
+The same recall--workload tradeoff persists under perturbed conditions.
+\texttt{D20} maintains the lowest \gls{fpr} in both families, at 0.051 for
+the adversarial population and 0.022 for the anti-forensic population.
+However, its \gls{fnr} reaches 0.166 and 0.125, respectively.
 
-Table~\ref{tab:results-excire-d50-attack-metrics} reports the detailed results
-for the \texttt{D50} configuration, which is used as the main reference for the
-operational comparison. This choice does not imply that \texttt{D50} is optimal
-in an absolute sense, but makes it possible to analyze an intermediate
-configuration between the restrictive and permissive profiles.
+At \texttt{D50}, the adversarial-family \gls{fnr} decreases to 0.062, while
+the \gls{fpr} increases to 0.130. Under anti-forensic conditions, the
+corresponding values are 0.043 and 0.074.
+
+At \texttt{D80}, the adversarial-family \gls{fnr} decreases to 0.023, but the
+\gls{fpr} reaches 0.256. Under anti-forensic conditions, the \gls{fnr} is
+0.016 and the \gls{fpr} is 0.169.
+
+For every setting, the adversarial-family population produces lower aggregate
+accuracy and a higher \gls{fpr} than the anti-forensic population. The
+difference is particularly pronounced for \texttt{D80}, where permissive
+retrieval interacts with the adversarial artifacts to route more than one
+quarter of the reference \texttt{non\_weapon} population to the positive
+operational state.
+
+These results do not demonstrate that the software was attacked directly. The
+four model-dependent artifact populations were generated against fold-specific
+EfficientNet-B0 checkpoints and subsequently processed by Excire. Their effects
+therefore represent empirical transfer behavior. Color Shift and the five
+anti-forensic transformations are model-agnostic conditions.
+
+The \texttt{D50} configuration is retained as the intermediate reference for
+condition-level analysis. This choice facilitates comparison without implying
+that \texttt{D50} is universally optimal. The appropriate operating point
+depends on the relative cost assigned to missed target images and additional
+human-review workload.
+
+Table~\ref{tab:results-excire-d50-attack-metrics} reports the ten individual
+perturbed conditions for \texttt{D50}.
 
 \begin{table}[H]
 \centering
-\caption{Performance of \gls{excirefoto2025} \texttt{D50} under adversarial and anti-forensic conditions}
+\caption{Performance of \gls{excirefoto2025} \texttt{D50} under
+adversarial, adversarial-style, and anti-forensic conditions}
 \label{tab:results-excire-d50-attack-metrics}
 \scriptsize
 \renewcommand{\arraystretch}{1.12}
@@ -2621,116 +2769,219 @@ configuration between the restrictive and permissive profiles.
 \textbf{\acrshort{fp}} \\
 \midrule
 
-Adversarial &
-\gls{colorshift} &
-0.949 &
-0.966 &
-0.034 &
-0.068 &
-17 &
+Adversarial-style
+&
+\gls{colorshift}
+&
+0.949
+&
+0.966
+&
+0.034
+&
+0.068
+&
+17
+&
 34 \\
 
-Adversarial &
-\gls{fgsm} &
-0.926 &
-0.890 &
-0.110 &
-0.038 &
-55 &
+Adversarial transfer
+&
+\gls{fgsm}
+&
+0.926
+&
+0.890
+&
+0.110
+&
+0.038
+&
+55
+&
 19 \\
 
-Adversarial &
-\gls{onepixel} &
-0.946 &
-0.964 &
-0.036 &
-0.072 &
-18 &
+Adversarial transfer
+&
+\gls{onepixel}
+&
+0.946
+&
+0.964
+&
+0.036
+&
+0.072
+&
+18
+&
 36 \\
 
-Adversarial &
-\gls{sigmazero} &
-0.742 &
-0.926 &
-0.074 &
-0.442 &
-37 &
+Adversarial transfer
+&
+\gls{sigmazero}
+&
+0.742
+&
+0.926
+&
+0.074
+&
+0.442
+&
+37
+&
 221 \\
 
-Adversarial &
-\gls{superdeepfool} &
-0.956 &
-0.944 &
-0.056 &
-0.032 &
-28 &
+Adversarial transfer
+&
+\gls{superdeepfool}
+&
+0.956
+&
+0.944
+&
+0.056
+&
+0.032
+&
+28
+&
 16 \\
 
 \midrule
 
-Anti-forensic &
-\gls{contraststretching} &
-0.941 &
-0.952 &
-0.048 &
-0.070 &
-24 &
+Anti-forensic
+&
+\gls{contraststretching}
+&
+0.941
+&
+0.952
+&
+0.048
+&
+0.070
+&
+24
+&
 35 \\
 
-Anti-forensic &
-\gls{gaussianblur} &
-0.941 &
-0.960 &
-0.040 &
-0.078 &
-20 &
+Anti-forensic
+&
+\gls{gaussianblur}
+&
+0.941
+&
+0.960
+&
+0.040
+&
+0.078
+&
+20
+&
 39 \\
 
-Anti-forensic &
-\gls{histogrammodification} &
-0.932 &
-0.952 &
-0.048 &
-0.088 &
-24 &
+Anti-forensic
+&
+\gls{histogrammodification}
+&
+0.932
+&
+0.952
+&
+0.048
+&
+0.088
+&
+24
+&
 44 \\
 
-Anti-forensic &
-\gls{jpegrecompression} &
-0.946 &
-0.958 &
-0.042 &
-0.066 &
-21 &
+Anti-forensic
+&
+\gls{jpegrecompression}
+&
+0.946
+&
+0.958
+&
+0.042
+&
+0.066
+&
+21
+&
 33 \\
 
-Anti-forensic &
-\gls{resampleresize} &
-0.947 &
-0.964 &
-0.036 &
-0.070 &
-18 &
+Anti-forensic
+&
+\gls{resampleresize}
+&
+0.947
+&
+0.964
+&
+0.036
+&
+0.070
+&
+18
+&
 35 \\
 
 \bottomrule
 \end{tabular}
 \end{table}
 
-A particularly relevant case is that of \gls{sigmazero}. Unlike a simple
-evasion dynamic, in which the main effect would be the increase in false
-negatives on the \texttt{weapon} class, \gls{excirefoto2025} shows, under the
-\texttt{D50} and \texttt{D80} configurations, a semantic over-triggering
-behavior. Under these conditions, the system continues to retrieve many
-\texttt{weapon} images, but substantially increases the proportion of
-\texttt{non\_weapon} images returned by at least one firearm-oriented prompt.
+At \texttt{D50}, FGSM produces the largest missed-target burden among the
+transferred model-dependent conditions. Weapon recall decreases to 0.890 and
+the \gls{fnr} increases to 0.110, corresponding to 55 false negatives.
+However, its \gls{fpr} remains comparatively limited, at 0.038.
+
+Sigma-Zero produces a different operational failure mode. Weapon recall remains
+relatively high, at 0.926, and the \gls{fnr} is 0.074. Nevertheless, the
+\gls{fpr} increases to 0.442: 221 of the 500 reference
+\texttt{non\_weapon} images are returned by at least one firearm-oriented
+query.
+
+The resulting accuracy of 0.742 is therefore driven primarily by an expansion
+of positive assignments rather than by a predominant increase in missed
+firearm-oriented content. The operational consequence is a substantial increase
+in false-positive review workload.
+
+SuperDeepFool produces the highest D50 accuracy among the transferred
+model-dependent conditions, at 0.956, with 28 false negatives and 16 false
+positives. One Pixel remains close to the clean D50 profile, with 18 false
+negatives and 36 false positives.
+
+The model-agnostic Color Shift condition produces 17 false negatives and 34
+false positives. Its behavior is interpreted as a common perturbation condition
+rather than adversarial transfer success.
+
+Among the anti-forensic transformations, Histogram Modification produces the
+lowest accuracy, at 0.932, and the highest \gls{fpr}, at 0.088,
+corresponding to 44 false positives. Contrast Stretching produces 24 false
+negatives and 35 false positives, whereas Gaussian Blur produces 20 false
+negatives and 39 false positives.
+
+JPEG Recompression and Resample Resize remain close to the clean D50 operating
+profile. Their aggregate similarity does not establish sample-level invariance,
+because individual assignments may differ even when the resulting confusion
+counts are similar.
+
+Sigma-Zero provides the clearest illustration of the interaction between the
+perturbed population and the semantic-distance configuration.
+Table~\ref{tab:results-excire-sigma-zero} compares the three settings.
 
 \begin{table}[H]
 \centering
-\caption{Behavior of \gls{excirefoto2025} on the \gls{sigmazero} perturbation}
+\caption{Behavior of \gls{excirefoto2025} on the transferred
+\gls{sigmazero} population}
 \label{tab:results-excire-sigma-zero}
 \small
-\begin{tabular}{l r r r r r r}
+\begin{tabular}{@{}l r r r r r r@{}}
 \toprule
 \textbf{Setting} &
 \textbf{Accuracy} &
@@ -2741,315 +2992,106 @@ behavior. Under these conditions, the system continues to retrieve many
 \textbf{\acrshort{fp}} \\
 \midrule
 
-\texttt{D20} & 0.815 & 0.820 & 0.180 & 0.190 & 90 & 95 \\
-\texttt{D50} & 0.742 & 0.926 & 0.074 & 0.442 & 37 & 221 \\
-\texttt{D80} & 0.657 & 0.976 & 0.024 & 0.662 & 12 & 331 \\
+\texttt{D20}
+&
+0.815
+&
+0.820
+&
+0.180
+&
+0.190
+&
+90
+&
+95 \\
+
+\texttt{D50}
+&
+0.742
+&
+0.926
+&
+0.074
+&
+0.442
+&
+37
+&
+221 \\
+
+\texttt{D80}
+&
+0.657
+&
+0.976
+&
+0.024
+&
+0.662
+&
+12
+&
+331 \\
 
 \bottomrule
 \end{tabular}
 \end{table}
 
-The joint interpretation of the three configurations shows that
-\gls{sigmazero} does not give rise only to a missed-detection problem. On the
-contrary, as the retrieval threshold increases, recall on the \texttt{weapon}
-class also increases, but the \gls{fpr} grows markedly as well: from 0.190 under
-\texttt{D20}, to 0.442 under \texttt{D50}, and up to 0.662 under \texttt{D80}.
-This behavior is operationally significant because, while a permissive
-configuration may appear preferable due to its lower risk of false negatives,
-it can generate a high volume of false positives, substantially increasing the
-human-review workload and reducing the efficiency of the automatic filter.
+As the distance setting becomes more permissive, weapon recall on the
+Sigma-Zero population increases from 0.820 at \texttt{D20} to 0.926 at
+\texttt{D50} and 0.976 at \texttt{D80}. The number of false negatives
+consequently decreases from 90 to 37 and then to 12.
 
-Overall, \gls{excirefoto2025} highlights the critical role of the retrieval
-threshold in black-box evaluation. A restrictive configuration reduces noise but
-increases the risk of missed detection; a permissive configuration increases
-recall but may strongly amplify operational noise, especially in the presence
-of perturbed or semantically ambiguous inputs. For this reason, in the
-subsequent comparative discussion, the \texttt{D50} configuration is used as
-the main reference, whereas \texttt{D20} and \texttt{D80} are interpreted as
-operational extremes of the sensitivity analysis.
+At the same time, the \gls{fpr} increases from 0.190 to 0.442 and then to
+0.662. The number of false positives increases from 95 at \texttt{D20} to 221
+at \texttt{D50} and 331 at \texttt{D80}.
 
-% ─────────────────────────────────────────────────────────────────────────────
-\subsection{\texorpdfstring{\gls{cellebriteinseyets}}{Cellebrite Inseyets} Results}
-\label{subsec:results-cellebrite}
-% ─────────────────────────────────────────────────────────────────────────────
+The reduction in aggregate accuracy across the three settings must therefore
+not be interpreted as a conventional evasion pattern dominated by missed
+target images. Under \texttt{D50} and especially \texttt{D80}, the principal
+effect is the expansion of positive retrievals into the
+\texttt{non\_weapon} population.
 
-The observable classification mapping and normalization adopted for
-\gls{cellebriteinseyets} are documented in
-Section~\ref{subsec:implementation-cellebrite}. The present subsection reports
-the resulting normalized performance and its operational implications.
+The observed behavior may derive from the interaction between the perturbed
+visual content, the eight semantic queries, the internal retrieval
+representation, and the selected distance limit. Because the software is
+black-box, the experiment cannot determine the internal mechanism responsible
+for this expansion.
 
-As indicated in Section~\ref{sec:results-commercial}, matching between the
-software export and the forensic evaluation bundle is complete for all
-evaluated profiles. For \gls{cellebriteinseyets}, the binary metrics are
-therefore computed on the 11\,000 images belonging to the operational classes
-\texttt{weapon} and \texttt{non\_weapon}; the 500 \gls{ood} images are analyzed
-separately through the weapon flag rate.
+The result nevertheless has a clear operational implication. A permissive
+setting may preserve or increase firearm-oriented recall while substantially
+reducing the selectivity of the automated filter. Analysts may receive fewer
+missed target images but a much larger volume of irrelevant material requiring
+manual review.
 
-Table~\ref{tab:results-cellebrite-global-metrics} reports the overall metrics
-of \gls{cellebriteinseyets} on the binary
-\texttt{weapon}/\texttt{non\_weapon} task. The system achieves an accuracy of
-0.958 and a balanced accuracy of 0.958. Recall on the \texttt{weapon} class is
-0.958, with a \gls{fnr} of 0.042; the \gls{fpr} is also 0.042. This profile
-indicates a relatively symmetrical balance between false negatives and false
-positives in the evaluated bundle.
+Overall, \gls{excirefoto2025} demonstrates that configuration sensitivity is a
+central component of black-box robustness evaluation. The same software,
+queries, and image population produce materially different false-negative,
+false-positive, and \gls{ood} assignment profiles when the semantic-distance
+setting changes.
 
-\begin{table}[H]
-\centering
-\caption{Overall performance of \gls{cellebriteinseyets} on the binary \texttt{weapon}/\texttt{non\_weapon} task}
-\label{tab:results-cellebrite-global-metrics}
-\small
-\begin{tabular}{lr}
-\toprule
-\textbf{Metric} & \textbf{Value} \\
-\midrule
-Accuracy & 0.958 \\
-Balanced accuracy & 0.958 \\
-Precision \texttt{weapon} & 0.958 \\
-Recall \texttt{weapon} & 0.958 \\
-F1 \texttt{weapon} & 0.958 \\
-False negative rate & 0.042 \\
-False positive rate & 0.042 \\
-True positives & 5\,268 \\
-True negatives & 5\,271 \\
-False positives & 229 \\
-False negatives & 232 \\
-\bottomrule
-\end{tabular}
+No single setting simultaneously minimizes missed detections, false-positive
+workload, and \gls{ood} weapon assignments. \texttt{D20} favors selectivity,
+\texttt{D80} favors retrieval coverage, and \texttt{D50} provides an
+intermediate operating point within the evaluated range.
 
-\vspace{0.4em}
-\footnotesize
-\textit{Note.} The metrics are computed on the 11\,000 images belonging to the
-binary \texttt{weapon}/\texttt{non\_weapon} task. The 500 \gls{ood} images are
-not included in the accuracy computation and are analyzed separately.
-\end{table}
+These findings are bounded to the frozen software version, eight-query set,
+distance settings, imported population, and union-based output mapping. They
+do not establish the optimal configuration for other categories, cases,
+collections, software versions, or forensic objectives.
 
-Table~\ref{tab:results-cellebrite-condition-metrics} shows the disaggregation
-by experimental condition. Under clean conditions, \gls{cellebriteinseyets}
-achieves an accuracy of 0.964, with \texttt{weapon} recall equal to 0.968 and a
-\gls{fnr} of 0.032. On perturbed images, the aggregate accuracy is 0.958, with
-a \gls{fnr} of 0.043 and a \gls{fpr} of 0.042. The distinction between
-adversarial perturbations and anti-forensic transformations reveals only a
-limited accuracy reduction relative to the clean baseline, with aggregate
-values of 0.955 and 0.960, respectively.
+Excire outputs must therefore remain triage indicators rather than autonomous
+evidentiary conclusions. Operational deployment requires explicit configuration
+management, documentation of the query and distance settings, assessment of
+both error directions, and systematic human verification of the retrieved
+material.
 
-\begin{table}[H]
-\centering
-\caption{Behavior of \gls{cellebriteinseyets} by experimental condition}
-\label{tab:results-cellebrite-condition-metrics}
-\small
-\begin{tabularx}{\textwidth}{@{}l r r r r X@{}}
-\toprule
-\textbf{Condition} &
-\textbf{Accuracy} &
-\textbf{Recall weapon} &
-\textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} &
-\textbf{Operational note} \\
-\midrule
 
-Clean &
-0.964 &
-0.968 &
-0.032 &
-0.040 &
-Black-box baseline on 1\,000 unperturbed images. \\
 
-Perturbed &
-0.958 &
-0.957 &
-0.043 &
-0.042 &
-Values computed on 10\,000 perturbed images: 5\,000 adversarial and 5\,000
-anti-forensic. \\
 
-Adversarial &
-0.955 &
-0.950 &
-0.050 &
-0.040 &
-Aggregate performance across the five adversarial perturbations considered. \\
 
-Anti-forensic &
-0.960 &
-0.963 &
-0.037 &
-0.043 &
-Aggregate performance across the five anti-forensic transformations considered. \\
 
-\gls{ood} &
--- &
--- &
--- &
--- &
-Weapon flag rate equal to 0.292: 146 \gls{ood} images out of 500 were
-operationally mapped to the \texttt{weapon} class. Standard binary metrics are
-not applicable. \\
-
-\bottomrule
-\end{tabularx}
-\end{table}
-
-The behavior on \gls{ood} samples is relevant because it highlights the
-tendency of the system to map \gls{ood} or semantically
-weapon-adjacent content to the operational \texttt{weapon} class. In the case
-of \gls{cellebriteinseyets}, 146 \gls{ood} images out of 500 were flagged as
-\texttt{weapon}, with a weapon flag rate of 0.292. This value does not
-represent a binary error because \gls{ood} samples have
-no \texttt{weapon}/\texttt{non\_weapon} reference operational assignment;
-rather, it describes the frequency with which the separate \gls{ood} branch is
-mapped to the positive operational state.
-
-Table~\ref{tab:results-cellebrite-attack-metrics} reports the behavior of
-\gls{cellebriteinseyets} with respect to all perturbations considered in the
-forensic evaluation bundle. In the condition-level detail, \gls{fgsm} produces
-the largest increase in false negatives among the adversarial perturbations,
-with an accuracy of 0.918, recall on the \texttt{weapon} class equal to 0.894,
-and a \gls{fnr} of 0.106. Among the anti-forensic transformations,
-\gls{histogrammodification} produces the highest \gls{fnr}, equal to 0.060,
-whereas \gls{gaussianblur} produces the highest \gls{fpr}, equal to 0.056.
-
-\begin{table}[H]
-\centering
-\caption{Performance of \gls{cellebriteinseyets} under adversarial and anti-forensic conditions}
-\label{tab:results-cellebrite-attack-metrics}
-\scriptsize
-\renewcommand{\arraystretch}{1.12}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}l l r r r r r r@{}}
-\toprule
-\textbf{Family} &
-\textbf{Condition} &
-\textbf{Accuracy} &
-\textbf{Recall} &
-\textbf{\gls{fnr}} &
-\textbf{\gls{fpr}} &
-\textbf{\acrshort{fn}} &
-\textbf{\acrshort{fp}} \\
-\midrule
-
-Adversarial &
-\gls{colorshift} &
-0.964 &
-0.968 &
-0.032 &
-0.040 &
-16 &
-20 \\
-
-Adversarial &
-\gls{fgsm} &
-0.918 &
-0.894 &
-0.106 &
-0.058 &
-53 &
-29 \\
-
-Adversarial &
-\gls{onepixel} &
-0.962 &
-0.968 &
-0.032 &
-0.044 &
-16 &
-22 \\
-
-Adversarial &
-\gls{sigmazero} &
-0.970 &
-0.958 &
-0.042 &
-0.018 &
-21 &
-9 \\
-
-Adversarial &
-\gls{superdeepfool} &
-0.961 &
-0.964 &
-0.036 &
-0.042 &
-18 &
-21 \\
-
-\midrule
-
-Anti-forensic &
-\gls{contraststretching} &
-0.967 &
-0.972 &
-0.028 &
-0.038 &
-14 &
-19 \\
-
-Anti-forensic &
-\gls{gaussianblur} &
-0.954 &
-0.964 &
-0.036 &
-0.056 &
-18 &
-28 \\
-
-Anti-forensic &
-\gls{histogrammodification} &
-0.949 &
-0.940 &
-0.060 &
-0.042 &
-30 &
-21 \\
-
-Anti-forensic &
-\gls{jpegrecompression} &
-0.966 &
-0.972 &
-0.028 &
-0.040 &
-14 &
-20 \\
-
-Anti-forensic &
-\gls{resampleresize} &
-0.964 &
-0.968 &
-0.032 &
-0.040 &
-16 &
-20 \\
-
-\bottomrule
-\end{tabular}
-\end{table}
-
-The observed profile differs from both the proxy models and the other selected
-software systems. \gls{cellebriteinseyets} does not show extreme degradation
-under \gls{sigmazero}: in this condition, accuracy is 0.970, with a \gls{fnr}
-of 0.042 and a \gls{fpr} of 0.018. The most critical adversarial condition is
-instead \gls{fgsm}, which produces the highest number of false negatives among
-the perturbations considered. This result must be interpreted with caution,
-because the system remains black-box and it is not possible to determine
-whether the greater observed stability derives from architectural differences,
-internal preprocessing, proprietary media analysis logic, or characteristics
-specific to the evaluated export.
-
-Overall, \gls{cellebriteinseyets} shows a good profile within the considered
-forensic evaluation bundle: clean accuracy is 0.964, the clean \gls{fnr} is
-0.032, and the weapon flag rate on \gls{ood} samples is 0.292. These values
-must not be interpreted as a guarantee of general robustness, but as the
-behavior observed under the defined experimental protocol. Compared with the
-other selected software systems, \gls{cellebriteinseyets} maintains high recall
-on the \texttt{weapon} class; however, \gls{griffeye}/\gls{t3kcore} exhibits
-the highest aggregate accuracy and the lowest false positive rate in the
-considered protocol. The comparison among selected software systems must
-therefore be interpreted as a trade-off among recall, false negatives, false
-positives, and behavior on \gls{ood} inputs, not as the identification of a
-generally superior system.
-
-In this case as well, the automatic output must be treated as support for
-triage and not as a conclusive decision, especially in the presence of
-perturbed, \gls{ood}, or semantically ambiguous inputs.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Embedded Metadata Sensitivity Check}
