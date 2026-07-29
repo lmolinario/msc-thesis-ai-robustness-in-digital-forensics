@@ -1043,20 +1043,15 @@ efficient batch processing, making them relevant to both deliberate
 manipulation and ordinary image-handling workflows.
 
 The perturbation set should provide complementary experimental coverage rather
-than multiple near-duplicate variants of the same mechanism. Selection should
-therefore consider:
+than multiple near-duplicate variants of the same mechanism. Its selection
+should account for diversity in access assumptions and algorithmic mechanisms,
+while also considering computational feasibility, scalability, and
+reproducibility across experimental runs.
 
-\begin{itemize}
-\item diversity of access assumptions;
-\item diversity of algorithmic mechanisms;
-\item computational feasibility and scalability;
-\item reproducibility across experimental runs;
-\item preservation of sufficient task-relevant semantic content;
-\item operational plausibility;
-\item suitability for cross-system comparison and, where applicable,
-transferability analysis;
-\item compatibility with the evaluated image formats and software systems.
-\end{itemize}
+The selected conditions should preserve sufficient task-relevant semantic
+content and retain operational plausibility. They should also support
+cross-system comparison and, where applicable, transferability analysis, while
+remaining compatible with the evaluated image formats and software systems.
 
 Table~\ref{tab:methodology-attack-cost-operational-relevance} summarizes the
 general relationship between perturbation category, computational cost, and
