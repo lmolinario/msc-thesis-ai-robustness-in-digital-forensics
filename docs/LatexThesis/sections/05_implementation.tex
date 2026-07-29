@@ -2165,7 +2165,7 @@ Excire Foto 2025; Cellebrite Inseyets};
 
 \node[box, fill=green!10] (proxout) at (-4.2,-16.8)
 {\textbf{Proxy outputs}\\
-Predictions, metrics, directional errors, confidence-related indicators,
+Predictions, metrics, directional errors, Max-P indicators,
 and five-case Integrated Gradients analysis};
 
 \node[box, fill=green!10] (norm) at (4.2,-16.8)
@@ -3972,7 +3972,7 @@ The resulting records contain:
 \item the number and rate of predictions assigned to \texttt{weapon};
 \item the number of predictions assigned to \texttt{non\_weapon};
 \item the mean maximum predicted-class probability;
-\item the high-confidence threshold;
+\item the high-Max-P threshold;
 \item the number and rate of responses whose maximum probability meets or
 exceeds that threshold.
 \end{itemize}
@@ -3985,15 +3985,16 @@ The frozen threshold is:
 0.90.
 \end{equation}
 
-The high-confidence count includes responses assigned to either binary class
-and characterizes confident closed-set assignment of an \gls{ood} input. The
-predicted-weapon rate instead characterizes the tendency to flag \gls{ood}
-content as firearm-related.
+The high-Max-P count includes responses assigned to either binary class and
+characterizes closed-set assignments whose maximum predicted-class probability
+meets or exceeds 0.90. The predicted-weapon rate instead characterizes the
+tendency to flag \gls{ood} content as firearm-related.
 
 Neither quantity represents supervised correctness because the \gls{ood}
 branch has no positive or negative binary reference assignment. The associated
 probabilities remain architecture-specific diagnostic outputs and are not
 treated as calibrated across proxy models.
+
 
 \paragraph{Proxy-model evaluation artifacts.}
 
@@ -4035,7 +4036,7 @@ transformation. \\
 \codepath{results/metrics/proxy_model_ood_metrics.csv}
 &
 Fold-aggregated \gls{ood} prediction, weapon-rate,
-mean-maximum-probability, and high-confidence statistics. \\
+mean-maximum-probability, and high-Max-P statistics. \\
 
 \codepath{results/metrics/proxy_model_comparative_metrics.csv}
 &
@@ -4291,7 +4292,7 @@ Input resolution
 &
 \(224 \times 224\) pixels \\
 
-High-confidence selection threshold
+High-Max-P selection threshold
 &
 0.90 \\
 
@@ -4328,7 +4329,7 @@ diagnostic buckets:
 \begin{enumerate}
 \item a correctly classified clean \texttt{weapon} image;
 \item a clean \texttt{weapon} false negative;
-\item a high-confidence \gls{ood} input assigned to \texttt{weapon};
+\item a high-Max-P \gls{ood} input assigned to \texttt{weapon};
 \item an image correctly classified in its clean state and rendered incorrect
 by an anti-forensic transformation;
 \item an image correctly classified in its clean state and rendered incorrect
@@ -4349,8 +4350,8 @@ probability, perturbation condition, and selection rationale.
 
 Selection and deselection actions were logged together with timestamps, ranks,
 case identifiers, and the pseudonymous reviewer identifier. A subsequent
-thesis-level reduction retained one representative case for each diagnostic
-bucket.
+thesis-level reduction purposively retained one case from each
+diagnostic bucket.
 
 Table~\ref{tab:implementation-xai-thesis-selection} summarizes both the
 candidate population and the final five-case selection.
@@ -4388,13 +4389,13 @@ Clean weapon false negative
 \texttt{xai\_case\_0006}: clean \texttt{weapon} input classified as
 \texttt{non\_weapon}. \\
 
-High-confidence OOD as weapon
+High-Max-P OOD as weapon
 &
 139
 &
 3
 &
-\texttt{xai\_case\_0009}: high-confidence \gls{ood} assignment to
+\texttt{xai\_case\_0009}: high-Max-P \gls{ood} assignment to
 \texttt{weapon}. \\
 
 Anti-forensic failure
@@ -4406,13 +4407,13 @@ Anti-forensic failure
 \texttt{xai\_case\_0010}: clean-correct image rendered incorrect by
 Histogram Modification. \\
 
-Adversarial high-confidence failure
+Adversarial high-Max-P failure
 &
 500
 &
 3
 &
-\texttt{xai\_case\_0015}: high-confidence induced failure associated with
+\texttt{xai\_case\_0015}: high-Max-P induced failure associated with
 Sigma-Zero. \\
 
 \midrule
