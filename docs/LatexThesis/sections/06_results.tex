@@ -3087,6 +3087,500 @@ management, documentation of the query and distance settings, assessment of
 both error directions, and systematic human verification of the retrieved
 material.
 
+% ─────────────────────────────────────────────────────────────────────────────
+\subsection{\texorpdfstring{\gls{cellebriteinseyets}}{Cellebrite Inseyets} Results}
+\label{subsec:results-cellebrite}
+% ─────────────────────────────────────────────────────────────────────────────
+
+The observable classification mapping and normalization procedure adopted for
+\gls{cellebriteinseyets} are documented in
+Section~\ref{subsec:implementation-cellebrite}. The present subsection reports
+the resulting normalized behavior without making assumptions about the
+inaccessible internal models, preprocessing stages, thresholds, or media
+classification logic.
+
+All 11\,500 forensic evaluation bundle items were associated with one
+normalized decision. Binary metrics are computed on the 11\,000 items whose
+reference operational assignment is \texttt{weapon} or
+\texttt{non\_weapon}. The separate 500-image \gls{ood} branch is analyzed
+through the proportion of inputs assigned to the positive operational state.
+
+Under the frozen mapping, an image is assigned to \texttt{weapon} when the
+exported \texttt{Classifications} field contains at least one of the labels
+\texttt{Armi}, \texttt{Pistola}, or \texttt{Fucile}. In the absence of these
+labels, the image is assigned to \texttt{non\_weapon}.
+
+The percentages associated with individual exported labels are preserved in
+the auditable source field but are removed before applying the operational
+mapping. They are not treated as calibrated probabilities and do not influence
+the normalized binary decision.
+
+Table~\ref{tab:results-cellebrite-global-metrics} reports the bundle-weighted
+binary results.
+
+\begin{table}[H]
+\centering
+\caption{Bundle-weighted performance of \gls{cellebriteinseyets} on the binary
+\texttt{weapon}/\texttt{non\_weapon} task}
+\label{tab:results-cellebrite-global-metrics}
+\small
+\begin{tabular}{@{}l r@{}}
+\toprule
+\textbf{Metric} &
+\textbf{Value} \\
+\midrule
+
+Accuracy
+& 0.958 \\
+
+Balanced accuracy
+& 0.958 \\
+
+Precision \texttt{weapon}
+& 0.958 \\
+
+Recall \texttt{weapon}
+& 0.958 \\
+
+F1-score \texttt{weapon}
+& 0.958 \\
+
+False negative rate
+& 0.042 \\
+
+False positive rate
+& 0.042 \\
+
+True positives
+& 5\,268 \\
+
+True negatives
+& 5\,271 \\
+
+False positives
+& 229 \\
+
+False negatives
+& 232 \\
+
+\bottomrule
+\end{tabular}
+
+\vspace{0.4em}
+\footnotesize
+\textit{Note.} The metrics are computed on the 11\,000-item binary bundle,
+comprising 1\,000 clean inputs and 10\,000 perturbed artifacts. The values are
+therefore bundle-weighted and do not represent an arithmetic mean across
+experimental conditions. The 500 \gls{ood} inputs are excluded from binary
+correctness metrics.
+\end{table}
+
+Within the frozen binary bundle, \gls{cellebriteinseyets} achieves an accuracy
+and balanced accuracy of 0.958. Precision and recall for the
+\texttt{weapon} class are also approximately 0.958.
+
+The resulting error profile is comparatively symmetrical. A total of 232
+reference \texttt{weapon} items are assigned to \texttt{non\_weapon}, whereas
+229 reference \texttt{non\_weapon} items are assigned to
+\texttt{weapon}. The corresponding \gls{fnr} and \gls{fpr} are 0.042 and
+0.042, respectively.
+
+This approximate balance does not imply that the two error directions have the
+same operational consequence. False negatives may reduce the priority assigned
+to firearm-oriented evidence, whereas false positives increase the volume of
+material requiring analyst review.
+
+Table~\ref{tab:results-cellebrite-condition-metrics} separates clean,
+perturbed, adversarial-family, anti-forensic-family, and \gls{ood} behavior.
+
+\begin{table}[H]
+\centering
+\caption{Behavior of \gls{cellebriteinseyets} by experimental condition}
+\label{tab:results-cellebrite-condition-metrics}
+\small
+\begin{tabularx}{\textwidth}{@{}l r r r r X@{}}
+\toprule
+\textbf{Condition} &
+\textbf{Accuracy} &
+\textbf{Recall weapon} &
+\textbf{\gls{fnr}} &
+\textbf{\gls{fpr}} &
+\textbf{Operational interpretation} \\
+\midrule
+
+Clean
+&
+0.964
+&
+0.968
+&
+0.032
+&
+0.040
+&
+Baseline behavior on 1\,000 unperturbed binary inputs. \\
+
+Perturbed
+&
+0.958
+&
+0.957
+&
+0.043
+&
+0.042
+&
+Aggregate behavior on 10\,000 artifacts: 5\,000 adversarial or
+adversarial-style variants and 5\,000 anti-forensic variants. \\
+
+Adversarial family
+&
+0.955
+&
+0.950
+&
+0.050
+&
+0.040
+&
+Aggregate transfer behavior across four EfficientNet-B0-oriented attacks and
+the model-agnostic Color Shift condition. \\
+
+Anti-forensic family
+&
+0.960
+&
+0.963
+&
+0.037
+&
+0.043
+&
+Aggregate behavior across the five model-agnostic anti-forensic
+transformations. \\
+
+\gls{ood}
+&
+--
+&
+--
+&
+--
+&
+--
+&
+A total of 146 of the 500 \gls{ood} inputs are assigned to the operational
+\texttt{weapon} state, corresponding to a weapon assignment rate of 0.292.
+Binary correctness metrics are not applicable. \\
+
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The clean baseline yields an accuracy of 0.964, weapon recall of 0.968,
+\gls{fnr} of 0.032, and \gls{fpr} of 0.040. This corresponds to 16 missed
+\texttt{weapon} inputs and 20 false-positive assignments among the 1\,000
+unperturbed images.
+
+Across the complete perturbed population, accuracy decreases to 0.958 and
+weapon recall decreases to 0.957. The \gls{fnr} increases to 0.043, whereas
+the \gls{fpr} remains close to the clean value, at 0.042.
+
+The aggregate changes are therefore limited, but the perturbed population still
+contains a greater proportion of missed firearm-oriented inputs than the clean
+baseline. Aggregate stability must not be interpreted as invariance of
+individual decisions.
+
+The adversarial-family population produces an accuracy of 0.955, weapon recall
+of 0.950, and \gls{fnr} of 0.050. The anti-forensic population exhibits an
+accuracy of 0.960, weapon recall of 0.963, and \gls{fnr} of 0.037.
+
+Under the frozen protocol, the adversarial-family population therefore produces
+a somewhat larger missed-target burden than the anti-forensic population. The
+anti-forensic family instead produces a slightly higher \gls{fpr}, at 0.043,
+compared with 0.040 for the adversarial family.
+
+This comparison does not establish that \gls{cellebriteinseyets} was attacked
+directly. The four model-dependent adversarial populations were generated
+against fold-specific EfficientNet-B0 checkpoints. Their evaluation through
+Cellebrite constitutes an empirical transfer assessment rather than a
+white-box attack against the commercial software.
+
+On the separate \gls{ood} branch, 146 of the 500 images are assigned to the
+positive operational state, corresponding to a weapon assignment rate of
+0.292. These assignments are not false positives in the supervised binary
+sense because the \gls{ood} inputs have no \texttt{weapon} or
+\texttt{non\_weapon} reference assignment.
+
+Nevertheless, the result remains operationally relevant because these
+assignments may increase the amount of material routed to the firearm-oriented
+review category. The observed rate describes only the behavior of the frozen
+configuration and does not establish the investigative relevance of the
+individual \gls{ood} inputs.
+
+Table~\ref{tab:results-cellebrite-attack-metrics} reports the ten individual
+perturbed conditions.
+
+\begin{table}[H]
+\centering
+\caption{Performance of \gls{cellebriteinseyets} under adversarial,
+adversarial-style, and anti-forensic conditions}
+\label{tab:results-cellebrite-attack-metrics}
+\scriptsize
+\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}l l r r r r r r@{}}
+\toprule
+\textbf{Family} &
+\textbf{Condition} &
+\textbf{Accuracy} &
+\textbf{Recall} &
+\textbf{\gls{fnr}} &
+\textbf{\gls{fpr}} &
+\textbf{\acrshort{fn}} &
+\textbf{\acrshort{fp}} \\
+\midrule
+
+Adversarial-style
+&
+\gls{colorshift}
+&
+0.964
+&
+0.968
+&
+0.032
+&
+0.040
+&
+16
+&
+20 \\
+
+Adversarial transfer
+&
+\gls{fgsm}
+&
+0.918
+&
+0.894
+&
+0.106
+&
+0.058
+&
+53
+&
+29 \\
+
+Adversarial transfer
+&
+\gls{onepixel}
+&
+0.962
+&
+0.968
+&
+0.032
+&
+0.044
+&
+16
+&
+22 \\
+
+Adversarial transfer
+&
+\gls{sigmazero}
+&
+0.970
+&
+0.958
+&
+0.042
+&
+0.018
+&
+21
+&
+9 \\
+
+Adversarial transfer
+&
+\gls{superdeepfool}
+&
+0.961
+&
+0.964
+&
+0.036
+&
+0.042
+&
+18
+&
+21 \\
+
+\midrule
+
+Anti-forensic
+&
+\gls{contraststretching}
+&
+0.967
+&
+0.972
+&
+0.028
+&
+0.038
+&
+14
+&
+19 \\
+
+Anti-forensic
+&
+\gls{gaussianblur}
+&
+0.954
+&
+0.964
+&
+0.036
+&
+0.056
+&
+18
+&
+28 \\
+
+Anti-forensic
+&
+\gls{histogrammodification}
+&
+0.949
+&
+0.940
+&
+0.060
+&
+0.042
+&
+30
+&
+21 \\
+
+Anti-forensic
+&
+\gls{jpegrecompression}
+&
+0.966
+&
+0.972
+&
+0.028
+&
+0.040
+&
+14
+&
+20 \\
+
+Anti-forensic
+&
+\gls{resampleresize}
+&
+0.964
+&
+0.968
+&
+0.032
+&
+0.040
+&
+16
+&
+20 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+Among the transferred model-dependent adversarial conditions, FGSM produces the
+largest degradation. Accuracy decreases to 0.918 and weapon recall to 0.894,
+while the \gls{fnr} increases to 0.106. The population contains 53 false
+negatives and 29 false positives.
+
+The FGSM result therefore represents the most relevant missed-target failure
+mode observed for the frozen Cellebrite configuration. Its 53 missed
+\texttt{weapon} inputs considerably exceed the 16 false negatives observed on
+the clean population.
+
+Transferred Sigma-Zero artifacts produce a different profile. Accuracy reaches
+0.970, exceeding the clean aggregate value, while the \gls{fnr} is 0.042 and
+the \gls{fpr} is 0.018. The corresponding population contains 21 false
+negatives and nine false positives.
+
+This result does not demonstrate general robustness to Sigma-Zero. It shows
+only that artifacts generated against EfficientNet-B0 do not reproduce their
+direct-target failure mode when processed by the frozen Cellebrite
+configuration.
+
+One Pixel remains close to the clean profile, retaining 16 false negatives but
+increasing false positives from 20 to 22. SuperDeepFool produces 18 false
+negatives and 21 false positives.
+
+The model-agnostic Color Shift condition reproduces the same aggregate
+confusion-matrix values as the clean baseline. This equality does not guarantee
+sample-level invariance because different individual decisions may produce the
+same aggregate counts.
+
+Among the anti-forensic transformations, Histogram Modification produces the
+largest missed-target burden. Weapon recall decreases to 0.940 and the
+\gls{fnr} increases to 0.060, corresponding to 30 false negatives and 21 false
+positives.
+
+Gaussian Blur produces the highest anti-forensic \gls{fpr}, at 0.056,
+corresponding to 28 false positives. Its \gls{fnr} remains comparatively
+limited, at 0.036, with 18 false negatives.
+
+Contrast Stretching and JPEG Recompression yield the lowest anti-forensic
+\gls{fnr}, at 0.028, corresponding to 14 false negatives each. Resample Resize
+reproduces the same aggregate confusion-matrix values as the clean baseline.
+
+The condition-level results therefore show that the aggregate balance between
+false negatives and false positives is not preserved uniformly. FGSM transfer
+primarily increases missed firearm-oriented content, Histogram Modification
+produces the largest anti-forensic missed-target burden, and Gaussian Blur
+increases false-positive review workload.
+
+The observable percentages retained in the original
+\texttt{Classifications} field are not used to interpret these differences.
+They are not established as calibrated probabilities and are not directly
+comparable across labels, images, conditions, or software systems.
+
+Overall, the frozen \gls{cellebriteinseyets} configuration presents a
+comparatively balanced bundle-level profile, with similar overall
+false-negative and false-positive rates. Its clean weapon recall is high, and
+its aggregate degradation under the combined perturbed population is limited.
+
+These values do not constitute a guarantee of general robustness. The system
+remains black-box, and the experiment cannot determine whether the observed
+behavior derives from internal architecture, preprocessing, proprietary
+classification rules, label thresholds, or characteristics specific to the
+evaluated export.
+
+The findings are bounded to the frozen software version, enabled processing
+configuration, exported classification labels, operational mapping, and image
+population. They must not be extrapolated to other versions, categories,
+devices, case exports, or media-analysis settings.
+
+Cellebrite classifications must therefore remain triage indicators rather than
+autonomous evidentiary conclusions. Their operational use requires systematic
+human verification and traceable documentation of the software version,
+processing configuration, imported population, export procedure, and
+normalization rule.
 
 
 
