@@ -536,25 +536,37 @@ the analyst, such as classifications, tags, semantic bookmarks, or
 visual and semantic retrieval results, with respect to the experimental conditions
 considered.
 
+
 From a forensic perspective, model choice cannot be assessed exclusively as a
 function of average accuracy. An automated classification system must also be
-considered with respect to its behavior on heterogeneous, degraded, or
-out-of-domain data. The presence of out-of-distribution images, borderline
-cases, or visually ambiguous content may in fact produce incorrect
-classifications or classifications associated with confidence levels that are
-not sufficiently cautious. In this sense, evaluating behavior on \gls{ood}
-inputs is closely connected to operational robustness, because it makes it
-possible to observe whether images that are external to or ambiguous with
-respect to the task are mapped with excessive confidence to the categories
-defined by the classifier \cite{hendrycks2017baseline,fort2021exploring}.
+considered with respect to its behavior on heterogeneous, degraded, ambiguous,
+or out-of-distribution data.
 
-This setting methodologically justifies the introduction of an experimental
-\texttt{ood} class, distinct from the main operational classes. In the context
-of the present thesis, this class makes it possible to represent borderline,
-anomalous, or not fully task-aligned content with respect to the semantic
-domain of the \texttt{weapon}/\texttt{non\_weapon} task, without presupposing
-the implementation of a specific \textit{OOD detection} mechanism in the
-software evaluated in a black-box setting.
+Such inputs may produce incorrect closed-set assignments or predictions
+associated with high maximum predicted-class probabilities. Evaluating
+\gls{ood} behavior therefore makes it possible to observe how frequently
+content outside the nominal task is assigned to the known operational classes
+and how the corresponding probability outputs are distributed
+\cite{hendrycks2017baseline,fort2021exploring}.
+
+These probability values remain architecture-specific and may not be
+calibrated. They must therefore be interpreted as intra-model diagnostic
+outputs rather than as direct measures of correctness, certainty, or forensic
+reliability.
+
+This setting motivates the introduction of a separate experimental
+\gls{ood} branch, distinct from the two supervised operational classes. In the
+present thesis, this branch represents borderline, anomalous, degraded,
+synthetic, or otherwise out-of-task content with respect to the
+\texttt{weapon}/\texttt{non\_weapon} task.
+
+The branch is evaluated separately and is not used to train a three-class
+classifier. Its inclusion also does not presuppose that the black-box software
+systems implement a dedicated \gls{ood}-detection mechanism or expose an
+explicit unknown state.
+
+
+
 
 A further aspect concerns the probabilistic interpretation of outputs. Many
 classification models produce scores or probabilities associated with classes,
