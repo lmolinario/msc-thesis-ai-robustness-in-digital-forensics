@@ -147,8 +147,8 @@ Explainability cases
 &
 5
 &
-One representative case for each predefined diagnostic category, associated
-with 20 thesis-level visual assets. \\
+One purposively selected case for each predefined diagnostic category,
+associated with 20 thesis-level visual assets. \\
 
 \bottomrule
 \end{tabularx}
@@ -4380,7 +4380,7 @@ configuration, observable mapping, evaluated condition, and relevant
 limitations. The role of the human analyst remains central to the final
 assessment.
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Explainability Analysis and Representative Failure Cases}
+\section{Explainability Analysis and Purposively Selected Cases}
 \label{sec:results-explainability}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -4436,8 +4436,8 @@ claim of \gls{ig} convergence.
 
 The case-selection process was also qualitative. The original review considered
 1\,175 candidate rows and retained 15 cases, comprising three manually selected
-examples for each of five narrative categories. One case from each category
-was subsequently included in the thesis.
+examples for each of five diagnostic categories. One case from each category
+was subsequently included in the thesis through a purposive selection process.
 
 The resulting five-case set is purposive rather than random or statistically
 representative. It illustrates distinct operating behaviors but does not
@@ -4450,8 +4450,8 @@ Table~\ref{tab:results-xai-cases} summarizes the selected cases.
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{3.2pt}
-\caption{Representative EfficientNet-B0 cases selected for qualitative
-analysis using \gls{ig}}
+\caption{Purposively selected EfficientNet-B0 cases for qualitative analysis
+using \gls{ig}}
 \label{tab:results-xai-cases}
 \begin{tabularx}{\textwidth}{@{}
 p{0.15\textwidth}
@@ -4507,8 +4507,9 @@ model-agnostic tonal transformation. \\
 & \texttt{non\_weapon}
 & \texttt{weapon}
 & 1.000
-& Direct-target adversarial false positive illustrating that a maximum predicted
-probability of 1.000 does not establish operational reliability. \\
+& Direct-target adversarial false positive illustrating that a maximum
+predicted-class probability of 1.000 does not establish operational
+reliability. \\
 
 \bottomrule
 \end{tabularx}
@@ -4775,8 +4776,9 @@ attribution target, and selected visualization.
 
 This transparency does not convert the proxy prediction into evidence and does
 not extend to the selected black-box software systems. Within a \gls{df}
-workflow, the figures support critical review of representative cases while
-preserving the central role of the human analyst in the final interpretation.
+workflow, the figures support critical review of the purposively selected cases
+while preserving the central role of the human analyst in the final
+interpretation.
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Operational Interpretation and Experimental Limitations}
 \label{sec:results-limitations}

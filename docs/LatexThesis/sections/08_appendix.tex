@@ -152,9 +152,10 @@ and semantic assignments. \\
 
 \footnotesize\codepath{datasets/final/manifests/manual_selection_final_1500.csv}
 &
-Official manifest of the frozen dataset, composed of 1\,500 images balanced
-across the \texttt{weapon}, \texttt{non\_weapon}, and \gls{ood} evaluation
-categories. \\
+Official manifest of the frozen source population, containing 1\,500 images
+organized into three equally sized branches: 500 \texttt{weapon} images,
+500 \texttt{non\_weapon} images, and 500 images reserved for separate
+\gls{ood} evaluation. \\
 
 \footnotesize\codepath{datasets/final/manifests/manual_selection_adversarial_subset.csv}
 &
@@ -239,18 +240,27 @@ choice is consistent with the forensic purpose of the work: the dataset is not
 treated as a purely automatic product, but as a verifiable, frozen, and
 documented experimental artifact.
 
-The final dataset is represented by the
+
+The final source population is represented by the
 \codepath{manual_selection_final_1500.csv} manifest and contains 1\,500 images
-distributed in a balanced manner across three evaluation categories:
-\texttt{weapon}, \texttt{non\_weapon}, and \gls{ood}. The \texttt{weapon} class
-includes only realistic individual weapons that are clearly visible; the
-\texttt{non\_weapon} class includes realistic negative samples consistent with
-the task; and the \gls{ood} category collects borderline or
-out-of-distribution cases, such as knives, swords, replicas, airsoft items,
-synthetic renderings, video game images, heavy military vehicles, explosions,
-war scenes, and degraded or anomalous images. The official adversarial subset,
-stored in \codepath{manual_selection_adversarial_subset.csv}, excludes
-\gls{ood} examples and retains only the two operational classes
+organized into three equally sized branches.
+
+The supervised binary component comprises 500 \texttt{weapon} images and
+500 \texttt{non\_weapon} images. The \texttt{weapon} class contains realistic
+individual firearms and clearly recognizable firearm-related visual content,
+whereas the \texttt{non\_weapon} class contains realistic negative samples
+consistent with the binary task.
+
+A separate 500-image \gls{ood} branch contains borderline, anomalous, degraded,
+synthetic, semantically adjacent, or otherwise out-of-task content. Examples
+include knives, swords, replicas, airsoft items, synthetic renderings, video
+game images, heavy military vehicles, explosions, and war scenes. This branch
+is not a third supervised class and is excluded from proxy-model training and
+perturbation generation.
+
+The official adversarial subset, stored in
+\codepath{manual_selection_adversarial_subset.csv}, therefore excludes the
+\gls{ood} branch and retains only the two supervised operational classes,
 \texttt{weapon} and \texttt{non\_weapon}, for a total of 1\,000 images.
 
 Stable identifiers, \gls{sha256} hashes, relative paths, and intermediate
