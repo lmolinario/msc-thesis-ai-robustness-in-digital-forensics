@@ -594,65 +594,115 @@ traceability, and continued expert review
 \cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
 
 
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Technical-Forensic Relevance and Profiles of Evidentiary Reliability}
+\section{Technical-Forensic Relevance and Operational Reliability}
 % ─────────────────────────────────────────────────────────────────────────────
-In forensic contexts, the technical correctness of a tool cannot be assessed
-independently of the context in which it is used and of the consequences that
-its results may have on evidence analysis. The introduction of \gls{ai}-based
-systems into investigative workflows therefore raises a question that is both
-technical and forensic in nature: to what extent can an automated output be
-considered sufficiently reliable to guide the analyst's work without
-compromising the completeness of the examination or introducing systematic
-errors that are difficult to detect
-\cite{faqir2023digital,sanna2025cybercrime}.
 
-The issue becomes particularly significant when automated systems operate in a
-substantially opaque manner, that is, when the analyst has access to the
-classification result but not to a full understanding of the decision-making
-process that produced it. In such cases, model vulnerability with respect to
-manipulated or unexpected inputs does not merely represent an algorithmic
-limitation, but may also affect the quality of the entire investigative
-process. A false negative may lead to the failure to select relevant content; a
-false positive may generate noise, divert resources, and increase the burden of
-manual verification. Within this framework, \gls{xai} approaches can provide
-diagnostic support to the analyst by making it possible to examine, with the
-necessary caution, which components of the input contributed most to the
-prediction and whether the model's behavior appears coherent or anomalous in
-the presence of manipulated images. Such approaches do not automatically make
-the classification reliable, nor do they replace experimental validation or
-human oversight, but they do contribute to documenting and critically
-interpreting the role played by automation in forensic analysis
+In forensic contexts, the technical performance of an automated tool cannot be
+assessed independently of the task for which it is used and of the consequences
+that its outputs may have on evidence analysis. The introduction of
+\gls{ai}-based systems into investigative workflows therefore raises a question
+that is both technical and operational: under which conditions can an automated
+output provide useful support to the analyst without reducing the completeness,
+traceability, or critical review of the examination
+\cite{faqir2023digital,sanna2025cybercrime}?
+
+The relevance of an automated output depends on more than aggregate
+classification accuracy. It also depends on the direction of the errors, the
+software or model version, the active configuration, the observable output
+semantics, the adopted normalization rule, the input population, and the threat
+model under which the system was evaluated.
+
+A false negative on firearm-oriented content may prevent a potentially relevant
+image from receiving appropriate review priority. A false positive may increase
+the amount of irrelevant material requiring manual examination, reduce the
+selectivity of the triage process, and divert analyst attention. Neither error
+direction can therefore be evaluated independently of the intended workflow and
+the relative operational consequences of missed detections and additional
+review workload.
+
+The separate \gls{ood} branch introduces a further distinction. An
+\gls{ood} image assigned to \texttt{weapon} is not an ordinary supervised false
+positive because the input has no binary reference assignment. It may
+nevertheless affect the workflow by triggering a flag, changing the priority of
+an item, or increasing the amount of material presented to the analyst.
+
+Automated classifications, tags, bookmarks, and semantic retrieval results must
+therefore be interpreted as triage indicators rather than as autonomous
+evidentiary determinations. They may support the organization and prioritization
+of large evidence collections, but they do not independently establish the
+nature, relevance, authenticity, or evidentiary weight of an image.
+
+This issue becomes particularly significant when the evaluated systems operate
+as black boxes. In such cases, the analyst may observe a tag, bookmark,
+classification label, exported percentage, or semantic-query result without
+having access to the internal model, decision function, preprocessing pipeline,
+or thresholding procedure that produced it.
+
+These observable outputs do not necessarily share the same semantics. They
+cannot be assumed to represent equivalent binary classifications or directly
+comparable uncertainty measures. Their interpretation must remain associated
+with the specific software version, enabled functions, query or category
+configuration, export procedure, and normalization rule used in the evaluation.
+
+The same caution applies to the transparent proxy models. Maximum
+predicted-class probabilities are architecture-specific and are not calibrated
+across models. A high value does not independently establish correctness,
+calibrated certainty, operational robustness, or forensic reliability.
+
+The qualitative \gls{xai} component provides a limited form of diagnostic
+transparency for selected EfficientNet-B0 outputs. Through \gls{ig}, the
+analysis visualizes attribution magnitudes associated with the adopted
+predicted-class target, baseline, and integration procedure.
+
+These attribution maps do not identify causal features, certify prediction
+correctness, provide semantic localization ground truth, or explain the
+proprietary systems evaluated in the black-box branch. They supplement
+quantitative error analysis but do not replace robustness testing, convergence
+assessment, or expert interpretation
 \cite{Adadi2018,Doshi-Velez2017}.
 
-From this perspective, operational robustness is directly connected to the need
-for traceability, verifiability, and critical oversight that characterizes
-\gls{df}. An automated system can certainly provide effective support for
-evidence triage and prioritization, but its use requires that results be
-interpreted in light of the model's limitations, the experimental conditions
-under which it was evaluated, and the possible margins of error. The present
-thesis is situated precisely within this problem space: it does not assume
-automation to be intrinsically reliable, but instead examines its empirical
-resilience in order to understand under which conditions it may offer useful
-support and under which, by contrast, it requires particular caution.
+Operational reliability is therefore closely connected to traceability,
+verifiability, and critical oversight. An automated result is more defensible
+when it can be linked to:
 
+\begin{itemize}
+\item the original source item and its integrity record;
+\item the model or software version;
+\item the active checkpoint or operational configuration;
+\item the observable output produced by the system;
+\item the normalization rule applied to that output;
+\item the experimental or operational condition under which the item was
+processed;
+\item the subsequent human review and final interpretation.
+\end{itemize}
 
-From an evidentiary standpoint, this approach does not imply that the model
-should be regarded as an autonomous source of technical truth, but rather that
-any use of it must be accompanied by adequate methodological awareness. In
-other words, the relevance of the present study also lies in providing useful
-elements to distinguish between the merely instrumental use of \gls{ai} and
-uncritical reliance on algorithmic decisions that are not sufficiently robust.
-This is particularly important in a context in which digital evidence requires
-rigorous procedures and in which the adoption of automated tools must be
-defensible not only in terms of efficiency, but also in terms of technical
-controllability and the reliability of such tools in forensic contexts
+The present thesis is situated within this problem space. It does not assume
+that automation is intrinsically reliable and does not attempt to validate an
+automated classifier as an autonomous source of technical truth. Instead, it
+examines observable behavior under a frozen protocol in order to identify the
+conditions under which automated image analysis may provide useful triage
+support and those under which particular caution is required.
+
+From a legal and evidentiary perspective, the study remains deliberately
+limited. It does not determine the admissibility, probative value, or
+evidentiary weight of an automated classification, nor does it certify any of
+the evaluated software products. Such determinations would require
+case-specific legal analysis, independent validation, chain-of-custody
+assessment, disclosure of the applicable technical procedures, and
+consideration of the relevant procedural framework.
+
+The technical-forensic relevance of the work instead lies in supporting a
+distinction between the controlled instrumental use of \gls{ai} and uncritical
+reliance on automated outputs. In \gls{df}, automation remains most defensible
+when it operates as a documented, auditable, and reviewable component of a
+\textit{human-in-the-loop} workflow
 \cite{cpp1988,aiact2024,swgde_guidelines}.
+
+
+
+
+
 
 
 
