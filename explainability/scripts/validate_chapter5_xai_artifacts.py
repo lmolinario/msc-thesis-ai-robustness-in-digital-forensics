@@ -34,19 +34,19 @@ def fail(message: str) -> None:
     raise RuntimeError(message)
 
 
-def figure_confidence(content: str, figure_label: str) -> str:
+def figure_max_probability(content: str, figure_label: str) -> str:
     pattern = re.compile(
         rf"\\XAIcaseFigureMaskGrid\s*"
         rf"\{{{re.escape(figure_label)}\}}"
         rf"(?:(?!\\XAIcaseFigureMaskGrid).)*?"
-        rf"\\textbf\{{confidence\}}\s*:\s*"
+        rf"\\textbf\{{(?:confidence|Max-P)\}}\s*:\s*"
         rf"([0-9]+(?:\.[0-9]+)?)"
         rf"\s*\}}",
         re.DOTALL,
     )
     matches = pattern.findall(content)
     if len(matches) != 1:
-        fail(f"Expected one confidence value for figure {figure_label}, found {len(matches)}")
+        fail(f"Expected one Max-P value for figure {figure_label}, found {len(matches)}")
     return matches[0]
 
 
@@ -66,11 +66,11 @@ def main() -> None:
 
     for row in rows:
         case_id = row["case_id"]
-        bucket, confidence, _ = EXPECTED_CASES[case_id]
+        bucket, expected_probability, _ = EXPECTED_CASES[case_id]
         if row["case_bucket"] != bucket:
             fail(f"Bucket mismatch for {case_id}")
-        if abs(float(row["confidence"]) - confidence) > 1e-9:
-            fail(f"Confidence mismatch for {case_id}")
+        if abs(float(row["confidence"]) - expected_probability) > 1e-9:
+            fail(f"Canonical probability mismatch for {case_id}")
 
         for column in ("input_asset", "heatmap_asset", "overlay_asset", "top10_mask_asset"):
             value = row[column]
@@ -81,9 +81,9 @@ def main() -> None:
 
     warnings: list[str] = []
     content = THESIS_FILE.read_text(encoding="utf-8")
-    for case_id, (_, confidence, figure_label) in EXPECTED_CASES.items():
-        current = figure_confidence(content, figure_label)
-        expected = f"{confidence:.3f}"
+    for case_id, (_, expected_probability, figure_label) in EXPECTED_CASES.items():
+        current = figure_max_probability(content, figure_label)
+        expected = f"{expected_probability:.3f}"
         if current != expected:
             message = f"Thesis reports {current} for {case_id}; expected {expected}"
             if args.strict_thesis_text:
