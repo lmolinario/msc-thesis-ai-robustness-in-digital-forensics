@@ -246,13 +246,15 @@ affects triage and subsequent human review
 \cite{sanna2024preliminary,sanna2025pixelperfect}.
 
 The threat model is therefore essential to the interpretation of robustness
-results. A perturbation generated directly against an accessible model,
-empirical transfer of the same artifact to a different architecture, a
-score-based attack, and a deterministic model-agnostic transformation represent
-different experimental conditions.
+results. Direct-target evaluation must be distinguished from empirical transfer
+to a different architecture or software system. Within direct-target
+generation, white-box and score-based access represent different attacker
+capabilities, whereas deterministic model-agnostic transformations follow a
+separate experimental rationale.
 
-Their effects must not be interpreted as equivalent forms of attack success or
-as interchangeable evidence of system robustness.
+The effects observed under these conditions must not be interpreted as
+equivalent forms of attack success or as interchangeable evidence of system
+robustness.
 
 The notion of operational robustness adopted in this thesis refers to the
 observable stability of a defined system, version, configuration, task, and
@@ -398,7 +400,7 @@ verification as the final interpretive layer
 
 In light of the critical issues identified in the previous sections, this
 thesis aims to evaluate systematically the operational robustness of
-transparent proxy models and selected black-box software systems used for the
+transparent proxy models and selected black-box software configurations used for the
 automated classification or semantic retrieval of images of potential
 investigative interest in \gls{df}.
 
@@ -418,12 +420,14 @@ Its purpose is to characterize the closed-set assignments produced when the
 input does not conform to the nominal binary task
 \cite{hendrycks2017baseline,hendrycks2019benchmarking}.
 
-Adversarial attacks and anti-forensic transformations are also treated as
-distinct experimental branches. The former include model-dependent
-perturbations designed to affect classifier decisions and the deterministic
-model-agnostic \gls{colorshift} condition. The latter represent plausible
-image-level modifications that may arise through ordinary media processing or
-may be intentionally used to reduce the effectiveness of automated analysis.
+The adversarial and anti-forensic branches are treated separately. The
+adversarial branch comprises four model-dependent attacks and the deterministic
+model-agnostic \gls{colorshift} condition. Because \gls{colorshift} does not
+rely on gradients, model parameters, checkpoints, or observable scores, it is
+interpreted separately from direct-target and transferred attack success. The
+anti-forensic branch comprises plausible image-level modifications that may
+arise through ordinary media processing or may be intentionally used to reduce
+the effectiveness of automated analysis.
 
 Broader anti-forensic behaviors, including the use of general-purpose
 generative \gls{ai} tools to facilitate the creation of steganographic code,
@@ -512,7 +516,7 @@ The experimental design addresses the following research questions:
     transfer, and the model-agnostic \gls{colorshift} condition differ in their
     effects on the evaluated proxy models?
 
-    \item[\textbf{RQ3.}] How do the selected black-box software systems respond
+    \item[\textbf{RQ3.}] How do the selected black-box software configurations respond
     to the same frozen experimental corpus, and how do observable output
     semantics and configuration choices affect the resulting operational
     profiles?
@@ -529,7 +533,7 @@ The experimental design addresses the following research questions:
 
 The main contribution of this thesis lies in the definition and application of
 a methodological protocol for evaluating the operational robustness of
-transparent proxy models and selected black-box software systems used for
+transparent proxy models and selected black-box software configurations used for
 automated image classification or semantic retrieval in \gls{df}.
 
 Unlike evaluations focused exclusively on standard \textit{computer vision}
@@ -622,17 +626,18 @@ checkpoints, predicted classes, maximum predicted-class probabilities,
 confusion matrices, matched clean-to-perturbed transitions, and internal
 gradients.
 
-The black-box level comprises:
+The black-box level comprises four software systems evaluated through six
+frozen configurations:
 
 \begin{itemize}
 \item \gls{magnetaxiomtool}/\gls{magnetai};
 \item \gls{griffeye}/\gls{t3kcore};
-\item \gls{excirefoto2025};
+\item \gls{excirefoto2025} at \texttt{D20}, \texttt{D50}, and \texttt{D80};
 \item \gls{cellebriteinseyets}.
 \end{itemize}
 
-These systems are evaluated exclusively through outputs observable to the
-analyst, including tags, bookmarks, exported classification labels, and
+These six configurations are evaluated exclusively through outputs observable
+to the analyst, including tags, bookmarks, exported classification labels, and
 semantic-query result membership. Their outputs are normalized through
 explicitly documented operational rules without assuming that the systems
 implement equivalent internal taxonomies or binary classification tasks.
