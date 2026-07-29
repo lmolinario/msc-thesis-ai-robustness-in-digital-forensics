@@ -282,85 +282,109 @@ in \gls{df}
 \cite{silva2021microservices,mckeown2024phaser,sanna2024preliminary,sanna2025pixelperfect}.
 
 
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Research Objectives}
 % ─────────────────────────────────────────────────────────────────────────────
-In light of the critical issues highlighted in the previous sections, this
-thesis aims to systematically evaluate the operational robustness of proxy
-models and AI-based software systems employed for the automated classification
-or semantic retrieval of images of potential investigative interest within the
-context of \gls{df}. The general objective is to determine to what extent
-these systems maintain reliable behavior, with respect to the reference
-conditions represented by unmanipulated inputs, when exposed to degraded,
-altered, or intentionally perturbed images. In an investigative scenario, such
-alterations may be intentionally applied by subjects seeking to reduce the
-likelihood that relevant content will be identified through automated detection
-or triage procedures. In addition, recent studies show that general-purpose
-generative \gls{ai} tools may facilitate the production of code intended to
-conceal information in digital images through steganographic techniques;
-although this does not coincide with the transformations experimentally
-evaluated in the present thesis, such evidence broadens the range of possible
-anti-forensic behaviors facilitated by automated tools
-\cite{sanna2025cybercrime}. Particular attention is devoted both to
-adversarial perturbations and anti-forensic transformations, and to system
-behavior in the presence of \gls{ood} content, that is, images that are
-external, ambiguous, or not representative of the operational domain of the
-main \texttt{weapon}/\texttt{non\_weapon} task, and that may therefore produce
-operationally relevant errors
+
+In light of the critical issues identified in the previous sections, this
+thesis aims to evaluate systematically the operational robustness of
+transparent proxy models and selected black-box software systems used for the
+automated classification or semantic retrieval of images of potential
+investigative interest in \gls{df}.
+
+The general objective is to determine whether the behavior observed under clean
+reference conditions remains stable when the evaluated systems process
+distributionally different, degraded, transformed, or intentionally perturbed
+images. In an investigative context, such alterations may reduce the likelihood
+that relevant content is prioritized through automated detection or triage
+procedures or may increase the amount of irrelevant material requiring human
+review.
+
+The experimental task distinguishes two supervised operational classes,
+\texttt{weapon} and \texttt{non\_weapon}, from a separate \gls{ood} branch.
+The latter contains external, ambiguous, borderline, degraded, synthetic, or
+otherwise out-of-task images and is not treated as a third supervised class.
+Its purpose is to characterize the closed-set assignments produced when the
+input does not conform to the nominal binary task
 \cite{hendrycks2017baseline,hendrycks2019benchmarking}.
 
-From this perspective, the work is structured around four main objectives. The
-first is the definition of a rigorous, documented, and reproducible
-experimental protocol for analyzing the robustness of proxy models and AI-based
-software employed for the automated classification or semantic retrieval of
-images in a realistic forensic context. This protocol includes the
-construction of a final manually validated dataset, the definition of a binary
-subset intended for the generation and evaluation of adversarial perturbations
-and anti-forensic transformations, the controlled generation of manipulated
-inputs, and the preparation of an evaluation bundle that can also be used with
-selected commercial software for operational evaluation in a forensic context.
+Adversarial attacks and anti-forensic transformations are also treated as
+distinct experimental branches. The former include model-dependent
+perturbations designed to affect classifier decisions and the deterministic
+model-agnostic \gls{colorshift} condition. The latter represent plausible
+image-level modifications that may arise through ordinary media processing or
+may be intentionally used to reduce the effectiveness of automated analysis.
 
-The second objective is to compare heterogeneous models, differing in
-architecture and representational paradigm, in order to observe possible
-differences in behavior with respect to clean images, \gls{ood} content,
-anti-forensic transformations, and adversarial perturbations. In particular,
-the proxy models make it possible to carry out a controlled quantitative
-analysis of performance degradation, whereas the AI-based software systems
-evaluated in a black-box setting make it possible to examine the operational
-relevance of the problem with respect to the outputs actually available to
-the analyst.
+Broader anti-forensic behaviors, including the use of general-purpose
+generative \gls{ai} tools to facilitate the creation of steganographic code,
+remain outside the experimental scope of this thesis. They nevertheless
+illustrate how automated technologies may expand the range of techniques
+available for concealing information in digital images
+\cite{sanna2025cybercrime}.
 
-The third objective concerns measuring the impact of manipulations on the
-ability of systems to correctly recognize images belonging to forensic classes
-of interest. The analysis is not limited to variations in overall accuracy. It
-also considers the introduced error patterns and behavior on
-out-of-distribution content. For the transparent proxy models, the analysis
-additionally examines confidence-related indicators associated with erroneous
-decisions and, from a diagnostic perspective, the qualitative interpretation
-of selected predictions through \gls{xai} techniques.
+Within this scope, the work is organized around four main objectives.
 
-The fourth objective is to relate the experimental evidence to an assessment of
-the operational reliability of automation within \gls{df} workflows. From this
-perspective, \gls{ai}-based systems are not regarded as substitutes for the
-analyst's judgment, but rather as support for the triage and examination of
-digital content; their reliability must therefore be verified under realistic
-and potentially hostile conditions. The analysis therefore aims to highlight
-limitations, operational risks, and methodological requirements necessary for
-the use of such systems to remain compatible with a \textit{human-in-the-loop}
-approach and with the verifiability requirements inherent in forensic activity
+The first objective is to define a rigorous, documented, and reproducible
+methodological protocol for evaluating operational robustness in a realistic
+forensic image-analysis scenario. The protocol includes human-validated dataset
+construction, deterministic partitioning, transparent proxy-model evaluation,
+controlled perturbation generation, preparation of a blind forensic evaluation
+bundle, black-box output normalization, quantitative analysis, qualitative
+explainability, and traceability controls.
+
+The second objective is to evaluate heterogeneous systems on the same frozen
+source population and derived perturbation suite. The transparent evaluation
+level comprises EfficientNet-B0, ResNet18, and a \gls{clip}-based proxy
+consisting of a frozen visual encoder and a supervised binary classification
+head. The operational black-box level comprises the selected software
+configurations evaluated exclusively through outputs observable to the analyst
+and through explicitly documented normalization rules.
+
+This parallel design does not assume that the proxy models reproduce or
+approximate the proprietary internal components of the selected software
+systems. Instead, it provides an inspectable experimental reference and a
+common basis for comparing observable operating profiles.
+
+The third objective is to characterize robustness through more than aggregate
+accuracy. The analysis considers false negatives, false positives,
+clean-to-perturbed error transitions, \gls{ood} weapon assignment rates,
+architecture-specific maximum predicted-class probabilities, and
+configuration-dependent changes in recall and selectivity.
+
+For the adversarial branch, the evaluation explicitly distinguishes attacks
+applied directly to the EfficientNet-B0 source models from their empirical
+transfer to ResNet18, the \gls{clip}-based proxy, and the selected black-box
+configurations. The deterministic \gls{colorshift} condition remains separate
+because it does not rely on gradients, model parameters, checkpoints, or
+observable scores.
+
+A complementary qualitative \gls{xai} analysis is conducted on purposively
+selected EfficientNet-B0 cases. Its purpose is to support case-level diagnostic
+inspection rather than to provide quantitative robustness evidence, causal
+feature explanations, or information about the internal behavior of the
+black-box systems.
+
+The fourth objective is to relate the experimental findings to the operational
+use of automation in \gls{df}. Automated classifications, tags, bookmarks, and
+semantic retrieval results are treated as triage indicators rather than as
+autonomous evidentiary determinations.
+
+The analysis therefore aims to identify the limitations, error profiles,
+configuration dependencies, traceability requirements, and forms of human
+verification necessary for the use of these systems to remain compatible with
+a \textit{human-in-the-loop} forensic workflow
 \cite{costantini2019digital,faqir2023digital,sanna2024preliminary}.
 
+Overall, the research is methodological and operational rather than exclusively
+performance-oriented. It examines how interactions among data, models,
+perturbations, software configurations, output mappings, and analyst review
+affect the support provided by automated image-analysis systems in realistic
+and potentially hostile conditions.
 
-The approach adopted in this work therefore does not aim merely to measure the
-accuracy of classifiers in a controlled environment, but to understand how the
-interaction among models, software systems, data, perturbations, and
-transformations may concretely affect the support provided to the analyst. In
-this sense, the objective of the research is not exclusively
-performance-oriented, but also methodological and applied: to define an
-evaluation protocol that makes it possible to assess the robustness of
-\gls{ai}-based systems in relation to their possible use in realistic
-investigative scenarios, while keeping human supervision central to the
-interpretation and validation of the results.
+
+
+
 
 
 % ─────────────────────────────────────────────────────────────────────────────
