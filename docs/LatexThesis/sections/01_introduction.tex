@@ -417,97 +417,187 @@ The experimental design addresses the following research questions:
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Contribution of the Thesis}
 % ─────────────────────────────────────────────────────────────────────────────
+
 The main contribution of this thesis lies in the definition and application of
-an experimental methodology for evaluating the operational robustness of proxy
-models and AI-based software systems employed, within a \gls{df} context, for the
-automated classification or semantic retrieval of images. Unlike studies
-primarily focused on standard \textit{computer vision} benchmarks or on
-robustness evaluations conducted in generic domains, the present work adopts a
-perspective oriented toward the needs of forensic analysis: it does not
-consider only nominal classification capability, but also examines the
-resilience of these systems in the presence of hostile, degraded, ambiguous, or
-out-of-distribution inputs
+a methodological protocol for evaluating the operational robustness of
+transparent proxy models and selected black-box software systems used for
+automated image classification or semantic retrieval in \gls{df}.
+
+Unlike evaluations focused exclusively on standard \textit{computer vision}
+benchmarks or aggregate performance under clean conditions, this work adopts a
+forensic and operational perspective. It examines how automated systems behave
+when they process clean binary inputs, a separate \gls{ood} population,
+adversarial artifacts, and anti-forensic transformations
 \cite{nowroozi2020phd,hendrycks2019benchmarking,sanna2024preliminary,sanna2025pixelperfect}.
 
-The experimental protocol adopted in this thesis is named \textbf{\gls{fairlab}}.
-It organizes, in a documented and reproducible manner, the components required
-for the evaluation: the final frozen dataset, proxy models, adversarial
-perturbations, anti-forensic transformations, commercial software selected for
-operational evaluation, quantitative metrics, \gls{xai} analysis, and
-traceability controls. \gls{fairlab} is not proposed as a new standalone
-software tool or as a general theoretical architecture, but as a methodological
-protocol used to make the experimental evaluation carried out in this thesis
-transparent, verifiable, and reproducible.
+The contribution of the thesis is articulated across four interconnected
+dimensions.
 
-A first contribution consists in the integration, within the same experimental
-design, of two complementary levels of evaluation. The first concerns the
-controlled evaluation of proxy models, through which datasets, perturbations, transformations,
-metrics, and \gls{xai} analyses can be examined under reproducible and
-comparable conditions. The second concerns the black-box operational evaluation
-of the selected commercial software, conducted through a common set of images
-organized by experimental condition and used to observe the behavior of the
-outputs available to the analyst. This integration makes it possible to connect
-the quantitative analysis of models with the verification of the behavior of
-software that can actually be used in digital content analysis activities,
-without assuming access to the internal logic of the relevant AI-based
-components \cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
+The first contribution is the formalization of the
+\textbf{\gls{fairlab}} protocol. \gls{fairlab} integrates:
 
-A second contribution concerns the construction of a final frozen dataset, as
-well as the definition of a selection protocol consistent with the
-investigative problem addressed. The final dataset is organized into three
-semantically distinct classes, denoted as \texttt{weapon}, \texttt{non\_weapon},
-and \texttt{ood}, for a total of 1\,500 balanced images. The \texttt{weapon}
-class includes only realistic individual firearms, or clearly recognizable
-firearm-related visual content; the \texttt{non\_weapon} class includes
-realistic negatives consistent with the task; the \texttt{ood} class
-encompasses borderline or out-of-distribution cases with respect to the main
-task, such as knives, swords, replicas, toy or airsoft weapons, synthetic
-renders, images from video games, vehicles or non-individual armaments, war
-scenes, explosions, degraded images, or content anomalous with respect to the
-domain of interest. Starting from the final dataset, a binary subset of 1\,000
-images is also defined, composed only of the \texttt{weapon} and
-\texttt{non\_weapon} classes, and intended for the generation and evaluation of
-adversarial perturbations and anti-forensic transformations. Sample selection
-follows a human-in-the-loop paradigm, in which the manual component
-is not concealed, but documented as an integral part of the methodological
-protocol, thereby making explicit the decision criteria, assumptions, and
-possible limitations involved in the construction of the experimental corpus
+\begin{itemize}
+\item human-validated dataset construction;
+\item deterministic data partitioning;
+\item transparent proxy-model evaluation;
+\item adversarial and anti-forensic artifact generation;
+\item preparation of a blind forensic evaluation bundle;
+\item black-box software assessment;
+\item explicit output-normalization rules;
+\item quantitative error-oriented metrics;
+\item qualitative explainability analysis;
+\item traceability and integrity controls.
+\end{itemize}
+
+\gls{fairlab} is not proposed as a new classifier, defensive mechanism,
+standalone forensic application, or general theoretical architecture. It is a
+documented procedure through which the behavior of heterogeneous automated
+systems can be evaluated under controlled but operationally relevant
+conditions.
+
+Its methodological value lies in the coordinated application of the individual
+components and in the preservation of the relationships among source images,
+derived artifacts, system outputs, normalized decisions, metrics, and reporting
+assets.
+
+The second contribution is the construction of a frozen experimental corpus
+aligned with the selected forensic image-analysis task. The source population
+contains:
+
+\begin{itemize}
+\item 500 \texttt{weapon} images;
+\item 500 \texttt{non\_weapon} images;
+\item 500 images reserved for the separate \gls{ood} branch.
+\end{itemize}
+
+The \texttt{weapon} branch contains realistic individual firearms and clearly
+recognizable firearm-related visual content. The \texttt{non\_weapon} branch
+contains realistic negatives consistent with the binary task. The separate
+\gls{ood} branch includes borderline, anomalous, degraded, synthetic,
+semantically adjacent, and otherwise out-of-task images.
+
+The \gls{ood} population is not treated as a third supervised class. It is used
+to characterize the closed-set assignments produced when an input does not
+conform to the nominal \texttt{weapon}/\texttt{non\_weapon} task.
+
+The 1\,000-image binary subset was used to generate five adversarial or
+adversarial-style populations and five anti-forensic populations. Together with
+the clean binary images and the separate \gls{ood} branch, these derivatives
+form an 11\,500-item forensic evaluation bundle:
+
+\begin{itemize}
+\item 1\,000 clean binary items;
+\item 500 clean \gls{ood} items;
+\item 5\,000 adversarial artifacts;
+\item 5\,000 anti-forensic artifacts.
+\end{itemize}
+
+The 10\,000 manipulated artifacts remain derived versions of the same 1\,000
+binary source images. They represent source--condition combinations rather than
+independent underlying cases.
+
+Sample selection follows a documented \textit{human-in-the-loop} procedure.
+Manual validation is treated as an explicit methodological component rather
+than concealed as an automatic ground-truth generation process. The adopted
+criteria, reviewer decisions, and associated limitations remain traceable
 \cite{sambasivan2021data}.
 
+The third contribution is the parallel evaluation of transparent proxy models
+and selected black-box software configurations on the same frozen experimental
+basis.
 
-A third contribution concerns the definition of an evaluation plan based on
-heterogeneous data, classification criteria consistent with the investigative
-problem addressed, and a set of manipulations selected to represent two
-distinct yet operationally related perspectives: adversarial perturbations
-designed to alter classifier responses, and anti-forensic transformations that
-are plausible from the standpoint of the life cycle and concealment of digital
-images. In this way, the thesis does not merely verify whether a system can be
-induced to fail, but also analyzes the nature of the error and its possible
-implications for triage and the preliminary selection of relevant content
-\cite{barni2018cf,nowroozi2024verifying,yaacoub2021digital}.
+The transparent level comprises EfficientNet-B0, ResNet18, and a
+\gls{clip}-based proxy consisting of a frozen visual encoder and a supervised
+binary classification head. These models provide access to fold-specific
+checkpoints, predicted classes, maximum predicted-class probabilities,
+confusion matrices, matched clean-to-perturbed transitions, and internal
+gradients.
 
-A fourth contribution consists in the comparison among models differing in
-architecture and representational paradigm, together with the black-box
-evaluation of the commercial software included in the protocol: Magnet
-AXIOM/Magnet.AI, Excire Foto 2025, Cellebrite Inseyets/Physical Analyzer, and
-Magnet Griffeye/T3K CORE. This approach makes it possible to avoid conclusions
-that depend exclusively on a single classifier and to observe whether the
-vulnerabilities identified under controlled conditions may also be relevant
-with respect to the outputs available in software used in the context of
-forensic analysis. Within this framework, the \gls{xai} analysis applied to
-the proxy models serves a complementary diagnostic function: it does not
-certify the correctness of classification, but supports the qualitative
-interpretation of representative cases of error or instability.
+The black-box level comprises:
+
+\begin{itemize}
+\item \gls{magnetaxiomtool}/\gls{magnetai};
+\item \gls{griffeye}/\gls{t3kcore};
+\item \gls{excirefoto2025};
+\item \gls{cellebriteinseyets}.
+\end{itemize}
+
+These systems are evaluated exclusively through outputs observable to the
+analyst, including tags, bookmarks, exported classification labels, and
+semantic-query result membership. Their outputs are normalized through
+explicitly documented operational rules without assuming that the systems
+implement equivalent internal taxonomies or binary classification tasks.
+
+The proxy models are not intended to reconstruct, approximate, or explain the
+proprietary models used by the black-box systems. They provide an inspectable
+experimental reference and the controlled generation layer for the
+model-dependent adversarial artifacts subsequently evaluated for empirical
+transfer.
+
+The protocol therefore distinguishes:
+
+\begin{itemize}
+\item direct-target attacks against fold-specific EfficientNet-B0 checkpoints;
+\item empirical transfer to ResNet18 and the \gls{clip}-based proxy;
+\item empirical transfer to the selected black-box configurations;
+\item the deterministic and model-agnostic \gls{colorshift} condition;
+\item the separate anti-forensic transformations.
+\end{itemize}
+
+This distinction prevents transfer results from being interpreted as direct
+robustness evaluations of systems against which no matched attack was
+independently optimized.
+
+The fourth contribution is an auditable and error-oriented interpretation of
+operational robustness. The evaluation does not reduce system behavior to a
+single aggregate score. It considers:
+
+\begin{itemize}
+\item false negatives affecting firearm-oriented content;
+\item false positives increasing analyst review workload;
+\item directional clean-to-perturbed error transitions;
+\item closed-set weapon assignments on the separate \gls{ood} branch;
+\item direct-target and transfer behavior;
+\item configuration-dependent changes in recall and selectivity;
+\item residual embedded-metadata sensitivity;
+\item the continued need for human verification.
+\end{itemize}
+
+Stable identifiers, manifests, fold assignments, model checkpoints,
+perturbation records, cryptographic digests, blind-bundle identifiers,
+normalized predictions, metric tables, and reporting assets preserve the
+relationship between each source item and the corresponding experimental
+outcomes.
+
+This traceability supports procedural reproducibility and artifact-level
+auditability, including where complete source datasets or proprietary software
+exports cannot be redistributed.
+
+A complementary qualitative \gls{xai} analysis is conducted through
+\gls{ig} on five purposively selected EfficientNet-B0 cases. The attribution
+maps support case-level diagnostic inspection of the selected proxy-model
+outputs. They are not treated as quantitative robustness evidence, causal
+feature explanations, semantic localization ground truth, or explanations of
+the selected black-box systems.
+
+Overall, the contribution of the thesis does not consist in proposing a
+universally robust firearm classifier or ranking the evaluated software
+products. It consists in defining and applying a traceable procedure for
+revealing how heterogeneous automated image-analysis systems behave when the
+assumptions of clean, closed-set evaluation no longer hold.
+
+The resulting perspective treats operational robustness as a functional
+requirement for the controlled use of automation in \gls{df}. Automated
+outputs remain triage indicators whose value depends on task-specific
+validation, explicit configuration and mapping rules, source-to-result
+traceability, and continued expert review
+\cite{costantini2019digital,sanna2024preliminary,sanna2025pixelperfect}.
 
 
-Overall, the thesis proposes an interpretation of robustness not merely as a
-technical property of the model, but as a functional requirement for the
-controlled use of automation in \gls{df}. The empirical analysis is therefore
-intended to assess the extent to which out-of-distribution data, adversarial
-perturbations, and anti-forensic transformations affect the stability of
-automated outputs and the quality of the support provided to the analyst, while
-keeping human supervision central to the interpretation and verification of the
-results.
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Technical-Forensic Relevance and Profiles of Evidentiary Reliability}
