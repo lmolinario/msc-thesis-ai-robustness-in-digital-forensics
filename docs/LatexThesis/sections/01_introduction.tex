@@ -112,18 +112,13 @@ prioritization, and preliminary examination of evidence collections
 \cite{garfinkel2010digital,costantini2019digital}.
 
 The integration of \gls{ai} techniques into \gls{df} tools has introduced
-additional possibilities for supporting investigative analysis. In particular,
-\gls{ml} and \gls{dl} methods may assist with tasks such as:
-
-\begin{itemize}
-\item semantic classification of images and videos;
-\item recognition of recurring patterns;
-\item grouping of visually or semantically similar content;
-\item analysis of logs and structured artifacts;
-\item detection of anomalies;
-\item retrieval and prioritization of material potentially relevant to an
+additional possibilities for supporting investigative analysis.
+In particular, \gls{ml} and \gls{dl} methods may assist with the semantic
+classification of images and videos, the recognition of recurring patterns,
+and the grouping of visually or semantically similar content. They may also
+support the analysis of logs and structured artifacts, anomaly detection, and
+the retrieval and prioritization of material potentially relevant to an
 investigation.
-\end{itemize}
 
 Automated triage may also affect the conditions under which analysts review
 sensitive material. Studies involving professionals engaged in the examination
@@ -161,18 +156,17 @@ false positive may increase analytical noise and the amount of material
 requiring manual verification. The operational consequences therefore depend
 on both the frequency and the direction of the errors.
 
-The introduction of \gls{ai} into forensic workflows consequently requires
-critical evaluation of:
+The introduction of \gls{ai} into forensic workflows consequently requires a
+critical evaluation that extends beyond nominal task performance. The analysis
+must examine system behavior under unexpected or manipulated inputs and
+distinguish the operational consequences of false negatives from those of false
+positives.
 
-\begin{itemize}
-\item nominal task performance;
-\item behavior under unexpected or manipulated inputs;
-\item false-negative and false-positive distributions;
-\item system version and configuration;
-\item output semantics and normalization rules;
-\item traceability from the source item to the automated result;
-\item the continued role of expert verification.
-\end{itemize}
+It must also document the system version and active configuration, clarify the
+semantics of the observable outputs and the rules used to normalize them, and
+preserve traceability from each source item to the corresponding automated
+result. Expert verification must remain part of the process throughout the
+evaluation and subsequent operational use.
 
 \gls{xai} methods may provide supplementary diagnostic information for
 transparent models by representing the attribution assigned to selected input
@@ -262,15 +256,13 @@ output mapping when evaluated across the frozen input conditions included in
 the protocol.
 
 Robustness is not treated as an absolute or version-independent property. A
-system may perform strongly on clean inputs while exhibiting:
+system may perform strongly on clean inputs while still increasing missed-target
+risk under a specific manipulation or generating additional false-positive
+review workload.
 
-\begin{itemize}
-\item increased missed-target risk under a specific manipulation;
-\item additional false-positive review workload;
-\item closed-set assignments on out-of-task content;
-\item sensitivity to thresholds, semantic-query settings, or output mappings;
-\item severe degradation under a direct-target adversarial condition.
-\end{itemize}
+It may also produce closed-set assignments on out-of-task content, exhibit
+sensitivity to thresholds, semantic-query settings, or output mappings, or
+undergo severe degradation under a direct-target adversarial condition.
 
 Operational robustness therefore concerns not only aggregate performance but
 also the quality, direction, traceability, and workflow consequences of the
@@ -304,16 +296,16 @@ In \gls{df}, the research problem is not limited to demonstrating that a
 classifier can be induced to fail. It is also necessary to determine how an
 error affects the support provided to the analyst.
 
-Relevant questions include whether a manipulation:
+Relevant questions concern whether a manipulation prevents target content from
+receiving appropriate review priority or increases the volume of irrelevant
+material presented for examination. The analysis must also determine whether
+the manipulation alters the balance between recall and selectivity or produces
+closed-set assignments on content outside the nominal task.
 
-\begin{itemize}
-\item prevents target content from receiving appropriate review priority;
-\item increases the volume of irrelevant material presented for examination;
-\item alters the balance between recall and selectivity;
-\item produces closed-set assignments on content outside the nominal task;
-\item exploits a specific model directly or transfers to other systems;
-\item reveals sensitivity to configuration or output-normalization choices.
-\end{itemize}
+A further distinction concerns whether the manipulation directly exploits a
+specific model or transfers to other architectures and software systems. It is
+also necessary to determine whether the observed behavior depends on the active
+configuration or on the rules used to normalize the available outputs.
 
 Addressing these questions requires evaluation populations aligned with the
 defined operational task. Such populations should include realistic positives,
@@ -344,13 +336,10 @@ assignments produced when closed-set systems process inputs that do not conform
 to the nominal binary task.
 
 Adversarial and anti-forensic artifacts are generated exclusively from the
-1\,000-image binary subset. This preserves the distinction between:
-
-\begin{itemize}
-\item supervised binary correctness;
-\item clean-to-perturbed error transitions;
-\item separate \gls{ood} assignment behavior.
-\end{itemize}
+1\,000-image binary subset. This design preserves the conceptual and
+experimental distinction among supervised binary correctness,
+clean-to-perturbed error transitions, and the assignment behavior observed on
+the separate \gls{ood} branch.
 
 The evaluation design combines two complementary levels of observation. The
 first uses transparent proxy models, for which predictions, maximum
@@ -547,20 +536,15 @@ The contribution of the thesis is articulated across four interconnected
 dimensions.
 
 The first contribution is the formalization of the
-\textbf{\gls{fairlab}} protocol. \gls{fairlab} integrates:
+\textbf{\gls{fairlab}} protocol. \gls{fairlab} integrates human-validated
+dataset construction, deterministic data partitioning, transparent proxy-model
+evaluation, and the generation of adversarial and anti-forensic artifacts.
 
-\begin{itemize}
-\item human-validated dataset construction;
-\item deterministic data partitioning;
-\item transparent proxy-model evaluation;
-\item adversarial and anti-forensic artifact generation;
-\item preparation of a blind forensic evaluation bundle;
-\item black-box software assessment;
-\item explicit output-normalization rules;
-\item quantitative error-oriented metrics;
-\item qualitative explainability analysis;
-\item traceability and integrity controls.
-\end{itemize}
+The protocol also encompasses the preparation of a blind forensic evaluation
+bundle, the assessment of black-box software, and the application of explicit
+output-normalization rules. These components are connected to quantitative
+error-oriented metrics, qualitative explainability analysis, and traceability
+and integrity controls.
 
 \gls{fairlab} is not proposed as a new classifier, defensive mechanism,
 standalone forensic application, or general theoretical architecture. It is a
@@ -575,13 +559,9 @@ assets.
 
 The second contribution is the construction of a frozen experimental corpus
 aligned with the selected forensic image-analysis task. The source population
-contains:
-
-\begin{itemize}
-\item 500 \texttt{weapon} images;
-\item 500 \texttt{non\_weapon} images;
-\item 500 images reserved for the separate \gls{ood} branch.
-\end{itemize}
+contains 1\,500 images organized into three equally sized branches. These
+comprise 500 \texttt{weapon} images, 500 \texttt{non\_weapon} images, and
+500 images reserved for the separate \gls{ood} branch.
 
 The \texttt{weapon} branch contains realistic individual firearms and clearly
 recognizable firearm-related visual content. The \texttt{non\_weapon} branch
@@ -596,14 +576,10 @@ conform to the nominal \texttt{weapon}/\texttt{non\_weapon} task.
 The 1\,000-image binary subset was used to generate five adversarial or
 adversarial-style populations and five anti-forensic populations. Together with
 the clean binary images and the separate \gls{ood} branch, these derivatives
-form an 11\,500-item forensic evaluation bundle:
+form an 11\,500-item forensic evaluation bundle.
 
-\begin{itemize}
-\item 1\,000 clean binary items;
-\item 500 clean \gls{ood} items;
-\item 5\,000 adversarial artifacts;
-\item 5\,000 anti-forensic artifacts.
-\end{itemize}
+The bundle comprises 1\,000 clean binary items, 500 clean \gls{ood} items,
+5\,000 adversarial artifacts, and 5\,000 anti-forensic artifacts.
 
 The 10\,000 manipulated artifacts remain derived versions of the same 1\,000
 binary source images. They represent source--condition combinations rather than
@@ -627,14 +603,11 @@ confusion matrices, matched clean-to-perturbed transitions, and internal
 gradients.
 
 The black-box level comprises four software systems evaluated through six
-frozen configurations:
-
-\begin{itemize}
-\item \gls{magnetaxiomtool}/\gls{magnetai};
-\item \gls{griffeye}/\gls{t3kcore};
-\item \gls{excirefoto2025} at \texttt{D20}, \texttt{D50}, and \texttt{D80};
-\item \gls{cellebriteinseyets}.
-\end{itemize}
+frozen configurations. These include
+\gls{magnetaxiomtool}/\gls{magnetai},
+\gls{griffeye}/\gls{t3kcore},
+\gls{excirefoto2025} at \texttt{D20}, \texttt{D50}, and \texttt{D80}, and
+\gls{cellebriteinseyets}.
 
 These six configurations are evaluated exclusively through outputs observable
 to the analyst, including tags, bookmarks, exported classification labels, and
@@ -648,15 +621,14 @@ experimental reference and the controlled generation layer for the
 model-dependent adversarial artifacts subsequently evaluated for empirical
 transfer.
 
-The protocol therefore distinguishes:
+The protocol therefore distinguishes direct-target attacks generated against
+fold-specific EfficientNet-B0 checkpoints from empirical transfer to ResNet18
+and the \gls{clip}-based proxy. It separately examines empirical transfer to
+the selected black-box configurations.
 
-\begin{itemize}
-\item direct-target attacks against fold-specific EfficientNet-B0 checkpoints;
-\item empirical transfer to ResNet18 and the \gls{clip}-based proxy;
-\item empirical transfer to the selected black-box configurations;
-\item the deterministic and model-agnostic \gls{colorshift} condition;
-\item the separate anti-forensic transformations.
-\end{itemize}
+The deterministic and model-agnostic \gls{colorshift} condition is kept
+distinct from these model-dependent attacks, while the anti-forensic
+transformations constitute a separate experimental branch.
 
 This distinction prevents transfer results from being interpreted as direct
 robustness evaluations of systems against which no matched attack was
@@ -664,18 +636,16 @@ independently optimized.
 
 The fourth contribution is an auditable and error-oriented interpretation of
 operational robustness. The evaluation does not reduce system behavior to a
-single aggregate score. It considers:
+single aggregate score. It examines false negatives affecting
+firearm-oriented content and false positives that increase analyst review
+workload.
 
-\begin{itemize}
-\item false negatives affecting firearm-oriented content;
-\item false positives increasing analyst review workload;
-\item directional clean-to-perturbed error transitions;
-\item closed-set weapon assignments on the separate \gls{ood} branch;
-\item direct-target and transfer behavior;
-\item configuration-dependent changes in recall and selectivity;
-\item residual embedded-metadata sensitivity;
-\item the continued need for human verification.
-\end{itemize}
+The analysis also considers directional clean-to-perturbed error transitions,
+closed-set weapon assignments on the separate \gls{ood} branch, and the
+distinction between direct-target and transfer behavior. Configuration-dependent
+changes in recall and selectivity, residual embedded-metadata sensitivity, and
+the continued need for human verification are incorporated into the
+operational interpretation.
 
 Stable identifiers, manifests, fold assignments, model checkpoints,
 perturbation records, cryptographic digests, blind-bundle identifiers,
@@ -778,18 +748,15 @@ assessment, or expert interpretation
 
 Operational reliability is therefore closely connected to traceability,
 verifiability, and critical oversight. An automated result is more defensible
-when it can be linked to:
+when it can be linked to the original source item and its integrity record, as
+well as to the model or software version used during processing.
 
-\begin{itemize}
-\item the original source item and its integrity record;
-\item the model or software version;
-\item the active checkpoint or operational configuration;
-\item the observable output produced by the system;
-\item the normalization rule applied to that output;
-\item the experimental or operational condition under which the item was
-processed;
-\item the subsequent human review and final interpretation.
-\end{itemize}
+The retained documentation should identify the active checkpoint or operational
+configuration, the observable output produced by the system, and the
+normalization rule applied to that output. It should also record the
+experimental or operational condition under which the item was processed and
+preserve the connection with the subsequent human review and final
+interpretation.
 
 The present thesis is situated within this problem space. It does not assume
 that automation is intrinsically reliable and does not attempt to validate an
