@@ -810,11 +810,6 @@ when it operates as a documented, auditable, and reviewable component of a
 
 
 
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Structure of the Thesis}
 % ─────────────────────────────────────────────────────────────────────────────
@@ -822,47 +817,58 @@ when it operates as a documented, auditable, and reviewable component of a
 The thesis is organized into seven chapters, progressing from the theoretical
 and research context to the methodological protocol, its concrete
 implementation, the experimental results, and their operational interpretation.
+A separate appendix documents the principal repository and reproducibility
+artifacts.
 
-\textbf{Chapter~\ref{chap:introduction}} introduces the research problem, the
-objectives of the work, and the main contributions of the thesis concerning the
-operational robustness of transparent proxy models and selected black-box
-software systems used for automated image classification or semantic retrieval
-in \gls{df}.
+\textbf{Chapter~\ref{chap:introduction}} introduces the research problem,
+defines the objectives and Research Questions, presents the main contributions,
+and discusses the technical-forensic relevance of evaluating the operational
+robustness of transparent proxy models and selected black-box software
+configurations.
 
 \textbf{Chapter~\ref{chap:background}} presents the theoretical foundations
-related to digital evidence, the use of \gls{ai} in forensic analysis,
-automated image classification, \gls{advml}, anti-forensic techniques, and
-\gls{xai}.
+related to digital evidence, automated forensic analysis, the use of
+\gls{ai} for image classification, \gls{advml}, anti-forensic techniques,
+\gls{ood} behavior, and \gls{xai}.
 
-\textbf{Chapter~\ref{chap:state-of-the-art}} critically analyzes the relevant
-literature and identifies the research gap concerning the integrated evaluation
-of transparent models and selected black-box software systems under realistic
-forensic conditions.
+\textbf{Chapter~\ref{chap:state-of-the-art}} critically examines the relevant
+literature and identifies the research gap concerning the integrated and
+operationally oriented evaluation of transparent models and selected black-box
+software systems under clean, distributionally different, adversarial, and
+anti-forensic conditions.
 
-\textbf{Chapter~\ref{chap:methodology}} defines the \gls{fairlab}
-methodological protocol, including dataset construction and validation, the
-parallel proxy-model and black-box evaluation design, the considered
-adversarial and anti-forensic conditions, the evaluation metrics, and the
-principles governing traceability and reproducibility.
+\textbf{Chapter~\ref{chap:methodology}} defines the high-level
+\gls{fairlab} methodological protocol. It describes the research design,
+dataset-construction and semantic-validation principles, the separate binary
+and \gls{ood} branches, the parallel proxy-model and black-box evaluation
+levels, the threat model, the evaluation metrics, the explainability approach,
+and the principles governing traceability, integrity, and reproducibility.
 
 \textbf{Chapter~\ref{chap:implementation}} documents the concrete
-implementation and frozen experimental setup. It describes the data structures,
-scripts, model configurations, parameter settings, software versions,
-perturbation-generation procedures, forensic evaluation bundle, black-box
-output-normalization procedures, explainability workflow, and technical
-validation controls.
+implementation of the protocol and the frozen experimental setup. It describes
+the data structures, scripts, fold construction, proxy-model configurations,
+parameter settings, software versions, perturbation-generation procedures,
+forensic evaluation bundle, black-box output-normalization rules,
+explainability workflow, and technical validation controls.
 
 \textbf{Chapter~\ref{chap:results}} presents and interprets the experimental
-results for the clean baseline, the separate \gls{ood} branch, adversarial
-attacks, anti-forensic transformations, selected black-box software
-configurations, metadata sensitivity, and the qualitative cases examined
-through \gls{xai}.
+evidence. It reports the clean proxy-model baseline, the separate \gls{ood}
+analysis, the anti-forensic and adversarial results, the behavior of the
+selected black-box configurations, the embedded-metadata sensitivity check,
+the comparative operational analysis, and the qualitative
+EfficientNet-B0 cases examined through \gls{xai}.
 
-\textbf{Chapter~\ref{chap:conclusions}} synthesizes the main findings,
-discusses their implications for the controlled use of automation in forensic
-contexts, and identifies the limitations of the study and the corresponding
-directions for future research.
-The separate Appendix~\ref{app:repository-reproducibility-artifacts}
-documents the repository structure, the canonical experimental artifacts, the
-official pipeline sequence, integrity records, provenance information, and the
+\textbf{Chapter~\ref{chap:conclusions}} answers the Research Questions,
+summarizes the principal contributions and experimental findings, discusses
+their operational and forensic implications, defines the limitations of the
+study, and identifies corresponding directions for future research.
+
+The separate
+\textbf{Appendix~\ref{app:repository-reproducibility-artifacts}} documents the
+repository structure, canonical experimental artifacts, official pipeline
+sequence, integrity records, provenance information, validation assets, and the
 boundaries of controlled reproducibility.
+
+
+
+
