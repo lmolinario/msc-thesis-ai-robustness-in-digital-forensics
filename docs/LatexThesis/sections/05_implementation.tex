@@ -3334,13 +3334,12 @@ For conventional row-oriented exports, each parsed software record is matched
 according to the following priority:
 
 \[
+\begin{aligned}
 \texttt{SHA-256}
-\succ
-\texttt{MD5}
-\succ
-\texttt{exact file name}
-\succ
-\texttt{file name embedded in an exported path or text field}.
+&\succ \texttt{MD5} \\
+&\succ \texttt{exact file name} \\
+&\succ \texttt{file name embedded in an exported path or text field}.
+\end{aligned}
 \]
 
 The selected matching method is retained in the normalized record. This permits
@@ -4648,17 +4647,14 @@ combination of architecture and held-out fold.
 The principal provenance chain is:
 
 \[
+\begin{aligned}
 \texttt{image\_id}
-\longrightarrow
-\texttt{generated\_image\_id}
-\longrightarrow
-\texttt{bundle\_id}
-\longrightarrow
-\texttt{normalized\_prediction}
-\longrightarrow
-\texttt{metric\_row}
-\longrightarrow
-\texttt{reporting\_asset}.
+&\longrightarrow \texttt{generated\_image\_id}
+\longrightarrow \texttt{bundle\_id} \\
+&\longrightarrow \texttt{normalized\_prediction}
+\longrightarrow \texttt{metric\_row} \\
+&\longrightarrow \texttt{reporting\_asset}.
+\end{aligned}
 \]
 
 For clean binary samples and \gls{ood} inputs, the original and generated
