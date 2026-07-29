@@ -399,9 +399,10 @@ disposition during human review and does not constitute an additional
 analytical branch. Likewise, the \gls{ood} branch is not a homogeneous semantic
 class or a subclass of \texttt{non\_weapon}. It contains borderline,
 anomalous, degraded, synthetic, or otherwise distributionally different inputs
-that do not constitute clean instances of either binary class. Since
-classifiers may produce high-confidence predictions outside their training
-distribution \cite{hendrycks2017baseline,fort2021exploring}, these inputs must
+that do not constitute clean instances of either binary class. Since classifiers
+may produce predictions with high maximum predicted-class
+probabilities outside their training distribution
+\cite{hendrycks2017baseline,fort2021exploring}, these inputs must
 be assessed separately from ordinary binary errors. Their exclusion from model
 training and perturbation generation is formalized in
 Section~\ref{sec:methodology-split-generation}.
@@ -903,8 +904,9 @@ folds for fold-aware training and held-out evaluation, while the clean
 The controlled component of the methodology relies on fully inspectable
 classification models, hereafter referred to as \textit{proxy classification
 models}. These models provide experimental references for analyzing
-classification behavior, robustness degradation, confidence patterns, error
-direction, and transferability under reproducible conditions. They are not
+classification behavior, robustness degradation, maximum predicted-class
+probability patterns, error direction, and transferability under reproducible
+conditions. They are not
 replicas, functionally equivalent substitutes, reverse-engineered
 reconstructions, or architectural reproductions of the selected black-box
 software systems.
@@ -2099,8 +2101,8 @@ corresponding clean condition. These quantities are diagnostic intra-model
 indicators and must not be interpreted as calibrated probabilities or compared
 directly across proxy architectures.
 
-For each proxy model and manipulated condition, the confidence shift is defined
-as:
+For each proxy model and manipulated condition, the maximum-probability shift
+is defined as:
 
 \begin{equation}
 \Delta c
@@ -2110,9 +2112,9 @@ c_{\mathrm{perturbed}}
 c_{\mathrm{clean}}
 \end{equation}
 
-where \(c\) denotes the maximum predicted-class probability. This value does
-not necessarily correspond to the probability assigned to the reference
-operational class.
+where \(c\) denotes the mean maximum predicted-class probability under the
+indicated condition. Because the predicted class may change, this quantity does
+not necessarily compare the probabilities assigned to the same semantic class.
 
 The \gls{ood} evaluation remains conceptually separate from the binary task.
 Since \gls{ood} samples are not treated as a third supervised class, binary or
@@ -2126,7 +2128,7 @@ operational classes through:
 \texttt{non\_weapon};
 \item the mean maximum predicted-class probability for proxy models;
 \item the proportion of proxy-model predictions whose maximum probability
-exceeds a predefined high-confidence threshold;
+meets or exceeds a predefined high-Max-P threshold;
 \item the proportion of unknown outputs exposed after normalization of
 black-box software outputs.
 \end{itemize}
@@ -2149,10 +2151,10 @@ false-positive rate because \gls{ood} inputs do not belong to the supervised
 negative class, nor does it establish that an individual assignment is
 semantically correct, incorrect, relevant, or irrelevant.
 
-Confidence-based \gls{ood} indicators are available only for proxy models.
-They remain diagnostic intra-model quantities because the selected black-box
-systems do not expose homogeneous confidence values suitable for an equivalent
-cross-system analysis.
+Maximum-probability-based \gls{ood} indicators are available only for proxy
+models. They remain diagnostic intra-model quantities because the selected
+black-box systems do not expose homogeneous numerical outputs suitable for an
+equivalent cross-system probability analysis.
 
 Black-box evaluation is based on the normalized states defined in
 Section~\ref{sec:methodology-forensic-tools}: positive detection, no target
@@ -2237,7 +2239,8 @@ for the \texttt{weapon} and \texttt{non\_weapon} classes. \\
 Robustness under manipulation
 &
 Clean and perturbed accuracy, accuracy drop, induced error count and rate,
-prediction transitions, and intra-model confidence variation when available. \\
+prediction transitions, and intra-model maximum-probability variation when
+available. \\
 
 Critical operational errors
 &
@@ -2247,8 +2250,9 @@ on forensic prioritization and review workload. \\
 
 \gls{ood} behavior
 &
-Weapon flag rate, in-domain assignment distribution, and proxy-model confidence
-indicators. The branch remains excluded from binary classification metrics. \\
+Weapon flag rate, in-domain assignment distribution, and proxy-model
+maximum-probability indicators. The branch remains excluded from binary
+classification metrics. \\
 
 Black-box software coverage
 &
@@ -2337,7 +2341,7 @@ draw=black!75
 \node[eval] (proxy) at (-4.5,-2.7)
 {\shortstack{
 \textbf{Proxy-model evaluation}\\[1mm]
-\scriptsize binary predictions and intra-model confidence diagnostics
+\scriptsize binary predictions and intra-model Max-P diagnostics
 }};
 
 \node[eval] (blackbox) at (4.5,-2.7)
@@ -2357,7 +2361,7 @@ draw=black!75
 {\shortstack{
 \textbf{\gls{ood} and coverage indicators}\\[1mm]
 \scriptsize weapon flag rate, in-domain assignments, matching rate,\\
-\scriptsize unknown outcomes, and proxy-only confidence indicators
+\scriptsize unknown outcomes, and proxy-only Max-P indicators
 }};
 
 \node[output] (interpretation) at (0,-8.4)
@@ -2424,9 +2428,9 @@ predefined diagnostic criteria to examine behaviors that cannot be fully
 characterized through corpus-level metrics. The selected cases are not used to
 estimate general model performance.
 
-High-confidence criteria are applied only within the selected proxy model and
-serve exclusively as case-selection indicators. They must not be interpreted
-as calibrated probabilities or compared directly with confidence values from
+High-Max-P criteria are applied only within the selected proxy model and serve
+exclusively as case-selection indicators. They must not be interpreted as
+calibrated probabilities or compared directly with numerical outputs from
 other architectures or software systems.
 
 Table~\ref{tab:methodology-xai-case-selection} summarizes the five case
@@ -2453,7 +2457,7 @@ Examines an error already present under the clean condition and whether the
 attribution pattern appears localized, diffuse, partial, or associated with
 contextual image regions. \\
 
-High-confidence \gls{ood} assignment
+High-Max-P \gls{ood} assignment
 &
 Examines the attribution pattern associated with an in-domain assignment
 produced for a distributionally different input. The assignment is treated as
