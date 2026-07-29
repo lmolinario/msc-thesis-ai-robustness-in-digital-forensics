@@ -1991,72 +1991,116 @@ configuration, imported population, and output-normalization rule.
 
 
 
-
-
-
-
-
-
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{\texorpdfstring{\gls{griffeye}/\gls{t3kcore}}{Magnet Griffeye/T3K CORE} Results}
 \label{subsec:results-griffeye}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The observable-bookmark mapping and normalization adopted for
+The observable bookmark mapping and normalization procedure adopted for
 \gls{griffeye}/\gls{t3kcore} are documented in
-Section~\ref{subsec:implementation-griffeye}. The present subsection reports the
-resulting normalized performance and its operational implications.
+Section~\ref{subsec:implementation-griffeye}. The present subsection reports
+the resulting normalized behavior without making assumptions about the
+inaccessible internal classification architecture, thresholds, preprocessing,
+or bookmark-generation criteria.
 
-As indicated in Section~\ref{sec:results-commercial}, matching between the
-software export and the forensic evaluation bundle is complete for all
-evaluated profiles. For \gls{griffeye}/\gls{t3kcore}, the binary metrics are
-therefore computed on the 11\,000 images belonging to the operational classes
-\texttt{weapon} and \texttt{non\_weapon}; the 500 \gls{ood} images are analyzed
-separately through the weapon flag rate. The operational mapping considers only
-the \texttt{CORE/Violence/Firearm} bookmark as a positive output, whereas other
-bookmarks semantically related to weapons, violence, or military context are
-preserved as raw information but are not used as primary positives. This choice
-makes the mapping deliberately conservative: the low \gls{fpr} observed for
-\gls{griffeye}/\gls{t3kcore} must therefore also be interpreted as an effect of
-the adopted normalization rule, not as stand-alone evidence of inherently better
-system performance. A more permissive mapping that included weapon-adjacent bookmarks as secondary
-positives would define a different operational task and could alter both recall
-and false-positive workload. This alternative mapping was not evaluated in the
-frozen analysis.
+All 11\,500 bundle files were associated with a normalized decision. Binary
+metrics are computed on the 11\,000 items whose reference operational
+assignment is \texttt{weapon} or \texttt{non\_weapon}, whereas the 500
+\gls{ood} inputs are analyzed separately through their weapon assignment rate.
+
+Under the frozen operational mapping, only the
+\texttt{CORE/Violence/Firearm} bookmark is treated as a positive
+\texttt{weapon} output. Other bookmarks related to weapons, violence,
+military equipment, or adjacent semantic categories are preserved in the
+controlled raw output but are not included as primary positives.
+
+This mapping is deliberately conservative. Consequently, the observed false
+positive rate must be interpreted jointly with the selected bookmark rule. A
+more permissive mapping incorporating secondary weapon-related bookmarks would
+define a different operational task and could alter both target recall and
+false-positive review workload. That alternative was not evaluated in the
+frozen protocol.
+
+Table~\ref{tab:results-griffeye-global-metrics} reports the bundle-weighted
+binary results.
 
 \begin{table}[H]
 \centering
-\caption{Overall performance of \gls{griffeye}/\gls{t3kcore} on the binary \texttt{weapon}/\texttt{non\_weapon} task}
+\caption{Bundle-weighted performance of
+\gls{griffeye}/\gls{t3kcore} on the binary
+\texttt{weapon}/\texttt{non\_weapon} task}
 \label{tab:results-griffeye-global-metrics}
 \small
-\begin{tabular}{lr}
+\begin{tabular}{@{}l r@{}}
 \toprule
-\textbf{Metric} & \textbf{Value} \\
+\textbf{Metric} &
+\textbf{Value} \\
 \midrule
-Accuracy & 0.972 \\
-Balanced accuracy & 0.972 \\
-Precision \texttt{weapon} & 0.992 \\
-Recall \texttt{weapon} & 0.951 \\
-F1 \texttt{weapon} & 0.971 \\
-False negative rate & 0.049 \\
-False positive rate & 0.007 \\
-True positives & 5\,229 \\
-True negatives & 5\,460 \\
-False positives & 40 \\
-False negatives & 271 \\
+
+Accuracy
+& 0.972 \\
+
+Balanced accuracy
+& 0.972 \\
+
+Precision \texttt{weapon}
+& 0.992 \\
+
+Recall \texttt{weapon}
+& 0.951 \\
+
+F1-score \texttt{weapon}
+& 0.971 \\
+
+False negative rate
+& 0.049 \\
+
+False positive rate
+& 0.007 \\
+
+True positives
+& 5\,229 \\
+
+True negatives
+& 5\,460 \\
+
+False positives
+& 40 \\
+
+False negatives
+& 271 \\
+
 \bottomrule
 \end{tabular}
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} The metrics are computed on the 11\,000 images belonging to the
-binary \texttt{weapon}/\texttt{non\_weapon} task. The 500 \gls{ood} images are
-not included in the accuracy computation and are analyzed separately. The low
-\gls{fpr} also reflects the conservative mapping based only on the
-\texttt{CORE/Violence/Firearm} bookmark as the primary positive output.
+\textit{Note.} The metrics are computed on the 11\,000-item binary bundle,
+comprising 1\,000 clean inputs and 10\,000 perturbed artifacts. The 500
+\gls{ood} inputs are excluded from binary correctness metrics. The low
+\acrshort{fpr} must also be interpreted in relation to the conservative
+positive mapping based exclusively on the
+\texttt{CORE/Violence/Firearm} bookmark.
 \end{table}
+
+Within the frozen binary bundle, \gls{griffeye}/\gls{t3kcore} achieves an
+accuracy and balanced accuracy of 0.972. Precision for the
+\texttt{weapon} class is 0.992, corresponding to only 40 false-positive
+assignments among the 5\,500 reference \texttt{non\_weapon} items.
+
+Weapon recall is 0.951, corresponding to an \gls{fnr} of 0.049. A total of
+271 reference \texttt{weapon} items are therefore not associated with the
+primary firearm bookmark.
+
+The result represents the highest bundle-level accuracy and the lowest
+bundle-level \gls{fpr} among the six normalized configurations under the
+frozen protocol. It must not be interpreted as evidence of intrinsically
+superior system quality because it is conditional on the evaluated software
+version, the selected category, the imported population, and the conservative
+normalization rule.
+
+Table~\ref{tab:results-griffeye-condition-metrics} separates clean,
+perturbed, adversarial-family, anti-forensic-family, and \gls{ood} behavior.
 
 \begin{table}[H]
 \centering
@@ -2070,84 +2114,126 @@ not included in the accuracy computation and are analyzed separately. The low
 \textbf{Recall weapon} &
 \textbf{\gls{fnr}} &
 \textbf{\gls{fpr}} &
-\textbf{Operational note} \\
+\textbf{Operational interpretation} \\
 \midrule
 
-Clean &
-0.978 &
-0.964 &
-0.036 &
-0.008 &
-Black-box baseline on 1\,000 unperturbed images. \\
+Clean
+&
+0.978
+&
+0.964
+&
+0.036
+&
+0.008
+&
+Baseline behavior on 1\,000 unperturbed binary inputs. \\
 
-Perturbed &
-0.971 &
-0.949 &
-0.051 &
-0.007 &
-Values computed on 10\,000 perturbed images: 5\,000 adversarial and
-5\,000 anti-forensic. \\
+Perturbed
+&
+0.971
+&
+0.949
+&
+0.051
+&
+0.007
+&
+Aggregate behavior on 10\,000 artifacts: 5\,000 adversarial or
+adversarial-style variants and 5\,000 anti-forensic variants. \\
 
-Adversarial &
-0.969 &
-0.945 &
-0.055 &
-0.008 &
-Aggregate performance across the five adversarial perturbations considered. \\
+Adversarial family
+&
+0.969
+&
+0.945
+&
+0.055
+&
+0.008
+&
+Aggregate transfer behavior across four EfficientNet-B0-oriented attacks and
+the model-agnostic Color Shift condition. \\
 
-Anti-forensic &
-0.974 &
-0.954 &
-0.046 &
-0.006 &
-Aggregate performance across the five anti-forensic transformations considered. \\
+Anti-forensic family
+&
+0.974
+&
+0.954
+&
+0.046
+&
+0.006
+&
+Aggregate behavior across the five model-agnostic anti-forensic
+transformations. \\
 
-\gls{ood} &
--- &
--- &
--- &
--- &
-Weapon flag rate equal to 0.260: 130 \gls{ood} images out of 500 were
-operationally mapped to the \texttt{weapon} class. Standard binary metrics are
-not applicable. \\
+\gls{ood}
+&
+--
+&
+--
+&
+--
+&
+--
+&
+A total of 130 of the 500 \gls{ood} inputs are assigned to the operational
+\texttt{weapon} state, corresponding to a weapon assignment rate of 0.260.
+Binary correctness metrics are not applicable. \\
 
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The behavior on \gls{ood} samples is relevant because it highlights the tendency
-of the system to map \gls{ood} or semantically weapon-adjacent content
-to the operational \texttt{weapon} class. In the case of
-\gls{griffeye}/\gls{t3kcore}, 130 \gls{ood} images out of 500 were flagged as
-\texttt{weapon}, with a weapon flag rate of 0.260. This value does not
-represent a binary error because \gls{ood} samples have
-no \texttt{weapon}/\texttt{non\_weapon} reference operational assignment;
-rather, it describes the frequency with which the separate \gls{ood} branch is
-mapped to the positive operational state. The observed value is lower than those of \gls{magnetai},
-\gls{excirefoto2025} under the \texttt{D50} configuration, and
-\gls{cellebriteinseyets}, but it confirms that even a system with a low
-\gls{fpr} on the binary task may produce operational flags on content outside
-the main domain.
+The clean baseline produces an accuracy of 0.978, weapon recall of 0.964,
+\gls{fnr} of 0.036, and \gls{fpr} of 0.008. This corresponds to 18 missed
+\texttt{weapon} inputs and four false-positive assignments among the 1\,000
+clean images.
 
-Table~\ref{tab:results-griffeye-attack-metrics} reports the behavior of
-\gls{griffeye}/\gls{t3kcore} with respect to all perturbations considered in the
-forensic evaluation bundle. In the condition-level detail, \gls{sigmazero}
-produces the highest \gls{fnr} among the adversarial perturbations, with an
-accuracy of 0.959, recall on the \texttt{weapon} class equal to 0.926, and a
-\gls{fnr} of 0.074. \gls{fgsm} exhibits very similar behavior, with an accuracy
-of 0.960 and a \gls{fnr} of 0.072. Among the anti-forensic transformations,
-\gls{histogrammodification} produces the highest \gls{fnr}, equal to 0.068,
-whereas \gls{contraststretching} produces the highest \gls{fpr}, equal to
-0.010.
+Across the 10\,000 perturbed artifacts, accuracy decreases to 0.971 and weapon
+recall decreases to 0.949. The \gls{fnr} increases to 0.051, whereas the
+\gls{fpr} remains slightly lower than the clean value, at 0.007. The primary
+aggregate change therefore concerns a moderate increase in missed
+firearm-oriented inputs rather than increased false-positive workload.
+
+The adversarial-family population produces an accuracy of 0.969, weapon recall
+of 0.945, and \gls{fnr} of 0.055. The anti-forensic population exhibits an
+accuracy of 0.974, weapon recall of 0.954, and \gls{fnr} of 0.046.
+
+The difference between the two families is limited but directionally
+consistent: under the frozen protocol, the transferred adversarial artifacts
+produce a somewhat larger missed-target burden than the model-agnostic
+anti-forensic transformations.
+
+This comparison does not constitute a white-box attack against
+\gls{griffeye}/\gls{t3kcore}. The four model-dependent adversarial populations
+were generated against fold-specific EfficientNet-B0 checkpoints. Their
+evaluation through Griffeye/T3K CORE measures only empirical transfer behavior.
+
+On the separate \gls{ood} branch, 130 of the 500 inputs receive the primary
+firearm-oriented operational assignment, yielding a weapon assignment rate of
+0.260. These outputs are not false positives in the supervised binary sense
+because the \gls{ood} inputs have no \texttt{weapon} or
+\texttt{non\_weapon} reference assignment.
+
+Nevertheless, the result remains operationally relevant. Even a configuration
+with a low binary \gls{fpr} may route material outside the nominal task toward
+the firearm-oriented review category, thereby increasing analyst workload or
+altering prioritization.
+
+Table~\ref{tab:results-griffeye-attack-metrics} reports the ten individual
+perturbed conditions.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.12}
 \setlength{\tabcolsep}{4pt}
-\caption{Performance of \gls{griffeye}/\gls{t3kcore} under adversarial and anti-forensic conditions}
+\caption{Performance of \gls{griffeye}/\gls{t3kcore} under adversarial,
+adversarial-style, and anti-forensic conditions}
 \label{tab:results-griffeye-attack-metrics}
-\begin{tabular}{@{}llrrrrrr@{}}
+\begin{tabular}{@{}l l r r r r r r@{}}
 \toprule
 \textbf{Family} &
 \textbf{Condition} &
@@ -2159,80 +2245,235 @@ whereas \gls{contraststretching} produces the highest \gls{fpr}, equal to
 \textbf{\acrshort{fp}} \\
 \midrule
 
-Adversarial &
-\gls{colorshift} &
-0.977 & 0.960 & 0.040 & 0.006 & 20 & 3 \\
+Adversarial-style
+&
+\gls{colorshift}
+&
+0.977
+&
+0.960
+&
+0.040
+&
+0.006
+&
+20
+&
+3 \\
 
-Adversarial &
-\gls{fgsm} &
-0.960 & 0.928 & 0.072 & 0.008 & 36 & 4 \\
+Adversarial transfer
+&
+\gls{fgsm}
+&
+0.960
+&
+0.928
+&
+0.072
+&
+0.008
+&
+36
+&
+4 \\
 
-Adversarial &
-\gls{onepixel} &
-0.978 & 0.964 & 0.036 & 0.008 & 18 & 4 \\
+Adversarial transfer
+&
+\gls{onepixel}
+&
+0.978
+&
+0.964
+&
+0.036
+&
+0.008
+&
+18
+&
+4 \\
 
-Adversarial &
-\gls{sigmazero} &
-0.959 & 0.926 & 0.074 & 0.008 & 37 & 4 \\
+Adversarial transfer
+&
+\gls{sigmazero}
+&
+0.959
+&
+0.926
+&
+0.074
+&
+0.008
+&
+37
+&
+4 \\
 
-Adversarial &
-\gls{superdeepfool} &
-0.969 & 0.948 & 0.052 & 0.010 & 26 & 5 \\
+Adversarial transfer
+&
+\gls{superdeepfool}
+&
+0.969
+&
+0.948
+&
+0.052
+&
+0.010
+&
+26
+&
+5 \\
 
 \midrule
 
-Anti-forensic &
-\gls{contraststretching} &
-0.977 & 0.964 & 0.036 & 0.010 & 18 & 5 \\
+Anti-forensic
+&
+\gls{contraststretching}
+&
+0.977
+&
+0.964
+&
+0.036
+&
+0.010
+&
+18
+&
+5 \\
 
-Anti-forensic &
-\gls{gaussianblur} &
-0.972 & 0.948 & 0.052 & 0.004 & 26 & 2 \\
+Anti-forensic
+&
+\gls{gaussianblur}
+&
+0.972
+&
+0.948
+&
+0.052
+&
+0.004
+&
+26
+&
+2 \\
 
-Anti-forensic &
-\gls{histogrammodification} &
-0.963 & 0.932 & 0.068 & 0.006 & 34 & 3 \\
+Anti-forensic
+&
+\gls{histogrammodification}
+&
+0.963
+&
+0.932
+&
+0.068
+&
+0.006
+&
+34
+&
+3 \\
 
-Anti-forensic &
-\gls{jpegrecompression} &
-0.976 & 0.960 & 0.040 & 0.008 & 20 & 4 \\
+Anti-forensic
+&
+\gls{jpegrecompression}
+&
+0.976
+&
+0.960
+&
+0.040
+&
+0.008
+&
+20
+&
+4 \\
 
-Anti-forensic &
-\gls{resampleresize} &
-0.980 & 0.964 & 0.036 & 0.004 & 18 & 2 \\
+Anti-forensic
+&
+\gls{resampleresize}
+&
+0.980
+&
+0.964
+&
+0.036
+&
+0.004
+&
+18
+&
+2 \\
 
 \bottomrule
 \end{tabular}
 \end{table}
 
-The observed profile differs from both the proxy models and the other selected
-software systems. \gls{griffeye}/\gls{t3kcore} does not show extreme
-degradation under \gls{sigmazero}, unlike what was observed for EfficientNet-B0.
-Under this condition, however, the highest number of false negatives for the
-system is recorded, equal to 37, and recall on the \texttt{weapon} class
-decreases to 0.926. This result documents residual degradation on the transferred
-\gls{sigmazero} artifacts, although without the performance collapse observed
-for their EfficientNet-B0 target model.
+Among the transferred model-dependent conditions, Sigma-Zero produces the
+largest missed-target burden. Accuracy decreases to 0.959, weapon recall to
+0.926, and the \gls{fnr} increases to 0.074, corresponding to 37 false
+negatives and four false positives.
 
-Under the adopted conservative mapping, \gls{griffeye}/\gls{t3kcore} exhibits
-the most selective black-box profile in the considered protocol in terms of
-accuracy, balanced accuracy, and containment of false positives.
-The overall \gls{fpr}, equal to 0.007, is substantially lower than those of the
-other selected software systems, while recall on the \texttt{weapon} class,
-equal to 0.951, remains high but is not the highest. Indeed,
-\gls{cellebriteinseyets} maintains slightly higher recall on
-the \texttt{weapon} class, whereas \gls{griffeye}/\gls{t3kcore} exhibits a more
-selective profile and is less prone to generating false positives.
+FGSM produces a closely related profile, with an accuracy of 0.960, weapon
+recall of 0.928, and \gls{fnr} of 0.072. The population contains 36 false
+negatives and four false positives.
 
-These values must not be interpreted as a guarantee of general robustness, but
-as the behavior observed under the defined experimental protocol. In this case
-as well, the system remains black-box: it is not possible to determine whether
-the observed profile depends on the internal architecture of the module,
-preprocessing, proprietary thresholds, bookmark generation criteria, or the
-specific characteristics of the evaluated export. Automatic outputs must
-therefore be treated as support for triage and not as a conclusive decision,
-especially in the presence of perturbed, \gls{ood}, or semantically
-ambiguous inputs.
+The transferred Sigma-Zero artifacts therefore produce measurable degradation
+but do not reproduce the near-total collapse observed for their direct
+EfficientNet-B0 target. This difference is evidence of limited transfer under
+the evaluated conditions, not proof of general robustness against attacks
+generated directly against Griffeye/T3K CORE.
+
+SuperDeepFool produces an accuracy of 0.969 and an \gls{fnr} of 0.052.
+One Pixel preserves the same aggregate confusion-matrix values as the clean
+baseline, with 18 false negatives and four false positives. This result is
+specific to the frozen transferred population.
+
+The model-agnostic Color Shift condition remains close to the clean baseline,
+with an accuracy of 0.977, \gls{fnr} of 0.040, and \gls{fpr} of 0.006. Its
+effect is interpreted as condition-specific behavior rather than adversarial
+transfer success.
+
+Among the anti-forensic transformations, Histogram Modification produces the
+largest missed-target effect. Accuracy decreases to 0.963, weapon recall to
+0.932, and the \gls{fnr} increases to 0.068, corresponding to 34 false
+negatives.
+
+Gaussian Blur produces 26 false negatives but only two false positives.
+JPEG Recompression produces 20 false negatives and four false positives.
+Contrast Stretching produces the highest anti-forensic \gls{fpr}, at 0.010,
+although this corresponds to only five false-positive assignments.
+
+Resample Resize produces the highest condition-level accuracy, at 0.980, while
+retaining 18 false negatives and two false positives. The slightly higher
+accuracy than the clean baseline does not establish sample-level invariance:
+aggregate improvements may coexist with changed individual decisions.
+
+Overall, the frozen Griffeye/T3K CORE configuration combines high
+firearm-oriented recall with a particularly low false-positive rate. The
+profile is operationally selective, but its interpretation is inseparable from
+the conservative choice to count only
+\texttt{CORE/Violence/Firearm} as a primary positive.
+
+The results do not reveal whether the observed behavior derives from the
+internal model architecture, proprietary preprocessing, semantic thresholds,
+bookmark taxonomy, or other inaccessible implementation factors. They also do
+not support extrapolation to alternative bookmark mappings, software versions,
+categories, or operational configurations.
+
+The automatic firearm bookmark must therefore remain a triage signal rather
+than an autonomous evidentiary conclusion. Its use requires human verification
+and traceable documentation of the software version, enabled processing
+modules, imported population, and normalization rule.
+
+
+
+
+
+
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{\texorpdfstring{\gls{excirefoto2025}}{Excire Foto 2025} Results and Sensitivity Analysis}
