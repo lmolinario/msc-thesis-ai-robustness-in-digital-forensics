@@ -994,17 +994,13 @@ It would also permit more precise evaluation of rejection, abstention,
 open-set-recognition, or unknown-output mechanisms.
 
 Further work should examine methods for explicitly managing inputs outside the
-nominal binary task. Potential extensions include:
+nominal binary task. Potential extensions include calibrated model-specific
+probability estimates, abstention thresholds, dedicated \gls{ood} detectors,
+and open-set classification methods.
 
-\begin{itemize}
-\item calibrated model-specific probability estimates;
-\item abstention thresholds;
-\item dedicated \gls{ood} detectors;
-\item open-set classification methods;
-\item analyst-visible unknown or ambiguous states;
-\item selective-classification procedures that defer uncertain cases to human
-review.
-\end{itemize}
+Additional mechanisms could expose unknown or ambiguous states directly to the
+analyst or implement selective-classification procedures that defer uncertain
+cases to human review.
 
 These mechanisms should not be evaluated only through conventional technical
 metrics. Their effects on missed detections, false-positive workload, deferred
@@ -1014,14 +1010,11 @@ The adversarial branch should be expanded through matched direct-target attacks
 against each transparent proxy architecture. In the present protocol,
 model-dependent attacks were generated only against EfficientNet-B0. Generating
 comparable attacks independently against ResNet18 and the
-\gls{clip}-based proxy would permit a more systematic distinction among:
+\gls{clip}-based proxy would permit a more systematic distinction between
+direct-target vulnerability and cross-architecture transferability.
 
-\begin{itemize}
-\item direct-target vulnerability;
-\item cross-architecture transferability;
-\item attack-specific behavior;
-\item architecture-specific robustness.
-\end{itemize}
+Such an extension would also make it possible to separate attack-specific
+behavior from architecture-specific robustness.
 
 Such a design should use harmonized access assumptions and perturbation budgets
 where technically meaningful. It should also preserve the distinction between
@@ -1041,19 +1034,14 @@ workload.
 
 The anti-forensic branch should be extended through multiple severity levels
 and sequential transformation chains. The current protocol evaluates one frozen
-parameterization for each transformation. Future work should investigate:
+parameterization for each transformation. Future work should investigate
+repeated JPEG encoding, platform-specific recompression, multiple resize ratios,
+cropping, partial occlusion, screenshot acquisition, and color-space
+conversion.
 
-\begin{itemize}
-\item repeated JPEG encoding;
-\item platform-specific recompression;
-\item multiple resize ratios;
-\item cropping and partial occlusion;
-\item screenshot acquisition;
-\item color-space conversion;
-\item stronger or weaker blurring;
-\item combined tonal and geometric transformations;
-\item sequential adversarial and anti-forensic manipulations.
-\end{itemize}
+Additional conditions should include stronger and weaker blurring, combined
+tonal and geometric transformations, and sequential adversarial and
+anti-forensic manipulations.
 
 This extension would make it possible to determine whether individually limited
 effects accumulate when images pass through realistic evidence-handling,
@@ -1072,17 +1060,14 @@ procedures for operational environments in which an update may invalidate
 previous validation results.
 
 Alternative normalization mappings should be evaluated where the observable
-outputs support more than one defensible interpretation. Examples include:
+outputs support more than one defensible interpretation. These mappings could
+include broader bookmark combinations for
+\gls{griffeye}/\gls{t3kcore}, alternative unions of exported categories for
+\gls{cellebriteinseyets}, and additional tags exposed by
+\gls{magnetai}.
 
-\begin{itemize}
-\item broader bookmark combinations for
-\gls{griffeye}/\gls{t3kcore};
-\item alternative unions of exported categories for
-\gls{cellebriteinseyets};
-\item additional Magnet.AI tags;
-\item different semantic-query sets and distance settings for
+Different semantic-query sets and distance settings should also be examined for
 \gls{excirefoto2025}.
-\end{itemize}
 
 The objective would not be to identify a universally optimal mapping, but to
 quantify how mapping choices alter recall, selectivity, \gls{ood} assignment,
@@ -1101,18 +1086,15 @@ embedded non-pixel information.
 The explainability component should also be strengthened. The five historical
 \gls{ig} cases should be regenerated using the hardened adaptive
 convergence-validation procedure described in
-Section~\ref{subsec:implementation-explainability}. Future work should include:
+Section~\ref{subsec:implementation-explainability}. Future work should adopt
+explicit numerical convergence criteria, multiple attribution baselines, and
+larger, systematically sampled case populations.
 
-\begin{itemize}
-\item explicit numerical convergence criteria;
-\item multiple attribution baselines;
-\item larger and systematically sampled case populations;
-\item comparison among different attribution methods;
-\item stability analysis across checkpoints;
-\item comparison between clean and manipulated variants of the same source
-image;
-\item quantitative measures of attribution consistency.
-\end{itemize}
+The analysis should also compare different attribution methods, examine
+stability across checkpoints, and compare clean and manipulated variants of the
+same source image. Quantitative measures of attribution consistency could
+provide an additional basis for assessing the stability of the resulting
+visualizations.
 
 Explainability should nevertheless remain supplementary to quantitative
 robustness testing. Attribution agreement must not be interpreted as proof of
@@ -1123,18 +1105,15 @@ outputs through analyst-centered studies. The present thesis infers operational
 relevance from error direction, assignment behavior, and review workload.
 Controlled user studies could measure these consequences directly.
 
-Such evaluations could compare workflows with and without automated triage and
-measure:
+Such evaluations could compare workflows with and without automated triage by
+measuring analyst review time, the number of images examined, and the number of
+relevant items detected or missed.
 
-\begin{itemize}
-\item analyst review time;
-\item number of images examined;
-\item relevant items detected or missed;
-\item frequency of automatic-output overrides;
-\item effect of false positives on attention allocation;
-\item effect of false negatives on final case-level findings;
-\item usefulness of uncertainty, \gls{ood}, and explainability indicators.
-\end{itemize}
+They could also examine the frequency with which analysts override automated
+outputs, the effects of false positives on attention allocation, and the
+effects of false negatives on final case-level findings. The perceived and
+measured usefulness of uncertainty, \gls{ood}, and explainability indicators
+should also be assessed.
 
 This would connect technical robustness metrics more directly to the actual
 quality of analyst support.
@@ -1148,19 +1127,12 @@ semantic-validation criteria, threat model, and operational mapping.
 Finally, the protocol would benefit from independent replication and broader
 artifact availability. Where licensing, privacy, legal, or institutional
 constraints prevent full redistribution, future repositories should continue
-to preserve:
+to preserve source and artifact schemas, executable scripts, configuration
+records, software-version information, manifests, and stable identifiers.
 
-\begin{itemize}
-\item source and artifact schemas;
-\item executable scripts;
-\item configuration records;
-\item software-version information;
-\item manifests and stable identifiers;
-\item cryptographic digests;
-\item sanitized normalized outputs;
-\item aggregate and condition-level metrics;
-\item validation and compilation reports.
-\end{itemize}
+They should also retain cryptographic digests, sanitized normalized outputs,
+aggregate and condition-level metrics, and the corresponding validation and
+compilation reports.
 
 Independent application of the protocol across laboratories, software versions,
 datasets, and forensic tasks would provide stronger evidence regarding the
