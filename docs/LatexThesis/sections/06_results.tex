@@ -78,10 +78,10 @@ therefore represent repeated checkpoint responses to 500 unique images and
 must not be interpreted as 7\,500 independent \gls{ood} samples.
 
 The black-box evaluation comprises four software families and six normalized
-operational configurations. Magnet AXIOM/Magnet.AI, Griffeye/T3K CORE, and
-Cellebrite Inseyets each contribute one configuration, whereas the D20, D50,
-and D80 Excire Foto 2025 settings are retained as three separate
-configurations. Each configuration produces one normalized decision for every
+operational configurations. Magnet AXIOM/Magnet.AI and Griffeye/T3K CORE each
+contribute one configuration; the D20, D50, and D80 Excire Foto 2025 settings
+are retained as three separate configurations; and Cellebrite Inseyets
+contributes one configuration. Each configuration produces one normalized decision for every
 item in the 11\,500-file forensic evaluation bundle.
 
 Table~\ref{tab:results-evaluation-completeness} summarizes the completeness of
@@ -3676,6 +3676,10 @@ embedded-metadata term matches}
 & 0.9500 & 0.9515 & +0.0015
 & 0.3600 & 0.3548 & -0.0052 \\
 
+\gls{griffeye}/\gls{t3kcore}
+& 0.9780 & 0.9788 & +0.0008
+& 0.2600 & 0.2601 & +0.0001 \\
+
 \gls{excirefoto2025} \texttt{D20}
 & 0.9270 & 0.9282 & +0.0012
 & 0.2380 & 0.2379 & -0.0001 \\
@@ -3692,9 +3696,7 @@ embedded-metadata term matches}
 & 0.9640 & 0.9636 & -0.0004
 & 0.2920 & 0.2883 & -0.0037 \\
 
-\gls{griffeye}/\gls{t3kcore}
-& 0.9780 & 0.9788 & +0.0008
-& 0.2600 & 0.2601 & +0.0001 \\
+
 
 \bottomrule
 \end{tabular}%
