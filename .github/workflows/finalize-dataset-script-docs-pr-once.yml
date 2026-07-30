@@ -1,0 +1,91 @@
+name: Finalize dataset script documentation PR
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    if: github.head_ref == 'agent/document-dataset-scripts' && github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/document-dataset-scripts
+          fetch-depth: 0
+
+      - name: Finalize documentation
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          scripts_readme = Path("datasets/scripts/README.md")
+          text = scripts_readme.read_text(encoding="utf-8")
+          old = "Differential Evolution over five variables: `x`, `y`, `R`, and `B`."
+          new = "Differential Evolution over five variables: `x`, `y`, `R`, `G`, and `B`."
+          if old not in text and new not in text:
+              raise SystemExit("One Pixel variable description was not found")
+          text = text.replace(old, new, 1)
+
+          expected_files = [
+              "00_download_raw_datasets_bundle.py",
+              "01_download_kaggle.py",
+              "02_download_github.py",
+              "03_build_subset_deepfirearm.py",
+              "04_scrape_google.py",
+              "05_scrape_telegram.py",
+              "06_scrape_youtube.py",
+              "07_scrape_deepweb.py",
+              "08_build_prepared_dataset.py",
+              "09_generate_review_manifest_full.py",
+              "10_manual_selection_protocol_reviewer.py",
+              "11_generate_clean_and_ood_splits.py",
+              "13_generate_anti_forensic_attacks.py",
+              "14_generate_adversarial_attacks.py",
+              "16_build_forensic_evaluation_bundle.py",
+              "17_build_public_embedded_metadata_audit.py",
+              "adversarial_model_interface.py",
+              "adversarial_torch_model_adapters.py",
+              "sigma_zero_reference_adapter.py",
+              "superdeepfool_adapter.py",
+              "paths.py",
+          ]
+          missing = [name for name in expected_files if name not in text]
+          if missing:
+              raise SystemExit(f"README is missing documented files: {missing}")
+          scripts_readme.write_text(text, encoding="utf-8")
+
+          datasets_readme = Path("datasets/README.md")
+          parent = datasets_readme.read_text(encoding="utf-8")
+          link_text = (
+              "Detailed per-file documentation for every dataset script, internal "
+              "adapter, utility, and package marker is available in "
+              "[`scripts/README.md`](scripts/README.md)."
+          )
+          if link_text not in parent:
+              marker = "```\n\n## Frozen dataset"
+              if marker not in parent:
+                  raise SystemExit("Could not locate insertion point in datasets/README.md")
+              parent = parent.replace(
+                  marker,
+                  "```\n\n" + link_text + "\n\n## Frozen dataset",
+                  1,
+              )
+          datasets_readme.write_text(parent, encoding="utf-8")
+
+          Path(".github/workflows/finalize-dataset-script-docs-pr-once.yml").unlink()
+          PY
+
+      - name: Commit finalized documentation
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "docs: finalize dataset script guide"
+          git push origin HEAD:agent/document-dataset-scripts
