@@ -26,8 +26,8 @@ jobs:
 
           scripts_readme = Path("datasets/scripts/README.md")
           text = scripts_readme.read_text(encoding="utf-8")
-          old = "Differential Evolution over five variables: `x`, `y`, `R`, and `B`."
-          new = "Differential Evolution over five variables: `x`, `y`, `R`, `G`, and `B`."
+          old = "Evolution over five variables: `x`, `y`, `R`, and `B`."
+          new = "Evolution over five variables: `x`, `y`, `R`, `G`, and `B`."
           if old not in text and new not in text:
               raise SystemExit("One Pixel variable description was not found")
           text = text.replace(old, new, 1)
