@@ -5,19 +5,19 @@
 08_build_prepared_dataset.py
 
 Builds the prepared/final_pool dataset from datasets/raw by:
-- scanning candidate image files
-- validating images technically
-- computing SHA256
-- removing exact duplicates globally
-- copying valid unique images into datasets/prepared/final_pool/images
-- generating metadata.csv
-- generating reports for invalid images, discarded duplicates, and build summary
+- scanning candidate image files;
+- validating images technically;
+- computing SHA-256;
+- removing exact duplicates globally;
+- copying valid unique images into datasets/prepared/final_pool/images;
+- generating metadata.csv;
+- generating reports for invalid images, discarded duplicates, and build summary.
 
 Methodological note
 -------------------
-This script is intentionally limited to the technical preparation stage of the dataset.
-It does NOT perform semantic annotation, manual review, or final selection.
-All review-related fields belong to downstream scripts in the annotation pipeline.
+This script is intentionally limited to the technical preparation stage of the
+dataset. It does not perform semantic annotation, manual review, or final
+selection. All review-related fields belong to downstream scripts.
 """
 
 from __future__ import annotations
@@ -28,15 +28,16 @@ import hashlib
 import json
 import logging
 import shutil
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
 
 from PIL import Image, UnidentifiedImageError
 
 from datasets.scripts.utils.paths import (
-    RAW_DATASETS_DIR,
     PREPARED_DATASETS_DIR,
+    RAW_DATASETS_DIR,
+    REPO_ROOT,
     repo_relative_path,
 )
 
@@ -98,7 +99,10 @@ class DuplicateDiscardedRecord:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Build prepared/final_pool from raw datasets with validation and global deduplication."
+        description=(
+            "Build prepared/final_pool from raw datasets with validation and "
+            "global exact deduplication."
+        )
     )
     parser.add_argument(
         "--raw-root",
@@ -110,7 +114,7 @@ def parse_args() -> argparse.Namespace:
         "--output-dir",
         type=str,
         default=str(DEFAULT_OUTPUT_DIR),
-        help=f"Prepared final pool output directory (default: {DEFAULT_OUTPUT_DIR})",
+        help=f"Prepared final-pool output directory (default: {DEFAULT_OUTPUT_DIR})",
     )
     parser.add_argument(
         "--min-width",
@@ -164,33 +168,38 @@ def iter_candidate_files(dataset_root: Path) -> Iterable[Path]:
 
 
 def compute_sha256(file_path: Path) -> str:
-    sha256 = hashlib.sha256()
-    with file_path.open("rb") as f:
-        for chunk in iter(lambda: f.read(1024 * 1024), b""):
-            sha256.update(chunk)
-    return sha256.hexdigest()
+    digest = hashlib.sha256()
+    with file_path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
-def validate_image(file_path: Path, min_width: int, min_height: int) -> tuple[bool, int, int, str]:
+def validate_image(
+    file_path: Path,
+    min_width: int,
+    min_height: int,
+) -> tuple[bool, int, int, str]:
     try:
-        with Image.open(file_path) as img:
-            img.verify()
+        with Image.open(file_path) as image:
+            image.verify()
 
-        with Image.open(file_path) as img:
-            width, height = img.size
+        with Image.open(file_path) as image:
+            width, height = image.size
 
         if width < min_width or height < min_height:
             return False, width, height, "below_min_size"
-
         return True, width, height, ""
-
     except (UnidentifiedImageError, OSError, ValueError):
         return False, 0, 0, "unreadable_image"
-    except Exception as exc:
+    except Exception as exc:  # fail visibly while preserving a compact report code
         return False, 0, 0, f"unexpected_error:{type(exc).__name__}"
 
 
-def ensure_clean_output_dir(output_dir: Path, force: bool) -> tuple[Path, Path, Path]:
+def ensure_clean_output_dir(
+    output_dir: Path,
+    force: bool,
+) -> tuple[Path, Path, Path]:
     images_dir = output_dir / DEFAULT_IMAGES_DIRNAME
     reports_dir = output_dir / DEFAULT_REPORTS_DIRNAME
 
@@ -200,7 +209,8 @@ def ensure_clean_output_dir(output_dir: Path, force: bool) -> tuple[Path, Path, 
             shutil.rmtree(output_dir)
         else:
             raise FileExistsError(
-                f"Output directory already exists: {output_dir}. Use --force to rebuild it."
+                f"Output directory already exists: {output_dir}. "
+                "Use --force to rebuild it."
             )
 
     images_dir.mkdir(parents=True, exist_ok=True)
@@ -210,10 +220,25 @@ def ensure_clean_output_dir(output_dir: Path, force: bool) -> tuple[Path, Path, 
 
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+    with path.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
+
+
+def portable_summary_path(path: Path) -> str:
+    """Return a non-sensitive path suitable for a committed public summary.
+
+    Repository-contained paths are stored relative to the repository root. A
+    deliberately external output is represented only by its final directory or
+    file name, without exposing the local absolute parent path.
+    """
+
+    resolved = path.expanduser().resolve()
+    try:
+        return resolved.relative_to(REPO_ROOT.resolve()).as_posix()
+    except ValueError:
+        return f"<external>/{resolved.name}"
 
 
 def main() -> None:
@@ -223,7 +248,10 @@ def main() -> None:
     raw_root = repo_relative_path(args.raw_root)
     output_dir = repo_relative_path(args.output_dir)
 
-    _, images_dir, reports_dir = ensure_clean_output_dir(output_dir, force=args.force)
+    _, images_dir, reports_dir = ensure_clean_output_dir(
+        output_dir,
+        force=args.force,
+    )
 
     metadata_path = output_dir / DEFAULT_METADATA_FILENAME
     invalid_report_path = reports_dir / DEFAULT_INVALID_REPORT
@@ -239,9 +267,7 @@ def main() -> None:
     valid_unique_images = 0
     invalid_images = 0
     duplicates_discarded = 0
-
     per_dataset_stats: dict[str, dict[str, int]] = {}
-
     image_counter = 0
 
     for source_dataset in DEFAULT_SOURCE_DATASETS:
@@ -264,9 +290,8 @@ def main() -> None:
             total_candidate_files += 1
             per_dataset_stats[source_dataset]["candidate_files"] += 1
 
-            source_relative_path = str(file_path.relative_to(dataset_root)).replace("\\", "/")
+            source_relative_path = file_path.relative_to(dataset_root).as_posix()
             source_filename = file_path.name
-
             is_valid, width, height, reason = validate_image(
                 file_path=file_path,
                 min_width=args.min_width,
@@ -288,7 +313,6 @@ def main() -> None:
                 continue
 
             sha256 = compute_sha256(file_path)
-
             if sha256 in kept_by_sha256:
                 duplicates_discarded += 1
                 per_dataset_stats[source_dataset]["duplicates_discarded"] += 1
@@ -310,15 +334,17 @@ def main() -> None:
             image_id = f"img_{image_counter:08d}"
             extension = file_path.suffix.lower()
             prepared_filename = f"{image_id}{extension}"
-            prepared_relative_path = f"{DEFAULT_IMAGES_DIRNAME}/{prepared_filename}"
+            prepared_relative_path = (
+                f"{DEFAULT_IMAGES_DIRNAME}/{prepared_filename}"
+            )
             prepared_file_path = images_dir / prepared_filename
 
             shutil.copy2(file_path, prepared_file_path)
-
             copied_sha256 = compute_sha256(prepared_file_path)
             if copied_sha256 != sha256:
                 raise RuntimeError(
-                    f"SHA256 mismatch after copy: source={file_path} destination={prepared_file_path}"
+                    "SHA-256 mismatch after copy: "
+                    f"source={file_path} destination={prepared_file_path}"
                 )
 
             record = ValidImageRecord(
@@ -339,7 +365,6 @@ def main() -> None:
 
             kept_by_sha256[sha256] = record
             metadata_rows.append(record)
-
             valid_unique_images += 1
             per_dataset_stats[source_dataset]["valid_unique_images"] += 1
 
@@ -360,7 +385,7 @@ def main() -> None:
             "extension",
             "is_valid_image",
         ],
-        rows=[row.__dict__ for row in metadata_rows],
+        rows=[asdict(row) for row in metadata_rows],
     )
 
     write_csv(
@@ -372,7 +397,7 @@ def main() -> None:
             "source_filename",
             "reason",
         ],
-        rows=[row.__dict__ for row in invalid_rows],
+        rows=[asdict(row) for row in invalid_rows],
     )
 
     write_csv(
@@ -386,7 +411,7 @@ def main() -> None:
             "discarded_source_relative_path",
             "discarded_source_filename",
         ],
-        rows=[row.__dict__ for row in duplicate_rows],
+        rows=[asdict(row) for row in duplicate_rows],
     )
 
     summary = {
@@ -397,17 +422,20 @@ def main() -> None:
         "min_width": args.min_width,
         "min_height": args.min_height,
         "source_datasets_processed": sum(
-            1 for dataset in DEFAULT_SOURCE_DATASETS if (raw_root / dataset).exists()
+            1
+            for dataset in DEFAULT_SOURCE_DATASETS
+            if (raw_root / dataset).exists()
         ),
         "per_dataset_stats": per_dataset_stats,
-        "output_dir": str(output_dir),
-        "metadata_csv": str(metadata_path),
-        "invalid_report_csv": str(invalid_report_path),
-        "duplicates_report_csv": str(duplicates_report_path),
+        "output_dir": portable_summary_path(output_dir),
+        "metadata_csv": portable_summary_path(metadata_path),
+        "invalid_report_csv": portable_summary_path(invalid_report_path),
+        "duplicates_report_csv": portable_summary_path(duplicates_report_path),
     }
 
-    with summary_json_path.open("w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
+    with summary_json_path.open("w", encoding="utf-8") as stream:
+        json.dump(summary, stream, indent=2, ensure_ascii=False, allow_nan=False)
+        stream.write("\n")
 
     logging.info("Prepared dataset build completed.")
     logging.info("Valid unique images: %d", valid_unique_images)

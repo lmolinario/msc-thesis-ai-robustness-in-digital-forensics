@@ -1,6 +1,21 @@
 # Data Dictionary
 
-This document summarizes the principal CSV and JSON artifacts used by the thesis repository.
+This document summarizes the principal CSV and JSON artifacts used by the thesis
+repository.
+
+## Terminology and Historical Field Names
+
+The final thesis describes transparent-proxy probability outputs as **maximum
+predicted-class probability** (`Max-P`). Several frozen CSV schemas retain the
+historical field names `confidence`, `confidence_mean`, `confidence_shift`, and
+`high_confidence_*`. In this repository those fields must be interpreted as
+model-specific Max-P values or summaries. They are not calibrated confidence,
+forensic certainty, or quantities directly comparable across architectures.
+
+Likewise, paths and identifiers containing `chapter5` or `chapter_5` predate the
+final separation between implementation (Chapter 5) and results (Chapter 6).
+They are preserved as frozen artifact identifiers. The associated results are
+discussed in Chapter 6.
 
 ## General Identifiers
 
@@ -11,22 +26,21 @@ This document summarizes the principal CSV and JSON artifacts used by the thesis
 | `generated_image_id` | Identifier assigned to a perturbed image |
 | `bundle_id` | Anonymous identifier in the 11,500-item forensic evaluation bundle |
 | `fold` | Fold used for fold-aware proxy training or evaluation |
-| `final_label` | Frozen semantic label: `weapon`, `non_weapon`, or `ood` |
+| `final_label` | Frozen operational assignment: `weapon`, `non_weapon`, or `ood` |
 | `sample_type` | `clean`, `ood`, `adversarial`, or `anti_forensic` |
 | `attack_family` | `none`, `adversarial`, or `anti_forensic` |
 | `attack_name` | Specific perturbation, transformation, or `clean` condition |
 | `tool_name` | Normalized commercial configuration identifier |
 | `evaluated_model` | Transparent proxy architecture being evaluated |
 
-Commercial-tool fields are observable operational signals. They must not be interpreted as access to proprietary internal probabilities or decision logic.
+Commercial-tool fields are observable operational signals. They must not be
+interpreted as access to proprietary internal probabilities or decision logic.
 
-## Frozen Dataset Manifest
+## Frozen Dataset Manifests
 
 ### `datasets/final/manifests/manual_selection_final_1500.csv`
 
-Official 1,500-image dataset manifest.
-
-Expected class profile:
+Official 1,500-image source-population manifest:
 
 ```text
 weapon      500
@@ -42,7 +56,7 @@ Important fields may include:
 | `relative_path` | Prepared-image path used in the local pipeline |
 | `source_dataset` | Source collection identifier |
 | `sha256` | Primary integrity digest |
-| `final_label` | Frozen semantic label |
+| `final_label` | Frozen operational assignment |
 | `review_state` | Human-review status |
 | `reviewer_id` | Reviewer identifier |
 | `review_timestamp` | Review timestamp |
@@ -57,7 +71,9 @@ weapon      500
 non_weapon  500
 ```
 
-It is the source for clean folds, adversarial generation, anti-forensic generation, and binary robustness evaluation.
+It is the source for clean folds, adversarial generation, anti-forensic
+generation, and binary robustness evaluation. OOD remains a separate evaluation
+branch and is not a supervised third class.
 
 ## Split Manifests
 
@@ -74,24 +90,25 @@ sha256
 source_dataset
 ```
 
-Each of the five test folds contains 200 items: 100 weapon and 100 non-weapon.
+Each of the five held-out folds contains 200 items: 100 `weapon` and 100
+`non_weapon`.
 
 ### `datasets/splits/manifests/ood_eval_manifest.csv`
 
-Clean OOD evaluation manifest. OOD images are not used as a supervised third class and are not perturbed by the attack-generation stages.
+Clean OOD evaluation manifest. OOD images are not used as a supervised third
+class and are not perturbed by the attack-generation stages.
 
 ## Attack Manifests
 
-Files under `attacks/manifests/` provide traceability for generated adversarial and anti-forensic items.
-
-Common fields:
+Files under `attacks/manifests/` provide traceability for generated adversarial
+and anti-forensic items.
 
 | Field | Meaning |
 |---|---|
 | `generated_image_id` | Perturbed artifact identifier |
 | `original_image_id` | Source clean image identifier |
 | `fold` | Inherited fold |
-| `final_label` | Original binary ground truth |
+| `final_label` | Original binary reference assignment |
 | `attack_family` | `adversarial` or `anti_forensic` |
 | `attack_name` | Specific condition |
 | `attack_parameters` | Serialized generation parameters |
@@ -100,7 +117,7 @@ Common fields:
 | `checkpoint_sha256` | Checkpoint integrity digest where applicable |
 | `sha256_original` | Source-image digest |
 | `sha256_perturbed` | Generated-image digest |
-| `md5_perturbed` | Compatibility digest used for some commercial matching workflows |
+| `md5_perturbed` | Auxiliary compatibility digest for some commercial matching workflows |
 | `perturbed_relative_path` | Local generated-image path |
 
 ## Forensic Evaluation Bundle
@@ -119,20 +136,19 @@ Official metadata source for the 11,500-item blind bundle.
 | `attack_name` | Specific condition |
 | `attack_target_model` | Generation target for model-dependent attacks |
 | `fold` | Fold inherited from source data |
-| `final_label` | Hidden evaluation ground truth |
+| `final_label` | Hidden reference operational assignment |
 | `blind_relative_path` | Semantically neutral import path |
-| `sha256_actual` | Bundle-file SHA256 |
-| `md5_actual` | Bundle-file MD5 |
+| `sha256_actual` | Bundle-file SHA-256 |
+| `md5_actual` | Auxiliary bundle-file MD5 |
 
-The metadata and structured audit views must not be imported into commercial tools.
+The metadata and structured audit views must not be imported into commercial
+tools.
 
 ## Proxy Prediction Table
 
 ### `evaluation/proxy_models/proxy_model_predictions.csv`
 
-Prediction-level output for EfficientNet-B0, ResNet18, and CLIP.
-
-Typical fields:
+Prediction-level output for EfficientNet-B0, ResNet18, and the CLIP-based proxy.
 
 | Field | Meaning |
 |---|---|
@@ -143,20 +159,20 @@ Typical fields:
 | `attack_family` | Condition family |
 | `attack_name` | Specific condition |
 | `attack_target_model` | Attack generation target where applicable |
-| `final_label` | Ground truth where defined |
+| `final_label` | Reference assignment where defined |
 | `predicted_label` | Binary proxy prediction |
-| `confidence` | Model-specific prediction confidence |
-| `correct` | Ground-truth agreement where meaningful |
+| `confidence` | Historical field name containing prediction Max-P |
+| `correct` | Reference-assignment agreement where meaningful |
 
-Confidence is an intra-model diagnostic and is not assumed to be calibrated across architectures.
+`confidence` is an intra-model maximum predicted-class probability and is not
+assumed to be calibrated across architectures.
 
 ## Canonical Commercial-Tool Prediction Table
 
 ### `evaluation/forensic_tools/normalized_predictions.csv`
 
-This is the public repository-wide source for commercial prediction-level analysis.
-
-Frozen profile:
+This is the public repository-wide source for commercial prediction-level
+analysis.
 
 ```text
 magnet_axiom             11,500
@@ -179,7 +195,7 @@ Common fields:
 | `sample_type` | Clean, OOD, adversarial, or anti-forensic |
 | `attack_family` | Condition family |
 | `attack_name` | Specific condition |
-| `final_label` | Hidden bundle ground truth joined after processing |
+| `final_label` | Hidden bundle reference assignment joined after processing |
 | `weapon_detected` | Normalized boolean operational signal |
 | `normalized_prediction` | `weapon` or `non_weapon` |
 
@@ -195,22 +211,11 @@ Tool-specific minimum observable fields:
 | `firearm_bookmark` | Griffeye/T3K CORE primary mapping |
 | `secondary_weapon_bookmarks` | Additional retained Griffeye weapon bookmarks |
 
-The canonical table deliberately excludes:
+The canonical table deliberately excludes raw export paths, raw row numbers,
+local filenames, image hashes, unrelated metadata, PhotoDNA, serial numbers,
+and local absolute paths.
 
-```text
-raw_export_file
-raw_row_number
-raw_filename_or_path
-tool_input_filename
-sha256
-md5
-metadata_json
-PhotoDNA
-serial numbers
-local absolute paths
-```
-
-Its schema and SHA256 are recorded in:
+Its schema and SHA-256 are recorded in:
 
 ```text
 evaluation/forensic_tools/normalized_predictions.schema.csv
@@ -252,15 +257,15 @@ Key metrics:
 | `balanced_accuracy` | Mean recall across binary classes |
 | `precision_weapon` | Weapon precision |
 | `recall_weapon` | Weapon recall |
-| `false_negative_rate` | Missed weapon rate |
-| `false_positive_rate` | Non-weapon false alarm rate |
-| `ood_weapon_flag_rate` | Share of OOD items mapped to weapon |
+| `false_negative_rate` | Missed `weapon` rate |
+| `false_positive_rate` | `non_weapon` false-alarm rate |
+| `ood_weapon_flag_rate` | Share of OOD items mapped to `weapon` |
 
 ## Proxy Core Metrics
 
 ### `results/metrics/final_core_metrics.csv`
 
-Contains clean and condition-level proxy metrics. Important fields include:
+Important fields include:
 
 ```text
 evaluated_model
@@ -281,11 +286,11 @@ misclassification_rate
 confidence_mean
 ```
 
+`confidence_mean` is the historical schema name for mean Max-P.
+
 ## Proxy Robustness Metrics
 
 ### `results/metrics/final_robustness_metrics.csv`
-
-Clean-to-perturbed comparison fields include:
 
 ```text
 clean_accuracy
@@ -301,13 +306,15 @@ weapon_to_non_weapon_count
 non_weapon_to_weapon_count
 ```
 
+`confidence_shift` is the historical schema name for the change in mean Max-P.
 Positive `accuracy_drop` means degradation relative to the clean baseline.
+`attack_success_rate` is interpreted as attack success only for the four
+model-dependent adversarial attacks; for model-agnostic and anti-forensic
+conditions, the corresponding transition is an induced-error rate.
 
 ## Proxy OOD Metrics
 
 ### `results/metrics/final_ood_metrics.csv`
-
-Important fields:
 
 ```text
 evaluated_model
@@ -322,9 +329,14 @@ high_confidence_count
 high_confidence_rate
 ```
 
-### OOD denominator rule
+The `confidence_*` and `high_confidence_*` names are historical schema fields.
+They describe Max-P and the rate above the recorded Max-P threshold, not
+calibrated confidence.
 
-The dataset contains 500 unique OOD images. Each image is evaluated by five fold-specific checkpoints for each architecture:
+### OOD Denominator Rule
+
+The dataset contains 500 unique OOD images. Each image is evaluated by five
+fold-specific checkpoints for each architecture:
 
 ```text
 500 unique OOD images × 5 folds = 2,500 predictions per architecture
@@ -337,7 +349,9 @@ Therefore `total = 2500` does not mean 2,500 distinct OOD images.
 
 ### `explainability/manifests/chapter5/thesis_selection.csv`
 
-Documents the five Integrated Gradients cases used in Chapter 5, including model/fold, scenario, prediction, confidence, historical convergence metadata, thesis asset paths, and selection rationale.
+Documents the five Integrated Gradients cases discussed in Chapter 6, including
+model/fold, scenario, prediction, historical `confidence` field (Max-P),
+convergence metadata, thesis asset paths, and selection rationale.
 
 XAI results are qualitative diagnostics for transparent proxies only.
 
@@ -347,5 +361,6 @@ Proxy metrics and commercial-tool metrics are not interchangeable:
 
 - proxy outputs come from known architectures and fold-specific checkpoints;
 - commercial results are normalized from observable black-box exports;
-- commercial tools may not expose probabilities or homogeneous thresholds;
-- all commercial mappings are operational recodings specific to the frozen protocol.
+- commercial tools do not expose homogeneous probabilities or thresholds;
+- all commercial mappings are operational recodings specific to the frozen
+  protocol.

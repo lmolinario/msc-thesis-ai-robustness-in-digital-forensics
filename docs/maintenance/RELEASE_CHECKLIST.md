@@ -55,9 +55,29 @@ README.md
 requirements.txt
 ```
 
-The obsolete Italian thesis tree and old root-level governance files must not reappear.
+The obsolete Italian thesis tree and old root-level governance files must not
+reappear.
 
-## 3. Run the Kali/Linux Audit Helper
+## 3. Verify the Final Thesis Map
+
+The authoritative source must contain:
+
+```text
+Chapter 1 - Introduction
+Chapter 2 - Background
+Chapter 3 - State of the Art
+Chapter 4 - Methodology
+Chapter 5 - Implementation and Experimental Setup
+Chapter 6 - Experimental Results and Operational Robustness Analysis
+Chapter 7 - Conclusions, Limitations, and Future Work
+Appendix
+```
+
+Paths containing `chapter5` or `chapter_5` are allowed only where they are
+historical frozen artifact identifiers. Documentation must explain this boundary
+and must not describe the final results as belonging to Chapter 5.
+
+## 4. Run the Kali/Linux Audit Helper
 
 ```bash
 bash tools/tasks.sh status
@@ -68,15 +88,10 @@ bash tools/tasks.sh check-xai
 bash tools/tasks.sh check-results
 bash tools/tasks.sh check-assets
 bash tools/tasks.sh check-latex-images
-```
-
-Complete audit:
-
-```bash
 bash tools/tasks.sh audit-all
 ```
 
-## 4. Validate Commercial Predictions
+## 5. Validate Commercial Predictions
 
 ```bash
 python forensic_tools/scripts/validate_public_extract_equivalence.py \
@@ -93,9 +108,10 @@ Expected:
 186 identical metric rows
 ```
 
-Confirm that the canonical CSV, public summary, and equivalence report record the same SHA256.
+Confirm that the canonical CSV, public summary, and equivalence report record the
+same SHA-256.
 
-## 5. Validate XAI and Results
+## 6. Validate XAI and Results
 
 ```bash
 python explainability/scripts/validate_chapter5_xai_artifacts.py \
@@ -108,9 +124,13 @@ python results/scripts/24_audit_reporting_asset_usage.py \
   --report results/reporting_asset_usage_summary.json
 ```
 
-Review the ignored local report before removing or replacing any reporting asset.
+The `chapter5` validator and manifest names are historical; their authoritative
+thesis target is `docs/LatexThesis/sections/06_results.tex`.
 
-## 6. Audit LaTeX Images
+Review the ignored local report before removing or replacing any reporting
+asset.
+
+## 7. Audit LaTeX Images
 
 ```bash
 python tools/latex/audit_latex_images_used.py \
@@ -119,7 +139,7 @@ python tools/latex/audit_latex_images_used.py \
 
 Review missing, ambiguous, unused, and duplicate image reports.
 
-## 7. Compile the Thesis
+## 8. Compile the Thesis
 
 ```bash
 cd docs/LatexThesis
@@ -133,8 +153,10 @@ Check:
 - cross-references resolve;
 - acronym/glossary warnings are understood;
 - no LaTeX error remains;
-- Chapter 5 figures and tables render correctly;
-- the PDF reflects the canonical metrics and XAI values.
+- Chapter 5 implementation figures and tables render correctly;
+- Chapter 6 result figures, tables, metrics, and XAI values render correctly;
+- Chapter 7 conclusions remain consistent with Chapter 6;
+- the PDF reflects the canonical metrics and Max-P terminology.
 
 Log check:
 
@@ -145,12 +167,14 @@ grep -En 'Undefined references|Citation.*undefined|LaTeX Error|Package glossarie
 
 The local `main.pdf` and auxiliary files are ignored.
 
-## 8. Documentation Check
+## 9. Documentation Check
 
 Verify:
 
 ```text
 README.md
+docs/README.md
+docs/LatexThesis/README.md
 docs/artifact/THESIS_ARTIFACT.md
 docs/artifact/ARTIFACT_EVALUATION.md
 docs/artifact/REPOSITORY_MAP.md
@@ -166,7 +190,7 @@ CHANGELOG.md
 CITATION.cff
 ```
 
-## 9. Data and Security Check
+## 10. Data and Security Check
 
 Confirm that current `main` does not contain:
 
@@ -181,7 +205,37 @@ Confirm that current `main` does not contain:
 
 Use `gitleaks` or an equivalent secret scanner where available.
 
-## 10. Historical Snapshot Check
+## 11. Numerical and Terminological Check
+
+Confirm the frozen profile:
+
+```text
+source images                         1,500
+binary subset                         1,000
+unique OOD images                       500
+forensic evaluation bundle           11,500
+commercial configurations                 6
+commercial decisions                 69,000
+commercial metric rows                  186
+proxy prediction rows                40,500
+proxy OOD rows                        7,500
+XAI cases                                  5
+XAI thesis assets                         20
+```
+
+Confirm that:
+
+- OOD is not described as a supervised third class;
+- 2,500 OOD predictions per architecture are not described as 2,500 distinct
+  images;
+- the four model-dependent attacks are distinguished from model-agnostic Color
+  Shift and anti-forensic transformations;
+- historical `confidence*` fields are described as Max-P outputs;
+- no direct robustness claim is inferred from transferred attacks alone;
+- commercial metrics are tied to frozen versions, configurations, observable
+  signals, and normalization rules.
+
+## 12. Historical Snapshot Check
 
 Both protected references must still resolve to:
 
@@ -198,7 +252,7 @@ snapshot/pre-commission-cleanup-2026-07-16
 
 Do not move or modify them.
 
-## 11. Release Assets
+## 13. Release Assets
 
 Preferred assets:
 
@@ -208,7 +262,8 @@ artifact-checksums.sha256
 repository-audit-summary.md
 ```
 
-Do not add the generated PDF to the Git tree solely for distribution. Attach it to the release.
+Do not add the generated PDF to the Git tree solely for distribution. Attach it
+to the release.
 
 Example checksum:
 
@@ -216,10 +271,14 @@ Example checksum:
 sha256sum docs/LatexThesis/main.pdf
 ```
 
-## 12. DOI Archival
+## 14. DOI Archival
 
-After GitHub release creation, archive through Zenodo or an institutional repository. Then update `CITATION.cff`, add the DOI badge, update `CHANGELOG.md`, and record the DOI in the academic audit document.
+After GitHub release creation, archive through Zenodo or an institutional
+repository. Then update `CITATION.cff`, add the DOI badge, update `CHANGELOG.md`,
+and record the DOI in the academic audit document.
 
-## 13. Post-Release Rule
+## 15. Post-Release Rule
 
-Allowed maintenance includes citation/DOI corrections, documentation fixes, release clarifications, security corrections, and non-substantive archival improvements. Substantive experimental changes require a new versioned release.
+Allowed maintenance includes citation/DOI corrections, documentation fixes,
+release clarifications, security corrections, and non-substantive archival
+improvements. Substantive experimental changes require a new versioned release.

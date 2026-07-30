@@ -13,20 +13,29 @@ commercial software.
 
 Public `main` includes:
 
-- numbered acquisition, preparation, training, perturbation, evaluation, and reporting scripts;
+- numbered acquisition, preparation, training, perturbation, evaluation, and
+  reporting scripts;
 - frozen dataset, split, attack, and bundle manifests;
-- proxy checkpoints and prediction outputs;
+- 15 proxy checkpoints and prediction outputs;
 - 69,000 sanitized commercial-tool decisions;
 - 186 commercial metric rows;
 - proxy robustness and OOD metric tables;
 - canonical XAI selection and thesis-ready assets;
-- the authoritative LaTeX thesis source;
+- the authoritative seven-chapter LaTeX thesis source;
 - validation and audit utilities;
 - authoritative complete-ZIP checksums for the controlled image artifacts.
 
 Public `main` excludes image corpora and complete commercial raw exports.
 
-## 2. Environment Setup on Kali/Linux
+## 2. Historical Naming Boundary
+
+The paths `results/figures/chapter_5/`,
+`explainability/manifests/chapter5/`, and related script or strategy names were
+created before the final thesis reorganization. They are preserved as frozen
+artifact identifiers. The implementation is reported in Chapter 5; the
+quantitative and qualitative results are reported in Chapter 6.
+
+## 3. Environment Setup on Kali/Linux
 
 ```bash
 git clone https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics.git
@@ -40,7 +49,7 @@ python -m pip install -r requirements.txt
 For GPU-dependent stages, install a PyTorch build compatible with the local CUDA
 environment.
 
-## 3. Controlled Data Access
+## 4. Controlled Data Access
 
 Access conditions are governed by:
 
@@ -54,16 +63,12 @@ Authoritative archive-level digests are stored in:
 docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256
 ```
 
-Two controlled artifacts serve different purposes:
-
 | Artifact | Purpose |
 |---|---|
-| `00_raw_datasets_bundle.zip` | Restore the heterogeneous source corpora and regenerate the numbered pipeline |
+| `00_raw_datasets_bundle.zip` | Restore heterogeneous source corpora and regenerate the numbered pipeline |
 | `16_frozen_forensic_evaluation_bundle.zip` | Restore the exact 11,500 files used for commercial black-box processing |
 
-### Raw source restoration
-
-Request access:
+Request raw-source access:
 
 ```bash
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
@@ -71,7 +76,7 @@ python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
   --request-access
 ```
 
-After approval, validate and extract the downloaded archive locally:
+Validate and extract an authorized raw archive:
 
 ```bash
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
@@ -79,9 +84,7 @@ python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
   --archive "/path/to/00_raw_datasets_bundle.zip"
 ```
 
-### Exact frozen-bundle restoration
-
-After the stable request page has been configured, request access with:
+Request exact frozen-bundle access:
 
 ```bash
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
@@ -89,7 +92,7 @@ python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
   --request-access
 ```
 
-Restore the exact black-box input with:
+Restore the exact black-box input:
 
 ```bash
 python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
@@ -97,7 +100,7 @@ python datasets/scripts/acquisition/00_download_raw_datasets_bundle.py \
   --archive "/path/to/16_frozen_forensic_evaluation_bundle.zip"
 ```
 
-The script automatically verifies the complete archive against the authoritative
+The restoration script verifies the complete archive against the authoritative
 repository checksum. Frozen restoration additionally verifies all 11,500 blind
 files against:
 
@@ -105,10 +108,10 @@ files against:
 datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
 ```
 
-Authorized direct URLs may be supplied through `--url` or the corresponding
-local environment variables. Never commit private, signed, or temporary values.
+Authorized direct URLs may be supplied through `--url` or local environment
+variables. Never commit private, signed, or temporary values.
 
-## 4. Numbered Experimental Pipeline
+## 5. Numbered Experimental Pipeline
 
 | Step | Entry point | Purpose |
 |---:|---|---|
@@ -132,7 +135,7 @@ local environment variables. Never commit private, signed, or temporary values.
 | 17 | `explainability/scripts/17_generate_integrated_gradients_case_studies.py` | Integrated Gradients generation |
 | 18 | `explainability/scripts/18_xai_interactive_launcher.py` | Human XAI review |
 | 19 | `evaluation/scripts/19_normalize_forensic_ai_tool_predictions.py` | Commercial export normalization |
-| 20 | `results/scripts/20_generate_experimental_reporting_assets.py` | Thesis reporting assets for the experimental-results chapter |
+| 20 | `results/scripts/20_generate_experimental_reporting_assets.py` | Chapter 6 reporting assets |
 | 21 | `results/scripts/21_generate_embedded_metadata_sensitivity_check.py` | Metadata-sensitivity analysis |
 
 Public-artifact support utilities:
@@ -143,7 +146,7 @@ Public-artifact support utilities:
 | 23 | `results/scripts/23_validate_results_artifacts.py` | Frozen-result validation |
 | 24 | `results/scripts/24_audit_reporting_asset_usage.py` | Reporting/LaTeX asset audit |
 
-## 5. Frozen Dataset and Bundle
+## 6. Frozen Dataset and Bundle
 
 ```text
 datasets/final/manifests/manual_selection_final_1500.csv
@@ -152,10 +155,10 @@ datasets/splits/manifests/clean_folds_manifest.csv
 datasets/splits/manifests/ood_eval_manifest.csv
 ```
 
-Frozen dataset:
+Frozen source population:
 
 ```text
-500 weapon + 500 non-weapon + 500 OOD = 1,500 images
+500 weapon + 500 non_weapon + 500 OOD = 1,500 images
 ```
 
 Forensic evaluation bundle:
@@ -163,11 +166,14 @@ Forensic evaluation bundle:
 ```text
 1,000 clean binary
   500 clean OOD
-5,000 adversarial
+5,000 adversarial or adversarial-style
 5,000 anti-forensic
 -------------------
 11,500 files
 ```
+
+The 10,000 perturbed files are derived variants of the same 1,000 binary source
+images, not independent underlying cases.
 
 For commercial processing, import only:
 
@@ -177,7 +183,7 @@ datasets/forensic_evaluation_bundle/blind_tool_input/files/
 
 Do not import metadata or structured audit views.
 
-## 6. Proxy Models
+## 7. Proxy Models
 
 Architectures:
 
@@ -205,19 +211,29 @@ python evaluation/scripts/15_evaluate_proxy_models.py \
 Partial or diagnostic runs must use a separate output directory and must not
 replace canonical frozen outputs.
 
-## 7. Perturbations
+Columns historically named `confidence*` contain maximum predicted-class
+probability (`Max-P`) information. Max-P is not calibrated certainty and should
+only be compared within the same model/configuration context.
 
-Adversarial families:
+## 8. Perturbations
+
+Model-dependent adversarial attacks generated against fold-specific
+EfficientNet-B0 checkpoints:
 
 ```text
 fgsm
 superdeepfool
 sigma_zero
 one_pixel
+```
+
+Separate deterministic model-agnostic adversarial-style condition:
+
+```text
 color_shift
 ```
 
-Anti-forensic families:
+Anti-forensic transformations:
 
 ```text
 jpeg_recompression
@@ -230,9 +246,7 @@ contrast_stretching
 Generated image directories are local. Public manifests preserve provenance,
 parameters, source identifiers, and integrity digests.
 
-## 8. Commercial Black-Box Evaluation
-
-Frozen perimeter:
+## 9. Commercial Black-Box Evaluation
 
 | Configuration | Version |
 |---|---|
@@ -246,6 +260,9 @@ Public canonical table:
 ```text
 evaluation/forensic_tools/normalized_predictions.csv
 ```
+
+It contains 69,000 sanitized decisions and is distinct from the excluded
+complete raw exports.
 
 Rebuild from committed public extracts:
 
@@ -270,15 +287,16 @@ Expected:
 186 identical metric rows
 ```
 
-## 9. Explainability
+## 10. Explainability
 
-Integrated Gradients is applied only to transparent proxy models.
-
-Final five-case manifest:
+Integrated Gradients is applied only to transparent proxy models. The final
+five-case manifest is:
 
 ```text
 explainability/manifests/chapter5/thesis_selection.csv
 ```
+
+The path is historical; the five cases are discussed in Chapter 6.
 
 Validate:
 
@@ -287,7 +305,7 @@ python explainability/scripts/validate_chapter5_xai_artifacts.py \
   --strict-thesis-text
 ```
 
-## 10. Result and Reporting Validation
+## 11. Result and Reporting Validation
 
 ```bash
 python results/scripts/23_validate_results_artifacts.py
@@ -296,10 +314,10 @@ python results/scripts/24_audit_reporting_asset_usage.py --strict
 
 The result validator checks 69,000 commercial decisions, 186 commercial metrics,
 40,500 proxy predictions, the `500 OOD images × 5 folds = 2,500 predictions per
-architecture` accounting, Chapter 5 manifest counts, and metadata-sensitivity
-counts.
+architecture` accounting, the historically named reporting-manifest counts,
+and metadata-sensitivity counts.
 
-## 11. LaTeX Audit and Compilation
+## 12. LaTeX Audit and Compilation
 
 ```bash
 python tools/latex/audit_latex_images_used.py \
@@ -312,7 +330,7 @@ cd ../..
 
 Generated auxiliary files and `main.pdf` are ignored.
 
-## 12. Kali/Linux Audit Helper
+## 13. Kali/Linux Audit Helper
 
 ```bash
 bash tools/tasks.sh status
@@ -327,21 +345,22 @@ bash tools/tasks.sh check-thesis-log
 bash tools/tasks.sh audit-all
 ```
 
-## 13. Traceability
+## 14. Traceability
 
 The pipeline preserves traceability through stable identifiers, SHA-256 digests,
 bundle IDs, fold assignments, attack manifests, checkpoint hashes, normalized
 decisions, metric tables, XAI manifests, and figure-generation records.
 
-SHA-256 is the primary integrity digest. MD5 is retained only where required for
-compatibility with commercial-tool matching workflows.
+SHA-256 is the primary integrity digest. MD5 is retained only as an auxiliary
+interoperability identifier for commercial-tool matching workflows.
 
 Archive-level and per-file integrity are distinct:
 
-- `CONTROLLED_ARTIFACT_CHECKSUMS.sha256` authenticates the complete distributed ZIP;
+- `CONTROLLED_ARTIFACT_CHECKSUMS.sha256` authenticates the complete distributed
+  ZIP;
 - `bundle_hashes_sha256.csv` authenticates each restored blind input.
 
-## 14. Reproducibility Boundary
+## 15. Reproducibility Boundary
 
 Publicly reproducible:
 
@@ -364,9 +383,9 @@ Licensed:
 
 Exact frozen-bundle restoration makes the original commercial inputs available
 under controlled access, but it does not remove the need for compatible licensed
-software or guarantee access to proprietary model internals.
+software or grant access to proprietary model internals.
 
-## 15. Related Documents
+## 16. Related Documents
 
 ```text
 docs/artifact/DATA_ACCESS.md
