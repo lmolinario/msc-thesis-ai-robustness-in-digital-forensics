@@ -135,6 +135,7 @@ jobs:
           from pathlib import Path
 
           selected = [
+              'datasets/prepared/final_pool/reports/prepared_build_summary.json',
               'datasets/splits/manifests/split_generation_summary.json',
               'datasets/forensic_evaluation_bundle/metadata/bundle_summary.json',
               'evaluation/forensic_tools/normalization_summary.json',
@@ -178,6 +179,42 @@ jobs:
               raise SystemExit(1)
           PY
 
+      - name: Check public text for local absolute paths
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          suffixes = {
+              '.cff', '.csv', '.json', '.md', '.ps1', '.py', '.sh', '.tex',
+              '.txt', '.yaml', '.yml'
+          }
+          patterns = {
+              'Windows absolute path': re.compile(r'(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\s"\']+'),
+              'Linux home path': re.compile(r'/home/[A-Za-z0-9._-]+/'),
+              'macOS user path': re.compile(r'/Users/[A-Za-z0-9._-]+/'),
+              'mounted user path': re.compile(r'/run/media/[A-Za-z0-9._-]+/'),
+          }
+          excluded_roots = {'.git'}
+          failures = []
+          for path in Path('.').rglob('*'):
+              if not path.is_file() or path.suffix.lower() not in suffixes:
+                  continue
+              if any(part in excluded_roots for part in path.parts):
+                  continue
+              text = path.read_text(encoding='utf-8', errors='ignore')
+              for label, pattern in patterns.items():
+                  match = pattern.search(text)
+                  if match:
+                      failures.append((str(path), label, match.group(0)))
+          if failures:
+              for path, label, value in failures:
+                  print(f'{label} in {path}: {value}')
+              raise SystemExit(1)
+          print('Public local-path leakage check passed.')
+          PY
+
       - name: Validate XAI artifact
         run: python explainability/scripts/validate_chapter5_xai_artifacts.py --strict-thesis-text
 
@@ -195,9 +232,14 @@ jobs:
 
           forbidden = [
               'LatexThesis_ITA',
-              '/run/media/lello',
               'explainability/outputs/integrated_gradients/',
               '.\\tasks.ps1',
+              'Chapter 5 - Experiments and Results',
+              'Chapter 6 - Conclusions',
+              'sections/05_experiments.tex',
+              'sections/06_conclusions.tex',
+              'sections/07_appendix.tex',
+              'both thesis-language variants',
           ]
           paths = [
               Path('README.md'),
@@ -207,6 +249,7 @@ jobs:
               Path('datasets/README.md'),
               Path('datasets/raw/README.md'),
               Path('datasets/forensic_evaluation_bundle/README.md'),
+              Path('evaluation/README.md'),
               Path('results/README.md'),
               Path('results/scripts/README.md'),
               Path('explainability/README.md'),
