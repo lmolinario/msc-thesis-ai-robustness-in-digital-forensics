@@ -3,8 +3,10 @@
 """Validate the frozen public result layer without regenerating any metric.
 
 The validator checks the canonical commercial-tool prediction table, frozen
-commercial metrics, proxy evaluation summary, OOD accounting, Chapter 5 figure
-manifest, and reporting provenance. It is read-only unless ``--report`` is used.
+commercial metrics, proxy evaluation summary, OOD accounting, the historically
+named reporting manifest under ``results/figures/chapter_5``, and reporting
+provenance. The final results are reported in Chapter 6. The script is read-only
+unless ``--report`` is used.
 """
 
 from __future__ import annotations
@@ -144,7 +146,8 @@ def validate_canonical_predictions() -> dict[str, Any]:
     counts = Counter(row["tool_name"].strip() for row in rows)
     if dict(counts) != EXPECTED_TOOL_COUNTS:
         raise ValueError(
-            f"Canonical tool profile mismatch: expected {EXPECTED_TOOL_COUNTS}, found {dict(counts)}"
+            "Canonical tool profile mismatch: "
+            f"expected {EXPECTED_TOOL_COUNTS}, found {dict(counts)}"
         )
 
     keys = [(row["tool_name"].strip(), row["bundle_id"].strip()) for row in rows]
@@ -171,7 +174,7 @@ def validate_canonical_predictions() -> dict[str, Any]:
     if output.get("rows") != 69_000:
         raise ValueError("Canonical summary does not report 69,000 rows")
     if output.get("sha256") != digest:
-        raise ValueError("Canonical summary SHA256 does not match the committed CSV")
+        raise ValueError("Canonical summary SHA-256 does not match the committed CSV")
     if summary.get("decision_profile") != EXPECTED_TOOL_COUNTS:
         raise ValueError("Canonical summary decision profile mismatch")
     if summary.get("local_paths_detected") is not False:
@@ -224,14 +227,18 @@ def validate_proxy_summary() -> dict[str, Any]:
     for key, value in expected.items():
         if counts.get(key) != value:
             raise ValueError(
-                f"Proxy summary mismatch for {key}: expected {value}, found {counts.get(key)}"
+                f"Proxy summary mismatch for {key}: "
+                f"expected {value}, found {counts.get(key)}"
             )
     return expected
 
 
 def validate_ood_accounting() -> dict[str, Any]:
     if FINAL_OOD.read_bytes() != PROXY_OOD.read_bytes():
-        raise ValueError("final_ood_metrics.csv is not byte-identical to proxy_model_ood_metrics.csv")
+        raise ValueError(
+            "final_ood_metrics.csv is not byte-identical to "
+            "proxy_model_ood_metrics.csv"
+        )
     rows, fields = read_csv(FINAL_OOD)
     required = {
         "evaluated_model",
@@ -256,7 +263,8 @@ def validate_ood_accounting() -> dict[str, Any]:
             raise ValueError("Non-OOD row found in final_ood_metrics.csv")
         if total != 2_500:
             raise ValueError(
-                f"Expected 2,500 fold-level OOD predictions per architecture, found {total}"
+                "Expected 2,500 fold-level OOD predictions per architecture, "
+                f"found {total}"
             )
         if weapon + non_weapon != total:
             raise ValueError("OOD predicted counts do not sum to total")
@@ -266,7 +274,9 @@ def validate_ood_accounting() -> dict[str, Any]:
         "predictions_per_architecture": 2_500,
         "architectures": 3,
         "total_ood_prediction_rows": 7_500,
-        "interpretation": "500 unique OOD images x 5 fold-specific checkpoints per architecture",
+        "interpretation": (
+            "500 unique OOD images x 5 fold-specific checkpoints per architecture"
+        ),
     }
 
 
@@ -278,9 +288,9 @@ def validate_reporting_assets() -> dict[str, Any]:
             f"Reporting summary script path mismatch: {summary.get('script')!r}"
         )
     if summary.get("figure_count_unique") != 24:
-        raise ValueError("Expected 24 unique Chapter 5 reporting assets")
+        raise ValueError("Expected 24 unique reporting assets")
     if summary.get("file_count") != 41:
-        raise ValueError("Expected 41 Chapter 5 manifest rows")
+        raise ValueError("Expected 41 historically named reporting-manifest rows")
 
     manifest_rows, fields = read_csv(FIGURE_MANIFEST)
     required = {"figure_id", "output_path", "format", "source_csv"}
@@ -310,6 +320,8 @@ def validate_reporting_assets() -> dict[str, Any]:
         raise ValueError("Expected 90 metadata-sensitivity detail rows")
 
     return {
+        "historical_path": "results/figures/chapter_5/",
+        "current_results_chapter": 6,
         "manifest_rows": len(manifest_rows),
         "unique_figure_ids": len(unique_ids),
         "metadata_sensitive_bundles": 15,
@@ -326,13 +338,13 @@ def main() -> int:
     reporting = validate_reporting_assets()
 
     report = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "status": "passed",
         "canonical_commercial_predictions": canonical,
         "commercial_metrics": commercial,
         "proxy_evaluation": proxy,
         "ood_accounting": ood,
-        "chapter5_reporting": reporting,
+        "reporting_assets": reporting,
     }
 
     report_path = resolve_report(args.report)
@@ -348,7 +360,9 @@ def main() -> int:
     print(" - commercial metric rows: 186")
     print(" - proxy prediction rows: 40500")
     print(" - OOD: 500 unique images x 5 folds = 2500 predictions per architecture")
-    print(" - Chapter 5 manifest: 41 files, 24 unique asset IDs")
+    print(" - reporting manifest: 41 rows, 24 unique asset IDs")
+    print(" - historical reporting path: results/figures/chapter_5/")
+    print(" - current thesis results chapter: 6")
     if report_path is not None:
         print(f" - report: {report_path}")
     return 0
