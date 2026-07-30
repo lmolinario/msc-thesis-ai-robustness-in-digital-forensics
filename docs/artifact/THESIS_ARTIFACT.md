@@ -13,11 +13,14 @@
 | Institution | University of Cagliari |
 | Author | Lello Molinario |
 | Supervisor | Davide Maiorca |
+| Co-advisor | Silvia Lucia Sanna |
 | Repository role | Final frozen research artifact supporting the MSc thesis |
 
 ## Artifact Purpose
 
-This repository preserves the experimental and documentary artifact supporting a study of the operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics under:
+This repository preserves the experimental and documentary artifact supporting
+a study of the operational robustness of AI-based image-classification and
+media-triage systems in Digital/Computer Forensics under:
 
 - clean in-distribution inputs;
 - out-of-distribution images;
@@ -25,17 +28,39 @@ This repository preserves the experimental and documentary artifact supporting a
 - anti-forensic transformations;
 - observable black-box outputs from commercial tools.
 
-The artifact supports auditability, traceability, and controlled reproducibility. It is not a general-purpose classifier, unrestricted benchmark release, or redistributable dataset mirror.
+The artifact supports auditability, traceability, and controlled reproducibility.
+It is not a general-purpose classifier, unrestricted benchmark release, or
+redistributable dataset mirror.
+
+## Final Thesis Structure
+
+```text
+Chapter 1 - Introduction
+Chapter 2 - Background
+Chapter 3 - State of the Art
+Chapter 4 - Methodology
+Chapter 5 - Implementation and Experimental Setup
+Chapter 6 - Experimental Results and Operational Robustness Analysis
+Chapter 7 - Conclusions, Limitations, and Future Work
+Appendix
+```
+
+Several frozen paths and identifiers containing `chapter5` or `chapter_5` were
+created before the final chapter reorganization. They remain unchanged for
+artifact identity and reproducibility; the associated results are reported in
+Chapter 6.
 
 ## Main Contents
 
 The curated `main` branch contains:
 
-- numbered dataset, training, perturbation, evaluation, XAI, and reporting scripts;
+- numbered dataset, training, perturbation, evaluation, XAI, and reporting
+  scripts;
 - frozen dataset, split, attack, and bundle manifests;
 - 15 transparent proxy-model checkpoints and their registry;
-- proxy prediction and metric outputs;
-- a canonical sanitized commercial-tool prediction table containing 69,000 decisions;
+- 40,500 proxy prediction rows and metric outputs;
+- a canonical sanitized commercial-tool prediction table containing 69,000
+  decisions across six configurations;
 - four tool-specific sanitized extracts and an exact equivalence report;
 - 186 frozen commercial metric rows;
 - five thesis-selected Integrated Gradients cases and 20 thesis-ready XAI assets;
@@ -51,9 +76,11 @@ The repository does not intentionally redistribute:
 - complete commercial-tool raw exports;
 - licensed forensic software or proprietary databases;
 - commercial case files, evidence material, or operational investigative data;
-- secrets, credentials, tokens, temporary signed URLs, or private download links.
+- secrets, credentials, tokens, temporary signed URLs, or private download
+  links.
 
-Full end-to-end reruns therefore require controlled-access images and, for commercial-tool processing, licensed software environments.
+Full end-to-end reruns therefore require controlled-access images and, for
+commercial-tool processing, licensed software environments.
 
 ## Official Sources of Truth
 
@@ -83,7 +110,7 @@ datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
 ```text
 evaluation/proxy_models/proxy_model_predictions.csv
 results/metrics/
-results/figures/chapter_5/
+results/figures/chapter_5/                 # historical frozen path
 ```
 
 ### Commercial-tool predictions and validation
@@ -101,6 +128,8 @@ results/metrics/forensic_tools_metrics.csv
 explainability/manifests/chapter5/thesis_selection.csv
 ```
 
+The XAI path is historical; the five cases are discussed in Chapter 6.
+
 ## Final Commercial-Tool Perimeter
 
 | Tool | Version / module | Evaluated signal |
@@ -110,7 +139,24 @@ explainability/manifests/chapter5/thesis_selection.csv
 | Cellebrite Inseyets | 10.9 / Physical Analyzer 10.9.0.3029 | exported weapon classifications |
 | Magnet Griffeye / T3K CORE | Griffeye 26.2.108 / T3K CORE 1.18.0 | exported firearm bookmark |
 
-The internal architectures, thresholds, weights, training data, calibrated probabilities, and undocumented decision logic are not inspected.
+The internal architectures, thresholds, weights, training data, calibrated
+probabilities, and undocumented decision logic are not inspected.
+
+## Key Interpretation Boundaries
+
+- The frozen source population contains 500 `weapon`, 500 `non_weapon`, and 500
+  OOD images.
+- OOD is a separate evaluation branch, not a supervised third class.
+- The forensic bundle contains 11,500 files, including 10,000 derived variants
+  of the same 1,000 binary source images.
+- FGSM, OnePixel, SigmaZero, and SuperDeepFool are model-dependent attacks
+  generated against fold-specific EfficientNet-B0 checkpoints.
+- Color Shift and the anti-forensic transformations are model-agnostic.
+- Transfer results do not establish direct robustness of non-target models.
+- Historical `confidence*` fields contain Max-P information, not calibrated
+  confidence or forensic certainty.
+- Commercial observations are specific to the frozen software versions,
+  configurations, exported signals, and normalization rules.
 
 ## Reproducibility Level
 
@@ -149,7 +195,8 @@ tag:    snapshot/pre-commission-cleanup-2026-07-16
 commit: 309a4580537ebc3bb7950f29c090bb2729fc603b
 ```
 
-The current `main` branch remains authoritative. Historical preservation does not grant redistribution permission for third-party data or proprietary exports.
+The current `main` branch remains authoritative. Historical preservation does
+not grant redistribution permission for third-party data or proprietary exports.
 
 ## Artifact Boundary
 
