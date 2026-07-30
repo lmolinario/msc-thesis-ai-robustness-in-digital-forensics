@@ -186,9 +186,14 @@ jobs:
           import re
           from pathlib import Path
 
+          # Evidence-derived CSV files may contain embedded binary/metadata values
+          # and several historical audit CSVs intentionally record source-layout
+          # paths. Canonical commercial CSV leakage is checked by the dedicated
+          # result validator. This general guard therefore scans public prose,
+          # configuration, source code, LaTeX, and JSON summaries.
           suffixes = {
-              '.cff', '.csv', '.json', '.md', '.ps1', '.py', '.sh', '.tex',
-              '.txt', '.yaml', '.yml'
+              '.cff', '.json', '.md', '.ps1', '.py', '.sh', '.tex', '.txt',
+              '.yaml', '.yml'
           }
           patterns = {
               'Windows absolute path': re.compile(r'(?<![A-Za-z0-9])[A-Za-z]:[\\/][^\s"\']+'),
