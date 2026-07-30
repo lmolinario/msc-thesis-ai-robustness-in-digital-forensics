@@ -167,6 +167,37 @@ data, preprocessing, or internal decision logic.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
+\subsection{Magnet Griffeye and T3K CORE}
+\label{subsec:sota_griffeye_t3k}
+% ─────────────────────────────────────────────────────────────────────────────
+\textit{Magnet Griffeye} is a commercial platform used for the triage, review,
+and organization of large volumes of multimedia content in investigative and
+forensic contexts. In the context of the present thesis, the tool is relevant
+not as a controllable academic classifier, but as commercial black-box software
+capable of producing observable semantic outputs on images through automated
+analysis modules.
+
+The \textit{T3K CORE} component enables the generation of automated semantic
+bookmarks associated with the analyzed multimedia content. These bookmarks can
+be used by the analyst to filter, prioritize, or review potentially relevant
+images. From a methodological perspective, this type of output differs from the
+categories returned by \textit{Magnet.AI}, from the semantic retrieval results
+produced by \textit{Excire Foto 2025}, and from the classifications exported
+in the Cellebrite workflow. Nevertheless, it belongs to the same family of
+observable operational signals that can be normalized against an experimental
+ground truth.
+
+The relevance of \textit{Magnet Griffeye} to this thesis therefore lies in the
+possibility of extending the black-box evaluation to an additional output
+paradigm: not a class probability or an explicit supervised decision, but a set
+of automatically generated semantic bookmarks. This characteristic reinforces
+the general methodological problem addressed in the thesis: different
+commercial tools may expose heterogeneous outputs, yet all must be mapped to a
+common representation through explicit, documented normalization rules that are
+consistent with the experimental task.
+
+
+% ─────────────────────────────────────────────────────────────────────────────
 \subsection{Excire Foto 2025}
 \label{subsec:sota_excire_foto}
 % ─────────────────────────────────────────────────────────────────────────────
@@ -238,39 +269,6 @@ or not fully representative inputs relative to ideal operating conditions. For
 this reason, \textit{Cellebrite Inseyets} is discussed as a further significant
 case of commercial black-box software with respect to the general problem of
 the operational robustness of \gls{ai}-based systems in forensic contexts.
-
-
-% ─────────────────────────────────────────────────────────────────────────────
-\subsection{Magnet Griffeye and T3K CORE}
-\label{subsec:sota_griffeye_t3k}
-% ─────────────────────────────────────────────────────────────────────────────
-\textit{Magnet Griffeye} is a commercial platform used for the triage, review,
-and organization of large volumes of multimedia content in investigative and
-forensic contexts. In the context of the present thesis, the tool is relevant
-not as a controllable academic classifier, but as commercial black-box software
-capable of producing observable semantic outputs on images through automated
-analysis modules.
-
-The \textit{T3K CORE} component enables the generation of automated semantic
-bookmarks associated with the analyzed multimedia content. These bookmarks can
-be used by the analyst to filter, prioritize, or review potentially relevant
-images. From a methodological perspective, this type of output differs from the
-categories returned by \textit{Magnet.AI}, from the semantic retrieval results
-produced by \textit{Excire Foto 2025}, and from the classifications exported
-in the Cellebrite workflow. Nevertheless, it belongs to the same family of
-observable operational signals that can be normalized against an experimental
-ground truth.
-
-The relevance of \textit{Magnet Griffeye} to this thesis therefore lies in the
-possibility of extending the black-box evaluation to an additional output
-paradigm: not a class probability or an explicit supervised decision, but a set
-of automatically generated semantic bookmarks. This characteristic reinforces
-the general methodological problem addressed in the thesis: different
-commercial tools may expose heterogeneous outputs, yet all must be mapped to a
-common representation through explicit, documented normalization rules that are
-consistent with the experimental task.
-
-
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Common Limitations of Black-Box Evaluation}
