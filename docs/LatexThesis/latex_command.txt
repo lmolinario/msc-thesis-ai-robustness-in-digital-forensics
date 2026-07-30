@@ -1,75 +1,31 @@
+# Preferred cross-platform build
+latexmk -pdf -interaction=nonstopmode -file-line-error main.tex
+
+# Equivalent explicit sequence
 pdflatex main.tex
 makeglossaries main
 biber main
 pdflatex main.tex
 pdflatex main.tex
 
-
-pdflatex main.tex
-biber main
-makeglossaries main
-pdflatex main.tex
-pdflatex main.tex
-
-
-
-
-
-pdflatex main.tex
+# Glossary fallback when makeglossaries is unavailable
 makeindex -s main.ist -t main.alg -o main.acr main.acn
-makeglossaries main
-biber main
-pdflatex main.tex
-pdflatex main.tex
 
-
-$perlRoot = "D:\strawberry-perl-5.42.0.1-64bit-portable"
-$env:Path = "$perlRoot\perl\bin;$perlRoot\c\bin;$env:Path"
-
-$perlRoot = "D:\strawberry-perl-5.42.0.1-64bit-portable"
-
-$pathsToAdd = @(
-    "$perlRoot\perl\bin",
-    "$perlRoot\c\bin"
-)
-
-$currentUserPath = [Environment]::GetEnvironmentVariable("Path", "User")
-
-foreach ($p in $pathsToAdd) {
-    if ($currentUserPath -notlike "*$p*") {
-        $currentUserPath = "$currentUserPath;$p"
-    }
+# PowerShell example for a portable local Perl installation.
+# Set the location through an environment variable instead of committing a
+# workstation-specific absolute path.
+$perlRoot = $env:STRAWBERRY_PERL_HOME
+if ($perlRoot) {
+    $env:Path = "$perlRoot\perl\bin;$perlRoot\c\bin;$env:Path"
 }
 
-[Environment]::SetEnvironmentVariable("Path", $currentUserPath, "User")
-
-
-pdflatex main.tex
-biber main
-makeindex -s main.ist -t main.alg -o main.acr main.acn
-pdflatex main.tex
-pdflatex main.tex
-
-
+# Remove auxiliary files on Unix-like systems
 rm -f main.aux main.bbl main.bcf main.blg main.run.xml main.out \
 main.toc main.lof main.lot main.acn main.acr main.alg \
 main.glg main.glo main.gls main.ist main.glsdefs main.log
 
+# Remove auxiliary files in PowerShell
 Remove-Item -Path main.aux,main.bbl,main.bcf,main.blg,main.run.xml,main.out,main.toc,main.lof,main.lot,main.acn,main.acr,main.alg,main.glg,main.glo,main.gls,main.ist,main.glsdefs,main.log -Force -ErrorAction SilentlyContinue
 
-pdflatex main.tex
-makeglossaries main
-biber main
-pdflatex main.tex
-pdflatex main.tex
-
-pdflatex main.tex
-makeindex -s main.ist -t main.alg -o main.acr main.acn
-biber main
-pdflatex main.tex
-pdflatex main.tex
-
-
-
+# latexmk cleanup
 latexmk -C
-latexmk -pdf -interaction=nonstopmode -file-line-error main.tex

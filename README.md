@@ -12,43 +12,49 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Audit](https://github.com/lmolinario/msc-thesis-ai-robustness-in-digital-forensics/actions/workflows/repository-audit.yml/badge.svg)
 
-This repository contains the frozen research artifact supporting an MSc thesis in **Computer Engineering, Cybersecurity and Artificial Intelligence** at the University of Cagliari.
+This repository contains the frozen research artifact supporting an MSc thesis
+in **Computer Engineering, Cybersecurity and Artificial Intelligence** at the
+University of Cagliari.
 
-The study evaluates the **operational robustness of AI-based image-classification and media-triage systems in Digital/Computer Forensics** under clean inputs, out-of-distribution samples, adversarial perturbations, and anti-forensic transformations. It compares transparent proxy models with observable outputs from selected commercial black-box tools.
+The study evaluates the **operational robustness of AI-based image-classification
+and media-triage systems in Digital/Computer Forensics** under clean inputs,
+out-of-distribution samples, adversarial perturbations, and anti-forensic
+transformations. It compares transparent proxy models with observable outputs
+from selected commercial black-box tools.
 
-The repository is a research artifact, not a general-purpose forensic classifier, unrestricted dataset release, or operational investigative system.
-
----
+The repository is a research artifact, not a general-purpose forensic classifier,
+unrestricted dataset release, or operational investigative system.
 
 ## At a Glance
 
 | Component | Description |
 |---|---|
 | Research focus | Robustness of AI-based forensic image classification and media triage |
-| Frozen dataset | 500 weapon + 500 non-weapon + 500 OOD images |
+| Frozen source population | 500 `weapon` + 500 `non_weapon` + 500 OOD images |
+| Binary subset | 1,000 images: 500 `weapon` + 500 `non_weapon` |
 | Evaluation bundle | 11,500 files |
 | Proxy models | EfficientNet-B0, ResNet18, CLIP-based visual proxy |
 | Commercial tools | Magnet AXIOM / Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, Griffeye / T3K CORE |
 | Conditions | Clean, OOD, adversarial, anti-forensic |
 | Public prediction outputs | 69,000 sanitized commercial-tool decisions |
 | Main quantitative outputs | Proxy metrics, 186 commercial metric rows, reporting figures and tables |
-| XAI | Five Integrated Gradients case studies selected for the thesis results chapter |
+| XAI | Five Integrated Gradients case studies discussed in Chapter 6 |
 | Data policy | Controlled access; raw corpora and the exact frozen 11,500-file input are distributed separately from `main` |
 | Integrity | Authoritative complete-ZIP and per-file SHA-256 records |
 
----
-
 ## Research Objective
 
-> How robust are AI-based forensic image-classification and media-triage systems when exposed to realistic adversarial and anti-forensic input manipulations?
+> How robust are AI-based forensic image-classification and media-triage systems
+> when exposed to realistic adversarial and anti-forensic input manipulations?
 
 The evaluation uses three complementary perspectives:
 
-1. **Transparent proxy evaluation** — fold-aware training and controlled robustness analysis with known model architectures.
-2. **Commercial black-box evaluation** — blind processing followed by post-export normalization against hidden ground truth.
-3. **Operational risk analysis** — false negatives, false positives, OOD forced classification, confidence behavior, traceability, and human-review implications.
-
----
+1. **Transparent proxy evaluation** — fold-aware training and controlled
+   robustness analysis with known model architectures.
+2. **Commercial black-box evaluation** — blind processing followed by
+   post-export normalization against hidden reference assignments.
+3. **Operational risk analysis** — false negatives, false positives, OOD forced
+   binary assignment, Max-P behavior, traceability, and human-review implications.
 
 ## Experimental Workflow
 
@@ -68,7 +74,7 @@ flowchart TD
 heterogeneous image sources and initial metadata`"]
     B["`**Human-in-the-loop review**
 manual validation, cleaning and dataset freezing`"]
-    C["`**Final frozen dataset**
+    C["`**Final frozen source population**
 1500 images: 500 weapon, 500 non-weapon, 500 OOD`"]
     D["`**Binary evaluation subset**
 1000 images: 500 weapon and 500 non-weapon`"]
@@ -79,7 +85,7 @@ adversarial attacks and anti-forensic transformations
 applied only to the binary subset`"]
     H["`**Forensic evaluation bundle**
 1000 clean + 500 clean OOD + 5000 adversarial
-+ 5000 anti-forensic samples`"]
++ 5000 anti-forensic artifacts`"]
     G["`**Controlled proxy evaluation**
 EfficientNet-B0, ResNet18 and CLIP`"]
     I["`**Black-box software evaluation**
@@ -100,9 +106,11 @@ Integrated Gradients and audit controls`"]
     I --> J
 ```
 
-The 1,500-image dataset is the methodological source dataset. The 11,500-file bundle consists of 1,000 clean binary images, 500 clean OOD images, 5,000 adversarial samples, and 5,000 anti-forensic samples.
-
----
+The 1,500-image population is the methodological source dataset. The 11,500-file
+bundle consists of 1,000 clean binary images, 500 clean OOD images, 5,000
+adversarial or adversarial-style artifacts, and 5,000 anti-forensic artifacts.
+The 10,000 perturbed files are derived variants of the same 1,000 binary source
+images, not 10,000 independent underlying cases.
 
 ## Canonical Public Artifacts
 
@@ -118,7 +126,8 @@ datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv
 datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
 ```
 
-The archive checksum file authenticates the two controlled ZIP objects. The bundle hash manifest authenticates each of the 11,500 blind inputs individually.
+The archive checksum file authenticates the two controlled ZIP objects. The
+bundle hash manifest authenticates each of the 11,500 blind inputs individually.
 
 ### Proxy evaluation
 
@@ -130,6 +139,10 @@ results/metrics/final_confusion_matrices.csv
 results/metrics/final_ood_metrics.csv
 ```
 
+Fields historically named `confidence*` store maximum predicted-class
+probability (`Max-P`) information. These values are intra-model diagnostics,
+not calibrated confidence or forensic certainty.
+
 ### Commercial-tool evaluation
 
 ```text
@@ -139,7 +152,9 @@ forensic_tools/public_extracts_validation.json
 results/metrics/forensic_tools_metrics.csv
 ```
 
-The canonical commercial table contains exactly **69,000 sanitized decisions** across six configurations. The validation report confirms equivalence with the four tool-specific extracts and with all **186 frozen metric rows**.
+The canonical commercial table contains exactly **69,000 sanitized decisions**
+across six configurations. The validation report confirms equivalence with the
+four tool-specific extracts and with all **186 frozen metric rows**.
 
 ### XAI and reporting
 
@@ -149,7 +164,10 @@ results/figures/chapter_5/
 docs/LatexThesis/images/
 ```
 
----
+The `chapter5` and `chapter_5` names are historical frozen identifiers created
+before the final thesis reorganization. They are preserved for artifact identity
+and reproducibility. The final quantitative and qualitative results are reported
+in Chapter 6 (`docs/LatexThesis/sections/06_results.tex`).
 
 ## Commercial-Tool Perimeter
 
@@ -160,14 +178,28 @@ docs/LatexThesis/images/
 | Cellebrite Inseyets | 10.9 / Physical Analyzer 10.9.0.3029 | exported weapon classifications |
 | Magnet Griffeye / T3K CORE | Griffeye 26.2.108 / T3K CORE 1.18.0 | `CORE/Violence/Firearm` bookmark |
 
-The thesis evaluates exported observable signals. It does not claim access to proprietary model architectures, thresholds, probabilities, weights, training data, or undocumented internal logic.
+The thesis evaluates exported observable signals. It does not claim access to
+proprietary model architectures, thresholds, probabilities, weights, training
+data, or undocumented internal logic.
 
----
+## Important Interpretation Boundaries
+
+- OOD is a separate evaluation branch, not a supervised third class.
+- `2,500` OOD predictions per architecture means `500 images × 5 checkpoints`,
+  not 2,500 distinct images.
+- FGSM, OnePixel, SigmaZero, and SuperDeepFool are the four model-dependent
+  attacks generated against fold-specific EfficientNet-B0 checkpoints.
+- Color Shift and the five anti-forensic transformations are model-agnostic.
+- Transfer results do not establish direct robustness of a non-target model.
+- Commercial results are specific to the frozen versions, configurations,
+  observable signals, and normalization rules.
+- No universal tool ranking is claimed.
 
 ## Quick Navigation
 
 | Document | Purpose |
 |---|---|
+| [`docs/README.md`](docs/README.md) | Final documentation and chapter map |
 | [`docs/artifact/THESIS_ARTIFACT.md`](docs/artifact/THESIS_ARTIFACT.md) | Official thesis-artifact scope and source-of-truth statement |
 | [`docs/artifact/REPOSITORY_MAP.md`](docs/artifact/REPOSITORY_MAP.md) | Directory-level repository map |
 | [`docs/artifact/ARTIFACT_EVALUATION.md`](docs/artifact/ARTIFACT_EVALUATION.md) | Public audit and reproducibility levels |
@@ -175,15 +207,11 @@ The thesis evaluates exported observable signals. It does not claim access to pr
 | [`docs/artifact/ENVIRONMENT.md`](docs/artifact/ENVIRONMENT.md) | Environment and dependency assumptions |
 | [`docs/artifact/REPRODUCIBILITY.md`](docs/artifact/REPRODUCIBILITY.md) | Controlled reproducibility workflow |
 | [`docs/artifact/DATA_ACCESS.md`](docs/artifact/DATA_ACCESS.md) | Controlled data-access procedure |
-| [`docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256`](docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256) | Authoritative raw and frozen archive digests |
 | [`datasets/forensic_evaluation_bundle/README.md`](datasets/forensic_evaluation_bundle/README.md) | Exact black-box input restoration and integrity boundary |
 | [`.github/SECURITY.md`](.github/SECURITY.md) | Secret, proprietary-data, and exposure policy |
 | [`docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md`](docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md) | Academic repository audit record |
 | [`docs/maintenance/RELEASE_CHECKLIST.md`](docs/maintenance/RELEASE_CHECKLIST.md) | Final release and DOI checklist |
-| [`docs/artifact/ARCHIVE_SNAPSHOT.md`](docs/artifact/ARCHIVE_SNAPSHOT.md) | Immutable pre-cleanup snapshot documentation |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release-oriented change history |
-
----
 
 ## Repository Structure
 
@@ -205,24 +233,16 @@ msc-thesis-ai-robustness-in-digital-forensics/
 └── requirements.txt
 ```
 
----
-
 ## Controlled Reproducibility
 
-The public repository supports structural audit, code review, manifest inspection, metric recomputation from committed sanitized decisions, reporting validation, and thesis-source review.
+The public repository supports structural audit, code review, manifest
+inspection, metric recomputation from committed sanitized decisions, reporting
+validation, and thesis-source review.
 
-Full pipeline regeneration requires controlled access to `00_raw_datasets_bundle.zip`. Exact restoration of the byte-identical black-box input uses the separately controlled `16_frozen_forensic_evaluation_bundle.zip`. Both complete archives are authenticated by `docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256`; the frozen bundle is additionally checked against the canonical per-file manifest.
-
-Commercial-tool reruns require compatible licensed software. For black-box processing, import only the blind input view and never the metadata or structured audit views.
-
-Controlled restoration and reproducibility instructions are documented in:
-
-- [`docs/artifact/DATA_ACCESS.md`](docs/artifact/DATA_ACCESS.md)
-- [`docs/artifact/REPRODUCIBILITY.md`](docs/artifact/REPRODUCIBILITY.md)
-- [`docs/artifact/ENVIRONMENT.md`](docs/artifact/ENVIRONMENT.md)
-- [`.env.example`](.env.example)
-
----
+Full pipeline regeneration requires controlled access to
+`00_raw_datasets_bundle.zip`. Exact restoration of the byte-identical black-box
+input uses the separately controlled `16_frozen_forensic_evaluation_bundle.zip`.
+Commercial-tool reruns require compatible licensed software.
 
 ## Validation Commands
 
@@ -240,13 +260,14 @@ python results/scripts/24_audit_reporting_asset_usage.py --strict
 python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
 
-The GitHub Actions workflow under `.github/workflows/repository-audit.yml` performs lightweight file, JSON, Python syntax, canonical-prediction, and documentation-guard checks.
-
----
+The GitHub Actions workflow under `.github/workflows/repository-audit.yml`
+performs lightweight structure, JSON, Python syntax, local-path leakage, result,
+XAI, reporting-asset, and documentation-consistency checks.
 
 ## Historical Preservation
 
-The current `main` branch is authoritative. The complete pre-cleanup state is preserved for provenance through:
+The current `main` branch is authoritative. The complete pre-cleanup state is
+preserved for provenance through:
 
 ```text
 branch: archive/pre-commission-cleanup-2026-07-16
@@ -254,22 +275,5 @@ tag:    snapshot/pre-commission-cleanup-2026-07-16
 commit: 309a4580537ebc3bb7950f29c090bb2729fc603b
 ```
 
-The branch and annotated tag are protected against update, deletion, and force-push operations. Historical preservation does not grant permission to redistribute third-party images, controlled datasets, or proprietary commercial exports.
-
----
-
-## Thesis Source
-
-The authoritative LaTeX source is:
-
-```text
-docs/LatexThesis/
-```
-
-Local compilation products, including `main.pdf`, are ignored. A final PDF may be attached to a versioned GitHub release instead of being committed to the source tree.
-
----
-
-## Citation and License
-
-Citation metadata are provided in [`CITATION.cff`](CITATION.cff). Source code is distributed under the MIT License. Dataset rights, third-party images, proprietary exports, licensed tools, and controlled-access material remain subject to their own legal, ethical, and contractual restrictions.
+Historical preservation does not grant permission to redistribute third-party
+images, controlled datasets, or proprietary commercial exports.

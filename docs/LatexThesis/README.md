@@ -17,11 +17,14 @@ cd docs/LatexThesis
 latexmk -pdf main.tex
 ```
 
-The toolchain must complete bibliography, glossary/acronym generation, and repeated LaTeX passes as configured by `main.tex` and `packages.sty`.
+The toolchain must complete bibliography, glossary/acronym generation, and
+repeated LaTeX passes as configured by `main.tex` and `packages.sty`.
 
-Generated auxiliary files and local `main.pdf` are ignored. The tracked LaTeX sources, bibliography, figures, manifests, and numerical source artifacts define the repository source of truth.
+Generated auxiliary files and local `main.pdf` are ignored. The tracked LaTeX
+sources, bibliography, figures, manifests, and numerical source artifacts define
+the repository source of truth.
 
-## Directory Structure
+## Current Directory Structure
 
 ```text
 docs/LatexThesis/
@@ -38,14 +41,29 @@ docs/LatexThesis/
 │   ├── 02_background.tex
 │   ├── 03_StateoftheArt.tex
 │   ├── 04_methodology.tex
-│   ├── 05_experiments.tex
-│   ├── 06_conclusions.tex
-│   └── 07_appendix.tex
+│   ├── 05_implementation.tex
+│   ├── 06_results.tex
+│   ├── 07_conclusions.tex
+│   └── 08_appendix.tex
 ├── methodology/
 └── images/
 ```
 
-The document contains six chapters followed by an appendix and references. `sections/07_appendix.tex` is included after `\appendix` and must not be described as a seventh main chapter.
+The document contains seven main chapters followed by an appendix and
+references. `sections/08_appendix.tex` is included after `\appendix` and must not
+be described as an eighth main chapter.
+
+## Final Chapter Map
+
+```text
+1  Introduction
+2  Background
+3  State of the Art
+4  Methodology
+5  Implementation and Experimental Setup
+6  Experimental Results and Operational Robustness Analysis
+7  Conclusions, Limitations, and Future Work
+```
 
 ## Acronyms and Bibliography
 
@@ -61,11 +79,13 @@ Bibliography database:
 tesi.bib
 ```
 
-Citation keys, bibliography metadata, and first-use acronym behavior must remain synchronized with the final source.
+Citation keys, bibliography metadata, and first-use acronym behavior must remain
+synchronized with the final source.
 
 ## Figures and Numerical Sources
 
-Thesis-ready images are stored in `images/`. Numerical values and figure content must be traceable to:
+Thesis-ready images are stored in `images/`. Numerical values and figure content
+must be traceable to:
 
 ```text
 results/metrics/
@@ -78,9 +98,17 @@ explainability/manifests/chapter5/thesis_selection.csv
 datasets/forensic_evaluation_bundle/metadata/
 ```
 
-The five selected XAI cases and their twenty thesis-ready assets are the public Chapter 5 XAI layer. The larger historical Integrated Gradients output tree is not distributed on current `main`.
+`chapter5` and `chapter_5` are historical frozen artifact names created before
+the final split between implementation and results. They are preserved for
+artifact identity and reproducibility. The five selected XAI cases and their
+twenty thesis-ready assets are discussed in Chapter 6 (`sections/06_results.tex`).
 
-Do not manually alter numerical values in presentation-layer figures when a CSV/JSON source or generation script exists.
+Proxy probability values reported in the thesis are maximum predicted-class
+probabilities (`Max-P`). They are intra-model diagnostic outputs and must not be
+presented as calibrated confidence or forensic certainty.
+
+Do not manually alter numerical values in presentation-layer figures when a
+CSV/JSON source or generation script exists.
 
 ## Validation
 
@@ -91,7 +119,10 @@ python results/scripts/24_audit_reporting_asset_usage.py --strict
 python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
 
-The result validator checks prediction and metric counts, canonical commercial SHA256, OOD accounting, reporting-manifest counts, and metadata-sensitivity counts. The asset audit checks the authoritative thesis tree and compares existing copies by SHA256.
+The result validator checks prediction and metric counts, canonical commercial
+SHA-256, OOD accounting, reporting-manifest counts, and metadata-sensitivity
+counts. The asset audit scans the authoritative thesis tree and compares existing
+copies by SHA-256.
 
 ## Archival Editing Rules
 
@@ -103,11 +134,14 @@ After thesis freeze, edits should be limited to:
 - documentation hygiene;
 - explicitly documented archival corrections.
 
-Dataset changes, attack regeneration, model retraining, metric replacement, or new experimental claims require explicit versioning.
+Dataset changes, attack regeneration, model retraining, metric replacement, or
+new experimental claims require explicit versioning.
 
 ## Public Repository Safety
 
-Do not commit private editor URLs, local absolute paths, credentials, license files, proprietary installers, case material, reusable private download URLs, or temporary exports containing unnecessary personal or sensitive data.
+Do not commit private editor URLs, local absolute paths, credentials, license
+files, proprietary installers, case material, reusable private download URLs, or
+temporary exports containing unnecessary personal or sensitive data.
 
 Governance and local configuration guidance:
 

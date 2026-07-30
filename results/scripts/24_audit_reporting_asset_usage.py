@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Audit Chapter 5 reporting assets against the authoritative LaTeX thesis.
+"""Audit frozen reporting assets against the authoritative LaTeX thesis.
 
-The script is read-only by default. It reports which manifest asset identifiers
-are referenced by the English thesis source, whether thesis-ready copies exist,
-and whether those copies are byte-identical to the reporting-layer files under
+The reporting directory and manifest retain historical ``chapter_5`` names
+created before the final thesis reorganization. The script is read-only by
+default. It reports which manifest asset identifiers are referenced by the
+authoritative thesis source, whether thesis-ready copies exist, and whether
+those copies are byte-identical to the reporting-layer files under
 ``results/figures/chapter_5``.
 """
 
@@ -152,6 +154,8 @@ def main() -> int:
     report = {
         "schema_version": "1.1",
         "manifest": repo_relative(MANIFEST),
+        "historical_manifest_name": True,
+        "current_results_chapter": 6,
         "thesis_root": repo_relative(THESIS_ROOT),
         "manifest_rows": len(manifest_rows),
         "unique_asset_ids": len(by_id),
@@ -172,7 +176,9 @@ def main() -> int:
             encoding="utf-8",
         )
 
-    print("Chapter 5 reporting-asset audit completed.")
+    print("Results-chapter reporting-asset audit completed.")
+    print(" - historical reporting path: results/figures/chapter_5/")
+    print(" - current thesis results chapter: 6")
     print(f" - manifest rows: {len(manifest_rows)}")
     print(f" - unique asset IDs: {len(by_id)}")
     print(f" - referenced in thesis: {referenced_count}")
