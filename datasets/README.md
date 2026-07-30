@@ -54,6 +54,8 @@ datasets/
     └── utils/
 ```
 
+Detailed per-file documentation for every dataset script, internal adapter, utility, and package marker is available in [`scripts/README.md`](scripts/README.md).
+
 ## Frozen dataset
 
 The official frozen manifest is:

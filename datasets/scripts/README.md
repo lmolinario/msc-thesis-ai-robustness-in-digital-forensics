@@ -1057,7 +1057,7 @@ pixel space and saved as lossless PNG.
 #### `one_pixel`
 
 A score-based, model-dependent one-pixel attack using SciPy Differential
-Evolution over five variables: `x`, `y`, `R`, and `B`. It minimizes the
+Evolution over five variables: `x`, `y`, `R`, `G`, and `B`. It minimizes the
 true-label predicted probability, uses a deterministic per-image seed derived
 from the base seed, image identifier, and attack name, and stops early after a
 successful misclassification.
