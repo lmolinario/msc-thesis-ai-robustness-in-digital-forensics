@@ -1333,17 +1333,17 @@ generation must use the corresponding fold-specific checkpoint trained without
 that sample. This requirement preserves the separation between model fitting,
 attack generation, and evaluation and prevents information leakage.
 
-Each generated artifact must retain an explicit association with:
 
-\begin{itemize}
-\item the original clean sample, reference operational class, and experimental
-fold;
-\item the attack family or model-agnostic condition;
-\item the source model, checkpoint, and access assumption, when applicable;
-\item the generation parameters and resulting output artifact;
-\item the information required to reconstruct the generation condition;
-\item the information required to verify identity, integrity, and provenance.
-\end{itemize}
+Each generated artifact must remain explicitly associated with the original clean
+sample, its reference operational class, and the corresponding experimental
+fold. The retained information must also identify the attack family or
+model-agnostic condition, as well as the source model, checkpoint, and access
+assumption when applicable. In addition, the generation parameters and resulting
+output artifact must be recorded together with all information necessary to
+reconstruct the generation condition and to verify the identity, integrity, and
+provenance of the artifact.
+
+
 
 The output representation should minimize changes unrelated to the selected
 adversarial mechanism. Any additional compression, encoding, or representation
