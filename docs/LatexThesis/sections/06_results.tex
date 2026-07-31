@@ -370,7 +370,7 @@ are false positives.
 \begin{figure}[htbp]
 \centering
 
-\begin{minipage}{0.48\textwidth}
+\begin{minipage}{0.58\textwidth}
 \centering
 \small EfficientNet-B0
 
@@ -379,7 +379,7 @@ are false positives.
 {images/fig_clean_confusion_matrix_efficientnet_b0.pdf}
 \end{minipage}
 \hfill
-\begin{minipage}{0.48\textwidth}
+\begin{minipage}{0.58\textwidth}
 \centering
 \small ResNet18
 
@@ -4262,17 +4262,11 @@ reported result.
 
 Figure~\ref{fig:results-operational-risk-summary} summarizes seven quantitative
 dimensions for the three proxy models and four black-box reference
-configurations:
-
-\begin{itemize}
-\item clean \gls{fnr};
-\item bundle-level \gls{fpr};
-\item \gls{ood} weapon assignment rate;
-\item adversarial-family \gls{fnr};
-\item anti-forensic-family \gls{fnr};
-\item adversarial degradation relative to clean accuracy;
-\item anti-forensic degradation relative to clean accuracy.
-\end{itemize}
+configurations. These comprise the clean \gls{fnr}, the bundle-level
+\gls{fpr}, the \gls{ood} weapon-assignment rate, and the adversarial- and
+anti-forensic-family \gls{fnr} values. The figure also reports the degradation
+in accuracy produced by adversarial and anti-forensic conditions relative to the
+corresponding clean baseline.
 
 The figure does not encode explainability, auditability, or system
 interpretability as numerical values. The distinction between transparent proxy
@@ -4389,15 +4383,10 @@ incorrectly predicted \texttt{weapon} class. The map does not represent an
 explanation of the reference operational assignment or indicate which regions
 the model should have used to produce the correct result.
 
-Each retained case comprises four visual assets:
-
-\begin{itemize}
-\item the model input;
-\item the \gls{ig} attribution-magnitude heatmap;
-\item the attribution overlay on the input;
-\item a mask retaining the locations with the largest 10\% of absolute
-attribution magnitudes.
-\end{itemize}
+Each retained case comprises four visual assets: the model input, the
+\gls{ig} attribution-magnitude heatmap, the attribution overlay on the input,
+and a mask retaining the image locations associated with the largest 10\% of
+absolute attribution magnitudes.
 
 The mask is not a semantic segmentation, object annotation, localization
 ground truth, or causal explanation. It reports only the spatial locations
@@ -4823,7 +4812,7 @@ study but does not represent the complete diversity of firearm-related,
 non-firearm, ambiguous, degraded, synthetic, and out-of-task imagery that may
 occur in operational investigations.
 
-\item \textbf{Artificial binary balance.}
+\item \textbf{Controlled class balance.}
 The binary subset contains equal numbers of \texttt{weapon} and
 \texttt{non\_weapon} images. This balance supports controlled comparison of the
 two error directions, but it must not be interpreted as an estimate of class
@@ -4833,8 +4822,8 @@ review workload may change under substantially different class distributions.
 \item \textbf{Human semantic review.}
 The final operational assignments derive from a documented
 \textit{human-in-the-loop} selection procedure conducted by a single reviewer.
-No independent second annotation or inter-rater agreement measurement was
-included. The labels are therefore controlled and traceable but remain
+No independent second annotation was conducted; consequently,
+inter-annotator agreement could not be assessed. The labels are therefore controlled and traceable but remain
 dependent on the task definitions and judgment applied during the review
 process.
 
@@ -4847,7 +4836,7 @@ classification behavior despite source-aware fold construction.
 
 \item \textbf{Heterogeneous \gls{ood} branch.}
 The \gls{ood} population intentionally combines borderline, ambiguous,
-degraded, synthetic, non-firearm weapon, and semantically out-of-task content.
+degraded, synthetic, non-firearm weapons, and semantically out-of-task content.
 It is not a homogeneous class and was not used as a third supervised training
 label. The reported weapon assignment rates summarize closed-set behavior over
 this frozen mixture and must not be interpreted as performance on a
@@ -4911,7 +4900,7 @@ assignment tendencies, but they do not constitute identical statistical
 observations or directly interchangeable denominators.
 
 \item \textbf{Black-box version and configuration dependence.}
-The black-box findings are bounded to the evaluated software versions, enabled
+The black-box findings are specific to the evaluated software versions, enabled
 processing functions, imported population, export procedures, and explicit
 normalization rules. Updates to internal models, preprocessing, category
 definitions, retrieval mechanisms, or default settings may change the
@@ -4923,13 +4912,14 @@ operational abstraction constructed from observable software outputs. It does
 not establish that the selected systems implement equivalent internal binary
 tasks.
 
-The Magnet.AI results depend on the \texttt{Possible weapons} tag. The
-Griffeye/T3K CORE results depend on the conservative use of
-\texttt{CORE/Violence/Firearm} as the primary positive bookmark. The Cellebrite
-results depend on the union of the exported \texttt{Armi}, \texttt{Pistola},
-and \texttt{Fucile} labels. The Excire results depend on the eight
+The \gls{magnetaxiomtool}/\gls{magnetai} results depend on the
+\texttt{Possible weapons} tag. The \gls{griffeye}/\gls{t3kcore} results depend
+on the conservative use of \texttt{CORE/Violence/Firearm} as the primary
+positive bookmark. The \gls{excirefoto2025} results depend on the eight
 firearm-oriented semantic queries, union-based retrieval mapping, and selected
-\texttt{Distance limit}.
+\texttt{Distance limit}. The \gls{cellebriteinseyets} results depend on the
+union of the exported \texttt{Armi}, \texttt{Pistola}, and \texttt{Fucile}
+labels.
 
 Alternative defensible mappings would define different operational tasks and
 could alter the observed balance between missed detections and false-positive
@@ -4956,14 +4946,14 @@ EfficientNet-B0 cases. The cases illustrate different operating conditions and
 failure modes but do not estimate their frequency in the complete population.
 
 The historical \gls{ig} assets were generated using 32 integration steps and a
-zero baseline in the preprocessed input space. Numerical convergence was not
-established for the retained figures, and the cases remain pending adaptive
-regeneration under the hardened validation procedure. The maps are therefore
-used only as qualitative diagnostic representations.
+zero baseline in the preprocessed input space. Because numerical convergence
+was not established for the retained figures, they are used exclusively as
+qualitative diagnostic representations, and no quantitative conclusion is
+derived from their attribution values.
 
-They must not be interpreted as semantic segmentations, causal explanations,
-proofs of feature correctness, or explanations of the selected black-box
-software systems.
+The maps must not be interpreted as semantic segmentations, causal
+explanations, proofs of feature correctness, or explanations of the selected
+black-box software systems.
 
 \item \textbf{Embedded-metadata sensitivity.}
 The metadata-preserving blind bundle concealed reference information in file
@@ -4994,33 +4984,26 @@ checkpoints, and proprietary software outputs.
 \end{itemize}
 
 These limitations define the conditions under which the experimental
-conclusions are supported. The chapter provides a protocol-specific assessment
-of operational robustness. It does not certify any evaluated software product,
-establish a universal ranking of models or commercial systems, or constitute a
-complete adversarial-security assessment.
+conclusions are supported. The study provides a protocol-specific assessment of
+operational robustness; it does not certify any evaluated software product,
+establish a universal ranking of models or commercial systems, constitute a
+complete adversarial-security assessment, or validate a production-grade
+firearm detector.
 
-The analysis also does not validate a production-grade firearm detector,
-provide evidentiary validation of automated classifications, or authorize
-autonomous operational deployment.
-
-The practical implication is that automated image-analysis systems should be
-used as traceable triage support within a \textit{human-in-the-loop} forensic
-workflow. Their outputs should remain associated with the source item, system
-or model version, checkpoint or software configuration, observable mapping,
-evaluated condition, and relevant limitations.
-
-Missed detections, false-positive workload, \gls{ood} assignments,
-configuration-dependent behavior, and failures accompanied by high maximum
-predicted-class probabilities must remain visible to the analyst rather than
-being concealed behind a single aggregate metric.
+The findings support the use of automated image-analysis systems only as
+traceable triage components within a \textit{human-in-the-loop} forensic
+workflow. Automated outputs should remain associated with the source item,
+model or software version, checkpoint or operational configuration, observable
+mapping, evaluated condition, and applicable limitations. Missed detections,
+false-positive workload, \gls{ood} assignments, configuration-dependent
+behavior, and incorrect predictions accompanied by high maximum predicted-class
+probabilities must remain visible to the analyst rather than being concealed
+behind a single aggregate metric.
 
 Operational deployment would require additional task-specific validation on
 representative local data, documented change management, periodic reevaluation
-after software or model updates, and explicit procedures for reviewing and
-overriding automated outputs.
-
-The final classification or evidentiary interpretation must remain the
-responsibility of the qualified human analyst. The evaluated systems may assist
-with prioritization and large-scale review, but their outputs do not replace
-contextual assessment, corroboration, chain-of-custody requirements, or expert
-judgment.
+following software or model updates, and explicit procedures for reviewing and
+overriding automated outputs. Final classification and evidentiary
+interpretation remain the responsibility of the qualified human analyst and
+require contextual assessment, corroboration, chain-of-custody controls, and
+expert judgment.
