@@ -1742,24 +1742,16 @@ behavior. The concrete software systems, versions, mappings, prompts,
 thresholds, and configurations adopted in this thesis are reported in
 Chapter~\ref{chap:implementation}.
 
-For each evaluated system, the protocol follows the same general workflow:
 
-\begin{enumerate}
-\item import or index only the blind evaluation inputs;
+For each evaluated system, the protocol follows the same general workflow. Only
+the blind evaluation inputs are imported or indexed, after which the relevant
+automated analysis or retrieval functionality is enabled. The complete blind
+input view is then processed under a documented configuration, and all observable
+outputs required for matching and interpretation are exported. These outputs are
+subsequently aligned with the experimental control metadata and normalized into
+common operational prediction states. Comparable metrics are then computed while
+preserving any outcomes classified as \texttt{unknown}.
 
-\item enable the relevant automated analysis or retrieval functionality;
-
-\item process the complete blind input view under a documented configuration;
-
-\item export all observable outputs required for matching and interpretation;
-
-\item align the exported outputs with the experimental control metadata;
-
-\item normalize the software-specific outputs into common operational
-prediction states;
-
-\item compute comparable metrics while preserving unknown outcomes.
-\end{enumerate}
 
 Raw exports, normalization records, and aggregated metrics must remain
 separate. Raw exports preserve the software outputs as originally produced;
@@ -2165,21 +2157,18 @@ be recoded as a conventional false negative. For a
 a false positive, whereas an unknown output is not automatically treated as
 one because it does not represent an explicit target detection.
 
-For the selected black-box software systems, the protocol considers:
 
-\begin{itemize}
-\item matching rate between exported outputs and bundle inputs;
-\item true-positive and false-negative counts on interpretable records;
-\item true-negative and false-positive counts on interpretable records;
-\item weapon recall;
-\item weapon false-negative rate;
-\item false-positive rate;
-\item accuracy and balanced accuracy, where the normalized outputs permit
-their computation;
-\item unknown output count and rate;
-\item system-specific not-detected or uncategorized rates, where exposed;
-\item supplementary operational miss counts, where explicitly defined.
-\end{itemize}
+For the selected black-box software systems, the protocol evaluates the matching
+rate between exported outputs and blind-bundle inputs and computes the
+true-positive, false-negative, true-negative, and false-positive counts on
+interpretable records. These counts support the calculation of weapon recall,
+the weapon false-negative rate, the false-positive rate, and, where permitted by
+the normalized outputs, accuracy and balanced accuracy. The evaluation also
+records the number and rate of \texttt{unknown} outcomes, together with any
+system-specific not-detected or uncategorized rates exposed by the software and
+any supplementary operational miss counts that are explicitly defined.
+
+
 
 The matching rate is a technical coverage measure rather than a classification
 metric. It represents the proportion of submitted bundle inputs for which a
