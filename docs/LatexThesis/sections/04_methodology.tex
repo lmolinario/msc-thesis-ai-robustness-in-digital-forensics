@@ -2382,6 +2382,8 @@ support may fail to surface target-category content, increase review workload,
 or produce unstable outputs on manipulated or distributionally different
 inputs.
 
+
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability Approach}
 \label{sec:methodology-explainability}
@@ -2476,18 +2478,13 @@ when their assumptions and limitations are compatible with the selected model
 and research questions. The specific technique and configuration adopted in
 this thesis are documented in Chapter~\ref{chap:implementation}.
 
-The adopted procedure should satisfy the following requirements:
-
-\begin{itemize}
-\item compatibility with the selected inspectable proxy model;
-\item explicit documentation of the attribution target and reference baseline,
-where required by the method;
-\item reproducibility of the attribution procedure;
-\item consistent application across the selected clean and manipulated cases;
-\item traceability to the model checkpoint, input sample, and prediction record;
-\item production of outputs that are not presented as definitive causal
-explanations.
-\end{itemize}
+The adopted procedure should be compatible with the selected inspectable proxy
+model and should explicitly document the attribution target and reference
+baseline whenever required by the chosen method. The attribution process must
+be reproducible, applied consistently across the selected clean and manipulated
+cases, and traceable to the corresponding model checkpoint, input sample, and
+prediction record. The resulting outputs must also be presented as diagnostic
+attribution evidence rather than as definitive causal explanations.
 
 Attribution maps and related visualizations characterize relationships between
 input features and a selected model output under the assumptions of the adopted
@@ -2530,24 +2527,18 @@ outputs, and final experimental results can be reconstructed
 identifiable throughout its lifecycle even when its filename, encoding,
 directory location, or visual representation changes.
 
-The traceability framework distinguishes four complementary elements:
+The traceability framework distinguishes four complementary elements. The first
+is \textit{sample identity}, which establishes a stable reference to the
+original image. The second is \textit{artifact lineage}, which records the
+relationship between an original sample and any derived adversarial,
+anti-forensic, blind-bundle, or explainability artifact.
 
-\begin{enumerate}
-\item \textit{sample identity}, which establishes a stable reference to the
-original image;
-
-\item \textit{artifact lineage}, which records the relationship between an
-original sample and any derived adversarial, anti-forensic, blind-bundle, or
-explainability artifact;
-
-\item \textit{experimental context}, which associates each input or derived
-artifact with its reference operational assignment, partition, model
-configuration, perturbation condition, and evaluation branch;
-
-\item \textit{output provenance}, which connects model predictions, software
-exports, normalization decisions, metrics, and qualitative case studies to the
+The third element is \textit{experimental context}, which associates each input
+or derived artifact with its reference operational assignment, partition, model
+configuration, perturbation condition, and evaluation branch. The fourth is
+\textit{output provenance}, which connects model predictions, software exports,
+normalization decisions, metrics, and qualitative case studies to the
 corresponding evaluation input.
-\end{enumerate}
 
 Integrity verification should rely on cryptographic identifiers or other
 mechanisms capable of detecting unintended changes to experimental files. The
@@ -2795,18 +2786,14 @@ processing while remaining available after export for matching, normalization,
 and metric computation. The evaluation records must make this separation
 verifiable.
 
-Automated consistency controls should verify, where applicable:
-
-\begin{itemize}
-\item correspondence between expected and generated artifacts;
-\item uniqueness of stable and derived identifiers;
-\item integrity of generated files;
-\item absence of missing or unresolved paths;
-\item consistency among source records, derived artifacts, and evaluation
-outputs;
-\item completeness of software exports and normalized predictions;
-\item separation between blind inputs and experimental metadata.
-\end{itemize}
+Automated consistency controls should verify, where applicable, the
+correspondence between expected and generated artifacts, the uniqueness of
+stable and derived identifiers, and the integrity of the generated files. They
+should also detect missing or unresolved paths and confirm consistency among
+source records, derived artifacts, and evaluation outputs. In addition, the
+controls should assess the completeness of software exports and normalized
+predictions while preserving a clear separation between blind inputs and
+experimental metadata.
 
 These controls establish the technical coherence of the experimental workflow;
 they do not demonstrate classification correctness or operational robustness.

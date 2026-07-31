@@ -2319,21 +2319,17 @@ into the black-box software systems.
 
 The canonical mapping is stored in
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}.
-For each logical item, it records:
+For each logical item, it records the assigned \texttt{bundle\_id}, the blind
+input file name, the sample type, the perturbation family and name, the target
+proxy model when applicable, the experimental fold, the reference operational
+assignment, and the source dataset.
 
-\begin{itemize}
-\item the assigned \texttt{bundle\_id} and blind input file name;
-\item the sample type, perturbation family, and perturbation name;
-\item the target proxy model, when applicable;
-\item the fold and reference operational assignment;
-\item the source dataset;
-\item the original and generated image identifiers;
-\item the originating manifest and source file path;
-\item the blind and structured bundle paths;
-\item the original, manifest-recorded, and materialized-file hashes;
-\item the hash-comparison result;
-\item the file size, extension, layout, and creation timestamp.
-\end{itemize}
+The manifest also preserves the original and generated image identifiers, the
+originating manifest and source file path, and the corresponding blind and
+structured bundle paths. In addition, it records the original,
+manifest-reported, and materialized-file hashes, the result of their comparison,
+and the relevant file metadata, including size, extension, layout, and creation
+timestamp.
 
 This mapping reconnects a black-box result associated with a neutral file name
 to its source image, reference assignment, fold, and experimental condition.
@@ -2357,17 +2353,14 @@ materialized-file SHA-256 values.
 
 The principal run-level record is
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_summary.json}.
-It records the selected layout, output locations, and counts by sample type,
-perturbation family, perturbation name, and reference assignment. Four
-validation conditions are computed directly:
+It records the selected layout, output locations, and item counts by sample type,
+perturbation family, perturbation name, and reference assignment.
 
-\begin{itemize}
-\item uniqueness of the bundle identifiers;
-\item uniqueness of the materialized-file \gls{sha256} values;
-\item agreement between manifest-recorded and materialized-file SHA-256 values
-whenever a manifest digest is available;
-\item absence of forbidden semantic and experimental tokens from blind paths.
-\end{itemize}
+The file also reports the outcome of four validation checks: uniqueness of the
+bundle identifiers, uniqueness of the materialized-file \gls{sha256} values,
+agreement between the manifest-recorded and materialized-file SHA-256 values
+whenever a manifest digest is available, and the absence of forbidden semantic
+or experimental tokens from blind paths.
 
 The summary additionally records the structural condition that the metadata
 directory is separate from the black-box input directory. All computed checks
@@ -2994,20 +2987,16 @@ throughout normalization and metric computation. Their retrieval results were
 not combined into a single Excire decision. Each setting produced one complete
 table containing exactly 11\,500 normalized predictions.
 
-For auditability, each normalized record preserves:
+For auditability, each normalized record preserves the semantic-distance limit,
+the complete frozen prompt set, and the number and names of the prompts that
+retrieved the image. It also includes one binary membership indicator for each
+of the eight prompts, together with the corresponding bundle identifier, neutral
+input file name, and \gls{sha256} and \gls{md5} values.
 
-\begin{itemize}
-\item the semantic-distance limit;
-\item the complete frozen prompt set;
-\item the number and names of prompts that retrieved the image;
-\item one binary membership indicator for each of the eight prompts;
-\item the bundle identifier and neutral input file name;
-\item the \gls{sha256} and \gls{md5} values;
-\item the sample type, perturbation family, condition, fold, reference
-operational assignment, source dataset, and source-image identifiers;
-\item the resulting \texttt{weapon\_detected} and normalized-prediction
-fields.
-\end{itemize}
+The record further retains the sample type, perturbation family, experimental
+condition, fold, reference operational assignment, source dataset, and
+source-image identifiers, as well as the resulting
+\texttt{weapon\_detected} and normalized-prediction fields.
 
 Preserving the individual prompt memberships prevents the union operation from
 discarding relevant retrieval information. Two images may receive the same
@@ -3223,19 +3212,17 @@ using available \gls{sha256} values, followed by \gls{md5}, the exact neutral
 bundle file name, or a bundle file name embedded within an exported path or
 text field. The matching method is preserved in each normalized record.
 
-For every successfully matched record, the normalized representation retains:
+For every successfully matched record, the normalized representation retains the
+\texttt{bundle\_id}, neutral input file name, matching method, and matched
+state, together with the available \gls{sha256} and \gls{md5} values. It also
+records whether the item is clean, \gls{ood}, or perturbed, as well as the
+corresponding perturbation family and condition, experimental fold, reference
+operational assignment, source dataset, and original and generated image
+identifiers.
 
-\begin{itemize}
-\item the \texttt{bundle\_id}, neutral input file name, matching method, and
-matched state;
-\item the available \gls{sha256} and \gls{md5} values;
-\item the clean, \gls{ood}, or perturbed sample type;
-\item the perturbation family and condition;
-\item the fold and reference operational assignment;
-\item the source dataset and original and generated image identifiers;
-\item the original observable \texttt{Classifications} value;
-\item the normalized binary decision and mapping reason.
-\end{itemize}
+In addition, the normalized record preserves the original observable
+\texttt{Classifications} value, the resulting normalized binary decision, and
+the reason supporting the applied mapping.
 
 The complete XLSX report also contained file-system, evidence, and case-export
 information not required for the classification mapping. Because these fields
@@ -3451,28 +3438,22 @@ final 69\,000-row population.
 
 During controlled local execution, the normalized representation separates
 software-observable information from the reference assignments and experimental
-metadata recovered from the bundle. Its principal fields include:
+metadata recovered from the bundle. Its principal fields include
+\texttt{tool\_name}, \texttt{bundle\_id}, \texttt{matched}, and
+\texttt{match\_method}, together with \texttt{sample\_type},
+\texttt{attack\_family}, \texttt{attack\_name}, and
+\texttt{attack\_target\_model}. The record also preserves the experimental
+\texttt{fold}, \texttt{final\_label}, \texttt{source\_dataset},
+\texttt{original\_image\_id}, and \texttt{generated\_image\_id}, as well as
+the neutral input file name and the available \gls{sha256} and \gls{md5}
+values.
 
-\begin{itemize}
-\item \texttt{tool\_name}, \texttt{bundle\_id},
-\texttt{matched}, and \texttt{match\_method};
-\item \texttt{sample\_type}, \texttt{attack\_family},
-\texttt{attack\_name}, and \texttt{attack\_target\_model};
-\item \texttt{fold}, \texttt{final\_label}, and
-\texttt{source\_dataset};
-\item \texttt{original\_image\_id} and
-\texttt{generated\_image\_id};
-\item the neutral input file name and available \gls{sha256} and
-\gls{md5} values;
-\item the original exported tag, classification, bookmark, or prompt-membership
-information;
-\item \texttt{weapon\_detected},
-\texttt{normalized\_prediction}, and
-\texttt{mapping\_reason};
-\item binary correctness, false-negative, and false-positive indicators when
-the reference operational assignment is \texttt{weapon} or
-\texttt{non\_weapon}.
-\end{itemize}
+The original software-observable tag, classification, bookmark, or
+prompt-membership information is retained alongside
+\texttt{weapon\_detected}, \texttt{normalized\_prediction}, and
+\texttt{mapping\_reason}. When the reference operational assignment is
+\texttt{weapon} or \texttt{non\_weapon}, the normalized representation also
+includes binary correctness, false-negative, and false-positive indicators.
 
 The literal field name \texttt{final\_label} is retained because it belongs to
 the implemented schema. Semantically, its value represents the reference
@@ -3491,18 +3472,13 @@ calculation of the \gls{ood} weapon-flag rate.
 
 \paragraph{Deduplication and completeness.}
 
-The normalizer supports deterministic consolidation to one row for each
+The normalizer supports deterministic consolidation to a single row for each
 normalized-configuration and bundle-identifier pair. When multiple matched
-records refer to the same pair, the consolidated decision follows this
-precedence:
-
-\begin{enumerate}
-\item if at least one row contains a positive decision, the consolidated
-decision is \texttt{true};
-\item otherwise, if at least one row contains an explicit negative decision,
-the consolidated decision is \texttt{false};
-\item otherwise, the consolidated decision is \texttt{unknown}.
-\end{enumerate}
+records refer to the same pair, the consolidated decision follows a fixed
+precedence rule: it is set to \texttt{true} if at least one row contains a
+positive decision; otherwise, it is set to \texttt{false} if at least one row
+contains an explicit negative decision. If neither condition is satisfied, the
+consolidated decision is assigned as \texttt{unknown}.
 
 The consolidation procedure preserves the combined export references, row
 numbers, observable labels, mapping reasons, and contributing-row count. When
@@ -3542,16 +3518,10 @@ correctness.
 
 \paragraph{Controlled and public output records.}
 
-The controlled normalization execution produces:
-
-\begin{itemize}
-\item the complete normalized prediction workspace;
-\item the separate unmatched-record table;
-\item the export audit;
-\item the software-version log;
-\item the normalization summary;
-\item the per-configuration and aggregate metric tables.
-\end{itemize}
+The controlled normalization execution produces the complete normalized
+prediction workspace, a separate table of unmatched records, the export audit,
+the software-version log, and the normalization summary. It also generates the
+per-configuration and aggregate metric tables.
 
 Separate files following the pattern
 \codepath{evaluation/forensic_tools/<tool_name>_normalized_predictions.csv}
@@ -3703,15 +3673,10 @@ denominators of binary accuracy, precision, recall, F1-score, \gls{fpr}, or
 
 \paragraph{Proxy-model prediction generation.}
 
-The proxy-model evaluation pipeline consumes:
-
-\begin{itemize}
-\item the clean-fold manifest;
-\item the separate \gls{ood} evaluation manifest;
-\item the five canonical adversarial-generation manifests;
-\item the anti-forensic transformation manifest;
-\item the 15 fold-specific proxy-model checkpoints.
-\end{itemize}
+The proxy-model evaluation pipeline consumes the clean-fold manifest, the
+separate \gls{ood} evaluation manifest, the five canonical
+adversarial-generation manifests, the anti-forensic transformation manifest,
+and the 15 fold-specific proxy-model checkpoints.
 
 The public evaluation entry point wraps the preserved implementation with
 additional integrity controls. Before inference, it verifies that the loaded
@@ -3735,22 +3700,18 @@ associated with its assigned fold. Consequently, the checkpoint used for
 prediction was trained while excluding the fold containing the corresponding
 source image.
 
-For each evaluated input, the implementation records:
+For each evaluated input, the implementation records the evaluated architecture
+and fold-specific checkpoint, together with whether the sample is clean,
+\gls{ood}, or perturbed. It also preserves the perturbation family, condition,
+and attack target model, as well as the original and generated image
+identifiers, the assigned fold, the reference operational assignment, the image
+path, and the recomputed \gls{sha256} and \gls{md5} values.
 
-\begin{itemize}
-\item the evaluated architecture and fold-specific checkpoint;
-\item the clean, \gls{ood}, or perturbed sample type;
-\item the perturbation family, condition, and attack target model;
-\item the original and generated image identifiers;
-\item the assigned fold and reference operational assignment;
-\item the image path and recomputed \gls{sha256} and \gls{md5} values;
-\item the predicted class;
-\item the maximum predicted-class probability;
-\item the probabilities assigned to \texttt{weapon} and
-\texttt{non\_weapon};
-\item the probability assigned to the reference class for binary samples;
-\item the correctness state and any evaluation error.
-\end{itemize}
+The resulting evaluation record includes the predicted class, the maximum
+predicted-class probability, and the probabilities assigned to
+\texttt{weapon} and \texttt{non\_weapon}. For binary samples, it additionally
+stores the probability assigned to the reference class, together with the
+correctness state and any error encountered during evaluation.
 
 The complete prediction-level record is stored in
 \codepath{evaluation/proxy_models/proxy_model_predictions.csv}. Before
@@ -3835,19 +3796,16 @@ For each binary evaluation group, the confusion matrix uses the fixed layout:
 \end{bmatrix}.
 \end{equation}
 
-The resulting metric records contain:
+The resulting metric records contain accuracy and balanced accuracy, together
+with class-specific precision, recall, and F1-score and their corresponding
+macro-averaged values. They also report the \gls{tp}, \gls{tn}, \gls{fp}, and
+\gls{fn} counts, the \gls{fpr} and \gls{fnr}, and the overall
+misclassification rate.
 
-\begin{itemize}
-\item accuracy and balanced accuracy;
-\item class-specific precision, recall, and F1-score;
-\item macro-averaged precision, recall, and F1-score;
-\item \gls{tp}, \gls{tn}, \gls{fp}, and \gls{fn} counts;
-\item \gls{fpr} and \gls{fnr};
-\item misclassification rate;
-\item \texttt{weapon}-to-\texttt{non\_weapon} and
-\texttt{non\_weapon}-to-\texttt{weapon} error counts;
-\item mean maximum predicted-class probability.
-\end{itemize}
+In addition, the records preserve the directional
+\texttt{weapon}-to-\texttt{non\_weapon} and
+\texttt{non\_weapon}-to-\texttt{weapon} error counts, as well as the mean
+maximum predicted-class probability.
 
 The \gls{fpr} and \gls{fnr} are implemented as:
 
@@ -3899,19 +3857,14 @@ correctness state, clean class probabilities, clean maximum predicted-class
 probability, and probability difference relative to the perturbed input.
 
 For each proxy architecture and perturbation condition, the comparative layer
-computes:
+records clean and perturbed accuracy, the schema field
+\texttt{robust\_accuracy}, and the corresponding accuracy drop. It also
+computes the clean and perturbed macro F1-scores and their difference.
 
-\begin{itemize}
-\item clean and perturbed accuracy;
-\item the schema field \texttt{robust\_accuracy};
-\item accuracy drop;
-\item clean and perturbed macro F1-scores;
-\item macro F1-score drop;
-\item induced-error count and rate;
-\item the schema field \texttt{attack\_success\_rate};
-\item mean maximum-probability shift;
-\item directional error counts and rates.
-\end{itemize}
+The resulting comparative record further includes the induced-error count and
+rate, the schema field \texttt{attack\_success\_rate}, the shift in mean
+maximum predicted-class probability, and the directional error counts and
+rates.
 
 The stored value of \texttt{robust\_accuracy} is identical to the
 perturbed-condition accuracy and does not represent an additional metric.
@@ -3967,17 +3920,12 @@ as an intra-model diagnostic.
 \paragraph{Proxy-model \gls{ood} metrics.}
 
 The \gls{ood} branch is summarized independently for each proxy architecture.
-The resulting records contain:
-
-\begin{itemize}
-\item the fold-aggregated number of checkpoint responses;
-\item the number and rate of predictions assigned to \texttt{weapon};
-\item the number of predictions assigned to \texttt{non\_weapon};
-\item the mean maximum predicted-class probability;
-\item the high-Max-P threshold;
-\item the number and rate of responses whose maximum probability meets or
-exceeds that threshold.
-\end{itemize}
+The resulting records report the fold-aggregated number of checkpoint responses,
+the number and rate of predictions assigned to \texttt{weapon}, and the number
+assigned to \texttt{non\_weapon}. They also preserve the mean maximum
+predicted-class probability, the adopted high-Max-P threshold, and the number
+and rate of responses whose maximum predicted-class probability meets or exceeds
+that threshold.
 
 The frozen threshold is:
 
@@ -4102,19 +4050,16 @@ records with an interpretable \texttt{true} or \texttt{false}
 Records assigned to \texttt{unknown} are excluded from binary denominators and
 reported separately.
 
-The black-box metric layer computes:
+The black-box metric layer computes accuracy and balanced accuracy, together
+with precision, recall, and F1-score for the \texttt{weapon} class and
+specificity for the \texttt{non\_weapon} class. It also reports the
+\gls{fpr}, \gls{fnr}, and the corresponding \gls{tp}, \gls{tn}, \gls{fp},
+and \gls{fn} counts.
 
-\begin{itemize}
-\item accuracy and balanced accuracy;
-\item \texttt{weapon} precision, recall, and F1-score;
-\item \texttt{non\_weapon} specificity;
-\item \gls{fpr} and \gls{fnr};
-\item \gls{tp}, \gls{tn}, \gls{fp}, and \gls{fn} counts;
-\item the count and rate of unknown decisions;
-\item the number and rate of \gls{ood} inputs flagged as \texttt{weapon};
-\item the number of \gls{ood} inputs not flagged or assigned to
-\texttt{unknown}.
-\end{itemize}
+The evaluation further records the number and rate of \texttt{unknown}
+decisions. For the separate \gls{ood} branch, it reports the number and rate of
+inputs flagged as \texttt{weapon}, together with the number assigned to
+\texttt{non\_weapon} or \texttt{unknown}.
 
 Binary metrics are computed only for records whose reference operational
 assignment is \texttt{weapon} or \texttt{non\_weapon}. The \gls{ood}
@@ -4123,15 +4068,10 @@ corresponding configuration as its denominator. This rate characterizes
 observable flagging behavior and is not interpreted as supervised accuracy or
 error.
 
-Metrics are generated at the following aggregation scopes:
-
-\begin{itemize}
-\item complete normalized configuration;
-\item sample type;
-\item perturbation family;
-\item individual perturbation condition;
-\item combined sample-type and perturbation-condition scope.
-\end{itemize}
+Metrics are generated at multiple aggregation scopes, including the complete
+normalized configuration, the sample type, the perturbation family, the
+individual perturbation condition, and the combined sample-type and
+perturbation-condition level.
 
 Each of the six normalized configurations produces 31 metric rows:
 
@@ -4276,7 +4216,7 @@ EfficientNet-B0 \\
 
 Selection strategy
 &
-\texttt{chapter5\_core} \\
+Thesis-oriented diagnostic case selection \\
 
 Attribution target
 &
@@ -4284,7 +4224,7 @@ Predicted binary class \\
 
 Baseline
 &
-Zero tensor in normalized, preprocessed input space \\
+Zero tensor in the normalized, preprocessed input space \\
 
 Historical integration steps
 &
@@ -4315,28 +4255,27 @@ Historical convergence-validation status
 \end{tabularx}
 \end{table}
 
-The identifiers \texttt{chapter5\_core} and
-\codepath{explainability/manifests/chapter5/} are retained as historical
-implementation names created before the final reorganization of the thesis
-chapters. They identify the frozen records and do not indicate that the
-qualitative results are reported in Chapter~5. The resulting attribution
-analyses are discussed in
+The repository path
+\codepath{explainability/manifests/chapter5/} retains a historical directory
+name created before the final reorganization of the thesis chapters. The path
+identifies the frozen selection and provenance records and does not indicate the
+chapter in which the qualitative results are currently presented. The resulting
+attribution analyses are discussed in
 Section~\ref{sec:results-explainability}.
 
 \paragraph{Case-selection procedure.}
 
-The \texttt{chapter5\_core} strategy organizes prediction records into five
-diagnostic buckets:
+The thesis-oriented selection procedure organizes the prediction records into
+five diagnostic categories. These comprise a correctly classified clean
+\texttt{weapon} image, a clean \texttt{weapon} false negative, and a
+high-Max-P \gls{ood} input assigned to \texttt{weapon}. The remaining
+categories include an image that is correctly classified in its clean state but
+rendered incorrect by an anti-forensic transformation, and an image that is
+correctly classified in its clean state but rendered incorrect with a high
+maximum predicted-class probability under an adversarial condition.
 
-\begin{enumerate}
-\item a correctly classified clean \texttt{weapon} image;
-\item a clean \texttt{weapon} false negative;
-\item a high-Max-P \gls{ood} input assigned to \texttt{weapon};
-\item an image correctly classified in its clean state and rendered incorrect
-by an anti-forensic transformation;
-\item an image correctly classified in its clean state and rendered incorrect
-with high maximum predicted-class probability by an adversarial condition.
-\end{enumerate}
+
+
 
 Candidates are ordered deterministically using the maximum predicted-class
 probability, fold, and image path. For perturbation-induced failures, the
@@ -4448,17 +4387,11 @@ with larger attribution magnitudes for the selected model output along the
 baseline-to-input path, but it does not distinguish positive evidence from
 negative evidence.
 
-The implementation produces the following diagnostic files for each case:
-
-\begin{itemize}
-\item the resized RGB input image;
-\item a colorized attribution heatmap;
-\item an overlay combining the input and heatmap;
-\item a normalized grayscale attribution mask;
-\item a binary high-attribution mask;
-\item a side-by-side diagnostic comparison;
-\item a histogram of normalized attribution values.
-\end{itemize}
+For each selected case, the implementation produces a resized RGB input image,
+a colorized attribution heatmap, and an overlay combining the input with the
+heatmap. It also generates a normalized grayscale attribution mask, a binary
+high-attribution mask, a side-by-side diagnostic comparison, and a histogram of
+the normalized attribution values.
 
 The heatmap uses the \texttt{inferno} color map. The overlay combines the
 resized input and colorized map using an attribution opacity of 0.45. The
@@ -4469,14 +4402,9 @@ This threshold identifies approximately the 10\% of image locations with the
 largest attribution magnitudes. The exact proportion may differ when multiple
 locations share the percentile value.
 
-Four visual assets are retained in the thesis for each selected case:
-
-\begin{enumerate}
-\item input image;
-\item standalone attribution heatmap;
-\item heatmap overlay;
-\item top-10\% attribution mask.
-\end{enumerate}
+For each selected case, the thesis retains four visual assets: the input image,
+the standalone attribution heatmap, the heatmap overlay, and the top-10\%
+attribution mask.
 
 The resulting thesis-level visual corpus contains:
 
@@ -4614,22 +4542,15 @@ perturbations, black-box inputs, normalized software outputs, metric tables,
 explainability cases, and reporting assets through stable identifiers,
 cryptographic digests, manifests, registries, and version-controlled metadata.
 
-The implementation distinguishes three related but non-equivalent objectives:
-
-\begin{itemize}
-\item \emph{traceability}, defined as the ability to reconstruct the provenance
-and processing history of an experimental input, derived artifact, model, or
-result record;
-
-\item \emph{integrity}, defined as the ability to verify that an input,
-artifact, model, or record has not changed relative to its canonical recorded
-state;
-
-\item \emph{controlled reproducibility}, defined as the ability to inspect or
-rerun the workflow to the extent permitted by data-access restrictions,
-licensed-software requirements, human-review stages, and the available
-execution environment.
-\end{itemize}
+The implementation distinguishes three related but non-equivalent objectives.
+\emph{Traceability} refers to the ability to reconstruct the provenance and
+processing history of an experimental input, derived artifact, model, or result
+record. \emph{Integrity} concerns the ability to verify that an input, artifact,
+model, or record has not changed relative to its canonical recorded state.
+\emph{Controlled reproducibility} refers to the extent to which the workflow can
+be inspected or rerun under the constraints imposed by data-access restrictions,
+licensed-software requirements, human-review stages, and the available execution
+environment.
 
 This distinction is necessary because public availability of code, manifests,
 and sanitized results does not imply unrestricted redistribution of the source
@@ -4736,20 +4657,17 @@ thesis assets. \\
 some forensic software exports expose MD5-oriented fields or matching
 workflows. It is not treated as the primary integrity mechanism.
 
-Per-file SHA-256 values are recorded or verified at the principal
-transformation and transfer boundaries, including:
+Per-file \gls{sha256} values are recorded or verified at the principal
+transformation and transfer boundaries. These include the prepared and frozen
+source images, the deterministic clean and \gls{ood} partitions, the
+adversarial and anti-forensic artifacts, and the blind and structured copies
+contained in the forensic evaluation bundle.
 
-\begin{itemize}
-\item prepared and frozen source images;
-\item deterministic clean and \gls{ood} partitions;
-\item adversarial and anti-forensic artifacts;
-\item blind and structured forensic-bundle copies;
-\item proxy-model checkpoints;
-\item selected explainability inputs and their fold-specific checkpoints;
-\item sanitized black-box software extracts;
-\item the canonical normalized black-box prediction table and associated
-commercial metric table.
-\end{itemize}
+Integrity verification also covers the proxy-model checkpoints, the selected
+explainability inputs and their corresponding fold-specific checkpoints, the
+sanitized extracts produced by the black-box software systems, and the canonical
+normalized black-box prediction table together with the associated commercial
+metric table.
 
 Thesis-level explainability images are validated through their canonical
 manifest paths, case metadata, and asset audits rather than being treated as
@@ -4809,20 +4727,18 @@ PyTorch and cuDNN deterministic options reduce nondeterministic behavior where
 supported, but the execution environment remains part of the reproducibility
 boundary.
 
-The frozen machine-readable configurations specify:
+The frozen machine-readable configurations specify the accepted reference
+assignments and expected group counts, the five clean folds, and the separate
+\gls{ood} branch. They also define architecture-specific preprocessing and
+normalization, training hyperparameters, checkpoint-selection rules, and the
+parameters associated with adversarial and anti-forensic conditions.
 
-\begin{itemize}
-\item accepted reference assignments and expected group counts;
-\item the five clean folds and separate \gls{ood} branch;
-\item architecture-specific preprocessing and normalization;
-\item training hyperparameters and checkpoint-selection rules;
-\item adversarial and anti-forensic parameters;
-\item model, checkpoint, and fold associations;
-\item black-box software versions and observable-output mappings;
-\item metric definitions and confusion-matrix layout;
-\item explainability architecture, target, baseline, historical integration
-steps, selection criteria, and convergence status.
-\end{itemize}
+The configurations further preserve the associations among models, checkpoints,
+and folds, together with the black-box software versions and observable-output
+mappings. In addition, they document the metric definitions, confusion-matrix
+layout, and explainability settings, including the selected architecture,
+attribution target, baseline, historical number of integration steps,
+case-selection criteria, and convergence status.
 
 These values are retained in CSV or JSON records rather than being represented
 only in narrative documentation.
@@ -4853,21 +4769,17 @@ counts, validation states, and creation metadata. These records permit
 structural checks without requiring manual inspection of every image or
 prediction.
 
-The principal frozen invariants are:
+The principal frozen invariants comprise 1\,500 records in the final dataset,
+including 1\,000 binary samples and 500 \gls{ood} inputs. The binary subset is
+partitioned into five clean folds containing 200 images each and is associated
+with 15 fold-aware proxy-model checkpoints. The experimental pipeline also
+produces 5\,000 adversarial and 5\,000 anti-forensic artifacts, resulting in
+11\,500 unique items in the forensic evaluation bundle.
 
-\begin{itemize}
-\item 1\,500 records in the final frozen dataset;
-\item 1\,000 binary samples and 500 \gls{ood} inputs;
-\item five clean folds containing 200 binary images each;
-\item 15 fold-aware proxy-model checkpoints;
-\item 5\,000 adversarial and 5\,000 anti-forensic artifacts;
-\item 11\,500 unique forensic evaluation bundle items;
-\item 40\,500 proxy-model prediction rows;
-\item 69\,000 canonical sanitized black-box software decisions;
-\item 186 black-box software metric rows;
-\item five canonical thesis-level explainability cases and 20 associated thesis
-assets.
-\end{itemize}
+At the evaluation level, the frozen outputs include 40\,500 proxy-model
+prediction rows, 69\,000 canonical sanitized black-box software decisions, and
+186 black-box software metric rows. The explainability branch retains five
+canonical thesis-level cases and 20 associated visual assets.
 
 These counts are implementation invariants and completeness checks. Their
 satisfaction does not establish model or software robustness. The quantitative
@@ -4897,17 +4809,15 @@ The table can be reconstructed through
 
 Decision-level and metric-level equivalence is evaluated through
 \codepath{forensic_tools/scripts/validate_public_extract_equivalence.py}. The
-validation verifies that:
+validation confirms that the four sanitized extracts reconstruct all 69\,000
+normalized decisions and that the reconstructed records are identical to the
+canonical public prediction table. It also verifies that the same decision
+population reproduces all 186 frozen black-box software metric rows.
 
-\begin{itemize}
-\item the four sanitized extracts reconstruct all 69\,000 normalized decisions;
-\item the reconstructed decisions are identical to the canonical public table;
-\item the same population reproduces all 186 frozen black-box software metric
-rows;
-\item the canonical prediction and metric digests match the values recorded in
-the validation report;
-\item each sanitized source extract matches its recorded SHA-256 digest.
-\end{itemize}
+In addition, the procedure checks that the canonical prediction and metric
+digests match the values recorded in the validation report and that each
+sanitized source extract matches its corresponding recorded \gls{sha256}
+digest.
 
 This procedure does not establish field-level equivalence with every column of
 the complete raw exports. It establishes that the sanitized records preserve
@@ -5062,18 +4972,15 @@ but does not claim to reproduce a byte-identical operating-system environment.
 Exact numerical reproduction may depend on hardware, operating-system,
 dependency, driver, and licensed-software behavior.
 
-The public-release policy excludes:
+The public-release policy excludes unrestricted copies of the image corpora,
+complete raw exports generated by the black-box software systems, proprietary
+case databases, and evidence-related material that is not required for the
+experimental record. It also excludes credentials, API keys, session data,
+commercial license information, and private or temporary artifact-access URLs.
 
-\begin{itemize}
-\item unrestricted copies of the image corpora;
-\item complete raw black-box software exports;
-\item proprietary case databases;
-\item evidence-related material not required for the experimental record;
-\item credentials, API keys, session data, commercial license information, and
-private or temporary artifact-access URLs;
-\item exact usernames and unnecessary local absolute paths;
-\item generated LaTeX auxiliary files and locally compiled PDFs.
-\end{itemize}
+Exact usernames, unnecessary local absolute paths, generated LaTeX auxiliary
+files, and locally compiled PDF documents are likewise omitted from the public
+release.
 
 Tracked summaries, logs, and machine-readable outputs must be audited before
 release to ensure that this policy is satisfied. Public sanitization is a
