@@ -3800,7 +3800,13 @@ The resulting metric records contain accuracy and balanced accuracy, together
 with class-specific precision, recall, and F1-score and their corresponding
 macro-averaged values. They also report the \gls{tp}, \gls{tn}, \gls{fp}, and
 \gls{fn} counts, the \gls{fpr} and \gls{fnr}, and the overall
-misclassification rate.
+misclassification rate. Since all evaluated binary groups contain one
+interpretable prediction for every sample, the misclassification rate is equal
+to \(1-\mathrm{accuracy}\). It is retained in the consolidated records for
+schema completeness and automated validation but is not reported separately in
+Chapter~\ref{chap:results}, where accuracy and the direction-specific error
+measures provide the same information in a more operationally interpretable
+form.
 
 In addition, the records preserve the directional
 \texttt{weapon}-to-\texttt{non\_weapon} and
@@ -3858,16 +3864,36 @@ probability, and probability difference relative to the perturbed input.
 
 For each proxy architecture and perturbation condition, the comparative layer
 records clean and perturbed accuracy, the schema field
-\texttt{robust\_accuracy}, and the corresponding accuracy drop. It also
-computes the clean and perturbed macro F1-scores and their difference.
+\texttt{robust\_accuracy}, and the corresponding accuracy drop. The stored
+value of \texttt{robust\_accuracy} is identical to the perturbed-condition
+accuracy. It is retained for schema compatibility with the evaluation pipeline
+and does not represent an additional robustness metric; consequently, it is
+not reported separately in Chapter~\ref{chap:results}.
+
+The comparative layer also computes the clean and perturbed macro F1-scores and
+their difference. The macro-F1 difference is preserved as a secondary
+descriptive indicator in the consolidated records. The results chapter
+prioritizes accuracy degradation, false-negative and false-positive behavior,
+and clean-correct decision transitions because these quantities provide a more
+direct operational interpretation for forensic triage. The macro-F1 difference
+is therefore not reported as a separate primary robustness measure.
 
 The resulting comparative record further includes the induced-error count and
 rate, the schema field \texttt{attack\_success\_rate}, the shift in mean
-maximum predicted-class probability, and the directional error counts and
-rates.
+maximum predicted-class probability, and both the counts and rates of the
+directional
+\texttt{weapon}-to-\texttt{non\_weapon} and
+\texttt{non\_weapon}-to-\texttt{weapon} transitions.
 
-The stored value of \texttt{robust\_accuracy} is identical to the
-perturbed-condition accuracy and does not represent an additional metric.
+Chapter~\ref{chap:results} reports the directional transition counts together
+with the overall induced-error rate or attack success rate. The corresponding
+direction-specific rates remain available in the consolidated records but are
+not tabulated separately because the frozen binary evaluation groups are
+class-balanced and have fixed denominators. The counts therefore provide an
+immediate operational interpretation of newly missed target images and
+additional false-positive review workload. The normalized directional rates
+remain relevant for machine-readable comparison and for possible future
+evaluations with unequal class distributions.
 
 Let \(\mathcal{C}_{\mathrm{clean}}\) denote the set of samples correctly
 classified under the corresponding clean condition. The induced-error rate for
@@ -4109,6 +4135,22 @@ The frozen reporting execution generated PDF and PNG outputs at 300 dpi,
 together with a manifest and summary under
 \codepath{results/figures/chapter_5/}. It produced 24 unique figure or table
 identifiers and 41 materialized files.
+
+The reporting layer intentionally contains a broader set of presentation assets
+than those selected for inclusion in Chapter~\ref{chap:results}. Some generated
+figures and tabular extracts provide alternative views of the same consolidated
+metrics and are retained as auditable reporting artifacts without being
+referenced by the final thesis text. Their absence from the chapter therefore
+does not indicate missing experimental results. The reporting-asset audit
+distinguishes assets referenced by the authoritative \LaTeX{} source from
+generated but unselected assets and verifies the availability and integrity of
+the corresponding files.
+
+The directory name \codepath{chapter_5} and the corresponding manifest
+identifiers are historical frozen names established before the final thesis
+reorganization. They are preserved for artifact identity and reproducibility,
+although the final experimental results are reported in
+Chapter~\ref{chap:results}.
 
 The complete metric layer therefore preserves three distinct levels:
 
