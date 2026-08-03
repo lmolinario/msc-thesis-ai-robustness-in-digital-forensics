@@ -6,11 +6,11 @@
 This chapter defines the methodology adopted to evaluate the operational
 robustness of \gls{ai}-based tools for automated image classification in
 forensic contexts. It addresses the gap identified in
-Chapter~\ref{chap:state-of-the-art} by formalizing the \gls{fairlab} framework
-as a reproducible and auditable protocol that combines controlled experimental
-conditions with operationally relevant forensic scenarios.
+Chapter~\ref{chap:state-of-the-art} by formalizing \gls{fairlab} as a
+reproducible and auditable experimental protocol that combines controlled
+experimental conditions with operationally relevant forensic scenarios.
 
-The chapter presents the overall framework and research assumptions, followed
+The chapter presents the overall methodology and research assumptions, followed
 by the procedures for dataset construction, human-in-the-loop validation,
 dataset freezing and partitioning, proxy-model and black-box software
 evaluation, perturbation testing, metric computation, explainability, and
@@ -726,8 +726,6 @@ corpus.
 
 
 
-
-
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Data Partitioning and OOD Evaluation Strategy}
 \label{sec:methodology-split-generation}
@@ -902,7 +900,7 @@ folds for fold-aware training and held-out evaluation, while the clean
 \end{figure}
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Proxy-Model Evaluation Framework}
+\section{Proxy-Model Evaluation Methodology}
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -916,13 +914,13 @@ replicas, functionally equivalent substitutes, reverse-engineered
 reconstructions, or architectural reproductions of the selected black-box
 software systems.
 
-The proxy-model framework serves three methodological objectives. First, it
-provides a transparent reference for measuring classification performance and
-robustness degradation. Second, it enables the generation of model-dependent
-adversarial examples under explicit white-box or score-based access
-assumptions. Third, it supports the evaluation of whether perturbations
-generated against one controlled model transfer to other proxy architectures
-or to the selected black-box software systems.
+The proxy-model evaluation methodology serves three methodological
+objectives. First, it provides a transparent reference for measuring
+classification performance and robustness degradation. Second, it enables the
+generation of model-dependent adversarial examples under explicit white-box or
+score-based access assumptions. Third, it supports the evaluation of whether
+perturbations generated against one controlled model transfer to other proxy
+architectures or to the selected black-box software systems.
 
 The proxy models implement the binary classification task defined in
 Section~\ref{sec:methodology-research-design}. The mapping between
@@ -1004,7 +1002,7 @@ functional equivalence.
 \label{sec:methodology-perturbation-selection-rationale}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The perturbation framework evaluates classification behavior under controlled
+The perturbation methodology evaluates classification behavior under controlled
 input modifications selected according to their access assumptions,
 computational cost, perceptual impact, reproducibility, and operational
 plausibility. These criteria are particularly relevant to forensic visual
@@ -1926,7 +1924,7 @@ states}
 \label{sec:methodology-evaluation-metrics}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The \gls{fairlab} metric framework evaluates three complementary dimensions of
+The \gls{fairlab} evaluation metrics cover three complementary dimensions of
 operational robustness: binary classification performance under clean
 conditions, robustness under adversarial and anti-forensic conditions, and
 system behavior on clean \gls{ood} inputs. It also supports the evaluation of
@@ -1943,7 +1941,7 @@ The protocol does not adopt \gls{auroc} as a central cross-system metric.
 Although score-based measures are applicable to proxy models, the selected
 black-box systems may expose only categories, semantic tags, bookmarks,
 retrieval results, or system-specific scores whose meaning and calibration
-cannot be independently verified. The framework therefore prioritizes measures
+cannot be independently verified. The protocol therefore prioritizes measures
 that can be derived consistently from both inspectable models and normalized
 black-box outputs, without implying a theoretical limitation of \gls{auroc} or
 other score-based metrics.
@@ -2264,7 +2262,7 @@ negatives. \\
 \end{tabularx}
 \end{table}
 
-Figure~\ref{fig:methodology-metric-layers} summarizes the metric framework
+Figure~\ref{fig:methodology-metric-layers} summarizes the metric structure
 across the proxy-model and black-box evaluation levels.
 
 \begin{figure}[H]
@@ -2374,7 +2372,7 @@ draw=black!75
 
 \end{tikzpicture}%
 }
-\caption[Metric framework]{Metric framework. Condition-specific binary,
+\caption[Metric structure]{Metric structure. Condition-specific binary,
 robustness, \gls{ood}, and coverage indicators are computed across the
 proxy-model and black-box evaluation levels and integrated only during the
 operational interpretation}
@@ -2532,7 +2530,7 @@ outputs, and final experimental results can be reconstructed
 identifiable throughout its lifecycle even when its filename, encoding,
 directory location, or visual representation changes.
 
-The traceability framework distinguishes four complementary elements. The first
+The traceability structure distinguishes four complementary elements. The first
 is \textit{sample identity}, which establishes a stable reference to the
 original image. The second is \textit{artifact lineage}, which records the
 relationship between an original sample and any derived adversarial,
