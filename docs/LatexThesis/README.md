@@ -112,7 +112,14 @@ CSV/JSON source or generation script exists.
 
 ## Validation
 
+Run the principal artifact checks from the repository root:
+
 ```bash
+python forensic_tools/scripts/validate_public_extract_equivalence.py \
+  --source evaluation/forensic_tools/normalized_predictions.csv \
+  --metrics results/metrics/forensic_tools_metrics.csv \
+  --force
+
 python explainability/scripts/validate_chapter5_xai_artifacts.py --strict-thesis-text
 python results/scripts/23_validate_results_artifacts.py
 python results/scripts/24_audit_reporting_asset_usage.py --strict
@@ -123,6 +130,11 @@ The result validator checks prediction and metric counts, canonical commercial
 SHA-256, OOD accounting, reporting-manifest counts, and metadata-sensitivity
 counts. The asset audit scans the authoritative thesis tree and compares existing
 copies by SHA-256.
+
+The latest recorded local validation outcomes and the exact commit to which they
+apply are maintained in `docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md`.
+Regardless of earlier successful checks, the thesis must be compiled and its log
+reviewed again at the exact official release commit/tag.
 
 ## Archival Editing Rules
 
