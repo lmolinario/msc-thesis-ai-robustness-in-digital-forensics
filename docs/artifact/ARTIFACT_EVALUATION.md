@@ -118,11 +118,7 @@ The repository should be interpreted as:
 final thesis research artifact with public audit material and controlled-access reproduction boundaries
 ```
 
-It should not be interpreted as:
 
-```text
-unrestricted data release or complete public reproduction package for licensed forensic software
-```
 
 ## Frozen Status
 

@@ -205,9 +205,3 @@ The correct interpretation is:
 ```text
 public research artifact + controlled-access data + black-box commercial evaluation
 ```
-
-not:
-
-```text
-fully open raw dataset + unrestricted commercial-tool reproduction package
-```
