@@ -1010,7 +1010,7 @@ retained for its dedicated behavioral evaluation.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The proxy-model layer was implemented through three fully inspectable binary
-classifiers: ResNet18, EfficientNet-B0, and a \gls{clip}-based classifier built
+classifiers: \gls{resnet18}, \gls{efficientnetb0}, and a \gls{clip}-based classifier built
 on a ViT-B/32 visual encoder. The two convolutional architectures were adapted
 through supervised fine-tuning, whereas the \gls{clip} proxy uses frozen
 pretrained visual representations and a trainable binary head. This
@@ -1051,7 +1051,7 @@ architectures and their adaptation to the binary task.
 \textbf{Binary adaptation} \\
 \midrule
 
-ResNet18
+\gls{resnet18}
 &
 \texttt{torchvision.resnet18} initialized with
 \texttt{IMAGENET1K\_V1} weights
@@ -1060,7 +1060,7 @@ The original fully connected layer is replaced by
 \texttt{Linear(in\_features, 2)}. The residual convolutional architecture
 provides the conventional supervised baseline \cite{he2016deep}. \\
 
-EfficientNet-B0
+\gls{efficientnetb0}
 &
 \texttt{torchvision.efficientnet\_b0} initialized with
 \texttt{IMAGENET1K\_V1} weights
@@ -1084,7 +1084,7 @@ rather than using the original image--text similarity interface
 \end{tabularx}
 \end{table}
 
-For ResNet18 and EfficientNet-B0, the implementation explicitly requires the
+For \gls{resnet18} and \gls{efficientnetb0}, the implementation explicitly requires the
 corresponding \texttt{IMAGENET1K\_V1} weight definitions exposed by
 Torchvision. Training terminates if these definitions are unavailable rather
 than silently falling back to random initialization.
@@ -1137,7 +1137,7 @@ normalization values used by the implemented models.
 \textbf{Channel standard deviations} \\
 \midrule
 
-ResNet18 and EfficientNet-B0
+\gls{resnet18} and \gls{efficientnetb0}
 &
 \((0.485,\ 0.456,\ 0.406)\)
 &
@@ -1272,7 +1272,7 @@ same maximum value occurs more than once. \\
 \end{tabularx}
 \end{table}
 
-ResNet18 and EfficientNet-B0 were fine-tuned from their ImageNet-initialized
+\gls{resnet18} and \gls{efficientnetb0} were fine-tuned from their ImageNet-initialized
 weights. Both the convolutional backbones and the newly introduced binary
 classification layers were optimized. The script also exposes a
 \texttt{--freeze-backbone} option for alternative or diagnostic runs, but this
@@ -1340,7 +1340,7 @@ contains:
 15\ \text{checkpoints}.
 \end{equation}
 
-For ResNet18 and EfficientNet-B0, each checkpoint contains the trained model
+For \gls{resnet18} and \gls{efficientnetb0}, each checkpoint contains the trained model
 state, class mapping, held-out-fold identifier, input size, training
 configuration, creation timestamp, and metric history available when the
 checkpoint was saved. For the \gls{clip}-based proxy, the checkpoint stores the
@@ -1366,11 +1366,11 @@ principal outputs of the training stage.
 
 \codepath{models/checkpoints/resnet18/}
 &
-Five fold-specific ResNet18 checkpoints. \\
+Five fold-specific \gls{resnet18} checkpoints. \\
 
 \codepath{models/checkpoints/efficientnet_b0/}
 &
-Five fold-specific EfficientNet-B0 checkpoints. \\
+Five fold-specific \gls{efficientnetb0} checkpoints. \\
 
 \codepath{models/checkpoints/clip/}
 &
@@ -1450,7 +1450,7 @@ to the output probabilities of the target proxy model. Color Shift does not
 query a model and is therefore recorded as an adversarial-style condition
 rather than as a white-box or score-based attack.
 
-EfficientNet-B0 was used as the primary proxy target for all model-dependent
+\gls{efficientnetb0} was used as the primary proxy target for all model-dependent
 conditions. For each source image, the generator reads the fold identifier from
 the clean manifest and loads the corresponding checkpoint from
 \codepath{models/checkpoints/efficientnet_b0/<fold>.pt}. Because that checkpoint
@@ -1484,7 +1484,7 @@ used in the frozen generation runs.
 
 \gls{fgsm}
 &
-EfficientNet-B0, fold-aware white-box checkpoint
+\gls{efficientnetb0}, fold-aware white-box checkpoint
 &
 Untargeted perturbation with
 \(\epsilon = 8/255 \approx 0.03137\), applied in pixel space
@@ -1495,7 +1495,7 @@ PNG \\
 
 One Pixel
 &
-EfficientNet-B0, fold-aware score-based checkpoint access
+\gls{efficientnetb0}, fold-aware score-based checkpoint access
 &
 Differential Evolution over five variables
 \((x,y,R,G,B)\); 50 maximum iterations; population-size multiplier 20,
@@ -1507,7 +1507,7 @@ PNG \\
 
 Sigma-Zero
 &
-EfficientNet-B0, fold-aware white-box checkpoint
+\gls{efficientnetb0}, fold-aware white-box checkpoint
 &
 Reference untargeted implementation; 1\,000 optimization steps;
 \(\eta_0 = 1.0\), \(\sigma = 0.001\), \(\tau_0 = 0.3\),
@@ -1518,7 +1518,7 @@ PNG \\
 
 SuperDeepFool
 &
-EfficientNet-B0, fold-aware white-box checkpoint
+\gls{efficientnetb0}, fold-aware white-box checkpoint
 &
 Internal paper-based implementation of
 \(\mathrm{SDF}(\infty,1)\); 20 maximum outer iterations; 50 maximum
@@ -1544,7 +1544,7 @@ JPEG \\
 \paragraph{\gls{fgsm}.}
 
 The FGSM implementation preprocesses the clean image according to the
-EfficientNet-B0 normalization and computes the loss gradient with respect to
+\gls{efficientnetb0} normalization and computes the loss gradient with respect to
 the reference operational assignment. The normalized gradient is converted to
 pixel space before applying the perturbation:
 
@@ -1617,7 +1617,7 @@ invokes the reference function directly rather than reimplementing it.
 
 The reference function operates on unnormalized tensors in \([0,1]\). The
 adapter therefore converts the model-normalized input to pixel space and wraps
-the EfficientNet-B0 checkpoint so that model normalization is reapplied before
+the \gls{efficientnetb0} checkpoint so that model normalization is reapplied before
 logit computation. The untargeted sparse-perturbation objective can be
 summarized as:
 
@@ -1997,7 +1997,7 @@ condition, together with uniqueness of the generated identifiers and
 transformed \gls{sha256} values.
 
 The script supports optional immediate evaluation of generated artifacts against
-an EfficientNet-B0 checkpoint and an evaluation-only mode for an existing
+an \gls{efficientnetb0} checkpoint and an evaluation-only mode for an existing
 anti-forensic manifest. These modes are auxiliary to the generation stage. The
 canonical comparative proxy-model evaluation is performed separately through
 the common evaluation pipeline described in
@@ -2156,7 +2156,7 @@ No adversarial or anti-forensic generation};
 
 \node[box, fill=orange!10] (proxy) at (-4.2,-14.1)
 {\textbf{Transparent proxy-model evaluation}\\
-EfficientNet-B0, ResNet18, and CLIP-based proxy};
+\gls{efficientnetb0}, \gls{resnet18}, and \gls{clip}-based proxy};
 
 \node[box, fill=orange!10] (blackbox) at (4.2,-14.1)
 {\textbf{Black-box software evaluation}\\
@@ -2208,7 +2208,7 @@ binary branch and a separate 500-image clean \gls{ood} branch. Adversarial and
 anti-forensic artifacts are generated only from the binary subset. The resulting
 11\,500-item bundle supports parallel proxy-model and black-box software
 evaluation, followed by output normalization, metrics, qualitative
-explainability for EfficientNet-B0, and traceability controls}
+explainability for \gls{efficientnetb0}, and traceability controls}
 \label{fig:implementation-fairlab-instantiation}
 \end{figure}
 
@@ -3833,7 +3833,7 @@ model. Anti-forensic metrics are grouped by evaluated architecture and
 transformation condition.
 
 The attack-target field is retained because the model-dependent adversarial
-artifacts were generated against fold-aware EfficientNet-B0 checkpoints but
+artifacts were generated against fold-aware \gls{efficientnetb0} checkpoints but
 were subsequently evaluated by all three proxy architectures. This distinction
 supports separate analysis of direct target-model behavior and cross-model
 transfer. Color Shift remains marked as model-agnostic and is not interpreted
@@ -3842,7 +3842,7 @@ as a transfer attack.
 The maximum predicted-class probabilities stored by the evaluation pipeline are
 used only as intra-model diagnostic values. They are not assumed to be
 calibrated across architectures and are not used as directly comparable
-confidence measures between ResNet18, EfficientNet-B0, and the
+confidence measures between \gls{resnet18}, \gls{efficientnetb0}, and the
 \gls{clip}-based proxy.
 
 \paragraph{Clean-to-perturbed comparison.}
@@ -4196,10 +4196,10 @@ provides the prediction, maximum predicted-class probability, fold, reference
 operational assignment, perturbation condition, clean-to-perturbed association,
 and input path required to identify diagnostically relevant cases.
 
-The frozen thesis workflow applies \gls{ig} exclusively to EfficientNet-B0,
+The frozen thesis workflow applies \gls{ig} exclusively to \gls{efficientnetb0},
 which was also the primary proxy target used for model-dependent adversarial
 generation. The corresponding attribution maps must therefore be interpreted
-as evidence concerning the transparent EfficientNet-B0 proxy rather than as
+as evidence concerning the transparent \gls{efficientnetb0} proxy rather than as
 explanations of the selected black-box software systems.
 
 For each selected case, the implementation loads the checkpoint associated with
@@ -4212,7 +4212,7 @@ computed and recorded digests differ.
 The input-image SHA-256 value is also verified whenever an expected digest is
 available in the prediction or perturbation metadata. The image is then opened
 through the common EXIF-aware RGB-loading procedure and processed using the
-same EfficientNet-B0 transformation applied during proxy-model evaluation.
+same \gls{efficientnetb0} transformation applied during proxy-model evaluation.
 
 The resulting model-input tensor is passed to the Captum implementation of
 \gls{ig}. The baseline is generated as a tensor of zeros having the same shape
@@ -4254,7 +4254,7 @@ configuration used to generate the historical thesis figures.
 
 Proxy architecture
 &
-EfficientNet-B0 \\
+\gls{efficientnetb0} \\
 
 Selection strategy
 &
@@ -4563,7 +4563,7 @@ The explainability layer is intentionally qualitative and diagnostic. The
 generated maps are not semantic segmentations, causal demonstrations,
 calibrated reliability estimates, or explanations of the selected black-box
 software systems. They provide evidence concerning the attribution behavior of
-the transparent EfficientNet-B0 proxy for the selected cases and complement,
+the transparent \gls{efficientnetb0} proxy for the selected cases and complement,
 rather than replace, the quantitative robustness metrics.
 
 The integrity and provenance controls shared across the complete experimental
