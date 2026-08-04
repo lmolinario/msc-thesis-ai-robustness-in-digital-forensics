@@ -43,7 +43,7 @@ these derived populations form an 11\,500-item forensic evaluation bundle. The
 10\,000 manipulated artifacts remain source--condition variants of the same
 1\,000 binary images and do not represent independent underlying cases.
 
-The transparent evaluation level comprises EfficientNet-B0, ResNet18, and a
+The transparent evaluation level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
 \gls{clip}-based proxy consisting of a frozen visual encoder and a supervised
 binary classification head. The black-box level comprises four software
 systems evaluated through six frozen configurations:
@@ -55,9 +55,9 @@ semantic-retrieval results are interpreted through explicitly documented
 normalization rules without assuming architectural or semantic equivalence.
 
 The perturbation suite includes four model-dependent attacks generated against
-fold-specific EfficientNet-B0 checkpoints: \gls{fgsm}, \gls{onepixel},
-\gls{sigmazero}, and \gls{superdeepfool}. Their evaluation on EfficientNet-B0
-constitutes direct-target assessment, whereas their application to ResNet18,
+fold-specific \gls{efficientnetb0} checkpoints: \gls{fgsm}, \gls{onepixel},
+\gls{sigmazero}, and \gls{superdeepfool}. Their evaluation on \gls{efficientnetb0}
+constitutes direct-target assessment, whereas their application to \gls{resnet18},
 the \gls{clip}-based proxy, and the black-box configurations measures empirical
 transfer. The deterministic and model-agnostic \gls{colorshift} condition is
 interpreted separately from direct-target and transferred attack success. The
@@ -71,17 +71,17 @@ architecture-specific maximum predicted-class probabilities. These
 probabilities are treated as intra-model diagnostic outputs rather than as
 calibrated measures comparable across architectures. A complementary
 qualitative \gls{xai} analysis applies \gls{ig} to five purposively selected
-EfficientNet-B0 cases and is not treated as quantitative robustness evidence or
+\gls{efficientnetb0} cases and is not treated as quantitative robustness evidence or
 as an explanation of the black-box systems.
 
 The results show that strong clean performance does not imply uniform
 operational robustness. Clean proxy-model accuracies are 0.978 for
-EfficientNet-B0, 0.964 for ResNet18, and 0.927 for the \gls{clip}-based proxy.
+\gls{efficientnetb0}, 0.964 for \gls{resnet18}, and 0.927 for the \gls{clip}-based proxy.
 The evaluated anti-forensic transformations generally produce smaller
 aggregate variations than the strongest adversarial conditions, although they
 still introduce operationally relevant sample-level errors.
 
-Under direct-target evaluation, EfficientNet-B0 accuracy decreases to 0.575
+Under direct-target evaluation, \gls{efficientnetb0} accuracy decreases to 0.575
 under \gls{fgsm} and to 0.015 under \gls{sigmazero}. The same frozen artifacts
 produce more limited and heterogeneous effects on the non-target proxy
 architectures and black-box configurations, demonstrating that empirical
@@ -90,8 +90,8 @@ robustness.
 
 The separate \gls{ood} analysis further shows that out-of-task inputs may still
 be assigned to the firearm-oriented operational state. At the proxy level, the
-fold-aggregated weapon assignment rates are 0.3696 for EfficientNet-B0, 0.4376
-for ResNet18, and 0.8356 for the \gls{clip}-based proxy. These values represent
+fold-aggregated weapon assignment rates are 0.3696 for \gls{efficientnetb0}, 0.4376
+for \gls{resnet18}, and 0.8356 for the \gls{clip}-based proxy. These values represent
 forced closed-set assignments rather than supervised correctness.
 
 The black-box evaluation produces 69\,000 normalized decisions and reveals

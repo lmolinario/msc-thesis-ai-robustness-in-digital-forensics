@@ -278,7 +278,7 @@ traceability controls.
 
 The second objective is to evaluate heterogeneous systems on the same frozen
 source population and derived perturbation suite. The transparent level
-comprises EfficientNet-B0, ResNet18, and a \gls{clip}-based proxy consisting of
+comprises \gls{efficientnetb0}, \gls{resnet18}, and a \gls{clip}-based proxy consisting of
 a frozen visual encoder and a supervised binary classification head. The
 black-box level comprises the selected software configurations evaluated
 exclusively through observable outputs and explicitly documented normalization
@@ -289,10 +289,10 @@ accuracy. The analysis considers false negatives, false positives,
 clean-to-perturbed error transitions, \gls{ood} weapon assignment rates,
 architecture-specific maximum predicted-class probabilities, and
 configuration-dependent changes in recall and selectivity. Direct attacks
-against fold-specific EfficientNet-B0 source models are distinguished from
-empirical transfer to ResNet18, the \gls{clip}-based proxy, and the selected
+against fold-specific \gls{efficientnetb0} source models are distinguished from
+empirical transfer to \gls{resnet18}, the \gls{clip}-based proxy, and the selected
 black-box configurations. A complementary qualitative \gls{xai} analysis of
-selected EfficientNet-B0 cases supports case-level diagnostic inspection but is
+selected \gls{efficientnetb0} cases supports case-level diagnostic inspection but is
 not treated as quantitative robustness evidence or as an explanation of the
 black-box systems.
 
@@ -407,7 +407,7 @@ throughout the experimental workflow and support procedural reproducibility and
 artifact-level auditability.
 
 A complementary qualitative \gls{xai} analysis applies \gls{ig} to five
-purposively selected EfficientNet-B0 cases. The attribution maps support
+purposively selected \gls{efficientnetb0} cases. The attribution maps support
 case-level diagnostic inspection but are not treated as quantitative robustness
 evidence, causal explanations, semantic localization ground truth, or
 explanations of the selected black-box systems.
