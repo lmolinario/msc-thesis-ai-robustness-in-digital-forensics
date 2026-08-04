@@ -95,11 +95,20 @@ A reviewer can inspect:
 Recommended read-only checks:
 
 ```bash
+python forensic_tools/scripts/validate_public_extract_equivalence.py \
+  --source evaluation/forensic_tools/normalized_predictions.csv \
+  --metrics results/metrics/forensic_tools_metrics.csv \
+  --force
+
 python explainability/scripts/validate_chapter5_xai_artifacts.py --strict-thesis-text
 python results/scripts/23_validate_results_artifacts.py
 python results/scripts/24_audit_reporting_asset_usage.py --strict
 python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
+
+The exact commit and outcomes of the latest recorded local execution are kept in
+`docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md`. This document defines what can
+be evaluated; it should not be used as a moving execution log.
 
 ## Expected Interpretation
 
