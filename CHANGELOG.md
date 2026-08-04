@@ -28,7 +28,15 @@ every intermediate editing commit.
 - scoped the Chapter 6 finalization report to its exact historical validation
   commit rather than implying that later commits had been compiled and tested;
 - clarified the OOD denominator, derived-variant dependence, attack-target
-  boundary, and non-universality of commercial-tool comparisons.
+  boundary, and non-universality of commercial-tool comparisons;
+- recorded the successful local execution of the principal final artifact
+  validators at commit `1018f307038f1a27d380df18c2725825cd8ab6b9`, including
+  exact commercial equivalence, XAI, result, reporting-asset, and LaTeX-image
+  checks;
+- separated the reusable release procedure from the live audit-status record and
+  retained final LaTeX compilation/log inspection as a release-commit check;
+- aligned validation entry points across the root documentation and the
+  `docs/` artifact documentation, including explicit Windows PowerShell guidance.
 
 ## v1.0.0-thesis-freeze — Planned Release
 
