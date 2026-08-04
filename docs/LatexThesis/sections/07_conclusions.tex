@@ -33,7 +33,7 @@ conditions changed and examined the resulting consequences for forensic
 triage.
 
 The experimental design combined two complementary evaluation levels. The
-first comprised three transparent proxy models: EfficientNet-B0, ResNet18, and
+first comprised three transparent proxy models: \gls{efficientnetb0}, \gls{resnet18}, and
 a \gls{clip}-based model consisting of a frozen visual encoder and a supervised
 binary classification head. These models provided access to predicted classes,
 maximum predicted-class probabilities, confusion matrices,
@@ -103,27 +103,27 @@ and anti-forensic conditions?}}
 
 The proxy models maintain their clean-baseline performance only to a
 condition-dependent extent. All three architectures achieve comparatively
-strong clean performance, with accuracies of 0.978 for EfficientNet-B0, 0.964
-for ResNet18, and 0.927 for the \gls{clip}-based proxy. These nominal results do
+strong clean performance, with accuracies of 0.978 for \gls{efficientnetb0}, 0.964
+for \gls{resnet18}, and 0.927 for the \gls{clip}-based proxy. These nominal results do
 not remain uniformly representative under the other evaluation branches.
 
 The five anti-forensic transformations generally produce smaller aggregate
 accuracy variations than the strongest adversarial attacks. The largest
-anti-forensic accuracy reduction among the proxy models is 0.030 for ResNet18
+anti-forensic accuracy reduction among the proxy models is 0.030 for \gls{resnet18}
 under \gls{histogrammodification}. Even where aggregate accuracy remains
 unchanged or increases, however, clean-correct samples may become incorrect.
 Anti-forensic robustness must therefore be interpreted through both aggregate
 metrics and directional error transitions.
 
 The direct-target adversarial conditions produce the most substantial
-degradation. EfficientNet-B0 accuracy decreases from 0.978 to 0.575 under
+degradation. \gls{efficientnetb0} accuracy decreases from 0.978 to 0.575 under
 \gls{fgsm} and to 0.015 under \gls{sigmazero}. The corresponding results show
 that strong clean performance does not imply robustness to attacks optimized
 against the evaluated model.
 
 The separate \gls{ood} branch exposes an additional behavior that cannot be
 predicted from clean binary accuracy. The fold-aggregated weapon assignment
-rates are 0.3696 for EfficientNet-B0, 0.4376 for ResNet18, and 0.8356 for the
+rates are 0.3696 for \gls{efficientnetb0}, 0.4376 for \gls{resnet18}, and 0.8356 for the
 \gls{clip}-based proxy. These values describe forced closed-set assignments and
 not supervised correctness.
 
@@ -139,27 +139,27 @@ differ in their effects on the evaluated proxy models?}}
 
 The direct source-model attacks produce substantially larger effects than the
 observed cross-architecture transfer. The four model-dependent attacks were
-generated against fold-specific EfficientNet-B0 checkpoints. Their evaluation
-on EfficientNet-B0 therefore represents direct-target assessment, whereas
-their evaluation on ResNet18 and the \gls{clip}-based proxy measures empirical
+generated against fold-specific \gls{efficientnetb0} checkpoints. Their evaluation
+on \gls{efficientnetb0} therefore represents direct-target assessment, whereas
+their evaluation on \gls{resnet18} and the \gls{clip}-based proxy measures empirical
 transfer.
 
 The clearest direct-target failure is produced by \gls{sigmazero}, which
-reduces EfficientNet-B0 accuracy to 0.015 and renders 963 of the 978
+reduces \gls{efficientnetb0} accuracy to 0.015 and renders 963 of the 978
 clean-correct samples incorrect. \gls{fgsm} reduces accuracy to 0.575 and
 introduces 406 errors among clean-correct samples, predominantly in the
 \texttt{weapon}-to-\texttt{non\_weapon} direction.
 
 The same frozen artifacts produce more limited and heterogeneous effects on
 the non-target architectures. The largest transferred degradation is observed
-under \gls{fgsm}: ResNet18 accuracy decreases from 0.964 to 0.918, whereas the
+under \gls{fgsm}: \gls{resnet18} accuracy decreases from 0.964 to 0.918, whereas the
 \gls{clip}-based proxy decreases from 0.927 to 0.914. Transferred
 \gls{sigmazero} artifacts do not reproduce the direct-target collapse and
 instead coexist with small aggregate accuracy increases and limited numbers of
 new individual errors.
 
 These results demonstrate that transferability must be measured rather than
-assumed. Limited transfer does not establish direct robustness of ResNet18 or
+assumed. Limited transfer does not establish direct robustness of \gls{resnet18} or
 the \gls{clip}-based proxy because no matched attacks were optimized
 independently against those architectures.
 
@@ -226,7 +226,7 @@ priority. The opposite transition,
 important because it increases analyst workload and may dilute prioritization.
 
 Aggregate degradation must be interpreted jointly with these directions. The
-EfficientNet-B0 \gls{sigmazero} result demonstrates a near-total direct-target
+\gls{efficientnetb0} \gls{sigmazero} result demonstrates a near-total direct-target
 collapse involving both missed targets and increased false-positive workload.
 Transferred \gls{fgsm} artifacts instead produce particularly relevant
 false-negative burdens for Magnet.AI and Cellebrite Inseyets, whereas Excire
@@ -303,7 +303,7 @@ Third, the thesis integrates transparent model evaluation with operational
 black-box assessment without assuming architectural equivalence between the two
 levels.
 
-EfficientNet-B0, ResNet18, and the \gls{clip}-based proxy provide inspectable
+\gls{efficientnetb0}, \gls{resnet18}, and the \gls{clip}-based proxy provide inspectable
 experimental references. They allow direct access to fold-specific
 checkpoints, predicted classes, maximum predicted-class probabilities,
 confusion matrices, matched clean-to-perturbed transitions, and internal
@@ -327,7 +327,7 @@ the comparison reproducible without implying that the selected systems
 implement the same internal taxonomy or classification task.
 
 The same model-dependent artifacts generated against fold-specific
-EfficientNet-B0 checkpoints were subsequently evaluated on ResNet18, the
+\gls{efficientnetb0} checkpoints were subsequently evaluated on \gls{resnet18}, the
 \gls{clip}-based proxy, and the selected black-box configurations. The protocol
 therefore distinguishes direct-target vulnerability from empirical
 cross-architecture and black-box transfer behavior. The model-agnostic
@@ -360,7 +360,7 @@ for human verification are incorporated into the resulting operational
 interpretation.
 
 A complementary qualitative \gls{xai} analysis was conducted using
-\gls{ig} on five purposively selected EfficientNet-B0 cases. The resulting
+\gls{ig} on five purposively selected \gls{efficientnetb0} cases. The resulting
 visualizations support case-level diagnostic inspection but are not treated as
 quantitative robustness evidence, semantic localization ground truth, or an
 explanation of the selected black-box systems.
@@ -401,7 +401,7 @@ their forensic relevance.
 
 Clean baseline
 &
-EfficientNet-B0 achieves the highest clean accuracy among the proxy models, at
+\gls{efficientnetb0} achieves the highest clean accuracy among the proxy models, at
 0.978. Under the adopted conservative mapping,
 \gls{griffeye}/\gls{t3kcore} achieves the highest clean accuracy among the
 selected black-box configurations, also at 0.978.
@@ -415,7 +415,7 @@ configuration-dependent conditions. \\
 \gls{ood}
 &
 The \gls{clip}-based proxy assigns 0.8356 of its fold-specific \gls{ood}
-responses to \texttt{weapon}. EfficientNet-B0 and ResNet18 produce lower weapon
+responses to \texttt{weapon}. \gls{efficientnetb0} and \gls{resnet18} produce lower weapon
 assignment rates but substantially higher proportions of maximum predicted-class
 probabilities above 0.90. The black-box weapon assignment rates range from
 0.238 to 0.522 across the six configurations.
@@ -430,7 +430,7 @@ The five evaluated anti-forensic transformations generally produce smaller
 aggregate accuracy variations than the strongest direct-target adversarial
 conditions. Nevertheless, they introduce condition- and system-specific false
 negatives and false positives. Gaussian Blur is particularly relevant for
-EfficientNet-B0 and Magnet.AI, whereas Histogram Modification affects ResNet18,
+\gls{efficientnetb0} and Magnet.AI, whereas Histogram Modification affects \gls{resnet18},
 Griffeye/T3K CORE, Excire \texttt{D50}, and Cellebrite through different error
 profiles.
 &
@@ -441,10 +441,10 @@ degradation alone. \\
 
 Adversarial
 &
-EfficientNet-B0 undergoes severe direct-target degradation under
+\gls{efficientnetb0} undergoes severe direct-target degradation under
 \gls{sigmazero}, with accuracy decreasing to 0.015, and under \gls{fgsm}, with
 accuracy decreasing to 0.575. The same artifacts produce more limited and
-heterogeneous transfer effects on ResNet18, the \gls{clip}-based proxy, and the
+heterogeneous transfer effects on \gls{resnet18}, the \gls{clip}-based proxy, and the
 selected black-box configurations.
 &
 High clean accuracy does not guarantee direct adversarial robustness. Transfer
@@ -492,7 +492,7 @@ feature relevance, or black-box system behavior. \\
 \end{table}
 
 The clean results already reveal different operational error profiles.
-EfficientNet-B0 minimizes the total number of clean errors among the proxy
+\gls{efficientnetb0} minimizes the total number of clean errors among the proxy
 models. The \gls{clip}-based proxy instead achieves the lowest clean
 \gls{fnr}, at 0.012, while producing the highest clean \gls{fpr}, at 0.134.
 A reduction in missed target images may therefore be accompanied by a
@@ -513,7 +513,7 @@ binary task.
 The maximum predicted-class probability results provide a separate diagnostic
 dimension. The \gls{clip}-based proxy produces the highest \gls{ood} weapon
 assignment rate while none of its fold-specific responses exceeds the 0.90
-maximum-probability threshold. ResNet18 produces fewer weapon assignments but
+maximum-probability threshold. \gls{resnet18} produces fewer weapon assignments but
 the highest high-maximum-probability rate.
 
 The two indicators must therefore not be conflated. Assignment frequency does
@@ -526,9 +526,9 @@ automated analysis without reproducing the extreme degradation observed under
 the strongest direct-target adversarial attacks. Their operational importance
 depends on the direction of the resulting errors.
 
-For example, Gaussian Blur introduces 17 new EfficientNet-B0 errors, all in the
+For example, Gaussian Blur introduces 17 new \gls{efficientnetb0} errors, all in the
 \texttt{weapon}-to-\texttt{non\_weapon} direction. Histogram Modification
-introduces errors in both directions for ResNet18. At the black-box level,
+introduces errors in both directions for \gls{resnet18}. At the black-box level,
 Gaussian Blur produces the largest anti-forensic missed-target burden for
 Magnet.AI, whereas Histogram Modification is associated with different
 combinations of false negatives and false positives across Griffeye/T3K CORE,
@@ -540,12 +540,12 @@ that become correct under the transformed population.
 
 The adversarial analysis demonstrates the clearest separation between nominal
 performance and direct-target robustness. The four model-dependent attacks were
-generated against fold-specific EfficientNet-B0 checkpoints.
+generated against fold-specific \gls{efficientnetb0} checkpoints.
 \gls{fgsm}, \gls{sigmazero}, and \gls{superdeepfool} used white-box access,
 whereas \gls{onepixel} used score-based access.
 
 Under direct-target evaluation, \gls{sigmazero} renders 963 of the 978
-clean-correct EfficientNet-B0 inputs incorrect. The induced transitions are
+clean-correct \gls{efficientnetb0} inputs incorrect. The induced transitions are
 nearly balanced between missed target images and false-positive assignments.
 \gls{fgsm} produces fewer errors but a stronger concentration in the
 \texttt{weapon}-to-\texttt{non\_weapon} direction.
@@ -592,7 +592,7 @@ of 1.000.
 The \gls{ood} case instead documents a closed-set assignment outside the
 supervised binary task and must not be described as an ordinary false positive.
 The attribution maps represent attribution magnitudes only for the selected
-EfficientNet-B0 output under the adopted attribution target, baseline, and
+\gls{efficientnetb0} output under the adopted attribution target, baseline, and
 integration procedure.
 
 Overall, the findings show that validation on clean data is not equivalent to
@@ -724,7 +724,7 @@ specify whether blindness applies to file-system organization, embedded
 metadata, image pixels, or all of these channels.
 
 The qualitative \gls{xai} analysis provides an additional form of diagnostic
-transparency for EfficientNet-B0. It preserves a link among the input,
+transparency for \gls{efficientnetb0}. It preserves a link among the input,
 prediction, maximum predicted-class probability, attribution target, and
 visualization. This information may support analyst inspection of selected
 cases.
@@ -827,17 +827,17 @@ sequential combinations may produce different robustness profiles.
 \item \textbf{Restricted direct-target adversarial evaluation.}
 
 The four model-dependent adversarial attacks were generated against
-fold-specific EfficientNet-B0 checkpoints. Their evaluation on EfficientNet-B0
+fold-specific \gls{efficientnetb0} checkpoints. Their evaluation on \gls{efficientnetb0}
 constitutes direct-target assessment.
 
-The results obtained on ResNet18, the \gls{clip}-based proxy, and the selected
+The results obtained on \gls{resnet18}, the \gls{clip}-based proxy, and the selected
 black-box software configurations measure only empirical transfer of the
-EfficientNet-B0-oriented artifacts. They do not establish robustness against
+\gls{efficientnetb0}-oriented artifacts. They do not establish robustness against
 attacks optimized independently for those systems.
 
 \item \textbf{Proxy-model role.}
 
-EfficientNet-B0, ResNet18, and the \gls{clip}-based model are transparent
+\gls{efficientnetb0}, \gls{resnet18}, and the \gls{clip}-based model are transparent
 experimental references. They are not reconstructions or validated surrogates
 of the internal models used by the selected proprietary software systems.
 
@@ -892,7 +892,7 @@ produce different error profiles.
 \item \textbf{Qualitative \gls{xai} scope.}
 
 The retained \gls{xai} analysis is limited to five purposively selected
-EfficientNet-B0 cases. The set is not statistically representative and cannot
+\gls{efficientnetb0} cases. The set is not statistically representative and cannot
 be used to estimate the prevalence of the illustrated behaviors.
 
 The historical \gls{ig} assets were generated using 32 integration steps and a
@@ -1008,8 +1008,8 @@ cases, analyst review time, and final decision quality should also be measured.
 
 The adversarial branch should be expanded through matched direct-target attacks
 against each transparent proxy architecture. In the present protocol,
-model-dependent attacks were generated only against EfficientNet-B0. Generating
-comparable attacks independently against ResNet18 and the
+model-dependent attacks were generated only against \gls{efficientnetb0}. Generating
+comparable attacks independently against \gls{resnet18} and the
 \gls{clip}-based proxy would permit a more systematic distinction between
 direct-target vulnerability and cross-architecture transferability.
 
