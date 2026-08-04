@@ -2,6 +2,14 @@
 
 Complete this checklist before creating the official thesis-artifact release.
 
+This file is a **reusable release procedure**, not a live record of completed
+work. The current audit state, latest successful validator execution, and exact
+validated commit are recorded in:
+
+```text
+docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md
+```
+
 Recommended tag:
 
 ```text
@@ -77,7 +85,9 @@ Paths containing `chapter5` or `chapter_5` are allowed only where they are
 historical frozen artifact identifiers. Documentation must explain this boundary
 and must not describe the final results as belonging to Chapter 5.
 
-## 4. Run the Kali/Linux Audit Helper
+## 4. Run the Repository Audit Helper
+
+### Kali/Linux
 
 ```bash
 bash tools/tasks.sh status
@@ -91,6 +101,24 @@ bash tools/tasks.sh check-latex-images
 bash tools/tasks.sh audit-all
 ```
 
+### Windows PowerShell
+
+```powershell
+.\tools\tasks.ps1 status
+.\tools\tasks.ps1 check-json
+.\tools\tasks.ps1 check-python-syntax
+.\tools\tasks.ps1 check-text-guards
+.\tools\tasks.ps1 check-results
+.\tools\tasks.ps1 check-xai
+.\tools\tasks.ps1 check-assets
+.\tools\tasks.ps1 check-thesis-log
+.\tools\tasks.ps1 audit-all
+```
+
+The PowerShell helper does not currently expose `check-latex-images`; Section 7
+therefore remains an explicit cross-platform release check. Neither helper
+replaces the explicit commercial equivalence check in Section 5.
+
 ## 5. Validate Commercial Predictions
 
 ```bash
@@ -99,6 +127,12 @@ python forensic_tools/scripts/validate_public_extract_equivalence.py \
   --metrics results/metrics/forensic_tools_metrics.csv \
   --report forensic_tools/public_extracts_validation.json \
   --force
+```
+
+PowerShell one-line equivalent:
+
+```powershell
+python forensic_tools/scripts/validate_public_extract_equivalence.py --source evaluation/forensic_tools/normalized_predictions.csv --metrics results/metrics/forensic_tools_metrics.csv --report forensic_tools/public_extracts_validation.json --force
 ```
 
 Expected:
@@ -124,17 +158,26 @@ python results/scripts/24_audit_reporting_asset_usage.py \
   --report results/reporting_asset_usage_summary.json
 ```
 
-The `chapter5` validator and manifest names are historical; their authoritative
-thesis target is `docs/LatexThesis/sections/06_results.tex`.
+PowerShell equivalents may be run on single lines. The `chapter5` validator and
+manifest names are historical; their authoritative thesis target is
+`docs/LatexThesis/sections/06_results.tex`.
 
 Review the ignored local report before removing or replacing any reporting
-asset.
+asset. Unreferenced generated reporting assets are not automatically errors;
+missing outputs or mismatched thesis copies are the release-blocking conditions
+reported by the strict audit.
 
 ## 7. Audit LaTeX Images
 
 ```bash
 python tools/latex/audit_latex_images_used.py \
   --main docs/LatexThesis/main.tex
+```
+
+PowerShell one-line equivalent:
+
+```powershell
+python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
 
 Review missing, ambiguous, unused, and duplicate image reports.
@@ -165,6 +208,12 @@ grep -En 'Undefined references|Citation.*undefined|LaTeX Error|Package glossarie
   docs/LatexThesis/main.log || true
 ```
 
+On Windows PowerShell, the repository helper can inspect an existing log:
+
+```powershell
+.\tools\tasks.ps1 check-thesis-log
+```
+
 The local `main.pdf` and auxiliary files are ignored.
 
 ## 9. Documentation Check
@@ -185,10 +234,15 @@ docs/artifact/DATA_ACCESS.md
 docs/artifact/ARCHIVE_SNAPSHOT.md
 .github/SECURITY.md
 docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md
+docs/maintenance/CHAPTER6_FINALIZATION_REPORT.md
 docs/maintenance/RELEASE_CHECKLIST.md
 CHANGELOG.md
 CITATION.cff
 ```
+
+The historical `CHAPTER6_FINALIZATION_REPORT.md` must remain scoped to its
+recorded commit. Do not rewrite it to imply validation of later repository
+states.
 
 ## 10. Data and Security Check
 
