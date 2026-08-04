@@ -131,7 +131,7 @@ Common generated files include `.acn`, `.acr`, `.alg`, `.aux`, `.bbl`, `.bcf`,
 `.blg`, `.fdb_latexmk`, `.fls`, `.glg`, `.glo`, `.gls`, `.log`, `.out`,
 `.run.xml`, `.synctex.gz`, `.toc`, and `main.pdf`. These files are ignored.
 
-## Lightweight Validation on Kali
+## Lightweight Validation on Kali/Linux
 
 ```bash
 bash tools/tasks.sh check-json
@@ -143,11 +143,43 @@ bash tools/tasks.sh check-assets
 bash tools/tasks.sh check-latex-images
 ```
 
-Complete audit:
+Complete helper audit:
 
 ```bash
 bash tools/tasks.sh audit-all
 ```
+
+The Linux helper also checks the local thesis log when present. The commercial
+public-extract equivalence validator remains a separate explicit release check.
+
+## Lightweight Validation on Windows PowerShell
+
+The PowerShell helper exposes the tasks implemented in `tools/tasks.ps1`:
+
+```powershell
+.\tools\tasks.ps1 status
+.\tools\tasks.ps1 check-json
+.\tools\tasks.ps1 check-python-syntax
+.\tools\tasks.ps1 check-text-guards
+.\tools\tasks.ps1 check-results
+.\tools\tasks.ps1 check-xai
+.\tools\tasks.ps1 check-assets
+.\tools\tasks.ps1 check-thesis-log
+.\tools\tasks.ps1 audit-all
+```
+
+The PowerShell helper does not currently expose the standalone LaTeX-image audit
+or the commercial public-extract equivalence validator. Run those explicitly
+from the repository root when performing the final artifact checks:
+
+```powershell
+python forensic_tools/scripts/validate_public_extract_equivalence.py --source evaluation/forensic_tools/normalized_predictions.csv --metrics results/metrics/forensic_tools_metrics.csv --force
+python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
+```
+
+PowerShell uses the backtick (`` ` ``), not a trailing backslash, for command
+continuation. Keeping these two commands on one line avoids shell-specific
+continuation issues.
 
 ## Reproducibility Boundary
 
