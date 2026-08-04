@@ -215,7 +215,7 @@ part of the evaluated operating profile
 (Section~\ref{sec:results-commercial}).
 
 \paragraph{\textbf{RQ4. Which error transitions, robustness degradations,
-\gls{ood} assignment behaviors, and non-operational outputs are most relevant
+\gls{ood} assignment behaviors, and unknown output states are most relevant
 to forensic triage and continued human review?}}
 
 The most relevant error transition is
@@ -245,8 +245,10 @@ may be associated with a maximum probability of 1.000. Such a value does not
 establish calibrated certainty, correctness, or forensic reliability.
 
 No \texttt{unknown} normalized output occurs in the canonical 69\,000-decision
-black-box result population. Consequently, unsupported or non-operational
-outputs were not a primary observed failure mode in the frozen evaluation.
+black-box result population. Consequently, unknown outputs were not an observed failure mode in the frozen
+evaluation. Their explicit handling remains methodologically necessary for
+future software versions, alternative exports, or incomplete normalization
+cases.
 Their explicit handling remains methodologically necessary for future software
 versions, alternative exports, or incomplete normalization cases.
 
