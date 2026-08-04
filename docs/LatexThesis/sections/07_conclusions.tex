@@ -677,21 +677,16 @@ software version, enabled processing functions, category or query
 configuration, output format, and normalization procedure through which it was
 obtained.
 
-Operational use therefore requires configuration management. At minimum, the
-following elements should remain associated with an automated output:
-
-\begin{itemize}
-\item the source item and its integrity record;
-\item the software or model version;
-\item the active checkpoint or software configuration;
-\item the enabled processing functions;
-\item the category, bookmark, label, or semantic query used;
-\item the observable output produced by the system;
-\item the normalization rule applied to that output;
-\item the experimental or operational condition under which the item was
-processed;
-\item the subsequent analyst review and final interpretation.
-\end{itemize}
+Operational use therefore requires explicit configuration management. Each
+automated output should remain traceably associated with the source item and
+its integrity record, together with the software or model version, the active
+checkpoint or operational configuration, and the processing functions enabled
+at the time of analysis. The record should also preserve the category,
+bookmark, label, or semantic query used to obtain the result, the observable
+output produced by the system, and the normalization rule applied to that
+output. Finally, the experimental or operational condition under which the item
+was processed should remain documented together with the subsequent analyst
+review and final interpretation.
 
 Software and model updates should also be treated as changes to the evaluated
 system. A new release may modify preprocessing, model weights, thresholds,
@@ -734,27 +729,27 @@ correctness, or explain the selected black-box systems. They also do not remove
 the need to evaluate the model through quantitative error metrics. Explainability
 must remain supplementary to robustness testing and expert assessment.
 
-These considerations support a \textit{human-in-the-loop} model of use. The
-analyst remains responsible for:
+These considerations support a \textit{human-in-the-loop} model of use in which
+the analyst remains responsible for interpreting automated outputs within the
+investigative context and for reviewing both flagged content and, where
+appropriate, material that has not been prioritized by the automated process.
+An unflagged item may still retain investigative relevance, and automated
+decisions should therefore not be treated as substitutes for expert review.
 
-\begin{itemize}
-\item interpreting automatic outputs within the investigative context;
-\item reviewing flagged content and, where appropriate, samples not prioritized
-by the automated process;
-\item recognizing that an unflagged item may still be relevant;
-\item documenting the system version, configuration, and normalization rule;
-\item assessing the consequences of false negatives, false positives, and
-\gls{ood} assignments;
-\item corroborating automated outputs with the remaining forensic evidence;
-\item determining the final analytical and evidentiary significance of the
-material.
-\end{itemize}
+The analyst should also document the software or model version, the active
+configuration, and the normalization rule associated with each result, while
+assessing the operational consequences of false negatives, false positives, and
+\gls{ood} assignments. Automated outputs should be corroborated with the
+remaining forensic evidence, and the final analytical and evidentiary
+significance of the material must remain the responsibility of the qualified
+human examiner.
 
 The experimental findings therefore do not argue against the use of
 \gls{ai}-assisted image analysis in \gls{df}. They define the conditions under
 which such use is more defensible: task-specific validation, explicit threat
 modeling, traceable configurations, version control, human oversight, and
 continued visibility of the system's limitations.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Limitations}
@@ -802,8 +797,8 @@ therefore influence some results despite source-aware fold construction.
 \item \textbf{Heterogeneous \gls{ood} population.}
 
 The \gls{ood} branch intentionally combines borderline, ambiguous, degraded,
-synthetic, non-firearm weapon, and semantically external content. It is not a
-homogeneous supervised class or a universal representation of
+synthetic, non-firearm weapon imagery, and semantically external content. It is
+not a homogeneous supervised class or a universal representation of
 out-of-distribution imagery. The reported rates characterize behavior only on
 the frozen mixture used in this study.
 
@@ -827,19 +822,20 @@ sequential combinations may produce different robustness profiles.
 \item \textbf{Restricted direct-target adversarial evaluation.}
 
 The four model-dependent adversarial attacks were generated against
-fold-specific \gls{efficientnetb0} checkpoints. Their evaluation on \gls{efficientnetb0}
-constitutes direct-target assessment.
+fold-specific \gls{efficientnetb0} checkpoints. Their evaluation on
+\gls{efficientnetb0} constitutes direct-target assessment.
 
-The results obtained on \gls{resnet18}, the \gls{clip}-based proxy, and the selected
-black-box software configurations measure only empirical transfer of the
-\gls{efficientnetb0}-oriented artifacts. They do not establish robustness against
-attacks optimized independently for those systems.
+The results obtained on \gls{resnet18}, the \gls{clip}-based proxy, and the
+selected black-box software configurations measure only empirical transfer of
+the \gls{efficientnetb0}-oriented artifacts. They do not establish robustness
+against attacks optimized independently for those systems.
 
 \item \textbf{Proxy-model role.}
 
-\gls{efficientnetb0}, \gls{resnet18}, and the \gls{clip}-based model are transparent
-experimental references. They are not reconstructions or validated surrogates
-of the internal models used by the selected proprietary software systems.
+\gls{efficientnetb0}, \gls{resnet18}, and the \gls{clip}-based model are
+transparent experimental references. They are not reconstructions or validated
+surrogates of the internal models used by the selected proprietary software
+systems.
 
 Their gradients, probability distributions, and attribution results must not be
 used to infer the internal behavior of the black-box systems.
@@ -862,7 +858,7 @@ identical numbers or types of prediction events.
 
 \item \textbf{Black-box version and configuration dependence.}
 
-The black-box results are bounded to the evaluated software versions, enabled
+The black-box results are specific to the evaluated software versions, enabled
 functions, imported population, export procedures, and normalization rules.
 Internal updates or configuration changes may modify the observed behavior.
 
@@ -881,7 +877,7 @@ The results depend on the \texttt{Possible weapons} tag adopted for
 \texttt{CORE/Violence/Firearm} bookmark mapping used for
 \gls{griffeye}/\gls{t3kcore}.
 
-They also depend on the eight firearm-oriented query sets and the
+They also depend on the eight firearm-oriented semantic queries and the
 \texttt{Distance limit} adopted for \gls{excirefoto2025}, as well as on the
 exported \texttt{Armi}, \texttt{Pistola}, and \texttt{Fucile} labels used for
 \gls{cellebriteinseyets}.
@@ -892,8 +888,8 @@ produce different error profiles.
 \item \textbf{Qualitative \gls{xai} scope.}
 
 The retained \gls{xai} analysis is limited to five purposively selected
-\gls{efficientnetb0} cases. The set is not statistically representative and cannot
-be used to estimate the prevalence of the illustrated behaviors.
+\gls{efficientnetb0} cases. The set is not statistically representative and
+cannot be used to estimate the prevalence of the illustrated behaviors.
 
 The historical \gls{ig} assets were generated using 32 integration steps and a
 zero baseline in the preprocessed input space. Numerical convergence was not
@@ -942,16 +938,12 @@ certify any software product, establish a universal ranking of the evaluated
 systems, or constitute a complete adversarial-security assessment.
 
 The study also does not validate a production-grade firearm detector, provide
-evidentiary validation of automated classifications, or authorize autonomous
-operational deployment.
+evidentiary validation of automated classifications, or establish a basis for
+autonomous operational deployment.
 
 The findings must therefore be interpreted as evidence about the observable
 behavior of the frozen systems, configurations, mappings, dataset, and threat
 model evaluated in this thesis.
-
-
-
-
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -959,186 +951,205 @@ model evaluated in this thesis.
 \label{sec:conclusions-future-work}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Future research directions derive directly from the observed results and from
-the limitations of the frozen protocol. The proposed extensions concern the
-experimental population, the evaluated threat models, black-box configuration
-management, \gls{ood} handling, explainability, and operational validation.
+Future research directions derive directly from the experimental findings and
+from the limitations of the frozen protocol. The main opportunities for
+extension concern the experimental population, adversarial and anti-forensic
+threat models, \gls{ood} handling, black-box configuration management,
+explainability, operational validation, and independent replication.
 
-A first extension should enlarge and diversify the source corpus. Future studies
-should include larger multi-source collections, additional firearm-related
-subcategories, more varied realistic negatives, and visual material obtained
-from different devices, acquisition procedures, messaging platforms, social
-networks, and media-processing pipelines.
+A first direction concerns the size and diversity of the experimental
+population. Future studies should include larger multi-source collections,
+additional firearm-related subcategories, more varied realistic negative
+samples, and visual material obtained from different devices, acquisition
+procedures, messaging platforms, social networks, and media-processing
+pipelines. Increasing source diversity would provide a stronger basis for
+assessing whether the operating profiles observed in this study persist across
+different acquisition and content-generation conditions.
 
-The binary class distribution should also be varied. The balanced binary population
-of 500 images per class used in this thesis supports controlled comparison
-of false negatives and false positives but does not represent the prevalence
-expected in operational evidence collections. Evaluations conducted under
-different class ratios would make it possible to measure how prevalence affects
-precision, review workload, and the practical usefulness of automated triage.
+The class distribution should also be varied. The balanced binary population
+used in this thesis, comprising 500 \texttt{weapon} and 500
+\texttt{non\_weapon} images, supports controlled comparison of false negatives
+and false positives but does not represent the prevalence expected in
+operational evidence collections. Evaluations conducted under different class
+ratios would make it possible to examine how prevalence affects precision,
+false-positive review workload, missed-target risk, and the practical
+usefulness of automated triage.
 
-The semantic-validation stage should be extended through multiple independent
-reviewers. A multi-annotator procedure, supported by formal agreement measures
-and an explicit adjudication process, would quantify uncertainty in borderline
-cases and reduce dependence on the judgment of a single reviewer.
+The semantic-validation procedure could be strengthened through the
+involvement of multiple independent reviewers. A multi-annotator protocol,
+supported by formal agreement measures and an explicit adjudication process,
+would quantify uncertainty in borderline cases and reduce dependence on the
+judgment of a single reviewer. This would be particularly relevant for
+ambiguous firearm-related material and for the heterogeneous
+\gls{ood} population.
 
-The heterogeneous \gls{ood} branch should be decomposed into more specific
+The \gls{ood} branch itself should be decomposed into more specific
 subpopulations. Borderline firearm-related content, non-firearm weapons,
 synthetic imagery, degraded media, video-game content, large-scale military
-equipment, and semantically unrelated material may produce different closed-set
-behaviors.
+equipment, and semantically unrelated material may produce substantially
+different closed-set behaviors. Analyzing these groups separately would help
+identify whether the observed weapon-assignment rates are concentrated in
+particular semantic or visual categories.
 
-Analyzing these groups separately would clarify whether the observed weapon
-assignment rates are concentrated in particular semantic or visual categories.
-It would also permit more precise evaluation of rejection, abstention,
-open-set-recognition, or unknown-output mechanisms.
+Future work should also examine mechanisms designed explicitly for inputs
+outside the nominal binary task. Possible approaches include calibrated
+model-specific probability estimates, abstention thresholds, dedicated
+\gls{ood} detectors, open-set recognition, and selective-classification
+procedures capable of exposing an unknown or ambiguous state to the analyst.
 
-Further work should examine methods for explicitly managing inputs outside the
-nominal binary task. Potential extensions include calibrated model-specific
-probability estimates, abstention thresholds, dedicated \gls{ood} detectors,
-and open-set classification methods.
+The value of these mechanisms should not be assessed exclusively through
+conventional classification metrics. Their effects on missed detections,
+false-positive workload, deferred cases, analyst review time, and final
+decision quality should also be measured. An effective rejection mechanism,
+for example, may reduce inappropriate closed-set assignments while increasing
+the number of cases requiring direct human review. This tradeoff should be
+treated as an operational property rather than solely as a model-performance
+measure.
 
-Additional mechanisms could expose unknown or ambiguous states directly to the
-analyst or implement selective-classification procedures that defer uncertain
-cases to human review.
-
-These mechanisms should not be evaluated only through conventional technical
-metrics. Their effects on missed detections, false-positive workload, deferred
-cases, analyst review time, and final decision quality should also be measured.
-
-The adversarial branch should be expanded through matched direct-target attacks
+The adversarial branch should be extended through matched direct-target attacks
 against each transparent proxy architecture. In the present protocol,
-model-dependent attacks were generated only against \gls{efficientnetb0}. Generating
-comparable attacks independently against \gls{resnet18} and the
-\gls{clip}-based proxy would permit a more systematic distinction between
-direct-target vulnerability and cross-architecture transferability.
+model-dependent attacks were generated only against fold-specific
+\gls{efficientnetb0} checkpoints. Comparable attacks generated independently
+against \gls{resnet18} and the \gls{clip}-based proxy would permit a more
+systematic distinction between direct-target vulnerability and
+cross-architecture transferability.
 
-Such an extension would also make it possible to separate attack-specific
-behavior from architecture-specific robustness.
+Such an extension should use harmonized access assumptions and perturbation
+budgets where technically meaningful while preserving the distinction among
+white-box, score-based, transfer, and model-agnostic conditions. This would
+allow attack-specific effects to be separated more clearly from
+architecture-specific robustness.
 
-Such a design should use harmonized access assumptions and perturbation budgets
-where technically meaningful. It should also preserve the distinction between
-white-box, score-based, transfer, and model-agnostic conditions.
-
-Future adversarial evaluations could include broader parameter sweeps,
+Future adversarial evaluations could also include broader parameter sweeps,
 alternative optimization objectives, targeted attacks, adversarial patches,
-physical or hybrid manipulations, and transformations designed to preserve
-plausibility after ordinary media handling.
+physical or hybrid manipulations, and conditions designed to remain effective
+after ordinary media handling. These experiments would help determine whether
+the observed vulnerabilities persist under more varied attack objectives and
+delivery mechanisms.
 
-The evaluation of defenses could also be incorporated. Potential approaches
-include adversarial training, robust preprocessing, input randomization,
-ensemble decision procedures, and anomaly detection. Their assessment should
-consider not only recovery of aggregate accuracy but also changes in false
-negatives, false positives, \gls{ood} behavior, computational cost, and analyst
-workload.
+The evaluation of defensive strategies represents a complementary direction.
+Potential approaches include adversarial training, robust preprocessing, input
+randomization, ensemble decision procedures, and anomaly-detection mechanisms.
+Their assessment should consider not only recovery of aggregate accuracy but
+also changes in false negatives, false positives, \gls{ood} behavior,
+computational cost, and analyst workload. A defense that improves aggregate
+performance while materially increasing missed-target risk would not
+necessarily constitute an operational improvement.
 
-The anti-forensic branch should be extended through multiple severity levels
-and sequential transformation chains. The current protocol evaluates one frozen
-parameterization for each transformation. Future work should investigate
-repeated JPEG encoding, platform-specific recompression, multiple resize ratios,
-cropping, partial occlusion, screenshot acquisition, and color-space
-conversion.
+The anti-forensic branch should likewise be expanded through multiple severity
+levels and sequential transformation chains. The current protocol evaluates
+one frozen parameterization for each transformation. Future studies should
+consider repeated JPEG encoding, platform-specific recompression, multiple
+resize ratios, cropping, partial occlusion, screenshot acquisition, and
+color-space conversion.
 
-Additional conditions should include stronger and weaker blurring, combined
-tonal and geometric transformations, and sequential adversarial and
-anti-forensic manipulations.
-
-This extension would make it possible to determine whether individually limited
-effects accumulate when images pass through realistic evidence-handling,
-content-sharing, or concealment processes.
+Additional conditions could include stronger and weaker levels of blurring,
+combined tonal and geometric transformations, and sequential adversarial and
+anti-forensic manipulations. Such experiments would make it possible to
+determine whether individually limited effects accumulate when images pass
+through realistic evidence-handling, content-sharing, or concealment
+processes.
 
 The black-box evaluation should be repeated across additional software
 versions, processing modules, operational categories, and documented
 configurations. Proprietary systems may change their internal models,
-preprocessing procedures, output taxonomies, thresholds, or export formats
-between releases.
+preprocessing procedures, output taxonomies, thresholds, retrieval mechanisms,
+or export formats between releases. Findings obtained from one frozen version
+should therefore not be assumed to remain stable after software updates.
 
-Longitudinal evaluation would help distinguish behavior that remains stable
-across versions from findings that depend on a particular frozen
-configuration. Such work would also support the definition of change-management
-procedures for operational environments in which an update may invalidate
-previous validation results.
+Longitudinal evaluation would help distinguish behavior that persists across
+versions from findings that depend on a particular release or configuration.
+It could also support the development of explicit change-management procedures
+for operational environments in which software updates may invalidate previous
+validation results.
 
-Alternative normalization mappings should be evaluated where the observable
-outputs support more than one defensible interpretation. These mappings could
-include broader bookmark combinations for
+Alternative normalization mappings should be evaluated whenever the observable
+outputs support more than one defensible operational interpretation. Such
+experiments could consider broader bookmark combinations for
 \gls{griffeye}/\gls{t3kcore}, alternative unions of exported categories for
-\gls{cellebriteinseyets}, and additional tags exposed by
+\gls{cellebriteinseyets}, and additional observable tags exposed by
 \gls{magnetai}.
 
-Different semantic-query sets and distance settings should also be examined for
-\gls{excirefoto2025}.
+For \gls{excirefoto2025}, different firearm-oriented semantic-query sets and
+\texttt{Distance limit} values should also be examined systematically. The
+objective would not be to identify a universally optimal mapping, but to
+quantify how configuration and normalization choices alter recall,
+selectivity, \gls{ood} assignment behavior, and human-review workload.
 
-The objective would not be to identify a universally optimal mapping, but to
-quantify how mapping choices alter recall, selectivity, \gls{ood} assignment,
-and human-review workload.
+A dedicated controlled experiment should address the residual embedded-metadata
+channel identified in the present study. Matched metadata-preserving and
+metadata-neutralized copies of the same images should be created while keeping
+their visual content unchanged. Both populations could then be processed under
+identical software configurations.
 
-A specific controlled experiment should address the residual embedded-metadata
-channel. Matched metadata-preserving and metadata-neutralized copies of the same
-images should be created while keeping the visual content unchanged.
-
-The paired populations could then be processed under identical software
-configurations. Comparing the corresponding outputs would permit direct
-measurement of decision changes associated with metadata removal and would
-provide stronger evidence regarding whether a system accesses or relies on
-embedded non-pixel information.
+A paired comparison would permit direct measurement of output changes
+associated with metadata removal and would provide stronger evidence regarding
+whether a system accesses or relies on embedded non-pixel information. This
+would move beyond the leave-out sensitivity analysis used in the current
+protocol and allow a causal effect of metadata modification to be investigated
+more directly.
 
 The explainability component should also be strengthened. The five historical
 \gls{ig} cases should be regenerated using the hardened adaptive
 convergence-validation procedure described in
-Section~\ref{subsec:implementation-explainability}. Future work should adopt
-explicit numerical convergence criteria, multiple attribution baselines, and
-larger, systematically sampled case populations.
+Section~\ref{subsec:implementation-explainability}. Future analyses should
+adopt explicit numerical convergence criteria, multiple attribution baselines,
+and larger, systematically sampled case populations.
 
-The analysis should also compare different attribution methods, examine
-stability across checkpoints, and compare clean and manipulated variants of the
-same source image. Quantitative measures of attribution consistency could
-provide an additional basis for assessing the stability of the resulting
-visualizations.
+Different attribution methods could also be compared, together with the
+stability of explanations across checkpoints and across clean and manipulated
+versions of the same source image. Quantitative measures of attribution
+consistency may provide an additional basis for evaluating the stability of
+the resulting visualizations.
 
 Explainability should nevertheless remain supplementary to quantitative
-robustness testing. Attribution agreement must not be interpreted as proof of
-classification correctness, causal feature relevance, or forensic validity.
+robustness testing. Agreement among attribution methods or visual stability
+across conditions must not be interpreted as proof of classification
+correctness, causal feature relevance, or forensic validity.
 
 A further extension should evaluate the practical consequences of automated
-outputs through analyst-centered studies. The present thesis infers operational
-relevance from error direction, assignment behavior, and review workload.
-Controlled user studies could measure these consequences directly.
+outputs through analyst-centered studies. The present thesis infers
+operational relevance from error direction, assignment behavior, and expected
+review workload. Controlled user studies could measure these effects directly
+by comparing forensic workflows with and without automated triage.
 
-Such evaluations could compare workflows with and without automated triage by
-measuring analyst review time, the number of images examined, and the number of
-relevant items detected or missed.
+Such studies could measure analyst review time, the number of images examined,
+the number of relevant items detected or missed, and the frequency with which
+analysts override automated outputs. They could also examine whether false
+positives affect attention allocation and whether false negatives influence
+final case-level findings.
 
-They could also examine the frequency with which analysts override automated
-outputs, the effects of false positives on attention allocation, and the
-effects of false negatives on final case-level findings. The perceived and
-measured usefulness of uncertainty, \gls{ood}, and explainability indicators
-should also be assessed.
+The practical usefulness of uncertainty indicators, explicit \gls{ood} states,
+and explainability information could likewise be evaluated. This would connect
+technical robustness metrics more directly to the actual quality of support
+provided to the forensic analyst.
 
-This would connect technical robustness metrics more directly to the actual
-quality of analyst support.
+The \gls{fairlab} protocol could also be applied to other forensic visual
+categories. Potential domains include illicit substances, documents,
+screenshots, explicit content, extremist material, vehicles, faces, logos, and
+other categories of investigative interest. Each extension would require its
+own task definition, semantic-validation criteria, threat model, output
+normalization, and operational interpretation.
 
-The protocol could also be applied to other forensic visual categories.
-Potential domains include illicit substances, documents, screenshots, explicit
-content, extremist material, vehicles, faces, logos, and other categories of
-investigative interest. Each extension would require its own task definition,
-semantic-validation criteria, threat model, and operational mapping.
+Finally, the methodological approach would benefit from independent
+replication and broader artifact availability. Where licensing, privacy, legal,
+or institutional constraints prevent complete redistribution, future
+repositories should continue to preserve source and artifact schemas,
+executable scripts, configuration records, software-version information,
+manifests, and stable identifiers.
 
-Finally, the protocol would benefit from independent replication and broader
-artifact availability. Where licensing, privacy, legal, or institutional
-constraints prevent full redistribution, future repositories should continue
-to preserve source and artifact schemas, executable scripts, configuration
-records, software-version information, manifests, and stable identifiers.
+Cryptographic digests, sanitized normalized outputs, aggregate and
+condition-level metrics, and the corresponding validation and compilation
+reports should likewise remain available whenever possible. These artifacts
+would support independent verification even when complete datasets or
+proprietary exports cannot be distributed publicly.
 
-They should also retain cryptographic digests, sanitized normalized outputs,
-aggregate and condition-level metrics, and the corresponding validation and
-compilation reports.
+Independent application of the protocol across laboratories, software
+versions, datasets, and forensic tasks would provide stronger evidence
+regarding the generalizability of the methodological approach. Such
+replication should continue to distinguish procedural reproducibility from
+unrestricted access to controlled, licensed, or proprietary material.
 
-Independent application of the protocol across laboratories, software versions,
-datasets, and forensic tasks would provide stronger evidence regarding the
-generalizability of the methodological approach while preserving the
-distinction between procedural reproducibility and unrestricted access to
-controlled or proprietary material.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Closing Remarks}
@@ -1146,55 +1157,65 @@ controlled or proprietary material.
 % ─────────────────────────────────────────────────────────────────────────────
 
 This thesis has shown that the operational robustness of \gls{ai}-based image
-classification and semantic retrieval in \gls{df} cannot be reduced to clean
-accuracy.
+classification and semantic retrieval in \gls{df} cannot be characterized
+through clean accuracy alone. Systems that perform well under nominal
+conditions may still exhibit missed detections, increased false-positive
+review workload, non-zero \gls{ood} weapon-assignment rates, configuration
+sensitivity, or substantial degradation under specific manipulated
+conditions.
 
-Systems that perform well under nominal conditions may still exhibit missed
-detections, additional false-positive review workload, non-zero \gls{ood}
-weapon assignment rates, configuration sensitivity, or severe degradation
-under specific adversarial conditions.
+A central contribution of the study is the parallel evaluation of transparent
+proxy models and selected black-box software configurations on the same frozen
+source population and derived perturbation suite. This design combines
+experimental control with operational relevance while maintaining a clear
+distinction between inspectable model behavior and the normalized observable
+outputs of proprietary software systems.
 
-The central contribution is the parallel evaluation of transparent proxy models
-and selected black-box software configurations on the same frozen source
-population and derived perturbation suite. This design combines experimental
-control with operational relevance while preserving the distinction between
-inspectable model behavior and normalized proprietary outputs.
-
-The \gls{fairlab} protocol makes this evaluation traceable from the source
-image to the reported metric. It connects dataset construction, human semantic
-validation, model evaluation, perturbation generation, blind-bundle
-construction, software-output normalization, quantitative analysis,
-explainability assets, and integrity controls.
+The \gls{fairlab} protocol provides the traceable methodological structure
+through which this evaluation is conducted. It connects dataset construction,
+human semantic validation, deterministic partitioning, proxy-model evaluation,
+perturbation generation, blind-bundle construction, black-box output
+normalization, quantitative analysis, qualitative explainability, and
+integrity controls.
 
 Within the defined experimental scope, no evaluated system or configuration
-minimizes all forms of operational risk. High target recall may coexist with a
-large false-positive burden. High clean accuracy may coexist with severe
-direct-target adversarial vulnerability. Selective configurations may reduce
-review workload while increasing missed detections. Forced closed-set
-assignments may also route \gls{ood} material toward an operational category
-without providing evidence of binary correctness.
+minimizes all dimensions of operational risk. High target recall may coexist
+with substantial false-positive workload, while strong clean accuracy may
+coexist with severe direct-target adversarial vulnerability. More selective
+configurations may reduce review workload while increasing missed detections,
+whereas more permissive configurations may reduce false negatives at the cost
+of routing larger quantities of unrelated material to human review.
+
+The separate \gls{ood} analysis further shows that closed-set systems may
+assign out-of-task content to an operational category even when no supervised
+binary reference assignment exists. Such behavior reinforces the need to
+distinguish \gls{ood} assignment from ordinary false-positive error and to make
+anomalous or ambiguous content visible to the analyst.
 
 These findings do not preclude the use of \gls{ai}-assisted software in
-forensic workflows. Such use becomes more defensible when supported by
-task-specific validation on representative data and by an explicit definition
-of the evaluated threat model.
+forensic workflows. They indicate that such use is more defensible when
+supported by task-specific validation on representative data, an explicit
+threat model, documented software and model versions, controlled
+configurations, and reproducible output mappings.
 
-Software and model versions must be documented, while configurations and
-output mappings must be actively managed. The process must also preserve
-source-to-output traceability, analyze \gls{ood} behavior separately, maintain
-the visibility of false negatives and false positives, and include systematic
-human verification.
+Source-to-output traceability must also be preserved, while false negatives,
+false positives, \gls{ood} assignments, and configuration-dependent behavior
+must remain visible rather than being concealed behind a single aggregate
+metric. Automated classifications, tags, bookmarks, and semantic retrieval
+results should therefore be interpreted as triage indicators rather than as
+autonomous evidentiary conclusions.
 
-Automated classifications, tags, bookmarks, and semantic retrieval results
-remain triage indicators. They may support the organization and prioritization
-of large evidence collections, but they do not replace contextual analysis,
-corroboration, chain-of-custody requirements, or expert judgment.
+Such outputs may assist in organizing and prioritizing large evidence
+collections, but they do not replace contextual analysis, corroboration,
+chain-of-custody requirements, or expert judgment. Maximum predicted-class
+probabilities and other system-specific scores likewise cannot independently
+establish correctness or forensic reliability.
 
 Operational robustness must therefore be demonstrated under the conditions in
 which a system is expected to operate. It cannot be presumed from nominal
-performance, proprietary status, or a model-specific maximum
-predicted-class probability.
+performance, proprietary status, or the apparent confidence of an automated
+output.
 
 In forensic image analysis, automation remains most defensible when it operates
-as a controlled, auditable, and reviewable component of a
+as a controlled, auditable, traceable, and reviewable component of a
 \textit{human-in-the-loop} workflow.
