@@ -173,6 +173,67 @@ Kali/Linux helper:
 bash tools/tasks.sh audit-all
 ```
 
+The helper covers repository structure, JSON, Python syntax, text guards, XAI,
+results, reporting assets, LaTeX-image references, and the local thesis log when
+present. The commercial public-extract equivalence validator remains an explicit
+separate release check.
+
+## Latest Local Validation Record
+
+On **2026-08-04**, immediately before the documentation synchronization recorded
+by later documentation-only commits, the local checkout was aligned with
+`origin/main` at:
+
+```text
+1018f307038f1a27d380df18c2725825cd8ab6b9
+```
+
+The following final artifact checks completed successfully at that exact commit:
+
+```text
+Public extract equivalence validation
+  69,000 identical decision rows
+  186 identical metric rows
+
+Results-chapter XAI public-artifact validation
+  5 thesis cases
+  20 thesis assets
+  local path leakage: none
+
+Results artifact validation
+  69,000 canonical commercial decisions
+  186 commercial metric rows
+  40,500 proxy prediction rows
+  500 unique OOD images × 5 folds = 2,500 predictions per architecture
+  41 reporting-manifest rows
+  24 unique reporting asset IDs
+
+Reporting-asset usage audit
+  missing reporting outputs: 0
+  mismatched existing thesis copies: 0
+  13 reporting asset IDs not referenced by the thesis
+
+LaTeX image audit
+  21 includegraphics references
+  21 resolved references
+  0 missing references
+  0 duplicate image groups
+```
+
+The 13 unreferenced reporting asset IDs are retained generated reporting outputs;
+they are not missing assets and do not by themselves indicate an error. Their
+presence remains subject to the reporting-layer retention rules documented in
+`results/README.md` and `results/scripts/README.md`.
+
+This validation record applies to commit `1018f307...`. Subsequent
+**documentation-only** synchronization does not redefine the frozen experimental
+artifacts, but the official release must still be compiled and checked at the
+exact release commit/tag before archival publication.
+
+The historical Chapter 6 validation report remains independently scoped to
+commit `14246371e4551726e02a7e23c5fb76b78591148d` and must not be interpreted as
+validation of later commits.
+
 ## Current Strengths
 
 The repository provides:
@@ -194,17 +255,12 @@ The repository provides:
 
 These are not methodological blockers:
 
-- optional creation of a fully pinned environment lock from a verified working
-  environment;
-- local execution and review of all validators after the consistency branch is
-  merged;
 - independent final LaTeX compilation and log inspection at the exact release
   commit;
+- optional creation of a fully pinned environment lock from a verified working
+  environment;
 - creation of the official thesis release tag after owner approval;
 - optional Zenodo or institutional DOI archival.
-
-The historical Chapter 6 validation report applies only to commit
-`14246371e4551726e02a7e23c5fb76b78591148d`; it does not validate later commits.
 
 ## Archival Readiness Checklist
 
@@ -226,14 +282,17 @@ The historical Chapter 6 validation report applies only to commit
 - [x] controlled access documented;
 - [x] LaTeX build products ignored;
 - [x] redundant thesis source tree removed;
-- [ ] local execution of all final validators after merge;
-- [ ] final LaTeX build check at the release commit;
+- [x] final artifact validators executed locally at commit `1018f307...`;
+- [ ] final LaTeX build check at the exact release commit;
 - [ ] optional environment lock;
 - [ ] final release and DOI archival after approval.
 
 ## Conclusion
 
 The repository documentation and public artifact boundaries are aligned with the
-final thesis structure and experimental claims. The remaining work concerns
-execution of the final validators, compilation at the exact release commit, and
-release management rather than experimental redesign.
+final thesis structure and experimental claims. The final artifact validators
+were successfully executed locally at commit `1018f307...`; their observed
+counts and integrity checks are recorded above. The remaining release work is
+limited to final LaTeX compilation and log inspection at the exact release
+commit, followed by release management and, optionally, DOI archival. No
+experimental redesign is required by this repository audit.
