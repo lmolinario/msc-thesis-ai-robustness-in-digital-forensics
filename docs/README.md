@@ -119,12 +119,24 @@ Chapter 6.
 
 ## Validation
 
+Run from the repository root:
+
 ```bash
+python forensic_tools/scripts/validate_public_extract_equivalence.py \
+  --source evaluation/forensic_tools/normalized_predictions.csv \
+  --metrics results/metrics/forensic_tools_metrics.csv \
+  --force
+
 python explainability/scripts/validate_chapter5_xai_artifacts.py --strict-thesis-text
 python results/scripts/23_validate_results_artifacts.py
 python results/scripts/24_audit_reporting_asset_usage.py --strict
 python tools/latex/audit_latex_images_used.py --main docs/LatexThesis/main.tex
 ```
+
+These commands define the principal artifact-validation entry points. The latest
+recorded successful local execution, including the exact validated commit and
+observed counts, is maintained in
+`docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md`.
 
 Do not delete a reporting image solely because a byte-identical thesis copy
 exists. Review usage, provenance, and release purpose first.
@@ -134,6 +146,9 @@ exists. Review usage, provenance, and release purpose first.
 Artifact documentation is under `docs/artifact/`. Audit and release records are
 under `docs/maintenance/`. Security handling is defined in
 `.github/SECURITY.md`.
+
+`docs/maintenance/RELEASE_CHECKLIST.md` is a reusable release procedure; current
+completion status belongs in `docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md`.
 
 ## Historical Snapshot
 
