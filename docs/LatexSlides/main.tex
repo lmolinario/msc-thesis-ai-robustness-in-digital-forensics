@@ -1,0 +1,412 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsfonts,amsmath,oldgerm}
+\usepackage{booktabs}
+\usepackage{array}
+\usetheme{sintef}
+\usefonttheme[onlymath]{serif}
+
+\titlebackground*{assets/background}
+
+\newcommand{\highlight}[1]{\textcolor{maincolor}{\textbf{#1}}}
+\newcommand{\smallgap}{\vspace{0.35em}}
+
+\title{Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks}
+\course{Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence}
+\author{Lello Molinario\\[0.6em]
+\small
+\textbf{Advisor:} Prof. Davide Maiorca\\
+\textbf{Co-Advisor:} Silvia Lucia Sanna, Ph.D.
+}
+\IDnumber{70/90/00369}
+\date{Academic Year 2025/2026}
+
+\begin{document}
+\maketitle
+
+% ---------------------------------------------------------------------
+\section{Motivation and Research Problem}
+
+\begin{frame}{Why this matters in Digital Forensics}
+\begin{columns}
+\begin{column}{0.54\textwidth}
+\begin{itemize}
+    \item AI-based forensic tools are increasingly used to \highlight{triage large image collections}.
+    \item The analyst often relies on labels, tags, bookmarks or semantic retrieval outputs.
+    \item In forensic contexts, a missed item is not only a technical error: it can become an \highlight{operational risk}.
+\end{itemize}
+\end{column}
+\begin{column}{0.40\textwidth}
+\begin{colorblock}[black]{sinteflightgreen}{Core message}
+The thesis does not build another weapon classifier.\\[0.35em]
+It evaluates whether AI-based forensic classification remains reliable when inputs are manipulated.
+\end{colorblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Research question}
+\begin{block}{Main question}
+How robust are AI-based forensic image-classification and media-triage systems when exposed to realistic adversarial and anti-forensic input manipulations?
+\end{block}
+
+\smallgap
+The study combines three perspectives:
+\begin{enumerate}
+    \item \highlight{Transparent proxy evaluation}: controlled models and known architectures.
+    \item \highlight{Commercial black-box evaluation}: observable outputs from forensic tools.
+    \item \highlight{Operational risk analysis}: false negatives, false positives, OOD behavior and traceability.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Research gap}
+\begin{itemize}
+    \item Existing evaluations often emphasize clean performance.
+    \item Commercial forensic tools expose heterogeneous and partial decision signals.
+    \item Robustness under anti-forensic image transformations is rarely assessed with an operational protocol.
+    \item OOD behavior is often mixed with classification performance, instead of being analyzed separately.
+\end{itemize}
+
+\begin{colorblock}[black]{sintefyellow}{Gap addressed by this thesis}
+A reproducible forensic evaluation framework that tests clean, OOD, adversarial and anti-forensic conditions under a common audit logic.
+\end{colorblock}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Contribution}
+
+\begin{frame}{Main contribution: FAIRLab}
+\begin{columns}
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+    \item Frozen dataset and controlled manifests.
+    \item Fold-aware proxy evaluation.
+    \item Blind forensic evaluation bundle.
+    \item Black-box output normalization.
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+    \item Robustness metrics.
+    \item OOD analysis.
+    \item XAI case studies.
+    \item Repository-level traceability and checksums.
+\end{itemize}
+\end{column}
+\end{columns}
+
+\begin{block}{Takeaway}
+FAIRLab is the methodological artifact: it makes the evaluation repeatable, auditable and aligned with forensic constraints.
+\end{block}
+\end{frame}
+
+\begin{frame}{At a glance}
+\begin{table}
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Component} & \textbf{Scope} \\
+\midrule
+Research focus & AI robustness in forensic image triage \\
+Frozen dataset & 500 weapon + 500 non-weapon + 500 OOD \\
+Evaluation bundle & 11,500 files \\
+Proxy models & EfficientNet-B0, ResNet18, CLIP-based proxy \\
+Commercial tools & Magnet, Excire, Cellebrite, Griffeye/T3K \\
+Conditions & Clean, OOD, adversarial, anti-forensic \\
+Public decisions & 69,000 sanitized commercial-tool decisions \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{colorblock}[black]{sinteflightgreen}{What to emphasize verbally}
+The dataset is small by design but strongly controlled: the objective is forensic robustness assessment, not generic model training.
+\end{colorblock}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Experimental Design}
+
+\begin{frame}{Dataset construction}
+\begin{columns}
+\begin{column}{0.50\textwidth}
+\begin{block}{Frozen source dataset}
+\begin{itemize}
+    \item 1,500 total images.
+    \item 500 weapon.
+    \item 500 non-weapon.
+    \item 500 out-of-distribution.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{block}{Binary subset}
+\begin{itemize}
+    \item 1,000 images.
+    \item 500 weapon.
+    \item 500 non-weapon.
+    \item Base for proxy and perturbation generation.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{colorblock}[black]{sintefyellow}{Important distinction}
+OOD images are not a third class. They are used to test how systems behave outside the intended distribution.
+\end{colorblock}
+\end{frame}
+
+\begin{frame}{Forensic evaluation bundle}
+\begin{table}
+\centering
+\small
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Bundle component} & \textbf{Files} \\
+\midrule
+Clean binary images & 1,000 \\
+Clean OOD images & 500 \\
+Adversarial samples & 5,000 \\
+Anti-forensic samples & 5,000 \\
+\midrule
+\textbf{Total} & \textbf{11,500} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{block}{Why this matters}
+The bundle is processed blindly by forensic tools; ground truth and metadata remain outside the tool-facing view.
+\end{block}
+\end{frame}
+
+\begin{frame}{Workflow}
+\small
+\begin{enumerate}
+    \item Source image pool.
+    \item Human-in-the-loop validation and dataset freezing.
+    \item Binary subset and clean OOD split.
+    \item Adversarial and anti-forensic perturbation generation.
+    \item Blind bundle construction.
+    \item Proxy-model evaluation.
+    \item Commercial black-box evaluation.
+    \item Output normalization, metrics, XAI and audit controls.
+\end{enumerate}
+
+\begin{colorblock}[black]{sinteflightgreen}{Slide note}
+This is the slide where the FAIRLab flowchart should be shown visually.
+\end{colorblock}
+\end{frame}
+
+\begin{frame}{Proxy models vs commercial tools}
+\begin{columns}
+\begin{column}{0.47\textwidth}
+\begin{block}{Proxy models}
+\begin{itemize}
+    \item EfficientNet-B0.
+    \item ResNet18.
+    \item CLIP-based visual proxy.
+    \item Controlled training and evaluation.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{block}{Black-box tools}
+\begin{itemize}
+    \item Magnet AXIOM / Magnet.AI.
+    \item Excire Foto 2025.
+    \item Cellebrite Inseyets.
+    \item Griffeye / T3K CORE.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{block}{Methodological point}
+Proxy models give experimental control; black-box tools give operational realism.
+\end{block}
+\end{frame}
+
+\begin{frame}{Attack and perturbation families}
+\begin{columns}
+\begin{column}{0.48\textwidth}
+\begin{block}{Adversarial side}
+\begin{itemize}
+    \item FGSM.
+    \item Iterative attacks.
+    \item DeepFool.
+    \item OnePixel / sparse perturbations.
+    \item Transfer and direct-target settings.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Anti-forensic side}
+\begin{itemize}
+    \item JPEG recompression.
+    \item Resize.
+    \item Blur / sharpen.
+    \item Noise.
+    \item Color shift.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Evaluation Logic}
+
+\begin{frame}{Output normalization}
+Commercial tools do not expose the same kind of output.
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Tool} & \textbf{Observable forensic signal} \\
+\midrule
+Magnet AXIOM / Magnet.AI & Possible weapons tag \\
+Excire Foto 2025 & Firearm-oriented semantic prompt membership \\
+Cellebrite Inseyets & Exported weapon classifications \\
+Griffeye / T3K CORE & CORE/Violence/Firearm bookmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{colorblock}[black]{sintefyellow}{Critical point}
+The thesis evaluates observable exported signals, not proprietary model internals, thresholds, weights or training data.
+\end{colorblock}
+\end{frame}
+
+\begin{frame}{Metrics: not only accuracy}
+\begin{columns}
+\begin{column}{0.48\textwidth}
+\begin{block}{Proxy models}
+\begin{itemize}
+    \item Accuracy.
+    \item Recall.
+    \item False-negative rate.
+    \item False-positive rate.
+    \item F1 score.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Forensic tools}
+\begin{itemize}
+    \item Weapon recall.
+    \item False-negative rate.
+    \item False-positive rate.
+    \item Unknown / no-decision behavior.
+    \item OOD weapon-rate.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{block}{Forensic framing}
+The key risk is not only whether the system is accurate, but whether it silently misses relevant evidence.
+\end{block}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Results and Interpretation}
+
+\begin{frame}{Proxy-model results: what to show}
+\begin{itemize}
+    \item Start from clean performance to establish the baseline.
+    \item Then show robustness degradation under adversarial and anti-forensic conditions.
+    \item Highlight the strongest collapse case: EfficientNet-B0 under direct-target Sigma Zero.
+    \item Emphasize that robustness differs across architectures and attack settings.
+\end{itemize}
+
+\begin{colorblock}[black]{sinteflightgreen}{Main sentence}
+Clean performance does not imply operational robustness.
+\end{colorblock}
+\end{frame}
+
+\begin{frame}{Commercial-tool results: what to show}
+\begin{itemize}
+    \item Do not present the tools as if they shared the same internal logic.
+    \item Compare them through normalized observable signals.
+    \item Focus on operational behavior: detections, misses, false alarms and no-decision cases.
+    \item Show that effects are tool-specific and condition-specific.
+\end{itemize}
+
+\begin{block}{Defensible interpretation}
+The thesis does not claim to reverse engineer commercial AI modules; it assesses their exported behavior under controlled forensic inputs.
+\end{block}
+\end{frame}
+
+\begin{frame}{OOD behavior}
+\begin{itemize}
+    \item OOD samples test what happens outside the expected binary weapon/non-weapon setting.
+    \item Forced labeling on OOD content can create operational noise.
+    \item High-confidence or repeated OOD weapon tagging should be treated as a risk signal.
+\end{itemize}
+
+\begin{colorblock}[black]{sintefyellow}{Why this slide is important}
+It shows that the problem is not only adversarial attacks. Robust forensic triage must also manage distribution shift.
+\end{colorblock}
+\end{frame}
+
+\begin{frame}{Explainability and case studies}
+\begin{itemize}
+    \item Integrated Gradients is used to inspect selected proxy-model decisions.
+    \item XAI is not treated as legal proof.
+    \item Its role is diagnostic: understanding where the model focuses under clean and perturbed conditions.
+\end{itemize}
+
+\begin{block}{Message for the commission}
+Explainability supports interpretation and debugging, but it does not replace validation, audit trails or human forensic review.
+\end{block}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Forensic Implications}
+
+\begin{frame}{Operational implications}
+\begin{itemize}
+    \item AI-based forensic tools are useful for prioritization and workload reduction.
+    \item They should not be used as autonomous evidence selectors.
+    \item Every AI-based triage result should be linked to tool version, configuration, export logic and validation context.
+    \item Human review remains necessary, especially for negative or no-decision outcomes.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Limitations}
+\begin{itemize}
+    \item Dataset size is intentionally controlled, not exhaustive.
+    \item Commercial tools are black boxes: only observable outputs are evaluated.
+    \item Some results depend on specific tool versions and export settings.
+    \item The study does not claim universal validity across all forensic domains.
+\end{itemize}
+
+\begin{colorblock}[black]{sinteflightgreen}{How to phrase it}
+These limitations are not weaknesses of the protocol; they define the exact operational perimeter of the experiment.
+\end{colorblock}
+\end{frame}
+
+\begin{frame}{Conclusions}
+\begin{enumerate}
+    \item The thesis provides a reproducible framework for forensic AI robustness assessment.
+    \item Clean accuracy alone is insufficient for evaluating forensic reliability.
+    \item Output normalization is necessary for comparing black-box forensic tools.
+    \item OOD behavior and false negatives are central operational risks.
+    \item AI-based forensic classification should remain human-supervised and validation-driven.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Future work}
+\begin{itemize}
+    \item Extend the protocol to larger and more heterogeneous forensic datasets.
+    \item Include additional media classes and tools.
+    \item Repeat tests across tool versions to measure robustness drift.
+    \item Explore stronger audit mechanisms for AI-assisted forensic triage.
+\end{itemize}
+\end{frame}
+
+\backmatter
+\end{document}
