@@ -153,22 +153,96 @@
 \newcommand{\course}[1]{\def\@courseLabel{#1}}
 \newcommand{\IDnumber}[1]{\def\@IDnumber{#1}}
 
-% Define the title page
-\setbeamertemplate{title page}{%
-  % Reposition the box in an inelegant way - but it works!
-  \hspace{-12mm}
-  \vspace{-10mm}
-  \begin{beamercolorbox}[wd=0.72\textwidth,sep=10pt,leftskip=8mm]{title}%
-    {\usebeamerfont{title}\inserttitle}
-  
-    {\usebeamerfont{subtitle}\insertsubtitle}
+\def\@advisor{}
+\def\@coadvisor{}
 
-    {\usebeamerfont{subtitle}\@courseLabel}
-    
-    {\usebeamerfont{author}\usebeamercolor[fg]{author}\textbf{\insertauthor} \ifdefempty{\@IDnumber}{}{(\@IDnumber)}}
-  
-    {\usebeamerfont{date}\usebeamercolor[fg]{date}\insertdate}
-  \end{beamercolorbox}
+\newcommand{\advisor}[1]{\def\@advisor{#1}}
+\newcommand{\coadvisor}[1]{\def\@coadvisor{#1}}
+
+\setbeamertemplate{title page}{%
+
+  % ------------------------------------------------
+  % TITLE + COURSE
+  % ------------------------------------------------
+  \vspace*{0.8cm}
+
+  \begin{minipage}{0.58\paperwidth}
+    \centering
+
+    {\usebeamerfont{title}
+     \usebeamercolor[fg]{title}
+     \inserttitle\par}
+
+    \vspace{0.45cm}
+
+    {\usebeamerfont{subtitle}
+     \@courseLabel\par}
+
+  \end{minipage}
+
+  \vspace{1.0cm}
+
+  % ------------------------------------------------
+  % ADVISORS + CANDIDATE
+  % tutto contenuto nella parte bianca
+  % ------------------------------------------------
+
+  \begin{minipage}{0.55\paperwidth}
+
+    \begin{columns}[T,totalwidth=\textwidth]
+
+      % LEFT
+      \begin{column}{0.48\textwidth}
+        \raggedright
+
+        {\usebeamerfont{author}
+        \usebeamercolor[fg]{author}
+
+        \textbf{Advisor}\\
+        \@advisor
+
+        \vspace{0.35cm}
+
+        \textbf{Co-Advisor}\\
+        \@coadvisor
+        }
+
+      \end{column}
+
+      % RIGHT
+      \begin{column}{0.48\textwidth}
+        \raggedleft
+
+        {\usebeamerfont{author}
+        \usebeamercolor[fg]{author}
+
+        \textbf{Candidate}\\
+        \insertauthor\\[0.15cm]
+        \ifdefempty{\@IDnumber}{}{Student ID: \@IDnumber}
+        }
+
+      \end{column}
+
+    \end{columns}
+
+  \end{minipage}
+
+  \vfill
+
+  % ------------------------------------------------
+  % ACADEMIC YEAR
+  % ------------------------------------------------
+
+  \begin{minipage}{0.55\paperwidth}
+    \centering
+
+    {\usebeamerfont{date}
+     \usebeamercolor[fg]{date}
+     \insertdate}
+
+  \end{minipage}
+
+  \vspace{0.45cm}
 }
 
 % Define slide splitting dimensions (e.g. title and chapter slides)
