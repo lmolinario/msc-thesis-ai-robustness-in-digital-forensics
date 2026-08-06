@@ -39,24 +39,24 @@
 \end{column}
 \begin{column}{0.40\textwidth}
 \begin{colorblock}[black]{sinteflightgreen}{Core message}
-The thesis does not build another weapon classifier.\\[0.35em]
-It evaluates whether AI-based forensic classification remains reliable when inputs are manipulated.
+The contribution is not a new weapon classifier.\\[0.35em]
+Proxy models are controlled experimental references used to evaluate operational robustness.
 \end{colorblock}
 \end{column}
 \end{columns}
 \end{frame}
 
-\begin{frame}{Research question}
+\begin{frame}{Research questions}
 \begin{block}{Main question}
-How robust are AI-based forensic image-classification and media-triage systems when exposed to realistic adversarial and anti-forensic input manipulations?
+How robust are AI-based forensic image-classification and media-triage systems when exposed to adversarial, anti-forensic and out-of-distribution inputs?
 \end{block}
 
-\smallgap
-The study combines three perspectives:
+\small
 \begin{enumerate}
-    \item \highlight{Transparent proxy evaluation}: controlled models and known architectures.
-    \item \highlight{Commercial black-box evaluation}: observable outputs from forensic tools.
-    \item \highlight{Operational risk analysis}: false negatives, false positives, OOD behavior and traceability.
+    \item \highlight{RQ1}: Proxy robustness across clean, OOD, adversarial and anti-forensic conditions.
+    \item \highlight{RQ2}: Direct-target attacks, cross-architecture transfer and model-agnostic Color Shift.
+    \item \highlight{RQ3}: Black-box behavior, observable output semantics and configuration sensitivity.
+    \item \highlight{RQ4}: Operational error patterns and implications for continued human review.
 \end{enumerate}
 \end{frame}
 
@@ -69,14 +69,14 @@ The study combines three perspectives:
 \end{itemize}
 
 \begin{colorblock}[black]{sintefyellow}{Gap addressed by this thesis}
-A reproducible forensic evaluation framework that tests clean, OOD, adversarial and anti-forensic conditions under a common audit logic.
+A task-specific methodological protocol that tests clean, OOD, adversarial and anti-forensic conditions under a common traceability logic.
 \end{colorblock}
 \end{frame}
 
 % ---------------------------------------------------------------------
 \section{Contribution}
 
-\begin{frame}{Main contribution: FAIRLab}
+\begin{frame}{Main contribution: the FAIRLab protocol}
 \begin{columns}
 \begin{column}{0.48\textwidth}
 \begin{itemize}
@@ -97,7 +97,7 @@ A reproducible forensic evaluation framework that tests clean, OOD, adversarial 
 \end{columns}
 
 \begin{block}{Takeaway}
-FAIRLab is the methodological artifact: it makes the evaluation repeatable, auditable and aligned with forensic constraints.
+FAIRLab is a task-specific methodological protocol that makes the evaluation reproducible, auditable and operationally traceable.
 \end{block}
 \end{frame}
 
@@ -113,7 +113,7 @@ Research focus & AI robustness in forensic image triage \\
 Frozen dataset & 500 weapon + 500 non-weapon + 500 OOD \\
 Evaluation bundle & 11,500 files \\
 Proxy models & EfficientNet-B0, ResNet18, CLIP-based proxy \\
-Commercial tools & Magnet, Excire, Cellebrite, Griffeye/T3K \\
+Black-box evaluation & 4 systems / 6 frozen configurations \\
 Conditions & Clean, OOD, adversarial, anti-forensic \\
 Public decisions & 69,000 sanitized commercial-tool decisions \\
 \bottomrule
@@ -176,11 +176,11 @@ Anti-forensic samples & 5,000 \\
 \end{table}
 
 \begin{block}{Why this matters}
-The bundle is processed blindly by forensic tools; ground truth and metadata remain outside the tool-facing view.
+The bundle is processed blindly by forensic tools; ground truth and evaluation metadata remain outside the tool-facing view. The 10,000 manipulated files are source--condition variants, not independent real-world cases.
 \end{block}
 \end{frame}
 
-\begin{frame}{Workflow}
+\begin{frame}[shrink=2]{Workflow}
 \small
 \begin{enumerate}
     \item Source image pool.
@@ -193,65 +193,70 @@ The bundle is processed blindly by forensic tools; ground truth and metadata rem
     \item Output normalization, metrics, XAI and audit controls.
 \end{enumerate}
 
-\begin{colorblock}[black]{sinteflightgreen}{Slide note}
-This is the slide where the FAIRLab flowchart should be shown visually.
+\begin{colorblock}[black]{sinteflightgreen}{Traceability principle}
+FAIRLab separates source data, transformations, tool-facing inputs and evaluation metadata while preserving deterministic identifiers and checksums.
 \end{colorblock}
 \end{frame}
 
-\begin{frame}{Proxy models vs commercial tools}
+\begin{frame}{Proxy models vs black-box systems}
 \begin{columns}
 \begin{column}{0.47\textwidth}
-\begin{block}{Proxy models}
+\begin{block}{Transparent proxies}
 \begin{itemize}
     \item EfficientNet-B0.
     \item ResNet18.
-    \item CLIP-based visual proxy.
-    \item Controlled training and evaluation.
+    \item CLIP: frozen visual encoder + supervised binary head.
+    \item Controlled training, gradients and diagnostic outputs.
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.49\textwidth}
-\begin{block}{Black-box tools}
+\begin{block}{Black-box systems}
 \begin{itemize}
     \item Magnet AXIOM / Magnet.AI.
-    \item Excire Foto 2025.
+    \item Excire Foto 2025: D20, D50 and D80.
     \item Cellebrite Inseyets.
-    \item Griffeye / T3K CORE.
+    \item Magnet Griffeye / T3K CORE.
 \end{itemize}
 \end{block}
 \end{column}
 \end{columns}
 
 \begin{block}{Methodological point}
-Proxy models give experimental control; black-box tools give operational realism.
+Proxy models provide experimental control; four software systems and six frozen configurations provide operational realism.
 \end{block}
 \end{frame}
 
-\begin{frame}{Attack and perturbation families}
+\begin{frame}{Perturbation suite}
+\small
 \begin{columns}
 \begin{column}{0.48\textwidth}
-\begin{block}{Adversarial side}
+\begin{block}{Adversarial branch}
 \begin{itemize}
     \item FGSM.
-    \item Iterative attacks.
-    \item DeepFool.
-    \item OnePixel / sparse perturbations.
-    \item Transfer and direct-target settings.
+    \item One Pixel Attack.
+    \item Sigma Zero Attack.
+    \item SuperDeepFool.
+    \item Color Shift: model-agnostic adversarial-style condition.
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{block}{Anti-forensic side}
+\begin{block}{Anti-forensic branch}
 \begin{itemize}
-    \item JPEG recompression.
-    \item Resize.
-    \item Blur / sharpen.
-    \item Noise.
-    \item Color shift.
+    \item JPEG Recompression.
+    \item Resample + Resize.
+    \item Gaussian Blur.
+    \item Histogram Modification.
+    \item Contrast Stretching.
 \end{itemize}
 \end{block}
 \end{column}
 \end{columns}
+
+\begin{block}{Direct target vs transfer}
+Model-dependent attacks were generated only against EfficientNet-B0: direct-target evaluation on EfficientNet-B0 and empirical transfer evaluation on ResNet18, CLIP and the black-box systems.
+\end{block}
 \end{frame}
 
 % ---------------------------------------------------------------------
@@ -268,8 +273,8 @@ Commercial tools do not expose the same kind of output.
 \textbf{Tool} & \textbf{Observable forensic signal} \\
 \midrule
 Magnet AXIOM / Magnet.AI & Possible weapons tag \\
-Excire Foto 2025 & Firearm-oriented semantic prompt membership \\
-Cellebrite Inseyets & Exported weapon classifications \\
+Excire Foto 2025 & Union of eight firearm-oriented semantic queries \\
+Cellebrite Inseyets & Exported \texttt{Armi} / \texttt{Pistola} / \texttt{Fucile} labels \\
 Griffeye / T3K CORE & CORE/Violence/Firearm bookmark \\
 \bottomrule
 \end{tabular}
@@ -280,87 +285,125 @@ The thesis evaluates observable exported signals, not proprietary model internal
 \end{colorblock}
 \end{frame}
 
-\begin{frame}{Metrics: not only accuracy}
+\begin{frame}[shrink=2]{Metrics: not only accuracy}
+\small
 \begin{columns}
 \begin{column}{0.48\textwidth}
-\begin{block}{Proxy models}
+\begin{block}{Binary performance}
 \begin{itemize}
-    \item Accuracy.
-    \item Recall.
-    \item False-negative rate.
-    \item False-positive rate.
-    \item F1 score.
+    \item Accuracy and balanced accuracy.
+    \item Weapon recall, precision and F1.
+    \item False-negative and false-positive rates.
+\end{itemize}
+\end{block}
+\begin{block}{Robustness}
+\begin{itemize}
+    \item Accuracy drop and induced errors.
+    \item Directional prediction transitions.
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{block}{Forensic tools}
+\begin{block}{OOD and coverage}
 \begin{itemize}
-    \item Weapon recall.
-    \item False-negative rate.
-    \item False-positive rate.
-    \item Unknown / no-decision behavior.
-    \item OOD weapon-rate.
+    \item OOD weapon-assignment rate.
+    \item Matching and unknown-state handling.
+\end{itemize}
+\end{block}
+\begin{block}{Proxy-only diagnostics}
+\begin{itemize}
+    \item Maximum predicted-class probability.
+    \item Qualitative Integrated Gradients analysis.
 \end{itemize}
 \end{block}
 \end{column}
 \end{columns}
 
 \begin{block}{Forensic framing}
-The key risk is not only whether the system is accurate, but whether it silently misses relevant evidence.
+The central risk is not only aggregate error, but the direction of errors and whether relevant evidence is silently deprioritized.
 \end{block}
 \end{frame}
 
 % ---------------------------------------------------------------------
 \section{Results and Interpretation}
 
-\begin{frame}{Proxy-model results: what to show}
+\begin{frame}{Proxy-model results}
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Model} & \textbf{Clean acc.} & \textbf{Largest adversarial drop} & \textbf{Largest anti-forensic drop} \\
+\midrule
+EfficientNet-B0 & 0.978 & 0.963 -- Sigma Zero (direct) & 0.013 -- Gaussian Blur \\
+ResNet18 & 0.964 & 0.046 -- FGSM (transfer) & 0.030 -- Histogram Mod. \\
+CLIP proxy & 0.927 & 0.013 -- FGSM (transfer) & 0.002 -- JPEG / Histogram \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \begin{itemize}
-    \item Start from clean performance to establish the baseline.
-    \item Then show robustness degradation under adversarial and anti-forensic conditions.
-    \item Highlight the strongest collapse case: EfficientNet-B0 under direct-target Sigma Zero.
-    \item Emphasize that robustness differs across architectures and attack settings.
+    \item EfficientNet-B0 falls from 0.978 to 0.015 under direct-target Sigma Zero.
+    \item The same frozen artifacts do not produce equivalent collapse on ResNet18 or CLIP.
+    \item Anti-forensic transformations produce smaller aggregate degradation, but still induce operationally relevant error transitions.
 \end{itemize}
 
-\begin{colorblock}[black]{sinteflightgreen}{Main sentence}
-Clean performance does not imply operational robustness.
+\begin{colorblock}[black]{sinteflightgreen}{Main result}
+Clean performance does not imply operational robustness, and direct-target vulnerability must be distinguished from transferability.
 \end{colorblock}
 \end{frame}
 
-\begin{frame}{Commercial-tool results: what to show}
+\begin{frame}[shrink=3]{Black-box results}
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Configuration} & \textbf{Accuracy} & \textbf{Recall} & \textbf{FNR} & \textbf{FPR} \\
+\midrule
+Magnet AXIOM / Magnet.AI & 0.933 & 0.901 & 0.099 & 0.035 \\
+Excire D20 & 0.911 & 0.857 & 0.143 & 0.036 \\
+Excire D50 & 0.925 & 0.949 & 0.051 & 0.099 \\
+Excire D80 & 0.887 & 0.981 & 0.019 & 0.207 \\
+Cellebrite Inseyets & 0.958 & 0.958 & 0.042 & 0.042 \\
+Griffeye / T3K CORE & 0.972 & 0.951 & 0.049 & 0.007 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \begin{itemize}
-    \item Do not present the tools as if they shared the same internal logic.
-    \item Compare them through normalized observable signals.
-    \item Focus on operational behavior: detections, misses, false alarms and no-decision cases.
-    \item Show that effects are tool-specific and condition-specific.
+    \item Excire shows the clearest configuration-sensitive trade-off between missed targets and review workload.
+    \item No unknown normalized decisions occurred in the canonical 69,000-decision population.
 \end{itemize}
 
-\begin{block}{Defensible interpretation}
-The thesis does not claim to reverse engineer commercial AI modules; it assesses their exported behavior under controlled forensic inputs.
+\begin{block}{Interpretation boundary}
+These are protocol- and configuration-specific operational profiles, not a universal ranking or a reverse engineering of proprietary models.
 \end{block}
 \end{frame}
 
 \begin{frame}{OOD behavior}
 \begin{itemize}
-    \item OOD samples test what happens outside the expected binary weapon/non-weapon setting.
-    \item Forced labeling on OOD content can create operational noise.
-    \item High-confidence or repeated OOD weapon tagging should be treated as a risk signal.
+    \item OOD images probe behavior outside the nominal weapon / non-weapon task.
+    \item An OOD weapon assignment is not a supervised false positive, but it may increase review workload or distort prioritization.
+    \item Excire illustrates configuration sensitivity: the OOD weapon-assignment rate rises from 0.238 at D20 to 0.522 at D80.
+    \item Proxy Max-P values are intra-model diagnostic indicators only; they are not calibrated probabilities comparable across architectures.
 \end{itemize}
 
-\begin{colorblock}[black]{sintefyellow}{Why this slide is important}
-It shows that the problem is not only adversarial attacks. Robust forensic triage must also manage distribution shift.
+\begin{colorblock}[black]{sintefyellow}{Denominator caveat}
+Proxy OOD rates aggregate five fold-specific responses per image; black-box rates use one normalized decision per image.
 \end{colorblock}
 \end{frame}
 
 \begin{frame}{Explainability and case studies}
 \begin{itemize}
-    \item Integrated Gradients is used to inspect selected proxy-model decisions.
-    \item XAI is not treated as legal proof.
-    \item Its role is diagnostic: understanding where the model focuses under clean and perturbed conditions.
+    \item Integrated Gradients is applied to five purposively selected EfficientNet-B0 cases.
+    \item The analysis is qualitative and diagnostic, not a quantitative robustness metric.
+    \item It compares model focus under clean and perturbed conditions.
+    \item It does not explain the proprietary black-box systems and is not treated as legal proof.
 \end{itemize}
 
 \begin{block}{Message for the commission}
-Explainability supports interpretation and debugging, but it does not replace validation, audit trails or human forensic review.
+Explainability supports interpretation and debugging, but it does not replace validation, traceability or human forensic review.
 \end{block}
 \end{frame}
 
@@ -372,39 +415,42 @@ Explainability supports interpretation and debugging, but it does not replace va
     \item AI-based forensic tools are useful for prioritization and workload reduction.
     \item They should not be used as autonomous evidence selectors.
     \item Every AI-based triage result should be linked to tool version, configuration, export logic and validation context.
-    \item Human review remains necessary, especially for negative or no-decision outcomes.
+    \item Human review remains necessary, especially for negative decisions, OOD assignments and configuration-sensitive outputs.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Limitations}
+\small
 \begin{itemize}
-    \item Dataset size is intentionally controlled, not exhaustive.
-    \item Commercial tools are black boxes: only observable outputs are evaluated.
-    \item Some results depend on specific tool versions and export settings.
-    \item The study does not claim universal validity across all forensic domains.
+    \item The corpus contains 1,500 manually selected images; review was performed by one reviewer without inter-rater agreement.
+    \item Each perturbation condition uses one frozen parameterization rather than a severity sweep.
+    \item Model-dependent attacks were generated only against EfficientNet-B0.
+    \item Black-box findings depend on software version, configuration, export semantics and normalization mapping.
+    \item The study evaluates operational triage behavior, not legal admissibility or evidentiary weight.
 \end{itemize}
 
-\begin{colorblock}[black]{sinteflightgreen}{How to phrase it}
-These limitations are not weaknesses of the protocol; they define the exact operational perimeter of the experiment.
+\begin{colorblock}[black]{sinteflightgreen}{Scope of the claims}
+The thesis provides a protocol-specific robustness assessment, not software certification, universal ranking or evidentiary validation.
 \end{colorblock}
 \end{frame}
 
 \begin{frame}{Conclusions}
 \begin{enumerate}
-    \item The thesis provides a reproducible framework for forensic AI robustness assessment.
-    \item Clean accuracy alone is insufficient for evaluating forensic reliability.
-    \item Output normalization is necessary for comparing black-box forensic tools.
-    \item OOD behavior and false negatives are central operational risks.
-    \item AI-based forensic classification should remain human-supervised and validation-driven.
+    \item FAIRLab provides a reproducible and auditable protocol for forensic AI robustness assessment.
+    \item Clean accuracy alone is insufficient for evaluating operational reliability.
+    \item Direct-target collapse does not imply equivalent cross-architecture or black-box transfer.
+    \item Black-box behavior depends on observable output semantics and documented configuration.
+    \item OOD assignments and directional errors reinforce the need for validation-driven, human-supervised triage.
 \end{enumerate}
 \end{frame}
 
 \begin{frame}{Future work}
 \begin{itemize}
-    \item Extend the protocol to larger and more heterogeneous forensic datasets.
-    \item Include additional media classes and tools.
-    \item Repeat tests across tool versions to measure robustness drift.
-    \item Explore stronger audit mechanisms for AI-assisted forensic triage.
+    \item Larger, more diverse forensic corpora with multi-annotator validation and agreement measures.
+    \item Matched direct-target attacks against all transparent proxy architectures.
+    \item OOD rejection, abstention and open-set mechanisms evaluated against analyst workload.
+    \item Multiple transformation severity levels and chained adversarial / anti-forensic conditions.
+    \item Longitudinal testing across software versions, configurations and defensible normalization mappings.
 \end{itemize}
 \end{frame}
 
