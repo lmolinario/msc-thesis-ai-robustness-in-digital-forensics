@@ -37,6 +37,7 @@
     \item In forensic contexts, a missed item is not only a technical error: it can become an \highlight{operational risk}.
 \end{itemize}
 \end{column}
+
 \begin{column}{0.40\textwidth}
 \begin{colorblock}[black]{sinteflightgreen}{Core message}
 The contribution is not a new weapon classifier.\\[0.35em]
@@ -46,21 +47,29 @@ Proxy models are controlled experimental references used to evaluate operational
 \end{columns}
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Research questions}
+
 \begin{block}{Main question}
 How robust are AI-based forensic image-classification and media-triage systems when exposed to adversarial, anti-forensic and out-of-distribution inputs?
 \end{block}
 
 \small
+
 \begin{enumerate}
-    \item \highlight{RQ1}: Proxy robustness across clean, OOD, adversarial and anti-forensic conditions.
+    \item \highlight{RQ1}: Proxy clean-baseline performance retention under OOD, adversarial and anti-forensic conditions.
     \item \highlight{RQ2}: Direct-target attacks, cross-architecture transfer and model-agnostic Color Shift.
     \item \highlight{RQ3}: Black-box behavior, observable output semantics and configuration sensitivity.
-    \item \highlight{RQ4}: Operational error patterns and implications for continued human review.
+    \item \highlight{RQ4}: Error transitions, OOD assignments and unknown states relevant to continued human review.
 \end{enumerate}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Research gap}
+
 \begin{itemize}
     \item Existing evaluations often emphasize clean performance.
     \item Commercial forensic tools expose heterogeneous and partial decision signals.
@@ -71,13 +80,16 @@ How robust are AI-based forensic image-classification and media-triage systems w
 \begin{colorblock}[black]{sintefyellow}{Gap addressed by this thesis}
 A task-specific methodological protocol that tests clean, OOD, adversarial and anti-forensic conditions under a common traceability logic.
 \end{colorblock}
+
 \end{frame}
 
 % ---------------------------------------------------------------------
 \section{Contribution}
 
 \begin{frame}{Main contribution: the FAIRLab protocol}
+
 \begin{columns}
+
 \begin{column}{0.48\textwidth}
 \begin{itemize}
     \item Frozen dataset and controlled manifests.
@@ -86,6 +98,7 @@ A task-specific methodological protocol that tests clean, OOD, adversarial and a
     \item Black-box output normalization.
 \end{itemize}
 \end{column}
+
 \begin{column}{0.48\textwidth}
 \begin{itemize}
     \item Robustness metrics.
@@ -94,14 +107,19 @@ A task-specific methodological protocol that tests clean, OOD, adversarial and a
     \item Repository-level traceability and checksums.
 \end{itemize}
 \end{column}
+
 \end{columns}
 
 \begin{block}{Takeaway}
 FAIRLab is a task-specific methodological protocol that makes the evaluation reproducible, auditable and operationally traceable.
 \end{block}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{At a glance}
+
 \begin{table}
 \centering
 \small
@@ -115,7 +133,7 @@ Evaluation bundle & 11,500 files \\
 Proxy models & EfficientNet-B0, ResNet18, CLIP-based proxy \\
 Black-box evaluation & 4 systems / 6 frozen configurations \\
 Conditions & Clean, OOD, adversarial, anti-forensic \\
-Public decisions & 69,000 sanitized commercial-tool decisions \\
+Matched decisions & 69,000 normalized commercial-tool decisions \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -123,13 +141,16 @@ Public decisions & 69,000 sanitized commercial-tool decisions \\
 \begin{colorblock}[black]{sinteflightgreen}{What to emphasize verbally}
 The dataset is small by design but strongly controlled: the objective is forensic robustness assessment, not generic model training.
 \end{colorblock}
+
 \end{frame}
 
 % ---------------------------------------------------------------------
 \section{Experimental Design}
 
 \begin{frame}{Dataset construction}
+
 \begin{columns}
+
 \begin{column}{0.50\textwidth}
 \begin{block}{Frozen source dataset}
 \begin{itemize}
@@ -140,6 +161,7 @@ The dataset is small by design but strongly controlled: the objective is forensi
 \end{itemize}
 \end{block}
 \end{column}
+
 \begin{column}{0.46\textwidth}
 \begin{block}{Binary subset}
 \begin{itemize}
@@ -150,14 +172,19 @@ The dataset is small by design but strongly controlled: the objective is forensi
 \end{itemize}
 \end{block}
 \end{column}
+
 \end{columns}
 
 \begin{colorblock}[black]{sintefyellow}{Important distinction}
 OOD images are not a third class. They are used to test how systems behave outside the intended distribution.
 \end{colorblock}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Forensic evaluation bundle}
+
 \begin{table}
 \centering
 \small
@@ -178,10 +205,15 @@ Anti-forensic samples & 5,000 \\
 \begin{block}{Why this matters}
 The bundle is processed blindly by forensic tools; ground truth and evaluation metadata remain outside the tool-facing view. The 10,000 manipulated files are source--condition variants, not independent real-world cases.
 \end{block}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}[shrink=2]{Workflow}
+
 \small
+
 \begin{enumerate}
     \item Source image pool.
     \item Human-in-the-loop validation and dataset freezing.
@@ -196,10 +228,15 @@ The bundle is processed blindly by forensic tools; ground truth and evaluation m
 \begin{colorblock}[black]{sinteflightgreen}{Traceability principle}
 FAIRLab separates source data, transformations, tool-facing inputs and evaluation metadata while preserving deterministic identifiers and checksums.
 \end{colorblock}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Proxy models vs black-box systems}
+
 \begin{columns}
+
 \begin{column}{0.47\textwidth}
 \begin{block}{Transparent proxies}
 \begin{itemize}
@@ -210,6 +247,7 @@ FAIRLab separates source data, transformations, tool-facing inputs and evaluatio
 \end{itemize}
 \end{block}
 \end{column}
+
 \begin{column}{0.49\textwidth}
 \begin{block}{Black-box systems}
 \begin{itemize}
@@ -220,18 +258,25 @@ FAIRLab separates source data, transformations, tool-facing inputs and evaluatio
 \end{itemize}
 \end{block}
 \end{column}
+
 \end{columns}
 
 \begin{block}{Methodological point}
 Proxy models provide experimental control; four software systems and six frozen configurations provide operational realism.
 \end{block}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Perturbation suite}
+
 \small
+
 \begin{columns}
+
 \begin{column}{0.48\textwidth}
-\begin{block}{Adversarial branch}
+\begin{block}{Adversarial / adversarial-style branch}
 \begin{itemize}
     \item FGSM.
     \item One Pixel Attack.
@@ -241,6 +286,7 @@ Proxy models provide experimental control; four software systems and six frozen 
 \end{itemize}
 \end{block}
 \end{column}
+
 \begin{column}{0.48\textwidth}
 \begin{block}{Anti-forensic branch}
 \begin{itemize}
@@ -252,17 +298,20 @@ Proxy models provide experimental control; four software systems and six frozen 
 \end{itemize}
 \end{block}
 \end{column}
+
 \end{columns}
 
 \begin{block}{Direct target vs transfer}
 Model-dependent attacks were generated only against EfficientNet-B0: direct-target evaluation on EfficientNet-B0 and empirical transfer evaluation on ResNet18, CLIP and the black-box systems.
 \end{block}
+
 \end{frame}
 
 % ---------------------------------------------------------------------
 \section{Evaluation Logic}
 
 \begin{frame}{Output normalization}
+
 Commercial tools do not expose the same kind of output.
 
 \begin{table}
@@ -283,12 +332,19 @@ Griffeye / T3K CORE & CORE/Violence/Firearm bookmark \\
 \begin{colorblock}[black]{sintefyellow}{Critical point}
 The thesis evaluates observable exported signals, not proprietary model internals, thresholds, weights or training data.
 \end{colorblock}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}[shrink=2]{Metrics: not only accuracy}
+
 \small
+
 \begin{columns}
+
 \begin{column}{0.48\textwidth}
+
 \begin{block}{Binary performance}
 \begin{itemize}
     \item Accuracy and balanced accuracy.
@@ -296,38 +352,47 @@ The thesis evaluates observable exported signals, not proprietary model internal
     \item False-negative and false-positive rates.
 \end{itemize}
 \end{block}
+
 \begin{block}{Robustness}
 \begin{itemize}
     \item Accuracy drop and induced errors.
     \item Directional prediction transitions.
 \end{itemize}
 \end{block}
+
 \end{column}
+
 \begin{column}{0.48\textwidth}
+
 \begin{block}{OOD and coverage}
 \begin{itemize}
     \item OOD weapon-assignment rate.
     \item Matching and unknown-state handling.
 \end{itemize}
 \end{block}
+
 \begin{block}{Proxy-only diagnostics}
 \begin{itemize}
     \item Maximum predicted-class probability.
     \item Qualitative Integrated Gradients analysis.
 \end{itemize}
 \end{block}
+
 \end{column}
+
 \end{columns}
 
 \begin{block}{Forensic framing}
 The central risk is not only aggregate error, but the direction of errors and whether relevant evidence is silently deprioritized.
 \end{block}
+
 \end{frame}
 
 % ---------------------------------------------------------------------
 \section{Results and Interpretation}
 
 \begin{frame}{Proxy-model results}
+
 \begin{table}
 \centering
 \scriptsize
@@ -349,11 +414,15 @@ CLIP proxy & 0.927 & 0.013 -- FGSM (transfer) & 0.002 -- JPEG / Histogram \\
 \end{itemize}
 
 \begin{colorblock}[black]{sinteflightgreen}{Main result}
-Clean performance does not imply operational robustness, and direct-target vulnerability must be distinguished from transferability.
+Clean performance does not imply uniform operational robustness, and direct-target vulnerability must be distinguished from transferability.
 \end{colorblock}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}[shrink=3]{Black-box results}
+
 \begin{table}
 \centering
 \scriptsize
@@ -371,6 +440,12 @@ Griffeye / T3K CORE & 0.972 & 0.951 & 0.049 & 0.007 \\
 \end{tabular}
 \end{table}
 
+{\scriptsize
+Bundle-level binary metrics are computed on 11,000 items
+(clean + adversarial + anti-forensic); the 500 OOD samples
+are analyzed separately.
+}
+
 \begin{itemize}
     \item Excire shows the clearest configuration-sensitive trade-off between missed targets and review workload.
     \item No unknown normalized decisions occurred in the canonical 69,000-decision population.
@@ -379,12 +454,26 @@ Griffeye / T3K CORE & 0.972 & 0.951 & 0.049 & 0.007 \\
 \begin{block}{Interpretation boundary}
 These are protocol- and configuration-specific operational profiles, not a universal ranking or a reverse engineering of proprietary models.
 \end{block}
+
 \end{frame}
 
-\begin{frame}{OOD behavior}
+% ---------------------------------------------------------------------
+
+\begin{frame}[shrink=2]{OOD behavior}
+
 \begin{itemize}
     \item OOD images probe behavior outside the nominal weapon / non-weapon task.
     \item An OOD weapon assignment is not a supervised false positive, but it may increase review workload or distort prioritization.
+\end{itemize}
+
+\begin{block}{Proxy OOD behavior}
+Fold-aggregated weapon-assignment rates:
+\textbf{0.370} EfficientNet-B0,
+\textbf{0.438} ResNet18,
+and \textbf{0.836} CLIP-based proxy.
+\end{block}
+
+\begin{itemize}
     \item Excire illustrates configuration sensitivity: the OOD weapon-assignment rate rises from 0.238 at D20 to 0.522 at D80.
     \item Proxy Max-P values are intra-model diagnostic indicators only; they are not calibrated probabilities comparable across architectures.
 \end{itemize}
@@ -392,35 +481,46 @@ These are protocol- and configuration-specific operational profiles, not a unive
 \begin{colorblock}[black]{sintefyellow}{Denominator caveat}
 Proxy OOD rates aggregate five fold-specific responses per image; black-box rates use one normalized decision per image.
 \end{colorblock}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Explainability and case studies}
+
 \begin{itemize}
     \item Integrated Gradients is applied to five purposively selected EfficientNet-B0 cases.
     \item The analysis is qualitative and diagnostic, not a quantitative robustness metric.
     \item It compares model focus under clean and perturbed conditions.
-    \item It does not explain the proprietary black-box systems and is not treated as legal proof.
+    \item It does not explain the proprietary black-box systems and is not treated as proof of classification correctness or forensic validity.
 \end{itemize}
 
 \begin{block}{Message for the commission}
 Explainability supports interpretation and debugging, but it does not replace validation, traceability or human forensic review.
 \end{block}
+
 \end{frame}
 
 % ---------------------------------------------------------------------
 \section{Forensic Implications}
 
 \begin{frame}{Operational implications}
+
 \begin{itemize}
     \item AI-based forensic tools are useful for prioritization and workload reduction.
     \item They should not be used as autonomous evidence selectors.
     \item Every AI-based triage result should be linked to tool version, configuration, export logic and validation context.
     \item Human review remains necessary, especially for negative decisions, OOD assignments and configuration-sensitive outputs.
 \end{itemize}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Limitations}
+
 \small
+
 \begin{itemize}
     \item The corpus contains 1,500 manually selected images; review was performed by one reviewer without inter-rater agreement.
     \item Each perturbation condition uses one frozen parameterization rather than a severity sweep.
@@ -432,9 +532,13 @@ Explainability supports interpretation and debugging, but it does not replace va
 \begin{colorblock}[black]{sinteflightgreen}{Scope of the claims}
 The thesis provides a protocol-specific robustness assessment, not software certification, universal ranking or evidentiary validation.
 \end{colorblock}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Conclusions}
+
 \begin{enumerate}
     \item FAIRLab provides a reproducible and auditable protocol for forensic AI robustness assessment.
     \item Clean accuracy alone is insufficient for evaluating operational reliability.
@@ -442,9 +546,13 @@ The thesis provides a protocol-specific robustness assessment, not software cert
     \item Black-box behavior depends on observable output semantics and documented configuration.
     \item OOD assignments and directional errors reinforce the need for validation-driven, human-supervised triage.
 \end{enumerate}
+
 \end{frame}
 
+% ---------------------------------------------------------------------
+
 \begin{frame}{Future work}
+
 \begin{itemize}
     \item Larger, more diverse forensic corpora with multi-annotator validation and agreement measures.
     \item Matched direct-target attacks against all transparent proxy architectures.
@@ -452,6 +560,7 @@ The thesis provides a protocol-specific robustness assessment, not software cert
     \item Multiple transformation severity levels and chained adversarial / anti-forensic conditions.
     \item Longitudinal testing across software versions, configurations and defensible normalization mappings.
 \end{itemize}
+
 \end{frame}
 
 \backmatter
