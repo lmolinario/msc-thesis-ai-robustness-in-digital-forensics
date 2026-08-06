@@ -182,52 +182,52 @@
 
   \vspace{1.0cm}
 
-  % ------------------------------------------------
-  % ADVISORS + CANDIDATE
-  % tutto contenuto nella parte bianca
-  % ------------------------------------------------
+% ------------------------------------------------
+% ADVISORS + CANDIDATE
+% tutto contenuto nella parte bianca
+% ------------------------------------------------
 
-  \begin{minipage}{0.55\paperwidth}
+\begin{minipage}{0.52\paperwidth}
 
-    \begin{columns}[T,totalwidth=\textwidth]
+  \begin{columns}[T,totalwidth=\textwidth]
 
-      % LEFT
-      \begin{column}{0.48\textwidth}
-        \raggedright
+  % LEFT
+  \begin{column}{0.54\textwidth}
+    \raggedright
 
-        {\usebeamerfont{author}
-        \usebeamercolor[fg]{author}
+    {\usebeamerfont{author}
+     \usebeamercolor[fg]{author}
 
-        \textbf{Advisor}\\
-        \@advisor
+     \begin{tabular}[t]{@{}l@{}}
+       \textbf{Advisor}\\[-0.04cm]
+       \@advisor\\[0.20cm]
+       \textbf{Co-Advisor}\\[-0.04cm]
+       \@coadvisor
+     \end{tabular}
+    }
 
-        \vspace{0.35cm}
+  \end{column}
 
-        \textbf{Co-Advisor}\\
-        \@coadvisor
-        }
+    % RIGHT
+    \begin{column}{0.42\textwidth}
+      \raggedleft
 
-      \end{column}
+      {\usebeamerfont{author}
+       \usebeamercolor[fg]{author}
 
-      % RIGHT
-      \begin{column}{0.48\textwidth}
-        \raggedleft
+       \textbf{Candidate}\\
+       \insertauthor\\[0.12cm]
+       \ifdefempty{\@IDnumber}{}{Student ID: \@IDnumber}
+      }
 
-        {\usebeamerfont{author}
-        \usebeamercolor[fg]{author}
+    \end{column}
 
-        \textbf{Candidate}\\
-        \insertauthor\\[0.15cm]
-        \ifdefempty{\@IDnumber}{}{Student ID: \@IDnumber}
-        }
+  \end{columns}
 
-      \end{column}
+\end{minipage}
 
-    \end{columns}
+\vfill
 
-  \end{minipage}
-
-  \vfill
 
   % ------------------------------------------------
   % ACADEMIC YEAR
@@ -244,6 +244,7 @@
 
   \vspace{0.45cm}
 }
+
 
 % Define slide splitting dimensions (e.g. title and chapter slides)
 \newcommand{\TikzSplitSlide}[1]{%
