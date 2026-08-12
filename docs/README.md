@@ -1,7 +1,8 @@
 # Documentation
 
 This directory contains research-artifact documentation, maintenance records,
-repository assets, and the authoritative LaTeX thesis source.
+repository assets, the authoritative LaTeX thesis source, and post-freeze thesis
+defense material.
 
 ## Directory Structure
 
@@ -23,14 +24,23 @@ docs/
 │   └── RELEASE_CHECKLIST.md
 ├── assets/
 │   └── repository_header.png
+├── LatexSlides/
+│   ├── README.md
+│   ├── main.tex
+│   ├── beamerthemesintef.sty
+│   ├── sintefcolor.sty
+│   └── assets/
+├── slides/
+│   └── Vademecum per la Discussione della Tesi.docx
 └── LatexThesis/
     ├── README.md
     ├── main.tex
     ├── packages.sty
     ├── title.tex
     ├── sections/
-    ├── methodology/
     ├── images/
+    ├── main_papers/
+    │   └── README.md
     └── tesi.bib
 ```
 
@@ -44,6 +54,23 @@ docs/LatexThesis/
 
 It controls the final wording, structure, experimental claims, numerical values,
 labels, and release status.
+
+The experimental thesis artifact is frozen at tag `thesis-freeze-2026-08-04`.
+Material created afterwards for the oral defense is kept separate under
+`docs/LatexSlides/` and `docs/slides/` and does not redefine the frozen
+experimental artifact.
+
+## Defense Material
+
+The authoritative LaTeX defense source is:
+
+```text
+docs/LatexSlides/main.tex
+```
+
+Historical slide drafts are intentionally absent from the current tree; Git
+history preserves their provenance. The discussion vademecum is retained under
+`docs/slides/` as a preparation aid rather than a scientific source of truth.
 
 ## Final Thesis Structure
 
@@ -92,7 +119,9 @@ The final results discussion is in `sections/06_results.tex`.
 - avoid silent methodological changes;
 - keep repository paths, identifiers, labels, and script names exact;
 - do not commit local paths, build files, credentials, private links, or case
-  material.
+  material;
+- do not keep complete third-party publications in the current release tree when
+  bibliographic metadata is sufficient for traceability.
 
 ## LaTeX Build Products
 

@@ -39,6 +39,12 @@ The adversarial and anti-forensic subset contains 500 `weapon` and 500
 `non_weapon` samples. OOD inputs are evaluated separately and are not used for
 perturbation generation.
 
+The `pending` count reported in `reports/manual_selection_summary.json` refers to
+candidate-pool items that no longer required review after all three target quotas
+had been reached. It does **not** denote unresolved labels inside the frozen
+1,500-image dataset: `final_1500_exact` and `adversarial_subset_1000_exact` are
+both true, and all final target counts are complete.
+
 ## Downstream use
 
 The frozen manifests feed:
