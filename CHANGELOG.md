@@ -8,9 +8,8 @@ every intermediate editing commit.
 
 ### Final repository cleanup
 
-- consolidated the LaTeX defense deck to a single authoritative `main.tex` entry
-  point and removed working `main2.tex` / `main3.tex` variants from the current
-  tree;
+- consolidated the defense material while retaining `main.tex`, `main2.tex`, and
+  `main3.tex` as active LaTeX working variants until the presentation is finalized;
 - removed superseded PowerPoint defense drafts while retaining the discussion
   vademecum and full Git provenance;
 - separated post-freeze defense material from the frozen experimental artifact;
