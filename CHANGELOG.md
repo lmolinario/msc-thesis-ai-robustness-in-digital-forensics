@@ -6,6 +6,19 @@ every intermediate editing commit.
 
 ## Unreleased — Thesis/Repository Consistency Audit
 
+### Final repository cleanup
+
+- consolidated the LaTeX defense deck to a single authoritative `main.tex` entry
+  point and removed working `main2.tex` / `main3.tex` variants from the current
+  tree;
+- removed superseded PowerPoint defense drafts while retaining the discussion
+  vademecum and full Git provenance;
+- separated post-freeze defense material from the frozen experimental artifact;
+- replaced complete third-party literature PDFs in the current release tree with
+  a bibliographic-access note pointing to `docs/LatexThesis/tesi.bib`;
+- clarified that the manual-review `pending` count concerns unneeded candidate
+  pool items, not unresolved labels in the frozen 1,500-image dataset.
+
 ### Corrected
 
 - aligned all central documentation with the final seven-chapter thesis
