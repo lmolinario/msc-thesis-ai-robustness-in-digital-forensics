@@ -1,0 +1,990 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsfonts,amsmath,oldgerm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc,fit}
+\usetheme{sintef}
+\usefonttheme[onlymath]{serif}
+
+\titlebackground*{assets/background}
+
+\newcommand{\highlight}[1]{\textcolor{maincolor}{\textbf{#1}}}
+\newcommand{\smallgap}{\vspace{0.35em}}
+
+% ---------------------------------------------------------------------
+% Visual language used across the defense deck
+% ---------------------------------------------------------------------
+\tikzset{
+  visualcard/.style={
+    rounded corners=3pt,
+    draw=maincolor,
+    line width=0.8pt,
+    fill=white,
+    inner sep=7pt,
+    align=center
+  },
+  softcard/.style={
+    rounded corners=3pt,
+    draw=maincolor!35,
+    line width=0.6pt,
+    fill=maincolor!5,
+    inner sep=7pt,
+    align=center
+  },
+  greencard/.style={
+    rounded corners=3pt,
+    draw=sintefgreen!80!black,
+    line width=0.8pt,
+    fill=sinteflightgreen,
+    inner sep=7pt,
+    align=center
+  },
+  yellowcard/.style={
+    rounded corners=3pt,
+    draw=sintefyellow!85!black,
+    line width=0.8pt,
+    fill=sintefyellow!15,
+    inner sep=7pt,
+    align=center
+  },
+  flowarrow/.style={
+    ->,
+    >=stealth,
+    line width=1.0pt,
+    draw=maincolor
+  },
+  thinflow/.style={
+    ->,
+    >=stealth,
+    line width=0.7pt,
+    draw=maincolor!75
+  }
+}
+
+% Replace the theme's repeated table-of-contents frames with concise
+% visual section dividers.
+\AtBeginSection[]{
+  \begingroup
+  \themecolor{main}
+  \begin{frame}[plain,noframenumbering]
+    \vfill
+    \begin{center}
+      {\fontsize{42}{46}\selectfont\bfseries\color{white!22}\thesection}\par
+      \vspace{0.15cm}
+      {\LARGE\bfseries\color{white}\insertsectionhead}\par
+      \vspace{0.35cm}
+      {\color{white!70}\rule{0.28\textwidth}{0.8pt}}
+    \end{center}
+    \vfill
+  \end{frame}
+  \endgroup
+}
+
+\title{Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks}
+\course{Master's Degree in Computer Engineering, Cybersecurity and Artificial Intelligence}
+\author{Lello Molinario}
+\IDnumber{70/90/00369}
+
+\advisor{Prof. Davide Maiorca}
+\coadvisor{Silvia Lucia Sanna, Ph.D.}
+
+\date{Academic Year 2025/2026}
+
+\begin{document}
+\maketitle
+
+% ---------------------------------------------------------------------
+\section{Motivation and Research Problem}
+
+\begin{frame}{Why this matters in Digital Forensics}
+\begin{columns}
+\begin{column}{0.54\textwidth}
+\begin{itemize}
+    \item AI-based forensic tools are increasingly used to \highlight{triage large image collections}.
+    \item The analyst often relies on labels, tags, bookmarks or semantic retrieval outputs.
+    \item In forensic contexts, a missed item is not only a technical error: it can become an \highlight{operational risk}.
+\end{itemize}
+\end{column}
+\begin{column}{0.40\textwidth}
+\begin{colorblock}[black]{sinteflightgreen}{Core message}
+The contribution is not a new weapon classifier.\\[0.35em]
+Proxy models are controlled experimental references used to evaluate operational robustness.
+\end{colorblock}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Research questions}
+\begin{block}{Main question}
+How robust are AI-based forensic image-classification and media-triage systems when exposed to adversarial, anti-forensic and out-of-distribution inputs?
+\end{block}
+
+\small
+\begin{enumerate}
+    \item \highlight{RQ1}: Proxy clean-baseline performance retention under OOD, adversarial and anti-forensic conditions.
+    \item \highlight{RQ2}: Direct-target attacks, cross-architecture transfer and model-agnostic Color Shift.
+    \item \highlight{RQ3}: Black-box behavior, observable output semantics and configuration sensitivity.
+    \item \highlight{RQ4}: Error transitions, OOD assignments and unknown states relevant to continued human review.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Research gap}
+\begin{itemize}
+    \item Existing evaluations often emphasize clean performance.
+    \item Commercial forensic tools expose heterogeneous and partial decision signals.
+    \item Robustness under anti-forensic image transformations is rarely assessed with an operational protocol.
+    \item OOD behavior is often mixed with classification performance, instead of being analyzed separately.
+\end{itemize}
+
+\begin{colorblock}[black]{sintefyellow}{Gap addressed by this thesis}
+A task-specific methodological protocol that tests clean, OOD, adversarial and anti-forensic conditions under a common traceability logic.
+\end{colorblock}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Contribution}
+
+\begin{frame}{Main contribution: the FAIRLab protocol}
+\begin{columns}
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+    \item Frozen dataset and controlled manifests.
+    \item Fold-aware proxy evaluation.
+    \item Blind forensic evaluation bundle.
+    \item Black-box output normalization.
+\end{itemize}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{itemize}
+    \item Robustness metrics.
+    \item OOD analysis.
+    \item XAI case studies.
+    \item Repository-level traceability and checksums.
+\end{itemize}
+\end{column}
+\end{columns}
+
+\begin{block}{Takeaway}
+FAIRLab is a task-specific methodological protocol that makes the evaluation reproducible, auditable and operationally traceable.
+\end{block}
+\end{frame}
+
+\begin{frame}{At a glance}
+\begin{table}
+\centering
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Component} & \textbf{Scope} \\
+\midrule
+Research focus & AI robustness in forensic image triage \\
+Frozen dataset & 500 weapon + 500 non-weapon + 500 OOD \\
+Evaluation bundle & 11,500 files \\
+Proxy models & EfficientNet-B0, ResNet18, CLIP-based proxy \\
+Black-box evaluation & 4 systems / 6 frozen configurations \\
+Conditions & Clean, OOD, adversarial, anti-forensic \\
+Matched decisions & 69,000 normalized commercial-tool decisions \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{colorblock}[black]{sinteflightgreen}{What to emphasize verbally}
+The dataset is small by design but strongly controlled: the objective is forensic robustness assessment, not generic model training.
+\end{colorblock}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Experimental Design}
+
+\begin{frame}{Dataset construction}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \node[font=\small\bfseries,text=maincolor] at (0,2.28)
+    {FROZEN SOURCE DATASET};
+  \node[font=\fontsize{28}{31}\selectfont\bfseries,text=maincolor] at (0,1.63)
+    {1,500};
+  \node[font=\scriptsize,text=black!65] at (0,1.18)
+    {manually reviewed and frozen images};
+
+  \node[visualcard,minimum width=3.30cm,minimum height=1.45cm] (weapon) at (-4.0,0.10) {
+    {\fontsize{23}{25}\selectfont\bfseries\color{maincolor}500}\\[-0.02cm]
+    {\small\bfseries WEAPON}
+  };
+
+  \node[visualcard,minimum width=3.30cm,minimum height=1.45cm] (nonweapon) at (0,0.10) {
+    {\fontsize{23}{25}\selectfont\bfseries\color{maincolor}500}\\[-0.02cm]
+    {\small\bfseries NON-WEAPON}
+  };
+
+  \node[yellowcard,minimum width=3.30cm,minimum height=1.45cm] (ood) at (4.0,0.10) {
+    {\fontsize{23}{25}\selectfont\bfseries\color{maincolor}500}\\[-0.02cm]
+    {\small\bfseries OOD}
+  };
+
+  \node[greencard,minimum width=7.30cm,minimum height=1.05cm] (binary) at (-2.0,-1.58) {
+    {\Large\bfseries 1,000-image binary subset}\\[-0.02cm]
+    {\scriptsize common basis for proxy evaluation and perturbation generation}
+  };
+
+  \node[yellowcard,minimum width=3.30cm,minimum height=1.05cm] (oodset) at (4.0,-1.58) {
+    {\small\bfseries Separate OOD set}\\[-0.02cm]
+    {\scriptsize distribution-shift analysis}
+  };
+
+  \draw[thinflow] (weapon.south) -- (weapon.south |- binary.north);
+  \draw[thinflow] (nonweapon.south) -- (nonweapon.south |- binary.north);
+  \draw[thinflow] (ood.south) -- (oodset.north);
+
+  \node[font=\scriptsize,text=black!70,align=center] at (0,-2.55) {
+    OOD is \textbf{not a third supervised class}; it is evaluated outside the nominal binary task.
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Forensic evaluation bundle}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \node[font=\small\bfseries,text=maincolor] at (0,2.24)
+    {BLIND TOOL-FACING BUNDLE};
+
+  \node[softcard,minimum width=2.15cm,minimum height=1.48cm] (clean) at (-5.20,0.62) {
+    {\fontsize{21}{23}\selectfont\bfseries\color{maincolor}1,000}\\[-0.02cm]
+    {\scriptsize clean binary}
+  };
+
+  \node[font=\Large\bfseries,text=maincolor!65] at (-3.82,0.62) {+};
+
+  \node[yellowcard,minimum width=1.95cm,minimum height=1.48cm] (oodbundle) at (-2.58,0.62) {
+    {\fontsize{21}{23}\selectfont\bfseries\color{maincolor}500}\\[-0.02cm]
+    {\scriptsize clean OOD}
+  };
+
+  \node[font=\Large\bfseries,text=maincolor!65] at (-1.28,0.62) {+};
+
+  \node[greencard,minimum width=2.15cm,minimum height=1.48cm] (adv) at (0.08,0.62) {
+    {\fontsize{21}{23}\selectfont\bfseries\color{maincolor}5,000}\\[-0.02cm]
+    {\scriptsize adversarial / style}
+  };
+
+  \node[font=\Large\bfseries,text=maincolor!65] at (1.48,0.62) {+};
+
+  \node[visualcard,minimum width=2.15cm,minimum height=1.48cm] (af) at (2.88,0.62) {
+    {\fontsize{21}{23}\selectfont\bfseries\color{maincolor}5,000}\\[-0.02cm]
+    {\scriptsize anti-forensic}
+  };
+
+  \node[font=\Large\bfseries,text=maincolor!65] at (4.28,0.62) {=};
+
+  \node[draw=maincolor,fill=maincolor,rounded corners=3pt,
+        minimum width=2.00cm,minimum height=1.62cm,align=center] (total) at (5.62,0.62) {
+    {\fontsize{21}{23}\selectfont\bfseries\color{white}11,500}\\[-0.02cm]
+    {\scriptsize\color{white}files}
+  };
+
+  \node[softcard,minimum width=12.2cm,minimum height=1.20cm] at (0.20,-1.38) {
+    {\small\bfseries Blind processing principle}\\[-0.02cm]
+    {\scriptsize Ground truth and evaluation metadata remain outside the tool-facing view.}
+  };
+
+  \node[font=\scriptsize,text=black!70,align=center] at (0.20,-2.35) {
+    The 10,000 manipulated files are source--condition variants of the same 1,000 binary images,\\
+    not independent real-world cases.
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{FAIRLab workflow}
+\small
+
+\begin{columns}[c,onlytextwidth]
+
+\begin{column}{0.17\textwidth}
+\begin{colorblock}[black]{sintefgrey}{1. Source}
+\centering
+\scriptsize Heterogeneous image pool
+\end{colorblock}
+\end{column}
+
+\begin{column}{0.035\textwidth}
+\centering
+{\Large\color{maincolor}$\rightarrow$}
+\end{column}
+
+\begin{column}{0.17\textwidth}
+\begin{colorblock}[black]{sinteflightgreen}{2. Validate}
+\centering
+\scriptsize Human review and dataset freezing
+\end{colorblock}
+\end{column}
+
+\begin{column}{0.035\textwidth}
+\centering
+{\Large\color{maincolor}$\rightarrow$}
+\end{column}
+
+\begin{column}{0.19\textwidth}
+\begin{colorblock}[black]{maincolor!10}{3. Derive}
+\centering
+\scriptsize Binary/OOD split and perturbation generation
+\end{colorblock}
+\end{column}
+
+\begin{column}{0.035\textwidth}
+\centering
+{\Large\color{maincolor}$\rightarrow$}
+\end{column}
+
+\begin{column}{0.17\textwidth}
+\begin{colorblock}[black]{sintefyellow!25}{4. Evaluate}
+\centering
+\scriptsize Proxies and black-box systems
+\end{colorblock}
+\end{column}
+
+\begin{column}{0.035\textwidth}
+\centering
+{\Large\color{maincolor}$\rightarrow$}
+\end{column}
+
+\begin{column}{0.16\textwidth}
+\begin{colorblock}[white]{maincolor}{5. Analyse}
+\centering
+\scriptsize Normalize, metrics, XAI and audit
+\end{colorblock}
+\end{column}
+
+\end{columns}
+
+\vspace{0.55cm}
+
+\begin{colorblock}[black]{maincolor!8}{Traceability layer}
+\centering
+\small
+Deterministic identifiers \quad $\vert$ \quad controlled manifests \quad $\vert$ \quad frozen configurations\\[0.12cm]
+checksums \quad $\vert$ \quad separated tool-facing inputs and evaluation metadata
+\end{colorblock}
+
+\vspace{0.18cm}
+
+\centering
+\scriptsize
+FAIRLab preserves the connection between source data, derived artifacts, tool outputs and final metrics without exposing ground truth to the black-box systems.
+\end{frame}
+
+\begin{frame}{Proxy models vs black-box systems}
+\begin{columns}
+\begin{column}{0.47\textwidth}
+\begin{block}{Transparent proxies}
+\begin{itemize}
+    \item EfficientNet-B0.
+    \item ResNet18.
+    \item CLIP: frozen visual encoder + supervised binary head.
+    \item Controlled training, gradients and diagnostic outputs.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.49\textwidth}
+\begin{block}{Black-box systems}
+\begin{itemize}
+    \item Magnet AXIOM / Magnet.AI.
+    \item Excire Foto 2025: D20, D50 and D80.
+    \item Cellebrite Inseyets.
+    \item Magnet Griffeye / T3K CORE.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{block}{Methodological point}
+Proxy models provide experimental control; four software systems and six frozen configurations provide operational realism.
+\end{block}
+\end{frame}
+
+\begin{frame}{Perturbation suite and evaluation paths}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \node[greencard,minimum width=6.15cm,minimum height=1.42cm] (advfamily) at (-3.45,1.48) {
+    {\small\bfseries ADVERSARIAL / ADVERSARIAL-STYLE}\\[0.05cm]
+    {\scriptsize FGSM · One Pixel · Sigma Zero · SuperDeepFool · Color Shift}
+  };
+
+  \node[visualcard,minimum width=6.15cm,minimum height=1.42cm] (affamily) at (3.45,1.48) {
+    {\small\bfseries ANTI-FORENSIC}\\[0.05cm]
+    {\scriptsize JPEG · Resample+Resize · Blur · Histogram · Contrast}
+  };
+
+  \node[softcard,minimum width=2.70cm,minimum height=1.38cm] (generator) at (-4.80,-0.48) {
+    {\small\bfseries EfficientNet-B0}\\[-0.01cm]
+    {\scriptsize attack-generation target}
+  };
+
+  \node[font=\scriptsize\bfseries,text=maincolor,align=center] at (-3.17,0.05)
+    {frozen\\artifacts};
+  \node[font=\Large\bfseries,text=maincolor] at (-3.17,-0.48) {$\rightarrow$};
+
+  \node[greencard,minimum width=2.35cm,minimum height=1.38cm] (direct) at (-1.45,-0.48) {
+    {\small\bfseries DIRECT-TARGET}\\[-0.01cm]
+    {\scriptsize EfficientNet-B0}
+  };
+
+  \node[font=\Large\bfseries,text=maincolor!75] at (0.02,-0.48) {$\rightarrow$};
+
+  \node[softcard,minimum width=1.85cm,minimum height=1.38cm] (resnet) at (1.20,-0.48) {
+    {\small\bfseries TRANSFER}\\[-0.01cm]
+    {\scriptsize ResNet18}
+  };
+
+  \node[font=\Large\bfseries,text=maincolor!75] at (2.42,-0.48) {$\rightarrow$};
+
+  \node[softcard,minimum width=1.85cm,minimum height=1.38cm] (clip) at (3.60,-0.48) {
+    {\small\bfseries TRANSFER}\\[-0.01cm]
+    {\scriptsize CLIP proxy}
+  };
+
+  \node[font=\Large\bfseries,text=maincolor!75] at (4.84,-0.48) {$\rightarrow$};
+
+  \node[yellowcard,minimum width=2.20cm,minimum height=1.38cm] (blackbox) at (6.20,-0.48) {
+    {\small\bfseries TRANSFER}\\[-0.01cm]
+    {\scriptsize black-box systems}
+  };
+
+  \node[font=\scriptsize,text=black!70,align=center] at (0.55,-2.05) {
+    Model-dependent attacks are direct-target only for EfficientNet-B0.\\
+    ResNet18, CLIP and the commercial systems measure empirical transfer; Color Shift remains model-agnostic.
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Evaluation Logic}
+
+\begin{frame}{Output normalization}
+Commercial tools do not expose the same kind of output.
+
+\begin{table}
+\centering
+\scriptsize
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Tool} & \textbf{Observable forensic signal} \\
+\midrule
+Magnet AXIOM / Magnet.AI & Possible weapons tag \\
+Excire Foto 2025 & Union of eight firearm-oriented semantic queries \\
+Cellebrite Inseyets & Exported \texttt{Armi} / \texttt{Pistola} / \texttt{Fucile} labels \\
+Griffeye / T3K CORE & CORE/Violence/Firearm bookmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{colorblock}[black]{sintefyellow}{Critical point}
+The thesis evaluates observable exported signals, not proprietary model internals, thresholds, weights or training data.
+\end{colorblock}
+\end{frame}
+
+\begin{frame}[shrink=2]{Metrics: not only accuracy}
+\small
+\begin{columns}
+\begin{column}{0.48\textwidth}
+\begin{block}{Binary performance}
+\begin{itemize}
+    \item Accuracy and balanced accuracy.
+    \item Weapon recall, precision and F1.
+    \item False-negative and false-positive rates.
+\end{itemize}
+\end{block}
+\begin{block}{Robustness}
+\begin{itemize}
+    \item Accuracy drop and induced errors.
+    \item Directional prediction transitions.
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{OOD and coverage}
+\begin{itemize}
+    \item OOD weapon-assignment rate.
+    \item Matching and unknown-state handling.
+\end{itemize}
+\end{block}
+\begin{block}{Proxy-only diagnostics}
+\begin{itemize}
+    \item Maximum predicted-class probability.
+    \item Qualitative Integrated Gradients analysis.
+\end{itemize}
+\end{block}
+\end{column}
+\end{columns}
+
+\begin{block}{Forensic framing}
+The central risk is not only aggregate error, but the direction of errors and whether relevant evidence is silently deprioritized.
+\end{block}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Results and Interpretation}
+
+\begin{frame}[shrink=5]{Proxy-model results}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \node[font=\scriptsize,text=black!65] at (0,2.72)
+    {Worst observed condition for each perturbation family};
+
+  % Card backgrounds
+  \node[softcard,minimum width=4.05cm,minimum height=4.65cm] at (-4.45,0.02) {};
+  \node[softcard,minimum width=4.05cm,minimum height=4.65cm] at (0,0.02) {};
+  \node[softcard,minimum width=4.05cm,minimum height=4.65cm] at (4.45,0.02) {};
+
+  % Model labels
+  \node[font=\small\bfseries,text=maincolor] at (-4.45,2.10) {EfficientNet-B0};
+  \node[font=\small\bfseries,text=maincolor] at (0,2.10) {ResNet18};
+  \node[font=\small\bfseries,text=maincolor] at (4.45,2.10) {CLIP proxy};
+
+  % Baselines
+  \draw[black!25] (-5.80,-1.12) -- (-3.10,-1.12);
+  \draw[black!25] (-1.35,-1.12) -- (1.35,-1.12);
+  \draw[black!25] (3.10,-1.12) -- (5.80,-1.12);
+
+  % EfficientNet bars: clean .978, adversarial .015, anti-forensic .965
+  \fill[maincolor] (-5.36,-1.12) rectangle (-4.78,1.23);
+  \fill[sintefred!85] (-4.74,-1.12) rectangle (-4.16,-1.08);
+  \fill[sintefyellow!85!black] (-4.12,-1.12) rectangle (-3.54,1.20);
+  \node[font=\scriptsize\bfseries,text=maincolor] at (-5.07,1.43) {0.978};
+  \node[font=\scriptsize\bfseries,text=sintefred!90!black] at (-4.45,-0.84) {0.015};
+  \node[font=\scriptsize\bfseries,text=sintefyellow!65!black] at (-3.83,1.40) {0.965};
+
+  % ResNet bars: clean .964, adversarial .918, anti-forensic .934
+  \fill[maincolor] (-0.91,-1.12) rectangle (-0.33,1.19);
+  \fill[sintefred!85] (-0.29,-1.12) rectangle (0.29,1.08);
+  \fill[sintefyellow!85!black] (0.33,-1.12) rectangle (0.91,1.12);
+  \node[font=\scriptsize\bfseries,text=maincolor] at (-0.62,1.39) {0.964};
+  \node[font=\scriptsize\bfseries,text=sintefred!90!black] at (0,1.28) {0.918};
+  \node[font=\scriptsize\bfseries,text=sintefyellow!65!black] at (0.62,1.32) {0.934};
+
+  % CLIP bars: clean .927, adversarial .914, anti-forensic .925
+  \fill[maincolor] (3.54,-1.12) rectangle (4.12,1.10);
+  \fill[sintefred!85] (4.16,-1.12) rectangle (4.74,1.07);
+  \fill[sintefyellow!85!black] (4.78,-1.12) rectangle (5.36,1.10);
+  \node[font=\scriptsize\bfseries,text=maincolor] at (3.83,1.30) {0.927};
+  \node[font=\scriptsize\bfseries,text=sintefred!90!black] at (4.45,1.27) {0.914};
+  \node[font=\scriptsize\bfseries,text=sintefyellow!65!black] at (5.07,1.30) {0.925};
+
+  % Bar labels
+  \foreach \x in {-5.07,-0.62,3.83}
+    \node[font=\tiny,text=black!65,rotate=45,anchor=east] at (\x,-1.28) {clean};
+  \foreach \x in {-4.45,0,4.45}
+    \node[font=\tiny,text=black!65,rotate=45,anchor=east] at (\x,-1.28) {adversarial};
+  \foreach \x in {-3.83,0.62,5.07}
+    \node[font=\tiny,text=black!65,rotate=45,anchor=east] at (\x,-1.28) {anti-forensic};
+
+  % Condition labels
+  \node[yellowcard,minimum width=3.15cm,minimum height=0.62cm,font=\scriptsize] at (-4.45,-2.00)
+    {Sigma Zero --- direct target};
+  \node[softcard,minimum width=3.15cm,minimum height=0.62cm,font=\scriptsize] at (0,-2.00)
+    {FGSM --- empirical transfer};
+  \node[softcard,minimum width=3.15cm,minimum height=0.62cm,font=\scriptsize] at (4.45,-2.00)
+    {FGSM --- empirical transfer};
+
+  % Legend
+  \fill[maincolor] (-2.42,-2.70) rectangle (-2.12,-2.45);
+  \node[font=\scriptsize,anchor=west] at (-2.03,-2.57) {clean};
+  \fill[sintefred!85] (-0.72,-2.70) rectangle (-0.42,-2.45);
+  \node[font=\scriptsize,anchor=west] at (-0.33,-2.57) {worst adversarial};
+  \fill[sintefyellow!85!black] (1.63,-2.70) rectangle (1.93,-2.45);
+  \node[font=\scriptsize,anchor=west] at (2.02,-2.57) {worst anti-forensic};
+
+\end{tikzpicture}
+
+\begin{colorblock}[black]{sinteflightgreen}{Main result}
+Clean performance does not imply uniform operational robustness; direct-target collapse must be distinguished from transferability.
+\end{colorblock}
+\end{frame}
+
+\begin{frame}{Black-box risk profiles}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \node[font=\scriptsize\bfseries,text=sintefred!90!black] at (-2.15,2.72)
+    {$\leftarrow$ FNR: missed-target risk};
+  \node[font=\scriptsize\bfseries,text=sintefyellow!65!black] at (2.15,2.72)
+    {FPR: review workload $\rightarrow$};
+
+  \draw[maincolor!55,line width=0.8pt] (0,-1.82) -- (0,2.42);
+
+  % Excire family highlight
+  \fill[sintefyellow!8,rounded corners=3pt] (-6.45,-0.10) rectangle (4.50,2.00);
+  \node[font=\tiny\bfseries,text=sintefyellow!60!black,anchor=east] at (4.35,1.86)
+    {EXCIRE CONFIGURATION TRADE-OFF};
+
+  % Row labels
+  \node[font=\scriptsize,anchor=east] at (-3.15,2.25) {Magnet.AI};
+  \node[font=\scriptsize\bfseries,anchor=east] at (-3.15,1.55) {Excire D20};
+  \node[font=\scriptsize\bfseries,anchor=east] at (-3.15,0.85) {Excire D50};
+  \node[font=\scriptsize\bfseries,anchor=east] at (-3.15,0.15) {Excire D80};
+  \node[font=\scriptsize,anchor=east] at (-3.15,-0.55) {Cellebrite};
+  \node[font=\scriptsize,anchor=east] at (-3.15,-1.25) {Griffeye / T3K};
+
+  % Magnet .099 / .035
+  \fill[sintefred!85] (-1.782,2.08) rectangle (0,2.42);
+  \fill[sintefyellow!85!black] (0,2.08) rectangle (0.630,2.42);
+  \node[font=\tiny\bfseries,text=sintefred!90!black,anchor=east] at (-1.92,2.25) {0.099};
+  \node[font=\tiny\bfseries,text=sintefyellow!65!black,anchor=west] at (0.76,2.25) {0.035};
+
+  % D20 .143 / .036
+  \fill[sintefred!85] (-2.574,1.38) rectangle (0,1.72);
+  \fill[sintefyellow!85!black] (0,1.38) rectangle (0.648,1.72);
+  \node[font=\tiny\bfseries,text=sintefred!90!black,anchor=east] at (-2.71,1.55) {0.143};
+  \node[font=\tiny\bfseries,text=sintefyellow!65!black,anchor=west] at (0.78,1.55) {0.036};
+
+  % D50 .051 / .099
+  \fill[sintefred!85] (-0.918,0.68) rectangle (0,1.02);
+  \fill[sintefyellow!85!black] (0,0.68) rectangle (1.782,1.02);
+  \node[font=\tiny\bfseries,text=sintefred!90!black,anchor=east] at (-1.05,0.85) {0.051};
+  \node[font=\tiny\bfseries,text=sintefyellow!65!black,anchor=west] at (1.92,0.85) {0.099};
+
+  % D80 .019 / .207
+  \fill[sintefred!85] (-0.342,-0.02) rectangle (0,0.32);
+  \fill[sintefyellow!85!black] (0,-0.02) rectangle (3.726,0.32);
+  \node[font=\tiny\bfseries,text=sintefred!90!black,anchor=east] at (-0.47,0.15) {0.019};
+  \node[font=\tiny\bfseries,text=sintefyellow!65!black,anchor=west] at (3.86,0.15) {0.207};
+
+  % Cellebrite .042 / .042
+  \fill[sintefred!85] (-0.756,-0.72) rectangle (0,-0.38);
+  \fill[sintefyellow!85!black] (0,-0.72) rectangle (0.756,-0.38);
+  \node[font=\tiny\bfseries,text=sintefred!90!black,anchor=east] at (-0.89,-0.55) {0.042};
+  \node[font=\tiny\bfseries,text=sintefyellow!65!black,anchor=west] at (0.89,-0.55) {0.042};
+
+  % Griffeye .049 / .007
+  \fill[sintefred!85] (-0.882,-1.42) rectangle (0,-1.08);
+  \fill[sintefyellow!85!black] (0,-1.42) rectangle (0.126,-1.08);
+  \node[font=\tiny\bfseries,text=sintefred!90!black,anchor=east] at (-1.02,-1.25) {0.049};
+  \node[font=\tiny\bfseries,text=sintefyellow!65!black,anchor=west] at (0.25,-1.25) {0.007};
+
+  \node[softcard,text width=11.35cm,minimum width=11.75cm,minimum height=0.62cm,font=\tiny,align=center] at (-0.65,-2.08) {
+    Binary metrics use 11,000 items; OOD is separate. No unknown normalized decisions occurred in 69,000 matched decisions.
+  };
+
+  \node[greencard,text width=11.35cm,minimum width=11.75cm,minimum height=0.82cm,font=\scriptsize,align=center] at (-0.65,-2.88) {
+    \textbf{Operational reading:} D20 reduces false positives at the cost of missed targets; D80 minimizes misses but substantially increases review workload.
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{OOD behavior}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  % Left panel: proxy rates
+  \node[softcard,minimum width=7.00cm,minimum height=4.45cm] at (-3.45,0.25) {};
+  \node[font=\small\bfseries,text=maincolor] at (-3.45,2.15)
+    {Proxy weapon-assignment rate};
+  \node[font=\tiny,text=black!60] at (-3.45,1.83)
+    {fold-aggregated OOD responses};
+
+  \node[font=\scriptsize,anchor=east] at (-5.55,1.15) {EfficientNet-B0};
+  \fill[maincolor!18] (-5.35,0.98) rectangle (-1.05,1.30);
+  \fill[maincolor] (-5.35,0.98) rectangle (-3.76,1.30);
+  \node[font=\scriptsize\bfseries,text=maincolor,anchor=west] at (-3.62,1.14) {0.370};
+
+  \node[font=\scriptsize,anchor=east] at (-5.55,0.35) {ResNet18};
+  \fill[maincolor!18] (-5.35,0.18) rectangle (-1.05,0.50);
+  \fill[maincolor] (-5.35,0.18) rectangle (-3.47,0.50);
+  \node[font=\scriptsize\bfseries,text=maincolor,anchor=west] at (-3.33,0.34) {0.438};
+
+  \node[font=\scriptsize\bfseries,anchor=east] at (-5.55,-0.45) {CLIP proxy};
+  \fill[sintefyellow!20] (-5.35,-0.62) rectangle (-1.05,-0.30);
+  \fill[sintefyellow!85!black] (-5.35,-0.62) rectangle (-1.76,-0.30);
+  \node[font=\scriptsize\bfseries,text=sintefyellow!60!black,anchor=west] at (-1.62,-0.46) {0.836};
+
+  \node[yellowcard,minimum width=5.80cm,minimum height=0.72cm,font=\scriptsize] at (-3.45,-1.45) {
+    CLIP assigns \texttt{weapon} to roughly 84\% of OOD responses.
+  };
+
+  % Right panel: Excire sensitivity
+  \node[softcard,minimum width=5.55cm,minimum height=4.45cm] at (4.15,0.25) {};
+  \node[font=\small\bfseries,text=maincolor] at (4.15,2.15)
+    {Configuration sensitivity};
+  \node[font=\tiny,text=black!60] at (4.15,1.83)
+    {Excire OOD weapon-assignment rate};
+
+  \node[visualcard,minimum width=1.75cm,minimum height=1.45cm] (d20) at (2.55,0.55) {
+    {\scriptsize\bfseries D20}\\[-0.02cm]
+    {\fontsize{22}{24}\selectfont\bfseries\color{maincolor}0.238}
+  };
+
+  \node[font=\LARGE\bfseries,text=maincolor] at (4.15,0.55) {$\longrightarrow$};
+  \node[font=\tiny\bfseries,text=maincolor] at (4.15,0.08) {+119\% relative};
+
+  \node[yellowcard,minimum width=1.75cm,minimum height=1.45cm] (d80) at (5.75,0.55) {
+    {\scriptsize\bfseries D80}\\[-0.02cm]
+    {\fontsize{22}{24}\selectfont\bfseries\color{maincolor}0.522}
+  };
+
+  \node[font=\scriptsize,text=black!70,align=center] at (4.15,-1.10) {
+    More aggressive retrieval reduces missed targets,\\
+    but routes substantially more OOD material into review.
+  };
+
+  \node[font=\scriptsize,text=black!70,align=center] at (0.20,-2.40) {
+    OOD assignments are \textbf{not supervised false positives}. Proxy rates use five fold-specific responses per image;\\
+    black-box rates use one normalized decision per image. Max-P is an intra-model diagnostic, not calibrated confidence.
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Explainability and case studies}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \node[softcard,minimum width=3.20cm,minimum height=2.55cm] (cases) at (-4.65,0.65) {
+    {\small\bfseries 5 selected cases}\\[0.15cm]
+    {\scriptsize EfficientNet-B0}\\
+    {\scriptsize clean and perturbed inputs}
+  };
+
+  % Five-case icon
+  \foreach \x in {-5.45,-5.05,-4.65,-4.25,-3.85}
+    \fill[maincolor!18,draw=maincolor!60,rounded corners=1pt] (\x-0.14,1.45) rectangle (\x+0.14,1.73);
+
+  \draw[flowarrow] (-2.95,0.65) -- (-1.85,0.65);
+
+  \node[visualcard,minimum width=3.55cm,minimum height=2.55cm] (ig) at (0,0.65) {
+    {\small\bfseries Integrated Gradients}\\[0.18cm]
+    {\scriptsize qualitative attribution maps}\\
+    {\scriptsize model-focus comparison}
+  };
+
+  % Abstract attribution-map icon
+  \foreach \i in {0,...,4}{
+    \foreach \j in {0,...,2}{
+      \pgfmathtruncatemacro{\shade}{15+12*\i+7*\j}
+      \fill[sintefred!\shade!sintefyellow,draw=white,line width=0.2pt]
+        (-0.70+0.28*\i,1.25-0.24*\j) rectangle (-0.45+0.28*\i,1.46-0.24*\j);
+    }
+  }
+
+  \draw[flowarrow] (1.85,0.65) -- (2.95,0.65);
+
+  \node[greencard,minimum width=3.35cm,minimum height=2.55cm] (interpret) at (4.65,0.65) {
+    {\small\bfseries Diagnostic reading}\\[0.15cm]
+    {\scriptsize where model attention shifts}\\
+    {\scriptsize under selected perturbations}
+  };
+
+  \node[yellowcard,text width=5.15cm,minimum width=5.65cm,minimum height=1.10cm,align=center] at (-3.00,-1.55) {
+    {\small\bfseries Not a robustness metric}\\[-0.02cm]
+    {\scriptsize purposive qualitative cases, not population-level evidence}
+  };
+
+  \node[yellowcard,text width=5.15cm,minimum width=5.65cm,minimum height=1.10cm,align=center] at (3.00,-1.55) {
+    {\small\bfseries Not proof of validity}\\[-0.02cm]
+    {\scriptsize no proprietary black-box explanation and no proof of correctness}
+  };
+
+  \node[font=\scriptsize,text=black!70,align=center] at (0,-2.62) {
+    Explainability supports interpretation and debugging, but it does not replace validation, traceability or human forensic review.
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+% ---------------------------------------------------------------------
+\section{Forensic Implications}
+
+\begin{frame}{Operational implications}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \node[softcard,text width=2.30cm,minimum width=2.75cm,minimum height=1.45cm,align=center] (ai) at (-5.00,0.85) {
+    {\small\bfseries AI outputs}\\[-0.02cm]
+    {\scriptsize tags · labels · semantic matches}
+  };
+
+  \draw[flowarrow] (ai.east) -- (-3.15,0.85);
+
+  \node[visualcard,text width=2.25cm,minimum width=2.75cm,minimum height=1.45cm,align=center] (queue) at (-1.75,0.85) {
+    {\small\bfseries Prioritized queue}\\[-0.02cm]
+    {\scriptsize workload reduction}
+  };
+
+  \draw[flowarrow] (queue.east) -- (0.15,0.85);
+
+  \node[greencard,text width=2.25cm,minimum width=2.75cm,minimum height=1.45cm,align=center] (human) at (1.65,0.85) {
+    {\small\bfseries Human review}\\[-0.02cm]
+    {\scriptsize contextual validation}
+  };
+
+  \draw[flowarrow] (human.east) -- (3.55,0.85);
+
+  \node[visualcard,text width=2.35cm,minimum width=2.85cm,minimum height=1.45cm,align=center] (action) at (5.15,0.85) {
+    {\small\bfseries Documented action}\\[-0.02cm]
+    {\scriptsize defensible forensic workflow}
+  };
+
+  % Traceability tags
+  \node[softcard,minimum width=2.35cm,minimum height=0.70cm,font=\scriptsize] at (-3.55,-0.65) {tool version};
+  \node[softcard,minimum width=2.35cm,minimum height=0.70cm,font=\scriptsize] at (-1.15,-0.65) {configuration};
+  \node[softcard,minimum width=2.35cm,minimum height=0.70cm,font=\scriptsize] at (1.25,-0.65) {export logic};
+  \node[softcard,minimum width=2.35cm,minimum height=0.70cm,font=\scriptsize] at (3.65,-0.65) {validation context};
+
+  \node[yellowcard,text width=8.70cm,minimum width=9.20cm,minimum height=0.95cm,align=center] at (0,-1.85) {
+    {\small\bfseries Not an autonomous evidence selector}\\[-0.02cm]
+    {\scriptsize Negative decisions, OOD assignments and configuration-sensitive outputs remain subject to human review.}
+  };
+
+  \node[font=\small\bfseries,text=maincolor] at (0,-2.65)
+    {AI is operationally useful as a triage layer --- not as a substitute for forensic judgment.};
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Limitations}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \node[softcard,text width=5.05cm,minimum width=5.65cm,minimum height=1.05cm,align=center] at (-3.10,1.75) {
+    {\small\bfseries Corpus and annotation}\\[-0.02cm]
+    {\tiny 1,500 images · single reviewer\\no inter-rater agreement}
+  };
+
+  \node[softcard,text width=5.05cm,minimum width=5.65cm,minimum height=1.05cm,align=center] at (3.10,1.75) {
+    {\small\bfseries Perturbation coverage}\\[-0.02cm]
+    {\tiny one frozen parameterization per condition\\no severity sweep}
+  };
+
+  \node[softcard,text width=3.00cm,minimum width=3.60cm,minimum height=1.18cm,align=center] at (-4.15,-0.05) {
+    {\small\bfseries Attack target}\\[-0.02cm]
+    {\tiny model-dependent attacks\\only against EfficientNet-B0}
+  };
+
+  \node[softcard,text width=3.00cm,minimum width=3.60cm,minimum height=1.18cm,align=center] at (0,-0.05) {
+    {\small\bfseries Black-box dependency}\\[-0.02cm]
+    {\tiny version · configuration\\export semantics · normalization}
+  };
+
+  \node[softcard,text width=3.00cm,minimum width=3.60cm,minimum height=1.18cm,align=center] at (4.15,-0.05) {
+    {\small\bfseries Legal boundary}\\[-0.02cm]
+    {\tiny operational triage behavior\\not admissibility or evidentiary weight}
+  };
+
+  \node[greencard,text width=11.10cm,minimum width=11.75cm,minimum height=0.92cm,align=center] at (0,-2.18) {
+    {\small\bfseries Scope of the claims}\\[-0.02cm]
+    {\scriptsize Protocol-specific robustness assessment --- not software certification, universal ranking or evidentiary validation.}
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Conclusions}
+\centering
+
+\begin{colorblock}[white]{maincolor}{Central takeaway}
+\centering
+\Large
+AI-based forensic triage is useful, but it is not self-validating.
+\end{colorblock}
+
+\vspace{0.28cm}
+
+\begin{columns}[T,onlytextwidth]
+
+\begin{column}{0.19\textwidth}
+\begin{colorblock}[black]{sinteflightgreen}{01}
+\centering
+\scriptsize FAIRLab makes robustness evaluation reproducible and auditable.
+\end{colorblock}
+\end{column}
+
+\begin{column}{0.19\textwidth}
+\begin{colorblock}[black]{maincolor!10}{02}
+\centering
+\scriptsize Clean accuracy alone does not establish operational reliability.
+\end{colorblock}
+\end{column}
+
+\begin{column}{0.19\textwidth}
+\begin{colorblock}[black]{sintefyellow!22}{03}
+\centering
+\scriptsize Direct-target collapse is not equivalent to transferability.
+\end{colorblock}
+\end{column}
+
+\begin{column}{0.19\textwidth}
+\begin{colorblock}[black]{maincolor!10}{04}
+\centering
+\scriptsize Black-box behavior depends on observable semantics and configuration.
+\end{colorblock}
+\end{column}
+
+\begin{column}{0.19\textwidth}
+\begin{colorblock}[black]{sinteflightgreen}{05}
+\centering
+\scriptsize OOD and directional errors require validation-driven human review.
+\end{colorblock}
+\end{column}
+
+\end{columns}
+
+\vspace{0.45cm}
+
+\centering
+\small
+\textbf{Operational principle:} use AI to prioritize evidence review, never to silently exclude it.
+\end{frame}
+
+\begin{frame}{Future work}
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+  \draw[maincolor!40,line width=1.2pt] (-5.35,0.35) -- (5.35,0.35);
+
+  \foreach \x/\n in {-5.0/1,-2.5/2,0/3,2.5/4,5.0/5}{
+    \fill[maincolor] (\x,0.35) circle (0.16);
+    \node[font=\scriptsize\bfseries,text=white] at (\x,0.35) {\n};
+  }
+
+  \node[softcard,text width=2.05cm,minimum width=2.45cm,minimum height=1.28cm,align=center] at (-5.0,1.55) {
+    {\scriptsize\bfseries Larger corpora}\\[-0.02cm]
+    {\tiny diversity + multi-annotator agreement}
+  };
+
+  \node[softcard,text width=2.05cm,minimum width=2.45cm,minimum height=1.28cm,align=center] at (-2.5,-0.72) {
+    {\scriptsize\bfseries Matched attacks}\\[-0.02cm]
+    {\tiny direct-target tests for every proxy}
+  };
+
+  \node[yellowcard,text width=2.05cm,minimum width=2.45cm,minimum height=1.28cm,align=center] at (0,1.55) {
+    {\scriptsize\bfseries Open-set behavior}\\[-0.02cm]
+    {\tiny rejection · abstention · workload}
+  };
+
+  \node[softcard,text width=2.05cm,minimum width=2.45cm,minimum height=1.28cm,align=center] at (2.5,-0.72) {
+    {\scriptsize\bfseries Stronger stress tests}\\[-0.02cm]
+    {\tiny severity sweeps + chained perturbations}
+  };
+
+  \node[softcard,text width=2.05cm,minimum width=2.45cm,minimum height=1.28cm,align=center] at (5.0,1.55) {
+    {\scriptsize\bfseries Longitudinal audit}\\[-0.02cm]
+    {\tiny versions · configurations · mappings}
+  };
+
+  \node[greencard,text width=10.85cm,minimum width=11.55cm,minimum height=0.82cm,font=\scriptsize,align=center] at (0,-2.10) {
+    Future evaluations should connect technical robustness to analyst workload, abstention behavior and software evolution over time.
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+\backmatter
+\end{document}
