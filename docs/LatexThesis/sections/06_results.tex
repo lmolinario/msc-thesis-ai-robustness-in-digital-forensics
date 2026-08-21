@@ -182,6 +182,10 @@ homogeneous numerical uncertainty measures; consequently, their comparison is
 based on normalized observable decisions rather than cross-system probability or uncertainty
 scores.
 
+Unless a subsection explicitly states otherwise, these population,
+accuracy-drop, attack-transfer, \gls{ood}, and probability-interpretation rules
+apply throughout the chapter.
+
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Clean Baseline Performance}
 \label{sec:results-clean-baseline}
@@ -200,11 +204,8 @@ positive corresponds to a \texttt{non\_weapon} image classified as
 \texttt{weapon}.
 
 Table~\ref{tab:results-clean-baseline-metrics} reports the principal clean
-binary metrics. In addition to accuracy, balanced accuracy, macro-averaged
-metrics, and class-specific performance for \texttt{weapon}, the table includes
-the mean maximum predicted-class probability. This value is retained only as
-an architecture-specific diagnostic of the output distribution and is not
-interpreted as a calibrated confidence measure.
+binary metrics, including the architecture-specific mean maximum predicted-class
+probability defined in Section~\ref{sec:results-scope}.
 
 \begin{table}[H]
 \centering
@@ -281,30 +282,15 @@ the mean maximum predicted-class probability and is reported only as an
 intra-model diagnostic indicator.
 \end{table}
 
-\gls{efficientnetb0} achieves the strongest overall clean-condition performance,
-with an accuracy and macro-F1 of 0.978. Its \texttt{weapon} recall is 0.984,
-corresponding to an \gls{fnr} of 0.016, while its \gls{fpr} is 0.028. Its mean
-maximum predicted-class probability is 0.979.
-
-\gls{resnet18} shows slightly lower but still high clean-condition performance, with
-an accuracy and macro-F1 of 0.964. Its \texttt{weapon} recall is 0.970, its
-\gls{fnr} is 0.030, and its \gls{fpr} is 0.042. The corresponding mean maximum
-predicted-class probability is 0.974.
-
-The \gls{clip}-based proxy exhibits a different operational profile. Its
-overall accuracy and macro-F1 are 0.927, lower than those of the two
-fully fine-tuned \glspl{cnn}. However, it achieves the highest
-\texttt{weapon} recall, at 0.988, and the lowest \gls{fnr}, at 0.012. This
-reduction in missed \texttt{weapon} samples is accompanied by an
-\gls{fpr} of 0.134, substantially higher than those of \gls{efficientnetb0} and
-\gls{resnet18}.
-
-The mean maximum predicted-class probability of the \gls{clip}-based proxy is
-0.559. This value must not be compared directly with the corresponding values
-of the convolutional architectures because the probability outputs are not
-calibrated across models. Within the \gls{clip}-based proxy, it indicates that
-the strong tendency to assign inputs to the \texttt{weapon} class does not
-generally coincide with maximum probabilities close to one.
+Among the two fully fine-tuned \glspl{cnn}, \gls{efficientnetb0} provides the
+strongest overall balance, with 0.978 accuracy and macro-F1, an \gls{fnr} of
+0.016, and an \gls{fpr} of 0.028.
+\gls{resnet18} follows at 0.964 accuracy and macro-F1, with an \gls{fnr} of
+0.030 and an \gls{fpr} of 0.042. The \gls{clip}-based proxy has lower overall
+accuracy (0.927) but the highest weapon recall (0.988) and lowest \gls{fnr}
+(0.012), at the cost of the highest \gls{fpr} (0.134). Its lower model-specific
+Max-P value (0.559) accompanies this positive-class tendency but is not a
+cross-architecture calibration result.
 
 This behavior is not the result of zero-shot classification. In the adopted
 implementation, \gls{clip} serves as a pretrained and frozen visual encoder
@@ -361,11 +347,7 @@ confusion-matrix components for the three proxy models. The layout is:
 \end{table}
 
 The same error distributions are visualized in
-Figure~\ref{fig:results-clean-confusion-matrices}. \gls{efficientnetb0} minimizes
-the total number of errors, producing 22 incorrect decisions. \gls{resnet18} produces
-36 errors and maintains an intermediate profile. The \gls{clip}-based proxy
-produces 73 errors, but only six of them are false negatives; the remaining 67
-are false positives.
+Figure~\ref{fig:results-clean-confusion-matrices}.
 
 \begin{figure}[htbp]
 \centering
@@ -404,25 +386,13 @@ subset}
 \label{fig:results-clean-confusion-matrices}
 \end{figure}
 
-From a forensic-triage perspective, the most consequential distinction concerns
-the direction of the errors. \gls{efficientnetb0} provides the strongest overall
-balance, with eight false negatives and 14 false positives. \gls{resnet18} produces
-15 false negatives and 21 false positives. The \gls{clip}-based proxy reduces
-false negatives to six but increases false positives to 67.
-
-The clean comparison therefore cannot be interpreted solely through aggregate
-accuracy. A lower false-negative rate may reduce the risk of failing to flag
-firearm-oriented content, but a higher false-positive rate increases the volume
-of irrelevant material presented for human review. Conversely, minimizing the
-review workload must not be achieved by accepting an operationally
-unacceptable number of missed target images.
-
-Overall, all three proxy architectures achieve high performance under clean
-conditions, but they expose distinct operational tradeoffs among target-class
-recall, false-negative risk, false-positive workload, and model-specific output
-distributions. These differences provide the necessary baseline for evaluating
-whether the same profiles remain stable under \gls{ood}, adversarial, and
-anti-forensic conditions.
+The direction of error is operationally decisive: the three models respectively
+produce 8/14, 15/21, and 6/67 false negatives/false positives, for 22, 36, and
+73 errors in total. Thus, the
+\gls{clip}-based proxy minimizes missed targets while substantially increasing
+review workload, whereas \gls{efficientnetb0} offers the strongest balance.
+These distinct clean profiles form the baseline for the following robustness
+analyses.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{\texorpdfstring{\gls{ood}}{Out-of-Distribution} Behavior}
@@ -527,29 +497,11 @@ comprises five checkpoint responses for each of the 500 unique \gls{ood}
 images.
 \end{table}
 
-The \gls{clip}-based proxy exhibits the strongest tendency to assign
-\gls{ood} inputs to the firearm-oriented class. It produces 2\,089
-\texttt{weapon} responses, corresponding to a weapon assignment rate of
-0.8356. However, its mean maximum predicted-class probability is only 0.5358,
-and none of its 2\,500 responses reaches the threshold of 0.90.
-
-The zero high-maximum-probability rate must therefore not be interpreted as an
-absence of \texttt{weapon} assignments. Instead, the \gls{clip}-based proxy
-frequently selects \texttt{weapon} while producing output probabilities close
-to the central region of the binary output range. This combination indicates a
-strong directional assignment tendency without high maximum-probability
-responses under the adopted threshold.
-
-\gls{efficientnetb0} and \gls{resnet18} assign lower proportions of the \gls{ood}
-responses to \texttt{weapon}. \gls{efficientnetb0} produces 924 such responses,
-corresponding to a rate of 0.3696, whereas \gls{resnet18} produces 1\,094, for a rate
-of 0.4376.
-
-Their model-specific output distributions nevertheless contain substantially
-more responses above the 0.90 threshold. \gls{efficientnetb0} produces 1\,252
-high-maximum-probability responses, corresponding to a rate of 0.5008.
-\gls{resnet18} produces 1\,617, corresponding to the highest rate among the three
-architectures, at 0.6468.
+The \gls{clip}-based proxy assigns 0.8356 of the responses to \texttt{weapon},
+far more than \gls{efficientnetb0} (0.3696) or \gls{resnet18} (0.4376), yet none
+of its responses reaches Max-P 0.90. Conversely, \gls{efficientnetb0} and
+\gls{resnet18} produce high-Max-P rates of 0.5008 and 0.6468. Assignment
+direction and output concentration are therefore distinct diagnostics.
 
 Figure~\ref{fig:results-ood-weapon-rate-confidence} compares the weapon
 assignment rate, mean maximum predicted-class probability, and
@@ -564,19 +516,9 @@ indicators on \gls{ood} inputs}
 \label{fig:results-ood-weapon-rate-confidence}
 \end{figure}
 
-The figure highlights that weapon assignment frequency and maximum-probability
-behavior represent distinct dimensions of the closed-set response. The
-\gls{clip}-based proxy exhibits the highest weapon assignment rate but the
-lowest mean maximum probability and no responses above the 0.90 threshold.
-\gls{resnet18} exhibits the highest high-maximum-probability rate despite assigning
-fewer responses to \texttt{weapon}. \gls{efficientnetb0} presents an intermediate
-profile for both indicators.
-
-These values are architecture-specific and must not be used to construct a
-cross-model probability or uncertainty ranking. The output probabilities were
-not calibrated across architectures, and the same numerical value may not
-represent the same degree of uncertainty for \gls{efficientnetb0}, \gls{resnet18}, and the
-\gls{clip}-based proxy.
+The comparison confirms the separation between assignment frequency and
+architecture-specific Max-P behavior; as established in
+Section~\ref{sec:results-scope}, it is not a cross-model uncertainty ranking.
 
 Figure~\ref{fig:results-ood-confidence-distribution} presents the complete
 distribution of maximum predicted-class probabilities for the three
@@ -591,35 +533,10 @@ architectures.
 \label{fig:results-ood-confidence-distribution}
 \end{figure}
 
-The distributional view confirms that the responses of the \gls{clip}-based
-proxy remain below the predefined 0.90 threshold, whereas \gls{efficientnetb0} and
-\gls{resnet18} produce substantial populations above it. This difference does not
-establish that one architecture is intrinsically more reliable on
-out-of-distribution content. It characterizes the architecture-specific score
-profiles produced when all inputs must be assigned to one of two closed-set
-classes.
-
-From a forensic perspective, a \texttt{weapon} assignment on the \gls{ood}
-branch is not a false positive in the supervised binary sense. The input has no
-\texttt{weapon} or \texttt{non\_weapon} reference assignment. Nevertheless,
-such an output may still affect triage by increasing the quantity of unrelated
-material prioritized for review.
-
-Conversely, a high maximum predicted-class probability on an \gls{ood} input
-does not demonstrate that the assignment is semantically valid. It indicates
-only that the corresponding proxy architecture produced a strongly peaked
-closed-set output for material outside the frozen binary evaluation
-distribution.
-
-The \gls{ood} results therefore identify two operationally relevant but
-separate behaviors. The first is the tendency to route distributionally
-different material toward the firearm-oriented review category. The second is
-the tendency to produce high maximum predicted-class probabilities for forced
-closed-set assignments.
-
-Both behaviors can influence prioritization and analyst workload. Neither can
-be treated as stand-alone evidence, supervised correctness, or calibrated
-uncertainty, and both remain subject to human verification
+The full distributions confirm these architecture-specific score profiles.
+Operationally, a positive \gls{ood} assignment can increase unrelated review
+volume, while a high Max-P indicates only a peaked closed-set output. Neither is
+supervised correctness or stand-alone evidence, and both require human review
 \cite{guo2017calibration,nist2023airmf}.
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -771,12 +688,6 @@ conditions. JPEG Recompression and Histogram Modification reduce accuracy by
 0.002, Contrast Stretching leaves it unchanged, and Resample Resize increases
 it by 0.002. Gaussian Blur increases aggregate accuracy from 0.927 to 0.934.
 
-These limited or negative accuracy drops must be interpreted cautiously. They
-do not demonstrate that the \gls{clip}-based proxy is unaffected by the
-transformations. A transformed population can contain both newly introduced
-errors and corrected clean-condition errors, with the latter compensating for
-the former in the aggregate accuracy.
-
 Table~\ref{tab:results-antiforensic-operational-errors} reports the most
 operationally relevant condition for each architecture. The selected conditions
 capture the largest aggregate degradation or, where aggregate drops are tied or
@@ -857,19 +768,9 @@ occur in the opposite direction. Although the aggregate accuracy drop is only
 0.002, the transition analysis confirms that the transformed condition is not
 behaviorally identical to the clean baseline.
 
-The maximum-probability shifts for the three representative cases are negative,
-but their magnitudes are limited. These values indicate a reduction in the
-mean maximum predicted-class probability relative to the corresponding clean
-predictions. They do not constitute calibrated uncertainty estimates and
-cannot be compared directly across architectures.
-
-The results also demonstrate why aggregate accuracy and induced-error rate
-must remain separate. For example, Gaussian Blur increases the aggregate
-accuracy of the \gls{clip}-based proxy by 0.007 while still inducing four new
-errors among clean-correct samples. The aggregate improvement therefore
-reflects the net balance between newly introduced errors and previously
-incorrect decisions that become correct, rather than the absence of
-transformation sensitivity.
+The model-specific Max-P shifts are small and negative. Gaussian Blur also
+shows why aggregate and transition metrics remain separate: \gls{clip} accuracy
+increases by 0.007 while four clean-correct samples become incorrect.
 
 From an operational perspective, the anti-forensic results identify
 architecture- and transformation-specific failure modes rather than a uniform
@@ -885,12 +786,9 @@ aggregate variation may become consequential when it produces missed
 target-category images, increases irrelevant review volume, or interacts with
 low visual quality and ambiguous context.
 
-The anti-forensic evaluation therefore does not support a general claim that
-the proxy architectures are robust to ordinary image transformations. It shows
-that their aggregate accuracy is comparatively stable under the frozen
-conditions, while also revealing specific clean-correct samples whose
-operational assignments change. These outputs remain triage indicators and
-must be subject to systematic human verification.
+Thus, comparatively stable aggregate accuracy under the frozen transformations
+coexists with architecture-specific decision changes and cannot support a
+general robustness claim.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Adversarial Robustness}
@@ -1439,40 +1337,14 @@ Furthermore, the binary bundle contains repeated manipulated versions derived
 from the same 1\,000 source images rather than 11\,000 independent real-world
 cases.
 
-Within the frozen protocol, \gls{griffeye}/\gls{t3kcore} exhibits the highest
-bundle-level accuracy, at 0.972, and the lowest \gls{fpr}, at 0.007. Its
-weapon recall is 0.951, corresponding to a bundle \gls{fnr} of 0.049.
-
-\gls{cellebriteinseyets} presents a comparatively balanced profile. Its bundle
-accuracy is 0.958, weapon recall is 0.958, \gls{fnr} is 0.042, and
-\gls{fpr} is 0.042.
-
-\gls{magnetaxiomtool}/\gls{magnetai} achieves a bundle accuracy of 0.933 and
-an \gls{fpr} of 0.035. Its weapon recall is lower, at 0.901, corresponding to
-a bundle \gls{fnr} of 0.099. Its clean \gls{fnr}, at 0.070, is lower than the
-bundle-weighted value, indicating a larger missed-target proportion across the
-combined perturbed population.
-
-The three \gls{excirefoto2025} configurations expose the clearest
-configuration-dependent tradeoff. At \texttt{D20}, the system produces a
-relatively low \gls{fpr} of 0.036 and the lowest \gls{ood} weapon assignment
-rate, at 0.238, but its weapon recall is 0.857 and its \gls{fnr} is 0.143.
-
-At \texttt{D50}, weapon recall increases to 0.949 and the \gls{fnr} decreases
-to 0.051. This improvement is accompanied by an \gls{fpr} of 0.099 and an
-\gls{ood} weapon assignment rate of 0.340.
-
-At \texttt{D80}, weapon recall reaches 0.981 and the \gls{fnr} decreases to
-0.019, the lowest among the six configurations. However, the \gls{fpr}
-increases to 0.207, and the \gls{ood} weapon assignment rate reaches 0.522.
-The broader retrieval setting therefore minimizes missed firearm-oriented
-content at the cost of a substantially larger false-positive review burden.
-
-The Excire results demonstrate why a configuration with lower \gls{fnr} is not
-automatically preferable in every operational context. Increasing retrieval
-coverage can reduce missed detections while simultaneously increasing the
-quantity of \texttt{non\_weapon} and \gls{ood} material routed to the
-firearm-oriented review category.
+The table exposes three distinct profiles that the software-specific
+subsections examine in detail. Griffeye/T3K CORE has the highest bundle
+accuracy and lowest \gls{fpr}; Cellebrite is comparatively balanced; and
+Magnet.AI has a larger perturbed missed-target burden than its clean result.
+Excire most clearly demonstrates configuration sensitivity: moving from
+\texttt{D20} to \texttt{D80} reduces the \gls{fnr} while increasing both the
+\gls{fpr} and \gls{ood} weapon-assignment rate. Greater retrieval coverage
+therefore exchanges missed-target risk for additional review workload.
 
 Figure~\ref{fig:results-forensic-tools-ood-weapon-flag-rate} reports the
 observable weapon assignment rate on the separate \gls{ood} branch.
@@ -1486,50 +1358,23 @@ configurations on \gls{ood} inputs}
 \label{fig:results-forensic-tools-ood-weapon-flag-rate}
 \end{figure}
 
-Every configuration assigns a non-zero proportion of the 500 \gls{ood} inputs
-to the operational \texttt{weapon} class. These assignments are not false
-positives in the supervised binary sense because the \gls{ood} inputs have no
-\texttt{weapon} or \texttt{non\_weapon} reference assignment.
-
-Nevertheless, the assignments remain operationally relevant. They may increase
-the amount of unrelated material prioritized for analyst review and may alter
-the ordering of content outside the nominal binary task. The lowest observed
-rate is 0.238 for Excire \texttt{D20}, whereas the highest is 0.522 for
-Excire \texttt{D80}. The other configurations fall between these values:
-0.260 for Griffeye/T3K CORE, 0.292 for Cellebrite Inseyets, 0.340 for Excire
-\texttt{D50}, and 0.360 for Magnet AXIOM/Magnet.AI.
-
-The overview therefore identifies no single configuration that simultaneously
-minimizes false negatives, false positives, and \gls{ood} weapon assignments.
-The selected systems expose different tradeoffs between missed-target risk and
-human-review workload. Their operational suitability cannot be inferred from a
-single aggregate metric and must be evaluated in relation to the intended
-forensic workflow, the consequences of each error direction, and the continued
-availability of human verification.
+All configurations assign some \gls{ood} inputs to \texttt{weapon}, with rates
+ranging from 0.238 (Excire \texttt{D20}) to 0.522 (Excire \texttt{D80}). These
+are not supervised false positives, but they can increase unrelated review
+volume. No configuration simultaneously minimizes missed targets, false
+positives, and \gls{ood} assignments; suitability therefore depends on the
+intended workflow and the consequence of each error direction.
 
 
 \subsection{\texorpdfstring{\gls{magnetaxiomtool}/\gls{magnetai}}{Magnet AXIOM/Magnet.AI} Results}
 \label{subsec:results-magnet}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The observable output mapping and normalization procedure adopted for
-\gls{magnetaxiomtool}/\gls{magnetai} are documented in
-Section~\ref{subsec:implementation-magnet}. The present subsection reports the
-resulting normalized behavior without making assumptions about the inaccessible
-internal classifier, decision threshold, or training data.
-
-All 11\,500 bundle files were associated with one normalized output. Binary
-metrics are computed on the 11\,000 items whose reference operational
-assignment is \texttt{weapon} or \texttt{non\_weapon}. The separate 500-image
-\gls{ood} branch is analyzed through the proportion of inputs receiving a
-weapon-oriented assignment.
-
-Under the frozen mapping, the exported \texttt{Possible weapons} tag is treated
-as the primary positive observable output. Absence of the tag is mapped to
-\texttt{non\_weapon}, while the defensive normalization rules described in
-Section~\ref{subsec:implementation-magnet} preserve any unsupported nonempty
-state as \texttt{unknown}. No such unknown state occurs in the canonical
-11\,500-item result population.
+Under the mapping documented in
+Section~\ref{subsec:implementation-magnet}, the exported
+\texttt{Possible weapons} tag is the positive observable output; its absence is
+mapped to \texttt{non\_weapon}. No unsupported \texttt{unknown} state occurs in
+the canonical population.
 
 Table~\ref{tab:results-magnet-global-metrics} reports the bundle-weighted
 binary metrics.
@@ -1685,29 +1530,14 @@ anti-forensic population under the frozen protocol. Its accuracy is 0.923,
 weapon recall is 0.884, and \gls{fnr} is 0.116. The anti-forensic population
 retains an accuracy of 0.940, weapon recall of 0.913, and \gls{fnr} of 0.087.
 
-This comparison does not establish that Magnet.AI was directly attacked in a
-white-box setting. The four model-dependent adversarial artifacts were
-generated against fold-specific \gls{efficientnetb0} checkpoints and were only
-subsequently processed by Magnet.AI. Their effects therefore measure empirical
-transfer behavior. Color Shift and the anti-forensic transformations are
-model-agnostic conditions.
+As defined in Section~\ref{sec:results-scope}, the adversarial-family results
+measure transfer from \gls{efficientnetb0}; Color Shift and the anti-forensic
+transformations are model-agnostic.
 
-The separate \gls{ood} result is also operationally relevant. Of the 500
-inputs outside the binary reference task, 180 receive the
-\texttt{Possible weapons} tag. The resulting rate of 0.360 is not a supervised
-false-positive rate because these inputs have no \texttt{weapon} or
-\texttt{non\_weapon} reference assignment.
-
-Nevertheless, these assignments may increase the quantity of unrelated
-material prioritized for analyst review. The result describes the observable
-closed-set behavior of the frozen configuration and does not establish the
-investigative relevance of the individual \gls{ood} images.
-
-Unlike the proxy models, \gls{magnetai} does not expose a homogeneous numerical
-probability or uncertainty value for the adopted image-level output. The
-analysis is therefore limited to the observable categorical tag and cannot
-include probability-distribution, calibration, or maximum-probability
-comparisons with the proxy architectures.
+On the separate \gls{ood} branch, 180 of 500 inputs receive the positive tag
+(0.360), an operational review-load indicator rather than a supervised false
+positive. Magnet.AI exposes no comparable numerical uncertainty output for this
+mapping.
 
 Table~\ref{tab:results-magnet-attack-metrics} reports the condition-level
 behavior for all ten perturbed populations.
@@ -1936,17 +1766,9 @@ proportion of firearm-oriented inputs not receiving the positive tag, whereas
 Histogram Modification produces a comparatively greater increase in
 false-positive review workload.
 
-These findings describe the normalized observable behavior of the frozen
-\gls{magnetaxiomtool}/\gls{magnetai} configuration. They do not reveal the
-internal model architecture, establish a general vulnerability of the
-commercial platform, or support extrapolation to other software versions,
-categories, thresholds, or media-analysis configurations.
-
-The \texttt{Possible weapons} tag must therefore remain a triage aid rather
-than a self-sufficient evidentiary conclusion. Its operational use requires
-human verification, awareness of the false-negative risk under both clean and
-perturbed conditions, and traceable documentation of the software version,
-configuration, imported population, and output-normalization rule.
+These results characterize only the frozen Magnet.AI version, category,
+configuration, population, and mapping. The tag remains a traceable triage aid
+requiring human verification, not an evidentiary conclusion.
 
 
 
@@ -1955,23 +1777,12 @@ configuration, imported population, and output-normalization rule.
 \label{subsec:results-griffeye}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The observable bookmark mapping and normalization procedure adopted for
-\gls{griffeye}/\gls{t3kcore} are documented in
-Section~\ref{subsec:implementation-griffeye}. The present subsection reports
-the resulting normalized behavior without making assumptions about the
-inaccessible internal classification architecture, thresholds, preprocessing,
-or bookmark-generation criteria.
-
-All 11\,500 bundle files were associated with a normalized decision. Binary
-metrics are computed on the 11\,000 items whose reference operational
-assignment is \texttt{weapon} or \texttt{non\_weapon}, whereas the 500
-\gls{ood} inputs are analyzed separately through their weapon assignment rate.
-
 Under the frozen operational mapping, only the
 \texttt{CORE/Violence/Firearm} bookmark is treated as a positive
 \texttt{weapon} output. Other bookmarks related to weapons, violence,
 military equipment, or adjacent semantic categories are preserved in the
-controlled raw output but are not included as primary positives.
+controlled raw output but are not included as primary positives, as documented
+in Section~\ref{subsec:implementation-griffeye}.
 
 This mapping is deliberately conservative. Consequently, the observed false
 positive rate must be interpreted jointly with the selected bookmark rule. A
@@ -2141,21 +1952,10 @@ consistent: under the frozen protocol, the transferred adversarial artifacts
 produce a somewhat larger missed-target burden than the model-agnostic
 anti-forensic transformations.
 
-This comparison does not constitute a white-box attack against
-\gls{griffeye}/\gls{t3kcore}. The four model-dependent adversarial populations
-were generated against fold-specific \gls{efficientnetb0} checkpoints. Their
-evaluation through Griffeye/T3K CORE measures only empirical transfer behavior.
-
-On the separate \gls{ood} branch, 130 of the 500 inputs receive the primary
-firearm-oriented operational assignment, yielding a weapon assignment rate of
-0.260. These outputs are not false positives in the supervised binary sense
-because the \gls{ood} inputs have no \texttt{weapon} or
-\texttt{non\_weapon} reference assignment.
-
-Nevertheless, the result remains operationally relevant. Even a configuration
-with a low binary \gls{fpr} may route material outside the nominal task toward
-the firearm-oriented review category, thereby increasing analyst workload or
-altering prioritization.
+The adversarial-family values are transfer results under the common scope. On
+the separate \gls{ood} branch, 130 of 500 inputs receive the firearm bookmark
+(0.260), which can affect review workload but is not a supervised false
+positive.
 
 Table~\ref{tab:results-griffeye-attack-metrics} reports the ten individual
 perturbed conditions.
@@ -2392,43 +2192,21 @@ profile is operationally selective, but its interpretation is inseparable from
 the conservative choice to count only
 \texttt{CORE/Violence/Firearm} as a primary positive.
 
-The results do not reveal whether the observed behavior derives from the
-internal model architecture, proprietary preprocessing, semantic thresholds,
-bookmark taxonomy, or other inaccessible implementation factors. They also do
-not support extrapolation to alternative bookmark mappings, software versions,
-categories, or operational configurations.
-
-The automatic firearm bookmark must therefore remain a triage signal rather
-than an autonomous evidentiary conclusion. Its use requires human verification
-and traceable documentation of the software version, enabled processing
-modules, imported population, and normalization rule.
+The profile is bounded to the frozen version, modules, population, and bookmark
+mapping. The automatic bookmark remains a traceable triage signal requiring
+human verification, not an evidentiary conclusion.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{\texorpdfstring{\gls{excirefoto2025}}{Excire Foto 2025} Results and Sensitivity Analysis}
 \label{subsec:results-excire}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The semantic-retrieval mapping and the three frozen
-\texttt{Distance limit} settings are documented in
-Section~\ref{subsec:implementation-excire}. The present subsection examines how
-the normalized operational behavior changes across the \texttt{D20},
-\texttt{D50}, and \texttt{D80} configurations.
-
-The software was evaluated using the same eight firearm-oriented semantic
-queries under each distance setting. An image was mapped to the operational
-\texttt{weapon} state when it appeared in the result set of at least one of
-the eight queries. Consequently, the reported decisions represent the union of
-the observable prompt-hit sets rather than an internal binary classifier output.
-
-The three configurations differ only in the frozen semantic-distance setting.
-Within the evaluated range, \texttt{D20} represents the most restrictive
-retrieval configuration, \texttt{D50} represents the intermediate
-configuration, and \texttt{D80} represents the most permissive configuration.
-
-The terms restrictive, intermediate, and permissive describe only the relative
-behavior of the three evaluated settings. They do not reveal the internal
-scoring function, semantic embedding space, or decision mechanism used by the
-software.
+Using the union-based mapping documented in
+Section~\ref{subsec:implementation-excire}, this subsection compares the same
+eight firearm-oriented queries at \texttt{D20}, \texttt{D50}, and
+\texttt{D80}. Within the evaluated range, these settings are respectively the
+most restrictive, intermediate, and most permissive retrieval configurations;
+the terms describe observable behavior, not the internal scoring mechanism.
 
 Table~\ref{tab:results-excire-sensitivity} reports clean binary performance and
 \gls{ood} weapon assignment behavior for the three configurations.
@@ -3005,39 +2783,20 @@ workload, and \gls{ood} weapon assignments. \texttt{D20} favors selectivity,
 \texttt{D80} favors retrieval coverage, and \texttt{D50} provides an
 intermediate operating point within the evaluated range.
 
-These findings are bounded to the frozen software version, eight-query set,
-distance settings, imported population, and union-based output mapping. They
-do not establish the optimal configuration for other categories, cases,
-collections, software versions, or forensic objectives.
-
-Excire outputs must therefore remain triage indicators rather than autonomous
-evidentiary conclusions. Operational deployment requires explicit configuration
-management, documentation of the query and distance settings, assessment of
-both error directions, and systematic human verification of the retrieved
-material.
+The conclusion is bounded to the frozen version, eight-query set, distance
+settings, population, and union mapping. Excire outputs remain triage
+indicators requiring documented configuration and human verification.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{\texorpdfstring{\gls{cellebriteinseyets}}{Cellebrite Inseyets} Results}
 \label{subsec:results-cellebrite}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The observable classification mapping and normalization procedure adopted for
-\gls{cellebriteinseyets} are documented in
-Section~\ref{subsec:implementation-cellebrite}. The present subsection reports
-the resulting normalized behavior without making assumptions about the
-inaccessible internal models, preprocessing stages, thresholds, or media
-classification logic.
-
-All 11\,500 forensic evaluation bundle items were associated with one
-normalized decision. Binary metrics are computed on the 11\,000 items whose
-reference operational assignment is \texttt{weapon} or
-\texttt{non\_weapon}. The separate 500-image \gls{ood} branch is analyzed
-through the proportion of inputs assigned to the positive operational state.
-
 Under the frozen mapping, an image is assigned to \texttt{weapon} when the
 exported \texttt{Classifications} field contains at least one of the labels
 \texttt{Armi}, \texttt{Pistola}, or \texttt{Fucile}. In the absence of these
-labels, the image is assigned to \texttt{non\_weapon}.
+labels, the image is assigned to \texttt{non\_weapon}, as documented in
+Section~\ref{subsec:implementation-cellebrite}.
 
 The percentages associated with individual exported labels are preserved in
 the auditable source field but are removed before applying the operational
@@ -3205,23 +2964,9 @@ a somewhat larger missed-target burden than the anti-forensic population. The
 anti-forensic family instead produces a slightly higher \gls{fpr}, at 0.043,
 compared with 0.040 for the adversarial family.
 
-This comparison does not establish that \gls{cellebriteinseyets} was attacked
-directly. The four model-dependent adversarial populations were generated
-against fold-specific \gls{efficientnetb0} checkpoints. Their evaluation through
-Cellebrite constitutes an empirical transfer assessment rather than a
-white-box attack against the commercial software.
-
-On the separate \gls{ood} branch, 146 of the 500 images are assigned to the
-positive operational state, corresponding to a weapon assignment rate of
-0.292. These assignments are not false positives in the supervised binary
-sense because the \gls{ood} inputs have no \texttt{weapon} or
-\texttt{non\_weapon} reference assignment.
-
-Nevertheless, the result remains operationally relevant because these
-assignments may increase the amount of material routed to the firearm-oriented
-review category. The observed rate describes only the behavior of the frozen
-configuration and does not establish the investigative relevance of the
-individual \gls{ood} inputs.
+The adversarial-family values are transfer results under the common scope. On
+the separate \gls{ood} branch, 146 of 500 inputs are assigned to the positive
+state (0.292), a review-load indicator rather than a supervised false positive.
 
 Table~\ref{tab:results-cellebrite-attack-metrics} reports the ten individual
 perturbed conditions.
@@ -3465,27 +3210,10 @@ The observable percentages retained in the original
 They are not established as calibrated probabilities and are not directly
 comparable across labels, images, conditions, or software systems.
 
-Overall, the frozen \gls{cellebriteinseyets} configuration presents a
-comparatively balanced bundle-level profile, with similar overall
-false-negative and false-positive rates. Its clean weapon recall is high, and
-its aggregate degradation under the combined perturbed population is limited.
-
-These values do not constitute a guarantee of general robustness. The system
-remains black-box, and the experiment cannot determine whether the observed
-behavior derives from internal architecture, preprocessing, proprietary
-classification rules, label thresholds, or characteristics specific to the
-evaluated export.
-
-The findings are bounded to the frozen software version, enabled processing
-configuration, exported classification labels, operational mapping, and image
-population. They must not be extrapolated to other versions, categories,
-devices, case exports, or media-analysis settings.
-
-Cellebrite classifications must therefore remain triage indicators rather than
-autonomous evidentiary conclusions. Their operational use requires systematic
-human verification and traceable documentation of the software version,
-processing configuration, imported population, export procedure, and
-normalization rule.
+Overall, the frozen Cellebrite configuration presents a comparatively balanced
+bundle-level profile and limited aggregate degradation. This observation is
+bounded to its version, configuration, exported labels, mapping, and population;
+the classifications remain traceable triage indicators requiring human review.
 
 
 
@@ -3808,37 +3536,14 @@ operational comparison but do not constitute identical statistical
 observations.
 \end{table}
 
-Clean performance alone does not identify a uniformly preferable operating
-profile. \gls{efficientnetb0} and Griffeye/T3K CORE both achieve a clean accuracy of
-0.978, but their outputs arise from different systems and mappings.
-\gls{efficientnetb0} is a supervised transparent proxy, whereas the Griffeye result
-uses only the \texttt{CORE/Violence/Firearm} bookmark as the positive observable
-output.
-
-Cellebrite Inseyets and \gls{resnet18} both achieve a clean accuracy of 0.964, but
-their error counts and output mechanisms differ. Excire \texttt{D50} achieves a
-lower clean accuracy, at 0.944, while exposing a configurable recall--workload
-tradeoff that cannot be represented by a single fixed metric.
-
-The \gls{clip}-based proxy presents the clearest distinction between nominal
-binary behavior and \gls{ood} assignment tendency. It produces only six clean
-false negatives but assigns 0.836 of its fold-specific \gls{ood} responses to
-\texttt{weapon}. Its mean maximum predicted-class probability on that branch is
-comparatively low, as discussed in Section~\ref{sec:results-ood}; assignment
-frequency and output-probability concentration must therefore remain separate
-dimensions.
-
-The four black-box reference configurations produce lower \gls{ood} weapon
-assignment rates than the \gls{clip}-based proxy, ranging from 0.260 for
-Griffeye/T3K CORE to 0.360 for Magnet.AI. This observation is
-configuration-dependent rather than system-wide. Excire \texttt{D80}, for
-example, reaches a rate of 0.522 and is not represented by the intermediate
-reference row in Table~\ref{tab:results-comparative-clean-ood}.
-
-A \texttt{weapon} assignment on the \gls{ood} branch is not a supervised false
-positive. Nevertheless, it may increase unrelated review volume or affect
-content prioritization. Clean accuracy and \gls{ood} assignment behavior must
-therefore be interpreted jointly.
+Similar clean accuracies do not imply equivalent operating profiles because the
+systems, mappings, and prediction units differ. The \gls{clip}-based proxy most
+clearly separates nominal accuracy from \gls{ood} behavior: it has only six
+clean false negatives but assigns 0.836 of fold-specific \gls{ood} responses to
+\texttt{weapon}, as discussed in Section~\ref{sec:results-ood}. Black-box
+reference rates are lower (0.260--0.360), although
+Excire \texttt{D80} reaches 0.522. Clean errors and \gls{ood} review-load
+tendency must therefore be read jointly and within configuration.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{Robustness under anti-forensic transformations.}
@@ -3955,45 +3660,22 @@ anti-forensic transformations}
 \label{fig:results-forensic-tools-antiforensic-drop-heatmap}
 \end{figure}
 
-Figure~\ref{fig:results-forensic-tools-antiforensic-drop-heatmap} presents the
-condition-level black-box drops for all six evaluated configurations, including
-Excire \texttt{D20}, \texttt{D50}, and \texttt{D80}. The largest
-configuration-specific variation is observed for Excire \texttt{D80} under
-Histogram Modification, whereas Magnet.AI shows its largest reduction under
-Gaussian Blur.
-
-Across the reference systems, anti-forensic family-level degradation remains
-smaller than the strongest direct-target adversarial effects. This result must
-not be interpreted as uniform robustness. The most relevant error direction
-differs by system: \gls{efficientnetb0} and Magnet.AI show increased missed-target
-risk under blurring; \gls{resnet18} produces bidirectional errors under Histogram
-Modification; and Excire \texttt{D50} experiences a greater false-positive
-review burden.
-
-The \gls{clip}-based proxy illustrates why aggregate family accuracy is
-insufficient. Its anti-forensic accuracy is slightly higher than its clean
-accuracy, yet 13 clean-correct samples become incorrect under Histogram
-Modification. Previously incorrect samples becoming correct compensate for
-those new errors in the aggregate.
-
-The black-box results similarly depend on observable mappings. The low
-Griffeye/T3K CORE \gls{fpr} is conditional on its conservative primary bookmark
-mapping. The Excire values depend on the semantic query set and distance
-configuration. The reported family accuracies therefore characterize frozen
-operating points rather than intrinsic system properties.
+Figure~\ref{fig:results-forensic-tools-antiforensic-drop-heatmap} extends the
+comparison to all Excire settings. Anti-forensic
+family-level degradation is smaller than the strongest direct-target effects,
+but the dominant burden differs: blurring increases missed targets for
+\gls{efficientnetb0} and Magnet.AI, Histogram Modification produces
+bidirectional ResNet18 errors, and Excire \texttt{D50} expands false-positive
+workload. The \gls{clip} row further shows that a small aggregate improvement
+can coexist with 13 newly induced errors. These are mapping- and
+configuration-specific operating points, not intrinsic system properties.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{Robustness under adversarial and adversarial-style conditions.}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The adversarial comparison requires an explicit distinction between
-direct-target vulnerability and empirical transfer behavior. \gls{fgsm},
-\gls{sigmazero}, \gls{superdeepfool}, and \gls{onepixel} were generated against
-fold-specific \gls{efficientnetb0} checkpoints. Their evaluation on \gls{efficientnetb0}
-constitutes direct-target assessment. Their evaluation on \gls{resnet18}, the
-\gls{clip}-based proxy, and the black-box software configurations measures
-transfer behavior. \gls{colorshift} is model-agnostic and is included as an
-adversarial-style comparison condition.
+The direct-target, transfer, and model-agnostic distinctions defined in
+Section~\ref{sec:results-scope} apply to this comparison.
 
 The family-level adversarial drop is:
 
@@ -4103,43 +3785,17 @@ adversarial and adversarial-style conditions}
 \label{fig:results-forensic-tools-adversarial-drop-heatmap}
 \end{figure}
 
-The strongest degradation in the complete comparison occurs for
-\gls{efficientnetb0} under Sigma-Zero. Accuracy decreases from 0.978 to 0.015, and
-963 of the 978 clean-correct inputs become incorrect. The nearly balanced
-directions of the induced transitions show that the result is not limited to
-target concealment: it produces both missed firearm-oriented images and a
-substantial false-positive review burden.
-
-FGSM also produces severe direct-target degradation for \gls{efficientnetb0},
-reducing accuracy to 0.575 and inducing 406 errors, 321 of which occur from
-\texttt{weapon} to \texttt{non\_weapon}. This condition is therefore
-particularly relevant to missed-target risk.
-
-The corresponding artifacts transfer only partially to \gls{resnet18} and the
-\gls{clip}-based proxy. Their lower family-level drops must not be generalized
-as direct adversarial robustness because neither architecture was used as the
-generation target for the four model-dependent attacks.
-
-The black-box systems do not reproduce the \gls{efficientnetb0} Sigma-Zero collapse.
-This difference does not reveal the cause of their apparent stability. It may
-reflect differences in preprocessing, internal representations, category
-definitions, thresholds, retrieval logic, or other inaccessible implementation
-factors.
-
-Magnet.AI and Cellebrite Inseyets are most affected by transferred FGSM
-artifacts, producing respectively 96 and 53 false negatives in the 1\,000-image
-condition populations. Griffeye/T3K CORE records its largest missed-target
-burden under Sigma-Zero, with 37 false negatives.
-
-Excire \texttt{D50} presents a different response. Under Sigma-Zero, its weapon
-recall remains 0.926, but the \gls{fpr} increases to 0.442. The reduction in
-accuracy is therefore driven primarily by a wider set of firearm-query
-retrievals among reference \texttt{non\_weapon} images.
-
-Figure~\ref{fig:results-forensic-tools-adversarial-drop-heatmap} also includes
-the Excire \texttt{D20} and \texttt{D80} configurations. Their presence
-illustrates that transfer behavior is not solely software-dependent but can
-change materially with the operational retrieval setting.
+Table~\ref{tab:results-comparative-adversarial} and
+Figure~\ref{fig:results-forensic-tools-adversarial-drop-heatmap} distinguish a
+severe direct-target collapse from much smaller transferred effects. Sigma-Zero
+drives \gls{efficientnetb0} to 0.015
+accuracy with 963 induced errors, while transferred FGSM produces the largest
+missed-target burden for Magnet.AI and Cellebrite (96 and 53 false negatives).
+Griffeye's largest burden occurs under Sigma-Zero (37 false negatives), whereas
+Excire \texttt{D50} responds chiefly through false-positive expansion
+(\gls{fpr} 0.442). The D20/D80 heatmap rows confirm that transfer behavior also
+depends on the retrieval setting; inaccessible internal causes cannot be
+inferred from these differences.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{Configuration sensitivity and black-box interpretation.}
@@ -4150,39 +3806,13 @@ configuration is part of the evaluated system. Under Sigma-Zero, moving from
 \texttt{D20} to \texttt{D80} decreases the \gls{fnr} from 0.180 to 0.024 but
 increases the \gls{fpr} from 0.190 to 0.662.
 
-The same software and query set can therefore support markedly different
-operational priorities. The restrictive \texttt{D20} setting favors
-selectivity, the permissive \texttt{D80} setting favors retrieval coverage, and
-\texttt{D50} provides an intermediate reference point. None of these settings
-is universally preferable because the operational choice depends on the
-relative consequences assigned to missed target images and additional
-manual-review workload.
-
-Comparable mapping dependence is present in the other black-box systems. The
-Griffeye/T3K CORE profile depends on treating only
-\texttt{CORE/Violence/Firearm} as the primary positive bookmark. The Cellebrite
-profile depends on the union of the observable \texttt{Armi}, \texttt{Pistola},
-and \texttt{Fucile} labels. The Magnet.AI profile depends on the exported
-\texttt{Possible weapons} tag.
-
-These mappings are explicit and reproducible operational recodings of
-observable outputs. They do not establish that the software systems implement
-the same internal binary taxonomy or that their categories are semantically
-equivalent.
-
-The black-box nature of the selected systems also limits the available
-diagnostic indicators. They do not expose homogeneous maximum predicted-class
-probabilities, inspectable decision boundaries, checkpoint-specific gradients,
-or directly comparable uncertainty values. Their robustness can therefore be
-evaluated only through observable decisions, coverage, error direction,
-condition-level variation, \gls{ood} assignment behavior, configuration
-sensitivity, and normalization completeness.
-
-This limitation reflects the operational context in which analysts interact
-with proprietary software. It also reinforces the need to record the exact
-software version, enabled processing functions, category or query
-configuration, export format, and normalization mapping associated with each
-reported result.
+The same queries therefore support different priorities: \texttt{D20} favors
+selectivity, \texttt{D80} retrieval coverage, and \texttt{D50} an intermediate
+point. The other black-box profiles likewise depend on the frozen Griffeye
+bookmark, Cellebrite label union, and Magnet.AI tag. These reproducible
+recodings are not semantically equivalent internal taxonomies; interpretation
+is limited to observable decisions and requires the version, configuration,
+export, and mapping to remain recorded.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{Operational-risk summary.}
@@ -4224,23 +3854,10 @@ non-negative operational degradation; the original signed values remain
 preserved in the underlying metric table.
 \end{flushleft}
 
-No row simultaneously minimizes all seven indicators. \gls{efficientnetb0} combines
-a low clean \gls{fnr} with severe direct-target adversarial degradation.
-\gls{resnet18} exhibits a more moderate profile under the transferred attacks but a
-higher \gls{ood} weapon assignment rate than \gls{efficientnetb0}.
-
-The \gls{clip}-based proxy minimizes clean missed detections but presents the
-highest \gls{ood} weapon assignment rate and a comparatively high bundle-level
-\gls{fpr}. Magnet.AI exhibits a higher missed-target burden under both
-adversarial and anti-forensic families than the other black-box reference
-configurations.
-
-Griffeye/T3K CORE presents the lowest bundle-level \gls{fpr} and the lowest
-black-box reference \gls{ood} weapon assignment rate under the conservative
-bookmark mapping. Excire \texttt{D50} shows the highest black-box reference
-bundle-level \gls{fpr}, largely reflecting its semantic-retrieval operating
-point. Cellebrite Inseyets presents a comparatively balanced false-negative and
-false-positive profile.
+No row minimizes all seven indicators. Low clean missed-target rates can
+coexist with adversarial degradation, high \gls{ood} routing, or increased
+false-positive workload; the black-box reference profiles likewise exchange
+selectivity, recall, and balance according to their frozen mappings.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{Overall operational interpretation.}
@@ -4269,17 +3886,10 @@ positives and \gls{ood} assignments may increase review volume or alter
 attention allocation. Maximum predicted-class probabilities, when available,
 do not independently establish forensic reliability.
 
-The comparison therefore does not identify a universally superior system. It
-identifies different tradeoffs among missed-target risk, false-positive
-workload, \gls{ood} assignment tendency, sensitivity to manipulated inputs,
-configuration dependence, and auditability.
-
-Within a forensic workflow, these systems should be treated as traceable triage
-support rather than autonomous evidentiary decision makers. Their outputs must
-remain associated with the source item, software or model version,
-configuration, observable mapping, evaluated condition, and relevant
-limitations. The role of the human analyst remains central to the final
-assessment.
+Accordingly, the comparison identifies bounded tradeoffs rather than a
+universally superior system. Outputs remain traceable triage support associated
+with their source, version, configuration, mapping, condition, and limitations;
+final assessment remains human.
 % ─────────────────────────────────────────────────────────────────────────────
 \section{Explainability Analysis and Purposively Selected Cases}
 \label{sec:results-explainability}
@@ -4442,18 +4052,9 @@ Figure~\ref{fig:xai-case1-clean-correct} presents a clean input for which the
 Both are \texttt{weapon}, and the model produces a maximum predicted-class
 probability of 1.000.
 
-The case provides a qualitative reference for examining the spatial
-distribution of attribution magnitudes. The heatmap and overlay allow the
-analyst to inspect whether the largest magnitudes occur near visually salient
-regions, contextual elements, image boundaries, or combinations of these
-areas.
-
-Such visual inspection does not establish that the highlighted regions are
-firearm-specific features or that they causally determine the prediction.
-Agreement between the prediction and reference assignment also does not
-validate the attribution method or demonstrate general model reliability. The
-case serves only as a reference against which the selected failure cases can be
-discussed.
+The heatmap and overlay provide a qualitative reference for comparing the
+spatial attribution pattern with the selected failure cases; agreement with the
+reference label does not validate either the model or the attribution method.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{Clean false negative.}
@@ -4478,21 +4079,15 @@ unperturbed input. The reference operational assignment is \texttt{weapon},
 whereas \gls{efficientnetb0} predicts \texttt{non\_weapon} with a maximum
 predicted-class probability of 0.692.
 
-Because the attribution target is the predicted class, the visualization
-represents attribution magnitudes associated with the incorrect
-\texttt{non\_weapon} output. It does not show an attribution map for the
-reference \texttt{weapon} state and cannot independently explain why the model
-failed to prioritize the firearm-oriented class.
-
 The case is operationally relevant because the error occurs without adversarial
 or anti-forensic manipulation. A workflow that uses the automatic prediction
 to filter, rank, or suppress content could assign reduced priority to a
 potentially relevant image.
 
-The visualization supports case-level inspection of the model output but does
-not resolve the failure mechanism. It cannot determine whether the error
-derives from object appearance, scale, occlusion, image context, source-specific
-regularities, preprocessing, or interactions among these factors.
+Because the map targets the incorrect predicted class, it supports case-level
+inspection but cannot determine whether the failure derives from appearance,
+scale, occlusion, context, source regularities, preprocessing, or their
+interaction.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{\texorpdfstring{\gls{ood}}{Out-of-Distribution} input assigned to
@@ -4519,21 +4114,10 @@ Figure~\ref{fig:xai-case3-ood-as-weapon} presents an input from the separate
 proxy assigns it to \texttt{weapon} with a maximum predicted-class probability
 of 0.999.
 
-The output is therefore not a false positive in the supervised binary sense.
-It documents how a distributionally different input can be absorbed into the
-positive operational class when the model is required to choose between only
-two available labels.
-
-The \gls{ig} map represents attribution magnitudes for the predicted
-\texttt{weapon} output. It may be inspected to identify where the output is
-locally sensitive along the adopted baseline path, but it does not establish
-that the highlighted areas correspond to a firearm, firearm component, or
-semantically meaningful weapon feature.
-
-The high maximum probability is particularly relevant to the operational
-interpretation. It indicates a strongly peaked output for this checkpoint and
-input, but it does not demonstrate that the assignment is correct, calibrated,
-or forensically reliable.
+The output is not a supervised false positive; it shows how an out-of-task
+input is absorbed into a positive closed-set class. Its 0.999 Max-P is a peaked
+checkpoint output, not proof of correctness, calibration, or forensic
+relevance, and the map does not establish a firearm-specific feature.
 
 This case supports the methodological decision to preserve \gls{ood} as a
 separate evaluation branch. Merging the sample into the
@@ -4569,18 +4153,12 @@ is not optimized against the \gls{efficientnetb0} decision boundary. It is a
 deterministic, model-agnostic transformation affecting the tonal distribution
 of the input.
 
-The attribution map targets the incorrect predicted \texttt{non\_weapon}
-class. It supports inspection of the transformed model output but does not
-identify the causal mechanism through which the transformation contributed to
-the error. Differences in attribution magnitude cannot, by themselves,
-determine whether the prediction changed because of contrast redistribution,
-local feature alteration, global intensity changes, preprocessing interactions,
-or another internal effect.
-
 Operationally, the case illustrates that a comparatively ordinary image-level
 transformation can coincide with a missed target image. The model output must
 therefore remain subject to human verification even when the manipulation does
-not require knowledge of the model or its gradients.
+not require model knowledge. The predicted-class map does not identify whether
+contrast redistribution, local or global intensity changes, preprocessing, or
+another internal effect caused the error.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{Maximum-probability adversarial false positive.}
@@ -4606,21 +4184,10 @@ reference operational assignment is \texttt{non\_weapon}, whereas the
 perturbed input is assigned to \texttt{weapon} with a maximum predicted-class
 probability of 1.000.
 
-The result requires a clear distinction among the predicted class, the maximum
-predicted-class probability, and the operational reliability of the
-prediction. These three quantities must not be conflated.
-
-For this case, the first two quantities indicate a strongly peaked
-\texttt{weapon} output, while the reference assignment establishes that the
-decision is incorrect. A maximum probability of 1.000 therefore does not
-constitute evidence of classification correctness, calibrated certainty, or
-forensic reliability.
-
-The \gls{ig} visualization reports attribution magnitudes for the incorrect
-predicted \texttt{weapon} class. It does not provide a complete explanation of
-the Sigma-Zero optimization process, identify the perturbation components
-responsible for the error, or demonstrate that the highlighted regions
-correspond to stable semantic features.
+The reference assignment establishes that the strongly peaked output is wrong:
+Max-P 1.000 is not correctness, calibrated certainty, or forensic reliability.
+The predicted-class map neither explains the Sigma-Zero optimization nor
+identifies stable semantic features responsible for the error.
 
 The historical attribution associated with this case also has a comparatively
 large legacy convergence delta. Its spatial pattern must consequently be
@@ -4628,29 +4195,16 @@ interpreted with particular caution and only as a qualitative diagnostic asset.
 The classification failure itself is established by the matched prediction
 record; it does not depend on the attribution visualization.
 
-From a forensic perspective, the case demonstrates why numerical output
-concentration must not replace expert assessment. A triage system may assign a
-high maximum probability to an incorrect and deliberately manipulated input.
-Human verification and traceable retention of the model version, checkpoint,
-input, perturbation, and reference state therefore remain necessary.
+The failure record, not the visualization, establishes the error and shows why
+output concentration cannot replace expert assessment.
 
 % ─────────────────────────────────────────────────────────────────────────────
 \paragraph{Cross-case interpretation.}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The five cases illustrate different relationships between input condition,
-model output, and operational consequence.
-
-The clean correct case provides a visual reference but does not validate the
-model or the attribution method. The clean false negative demonstrates that
-missed-target risk exists even under nominal conditions. The \gls{ood} case
-shows that a closed-set model can produce a highly concentrated positive output
-for material outside the supervised binary task.
-
-The Histogram Modification case illustrates a false negative under a
-model-agnostic transformation. The Sigma-Zero case demonstrates that a
-direct-target adversarial perturbation can produce an incorrect positive output
-with a maximum predicted-class probability of 1.000.
+Together, the cases contrast a clean reference, a nominal false negative, a
+peaked closed-set \gls{ood} assignment, a model-agnostic false negative, and a
+direct-target false positive at Max-P 1.000.
 
 These cases must not be used to infer the frequency of the represented
 behaviors. They were deliberately selected to support qualitative discussion

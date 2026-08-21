@@ -2418,6 +2418,20 @@ operational assignments, perturbation families or conditions, fold
 identifiers, proxy-model information, source provenance, or explicit
 \gls{ood} indicators in the imported paths or file names.
 
+The same interpretive and distribution boundary applies to all four systems.
+They were treated as black boxes and assessed only through decision-bearing
+fields observable in their frozen exports; internal architectures, training
+data, representations, thresholds, and calibration procedures were not
+available for inspection. The mappings below are therefore operational
+recodings for the common binary task, not reconstructions of internal decision
+rules, and software-specific numerical values are not treated as calibrated
+probabilities comparable across systems. Complete raw exports remain
+controlled-access artifacts, whereas minimized decision-bearing extracts are
+retained in the public repository. The shared matching, completeness,
+deduplication, and public-equivalence controls are consolidated in
+Section~\ref{subsec:implementation-normalization}; the following subsections
+focus on each system's configuration and observable mapping.
+
 
 % ─────────────────────────────────────────────────────────────────────────────
 \subsection{Magnet AXIOM and Magnet.AI}
@@ -2425,12 +2439,8 @@ identifiers, proxy-model information, source provenance, or explicit
 % ─────────────────────────────────────────────────────────────────────────────
 
 \gls{magnetaxiomtool} was evaluated through the image-categorization
-functionality provided by \gls{magnetai}. The platform was treated as a
-black-box software system: the experimental procedure relied exclusively on
-categories and tags observable through the user interface and exported case
-records. The underlying model architecture, training data, feature
-representations, decision thresholds, confidence calibration, and internal
-inference logic were not accessible.
+functionality provided by \gls{magnetai}, using categories and tags observable
+through the user interface and exported case records.
 
 The frozen software and case configuration is reported in
 Table~\ref{tab:implementation-magnet-configuration}.
@@ -2542,13 +2552,6 @@ Within the common normalized output space,
 previously unseen nonempty tag from being interpreted automatically as evidence
 of the absence of a weapon.
 
-This recoding represents an operational interpretation of observable software
-output for the binary experimental task. It does not reconstruct the internal
-\gls{magnetai} decision boundary and does not imply that the exported tag
-corresponds to a calibrated probability or a known internal threshold. The
-platform did not expose a numerical confidence value suitable for comparison
-with proxy-model probabilities.
-
 The case export produced five principal files:
 
 \begin{itemize}
@@ -2564,33 +2567,21 @@ remaining files were retained for export auditing, case identification,
 software-version documentation, and execution traceability, but did not
 contribute additional image-classification decisions.
 
-The prediction-bearing export contained exactly 11\,500 rows, corresponding to
-the 11\,500 files imported from the blind bundle. Every exported image record
-was associated with one bundle entry, and no prediction row remained
-unmatched. This one-to-one coverage confirms that an observable decision state
-was available for every clean, \gls{ood}, adversarial, and anti-forensic input.
-It does not establish the correctness or semantic completeness of the exported
-decisions.
+The prediction-bearing export contained exactly 11\,500 rows. Every row was
+associated with one blind-bundle entry, providing complete output coverage
+without implying correctness or semantic completeness.
 
-The raw AXIOM export included information beyond the fields required for the
-experimental classification task, including file-system timestamps, paths,
-cryptographic hashes, EXIF-derived values, device-related identifiers, and
-case-export metadata. The complete raw export was therefore retained as a
-controlled-access artifact and excluded from the public repository. Its
-expected local location is
+The raw AXIOM export includes file-system, hash, EXIF, device, and case metadata
+beyond the experimental mapping and is therefore controlled at
 \codepath{forensic_tools/magnet_axiom/raw_exports/FAIRLAB_AXIOM_RUN_02/}.
-
-The public repository retains the corresponding sanitized prediction extract:
+The corresponding public decision extract is:
 
 \smallskip
 \noindent
 \codepath{forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv}.
 \smallskip
 
-This extract contains one decision record for each of the 11\,500 bundle items.
-The repository additionally preserves the run registry, software-version log,
-export audit, canonical normalized predictions, and derived metric artifacts
-required to inspect the adopted mapping and verify the reported evaluation.
+It contains one sanitized decision record for each bundle item.
 
 The exported file name, available hash fields, and observable tag were matched
 against the canonical bundle metadata through the common normalization
@@ -2605,17 +2596,9 @@ Section~\ref{subsec:results-magnet}.
 % ─────────────────────────────────────────────────────────────────────────────
 
 \gls{griffeye} was evaluated together with the \gls{t3kcore}
-semantic-analysis module as a black-box forensic media-triage and
-semantic-bookmarking system. The experimental procedure relied exclusively on
-automatically generated semantic bookmarks observable in the software export.
-No manual bookmark addition, removal, correction, or reassignment was permitted
-during the frozen evaluation.
-
-The internal architecture, training data, feature representations, model
-parameters, category thresholds, and confidence-calibration procedures of
-\gls{t3kcore} were not accessible. The system was therefore evaluated through
-operational decisions derived from the exported bookmark field rather than
-through assumptions concerning its internal model behavior.
+semantic-analysis module through automatically generated semantic bookmarks in
+the software export. No manual bookmark addition, removal, correction, or
+reassignment was permitted during the frozen evaluation.
 
 The frozen software and case configuration is reported in
 Table~\ref{tab:implementation-griffeye-configuration}.
@@ -2696,7 +2679,7 @@ After media ingestion, \gls{t3kcore} automatically generated semantic
 bookmarks. The exported \texttt{Bookmarks} field could contain one or more
 hierarchical labels assigned by the module. The primary operational rule
 adopted in this thesis was deliberately restricted to the firearm-specific
-bookmark:
+\texttt{Firearm} bookmark:
 
 \[
 \texttt{weapon\_detected}
@@ -2716,13 +2699,6 @@ Within the common normalized output space,
 \texttt{weapon\_detected = true} is mapped to \texttt{weapon}, whereas
 \texttt{weapon\_detected = false} is mapped to
 \texttt{non\_weapon}.
-
-This mapping aligns an observable software output with the firearm-oriented
-binary task defined by the experimental protocol. It does not imply that the
-\texttt{Firearm} bookmark corresponds to a calibrated probability, a known
-internal threshold, or the complete semantic representation generated by
-\gls{t3kcore}. No numerical confidence value suitable for comparison with
-proxy-model probabilities was exposed through the adopted export.
 
 The following automatically generated bookmarks were preserved as secondary
 semantic indicators:
@@ -2758,22 +2734,7 @@ genuine bundle item through an incidental hash or path value.
 This preliminary procedure excluded 553 non-bundle rows. The remaining
 11\,500 records were associated with the complete forensic evaluation bundle,
 and no bundle item remained without an observable exported decision state.
-Complete coverage establishes the availability of a matched output for every
-bundle item but does not establish the correctness of the corresponding
-semantic decisions.
-
-The matching procedure used the indexes constructed from
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}
-and
-\codepath{datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv}.
-When available, \gls{sha256} was used as the primary matching identifier,
-followed by \gls{md5} and the neutral bundle file name. The implementation
-could also recover a bundle identifier embedded within an exported path or text
-field when an exact filename field was not directly available.
-
-Each normalized record preserves the matching method, bundle identifier,
-reference operational assignment, sample type, perturbation condition, fold,
-source dataset, original image identifier, and generated image identifier.
+This establishes complete matched-output coverage, not semantic correctness.
 
 Only the automatically generated \texttt{Bookmarks} field was used to derive
 the prediction. Other case-management fields, manually assigned categories,
@@ -2781,25 +2742,16 @@ and descriptive columns were not treated as model outputs. This restriction
 prevents analyst-generated annotations from being conflated with the observable
 behavior of \gls{t3kcore}.
 
-The original Griffeye export contained additional information not required for
-the firearm-bookmark analysis, including multiple cryptographic hashes,
-PhotoDNA-related values, file paths, timestamps, EXIF-derived fields,
-face-detection information, case-management attributes, file-system records,
-and other forensic columns. The complete raw export was therefore retained as
-a controlled-access artifact and excluded from the public repository. Its
-expected local location is
+The full export contains hashes, PhotoDNA-related values, paths, timestamps,
+EXIF, face-detection, case-management, and file-system fields and is controlled
+at
 \codepath{forensic_tools/griffeye/raw_exports/FAIRLAB_GRIFFEYE_T3_RUN_01/}.
 
-The public repository retains the sanitized prediction extract
+The public decision extract is
 \codepath{forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv}.
 It contains the neutral bundle identifiers, the primary firearm bookmark,
 selected secondary weapon-related bookmarks, and the corresponding normalized
 decision fields for all 11\,500 bundle items.
-
-The run registry, software-version log, export audit, normalized prediction
-table, public-extract validation, and metric artifacts provide the remaining
-records required to inspect the adopted mapping and verify the equivalence
-between the controlled raw export and the sanitized public representation.
 
 The common normalization and output-matching implementation is described in
 Section~\ref{subsec:implementation-normalization}. The experimental behavior
@@ -2817,12 +2769,6 @@ Section~\ref{subsec:results-griffeye}.
 forensic evaluation context. It was not treated as a native forensic suite or
 as an internally binary firearm classifier. Its observable behavior was
 assessed through the images returned by controlled text-based semantic queries.
-
-The internal architecture, training corpus, embedding space, similarity
-function, retrieval thresholds, and confidence-calibration procedure were not
-accessible. The software was therefore treated as a black-box retrieval
-system, and the experimental decision was derived exclusively from membership
-in the exported semantic-search result sets.
 
 The frozen software and retrieval configurations are summarized in
 Table~\ref{tab:implementation-excire-configuration}.
@@ -2975,12 +2921,8 @@ Images absent from all eight hit lists under the same distance setting are
 completed against the canonical 11\,500-item bundle as operational negative
 decisions.
 
-This rule is an operational recoding of semantic-retrieval membership. It does
-not imply that \gls{excirefoto2025} internally performs binary
-\texttt{weapon}/\texttt{non\_weapon} classification. Similarly, the
-software-specific distance limits must not be interpreted as calibrated
-probabilities, numerical confidence values, or thresholds directly comparable
-with those of another system.
+The distance limits are software-specific retrieval settings, not calibrated
+probabilities or thresholds comparable with those of another system.
 
 The D20, D50, and D80 settings were retained as separate system configurations
 throughout normalization and metric computation. Their retrieval results were
@@ -3003,31 +2945,20 @@ discarding relevant retrieval information. Two images may receive the same
 positive normalized decision even when one is retrieved by a single prompt and
 the other by several semantically related prompts.
 
-After the union and bundle-completion procedures, every configuration contained
-exactly one normalized prediction for each of the 11\,500 bundle items, and no
-bundle item remained unmatched. The three configurations therefore produced
-34\,500 normalized Excire records in total. Complete matching establishes
-output coverage but does not establish the correctness of the resulting
-operational decisions.
+After union and bundle completion, the three configurations each contained one
+prediction per bundle item, producing 34\,500 normalized Excire records with no
+unmatched item.
 
-The 24 original CSV files contained local Windows paths in addition to the
-neutral bundle file names. They were therefore retained as controlled-access
-artifacts and excluded from the public repository. Their expected local
-location is
+Because the 24 original CSV files contain local Windows paths, they are
+controlled at
 \codepath{forensic_tools/excire_foto_2025/raw_exports/}.
 
-The public repository retains the sanitized extract
+The public decision extract is
 \codepath{forensic_tools/excire_foto_2025/public_extracts/%
 excire_prompt_hits_extract.csv}.
 It contains the bundle identifiers, semantic-distance configurations,
 prompt-membership information, and normalized decision fields for the three
 complete 11\,500-item configurations.
-
-The run registry, software-version log, export audit, canonical normalized
-prediction table, public-extract validation, and metric artifacts provide the
-remaining records required to inspect the adopted mapping and verify the
-equivalence between the controlled raw exports and the sanitized public
-representation.
 
 The common normalization procedure is described in
 Section~\ref{subsec:implementation-normalization}. The sensitivity of the
@@ -3040,12 +2971,8 @@ in Section~\ref{subsec:results-excire}.
 \label{subsec:implementation-cellebrite}
 % ─────────────────────────────────────────────────────────────────────────────
 
-\gls{cellebriteinseyets} was evaluated as a black-box
-\gls{ai}-assisted media-analysis system. The experimental analysis relied
-exclusively on the classifications observable in the report exported through
-Cellebrite Physical Analyzer. The internal model architecture, training data,
-feature representations, category thresholds, confidence-calibration
-procedure, and undocumented decision logic were not accessible.
+\gls{cellebriteinseyets} was evaluated through the classifications observable
+in the report exported by Cellebrite Physical Analyzer.
 
 The frozen software and case configuration is reported in
 Table~\ref{tab:implementation-cellebrite-configuration}.
@@ -3189,11 +3116,8 @@ evaluation. This rule prevents firearm-specific positive classifications from
 being discarded when the broader \texttt{Armi} category is absent from the
 same exported field.
 
-The mapping is an operational recoding of observable software output. It does
-not imply that \gls{cellebriteinseyets} internally implements the same binary
-taxonomy, that the exported labels are mutually exclusive, or that their
-associated percentage values correspond to probabilities comparable across
-images, categories, or software systems.
+The mapping does not assume that the exported labels are mutually exclusive or
+that Cellebrite internally implements the same binary taxonomy.
 
 The original report contained 11\,829 image rows. Of these, 11\,500 were
 matched to the complete forensic evaluation bundle, whereas 329 did not
@@ -3202,49 +3126,22 @@ unmatched-output artifact and summarized by tool in the public normalization
 report. They were excluded from the canonical bundle-level prediction table
 and from the quantitative robustness analysis.
 
-The resulting canonical Cellebrite output contains one matched decision for
-each of the 11\,500 bundle items. Complete bundle coverage confirms that an
-observable exported decision was available for every experimental item but
-does not establish classification correctness.
+The resulting canonical output contains one matched decision for each bundle
+item; the shared normalized schema preserves the original
+\texttt{Classifications} value and the mapping reason.
 
-The matching procedure associates report records with the canonical bundle
-using available \gls{sha256} values, followed by \gls{md5}, the exact neutral
-bundle file name, or a bundle file name embedded within an exported path or
-text field. The matching method is preserved in each normalized record.
-
-For every successfully matched record, the normalized representation retains the
-\texttt{bundle\_id}, neutral input file name, matching method, and matched
-state, together with the available \gls{sha256} and \gls{md5} values. It also
-records whether the item is clean, \gls{ood}, or perturbed, as well as the
-corresponding perturbation family and condition, experimental fold, reference
-operational assignment, source dataset, and original and generated image
-identifiers.
-
-In addition, the normalized record preserves the original observable
-\texttt{Classifications} value, the resulting normalized binary decision, and
-the reason supporting the applied mapping.
-
-The complete XLSX report also contained file-system, evidence, and case-export
-information not required for the classification mapping. Because these fields
-may expose local paths or case-specific metadata, the raw report is managed as
-a controlled-access artifact and is excluded from the public repository. Its
-expected local location is
+Because the complete XLSX report also contains file-system, evidence, and case
+metadata, it is controlled at
 \codepath{forensic_tools/cellebrite_inseyets/raw_exports/%
 FAIRLAB_CELLEBRITE_INSEYETS_RUN_01/}.
 
-The public repository retains the sanitized prediction extract
+The public decision extract is
 \codepath{forensic_tools/cellebrite_inseyets/public_extracts/%
 cellebrite_classifications_extract.csv}.
 It contains the neutral bundle identifiers, experimental-condition fields,
 observable classification values, and normalized decision fields for all
 11\,500 matched bundle items. Local paths and the 329 non-bundle report rows are
 not included in this public extract.
-
-The run registry, software-version log, export audit, normalization summary,
-public-extract validation, canonical normalized prediction table, and metric
-artifacts provide the remaining records required to inspect the frozen
-configuration and verify the equivalence between the controlled raw report and
-the sanitized public representation.
 
 The common matching, normalization, completeness, and deduplication procedures
 applied across the selected black-box software systems are described in
@@ -4621,19 +4518,11 @@ The principal provenance chain is:
 \end{aligned}
 \]
 
-For clean binary samples and \gls{ood} inputs, the original and generated
-identifiers may coincide because no derived image artifact is created. For
-adversarial and anti-forensic artifacts, the generated identifier preserves the
-association with the corresponding clean source image while distinguishing the
-perturbation condition and, where applicable, the target proxy model.
-
-Canonical sample-level manifests use repository-relative paths to associate
-artifacts with the logical repository structure independently of the local
-workspace. Run summaries and registries additionally preserve configurations,
-timestamps, sample counts, fold assignments, and output locations. Raw
-commercial exports, execution logs, and controlled local workspaces may contain
-machine-specific paths and are therefore subject to the distribution and
-sanitization boundary described later in this section.
+Original and generated identifiers coincide when no derived artifact exists;
+otherwise, the generated identifier retains the source association and the
+perturbation condition or target model. Canonical manifests use
+repository-relative paths, while run summaries retain the configuration,
+counts, folds, timestamps, and output locations needed to reconstruct a stage.
 
 Table~\ref{tab:implementation-identity-controls} summarizes the principal
 identity controls.
@@ -4700,25 +4589,11 @@ some forensic software exports expose MD5-oriented fields or matching
 workflows. It is not treated as the primary integrity mechanism.
 
 Per-file \gls{sha256} values are recorded or verified at the principal
-transformation and transfer boundaries. These include the prepared and frozen
-source images, the deterministic clean and \gls{ood} partitions, the
-adversarial and anti-forensic artifacts, and the blind and structured copies
-contained in the forensic evaluation bundle.
-
-Integrity verification also covers the proxy-model checkpoints, the selected
-explainability inputs and their corresponding fold-specific checkpoints, the
-sanitized extracts produced by the black-box software systems, and the canonical
-normalized black-box prediction table together with the associated commercial
-metric table.
-
-Thesis-level explainability images are validated through their canonical
-manifest paths, case metadata, and asset audits rather than being treated as
-independently authenticated model artifacts.
-
-Whenever an image is copied between controlled stages, its destination digest
-is recomputed and compared with the canonical value recorded in the originating
-manifest. A mismatch causes the corresponding operation to terminate rather
-than silently accepting a different file.
+transformation and transfer boundaries, covering source and derived images,
+partitions, bundle copies, checkpoints, sanitized black-box extracts, canonical
+predictions, and metric records. Copy operations recompute the destination
+digest and fail on mismatch. Thesis-level explainability images are checked
+through their manifest paths, case metadata, and asset audits.
 
 The checkpoint digests stored in
 \codepath{models/model_registry.json} bind every proxy architecture and
@@ -4742,15 +4617,10 @@ of the frozen forensic evaluation bundle additionally uses
 bundle_hashes_sha256.csv} to verify the expected file-name population and the
 SHA-256 value of each of the 11\,500 blind inputs.
 
-The restoration entry point also rejects malformed ZIP files, corrupt members,
-symbolic links, path-traversal attempts, unexpected archive roots, missing
-files, additional files, and content-hash mismatches. Public metadata already
-committed to the repository remains authoritative and is not overwritten by
-metadata packaged within the controlled archive.
-
-This separation prevents successful verification of a complete ZIP file from
-being treated as a substitute for verifying the expected file population after
-extraction.
+The restoration entry point rejects malformed or corrupt ZIP members, symbolic
+links, path traversal, unexpected roots, population differences, and content
+hash mismatches; repository metadata remains authoritative. Archive and
+post-extraction verification are therefore complementary controls.
 
 \paragraph{Deterministic configuration controls.}
 
@@ -4760,48 +4630,22 @@ image-specific randomized-search initialization where applicable. The seed is
 recorded in the corresponding machine-readable configuration and summary
 records.
 
-The use of a fixed seed supports repeatability of logical partitions and
-pseudo-random initialization. It does not imply that all numerical results are
-guaranteed to be bit-identical across different operating systems, hardware
-architectures, library versions, or CPU and GPU implementations.
+The fixed seed and supported PyTorch/cuDNN deterministic options improve
+repeatability but do not guarantee bit-identical results across operating
+systems, hardware, libraries, or CPU/GPU implementations.
 
-PyTorch and cuDNN deterministic options reduce nondeterministic behavior where
-supported, but the execution environment remains part of the reproducibility
-boundary.
-
-The frozen machine-readable configurations specify the accepted reference
-assignments and expected group counts, the five clean folds, and the separate
-\gls{ood} branch. They also define architecture-specific preprocessing and
-normalization, training hyperparameters, checkpoint-selection rules, and the
-parameters associated with adversarial and anti-forensic conditions.
-
-The configurations further preserve the associations among models, checkpoints,
-and folds, together with the black-box software versions and observable-output
-mappings. In addition, they document the metric definitions, confusion-matrix
-layout, and explainability settings, including the selected architecture,
-attribution target, baseline, historical number of integration steps,
-case-selection criteria, and convergence status.
-
-These values are retained in CSV or JSON records rather than being represented
-only in narrative documentation.
+Machine-readable CSV and JSON configurations preserve population counts,
+partitions, preprocessing, training and checkpoint rules, perturbation
+parameters, black-box versions and mappings, metric definitions, and
+explainability settings.
 
 \paragraph{Overwrite and rerun controls.}
 
-The principal generation and evaluation scripts implement fail-visible output
-guards. Existing canonical outputs are not silently replaced. A rebuild
-generally requires an explicit \texttt{--force} option, which removes or
-replaces only the output scope associated with the selected run.
-
-This policy reduces the risk of combining artifacts produced under different
-configurations or overwriting a frozen result with a partial diagnostic
-execution. Partial, limited, single-model, or single-fold experiments must use
-separate diagnostic output locations and cannot replace canonical manifests,
-prediction tables, or metric records.
-
-An explicit forced rebuild does not establish equivalence with the frozen
-research artifact. Regenerated outputs must still satisfy the expected counts,
-identifier constraints, integrity values, configuration requirements, and
-downstream validation procedures.
+Generation and evaluation scripts fail rather than silently replacing canonical
+outputs. A rebuild requires an explicit \texttt{--force} option scoped to the
+selected run; partial diagnostics must use separate locations. Regenerated
+outputs remain subject to the recorded counts, identifiers, digests,
+configurations, and downstream validations.
 
 \paragraph{Machine-readable invariants and completeness checks.}
 
@@ -4830,41 +4674,16 @@ Chapter~\ref{chap:results}.
 
 \paragraph{Black-box output correspondence and equivalence controls.}
 
-Complete black-box software exports are excluded from the public repository
-because they may contain proprietary structures, local paths, case metadata,
-device-related fields, file-system information, or data unrelated to the
-experimental decision mapping.
-
-The public artifact retains minimized decision extracts for the four software
-families. These extracts are combined into
-\codepath{evaluation/forensic_tools/normalized_predictions.csv}, which contains
-69\,000 sanitized decisions across the six normalized configurations.
-
-The canonical public table excludes complete raw-export fields, cryptographic
-hash columns used only for local matching, and local execution paths. It
-preserves the neutral bundle identifier, experimental condition, reference
-operational assignment, observable decision-relevant value, and normalized
-prediction required to audit the reported metrics.
-
-The table can be reconstructed through
+Complete commercial exports remain controlled because they include proprietary
+or case-specific fields. The four minimized extracts reconstruct the 69\,000
+sanitized decisions in
+\codepath{evaluation/forensic_tools/normalized_predictions.csv} through
 \codepath{forensic_tools/scripts/build_canonical_normalized_predictions.py}.
-
-Decision-level and metric-level equivalence is evaluated through
-\codepath{forensic_tools/scripts/validate_public_extract_equivalence.py}. The
-validation confirms that the four sanitized extracts reconstruct all 69\,000
-normalized decisions and that the reconstructed records are identical to the
-canonical public prediction table. It also verifies that the same decision
-population reproduces all 186 frozen black-box software metric rows.
-
-In addition, the procedure checks that the canonical prediction and metric
-digests match the values recorded in the validation report and that each
-sanitized source extract matches its corresponding recorded \gls{sha256}
-digest.
-
-This procedure does not establish field-level equivalence with every column of
-the complete raw exports. It establishes that the sanitized records preserve
-the complete normalized decision population and reproduce the quantitative
-values derived from the controlled local normalization workspace.
+Decision- and metric-level equivalence is checked by
+\codepath{forensic_tools/scripts/validate_public_extract_equivalence.py}, which
+verifies source and output digests and reproduction of all 186 metric rows.
+This establishes equivalence of the normalized decision population and derived
+metrics, not field-level equivalence with every raw-export column.
 
 \paragraph{Result, explainability, reporting, and LaTeX validation.}
 
@@ -4984,50 +4803,24 @@ compatible import/export environments used during the frozen evaluation. \\
 \end{tabularx}
 \end{table}
 
-The controlled layer is supported by two separate archives:
-
-\begin{itemize}
-\item \texttt{00\_raw\_datasets\_bundle.zip}, used to restore the
-heterogeneous source collections and rerun the numbered image-processing
-pipeline;
-
-\item \texttt{16\_frozen\_forensic\_evaluation\_bundle.zip}, used to restore
-the exact 11\,500 files supplied to the selected black-box software systems.
-\end{itemize}
-
-The controlled-access model reflects the legal, ethical, contractual, and
-licensing constraints associated with the heterogeneous image sources. Access
-to an archive does not grant unrestricted redistribution rights, remove
-obligations imposed by the original sources, or provide access to proprietary
-model internals.
+The two authenticated archives listed under the integrity controls support the
+controlled layer. Their availability reflects legal, ethical, contractual, and
+licensing restrictions and does not grant redistribution rights or access to
+proprietary model internals.
 
 \paragraph{Environment and public-distribution boundary.}
 
-The pipeline was developed through Python virtual environments in Windows and
-Linux contexts, including Windows PowerShell and Kali Linux, with CPU- or
-CUDA-enabled execution selected according to the computational stage.
-Black-box evaluation additionally requires compatible licensed software and a
-suitable workstation.
+The pipeline uses Python environments across Windows and Linux, with CPU or
+CUDA execution selected by stage; black-box evaluation additionally requires
+compatible licensed software. Recorded dependencies support reconstruction but
+do not claim a byte-identical operating environment, and numerical reproduction
+may depend on hardware, drivers, libraries, and commercial-software behavior.
 
-The repository records dependency specifications and operational assumptions
-but does not claim to reproduce a byte-identical operating-system environment.
-Exact numerical reproduction may depend on hardware, operating-system,
-dependency, driver, and licensed-software behavior.
-
-The public-release policy excludes unrestricted copies of the image corpora,
-complete raw exports generated by the black-box software systems, proprietary
-case databases, and evidence-related material that is not required for the
-experimental record. It also excludes credentials, API keys, session data,
-commercial license information, and private or temporary artifact-access URLs.
-
-Exact usernames, unnecessary local absolute paths, generated LaTeX auxiliary
-files, and locally compiled PDF documents are likewise omitted from the public
-release.
-
-Tracked summaries, logs, and machine-readable outputs must be audited before
-release to ensure that this policy is satisfied. Public sanitization is a
-distribution control and does not modify the byte-identical image artifacts
-used in the frozen black-box evaluation.
+The public release excludes source corpora, complete commercial exports,
+proprietary case material, credentials, licence data, private URLs, usernames,
+unnecessary absolute paths, and generated LaTeX outputs. Tracked records are
+audited before release; sanitization changes the distribution layer, not the
+byte-identical images used in the frozen evaluation.
 
 \paragraph{Version control, historical provenance, and artifact freezing.}
 
@@ -5063,12 +4856,6 @@ Chapter~\ref{chap:results} presents the quantitative outcomes obtained from the
 frozen implementation and analyzes their implications for the operational
 robustness of the evaluated proxy models and selected black-box software
 systems.
-
-
-
-
-
-
 
 
 
