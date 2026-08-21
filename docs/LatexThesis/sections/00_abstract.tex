@@ -16,18 +16,14 @@ and selected black-box software configurations used for automated image
 classification and semantic retrieval in forensic contexts. Rather than
 proposing a new classifier or ranking commercial products, the study examines
 how heterogeneous systems behave under clean, \gls{ood}, adversarial, and
-anti-forensic conditions. Errors are interpreted not only through aggregate
-performance metrics but also in terms of missed-target risk, additional human
-review workload, directional error transitions, configuration sensitivity, and
-source-to-output traceability.
-
-The evaluation is organized through \gls{fairlab}, a task-specific
-methodological protocol designed to support procedural reproducibility and
-artifact-level auditability. \gls{fairlab} connects human-validated dataset
+anti-forensic conditions. The evaluation is organized through \gls{fairlab}, a
+task-specific methodological protocol connecting human-validated dataset
 construction, deterministic partitioning, transparent proxy-model evaluation,
 perturbation generation, blind-bundle preparation, black-box output
 normalization, quantitative analysis, qualitative explainability, and integrity
-controls.
+controls. Errors are interpreted in terms of missed-target risk, human-review
+workload, directional transitions, configuration sensitivity, and
+source-to-output traceability.
 
 The frozen source population contains 1\,500 images: 500
 \texttt{weapon} images, 500 \texttt{non\_weapon} images, and a separate
@@ -43,77 +39,64 @@ these derived populations form an 11\,500-item forensic evaluation bundle. The
 10\,000 manipulated artifacts remain source--condition variants of the same
 1\,000 binary images and do not represent independent underlying cases.
 
-The transparent evaluation level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
-\gls{clip}-based proxy consisting of a frozen visual encoder and a supervised
-binary classification head. The black-box level comprises four software
-systems evaluated through six frozen configurations:
+The transparent level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
+\gls{clip}-based proxy. The black-box level comprises four software systems
+evaluated through six frozen configurations:
 \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{griffeye}/\gls{t3kcore},
 \gls{excirefoto2025} at \texttt{D20}, \texttt{D50}, and \texttt{D80}, and
 \gls{cellebriteinseyets}. Their tags, bookmarks, exported labels, and
-semantic-retrieval results are interpreted through explicitly documented
-normalization rules without assuming architectural or semantic equivalence.
+semantic-retrieval results are interpreted through documented normalization
+rules without assuming architectural or semantic equivalence.
 
-The perturbation suite includes four model-dependent attacks generated against
-fold-specific \gls{efficientnetb0} checkpoints: \gls{fgsm}, \gls{onepixel},
-\gls{sigmazero}, and \gls{superdeepfool}. Their evaluation on \gls{efficientnetb0}
-constitutes direct-target assessment, whereas their application to \gls{resnet18},
-the \gls{clip}-based proxy, and the black-box configurations measures empirical
-transfer. The deterministic and model-agnostic \gls{colorshift} condition is
-interpreted separately from direct-target and transferred attack success. The
-anti-forensic branch comprises \gls{jpegrecompression}, \gls{resampleresize},
-\gls{gaussianblur}, \gls{histogrammodification}, and
-\gls{contraststretching}.
-
-The proxy-model analysis considers accuracy, recall, \gls{fpr}, \gls{fnr},
-directional clean-to-perturbed transitions, \gls{ood} assignment behavior, and
-architecture-specific maximum predicted-class probabilities. These
-probabilities are treated as intra-model diagnostic outputs rather than as
-calibrated measures comparable across architectures. A complementary
-qualitative \gls{xai} analysis applies \gls{ig} to five purposively selected
-\gls{efficientnetb0} cases and is not treated as quantitative robustness evidence or
-as an explanation of the black-box systems.
+Four model-dependent attacks---\gls{fgsm}, \gls{onepixel}, \gls{sigmazero},
+and \gls{superdeepfool}---were generated against fold-specific
+\gls{efficientnetb0} checkpoints. Their evaluation on \gls{efficientnetb0}
+constitutes direct-target assessment, whereas their application to the other
+proxies and black-box configurations measures empirical transfer. The
+model-agnostic \gls{colorshift} condition and five anti-forensic transformations
+are interpreted separately. The analysis combines conventional performance
+metrics with directional error transitions, \gls{ood} assignment behavior,
+architecture-specific maximum predicted-class probabilities, and five
+qualitative \gls{ig} case studies. Probability and explainability outputs are
+used only as model-specific diagnostic evidence.
 
 The results show that strong clean performance does not imply uniform
 operational robustness. Clean proxy-model accuracies are 0.978 for
-\gls{efficientnetb0}, 0.964 for \gls{resnet18}, and 0.927 for the \gls{clip}-based proxy.
-The evaluated anti-forensic transformations generally produce smaller
-aggregate variations than the strongest adversarial conditions, although they
-still introduce operationally relevant sample-level errors.
-
-Under direct-target evaluation, \gls{efficientnetb0} accuracy decreases to 0.575
-under \gls{fgsm} and to 0.015 under \gls{sigmazero}. The same frozen artifacts
-produce more limited and heterogeneous effects on the non-target proxy
-architectures and black-box configurations, demonstrating that empirical
-transfer must be measured rather than assumed and does not establish direct
-robustness.
+\gls{efficientnetb0}, 0.964 for \gls{resnet18}, and 0.927 for the
+\gls{clip}-based proxy. Under direct-target evaluation,
+\gls{efficientnetb0} accuracy decreases to 0.575 under \gls{fgsm} and to 0.015
+under \gls{sigmazero}. The same artifacts produce more limited and
+heterogeneous effects on the non-target systems, demonstrating that empirical
+transfer must be measured rather than assumed. The anti-forensic conditions
+generally produce smaller aggregate variations than the strongest direct-target
+attacks but still introduce operationally relevant sample-level errors.
 
 The separate \gls{ood} analysis further shows that out-of-task inputs may still
 be assigned to the firearm-oriented operational state. At the proxy level, the
-fold-aggregated weapon assignment rates are 0.3696 for \gls{efficientnetb0}, 0.4376
-for \gls{resnet18}, and 0.8356 for the \gls{clip}-based proxy. These values represent
-forced closed-set assignments rather than supervised correctness.
+fold-aggregated weapon assignment rates are 0.3696 for \gls{efficientnetb0},
+0.4376 for \gls{resnet18}, and 0.8356 for the \gls{clip}-based proxy. These
+values represent closed-set assignment behavior rather than supervised
+correctness.
 
 The black-box evaluation produces 69\,000 normalized decisions and reveals
 distinct configuration-dependent operating profiles. No evaluated
 configuration simultaneously minimizes missed detections, false-positive review
 workload, and \gls{ood} weapon assignments. In particular, changes to the
 \gls{excirefoto2025} \texttt{Distance limit} materially alter recall,
-selectivity, and \gls{ood} behavior. The observed results are therefore
-properties of the frozen software versions, enabled functions, configurations,
-observable output semantics, and normalization mappings.
+selectivity, and \gls{ood} behavior. The results therefore characterize the
+frozen software versions, enabled functions, configurations, observable output
+semantics, and normalization mappings.
 
 The thesis concludes that \gls{ai}-based image-analysis systems may provide
 useful support for forensic triage but must not be treated as autonomous
-mechanisms for evidentiary decision-making. Their defensible use requires task-specific
-validation, explicit threat modeling, documented software and model versions,
-configuration and mapping management, separate analysis of \gls{ood} behavior,
-source-to-output traceability, and continued expert verification.
-
-\gls{fairlab} contributes a unified and auditable procedure for making these
-requirements experimentally observable across transparent proxy models and
-selected black-box software configurations evaluated on the same frozen
-experimental basis.
+mechanisms for evidentiary decision-making. Their defensible use requires
+task-specific validation, explicit threat modeling, documented versions and
+configurations, separate analysis of \gls{ood} behavior, source-to-output
+traceability, and continued expert verification. \gls{fairlab} contributes a
+unified and auditable procedure for making these requirements experimentally
+observable across transparent proxy models and selected black-box software
+configurations evaluated on the same frozen experimental basis.
 
 \vfill
 

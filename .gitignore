@@ -155,6 +155,10 @@ results/reporting_asset_usage_summary.json
 # Local/generated manual-selection backups
 datasets/final/reports/backups/
 
+# Local full embedded-metadata audit retained before public minimization
+datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.private.csv
+datasets/forensic_evaluation_bundle/metadata/.staging/
+
 # Local commercial-tool working material
 forensic_tools/.staging/
 forensic_tools/**/case_files/

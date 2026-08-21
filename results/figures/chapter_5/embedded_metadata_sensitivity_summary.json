@@ -1,30 +1,61 @@
 {
-  "script": "results/scripts/21_generate_embedded_metadata_sensitivity_check.py",
-  "created_at": "2026-06-10T18:32:37+00:00",
+  "schema_version": "2.0",
+  "created_at": "2026-08-21T00:56:42+00:00",
+  "script": "results/scripts/22_generate_public_embedded_metadata_sensitivity_check.py",
+  "artifact_policy": "minimized_public_inputs_and_outputs",
   "inputs": {
     "metadata_audit_csv": "datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv",
-    "normalized_predictions_csv": "evaluation/forensic_tools/normalized_predictions.csv"
+    "metadata_audit_sha256": "b2cf66738bb3c9d9371e77380c175d6b9f2f6c6137e1ecfe57c0b8b71d0bd448",
+    "public_extracts": [
+      {
+        "path": "forensic_tools/magnet_axiom/public_extracts/magnet_axiom_predictions_extract.csv",
+        "sha256": "93b12772de2590bf28cb5af044fc527ea66d397e1a27cb81aac992a5f2785fe0"
+      },
+      {
+        "path": "forensic_tools/excire_foto_2025/public_extracts/excire_prompt_hits_extract.csv",
+        "sha256": "3590d4a923a4e80eae3a7d5c717970654f0d1a7479e982f6407c4a6a2024f129"
+      },
+      {
+        "path": "forensic_tools/cellebrite_inseyets/public_extracts/cellebrite_classifications_extract.csv",
+        "sha256": "4f1a0a2d01905f7f0d601e2f1d36a1597a89e5f262317a5dce6472d0c644e6e1"
+      },
+      {
+        "path": "forensic_tools/griffeye/public_extracts/griffeye_bookmarks_extract.csv",
+        "sha256": "600b0aa37aa9e4fee7e89c2fa753720540329797abf0a96945a051a4c1de9ac4"
+      }
+    ]
   },
   "outputs": {
-    "output_dir": "results/figures/chapter_5",
     "detail_csv": "results/figures/chapter_5/tab_embedded_metadata_sensitive_hits_detail.csv",
     "tool_summary_csv": "results/figures/chapter_5/tab_embedded_metadata_tool_summary.csv",
     "delta_csv": "results/figures/chapter_5/tab_embedded_metadata_sensitivity_delta.csv",
     "summary_json": "results/figures/chapter_5/embedded_metadata_sensitivity_summary.json"
   },
-  "tools": [
-    "magnet_axiom",
-    "excire_foto_2025_d20",
-    "excire_foto_2025_d50",
-    "excire_foto_2025_d80",
-    "cellebrite_inseyets",
-    "griffeye"
-  ],
   "counts": {
+    "audit_rows": 11500,
     "sensitive_metadata_hit_bundles": 15,
-    "sensitive_metadata_hit_rows": 15,
     "prediction_rows": 69000,
-    "detail_rows": 90
+    "detail_rows": 90,
+    "tool_summary_rows": 6,
+    "delta_rows": 12
   },
-  "methodological_note": "This script joins metadata-audit hits with already normalized commercial-tool predictions and computes leave-out sensitivity deltas. It does not infer causal influence of embedded metadata on black-box tool decisions."
+  "aggregate_reference_equivalence": true,
+  "public_detail_columns": [
+    "bundle_id",
+    "suffix",
+    "sensitive_hits",
+    "sensitive_hit_count",
+    "tool_name",
+    "tool_display",
+    "sample_type",
+    "attack_family",
+    "attack_name",
+    "final_label",
+    "normalized_prediction",
+    "weapon_detected",
+    "correct",
+    "false_negative",
+    "false_positive"
+  ],
+  "methodological_note": "The leave-out sensitivity check is reproduced from minimized metadata indicators and validated sanitized tool decisions. It does not publish complete EXIF/XMP values and does not infer causal influence."
 }

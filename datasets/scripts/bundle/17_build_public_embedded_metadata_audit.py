@@ -106,6 +106,13 @@ def extract_bundle_id(row: dict[str, str], row_number: int) -> str:
 def load_source(path: Path) -> tuple[list[dict[str, str]], list[str]]:
     if not path.is_file():
         raise FileNotFoundError(f"Embedded metadata audit not found: {path}")
+    field_limit = sys.maxsize
+    while True:
+        try:
+            csv.field_size_limit(field_limit)
+            break
+        except OverflowError:
+            field_limit //= 10
     with path.open("r", newline="", encoding="utf-8-sig", errors="replace") as stream:
         reader = csv.DictReader(stream)
         rows = [dict(row) for row in reader]
@@ -197,6 +204,7 @@ def build_summary(
             "path": source_path,
             "sha256": source_sha256,
             "source_columns": source_fields,
+            "distributed": False,
         },
         "outputs": {
             "public_audit": repo_path(audit_path),
@@ -273,7 +281,7 @@ def main() -> None:
         write_json(
             PUBLIC_SUMMARY,
             build_summary(
-                source_path,
+                repo_path(PRIVATE_AUDIT),
                 source_sha256,
                 source_fields,
                 CANONICAL_AUDIT,

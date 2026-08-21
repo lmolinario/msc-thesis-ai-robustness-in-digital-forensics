@@ -385,19 +385,33 @@ configurations.
 Table~\ref{tab:conclusions-main-findings} summarizes the principal findings and
 their forensic relevance.
 
-\begin{table}[H]
-\centering
-\caption{Summary of the main experimental findings}
-\label{tab:conclusions-main-findings}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
+\begingroup
+\small
+\renewcommand{\arraystretch}{1.14}
 \setlength{\tabcolsep}{4pt}
-\begin{tabularx}{\textwidth}{@{}p{0.17\textwidth} X X@{}}
+\begin{longtable}{@{}L{0.15\textwidth} L{0.39\textwidth} L{0.39\textwidth}@{}}
+\caption{Summary of the main experimental findings}
+\label{tab:conclusions-main-findings} \\
 \toprule
 \textbf{Area} &
 \textbf{Main finding} &
 \textbf{Operational relevance} \\
 \midrule
+\endfirsthead
+
+\toprule
+\textbf{Area} &
+\textbf{Main finding} &
+\textbf{Operational relevance} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{3}{r}{\footnotesize Continued on the next page} \\
+\endfoot
+
+\bottomrule
+\endlastfoot
 
 Clean baseline
 &
@@ -487,9 +501,8 @@ Explainability supports qualitative diagnosis of selected proxy-model outputs
 but does not establish prediction correctness, calibrated certainty, causal
 feature relevance, or black-box system behavior. \\
 
-\bottomrule
-\end{tabularx}
-\end{table}
+\end{longtable}
+\endgroup
 
 The clean results already reveal different operational error profiles.
 \gls{efficientnetb0} minimizes the total number of clean errors among the proxy
@@ -830,6 +843,20 @@ selected black-box software configurations measure only empirical transfer of
 the \gls{efficientnetb0}-oriented artifacts. They do not establish robustness
 against attacks optimized independently for those systems.
 
+\item \textbf{Artifact-representation effects in black-box transfer.}
+
+The \gls{fgsm}, \gls{sigmazero}, and \gls{superdeepfool} artifacts were
+exported as \(224 \times 224\) \texttt{PNG} files, whereas the clean source
+population retained heterogeneous original dimensions and formats. The
+\gls{onepixel} outputs also used \texttt{PNG} serialization while preserving the
+original spatial dimensions.
+
+Consequently, black-box responses to these artifacts may include effects of
+resizing or serialization in addition to the optimized perturbation. The
+reported transfer results characterize the complete frozen artifacts submitted
+to each system and do not isolate the causal contribution of the adversarial
+operation alone.
+
 \item \textbf{Proxy-model role.}
 
 \gls{efficientnetb0}, \gls{resnet18}, and the \gls{clip}-based model are
@@ -1019,6 +1046,11 @@ budgets where technically meaningful while preserving the distinction among
 white-box, score-based, transfer, and model-agnostic conditions. This would
 allow attack-specific effects to be separated more clearly from
 architecture-specific robustness.
+
+Black-box transfer studies should additionally include clean controls matched
+to the adversarial artifacts in spatial resolution and serialization format.
+Comparing each manipulated population with its representation-matched clean
+control would separate perturbation effects from resizing and encoding effects.
 
 Future adversarial evaluations could also include broader parameter sweeps,
 alternative optimization objectives, targeted attacks, adversarial patches,

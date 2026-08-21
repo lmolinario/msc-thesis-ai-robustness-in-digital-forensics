@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "created_at": "2026-08-21T00:56:37+00:00",
+  "script": "datasets/scripts/bundle/17_build_public_embedded_metadata_audit.py",
+  "policy": "minimized_public_audit",
+  "source": {
+    "path": "datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.private.csv",
+    "sha256": "8797640e59f4f0e31db23a17f5ee6f1ed23b8f9938045274b0bdd61f5b658d3e",
+    "source_columns": [
+      "relative_path",
+      "suffix",
+      "has_embedded_metadata",
+      "sensitive_hits",
+      "metadata_keys",
+      "metadata_json"
+    ],
+    "distributed": false
+  },
+  "outputs": {
+    "public_audit": "datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv",
+    "public_audit_sha256": "b2cf66738bb3c9d9371e77380c175d6b9f2f6c6137e1ecfe57c0b8b71d0bd448",
+    "sensitive_hits_index": "datasets/forensic_evaluation_bundle/metadata/embedded_metadata_sensitive_hits.csv",
+    "sensitive_hits_index_sha256": "d6ec2803b68e1e06fc81e506a72d07d166828583c50920e5c633c9d3a6c299b0"
+  },
+  "counts": {
+    "audit_rows": 11500,
+    "files_with_embedded_metadata": 7640,
+    "files_with_sensitive_hits": 15
+  },
+  "public_columns": [
+    "bundle_id",
+    "suffix",
+    "has_embedded_metadata",
+    "sensitive_hits",
+    "sensitive_hit_count",
+    "metadata_keys"
+  ],
+  "removed_private_columns": [
+    "metadata_json"
+  ],
+  "note": "The public audit records metadata presence, key names and sensitive-term hits without publishing complete EXIF/XMP values or binary payloads."
+}

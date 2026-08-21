@@ -41,7 +41,7 @@ preparation, manual selection, split generation, attack production, automated
 evaluation, and preparation of the bundle intended for selected black-box
 software systems.
 
-\begin{lstlisting}[caption={Simplified structure of the experimental repository.}, label={lst:repository-structure}]
+\begin{lstlisting}[float=p, caption={Simplified structure of the experimental repository.}, label={lst:repository-structure}]
 msc-thesis-ai-robustness-in-digital-forensics/
   datasets/
     raw/
@@ -70,21 +70,32 @@ msc-thesis-ai-robustness-in-digital-forensics/
     proxy_models/
     forensic_tools/
   forensic_tools/
+    magnet_axiom/
+    griffeye/
+    excire_foto_2025/
+    cellebrite_inseyets/
+    scripts/
   explainability/
     scripts/
-    outputs/
     manifests/
+    logs/
   results/
     scripts/
     metrics/
-    tables/
-    plots/
     figures/
-    reports/
+    latex_image_audit/
   docs/
     LatexThesis/
+    LatexSlides/
+    artifact/
+    assets/
+    maintenance/
+    slides/
+  tools/
+    latex/
   .github/
 \end{lstlisting}
+\clearpage
 
 The \codepath{datasets/} directory contains the data pipeline, from the initial
 collection phase to the forensic evaluation bundle. The \codepath{attacks/}
@@ -97,8 +108,12 @@ contains the normalized black-box evaluation perimeter and related exported
 artifacts, whereas the \codepath{results/scripts/} directory contains the
 reporting and audit scripts used to generate thesis-ready figures, tables, and
 sensitivity checks. The \codepath{explainability/} directory is reserved for the
-generation of \gls{xai}-based case studies, whereas
-\codepath{docs/LatexThesis/} contains the official LaTeX version of the thesis.
+generation of \gls{xai}-based case studies; complete generated visualization
+trees remain local when they cannot be redistributed, while public manifests,
+scripts, logs, and selected reporting assets remain auditable. The
+\codepath{docs/LatexThesis/} directory contains the official LaTeX version of
+the thesis, and \codepath{tools/latex/} contains supporting layout-audit
+utilities.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
