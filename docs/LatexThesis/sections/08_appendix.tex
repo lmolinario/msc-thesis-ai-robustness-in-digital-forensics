@@ -376,16 +376,19 @@ experimental protocol. The use of proxy models places the analysis within the
 broader context of robustness in \gls{ml} and \gls{ai}
 systems~\cite{bishop2006pattern,biggio2018wild,radford2021learning}.
 
-The adversarial attacks generated in the pipeline are \texttt{fgsm},
-\texttt{superdeepfool}, \texttt{sigma\_zero}, \texttt{one\_pixel}, and
-\texttt{color\_shift}. The anti-forensic transformations are
+The pipeline generates four model-dependent adversarial attacks---\texttt{fgsm},
+\texttt{superdeepfool}, \texttt{sigma\_zero}, and \texttt{one\_pixel}---and
+the model-agnostic \texttt{color\_shift} comparison condition. The
+anti-forensic transformations are
 \texttt{jpeg\_recompression}, \texttt{resample\_resize},
 \texttt{gaussian\_blur}, \texttt{histogram\_modification}, and
 \texttt{contrast\_stretching}. This distinction is methodologically important:
-adversarial attacks are used to evaluate the decision vulnerability of the
-models, whereas anti-forensic transformations simulate operationally plausible
-manipulations of the image content or file that may alter the visibility,
-quality, or technical traces of the artifact~\cite{stamm2010anti,nowroozi2021survey,croce2020robustbench}.
+model-dependent adversarial attacks evaluate decision vulnerability under the
+specified access assumptions, Color Shift provides a shared model-agnostic
+perturbation condition, and anti-forensic transformations simulate
+operationally plausible manipulations of the image content or file that may
+alter the visibility, quality, or technical traces of the
+artifact~\cite{stamm2010anti,nowroozi2021survey,croce2020robustbench}.
 
 The outputs of the proxy model evaluation are collected in the
 \codepath{evaluation/proxy_models/} and \codepath{results/metrics/}
