@@ -4,7 +4,7 @@
 """
 16_build_forensic_evaluation_bundle.py
 
-Build the FAIR-Lab forensic evaluation bundle.
+Build the FAIRLab forensic evaluation bundle.
 
 The bundle is the operational bridge between the academic pipeline and
 commercial forensic-tool testing. It collects clean, OOD, adversarial and
@@ -305,7 +305,7 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Build the FAIR-Lab forensic evaluation bundle."
+        description="Build the FAIRLab forensic evaluation bundle."
     )
 
     parser.add_argument("--clean-manifest", default=str(DEFAULT_CLEAN_MANIFEST))

@@ -5,7 +5,7 @@
 19_normalize_forensic_ai_tool_predictions.py
 
 Interactive and CLI-capable normalization entry point for commercial forensic
--tool outputs in the FAIR-Lab thesis pipeline.
+-tool outputs in the FAIRLab thesis pipeline.
 
 Purpose
 -------
@@ -36,7 +36,7 @@ Implemented normalization logic
 - Generic forensic AI tool exports:
   - supports CSV, TSV, JSON, JSONL and TXT exports;
   - attempts to infer filename/hash, label/category and confidence columns;
-  - maps weapon-related labels to the binary FAIR-Lab task when possible.
+  - maps weapon-related labels to the binary FAIRLab task when possible.
 
 Main inputs
 -----------
@@ -326,7 +326,7 @@ class InteractiveSelection:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Normalize forensic-tool exports against the FAIR-Lab forensic "
+            "Normalize forensic-tool exports against the FAIRLab forensic "
             "evaluation bundle. By default, an interactive menu is shown."
         )
     )
@@ -567,7 +567,7 @@ def format_run_dir_label(run_dir: Path, tool_name: str) -> str:
 
 def print_interactive_header() -> None:
     print("\n" + "=" * 78)
-    print("FAIR-Lab forensic-tool output normalization")
+    print("FAIRLab forensic-tool output normalization")
     print("=" * 78)
     print("This menu selects which forensic-tool exports must be normalized.")
     print("The script does not modify datasets, bundle files, or raw exports.")

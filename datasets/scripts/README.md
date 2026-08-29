@@ -1230,7 +1230,7 @@ must call `load_model()` explicitly.
 
 ## `attacks/sigma_zero_reference_adapter.py`
 
-Connects the FAIR-Lab proxy interface to the reference Sigma-Zero implementation
+Connects the FAIRLab proxy interface to the reference Sigma-Zero implementation
 without reimplementing the optimizer.
 
 The expected pinned dependency is the inspected commit:
@@ -1244,7 +1244,7 @@ The module imports the specific `sigma_zero.py` source directly to avoid
 unnecessary optional visualization dependencies from the package-level attack
 registry.
 
-Its `PixelSpaceTargetModel` wraps a loaded FAIR-Lab adapter so that the reference
+Its `PixelSpaceTargetModel` wraps a loaded FAIRLab adapter so that the reference
 attack receives unnormalized tensors in `[0,1]` while the underlying proxy still
 receives its correct model-specific normalization.
 

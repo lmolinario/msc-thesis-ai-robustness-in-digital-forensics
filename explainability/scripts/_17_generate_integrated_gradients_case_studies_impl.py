@@ -4,7 +4,7 @@
 """
 17_generate_integrated_gradients_case_studies.py
 
-Generate Integrated Gradients case studies for FAIR-Lab proxy models.
+Generate Integrated Gradients case studies for FAIRLab proxy models.
 
 Supported workflows
 -------------------
@@ -1313,7 +1313,7 @@ class XAIManualCaseReviewer:
         self.status_ax = self.fig.add_subplot(gs[rows, :])
         self.status_ax.axis("off")
         self.fig.subplots_adjust(left=0.03, right=0.99, top=0.88, bottom=0.05, wspace=0.08, hspace=0.35)
-        self.fig.canvas.manager.set_window_title("FAIR-Lab XAI Manual Case Reviewer")
+        self.fig.canvas.manager.set_window_title("FAIRLab XAI Manual Case Reviewer")
         self.fig.canvas.mpl_connect("key_press_event", self.on_key)
         self.fig.canvas.mpl_connect("button_press_event", self.on_click)
 
@@ -1356,7 +1356,7 @@ class XAIManualCaseReviewer:
 
         if not self.batch_indices:
             self.fig.suptitle(
-                f"FAIR-Lab XAI Reviewer | {self.group_label}={self.group_name} | NO CANDIDATES",
+                f"FAIRLab XAI Reviewer | {self.group_label}={self.group_name} | NO CANDIDATES",
                 fontsize=12,
             )
             self.draw_status_panel()
@@ -1417,7 +1417,7 @@ class XAIManualCaseReviewer:
             self.ax_to_local_index[ax] = local_index
 
         self.fig.suptitle(
-            f"FAIR-Lab XAI Reviewer | {self.group_label}={self.group_name} | "
+            f"FAIRLab XAI Reviewer | {self.group_label}={self.group_name} | "
             f"selected={self.selected_count_for_group()}/{self.requested_cases} | "
             f"page={self.current_page()}/{self.total_pages()}",
             fontsize=11,

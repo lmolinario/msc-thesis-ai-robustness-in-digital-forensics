@@ -6,7 +6,7 @@
 
 Generate the embedded-metadata sensitivity tables used in Chapter 5.
 
-This reporting script connects two already consolidated FAIR-Lab artifacts:
+This reporting script connects two already consolidated FAIRLab artifacts:
 
 1. datasets/forensic_evaluation_bundle/metadata/embedded_metadata_audit.csv
    Produced by script 16. It identifies blind bundle files whose embedded image

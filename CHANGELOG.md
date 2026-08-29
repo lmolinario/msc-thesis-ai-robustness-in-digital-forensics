@@ -8,11 +8,13 @@ every intermediate editing commit.
 
 ### Final repository cleanup
 
-- consolidated the defense material while retaining `main.tex`, `main2.tex`, and
-  `main3.tex` as active LaTeX working variants until the presentation is finalized;
+- established `docs/LatexSlides/main.tex` as the only documented presentation
+  entry point; temporary drafting alternatives remain personal working backups
+  and must be consolidated or removed when the deck is finalized;
 - removed superseded PowerPoint defense drafts while retaining the discussion
   vademecum and full Git provenance;
-- separated post-freeze defense material from the frozen experimental artifact;
+- separated post-freeze defense material from the frozen experimental artifact
+  and excluded it from the official research-artifact release perimeter;
 - replaced complete third-party literature PDFs in the current release tree with
   a bibliographic-access note pointing to `docs/LatexThesis/tesi.bib`;
 - clarified that the manual-review `pending` count concerns unneeded candidate
@@ -55,6 +57,9 @@ every intermediate editing commit.
 Final frozen MSc thesis research artifact supporting:
 
 > **Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks**
+
+Working defense material under `docs/LatexSlides/` and `docs/slides/` is not a
+release asset and does not form part of the scientific artifact.
 
 ### Added
 

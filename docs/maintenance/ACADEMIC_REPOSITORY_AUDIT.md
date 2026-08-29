@@ -67,6 +67,7 @@ reproducibility and must not be interpreted as current chapter assignments.
 | XAI | Historical bulk outputs removed; five cases and 20 thesis assets retained |
 | Results | Validators added; OOD denominator documented |
 | LaTeX | A single authoritative seven-chapter thesis source retained; build outputs ignored |
+| Defense material | Retained only as an author working backup; `docs/LatexSlides/main.tex` is the sole documented entry point and slide material is excluded from release assets |
 | Chapter references | Documentation aligned to Chapters 5, 6, and 7; historical names explained |
 | Probability terminology | Proxy outputs documented as Max-P; historical schema names preserved |
 | Public commercial boundary | Sanitized canonical table distinguished from excluded raw exports |
@@ -282,6 +283,7 @@ These are not methodological blockers:
 - [x] controlled access documented;
 - [x] LaTeX build products ignored;
 - [x] redundant thesis source tree removed;
+- [x] defense working material separated from the scientific release perimeter;
 - [x] final artifact validators executed locally at commit `1018f307...`;
 - [ ] final LaTeX build check at the exact release commit;
 - [ ] optional environment lock;

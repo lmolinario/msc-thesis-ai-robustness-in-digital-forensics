@@ -4,7 +4,7 @@
 """
 11_generate_clean_and_ood_splits.py
 
-Official split-generation script for the FAIR-Lab thesis pipeline.
+Official split-generation script for the FAIRLab thesis pipeline.
 
 Purpose
 -------

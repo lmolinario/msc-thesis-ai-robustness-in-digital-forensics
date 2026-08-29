@@ -7,7 +7,7 @@ Script: 09_generate_review_manifest_full.py
 ===============================================================================
 
 Title:
-    Full Review Manifest Generator for the FAIR-Lab Annotation Pipeline
+    Full Review Manifest Generator for the FAIRLab Annotation Pipeline
 
 Purpose:
     This script generates the official full review manifest from

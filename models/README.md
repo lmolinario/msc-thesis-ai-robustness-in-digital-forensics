@@ -1,7 +1,7 @@
 # Proxy Models
 
 This directory contains the transparent proxy-model artifact used by the
-FAIR-Lab thesis experiments. The models are research instruments for controlled
+FAIRLab thesis experiments. The models are research instruments for controlled
 robustness evaluation and are not commercial forensic tools.
 
 See [`MODEL_CARD.md`](MODEL_CARD.md) for the complete scope, limitations, and

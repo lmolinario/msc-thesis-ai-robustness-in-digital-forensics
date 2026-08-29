@@ -8,7 +8,7 @@ Reference-integration adapter for Sigma-Zero adversarial generation.
 
 This module intentionally does not reimplement Sigma-Zero. It calls the
 reference implementation exposed by `adv_lib.attacks.sigma_zero` and adapts it
-to the FAIR-Lab fold-aware proxy-model interface.
+to the FAIRLab fold-aware proxy-model interface.
 
 Expected dependency
 -------------------
@@ -58,7 +58,7 @@ def _import_adv_lib_sigma_zero() -> Any:
     The adversarial-library package imports optional visualization utilities
     such as visdom from adv_lib.attacks.__init__. Importing the package-level
     registry would therefore require dependencies that are not needed by the
-    FAIR-Lab pipeline. This loader imports only adv_lib/attacks/sigma_zero.py
+    FAIRLab pipeline. This loader imports only adv_lib/attacks/sigma_zero.py
     directly from the installed package location.
     """
     import importlib.util
@@ -183,7 +183,7 @@ def compute_perturbation_metrics_from_arrays(
 
 
 def _probabilities_from_logits(logits: Any) -> dict[str, float]:
-    """Convert binary logits into the official FAIR-Lab label-probability dict."""
+    """Convert binary logits into the official FAIRLab label-probability dict."""
     torch_module = _import_torch()
     probabilities = torch_module.softmax(logits, dim=1)[0]
     return {
@@ -207,7 +207,7 @@ class PixelSpaceTargetModel:
     Torch-compatible wrapper exposing a pixel-space [0, 1] logits interface.
 
     The reference Sigma-Zero implementation expects a model that receives
-    unnormalized image tensors in [0, 1]. FAIR-Lab target-model adapters normally
+    unnormalized image tensors in [0, 1]. FAIRLab target-model adapters normally
     operate on normalized tensors, so this wrapper normalizes the input before
     dispatching to the underlying trained model/head.
     """
@@ -244,7 +244,7 @@ def apply_sigma_zero_reference(
     args: Any,
 ) -> tuple[Image.Image, dict[str, Any]]:
     """
-    Apply the reference Sigma-Zero attack through the FAIR-Lab adapter layer.
+    Apply the reference Sigma-Zero attack through the FAIRLab adapter layer.
 
     The attack is untargeted and model-dependent. The generated tensor is kept in
     pixel space [0, 1] and later saved as PNG by the caller.

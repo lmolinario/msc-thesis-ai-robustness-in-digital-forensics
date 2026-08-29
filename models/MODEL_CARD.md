@@ -2,7 +2,7 @@
 
 ## Model Suite
 
-**FAIR-Lab Proxy Models for Forensic Image Robustness Evaluation**
+**FAIRLab Proxy Models for Forensic Image Robustness Evaluation**
 
 This card documents the transparent proxy models used in the MSc thesis
 repository. They are experimental instruments for controlled robustness
@@ -134,7 +134,7 @@ one fold-matched prediction for each of the 1,000 binary samples.
 ## Adversarial and Anti-Forensic Role
 
 EfficientNet-B0 is the primary target for the four model-dependent attacks:
-FGSM, OnePixel, SigmaZero, and SuperDeepFool. ResNet18 and CLIP support empirical
+FGSM, One Pixel, Sigma-Zero, and SuperDeepFool. ResNet18 and CLIP support empirical
 cross-architecture transfer analysis. Color Shift is deterministic and
 model-agnostic. The five anti-forensic transformations are also model-agnostic.
 

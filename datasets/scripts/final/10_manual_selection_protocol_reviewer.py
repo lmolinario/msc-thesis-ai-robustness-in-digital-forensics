@@ -4,7 +4,7 @@
 """
 10_manual_selection_protocol_reviewer.py
 
-Official manual selection protocol reviewer for the FAIR-Lab public thesis pipeline.
+Official manual selection protocol reviewer for the FAIRLab public thesis pipeline.
 
 Purpose
 -------

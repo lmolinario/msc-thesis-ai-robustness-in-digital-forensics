@@ -17,7 +17,7 @@ Purpose:
     structured CSV summary of the resulting dataset.
 
 Research Context:
-    In the FAIR-Lab experimental workflow, this scripts contributes to the
+    In the FAIRLab experimental workflow, this scripts contributes to the
     acquisition of visually heterogeneous images from multimedia-oriented and
     open-source intelligence (OSINT) environments. Compared with static,
     curated datasets, YouTube thumbnails may capture more realistic settings,

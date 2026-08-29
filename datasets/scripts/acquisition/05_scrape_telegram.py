@@ -16,7 +16,7 @@ Purpose:
     reproducible research workflow.
 
 Research Context:
-    In the FAIR-Lab pipeline, Telegram scraping contributes to the acquisition of
+    In the FAIRLab pipeline, Telegram scraping contributes to the acquisition of
     images from semi-open and operationally relevant social-media-like sources.
     Compared to benchmark datasets, such sources may better reflect real-world
     variability, including:

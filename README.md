@@ -25,6 +25,17 @@ from selected commercial black-box tools.
 The repository is a research artifact, not a general-purpose forensic classifier,
 unrestricted dataset release, or operational investigative system.
 
+Working defense materials under `docs/LatexSlides/` and `docs/slides/` are kept
+only as an author backup. They are outside the scientific release perimeter and
+do not affect the frozen thesis artifact, its claims, or its validation status.
+
+## Release Status
+
+The scientific artifact is final and frozen. The archival GitHub release remains
+pending until the final thesis PDF is compiled at the selected release commit
+and the release assets are attached. Defense working material is not part of
+that release package.
+
 ## At a Glance
 
 | Component | Description |
@@ -187,7 +198,7 @@ data, or undocumented internal logic.
 - OOD is a separate evaluation branch, not a supervised third class.
 - `2,500` OOD predictions per architecture means `500 images × 5 checkpoints`,
   not 2,500 distinct images.
-- FGSM, OnePixel, SigmaZero, and SuperDeepFool are the four model-dependent
+- FGSM, One Pixel, Sigma-Zero, and SuperDeepFool are the four model-dependent
   attacks generated against fold-specific EfficientNet-B0 checkpoints.
 - Color Shift and the five anti-forensic transformations are model-agnostic.
 - Transfer results do not establish direct robustness of a non-target model.

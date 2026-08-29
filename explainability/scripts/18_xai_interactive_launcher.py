@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Sanitized interactive launcher for the FAIR-Lab XAI entry point."""
+"""Sanitized interactive launcher for the FAIRLab XAI entry point."""
 from __future__ import annotations
 
 import json
@@ -64,7 +64,7 @@ def log_command(preset: str, args: list[str]) -> None:
 
 
 def main() -> None:
-    print("FAIR-Lab XAI launcher")
+    print("FAIRLab XAI launcher")
     for key, preset in PRESETS.items():
         print(f"{key}. {preset['name']}")
     print("0. Exit")

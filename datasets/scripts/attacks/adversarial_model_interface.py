@@ -5,7 +5,7 @@
 adversarial_model_interface.py
 
 Stable target-model interface definitions for adversarial attack generation in
-the FAIR-Lab thesis pipeline.
+the FAIRLab thesis pipeline.
 
 Purpose
 -------

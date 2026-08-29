@@ -7,7 +7,7 @@ Script: 02_download_github.py
 ===============================================================================
 
 Title:
-    Automated GitHub Repository Downloader and Metadata Indexer for FAIR-Lab
+    Automated GitHub Repository Downloader and Metadata Indexer for FAIRLab
 
 Purpose:
     This scripts downloads a public GitHub repository as a ZIP archive, extracts
@@ -15,7 +15,7 @@ Purpose:
     CSV summary of all indexed files.
 
 Research Context:
-    In the FAIR-Lab experimental workflow, this module supports controlled and
+    In the FAIRLab experimental workflow, this module supports controlled and
     reproducible acquisition of raw sources hosted on public GitHub repositories.
     The scripts improves:
         - provenance tracking

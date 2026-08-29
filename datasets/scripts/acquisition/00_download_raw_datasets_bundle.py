@@ -4,7 +4,7 @@
 """
 00_download_raw_datasets_bundle.py
 
-Restore controlled-access image artifacts used by the FAIR-Lab thesis pipeline.
+Restore controlled-access image artifacts used by the FAIRLab thesis pipeline.
 Image corpora are intentionally excluded from the public ``main`` branch.
 
 Artifacts:
@@ -113,7 +113,7 @@ ARTIFACTS = {spec.key: spec for spec in (RAW_ARTIFACT, FROZEN_ARTIFACT)}
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Restore a controlled-access FAIR-Lab image artifact."
+        description="Restore a controlled-access FAIRLab image artifact."
     )
     parser.add_argument(
         "--artifact",

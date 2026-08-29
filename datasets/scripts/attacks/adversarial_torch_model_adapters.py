@@ -5,7 +5,7 @@
 adversarial_torch_model_adapters.py
 
 Optional PyTorch-based target-model adapters for model-dependent adversarial
-attacks in the FAIR-Lab thesis pipeline.
+attacks in the FAIRLab thesis pipeline.
 
 Purpose
 -------
@@ -142,7 +142,7 @@ class TorchVisionBinaryClassifierAdapter(TargetModelAdapter):
     Binary-classification adapter for torchvision image classifiers.
 
     This adapter is suitable for trained ResNet18 and EfficientNet-B0 checkpoints
-    using the official FAIR-Lab binary mapping:
+    using the official FAIRLab binary mapping:
     - class 0: non_weapon
     - class 1: weapon
     """

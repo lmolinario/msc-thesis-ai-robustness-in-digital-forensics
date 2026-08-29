@@ -16,7 +16,7 @@ Purpose:
     the collected files.
 
 Research Context:
-    In the FAIR-Lab experimental workflow, this module supports the acquisition
+    In the FAIRLab experimental workflow, this module supports the acquisition
     of visually heterogeneous samples from unconventional online environments.
     Compared with standard public datasets or mainstream web sources, indexed
     .onion pages may expose the collection pipeline to noisier, weaker, and less
@@ -269,7 +269,7 @@ def create_tor_session(tor_host: str, tor_port: int) -> requests.Session:
     )
     session.headers.update(
         {
-            "User-Agent": "Mozilla/5.0 (FAIR-Lab DeepWeb Collector)"
+            "User-Agent": "Mozilla/5.0 (FAIRLab DeepWeb Collector)"
         }
     )
     return session

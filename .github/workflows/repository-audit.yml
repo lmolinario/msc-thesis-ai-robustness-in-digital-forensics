@@ -47,6 +47,7 @@ jobs:
               'docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256',
               'docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md',
               'docs/maintenance/RELEASE_CHECKLIST.md',
+              'docs/LatexSlides/README.md',
               'docs/LatexThesis/README.md',
               'docs/LatexThesis/main.tex',
               'datasets/forensic_evaluation_bundle/README.md',
@@ -245,6 +246,12 @@ jobs:
               'sections/06_conclusions.tex',
               'sections/07_appendix.tex',
               'both thesis-language variants',
+              'FAIR-Lab',
+              'OnePixel',
+              'SigmaZero',
+              'main2.tex',
+              'main3.tex',
+              'main4.tex',
           ]
           paths = [
               Path('README.md'),

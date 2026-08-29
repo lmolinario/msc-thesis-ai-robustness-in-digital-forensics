@@ -9,7 +9,7 @@ import pandas as pd
 
 
 # =============================================================================
-# Import FAIR-Lab repository paths
+# Import FAIRLab repository paths
 # =============================================================================
 
 def _add_utils_to_path() -> None:
@@ -361,7 +361,7 @@ def build_proxy_metrics(df: pd.DataFrame) -> pd.DataFrame:
 
 def validate_proxy_counts(proxy_metrics: pd.DataFrame) -> None:
     """
-    Validate expected sample counts. Raises an error if the expected FAIR-Lab
+    Validate expected sample counts. Raises an error if the expected FAIRLab
     evaluation structure is not found.
     """
     expected = {

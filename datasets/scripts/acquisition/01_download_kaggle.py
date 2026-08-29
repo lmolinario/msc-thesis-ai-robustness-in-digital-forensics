@@ -12,7 +12,7 @@ Title:
 Purpose:
     This scripts is responsible for downloading a dataset from Kaggle, extracting
     its contents, and generating a structured metadata summary (CSV file).
-    It represents the initial stage of the FAIR-Lab pipeline, ensuring
+    It represents the initial stage of the FAIRLab pipeline, ensuring
     reproducibility and traceability of raw data sources.
 
 Context (Thesis Contribution):

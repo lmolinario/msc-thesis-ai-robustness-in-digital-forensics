@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Integrity wrapper for the frozen FAIR-Lab proxy-model evaluation.
+"""Integrity wrapper for the frozen FAIRLab proxy-model evaluation.
 
 The original evaluated implementation is preserved in
 `_15_evaluate_proxy_models_impl.py`. This public entry point adds fail-closed

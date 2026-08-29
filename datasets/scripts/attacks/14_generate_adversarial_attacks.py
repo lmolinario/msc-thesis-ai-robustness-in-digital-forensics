@@ -4,7 +4,7 @@
 """
 14_generate_adversarial_attacks.py
 
-Fold-aware adversarial generation entry point for the FAIR-Lab thesis pipeline.
+Fold-aware adversarial generation entry point for the FAIRLab thesis pipeline.
 
 This script supports two equivalent execution modes:
 
@@ -176,7 +176,7 @@ def ask_target_models(default_models: list[str]) -> list[str]:
 def parse_interactive_args() -> argparse.Namespace:
     """Build an argparse namespace through a safe interactive launcher."""
     print("\n" + "=" * 78)
-    print("FAIR-Lab adversarial attack generator")
+    print("FAIRLab adversarial attack generator")
     print("=" * 78)
     print(f"Repository root: {REPO_ROOT}")
     print(f"Input manifest: {INPUT_MANIFEST_PATH}")

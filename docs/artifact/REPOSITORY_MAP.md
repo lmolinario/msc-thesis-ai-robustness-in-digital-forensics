@@ -10,7 +10,7 @@ workflow.
 | `.github/` | Security policy and lightweight repository audit workflow |
 | `attacks/` | Adversarial and anti-forensic manifests plus local-output boundaries |
 | `datasets/` | Dataset acquisition/preparation scripts, frozen manifests, splits, and bundle metadata |
-| `docs/` | Artifact documentation, maintenance records, authoritative thesis source, and post-freeze defense material |
+| `docs/` | Artifact documentation, maintenance records, authoritative thesis source, and non-release defense working material |
 | `evaluation/` | Proxy predictions and canonical commercial-tool normalization outputs |
 | `explainability/` | Integrated Gradients scripts, logs, and canonical thesis-selection manifest |
 | `forensic_tools/` | Tool registry, sanitized extracts, validation reports, and tool documentation |
@@ -210,8 +210,8 @@ docs/artifact/       research-artifact governance and reproducibility documents
 docs/maintenance/    audit and release-maintenance records
 docs/assets/         repository-facing graphics
 docs/LatexThesis/    authoritative frozen thesis source
-docs/LatexSlides/    post-freeze LaTeX defense source
-docs/slides/         retained discussion-preparation material
+docs/LatexSlides/    post-freeze LaTeX defense working backup
+docs/slides/         retained discussion-preparation working material
 ```
 
 Authoritative thesis entry point:
@@ -227,7 +227,8 @@ docs/LatexSlides/main.tex
 ```
 
 The experimental artifact is frozen at `thesis-freeze-2026-08-04`. Defense
-materials created after that tag do not redefine the frozen experimental scope.
+materials created after that tag do not redefine the frozen experimental scope
+and are excluded from the official research-artifact release assets.
 
 The `docs/LatexThesis/main_papers/` directory contains only an access note in the
 current release tree. The authoritative literature metadata is maintained in

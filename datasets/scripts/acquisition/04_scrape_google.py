@@ -15,7 +15,7 @@ Purpose:
     and generates a structured CSV summary of the resulting dataset.
 
 Research Context:
-    In the FAIR-Lab experimental pipeline, this scripts supports the acquisition
+    In the FAIRLab experimental pipeline, this scripts supports the acquisition
     of heterogeneous web images intended to increase visual diversity beyond
     curated benchmark datasets. This is particularly relevant when building
     datasets that better approximate real-world variability, including:

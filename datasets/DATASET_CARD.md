@@ -2,7 +2,7 @@
 
 ## Dataset Name
 
-**FAIR-Lab Forensic Image Robustness Dataset**
+**FAIRLab Forensic Image Robustness Dataset**
 
 This dataset card describes the dataset artifacts used in the MSc thesis repository:
 

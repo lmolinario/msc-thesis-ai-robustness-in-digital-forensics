@@ -4,7 +4,7 @@
 """
 12_train_proxy_models.py
 
-Train the fold-aware proxy models used by the FAIR-Lab thesis pipeline.
+Train the fold-aware proxy models used by the FAIRLab thesis pipeline.
 
 For each held-out fold, the corresponding checkpoint is trained on the other
 four folds and stored under:
@@ -71,7 +71,7 @@ class TrainConfig:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Train fold-aware binary proxy models for FAIR-Lab."
+        description="Train fold-aware binary proxy models for FAIRLab."
     )
     parser.add_argument(
         "--manifest",

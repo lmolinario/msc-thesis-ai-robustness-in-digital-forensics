@@ -40,6 +40,7 @@ from pathlib import Path
 
 required = [
     'README.md',
+    'docs/LatexSlides/README.md',
     'docs/LatexThesis/main.tex',
     'docs/artifact/THESIS_ARTIFACT.md',
     '.github/SECURITY.md',
@@ -83,6 +84,12 @@ patterns = [
     'LatexThesis_ITA',
     '/run/media/lello',
     'explainability/outputs/integrated_gradients/',
+    'FAIR-Lab',
+    'OnePixel',
+    'SigmaZero',
+    'main2.tex',
+    'main3.tex',
+    'main4.tex',
 ]
 stale = []
 for path in text_files:

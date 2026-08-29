@@ -4,7 +4,7 @@
 """
 20_generate_experimental_reporting_assets.py
 
-Generate experimental reporting figures, tables and summaries from consolidated FAIR-Lab metric files.
+Generate experimental reporting figures, tables and summaries from consolidated FAIRLab metric files.
 
 This script belongs to the reporting layer of the thesis repository. It does
 not regenerate datasets, attacks, proxy-model predictions, or metrics. It only
@@ -1614,7 +1614,7 @@ def generate_forensic_reporting_assets(
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Generate thesis-ready Chapter 5 figures from consolidated FAIR-Lab metrics."
+        description="Generate thesis-ready Chapter 5 figures from consolidated FAIRLab metrics."
     )
     parser.add_argument("--core-metrics", default=str(DEFAULT_CORE_METRICS_CSV))
     parser.add_argument("--robustness-metrics", default=str(DEFAULT_ROBUSTNESS_METRICS_CSV))

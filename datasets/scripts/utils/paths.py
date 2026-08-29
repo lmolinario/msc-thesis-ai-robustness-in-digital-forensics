@@ -12,7 +12,7 @@ def _find_repo_root(start: Path) -> Path:
     - datasets/
     - datasets/scripts/
 
-    This criterion matches the current FAIR-Lab thesis repository layout.
+    This criterion matches the current FAIRLab thesis repository layout.
     """
     for candidate in [start, *start.parents]:
         if (candidate / "datasets").is_dir() and (candidate / "datasets" / "scripts").is_dir():

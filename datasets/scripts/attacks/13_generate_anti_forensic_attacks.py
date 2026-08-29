@@ -4,7 +4,7 @@
 """
 13_generate_anti_forensic_attacks.py
 
-Official anti-forensic transformation script for the FAIR-Lab thesis pipeline.
+Official anti-forensic transformation script for the FAIRLab thesis pipeline.
 
 This version preserves the original generation logic and adds an optional
 forensic-oriented evaluation stage.
@@ -159,7 +159,7 @@ def ask_attack_selection() -> list[str]:
 def parse_interactive_args() -> argparse.Namespace:
     """Build an argparse namespace through a safe interactive launcher."""
     print("\n" + "=" * 78)
-    print("FAIR-Lab anti-forensic transformation generator/evaluator")
+    print("FAIRLab anti-forensic transformation generator/evaluator")
     print("=" * 78)
     print(f"Repository root: {REPO_ROOT}")
     print(f"Input manifest: {INPUT_MANIFEST_PATH}")

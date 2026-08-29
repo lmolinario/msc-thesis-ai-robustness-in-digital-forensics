@@ -16,7 +16,7 @@ Purpose:
     describing the resulting subset contents.
 
 Research Context:
-    In the FAIR-Lab experimental workflow, this scripts supports dataset curation
+    In the FAIRLab experimental workflow, this scripts supports dataset curation
     and controlled reduction of large source collections into a manageable and
     reproducible subset. This is especially relevant when the experimental design
     requires:

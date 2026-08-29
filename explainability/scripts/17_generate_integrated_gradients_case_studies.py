@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Integrity-hardened entry point for FAIR-Lab Integrated Gradients case studies.
+"""Integrity-hardened entry point for FAIRLab Integrated Gradients case studies.
 
 The frozen implementation is preserved in the adjacent implementation module.
 This wrapper adds headless-safe execution, checkpoint and input integrity checks,

@@ -66,6 +66,10 @@ requirements.txt
 The obsolete Italian thesis tree and old root-level governance files must not
 reappear.
 
+Defense working material under `docs/LatexSlides/` and `docs/slides/` may remain
+available in `main` as an author backup, but it is outside the scientific release
+perimeter and must not be included among the official release assets.
+
 ## 3. Verify the Final Thesis Map
 
 The authoritative source must contain:
@@ -223,6 +227,7 @@ Verify:
 ```text
 README.md
 docs/README.md
+docs/LatexSlides/README.md
 docs/LatexThesis/README.md
 docs/artifact/THESIS_ARTIFACT.md
 docs/artifact/ARTIFACT_EVALUATION.md
@@ -315,6 +320,10 @@ thesis-final.pdf
 artifact-checksums.sha256
 repository-audit-summary.md
 ```
+
+Do not attach defense slides, slide PDFs, or discussion-preparation files to the
+official research-artifact release. Their presence as working material in the
+repository does not make them part of the release evidence package.
 
 Do not add the generated PDF to the Git tree solely for distribution. Attach it
 to the release.

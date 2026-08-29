@@ -67,6 +67,15 @@ The curated `main` branch contains:
 - the authoritative LaTeX thesis source;
 - access, security, reproducibility, audit, and release documentation.
 
+## Defense-Material Boundary
+
+The working presentation sources under `docs/LatexSlides/` and the discussion
+preparation material under `docs/slides/` are retained only as an author backup.
+They are not official release assets, are not scientific sources of truth, and
+do not redefine the thesis artifact's scope, claims, metrics, or validation
+status. The only documented presentation entry point is
+`docs/LatexSlides/main.tex`.
+
 ## Deliberately Excluded from `main`
 
 The repository does not intentionally redistribute:
@@ -149,7 +158,7 @@ probabilities, and undocumented decision logic are not inspected.
 - OOD is a separate evaluation branch, not a supervised third class.
 - The forensic bundle contains 11,500 files, including 10,000 derived variants
   of the same 1,000 binary source images.
-- FGSM, OnePixel, SigmaZero, and SuperDeepFool are model-dependent attacks
+- FGSM, One Pixel, Sigma-Zero, and SuperDeepFool are model-dependent attacks
   generated against fold-specific EfficientNet-B0 checkpoints.
 - Color Shift and the anti-forensic transformations are model-agnostic.
 - Transfer results do not establish direct robustness of non-target models.

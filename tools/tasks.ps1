@@ -32,7 +32,7 @@ function Check-Python {
 
 function Check-Text {
     In-Repo {
-        python -c "from pathlib import Path; required=['docs/LatexThesis/main.tex','docs/artifact/THESIS_ARTIFACT.md','.github/SECURITY.md']; forbidden=['docs/LatexThesis_ITA','THESIS_ARTIFACT.md','tasks.ps1']; missing=[p for p in required if not Path(p).exists()]; present=[p for p in forbidden if Path(p).exists()]; assert not missing and not present,(missing,present); texts=[Path('README.md'),*Path('docs').rglob('*.md'),Path('CHANGELOG.md')]; stale=[(str(p),s) for p in texts for s in ['LatexThesis_ITA','/run/media/lello','explainability/outputs/integrated_gradients/'] if s in p.read_text(encoding='utf-8',errors='ignore')]; assert not stale,stale; print('Text and layout guards passed.')"
+        python -c "from pathlib import Path; required=['docs/LatexThesis/main.tex','docs/LatexSlides/README.md','docs/artifact/THESIS_ARTIFACT.md','.github/SECURITY.md']; forbidden=['docs/LatexThesis_ITA','THESIS_ARTIFACT.md','tasks.ps1']; missing=[p for p in required if not Path(p).exists()]; present=[p for p in forbidden if Path(p).exists()]; assert not missing and not present,(missing,present); texts=[Path('README.md'),*Path('docs').rglob('*.md'),Path('CHANGELOG.md')]; stale=[(str(p),s) for p in texts for s in ['LatexThesis_ITA','/run/media/lello','explainability/outputs/integrated_gradients/','FAIR-Lab','OnePixel','SigmaZero','main2.tex','main3.tex','main4.tex'] if s in p.read_text(encoding='utf-8',errors='ignore')]; assert not stale,stale; print('Text and layout guards passed.')"
         if ($LASTEXITCODE -ne 0) { throw 'Text and layout validation failed' }
     }
 }

@@ -4,7 +4,7 @@
 """
 superdeepfool_adapter.py
 
-Paper-based reference-style SuperDeepFool adapter for the FAIR-Lab thesis
+Paper-based reference-style SuperDeepFool adapter for the FAIRLab thesis
 pipeline.
 
 Methodological note
@@ -66,7 +66,7 @@ def apply_superdeepfool_reference(
         transformed_img:
             Lossless-PNG-ready adversarial PIL image.
         attack_params:
-            JSON-serializable metadata dictionary for the FAIR-Lab manifest.
+            JSON-serializable metadata dictionary for the FAIRLab manifest.
     """
 
     clean_img = img.convert("RGB")
@@ -576,7 +576,7 @@ def resolve_label_names(adapter: Any, pixel_tensor: torch.Tensor) -> list[str]:
 
     The function first checks common adapter attributes. If they are not present,
     it falls back to the insertion order of predict_proba(...), which is the
-    interface already used by the FAIR-Lab attack pipeline.
+    interface already used by the FAIRLab attack pipeline.
     """
 
     for attribute_name in ("class_names", "labels", "classes"):
@@ -681,7 +681,7 @@ def compute_perturbation_metrics_from_tensors(
     adversarial_pixel_tensor: torch.Tensor,
     threshold: float,
 ) -> dict[str, float | int]:
-    """Compute FAIR-Lab perturbation metrics in pixel space [0, 1]."""
+    """Compute FAIRLab perturbation metrics in pixel space [0, 1]."""
 
     original = ensure_batch(original_pixel_tensor).detach().cpu().float()
     adversarial = ensure_batch(adversarial_pixel_tensor).detach().cpu().float()

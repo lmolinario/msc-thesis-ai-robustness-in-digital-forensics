@@ -4,7 +4,7 @@
 """
 15_evaluate_proxy_models.py
 
-Fold-aware evaluation entry point for FAIR-Lab proxy models.
+Fold-aware evaluation entry point for FAIRLab proxy models.
 
 The script evaluates transparent proxy models on clean, adversarial,
 anti-forensic and OOD artifacts. It is intentionally separate from the
@@ -157,7 +157,7 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Evaluate FAIR-Lab proxy models.")
+    parser = argparse.ArgumentParser(description="Evaluate FAIRLab proxy models.")
     parser.add_argument("--clean-manifest", default=str(DEFAULT_CLEAN_MANIFEST))
     parser.add_argument("--ood-manifest", default=str(DEFAULT_OOD_MANIFEST))
     parser.add_argument("--attack-manifests-dir", default=str(DEFAULT_ATTACK_MANIFESTS_DIR))

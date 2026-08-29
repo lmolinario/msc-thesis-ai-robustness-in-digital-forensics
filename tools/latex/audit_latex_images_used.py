@@ -108,7 +108,7 @@ class ImageInventoryRow:
 
 
 def find_repo_root(start: Path) -> Path:
-    """Find a likely repository root, compatible with the FAIR-Lab thesis layout."""
+    """Find a likely repository root, compatible with the FAIRLab thesis layout."""
     start = start.resolve()
     candidates = [start, *start.parents]
     for candidate in candidates:
