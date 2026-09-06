@@ -25,7 +25,7 @@ from selected commercial black-box tools.
 The repository is a research artifact, not a general-purpose forensic classifier,
 unrestricted dataset release, or operational investigative system.
 
-Working defense materials under `docs/LatexSlides/` and `docs/slides/` are kept
+Working defense materials under `docs/LatexSlides/` and `docs/presentation/` are kept
 only as an author backup. They are outside the scientific release perimeter and
 do not affect the frozen thesis artifact, its claims, or its validation status.
 

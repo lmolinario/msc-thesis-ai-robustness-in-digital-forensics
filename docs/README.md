@@ -57,7 +57,7 @@ labels, and release status.
 
 The experimental thesis artifact is frozen at tag `thesis-freeze-2026-08-04`.
 Material created afterwards for the oral defense is kept separate under
-`docs/LatexSlides/` and `docs/slides/` and does not redefine the frozen
+`docs/LatexSlides/` and `presentation/` and does not redefine the frozen
 experimental artifact. It is maintained only as a personal working backup and
 is excluded from the official research-artifact release.
 
@@ -72,7 +72,7 @@ docs/LatexSlides/main.tex
 Only `main.tex` is documented as the stable presentation entry point. Temporary
 drafting alternatives may coexist while the presentation is being developed,
 but they are not authoritative and must eventually be consolidated into
-`main.tex` or removed. The discussion vademecum is retained under `docs/slides/`
+`main.tex` or removed. The discussion vademecum is retained under `presentation/`
 as a preparation aid rather than a scientific source of truth.
 
 ## Final Thesis Structure

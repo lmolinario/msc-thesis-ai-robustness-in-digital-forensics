@@ -66,7 +66,7 @@ requirements.txt
 The obsolete Italian thesis tree and old root-level governance files must not
 reappear.
 
-Defense working material under `docs/LatexSlides/` and `docs/slides/` may remain
+Defense working material under `docs/LatexSlides/` and `../presentation/` may remain
 available in `main` as an author backup, but it is outside the scientific release
 perimeter and must not be included among the official release assets.
 

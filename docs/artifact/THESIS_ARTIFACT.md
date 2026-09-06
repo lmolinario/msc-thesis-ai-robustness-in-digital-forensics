@@ -70,7 +70,7 @@ The curated `main` branch contains:
 ## Defense-Material Boundary
 
 The working presentation sources under `docs/LatexSlides/` and the discussion
-preparation material under `docs/slides/` are retained only as an author backup.
+preparation material under `../presentation/` are retained only as an author backup.
 They are not official release assets, are not scientific sources of truth, and
 do not redefine the thesis artifact's scope, claims, metrics, or validation
 status. The only documented presentation entry point is

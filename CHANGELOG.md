@@ -58,7 +58,7 @@ Final frozen MSc thesis research artifact supporting:
 
 > **Evaluating the Robustness of AI-Based Forensic Tools under Adversarial and Anti-Forensic Attacks**
 
-Working defense material under `docs/LatexSlides/` and `docs/slides/` is not a
+Working defense material under `docs/LatexSlides/` and `docs/presentation/` is not a
 release asset and does not form part of the scientific artifact.
 
 ### Added
