@@ -14,10 +14,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -47,7 +47,6 @@ jobs:
               'docs/artifact/CONTROLLED_ARTIFACT_CHECKSUMS.sha256',
               'docs/maintenance/ACADEMIC_REPOSITORY_AUDIT.md',
               'docs/maintenance/RELEASE_CHECKLIST.md',
-              'docs/LatexSlides/README.md',
               'docs/LatexThesis/README.md',
               'docs/LatexThesis/main.tex',
               'datasets/forensic_evaluation_bundle/README.md',
