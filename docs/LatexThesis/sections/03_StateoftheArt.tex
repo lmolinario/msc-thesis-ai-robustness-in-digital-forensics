@@ -36,27 +36,19 @@ operational conditions. This agenda influenced subsequent research, which
 responded by progressively integrating \gls{ml} and \gls{dl} techniques into
 forensic workflows.
 
-A first systematic attempt to map this integration was made by Marturana et
-al.~\cite{marturana2011digital}, who surveyed the state of the art in
-artificial intelligence applied to \gls{df} at a time when the field was still
-predominantly experimental. Their work showed that existing applications were
-fragmented across domains---file system analysis, content classification, and
-pattern matching---and that a unified approach capable of covering the entire
-investigative workflow was lacking. The models proposed in the literature
-achieved good performance in controlled settings, but had not been
-systematically evaluated on data drawn from real-world scenarios or tested for
-reliability in the presence of anomalous inputs.
+Marturana and Tacconi~\cite{marturana2011digital} proposed an \gls{ml}-based
+triage methodology for automated categorization of digital media using
+crime-related features. They evaluated the methodology on forensic data from
+court cases concerning copyright infringement and child pornography exchange.
+This contribution addresses device prioritization rather than the robustness
+of image classifiers under manipulated or out-of-distribution inputs.
 
-This research direction matured over the following decade. Costantini et
-al.~\cite{costantini2019digital} proposed a framework integrating automated
-reasoning and \gls{ml} techniques to support the forensic analyst in managing
-complex evidence, with applications to event correlation and multimedia content
-classification. The work demonstrates how \gls{ai} can reduce the operational
-workload in the examination and analysis phases, but leaves the question of
-robustness unaddressed: the framework assumes well-formed data and does not
-address scenarios in which inputs have been manipulated or degraded. This
-limitation is relevant because real forensic data are often of variable quality
-and may have been intentionally altered before acquisition.
+Costantini et al.~\cite{costantini2019digital} explored a complementary form
+of analyst support through automated reasoning. Their Answer Set Programming
+proof of concept organizes evidence and investigative hypotheses in realistic
+case scenarios and sketches a decision-support system. It does not provide an
+empirical evaluation of image-classifier robustness under manipulated or
+degraded inputs.
 
 A more recent and operationally oriented perspective is offered by
 Faqir~\cite{faqir2023digital}, who provides an overview of \gls{ai}-based
@@ -131,12 +123,11 @@ identifying critical limitations in the robustness of the \gls{ai}-based
 functionalities examined, and emphasizing the particular forensic relevance of
 false negatives, since potentially relevant content may fail to reach the
 analyst's attention~\cite{sanna2025pixelperfect}. These works constitute the
-most directly relevant prior contributions for the present thesis, while
-differing from it in the specific task considered: the present work concerns
-the operational \texttt{weapon}/\texttt{non\_weapon} classification task,
-focused on the identification of images containing firearms or related content,
-and includes a separate analysis of system behavior in the presence of
-\texttt{ood} inputs.
+most directly relevant prior contributions for the present thesis. The
+preliminary study already included weapon-related visual content. The present
+work uses a controlled \texttt{weapon}/\texttt{non\_weapon} task, a separate
+\texttt{ood} branch, and paired, traceable evaluation across transparent
+proxies and commercial configurations.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -1050,12 +1041,12 @@ evaluated in a \textit{black-box} setting. \\
 \end{tabularx}
 \end{table}
 
-The main limitation emerging from this framework is not the absence of research
-on the individual topics, but the lack of an integrated evaluation.
+The works reviewed here address the individual topics but provide limited
+coverage of their integration in a common evaluation protocol.
 Figure~\ref{fig:sota-literature-gap} schematically illustrates this
 fragmentation: the seven reviewed research directions converge on a
-methodological space that the literature does not yet address in a unified
-manner.
+methodological space that is not jointly covered by these representative
+works.
 
 \begin{figure}[H]
 \centering
