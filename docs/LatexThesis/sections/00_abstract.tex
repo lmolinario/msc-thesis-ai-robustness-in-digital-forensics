@@ -52,8 +52,10 @@ rules without assuming architectural or semantic equivalence.
 Four model-dependent attacks---\gls{fgsm}, \gls{onepixel}, \gls{sigmazero},
 and \gls{superdeepfool}---were generated against fold-specific
 \gls{efficientnetb0} checkpoints. Their evaluation on \gls{efficientnetb0}
-constitutes direct-target assessment, whereas their application to the other
-proxies and black-box configurations measures empirical transfer. The
+constitutes source-model evaluation, whereas their application to the other
+proxies measures empirical cross-model transfer. Commercial results describe
+empirical responses to transferred artifacts and may also reflect resizing
+and serialization differences from the native clean inputs. The
 model-agnostic \gls{colorshift} condition and five anti-forensic transformations
 are interpreted separately. The analysis combines conventional performance
 metrics with directional error transitions, \gls{ood} assignment behavior,

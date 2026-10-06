@@ -86,12 +86,12 @@ sensitivity, direct adversarial vulnerability, and \gls{ood} behavior must
 therefore be evaluated as distinct dimensions
 (Sections~\ref{sec:results-clean-baseline}--\ref{sec:results-adversarial}).
 
-\paragraph{\textbf{RQ2. How do direct source-model attacks,
-cross-architecture transfer, and the model-agnostic \gls{colorshift} condition
-differ in their effects on the evaluated proxy models?}}
+\paragraph{\textbf{RQ2. How do proxy-model responses differ between
+source-model evaluation, empirical cross-model transfer, and the
+model-agnostic \gls{colorshift} condition?}}
 
-Direct source-model attacks have substantially larger effects than the observed
-cross-architecture transfer. The four model-dependent attacks were generated
+Source-model evaluation shows substantially larger effects than the observed
+cross-model transfer. The four model-dependent attacks were generated
 against fold-specific \gls{efficientnetb0} checkpoints, so their evaluation on
 that architecture is direct-target, whereas results for \gls{resnet18} and the
 \gls{clip}-based proxy measure empirical transfer.
@@ -524,7 +524,10 @@ The 5\,000 adversarial and 5\,000 anti-forensic files derive from the same
 source--condition combinations rather than an independent 11\,000-case binary
 population. Each perturbation also uses one frozen parameterization; different
 budgets, severities, encodings, implementations, or transformation chains may
-produce different profiles.
+produce different profiles. In particular, One Pixel used a bounded search
+budget, and SuperDeepFool results concern the internal single-cycle adapter
+described in Section~\ref{subsec:implementation-adversarial}, rather than a
+full reproduction of the published iterative method.
 
 \item \textbf{Direct-target scope and artifact representation.}
 The four model-dependent attacks were optimized only against fold-specific
@@ -535,6 +538,8 @@ establish direct robustness. In addition, \gls{fgsm}, \gls{sigmazero}, and
 while clean sources retained heterogeneous formats and dimensions;
 \gls{onepixel} also used \texttt{PNG} serialization. Black-box responses may
 therefore combine perturbation, resizing, and serialization effects.
+A representation-matched clean control would be required to isolate pure
+perturbation transfer.
 
 \item \textbf{Proxy and black-box comparability.}
 The proxy models are transparent experimental references, not validated

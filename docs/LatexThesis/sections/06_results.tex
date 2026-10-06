@@ -1209,10 +1209,12 @@ frequency with which these conditions would occur in an operational case.
 
 The four model-dependent adversarial conditions were generated against
 fold-specific \gls{efficientnetb0} checkpoints. Their evaluation through the
-selected black-box software systems therefore constitutes an empirical transfer
-assessment. It does not constitute a white-box attack against any commercial
-system. \gls{colorshift} instead provides a deterministic model-agnostic
-comparison condition.
+selected black-box software systems therefore describes empirical responses
+to transferred artifacts. These responses may combine perturbation, resizing,
+and serialization effects because no representation-matched clean control
+was evaluated (Section~\ref{sec:conclusions-limitations}). The artifacts were
+not optimized against any commercial system. \gls{colorshift} instead
+provides a deterministic model-agnostic comparison condition.
 
 Table~\ref{tab:results-commercial-overview} summarizes the normalized results
 for the six configurations.

@@ -1016,6 +1016,9 @@ through supervised fine-tuning, whereas the \gls{clip} proxy uses frozen
 pretrained visual representations and a trainable binary head. This
 implementation provides three controlled architectural references without
 assuming equivalence with the selected black-box software systems.
+All three proxies are white-box-capable; the information used during attack
+generation is a separate choice. Only \gls{efficientnetb0} was designated as
+the source model for the model-dependent adversarial artifacts.
 
 All three models use the same class-to-index mapping:
 
@@ -1499,8 +1502,8 @@ One Pixel
 &
 Differential Evolution over five variables
 \((x,y,R,G,B)\); 50 maximum iterations; population-size multiplier 20,
-corresponding to an effective population of approximately 100 candidates;
-deterministic base seed 42; early termination after misclassification
+corresponding to an effective population of 100 candidates;
+deterministic base seed 42; generation-level early stopping after misclassification
 \cite{su2019onepixel}.
 &
 PNG \\
@@ -1520,10 +1523,10 @@ SuperDeepFool
 &
 \gls{efficientnetb0}, fold-aware white-box checkpoint
 &
-Internal paper-based implementation of
-\(\mathrm{SDF}(\infty,1)\); 20 maximum outer iterations; 50 maximum
-DeepFool iterations; one projection step; all output classes considered as
-candidates \cite{zhang2024superdeepfool}.
+Internal bounded adapter inspired by \(\mathrm{SDF}(\infty,1)\);
+configured outer cap 20, but one executed boundary/projection cycle;
+50 maximum DeepFool iterations; one projection step; all output classes
+considered as candidates \cite{zhang2024superdeepfool}.
 &
 PNG \\
 
@@ -1570,6 +1573,12 @@ a lossless PNG file. The generation record includes clean and adversarial predic
 predicted-class probability, reference-class probability, and pixel-space
 perturbation measurements.
 
+The fixed \(\epsilon=8/255\) budget has precedent in adversarial-image
+evaluation, including the CIFAR-10 and CIFAR-100 \(L_\infty\) settings of
+RobustBench~\cite{croce2020robustbench}. It is a reproducible test condition,
+not a forensic standard or an optimized budget for this corpus. No epsilon
+sweep was performed; conclusions are restricted to the tested condition.
+
 \paragraph{One Pixel.}
 
 The One Pixel implementation uses Differential Evolution to optimize the
@@ -1603,10 +1612,18 @@ model to the reference class \(y\). The constraint applies to pixel locations,
 since all three channels of the selected pixel may change jointly.
 
 A deterministic image-specific seed is derived from the base seed, condition
-name, and stable image identifier through \gls{sha256}. Optimization terminates
-early when a candidate changes the prediction relative to the reference
-assignment. Otherwise, the best candidate identified before the iteration
-limit is exported.
+name, and stable image identifier through \gls{sha256}. The callback stops
+optimization at a generation boundary after a misclassified candidate has
+been observed. Otherwise, the best candidate identified before termination is
+exported. The recorded \texttt{queries\_used} counts objective evaluations,
+not all forward calls: each objective evaluation queries both probabilities
+and the predicted label.
+
+The effective population of 100 candidates and 50-iteration cap are smaller
+than the 400-candidate, 100-iteration configuration reported in the original
+work~\cite{su2019onepixel}. The limited effectiveness observed here therefore
+characterizes this bounded search budget and does not establish general
+robustness to One Pixel.
 
 \paragraph{Sigma-Zero.}
 
@@ -1614,6 +1631,8 @@ Sigma-Zero was integrated through the reference implementation exposed by the
 \texttt{adversarial-library} project, pinned to commit
 \nolinkurl{b14f81a3e1c414a573b969b402c99e65bfe2ca33}. The FAIRLab adapter
 invokes the reference function directly rather than reimplementing it.
+The settings in Table~\ref{tab:implementation-adversarial-parameters} match
+the defaults of that pinned reference function.
 
 The reference function operates on unnormalized tensors in \([0,1]\). The
 adapter therefore converts the model-normalized input to pixel space and wraps
@@ -1643,20 +1662,21 @@ Table~\ref{tab:implementation-adversarial-parameters}.
 
 \paragraph{SuperDeepFool.}
 
-SuperDeepFool was implemented internally from the published
+The internal SuperDeepFool adapter is inspired by the minimum-\(L_2\)
 \(\mathrm{SDF}(\infty,1)\) procedure and does not vendor or copy the official
-repository. The implementation first performs DeepFool-style iterations to
-identify an adversarial boundary point and then applies a projection based on
-the gradient difference between the boundary and reference classes.
+repository. In the published variant, \(\infty\) refers to continuing the
+inner DeepFool procedure until the decision changes, not to an \(L_\infty\)
+perturbation norm~\cite{zhang2024superdeepfool}. The frozen adapter caps this
+inner search at 50 iterations and then applies one gradient-based projection.
 
-The frozen untargeted objective is:
+The geometric untargeted objective motivating these updates is:
 
 \[
 \begin{aligned}
 \min_{\boldsymbol{\delta}}\quad &
 \left\|
 \boldsymbol{\delta}
-\right\|_{\infty}
+\right\|_2
 \\
 \text{subject to}\quad &
 \operatorname*{arg\,max}_{k}
@@ -1682,8 +1702,14 @@ At a boundary point \(\mathbf{x}_{b}\), the projection uses:
 
 where \(k_b\) is the boundary class. If the projected point remains
 adversarial, it is retained; otherwise, the implementation falls back to the
-adversarial boundary point. The manifest records iteration counts, convergence
-status, and whether the projection preserved adversariality.
+adversarial boundary point. Despite the configured outer cap of 20, the frozen
+control flow stops after this first cycle, or earlier if no boundary is found.
+It therefore differs from the published procedure, which repeats the
+boundary/projection cycle when the projected point is not adversarial. The
+manifest confirms one outer iteration for all 1\,000 artifacts. Reported
+results characterize this internal bounded implementation, not a reproduction
+of the full reference method. The manifest records iteration counts,
+convergence status, and whether the projection preserved adversariality.
 
 \paragraph{Color Shift.}
 
@@ -1826,6 +1852,10 @@ encoding effects beyond the principal operation.
 
 Table~\ref{tab:implementation-antiforensic-parameters} reports the frozen
 configuration of the five transformations.
+Each transformation was evaluated at one predefined setting to support
+controlled paired comparison. These settings define reproducible conditions;
+they are not claimed to be optimal or standard forensic severities. The study
+does not establish a complete severity-response curve.
 
 \begin{table}[H]
 \centering
