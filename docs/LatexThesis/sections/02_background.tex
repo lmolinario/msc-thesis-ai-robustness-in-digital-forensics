@@ -708,8 +708,10 @@ system.
 \subsection{Threat Model and Attacker Assumptions}
 \label{subsec:background_threat_model}
 % ─────────────────────────────────────────────────────────────────────────────
-The threat model defines the assumptions concerning the attacker's capabilities,
-objectives, and constraints. In \gls{advml}, it is necessary to rigorously
+The threat model is organized by the \gls{gkc} dimensions: the errors the
+attacker seeks to induce, the information available about the classifier, and
+the input modifications permitted within stated constraints
+\cite{biggio2018wild}. In \gls{advml}, it is necessary to rigorously
 delimit the attack scenario and to avoid robustness evaluations that lack an
 operational context. Without an explicit threat model, the result of an
 adversarial test risks being difficult to interpret, because it is not clear
@@ -717,7 +719,7 @@ which type of adversary the system is able to tolerate and which conditions are
 instead excluded from the analysis
 \cite{carlini2017towards,yuan2019adversarial}.
 
-In the context of automated image classification in forensic settings, the
+\textbf{Goal.} In automated image classification in forensic settings, the
 attacker can be modeled as an actor interested in reducing the likelihood that
 specific content will be correctly identified by an automated tool. The main
 objective is not necessarily to compromise the entire forensic workflow, but to
@@ -726,23 +728,27 @@ terms, this may translate into the attempt to transform a relevant image into
 one classified as non-relevant, ambiguous, or belonging to a category different
 from the expected one. This scenario is consistent with an evasion attack,
 because the manipulation affects the analyzed input rather than the model
-training phase.
+training phase. The evaluated model-dependent attacks use an untargeted
+objective; error direction is examined afterward for its forensic significance.
 
-The attacker's capabilities may vary depending on the level of access to the
-target system. In a white-box scenario, the attacker has complete or extensive
+\textbf{Knowledge.} The information available to the attacker varies with access
+to the target system. In a white-box scenario, the attacker has complete or extensive
 information about the model, including its architecture, parameters, loss
 function, and gradients, and can therefore construct perturbations directly
 optimized with respect to the classifier. In a black-box scenario, by contrast,
 the attacker does not have access to the internal logic of the target system
 and may rely on observable outputs, surrogate models, or the transferability of
-adversarial examples. In the protocol of the present thesis, white-box access is
-relevant for the controlled evaluation of proxy models when required by the
-specific attack technique, whereas the selected commercial software is observed
-in a black-box setting, since its internal classification logic is not
-available. This distinction affects the type of attack that can be applied, the
-required computational cost, and the operational plausibility of the threat.
+adversarial examples. In this protocol, all proxy models are inspectable and
+white-box-capable. Model-dependent generation uses gradients or observable
+scores on the designated source proxy, whereas \gls{colorshift} is
+model-agnostic. Commercial systems are observed only through their outputs on
+submitted artifacts. These information requirements are distinct from the
+source-model and transfer evaluation roles detailed in
+Chapters~\ref{chap:methodology} and~\ref{chap:implementation}.
 
-The threat model must also specify the constraints imposed on the perturbation.
+\textbf{Capability.} The attacker can modify image inputs at inference time,
+subject to the constraints of each perturbation; model training is outside the
+evaluated attack scope.
 In the image domain, the modification may be limited in terms of numerical
 magnitude, perceptual distance, number of altered pixels, affected image area,
 or admissible transformations. In forensic contexts, these constraints acquire
@@ -786,7 +792,7 @@ level of operational effects, since both may reduce the likelihood that
 content of investigative relevance will be correctly flagged or prioritized for
 subsequent analyst review.
 
-Table~\ref{tab:threat_model} summarizes the main dimensions of the adversarial
+Table~\ref{tab:threat_model} summarizes the \gls{gkc} dimensions of the adversarial
 threat model adopted in the experimental evaluation, distinguishing between the
 theoretical formulation of the attacks and the operational-forensic focus of
 the present thesis.
@@ -795,22 +801,22 @@ the present thesis.
     \centering
     \small
     \renewcommand{\arraystretch}{1.25}
-    \begin{tabular}{@{}p{0.24\textwidth}p{0.34\textwidth}p{0.34\textwidth}@{}}
+    \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}p{0.34\textwidth}>{\raggedright\arraybackslash}p{0.34\textwidth}@{}}
         \toprule
         \textbf{Dimension} & \textbf{Theoretical scenarios} & \textbf{Thesis operational focus} \\
         \midrule
-        \textbf{Attack phase} &
-        Poisoning vs evasion &
-        \textbf{Evasion}, since the manipulation affects already acquired or analyzed images at inference time. \\
-        \textbf{Adversary knowledge} &
-        White-box vs black-box &
-        \textbf{White-box for controlled proxy-model evaluation, where required by the attack; black-box for commercial software}, whose internal \gls{ai}-based image-analysis logic is not available. \\
-        \textbf{Attack objective} &
+        \textbf{Goal} &
         Targeted vs untargeted &
-        \textbf{Untargeted}, with emphasis on performance degradation, missed detection, and reduced classification reliability. \\
+        \textbf{Untargeted} model-dependent attacks; operational analysis emphasizes degradation, missed detection, and classification reliability. \\
+        \textbf{Knowledge} &
+        Internal model information, observable scores, or no model access &
+        Gradients or scores on the designated source proxy; model-agnostic Color Shift; observable commercial outputs only. \\
+        \textbf{Capability} &
+        Training-time or inference-time manipulation, with application-specific constraints &
+        \textbf{Evasion}: inference-time image modifications within condition-specific magnitude, sparsity, or transformation constraints; model training is not altered. \\
         \bottomrule
     \end{tabular}
-    \caption{Adversarial threat model dimensions considered in the experimental robustness evaluation}
+    \caption{Goal--Knowledge--Capability dimensions of the experimental adversarial threat model}
     \label{tab:threat_model}
 \end{table}
 
