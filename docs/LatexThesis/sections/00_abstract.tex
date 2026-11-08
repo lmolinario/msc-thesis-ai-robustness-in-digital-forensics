@@ -11,17 +11,19 @@ content, their operational value depends on whether their behavior remains
 stable when inputs are degraded, distributionally different, or deliberately
 manipulated.
 
-This thesis evaluates the operational robustness of transparent proxy models
+This thesis evaluates the operational robustness of white-box proxy models
 and selected black-box software configurations used for automated image
 classification and semantic retrieval in forensic contexts. Rather than
 proposing a new classifier or ranking commercial products, the study examines
 how heterogeneous systems behave under clean, \gls{ood}, adversarial, and
 anti-forensic conditions. The evaluation is organized through \gls{fairlab}, a
 task-specific methodological protocol connecting human-validated dataset
-construction, deterministic partitioning, transparent proxy-model evaluation,
+construction, deterministic partitioning, white-box proxy-model evaluation,
 perturbation generation, blind-bundle preparation, black-box output
 normalization, quantitative analysis, qualitative explainability, and integrity
-controls. Errors are interpreted in terms of missed-target risk, human-review
+controls. Its outcome is a task- and protocol-specific validation profile,
+not a certification, universal robustness score, or product ranking.
+Errors are interpreted in terms of missed-target risk, human-review
 workload, directional transitions, configuration sensitivity, and
 source-to-output traceability.
 
@@ -39,8 +41,12 @@ these derived populations form an 11\,500-item forensic evaluation bundle. The
 10\,000 manipulated artifacts remain source--condition variants of the same
 1\,000 binary images and do not represent independent underlying cases.
 
-The transparent level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
-\gls{clip}-based proxy. The black-box level comprises four software systems
+The white-box level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
+\gls{clip}-based proxy. Here, \textit{proxy} identifies their controlled
+experimental role, whereas \textit{white-box} identifies the experimenter's
+access to architectures, checkpoints, scores, and gradients; it does not imply
+that every attack uses all of this information. The black-box level comprises
+four software systems
 evaluated through six frozen configurations:
 \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{griffeye}/\gls{t3kcore},
@@ -50,7 +56,7 @@ semantic-retrieval results are interpreted through documented normalization
 rules without assuming architectural or semantic equivalence.
 
 Four model-dependent attacks---\gls{fgsm}, \gls{onepixel}, \gls{sigmazero},
-and \gls{superdeepfool}---were generated against fold-specific
+and an internal \gls{superdeepfool} adapter---were generated against fold-specific
 \gls{efficientnetb0} checkpoints. Their evaluation on \gls{efficientnetb0}
 constitutes source-model evaluation, whereas their application to the other
 proxies measures empirical cross-model transfer. Commercial results describe
@@ -97,7 +103,7 @@ task-specific validation, explicit threat modeling, documented versions and
 configurations, separate analysis of \gls{ood} behavior, source-to-output
 traceability, and continued expert verification. \gls{fairlab} contributes a
 unified and auditable procedure for making these requirements experimentally
-observable across transparent proxy models and selected black-box software
+observable across white-box proxy models and selected black-box software
 configurations evaluated on the same frozen experimental basis.
 
 \vfill

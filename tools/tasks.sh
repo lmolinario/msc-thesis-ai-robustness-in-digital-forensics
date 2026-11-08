@@ -40,7 +40,7 @@ from pathlib import Path
 
 required = [
     'README.md',
-    'docs/LatexSlides/README.md',
+    'docs/LatexThesis/README.md',
     'docs/LatexThesis/main.tex',
     'docs/artifact/THESIS_ARTIFACT.md',
     '.github/SECURITY.md',

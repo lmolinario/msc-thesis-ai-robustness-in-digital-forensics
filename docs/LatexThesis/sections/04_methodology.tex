@@ -34,8 +34,10 @@ and unstable behavior on inputs that differ from the expected operational
 distribution.
 
 The protocol integrates two complementary evaluation levels. The first uses
-fully inspectable proxy classification models as controlled experimental
-references; these models are not treated as replicas or functionally equivalent
+white-box proxy classification models as controlled experimental
+references. Here, \textit{proxy} denotes the experimental reference role and
+\textit{white-box} denotes access to model internals; these models are not
+treated as replicas or functionally equivalent
 substitutes for proprietary systems. The second evaluates selected
 \gls{ai}-based software systems under black-box or near-black-box access
 conditions, using only their observable inputs and outputs and making no
@@ -59,6 +61,13 @@ involving an inspectable proxy model and is not extended to the selected
 black-box systems.
 Traceability controls preserve the relationships among source samples, derived
 artifacts, experimental conditions, observable outputs, and reported results.
+
+Together, these records constitute a task- and protocol-specific
+\textit{validation profile}: the observed behavior of a documented system and
+configuration on a frozen corpus under an explicit threat model and output
+mapping. Such a profile supports bounded, auditable interpretation; it does
+not certify the system, establish a universal robustness score, or provide a
+configuration-independent product ranking.
 
 The protocol specifies the methodological requirements and information that
 must be preserved without prescribing particular model architectures, software
@@ -195,7 +204,7 @@ draw=black!75
 % -------------------------------------------------------------------------
 \node[eval] (proxy) at (-4.3,-14.1)
 {\shortstack{
-\textbf{Controlled proxy-model evaluation}\\[1mm]
+\textbf{White-box proxy-model evaluation}\\[1mm]
 \scriptsize inspectable models under reproducible conditions
 }};
 
@@ -902,14 +911,18 @@ folds for fold-aware training and held-out evaluation, while the clean
 \end{figure}
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Proxy-Model Evaluation Methodology}
+\section{White-Box Proxy-Model Evaluation Methodology}
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
 The controlled component of the methodology relies on fully inspectable
-classification models, hereafter referred to as \textit{proxy classification
-models}. These models provide experimental references for analyzing
-classification behavior, robustness degradation, maximum predicted-class
+classification models, hereafter referred to as \textit{white-box proxy
+classification models}. The proxy role concerns their use as experimental
+references, while white-box access concerns the experimenter's ability to
+inspect architectures, checkpoints, scores, and gradients. The access actually
+used during attack generation must be specified separately. These models
+provide experimental references for analyzing classification behavior,
+robustness degradation, maximum predicted-class
 probability patterns, error direction, and transferability under reproducible
 conditions. They are not
 replicas, functionally equivalent substitutes, reverse-engineered
@@ -957,16 +970,16 @@ requirement prevents information leakage between model fitting, adversarial
 generation, and robustness evaluation.
 
 For model-dependent adversarial attacks, one controlled model is designated as
-the \textit{primary proxy target}. This model provides the source system against
-which adversarial examples are generated under the access assumptions required
+the \textit{designated white-box source model}. This model provides the source
+system against which adversarial examples are generated under the access assumptions required
 by each attack. White-box attacks may use gradients, decision-boundary
 information, or other internal properties, whereas score-based attacks rely on
 observable model scores without requiring direct gradient access. Selection of
-the primary proxy target is an implementation decision and does not imply that
+the designated source model is an implementation decision and does not imply that
 the chosen architecture is universally more accurate, representative, or
 robust than the alternatives.
 
-Using a single documented primary target limits unnecessary multiplication of
+Using a single documented source model limits unnecessary multiplication of
 experimental variants and produces a coherent adversarial test set. The
 resulting model-dependent artifacts are evaluated under three conditions:
 
@@ -1331,8 +1344,8 @@ which would require extensive parameter sweeps and standardized attack suites
 to be computationally feasible, reproducible, sufficiently heterogeneous, and
 suitable for direct vulnerability and transferability analyses.
 
-Model-dependent adversarial examples are generated against the primary proxy
-target defined in
+Model-dependent adversarial examples are generated against the designated
+white-box source model defined in
 Section~\ref{sec:methodology-models-classification}. For each held-out sample,
 generation must use the corresponding fold-specific checkpoint trained without
 that sample. This requirement preserves the separation between model fitting,
@@ -1354,6 +1367,12 @@ The output representation should minimize changes unrelated to the selected
 adversarial mechanism. Any additional compression, encoding, or representation
 effect introduced during artifact generation must be documented and considered
 when interpreting the resulting classification behavior.
+
+Generation-time predictions must also be distinguished from predictions made
+after reloading the serialized artifact. Quantization and encoding can change
+the numerical input presented to a model. Operational robustness metrics
+therefore refer to the evaluated files, whereas any pre-serialization success
+indicator remains a diagnostic of the generation procedure.
 
 Attack generation and robustness evaluation are treated as separate phases.
 Generation metadata may record whether an attack changed the prediction of the

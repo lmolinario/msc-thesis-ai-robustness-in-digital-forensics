@@ -66,9 +66,10 @@ requirements.txt
 The obsolete Italian thesis tree and old root-level governance files must not
 reappear.
 
-Defense working material under `docs/LatexSlides/` and `../presentation/` may remain
-available in `main` as an author backup, but it is outside the scientific release
-perimeter and must not be included among the official release assets.
+Defense working material is maintained in the separate
+[Molinario_Thesis_Defense_2026](https://github.com/lmolinario/Molinario_Thesis_Defense_2026)
+repository. It is outside the thesis scientific release perimeter and must not
+be included among the official release assets.
 
 ## 3. Verify the Final Thesis Map
 
@@ -190,9 +191,19 @@ Review missing, ambiguous, unused, and duplicate image reports.
 
 ```bash
 cd docs/LatexThesis
-latexmk -pdf main.tex
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+biber main
+makeglossaries main
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
 cd ../..
 ```
+
+Repeat pdfLaTeX until any rerun request is resolved. Follow the authoritative
+instructions in `docs/LatexThesis/README.md`; do not assume a bare `latexmk -pdf`
+invocation generates glossaries without a local configuration. Validation of a
+pre-commit working tree does not replace this check at the approved release
+commit/tag.
 
 Check:
 
@@ -227,7 +238,6 @@ Verify:
 ```text
 README.md
 docs/README.md
-docs/LatexSlides/README.md
 docs/LatexThesis/README.md
 docs/artifact/THESIS_ARTIFACT.md
 docs/artifact/ARTIFACT_EVALUATION.md

@@ -69,12 +69,12 @@ The curated `main` branch contains:
 
 ## Defense-Material Boundary
 
-The working presentation sources under `docs/LatexSlides/` and the discussion
-preparation material under `../presentation/` are retained only as an author backup.
-They are not official release assets, are not scientific sources of truth, and
-do not redefine the thesis artifact's scope, claims, metrics, or validation
-status. The only documented presentation entry point is
-`docs/LatexSlides/main.tex`.
+The presentation and discussion-preparation material is maintained separately in
+[Molinario_Thesis_Defense_2026](https://github.com/lmolinario/Molinario_Thesis_Defense_2026).
+It is not part of this repository's official release assets, is not a scientific
+source of truth, and does not redefine the thesis artifact's scope, claims,
+metrics, or validation status. No local presentation entry point is required
+for the thesis artifact.
 
 ## Deliberately Excluded from `main`
 

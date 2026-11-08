@@ -1,8 +1,8 @@
 # Documentation
 
 This directory contains research-artifact documentation, maintenance records,
-repository assets, the authoritative LaTeX thesis source, and post-freeze thesis
-defense material.
+repository assets, and the authoritative LaTeX thesis source. Oral-defense
+material is maintained in a separate repository.
 
 ## Directory Structure
 
@@ -24,14 +24,6 @@ docs/
 │   └── RELEASE_CHECKLIST.md
 ├── assets/
 │   └── repository_header.png
-├── LatexSlides/
-│   ├── README.md
-│   ├── main.tex
-│   ├── beamerthemesintef.sty
-│   ├── sintefcolor.sty
-│   └── assets/
-├── slides/
-│   └── Vademecum per la Discussione della Tesi.docx
 └── LatexThesis/
     ├── README.md
     ├── main.tex
@@ -56,24 +48,16 @@ It controls the final wording, structure, experimental claims, numerical values,
 labels, and release status.
 
 The experimental thesis artifact is frozen at tag `thesis-freeze-2026-08-04`.
-Material created afterwards for the oral defense is kept separate under
-`docs/LatexSlides/` and `presentation/` and does not redefine the frozen
-experimental artifact. It is maintained only as a personal working backup and
-is excluded from the official research-artifact release.
+Material created afterwards for the oral defense is maintained separately and
+does not redefine the frozen experimental artifact. It is excluded from the
+official research-artifact release.
 
 ## Defense Material
 
-The authoritative LaTeX defense source is:
-
-```text
-docs/LatexSlides/main.tex
-```
-
-Only `main.tex` is documented as the stable presentation entry point. Temporary
-drafting alternatives may coexist while the presentation is being developed,
-but they are not authoritative and must eventually be consolidated into
-`main.tex` or removed. The discussion vademecum is retained under `presentation/`
-as a preparation aid rather than a scientific source of truth.
+The presentation and discussion-preparation materials are maintained in
+[Molinario_Thesis_Defense_2026](https://github.com/lmolinario/Molinario_Thesis_Defense_2026).
+Consult that repository for its current entry points. No local slide directory
+is required to compile or validate the thesis artifact.
 
 ## Final Thesis Structure
 

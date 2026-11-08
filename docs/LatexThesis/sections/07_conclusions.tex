@@ -19,7 +19,7 @@ receive appropriate priority, whereas an incorrect positive assignment may
 increase the analyst's review workload.
 
 The study therefore treated clean, adversarial, anti-forensic, and \gls{ood}
-inputs as separate evaluation conditions. It combined three transparent proxy
+inputs as separate evaluation conditions. It combined three white-box proxy
 models---\gls{efficientnetb0}, \gls{resnet18}, and a \gls{clip}-based
 proxy---with six frozen configurations of four selected black-box software
 systems: \gls{magnetaxiomtool}/\gls{magnetai},
@@ -46,6 +46,11 @@ construction, deterministic partitioning, proxy-model analysis, controlled
 perturbation, blind-bundle preparation, black-box normalization, quantitative
 and qualitative analysis, and traceability controls.
 
+Its output is a task- and protocol-specific validation profile linking the
+frozen corpus, threat model, system versions and configurations, output
+semantics, normalization rules, metrics, and traceability records. It is not a
+certification, a universal robustness score, or a product ranking.
+
 The central conclusion is that robustness is not an intrinsic property that
 can be inferred from clean accuracy. It is conditional on the task, input
 population, threat model, system version, configuration, observable output, and
@@ -59,9 +64,10 @@ and subordinate to expert assessment
 \label{sec:conclusions-research-questions}
 % ─────────────────────────────────────────────────────────────────────────────
 
-\paragraph{\textbf{RQ1. To what extent do the transparent proxy models maintain
-their clean-baseline performance under the separate \gls{ood}, adversarial,
-and anti-forensic conditions?}}
+\paragraph{\textbf{RQ1. To what extent do the white-box proxy models retain
+their clean-baseline performance under adversarial and anti-forensic
+conditions, and how do they assign inputs from the separate \gls{ood}
+population?}}
 
 Only to a condition-dependent extent. Clean accuracies are 0.978 for
 \gls{efficientnetb0}, 0.964 for \gls{resnet18}, and 0.927 for the
@@ -86,7 +92,7 @@ sensitivity, direct adversarial vulnerability, and \gls{ood} behavior must
 therefore be evaluated as distinct dimensions
 (Sections~\ref{sec:results-clean-baseline}--\ref{sec:results-adversarial}).
 
-\paragraph{\textbf{RQ2. How do proxy-model responses differ between
+\paragraph{\textbf{RQ2. How do white-box proxy-model responses differ between
 source-model evaluation, empirical cross-model transfer, and the
 model-agnostic \gls{colorshift} condition?}}
 
@@ -186,7 +192,7 @@ The thesis makes four connected contributions.
 \item \textbf{A forensic robustness protocol.}
 It formalizes \gls{fairlab} as a methodological procedure for evaluating
 \gls{ai}-based image analysis beyond clean accuracy. The protocol coordinates
-human-validated data construction, deterministic partitioning, transparent
+human-validated data construction, deterministic partitioning, white-box
 proxy analysis, perturbation generation, a separate \gls{ood} branch,
 black-box evaluation, output normalization, explainability, and traceability.
 Its contribution is the integration of these components into one reproducible
@@ -201,7 +207,7 @@ binary and \gls{ood} branches in the 11\,500-item bundle. Stable source links
 ensure that the 10\,000 perturbed artifacts remain identifiable as derived
 source--condition combinations rather than independent cases.
 
-\item \textbf{A parallel transparent and black-box evaluation.}
+\item \textbf{A parallel white-box and black-box evaluation.}
 The proxy models provide inspectable checkpoints, predictions, matched error
 transitions, maximum predicted-class probabilities, and gradients. The
 commercial systems expose heterogeneous tags, bookmarks, classification
@@ -540,9 +546,14 @@ while clean sources retained heterogeneous formats and dimensions;
 therefore combine perturbation, resizing, and serialization effects.
 A representation-matched clean control would be required to isolate pure
 perturbation transfer.
+For tensor-based generators, generation-time success may also refer to the
+floating-point input before image quantization. The reported metrics instead
+use reloaded serialized files; the diagnostic generation flags are not
+interchangeable with these outcomes. A matched-stage rerun would be required
+to isolate the causes of any discrepancy.
 
 \item \textbf{Proxy and black-box comparability.}
-The proxy models are transparent experimental references, not validated
+The white-box proxy models are controlled experimental references, not validated
 surrogates for proprietary internal models. Their gradients, probabilities,
 and attributions cannot explain black-box behavior. Conversely, black-box
 tags, bookmarks, labels, percentages, and retrieval membership have
@@ -690,7 +701,7 @@ content, increase false-positive workload, assign \gls{ood} inputs to a closed
 operational category, respond differently after manipulation, or change
 materially with configuration.
 
-The parallel evaluation of transparent proxy models and selected black-box
+The parallel evaluation of white-box proxy models and selected black-box
 configurations on the same frozen source population makes these differences
 observable without conflating inspectable model behavior with proprietary
 outputs. The \gls{fairlab} protocol provides the traceable structure needed to

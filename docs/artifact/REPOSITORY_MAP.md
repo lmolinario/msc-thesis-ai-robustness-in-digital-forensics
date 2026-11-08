@@ -210,8 +210,6 @@ docs/artifact/       research-artifact governance and reproducibility documents
 docs/maintenance/    audit and release-maintenance records
 docs/assets/         repository-facing graphics
 docs/LatexThesis/    authoritative frozen thesis source
-docs/LatexSlides/    post-freeze LaTeX defense working backup
-docs/slides/         retained discussion-preparation working material
 ```
 
 Authoritative thesis entry point:
@@ -220,11 +218,9 @@ Authoritative thesis entry point:
 docs/LatexThesis/main.tex
 ```
 
-Authoritative defense entry point:
-
-```text
-docs/LatexSlides/main.tex
-```
+The defense presentation is maintained in the separate
+[Molinario_Thesis_Defense_2026](https://github.com/lmolinario/Molinario_Thesis_Defense_2026)
+repository, not under a local slide directory in the thesis tree.
 
 The experimental artifact is frozen at `thesis-freeze-2026-08-04`. Defense
 materials created after that tag do not redefine the frozen experimental scope

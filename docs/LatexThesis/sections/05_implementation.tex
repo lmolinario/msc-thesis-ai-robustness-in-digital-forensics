@@ -1000,7 +1000,7 @@ remains outside binary model training and perturbation generation and is
 retained for its dedicated behavioral evaluation.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{Proxy-Model Implementation}
+\section{White-Box Proxy-Model Implementation}
 \label{sec:implementation-proxy-models}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1009,16 +1009,20 @@ retained for its dedicated behavioral evaluation.
 \label{subsec:implementation-architectures}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The proxy-model layer was implemented through three fully inspectable binary
-classifiers: \gls{resnet18}, \gls{efficientnetb0}, and a \gls{clip}-based classifier built
+The white-box proxy-model layer was implemented through three fully inspectable
+binary classifiers: \gls{resnet18}, \gls{efficientnetb0}, and a \gls{clip}-based classifier built
 on a ViT-B/32 visual encoder. The two convolutional architectures were adapted
 through supervised fine-tuning, whereas the \gls{clip} proxy uses frozen
 pretrained visual representations and a trainable binary head. This
 implementation provides three controlled architectural references without
 assuming equivalence with the selected black-box software systems.
-All three proxies are white-box-capable; the information used during attack
-generation is a separate choice. Only \gls{efficientnetb0} was designated as
-the source model for the model-dependent adversarial artifacts.
+All three proxies are white-box models with respect to the experimenter:
+architectures, checkpoints, scores, and gradients are accessible. The
+information actually used during attack generation is a separate choice.
+Only \gls{efficientnetb0} was designated as the white-box source model for
+the model-dependent adversarial artifacts. \gls{resnet18} and the
+\gls{clip}-based proxy retain white-box access but serve as receiving
+architectures for empirical transfer, rather than as directly attacked models.
 
 All three models use the same class-to-index mapping:
 
@@ -1069,8 +1073,8 @@ provides the conventional supervised baseline \cite{he2016deep}. \\
 \texttt{IMAGENET1K\_V1} weights
 &
 The final classifier element is replaced by
-\texttt{Linear(in\_features, 2)}. This architecture serves as the primary
-proxy target for model-dependent adversarial generation
+\texttt{Linear(in\_features, 2)}. This architecture is the designated
+white-box source model for model-dependent adversarial generation
 \cite{tan2019efficientnet}. \\
 
 \gls{clip}
@@ -1453,8 +1457,8 @@ to the output probabilities of the target proxy model. Color Shift does not
 query a model and is therefore recorded as an adversarial-style condition
 rather than as a white-box or score-based attack.
 
-\gls{efficientnetb0} was used as the primary proxy target for all model-dependent
-conditions. For each source image, the generator reads the fold identifier from
+\gls{efficientnetb0} was used as the designated white-box source model for all
+model-dependent conditions. For each source image, the generator reads the fold identifier from
 the clean manifest and loads the corresponding checkpoint from
 \codepath{models/checkpoints/efficientnet_b0/<fold>.pt}. Because that checkpoint
 was trained while excluding the associated fold, the source image was not part
@@ -1807,6 +1811,18 @@ measures the proportion rendered incorrect by the perturbation. Color Shift is
 instead analyzed through induced errors and prediction transitions under a
 shared model-agnostic condition.
 
+There is also a representation-stage distinction. For tensor-based generators,
+including Sigma-Zero and the internal SuperDeepFool adapter, the logged
+adversarial prediction is computed on the optimized floating-point tensor
+before RGB \texttt{uint8} quantization and image serialization. By contrast,
+the evaluation pipeline reloads the saved files and applies the documented
+model preprocessing; its predictions are the basis of the reported robustness
+metrics. Quantization can change a prediction, so generation-time success
+flags must not be substituted for serialized-artifact outcomes. Differences
+between these records cannot be explained solely by changing the ASR
+denominator, nor attributed entirely to quantization without a dedicated
+matched-stage verification.
+
 The run summaries confirm that each frozen condition generated the expected
 1\,000 outputs, with 200 artifacts per fold and 500 per reference assignment.
 They also verify uniqueness of the generated identifiers and perturbed
@@ -1954,8 +1970,8 @@ without image-specific thresholds or model-derived information.
 
 \paragraph{\gls{contraststretching}.}
 
-Contrast Stretching is implemented through
-\texttt{ImageOps.autocontrast} with a cutoff value of 1.0. The operation
+Contrast Stretching uses \texttt{ImageOps.autocontrast} with a cutoff value
+of 1.0. The operation
 remaps the remaining intensity range after excluding the configured proportion
 of extreme values, modifying global contrast while retaining the original
 image dimensions.
@@ -2185,7 +2201,7 @@ No adversarial or anti-forensic generation};
 + 5\,000 anti-forensic};
 
 \node[box, fill=orange!10] (proxy) at (-4.2,-14.1)
-{\textbf{Transparent proxy-model evaluation}\\
+{\textbf{White-box proxy-model evaluation}\\
 \gls{efficientnetb0}, \gls{resnet18}, and \gls{clip}-based proxy};
 
 \node[box, fill=orange!10] (blackbox) at (4.2,-14.1)
@@ -4111,7 +4127,7 @@ identifiers, and run-specific output cleanup. Interactive manual review uses a
 graphical backend, whereas noninteractive attribution generation uses a
 headless-safe backend.
 
-The \gls{xai} workflow is restricted to transparent proxy models. It is not
+The \gls{xai} workflow is restricted to white-box proxy models. It is not
 used to explain \gls{magnetai}, \gls{t3kcore},
 \gls{excirefoto2025}, or \gls{cellebriteinseyets}, because the gradients,
 internal representations, and model parameters required by \gls{ig} are not
@@ -4124,9 +4140,9 @@ operational assignment, perturbation condition, clean-to-perturbed association,
 and input path required to identify diagnostically relevant cases.
 
 The frozen thesis workflow applies \gls{ig} exclusively to \gls{efficientnetb0},
-which was also the primary proxy target used for model-dependent adversarial
-generation. The corresponding attribution maps must therefore be interpreted
-as evidence concerning the transparent \gls{efficientnetb0} proxy rather than as
+which was also the designated white-box source model used for model-dependent
+adversarial generation. The corresponding attribution maps must therefore be interpreted
+as evidence concerning the white-box \gls{efficientnetb0} proxy rather than as
 explanations of the selected black-box software systems.
 
 For each selected case, the implementation loads the checkpoint associated with
@@ -4490,7 +4506,7 @@ The explainability layer is intentionally qualitative and diagnostic. The
 generated maps are not semantic segmentations, causal demonstrations,
 calibrated reliability estimates, or explanations of the selected black-box
 software systems. They provide evidence concerning the attribution behavior of
-the transparent \gls{efficientnetb0} proxy for the selected cases and complement,
+the white-box \gls{efficientnetb0} proxy for the selected cases and complement,
 rather than replace, the quantitative robustness metrics.
 
 The integrity and provenance controls shared across the complete experimental

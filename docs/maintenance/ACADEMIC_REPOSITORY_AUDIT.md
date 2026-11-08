@@ -67,7 +67,7 @@ reproducibility and must not be interpreted as current chapter assignments.
 | XAI | Historical bulk outputs removed; five cases and 20 thesis assets retained |
 | Results | Validators added; OOD denominator documented |
 | LaTeX | A single authoritative seven-chapter thesis source retained; build outputs ignored |
-| Defense material | Retained only as an author working backup; `docs/LatexSlides/main.tex` is the sole documented entry point and slide material is excluded from release assets |
+| Defense material | Maintained in the separate `Molinario_Thesis_Defense_2026` repository and excluded from this repository's scientific release assets |
 | Chapter references | Documentation aligned to Chapters 5, 6, and 7; historical names explained |
 | Probability terminology | Proxy outputs documented as Max-P; historical schema names preserved |
 | Public commercial boundary | Sanitized canonical table distinguished from excluded raw exports |
@@ -298,3 +298,113 @@ counts and integrity checks are recorded above. The remaining release work is
 limited to final LaTeX compilation and log inspection at the exact release
 commit, followed by release management and, optionally, DOI archival. No
 experimental redesign is required by this repository audit.
+
+## Pre-Commit Thesis Revision - 2026-11-07
+
+This record applies to an **uncommitted working-tree revision**, not to a new
+commit or release. Its base is:
+
+```text
+6dbfb2c1564b5a848c1e3e7be59db74cc192e102
+```
+
+Earlier local, unpushed revision objects were unavailable in this checkout and
+were not found on the remote. Their wording was reconstructed using the
+previously revised thesis PDF as a reference; no recovery of the original Git
+history or commit identifiers is claimed. No defense-repository edit, commit,
+or push was performed in this revision.
+
+### Editorial Scope
+
+- distinguish the white-box proxy role, experimenter access, designated source,
+  score-based generation, and empirical transfer, consistently with the GKC
+  threat model already present in the base revision;
+- restore FAIRLab validation-profile framing, including the compact
+  methodological-positioning table, without certification or universal-score
+  claims;
+- align RQ1 between introduction and conclusions, separating supervised
+  perturbation performance from OOD assignment behavior;
+- distinguish pre-serialization generation diagnostics, predictions on reloaded
+  serialized files, and the clean-correct ASR denominator;
+- qualify the SuperDeepFool result table as the internal bounded, single-cycle
+  adapter already described in the implementation;
+- correct bundle-weighting prose and notes: equal-sized test conditions, but
+  `1:5:5` clean/adversarial/anti-forensic branch weights;
+- document complete bibliography/glossary compilation and repair stale
+  documentation-guard requirements for the removed local slide directory;
+- remove one pre-existing minor overfull line through a shorter implementation
+  sentence, preserving the API identifier and numeric cutoff.
+
+The title, author information, main chapter structure, bibliography, package
+configuration, datasets, checkpoints, attacks, manifests, predictions, metrics,
+and numerical reporting figures were preserved. Only the two documentation
+guards changed executable repository files; attack and evaluation behavior did
+not change.
+
+### Identified Source State
+
+The complete tracked `docs/LatexThesis/` working-tree content was fingerprinted
+after the final source edit:
+
+```text
+SHA-256: e8924c12f741a1469be5734c74b02ae32ba5dd9a4fe53b228198c2cada9ad676
+```
+
+Fingerprint procedure: sort the tracked repository-relative paths under
+`docs/LatexThesis/`; for each path concatenate its UTF-8 bytes, one NUL byte,
+and the raw SHA-256 digest bytes of its working-tree content; then SHA-256 the
+complete concatenation. This identifies the reviewed source independently of
+any future commit hash. This audit file is outside that fingerprint's scope.
+
+### Verification Outcomes
+
+| Check | Observed result |
+|---|---|
+| Public commercial equivalence | 69,000 identical decisions; 186 identical metric rows |
+| Frozen result-artifact validator | 40,500 proxy rows; commercial and OOD counts passed |
+| Commercial aggregate weighting | Six configurations; 11 conditions of 1,000 binary items each; pooled accuracy equals the condition mean |
+| Existing numerical thesis tables | Numeric tokens unchanged in all 75 pre-existing table environments in the edited chapters |
+| Existing citations and image paths | Unchanged in the edited source files |
+| Main/title/packages/bibliography | Byte-identical to the base revision |
+| RQ1/RQ2 alignment | Identical wording in introduction and conclusions |
+| XAI validation | Five cases; 20 assets; no local-path leakage |
+| Reporting assets | 41 manifest rows; 24 asset IDs; zero missing outputs or mismatched thesis copies |
+| LaTeX image audit | 21 references resolved; zero missing references or duplicate image groups |
+| Linux documentation guards | Passed; shell syntax check passed |
+| PowerShell guard | Updated Python check body passed; native PowerShell was not available |
+| Full PDF build | 205 A4 pages; Biber and both glossary indexes completed |
+| Final LaTeX log | No errors, undefined references/citations, missing glyphs, overfull boxes, or rerun requests |
+| PDF structural/render check | All 205 pages rendered; no unresolved placeholder markers or text spans outside page bounds |
+
+Ordinary underfull-box spacing diagnostics remain in the LaTeX log. The revised
+abstract, positioning table, threat-model table, model definitions, generation
+diagnostics, ASR/results, weighting explanation, conclusions, and limitations
+were visually inspected. The 13 unreferenced generated reporting asset IDs
+remain retained outputs, not missing assets.
+
+The compiled pre-commit candidate has SHA-256:
+
+```text
+ee9c262ab4be49627cc1f906ba0caee2fb831f8a6b4d99c8d2e1364a30612e44
+```
+
+### Remaining Interpretive Boundary
+
+Recounting the frozen records confirms 544 generation-time success flags for
+SuperDeepFool versus 69 final serialized-file errors, of which 47 are newly
+induced; Sigma-Zero has 1,000 generation flags versus 985 final errors, of which
+963 are newly induced. All 1,000 SuperDeepFool records report one executed
+outer cycle. These are observations at different representation stages and
+with different success accounting, not interchangeable attack-success totals.
+
+This revision does not establish a causal decomposition of those discrepancies.
+It does not attribute them entirely to quantization and does not claim that an
+ASR denominator change explains the absolute differences. A dedicated
+matched-stage rerun would be needed for causal attribution. The thesis metrics
+continue to describe the frozen, serialized artifacts actually evaluated.
+
+No retraining, new attack generation, commercial rerun, new statistical
+experiment, paper-only population, or replacement numerical result was added.
+The prior historical validation records and release checklist status above
+remain scoped to their stated commits. Approval of this working-tree revision,
+creation of its commit, and the exact release-commit build are still pending.

@@ -120,12 +120,22 @@ Authoritative source:
 docs/LatexThesis/main.tex
 ```
 
-Typical local build:
+The complete build requires pdfLaTeX, Biber, `makeglossaries`/MakeIndex, and the
+packages loaded by `packages.sty`. From the repository root:
 
 ```bash
 cd docs/LatexThesis
-latexmk -pdf main.tex
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+biber main
+makeglossaries main
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
 ```
+
+Repeat pdfLaTeX if the final log requests another pass. Follow
+`docs/LatexThesis/README.md` for the authoritative build and log-review guidance;
+plain `latexmk -pdf` alone is not a guarantee of glossary generation without a
+local configuration.
 
 Common generated files include `.acn`, `.acr`, `.alg`, `.aux`, `.bbl`, `.bcf`,
 `.blg`, `.fdb_latexmk`, `.fls`, `.glg`, `.glo`, `.gls`, `.log`, `.out`,

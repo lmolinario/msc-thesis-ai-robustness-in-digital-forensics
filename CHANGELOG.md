@@ -6,6 +6,35 @@ every intermediate editing commit.
 
 ## Unreleased — Thesis/Repository Consistency Audit
 
+### Thesis pre-commit revision (2026-11-07)
+
+- reconstructed the earlier unpushed white-box proxy and FAIRLab validation-profile
+  wording on the current thesis source; this does not recover the missing local
+  Git objects or their original commit identifiers;
+- distinguished the controlled proxy role, experimenter white-box access, the
+  designated EfficientNet-B0 source, score-based One Pixel, and empirical transfer
+  to ResNet18, CLIP, and proprietary systems;
+- clarified that FAIRLab yields task- and protocol-specific validation profiles,
+  not certification, a universal robustness score, or a product ranking, and
+  reconstructed the compact methodological-positioning table in the introduction;
+- aligned RQ1 between introduction and conclusions so that OOD assignments are
+  not framed as supervised clean-baseline performance;
+- separated pre-serialization generation diagnostics from final predictions on
+  reloaded serialized files and from the clean-correct ASR denominator;
+- qualified SuperDeepFool result-table interpretation as the internal bounded,
+  single-cycle adapter already documented in the implementation;
+- corrected aggregate-weighting prose and table notes: 11 equally sized
+  conditions, but clean/adversarial/anti-forensic branch weights of `1:5:5`;
+- documented an explicit bibliography-and-glossary build and corrected the
+  acknowledgments filename in the thesis source map;
+- aligned current repository maps and release instructions with the separate
+  defense repository, and removed a stale local-slide requirement from the
+  Linux and PowerShell documentation guards;
+- shortened the Contrast Stretching implementation sentence to remove a small
+  pre-existing overfull text line without changing the operation or cutoff;
+- preserved the frozen datasets, checkpoints, attack implementations, manifests,
+  predictions, numerical metrics, reporting figures, and bibliography.
+
 ### Final repository cleanup
 
 - established `docs/LatexSlides/main.tex` as the only documented presentation

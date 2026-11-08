@@ -19,15 +19,16 @@ University of Cagliari.
 The study evaluates the **operational robustness of AI-based image-classification
 and media-triage systems in Digital/Computer Forensics** under clean inputs,
 out-of-distribution samples, adversarial perturbations, and anti-forensic
-transformations. It compares transparent proxy models with observable outputs
+transformations. It compares white-box proxy models with observable outputs
 from selected commercial black-box tools.
 
 The repository is a research artifact, not a general-purpose forensic classifier,
 unrestricted dataset release, or operational investigative system.
 
-Working defense materials under `docs/LatexSlides/` and `docs/presentation/` are kept
-only as an author backup. They are outside the scientific release perimeter and
-do not affect the frozen thesis artifact, its claims, or its validation status.
+Defense materials are maintained separately in
+[Molinario_Thesis_Defense_2026](https://github.com/lmolinario/Molinario_Thesis_Defense_2026).
+They are outside this repository's scientific release perimeter and do not
+redefine the frozen thesis artifact, its claims, or its validation status.
 
 ## Release Status
 

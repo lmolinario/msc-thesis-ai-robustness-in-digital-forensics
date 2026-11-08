@@ -13,7 +13,7 @@ inputs may prevent relevant content from receiving appropriate review priority
 or may increase the amount of irrelevant material presented to the analyst.
 
 Against this background, the present thesis evaluates the operational
-robustness of transparent proxy models and selected black-box software
+robustness of white-box proxy models and selected black-box software
 configurations used for automated image classification or semantic retrieval of
 images depicting firearms and related visual content. The evaluation compares
 behavior across clean binary inputs, a separate \gls{ood} branch, adversarial
@@ -221,12 +221,16 @@ inputs that do not conform to the nominal binary task
 Adversarial and anti-forensic artifacts are generated exclusively from the
 binary subset, preserving the distinction among supervised correctness,
 clean-to-perturbed error transitions, and behavior on the separate \gls{ood}
-branch. The evaluation combines transparent proxy models with selected
+branch. The evaluation combines white-box proxy models with selected
 black-box software configurations on the same frozen source population and
 derived perturbation suite. The proxy models provide an inspectable
 experimental reference, whereas the proprietary systems are assessed through
 outputs observable to the analyst. No assumption is made that the proxy models
-reproduce or explain their inaccessible internal components.
+reproduce or explain their inaccessible internal components. The term
+\textit{proxy} describes this controlled experimental role, whereas
+\textit{white-box} describes the experimenter's access to architectures,
+checkpoints, scores, and gradients. It does not mean that the proxies are
+surrogates of the proprietary systems or that every attack uses gradients.
 
 Within this framework, a \texttt{weapon}-to-\texttt{non\_weapon} transition may
 prevent potentially relevant content from being prioritized, while the opposite
@@ -248,7 +252,7 @@ used to support evidence analysis
 % ─────────────────────────────────────────────────────────────────────────────
 
 This thesis aims to evaluate systematically the operational robustness of
-transparent proxy models and selected black-box software configurations used for
+white-box proxy models and selected black-box software configurations used for
 the automated classification or semantic retrieval of images of potential
 investigative interest in \gls{df}. The general objective is to determine
 whether behavior observed under clean reference conditions remains stable when
@@ -277,7 +281,7 @@ black-box output normalization, quantitative and qualitative analysis, and
 traceability controls.
 
 The second objective is to evaluate heterogeneous systems on the same frozen
-source population and derived perturbation suite. The transparent level
+source population and derived perturbation suite. The white-box level
 comprises \gls{efficientnetb0}, \gls{resnet18}, and a \gls{clip}-based proxy consisting of
 a frozen visual encoder and a supervised binary classification head. The
 black-box level comprises the selected software configurations evaluated
@@ -313,11 +317,12 @@ a \textit{human-in-the-loop} forensic workflow
 The experimental design addresses the following research questions:
 
 \begin{enumerate}
-    \item[\textbf{RQ1.}] To what extent do the transparent proxy models maintain
-    their clean-baseline performance under the separate \gls{ood}, adversarial,
-    and anti-forensic conditions?
+    \item[\textbf{RQ1.}] To what extent do the white-box proxy models retain
+    their clean-baseline performance under adversarial and anti-forensic
+    conditions, and how do they assign inputs from the separate \gls{ood}
+    population?
 
-    \item[\textbf{RQ2.}] How do proxy-model responses differ between
+    \item[\textbf{RQ2.}] How do white-box proxy-model responses differ between
     source-model evaluation, empirical cross-model transfer, and the
     model-agnostic \gls{colorshift} condition?
 
@@ -337,7 +342,7 @@ The experimental design addresses the following research questions:
 
 The main contribution of this thesis lies in the definition and application of
 a methodological protocol for evaluating the operational robustness of
-transparent proxy models and selected black-box software configurations used for
+white-box proxy models and selected black-box software configurations used for
 automated image classification or semantic retrieval in \gls{df}. Unlike
 evaluations focused exclusively on standard \textit{computer vision} benchmarks
 or aggregate clean-condition performance, the study adopts a forensic and
@@ -349,13 +354,52 @@ The contribution is articulated across four interconnected dimensions.
 
 The first contribution is the formalization of the \textbf{\gls{fairlab}}
 protocol. \gls{fairlab} coordinates human-validated dataset construction,
-deterministic partitioning, transparent proxy-model evaluation, controlled
+deterministic partitioning, white-box proxy-model evaluation, controlled
 perturbation generation, blind-bundle preparation, black-box output
 normalization, error-oriented metrics, qualitative explainability, and
 traceability controls. It is not proposed as a new classifier, defensive
 mechanism, standalone forensic application, or general theoretical architecture,
 but as a documented and auditable procedure for evaluating heterogeneous
 systems under controlled but operationally relevant conditions.
+
+The resulting \textit{validation profile} links a defined task and frozen
+corpus to the threat model, tested system versions and configurations,
+observable output semantics, normalization rules, metrics, and traceability
+records. This profile documents what was observed under the specified
+protocol; it is neither a certification of the evaluated systems nor a
+universal robustness score or product ranking.
+
+Table~\ref{tab:introduction-fairlab-validation-profile} summarizes this
+methodological positioning.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{@{}L{0.27\textwidth}Y@{}}
+\toprule
+\textbf{Dimension} & \textbf{Role in FAIRLab} \\
+\midrule
+Source-linked analysis &
+Each derived artifact remains linked to its source, partition, perturbation
+condition, and reported decision. \\
+Direct attack vs transfer &
+Effects on the designated source model are separated from empirical transfer
+to other white-box proxy models or black-box configurations. \\
+\glsentryshort{ood} behavior &
+Out-of-task inputs are evaluated separately from supervised binary correctness
+and interpreted as closed-set operating behavior. \\
+Black-box configuration &
+Software version, enabled functions, retrieval settings, observable outputs,
+and normalization rules are part of the evaluated system. \\
+Forensic interpretation &
+Error direction is interpreted in relation to missed-target risk, review
+workload, and continued human verification. \\
+\bottomrule
+\end{tabularx}
+\caption{Methodological positioning of FAIRLab as a validation profile}
+\label{tab:introduction-fairlab-validation-profile}
+\end{table}
 
 The second contribution is the construction of a frozen experimental corpus
 aligned with the selected forensic image-analysis task. The source population
@@ -375,9 +419,9 @@ adopted criteria, reviewer decisions, and associated limitations remain
 traceable
 \cite{sambasivan2021data}.
 
-The third contribution is the parallel evaluation of transparent proxy models
+The third contribution is the parallel evaluation of white-box proxy models
 and selected black-box software configurations on the same frozen experimental
-basis. The transparent level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
+basis. The white-box level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
 \gls{clip}-based proxy. The black-box level comprises four software systems
 evaluated through six frozen configurations:
 \gls{magnetaxiomtool}/\gls{magnetai},

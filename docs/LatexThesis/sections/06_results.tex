@@ -11,7 +11,7 @@ robustness of \gls{ai}-based systems for automated image classification and
 triage in forensic contexts.
 
 A central feature of the evaluation is the parallel analysis of two
-complementary system levels. The first comprises the transparent proxy models
+complementary system levels. The first comprises the white-box proxy models
 defined in Section~\ref{subsec:implementation-architectures}, for which
 predictions, maximum predicted-class probabilities, confusion matrices, and
 internal attribution information are available. The second comprises the
@@ -23,7 +23,7 @@ Both evaluation levels operate on the same frozen source population. The
 source corpus, whereas 10\,000 adversarial and anti-forensic artifacts are
 derived exclusively from the binary subset. The resulting comparison is
 therefore based on the same underlying samples and experimental conditions,
-while preserving the distinction between transparent model evaluation and
+while preserving the distinction between white-box model evaluation and
 operational black-box assessment.
 
 The purpose of the chapter is not to construct an absolute ranking among
@@ -174,7 +174,7 @@ rate only for the four model-dependent adversarial attacks: \gls{fgsm},
 anti-forensic transformations, the same numerical transition is interpreted as
 an induced-error rate rather than as adversarial or transfer success.
 
-Maximum predicted-class probabilities are available only for the transparent
+Maximum predicted-class probabilities are available only for the white-box
 proxy models. They are retained as intra-model diagnostic indicators and are
 not interpreted as calibrated probabilities directly comparable across
 architectures. The selected black-box software systems do not expose
@@ -212,7 +212,7 @@ probability defined in Section~\ref{sec:results-scope}.
 \scriptsize
 \setlength{\tabcolsep}{2.3pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Clean performance of the proxy models on the binary subset}
+\caption{Clean performance of the white-box proxy models on the binary subset}
 \label{tab:results-clean-baseline-metrics}
 \begin{tabularx}{\textwidth}{@{}l *{11}{>{\centering\arraybackslash}X}@{}}
 \toprule
@@ -313,7 +313,7 @@ confusion-matrix components for the three proxy models. The layout is:
 
 \begin{table}[H]
 \centering
-\caption{Clean confusion matrices of the proxy models}
+\caption{Clean confusion matrices of the white-box proxy models}
 \label{tab:results-clean-confusion-matrices}
 \begin{tabular}{@{}l r r r r@{}}
 \toprule
@@ -381,7 +381,7 @@ Figure~\ref{fig:results-clean-confusion-matrices}.
 {images/fig_clean_confusion_matrix_clip.pdf}
 \end{minipage}
 
-\caption{Clean confusion matrices of the three proxy models on the binary
+\caption{Clean confusion matrices of the three white-box proxy models on the binary
 subset}
 \label{fig:results-clean-confusion-matrices}
 \end{figure}
@@ -442,7 +442,7 @@ Table~\ref{tab:results-ood-behavior} reports the fold-aggregated results.
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Fold-aggregated behavior of the proxy models on \gls{ood} inputs}
+\caption{Fold-aggregated behavior of the white-box proxy models on \gls{ood} inputs}
 \label{tab:results-ood-behavior}
 \begin{tabular}{@{}l r r r r r r r@{}}
 \toprule
@@ -661,7 +661,7 @@ comparison as a heatmap.
 \centering
 \includegraphics[width=0.88\textwidth]
 {images/fig_anti_forensic_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop of the proxy models under anti-forensic transformations}
+\caption{Accuracy drop of the white-box proxy models under anti-forensic transformations}
 \label{fig:results-antiforensic-accuracy-drop-heatmap}
 \end{figure}
 
@@ -795,7 +795,7 @@ general robustness claim.
 \label{sec:results-adversarial}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The adversarial evaluation examines the response of the transparent proxy
+The adversarial evaluation examines the response of the white-box proxy
 models to perturbations generated to alter classifier behavior
 \cite{szegedy2014intriguing,goodfellow2015explaining,biggio2018wild}. These
 conditions are used to assess operational robustness in a controlled forensic
@@ -860,6 +860,15 @@ This definition differs from the generation-time success indicator recorded
 while creating the artifacts. The results reported here use matched clean and
 perturbed predictions and exclude samples already misclassified in their clean
 form from the ASR denominator.
+
+The predictions used here are obtained after reloading the serialized image
+files. They are not the pre-serialization tensor predictions recorded by some
+generators (Section~\ref{subsec:implementation-adversarial}). Thus, a
+generation-time \texttt{attack\_success} flag is not evidence that the saved
+artifact remains successful after quantization, encoding, and evaluation
+preprocessing. The distinction concerns both the representation stage and the
+clean-correct denominator; neither the generation flags nor their totals
+replace the final file-based metrics.
 
 Table~\ref{tab:results-adversarial-robustness} reports perturbed accuracy and
 accuracy drop for the five evaluated conditions.
@@ -934,6 +943,9 @@ conditions}
 model-agnostic. Drop is computed as clean accuracy minus perturbed accuracy;
 negative values indicate a condition-specific aggregate increase and do not
 establish the absence of newly induced errors.
+SuperDeepFool denotes the internal bounded, single-cycle adapter documented in
+Section~\ref{subsec:implementation-adversarial}, not a full reproduction of the
+published iterative method.
 \end{table}
 
 Figure~\ref{fig:results-adversarial-accuracy-drop-heatmap} visualizes the
@@ -945,7 +957,7 @@ were generated against this architecture.
 \centering
 \includegraphics[width=0.88\textwidth]
 {images/fig_adversarial_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop of the proxy models under adversarial and
+\caption{Accuracy drop of the white-box proxy models under adversarial and
 adversarial-style conditions}
 \label{fig:results-adversarial-accuracy-drop-heatmap}
 \end{figure}
@@ -1186,9 +1198,9 @@ computed only on the 11\,000 interpretable binary items. The \gls{ood} inputs
 are excluded from those metrics because they have no binary reference
 assignment.
 
-The binary aggregate is itself bundle-weighted rather than
-condition-balanced. It contains 1\,000 clean inputs and 10\,000 perturbed
-artifacts:
+The binary aggregate assigns equal weight to each of the 11 test conditions,
+but not to the three evaluation branches. It contains 1\,000 clean inputs and
+10\,000 perturbed artifacts:
 
 \begin{equation}
 N_{\mathrm{binary}}
@@ -1206,6 +1218,11 @@ Consequently, the bundle-level metrics are influenced primarily by behavior on
 the perturbed population. They must not be interpreted as the arithmetic mean
 of clean, adversarial, and anti-forensic performance, nor as estimates of the
 frequency with which these conditions would occur in an operational case.
+For accuracy, equal condition sizes imply
+\(A_{\mathrm{bundle}}=(A_{\mathrm{clean}}+5A_{\mathrm{adv}}+
+5A_{\mathrm{anti}})/11\), where the latter two terms are within-branch
+condition means. This identity does not extend to nonlinear metrics such as
+precision or F1, which are computed from pooled confusion counts.
 
 The four model-dependent adversarial conditions were generated against
 fold-specific \gls{efficientnetb0} checkpoints. Their evaluation through the
@@ -1433,8 +1450,8 @@ False negatives
 \footnotesize
 \textit{Note.} The metrics are computed on the 11\,000-item binary bundle,
 comprising 1\,000 clean inputs and 10\,000 perturbed artifacts. The values are
-therefore bundle-weighted and do not represent an arithmetic mean across
-experimental conditions.
+therefore computed from pooled confusion counts and do not represent an
+equally weighted mean of the clean, adversarial, and anti-forensic branches.
 \end{table}
 
 Within the frozen binary bundle, \gls{magnetai} achieves an accuracy and
@@ -2860,8 +2877,9 @@ False negatives
 \footnotesize
 \textit{Note.} The metrics are computed on the 11\,000-item binary bundle,
 comprising 1\,000 clean inputs and 10\,000 perturbed artifacts. The values are
-therefore bundle-weighted and do not represent an arithmetic mean across
-experimental conditions. The 500 \gls{ood} inputs are excluded from binary
+therefore computed from pooled confusion counts and do not represent an
+equally weighted mean of the clean, adversarial, and anti-forensic branches.
+The 500 \gls{ood} inputs are excluded from binary
 correctness metrics.
 \end{table}
 
@@ -3393,7 +3411,7 @@ residual limitation of bundle blindness rather than removed retrospectively.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The common frozen source population enables a parallel comparison between the
-transparent proxy models and the selected black-box software configurations.
+white-box proxy models and the selected black-box software configurations.
 The comparison is operational rather than architectural: all outputs are
 interpreted through the common \texttt{weapon}/\texttt{non\_weapon} decision
 space, but the mechanisms producing those outputs remain fundamentally
@@ -3444,7 +3462,7 @@ reference assignment are routed to the operational \texttt{weapon} state.
 
 \begin{table}[!htbp]
 \centering
-\caption{Clean performance and \gls{ood} behavior of the proxy models and
+\caption{Clean performance and \gls{ood} behavior of the white-box proxy models and
 selected black-box reference configurations}
 \label{tab:results-comparative-clean-ood}
 
@@ -3829,7 +3847,7 @@ in accuracy produced by adversarial and anti-forensic conditions relative to the
 corresponding clean baseline.
 
 The figure does not encode explainability, auditability, or system
-interpretability as numerical values. The distinction between transparent proxy
+interpretability as numerical values. The distinction between white-box proxy
 models and black-box software is a methodological property rather than an
 experimentally measured risk score.
 
@@ -3838,7 +3856,7 @@ experimentally measured risk score.
 \includegraphics[width=\textwidth]
 {images/fig_results_operational_risk_summary.pdf}
 \caption[Operational behavior summary across evaluated systems]{Quantitative
-operational-risk indicators across the proxy models and selected black-box
+operational-risk indicators across the white-box proxy models and selected black-box
 reference configurations}
 \label{fig:results-operational-risk-summary}
 \end{figure}
@@ -3903,7 +3921,7 @@ individual \gls{efficientnetb0} outputs. It is not treated as a primary robustne
 metric, a quantitative validation of model reliability, or an evidentiary
 interpretation of the analyzed images.
 
-The analysis is limited to the transparent \gls{efficientnetb0} proxy. It does not
+The analysis is limited to the white-box \gls{efficientnetb0} proxy. It does not
 explain the behavior of \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{griffeye}/\gls{t3kcore},
 \gls{excirefoto2025}, or

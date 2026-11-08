@@ -324,11 +324,17 @@ python tools/latex/audit_latex_images_used.py \
   --main docs/LatexThesis/main.tex
 
 cd docs/LatexThesis
-latexmk -pdf main.tex
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+biber main
+makeglossaries main
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
+pdflatex -interaction=nonstopmode -halt-on-error main.tex
 cd ../..
 ```
 
-Generated auxiliary files and `main.pdf` are ignored.
+Repeat pdfLaTeX if references or page labels still require another pass. Review
+the final LaTeX/Biber logs and visually inspect the PDF, as documented in
+`docs/LatexThesis/README.md`. Generated auxiliary files and `main.pdf` are ignored.
 
 ## 13. Kali/Linux Audit Helper
 

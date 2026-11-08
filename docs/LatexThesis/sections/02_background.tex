@@ -738,11 +738,14 @@ function, and gradients, and can therefore construct perturbations directly
 optimized with respect to the classifier. In a black-box scenario, by contrast,
 the attacker does not have access to the internal logic of the target system
 and may rely on observable outputs, surrogate models, or the transferability of
-adversarial examples. In this protocol, all proxy models are inspectable and
-white-box-capable. Model-dependent generation uses gradients or observable
-scores on the designated source proxy, whereas \gls{colorshift} is
-model-agnostic. Commercial systems are observed only through their outputs on
-submitted artifacts. These information requirements are distinct from the
+adversarial examples. In this protocol, all three controlled proxy models are
+white-box models with respect to the experimenter: their architectures,
+checkpoints, scores, and gradients are accessible. This access is distinct from
+the information actually used by an attack. Model-dependent generation uses
+gradients or observable scores on the designated white-box source model;
+One Pixel remains score-based because it does not use gradients.
+\gls{colorshift} is model-agnostic. Commercial systems are observed only
+through their outputs on submitted artifacts. These information requirements are distinct from the
 source-model and transfer evaluation roles detailed in
 Chapters~\ref{chap:methodology} and~\ref{chap:implementation}.
 
@@ -810,7 +813,7 @@ the present thesis.
         \textbf{Untargeted} model-dependent attacks; operational analysis emphasizes degradation, missed detection, and classification reliability. \\
         \textbf{Knowledge} &
         Internal model information, observable scores, or no model access &
-        Gradients or scores on the designated source proxy; model-agnostic Color Shift; observable commercial outputs only. \\
+        White-box access to the controlled proxies; gradients or scores used on the designated source model; model-agnostic Color Shift; observable commercial outputs only. \\
         \textbf{Capability} &
         Training-time or inference-time manipulation, with application-specific constraints &
         \textbf{Evasion}: inference-time image modifications within condition-specific magnitude, sparsity, or transformation constraints; model training is not altered. \\
