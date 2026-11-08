@@ -402,10 +402,13 @@ workload, and continued human verification. \\
 \end{table}
 
 The second contribution is the construction of a frozen experimental corpus
-aligned with the selected forensic image-analysis task. The source population
-contains 1\,500 images: 500 \texttt{weapon} images, 500
-\texttt{non\_weapon} images, and 500 images reserved for the separate
-\gls{ood} branch. The 1\,000-image binary subset is used to generate five
+aligned with the selected forensic image-analysis task. Across five source
+collections, technical screening and exact-duplicate removal reduced 19\,769
+candidate files to 15\,321 eligible images. Manual selection from this pool
+continued until the predefined targets were reached, yielding 1\,500 images:
+500 \texttt{weapon} images, 500 \texttt{non\_weapon} images, and 500 images
+reserved for separate \gls{ood} evaluation.
+The 1\,000-image binary subset is used to generate five
 adversarial or adversarial-style populations and five anti-forensic populations.
 Together with the clean binary and \gls{ood} inputs, these derivatives form an
 11\,500-item forensic evaluation bundle comprising 1\,000 clean binary items,
