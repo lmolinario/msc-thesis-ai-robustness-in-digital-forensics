@@ -19,16 +19,12 @@ University of Cagliari.
 The study evaluates the **operational robustness of AI-based image-classification
 and media-triage systems in Digital/Computer Forensics** under clean inputs,
 out-of-distribution samples, adversarial perturbations, and anti-forensic
-transformations. It compares white-box proxy models with observable outputs
+transformations. It compares white-box models with observable outputs
 from selected commercial black-box tools.
 
 The repository is a research artifact, not a general-purpose forensic classifier,
 unrestricted dataset release, or operational investigative system.
 
-Defense materials are maintained separately in
-[Molinario_Thesis_Defense_2026](https://github.com/lmolinario/Molinario_Thesis_Defense_2026).
-They are outside this repository's scientific release perimeter and do not
-redefine the frozen thesis artifact, its claims, or its validation status.
 
 ## Release Status
 
@@ -45,8 +41,8 @@ that release package.
 | Frozen source population | 500 `weapon` + 500 `non_weapon` + 500 OOD images |
 | Binary subset | 1,000 images: 500 `weapon` + 500 `non_weapon` |
 | Evaluation bundle | 11,500 files |
-| Proxy models | EfficientNet-B0, ResNet18, CLIP-based visual proxy |
-| Commercial tools | Magnet AXIOM / Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, Griffeye / T3K CORE |
+| White-box models | EfficientNet-B0, ResNet18, CLIP-based visual proxy |
+| Commercial Black-Box tools | Magnet AXIOM / Magnet.AI, Excire Foto 2025, Cellebrite Inseyets, Griffeye / T3K CORE |
 | Conditions | Clean, OOD, adversarial, anti-forensic |
 | Public prediction outputs | 69,000 sanitized commercial-tool decisions |
 | Main quantitative outputs | Proxy metrics, 186 commercial metric rows, reporting figures and tables |
@@ -61,7 +57,7 @@ that release package.
 
 The evaluation uses three complementary perspectives:
 
-1. **Transparent proxy evaluation** — fold-aware training and controlled
+1. **White-box models evaluation** — fold-aware training and controlled
    robustness analysis with known model architectures.
 2. **Commercial black-box evaluation** — blind processing followed by
    post-export normalization against hidden reference assignments.
@@ -141,7 +137,7 @@ datasets/forensic_evaluation_bundle/metadata/bundle_hashes_sha256.csv
 The archive checksum file authenticates the two controlled ZIP objects. The
 bundle hash manifest authenticates each of the 11,500 blind inputs individually.
 
-### Proxy evaluation
+### White-box models evaluation
 
 ```text
 evaluation/proxy_models/proxy_model_predictions.csv
@@ -155,7 +151,7 @@ Fields historically named `confidence*` store maximum predicted-class
 probability (`Max-P`) information. These values are intra-model diagnostics,
 not calibrated confidence or forensic certainty.
 
-### Commercial-tool evaluation
+### Black-Box tool evaluation
 
 ```text
 evaluation/forensic_tools/normalized_predictions.csv
