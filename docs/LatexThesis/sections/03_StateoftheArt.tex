@@ -360,18 +360,12 @@ because it clarifies that visual classification, in forensic contexts, serves a
 primarily operational function: directing the analyst's attention toward
 portions of the evidence that warrant more detailed review.
 
-In the specific domain of weapon recognition, Hao et
-al.~\cite{Hao2018DeepFirearm} proposed DeepFirearm, an approach based on deep
-representations for fine-grained firearm recognition. Their work demonstrates
-that the classification of images containing firearms or related content cannot
-be reduced to a trivial visual problem: the variability of poses, perspectives,
-occlusions, image quality, and morphological similarity across different weapon
-models requires discriminative representations capable of capturing relevant
-visual detail. However, works of this type are primarily oriented toward
-recognition or retrieval under controlled experimental conditions, and do not
-systematically address the behavior of models when images are degraded,
-manipulated, or drawn from the heterogeneous sources typical of a digital
-investigation.
+Hao et al.~\cite{Hao2018DeepFirearm} assembled 14\,755 images from 167
+firearm classes for fine-grained retrieval. Their task is to retrieve a
+particular firearm type among visually similar alternatives. It is not to
+decide whether an image should be flagged for firearm-related review. The
+collection is therefore relevant to the target domain, but its size and
+class frequencies are not a sampling prescription for binary forensic triage.
 
 The availability of public datasets for weapon detection, such as the
 \textit{Weapon Detection Dataset}~\cite{Sanyal2023KaggleWeapon}, has supported
@@ -415,17 +409,17 @@ classes, the distribution of errors, the stability of predictions, and the
 ability to avoid assigning a known class with excessive confidence to
 out-of-distribution inputs.
 
-The most recent literature on \gls{ai}-based software applicable to forensic
-contexts confirms this concern. Sanna et al.~\cite{sanna2024preliminary}
-demonstrate that automated classification functionalities integrated into
-operational software may produce unstable results when visual content deviates
-from expected conditions. Although these studies do not exhaust the problem of
-image classification in forensic contexts, they indicate clearly that the
-transition from models that are accurate on controlled datasets to tools that
-are reliable in investigative scenarios requires more rigorous evaluation
-protocols. In particular, the combination of visual classification, content of
-investigative relevance, out-of-distribution images, and intentional
-manipulations remains insufficiently explored.
+Studies of commercial forensic tools illustrate why the unit of comparison
+matters. In a preliminary evaluation, Sanna et
+al.~\cite[Sec.~4.1]{sanna2024preliminary} included 25 pictures in the
+weapons chat; this was a chat-analysis scenario, not a balanced image test.
+In a separate experiment on facial morphing, Sanna et
+al.~\cite{sanna2025pixelperfect} selected 92 source photographs and generated
+5\,108 morphs. The latter are not 5\,108 independent source identities.
+Here, the unit is a source image: the same 1\,000 binary sources are
+compared before and after manipulation, while 500 additional images are
+reserved for \gls{ood} evaluation. Neither prior tool study establishes the
+class or source proportions expected in casework.
 
 Overall, the literature on automated image classification offers useful models
 and datasets, but leaves open a specific problem for \gls{df}: the limited

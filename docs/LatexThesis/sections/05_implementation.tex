@@ -651,10 +651,15 @@ Frozen experimental corpus supporting the complete evaluation protocol. \\
 \end{tabularx}
 \end{table}
 
+The targets of 500 images per group serve different measurements. For each
+binary condition, the same 500 firearm images provide the denominator for
+the false-negative rate and the same 500 negatives for the false-positive
+rate: one additional error changes the corresponding rate by 0.2 percentage
+points. The 500 \gls{ood} sources are a separate test of how often a system
+flags out-of-task inputs. These group sizes do not establish statistical
+power for a particular effect size or estimate casework prevalence.
 Table~\ref{tab:implementation-final-source-distribution} reports the
-source-level composition of the frozen corpus. The observed distribution
-results from the target-driven semantic review process and was not generated
-through rigid source quotas.
+resulting source mix; only the group sizes, not the source shares, were fixed.
 
 \begin{table}[H]
 \centering
@@ -713,11 +718,11 @@ through rigid source quotas.
 \end{tabular}
 \end{table}
 
-The source distribution is non-uniform. In particular, 413 of the 500
-\texttt{non\_weapon} samples originate from
-\texttt{05\_deepweb}. This composition is preserved explicitly in the frozen
-records and is considered when interpreting the experimental results in
-Chapter~\ref{chap:results}.
+Of the 500 \texttt{non\_weapon} sources, 413 come from
+\texttt{05\_deepweb}. Holding the same sources fixed across conditions allows
+changes on individual images to be counted. It does not remove the association
+between source and class or establish how often a different collection would
+produce the same errors.
 
 The \texttt{ood} group remains a separate evaluation branch and is not used as
 a third supervised class. The review application therefore also exports
@@ -1471,8 +1476,15 @@ clean-fold manifest. Model-dependent conditions additionally require the
 corresponding fold-specific checkpoint. Missing files or integrity mismatches
 terminate execution.
 
-Table~\ref{tab:implementation-adversarial-parameters} reports the parameters
-used in the frozen generation runs.
+Table~\ref{tab:implementation-adversarial-parameters} records what each
+condition holds fixed. FGSM bounds the change to each pixel channel; One
+Pixel limits the number of locations that may change; Sigma-Zero searches
+for a sparse perturbation; the SuperDeepFool adapter probes a decision
+boundary. These are complementary tests, not budgets of equal strength.
+A larger accuracy drop under one setting does not establish that its
+algorithm is intrinsically stronger than the others. A security evaluation
+curve would require testing the same attack at several
+strengths~\cite[Sec.~3.5]{biggio2018wild}.
 
 \begin{table}[H]
 \centering
@@ -1623,7 +1635,8 @@ exported. The recorded \texttt{queries\_used} counts objective evaluations,
 not all forward calls: each objective evaluation queries both probabilities
 and the predicted label.
 
-The effective population of 100 candidates and 50-iteration cap are smaller
+The effective population of 100 candidates and the 50-iteration cap bound
+the search per source image across the 1\,000 runs. Both are smaller
 than the 400-candidate, 100-iteration configuration reported in the original
 work~\cite{su2019onepixel}. The limited effectiveness observed here therefore
 characterizes this bounded search budget and does not establish general
@@ -1866,12 +1879,12 @@ stored as \gls{jpeg} files. The dedicated recompression condition uses quality
 70, while the remaining transformations use quality 95 to limit additional
 encoding effects beyond the principal operation.
 
-Table~\ref{tab:implementation-antiforensic-parameters} reports the frozen
-configuration of the five transformations.
-Each transformation was evaluated at one predefined setting to support
-controlled paired comparison. These settings define reproducible conditions;
-they are not claimed to be optimal or standard forensic severities. The study
-does not establish a complete severity-response curve.
+Table~\ref{tab:implementation-antiforensic-parameters} gives one setting per
+transformation, applied to the same sources for every system. By contrast,
+ImageNet-C tests each corruption at five severity levels~\cite{hendrycks2019benchmarking}.
+Here a setting such as JPEG quality 70 identifies the file transformation
+tested; it is neither a forensic threshold nor evidence about what happens
+at higher or lower quality settings.
 
 \begin{table}[H]
 \centering

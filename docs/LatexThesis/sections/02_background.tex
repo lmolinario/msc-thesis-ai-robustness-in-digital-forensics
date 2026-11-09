@@ -708,16 +708,13 @@ system.
 \subsection{Threat Model and Attacker Assumptions}
 \label{subsec:background_threat_model}
 % ─────────────────────────────────────────────────────────────────────────────
-The threat model is organized by the \gls{gkc} dimensions: the errors the
-attacker seeks to induce, the information available about the classifier, and
-the input modifications permitted within stated constraints
-\cite{biggio2018wild}. In \gls{advml}, it is necessary to rigorously
-delimit the attack scenario and to avoid robustness evaluations that lack an
-operational context. Without an explicit threat model, the result of an
-adversarial test risks being difficult to interpret, because it is not clear
-which type of adversary the system is able to tolerate and which conditions are
-instead excluded from the analysis
-\cite{carlini2017towards,yuan2019adversarial}.
+Biggio, Fumera, and Roli distinguish what the attacker wants to achieve,
+what the attacker knows about the classifier, and what the attacker can
+change; these assumptions define the setting in which an attack strategy is
+chosen~\cite[Sec.~3.1]{biggio2014security}. Biggio et al.\ apply this model to
+test-time evasion~\cite[Sec.~2.1]{biggio2013evasion}; Biggio and Roli review
+it in~\cite[Sec.~3]{biggio2018wild}. In this thesis, \gls{gkc} is shorthand
+for those three dimensions, not the name of a separate standard.
 
 \textbf{Goal.} In automated image classification in forensic settings, the
 attacker can be modeled as an actor interested in reducing the likelihood that
@@ -809,7 +806,7 @@ the present thesis.
         \textbf{Dimension} & \textbf{Theoretical scenarios} & \textbf{Thesis operational focus} \\
         \midrule
         \textbf{Goal} &
-        Targeted vs untargeted &
+        Intended security violation and attack objective &
         \textbf{Untargeted} model-dependent attacks; operational analysis emphasizes degradation, missed detection, and classification reliability. \\
         \textbf{Knowledge} &
         Internal model information, observable scores, or no model access &
