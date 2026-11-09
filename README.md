@@ -98,7 +98,7 @@ applied only to the binary subset`"]
     H["`**Forensic evaluation bundle**
 1000 clean + 500 clean OOD + 5000 adversarial
 + 5000 anti-forensic artifacts`"]
-    G["`**Controlled proxy evaluation**
+    G["`**White Box Models evaluation**
 EfficientNet-B0, ResNet18 and CLIP`"]
     I["`**Black-box software evaluation**
 Magnet.AI, Excire, Cellebrite and Griffeye/T3K CORE`"]
