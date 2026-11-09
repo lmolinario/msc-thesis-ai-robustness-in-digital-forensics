@@ -177,7 +177,7 @@ before the final thesis reorganization. They are preserved for artifact identity
 and reproducibility. The final quantitative and qualitative results are reported
 in Chapter 6 (`docs/LatexThesis/sections/06_results.tex`).
 
-## Commercial-Tool Perimeter
+## Black-Box Tool Perimeter
 
 | Tool | Version / module | Observable operational signal |
 |---|---|---|
