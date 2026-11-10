@@ -34,8 +34,7 @@ limited by legal, ethical, or source-dependent constraints.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The repository is organized according to a functional separation among raw data,
-prepared data, the final dataset, experimental splits, perturbations, proxy
-models, evaluation, explainability, results, and thesis documentation. This
+prepared data, the final dataset, experimental splits, perturbations, white-box models, evaluation, explainability, results, and thesis documentation. This
 organization makes it possible to distinguish the phases of acquisition,
 preparation, manual selection, split generation, attack production, automated
 evaluation, and preparation of the bundle intended for selected black-box
@@ -101,7 +100,7 @@ The \codepath{datasets/} directory contains the data pipeline, from the initial
 collection phase to the forensic evaluation bundle. The \codepath{attacks/}
 directory collects the outputs of adversarial perturbations and anti-forensic
 transformations, whereas \codepath{models/} contains the scripts and checkpoints
-of the proxy models. The \codepath{evaluation/} directory collects the scripts
+of the classifiers. The \codepath{evaluation/} directory collects the scripts
 and outputs of automated evaluation and normalization of the exports produced by
 selected black-box software systems. The \codepath{forensic_tools/} directory
 contains the normalized black-box evaluation perimeter and related exported
@@ -270,7 +269,7 @@ A separate 500-image \gls{ood} branch contains borderline, anomalous, degraded,
 synthetic, semantically adjacent, or otherwise out-of-task content. Examples
 include knives, swords, replicas, airsoft items, synthetic renderings, video
 game images, heavy military vehicles, explosions, and war scenes. This branch
-is not a third supervised class and is excluded from proxy-model training and
+is not a third supervised class and is excluded from model training and
 perturbation generation.
 
 The official adversarial subset, stored in
@@ -317,12 +316,12 @@ python datasets/scripts/final/10_manual_selection_protocol_reviewer.py
 # Clean/OOD split generation
 python datasets/scripts/splits/11_generate_clean_and_ood_splits.py
 
-# Proxy model training and perturbation generation
+# Model training and perturbation generation
 python models/scripts/12_train_proxy_models.py
 python datasets/scripts/attacks/13_generate_anti_forensic_attacks.py
 python datasets/scripts/attacks/14_generate_adversarial_attacks.py
 
-# Proxy model evaluation and forensic bundle construction
+# Model evaluation and forensic bundle construction
 python evaluation/scripts/15_evaluate_proxy_models.py
 python datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py
 
@@ -346,9 +345,9 @@ protocol, it exclusively supports outputs attributable to
 \texttt{magnet\_axiom}, \texttt{griffeye},
 \texttt{excire\_foto\_2025}, and \texttt{cellebrite\_inseyets}. Its role is to normalize
 the exports, map predictions back to the records of the forensic evaluation
-bundle, and produce results that are comparable with the proxy level through
-mapping based, in preferential order, on \texttt{bundle\_id}, \gls{sha256}
-hash, \gls{md5} hash, file name, and manual audit.
+bundle, and enable comparison with the classifiers' outputs. Records are
+matched, in order of preference, by \texttt{bundle\_id}, \gls{sha256} hash,
+\gls{md5} hash, file name, or manual audit.
 
 The final two scripts belong to the reporting and audit layer of the pipeline.
 The script
@@ -366,13 +365,11 @@ summary used to document the residual metadata limitation.
 \label{app:models-attacks-evaluation-outputs}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The consolidated experimental protocol uses three proxy models:
-\texttt{efficientnet\_b0}, \texttt{resnet18}, and \gls{clip}. These models are
-used as transparent and inspectable baselines to observe, in a controlled
-manner, the behavior of classifiers with respect to clean, perturbed, and
-out-of-distribution inputs. Any preliminary components or exploratory baselines
-not included in the final evaluation are not considered part of the consolidated
-experimental protocol. The use of proxy models places the analysis within the
+The protocol uses three white-box models: \gls{efficientnetb0}, \gls{resnet18},
+and a \gls{clip}-based classifier. These models provide a controlled reference
+for comparing predictions on clean, perturbed, and out-of-distribution inputs.
+Exploratory models are not included in the reported results.
+These comparisons place the analysis within the
 broader context of robustness in \gls{ml} and \gls{ai}
 systems~\cite{bishop2006pattern,biggio2018wild,radford2021learning}.
 
@@ -390,13 +387,13 @@ operationally plausible manipulations of the image content or file that may
 alter the visibility, quality, or technical traces of the
 artifact~\cite{stamm2010anti,nowroozi2021survey,croce2020robustbench}.
 
-The outputs of the proxy model evaluation are collected in the
+The outputs of the model evaluation are collected in the
 \codepath{evaluation/proxy_models/} and \codepath{results/metrics/}
 directories. These outputs include predictions, aggregate metrics, confusion
 matrices, and comparisons among clean, adversarial, anti-forensic, and
 \gls{ood} conditions. Their function is not only quantitative, but also
 methodological: they make it possible to compare the controlled behavior of the
-proxy models with that of the \gls{ai}-based software evaluated in
+white-box models with that of the \gls{ai}-based software evaluated in
 \textit{black-box} mode. The downstream reporting assets generated under
 \codepath{results/figures/chapter_5/} provide the thesis-ready figures,
 figure manifests, and summary files derived from these consolidated metrics.
@@ -477,8 +474,8 @@ numerical backends, \gls{gpu} drivers, and hardware availability.
 \texttt{SciPy} & Support for numerical operations and transformations used in the experimental pipeline. \\
 \texttt{Pillow} & Image opening, validation, conversion, and saving. \\
 \texttt{PyTorch} & Training, inference, and perturbation generation on neural models. \\
-\texttt{torchvision} & \gls{cnn} architectures, preprocessing, and support for proxy model evaluation. \\
-\texttt{open\_clip\_torch} & Implementation of the \gls{clip} model used as a proxy model. \\
+\texttt{torchvision} & \gls{cnn} architectures, preprocessing, and support for model evaluation. \\
+\texttt{open\_clip\_torch} & Implementation of the visual encoder used in the \gls{clip}-based classifier. \\
 \texttt{Captum} & Generation of attribution maps through \gls{ig}. \\
 \texttt{matplotlib} & Production of plots, curves, experimental figures, and diagnostic visualizations. \\
 \bottomrule
@@ -492,7 +489,7 @@ observed in \textit{black-box} mode: \gls{magnetaxiomtool}, version
 4.1.5, used as a stand-alone general-purpose application with \gls{ai}-based
 functionality; and \gls{cellebriteinseyets}, version 10.9, with exports produced
 in the \textit{Cellebrite Physical Analyzer} 10.9.0.3029 environment.
-Unlike Python scripts and proxy models, these systems introduce a component that
+Unlike Python scripts and white-box models, these systems introduce a component that
 is not fully automatable, due to licenses, graphical interfaces, software
 versions, operational configurations, and export formats. For this reason, their
 evaluation is documented through the blind bundle, operational instructions,
@@ -508,7 +505,7 @@ In addition to the main manifests, the repository preserves logs, summaries, and
 intermediate reports that are useful for verifying the operations performed.
 These artifacts do not all have the same role: some describe the status of the
 manual selection process, others summarize split generation, and others document
-the composition of the bundle or the evaluation of proxy models. Their overall
+the composition of the bundle or the evaluation of white-box models. Their overall
 function is to make the experimental path directly observable and to support any
 subsequent checks.
 

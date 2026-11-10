@@ -12,8 +12,8 @@ experimental conditions with operationally relevant forensic scenarios.
 
 The chapter presents the overall methodology and research assumptions, followed
 by the procedures for dataset construction, human-in-the-loop validation,
-dataset freezing and partitioning, proxy-model and black-box software
-evaluation, perturbation testing, metric computation, explainability, and
+dataset freezing and partitioning, evaluation of white-box models and
+black-box software, perturbation testing, metric computation, explainability, and
 traceability. Implementation-specific data structures, scripts, architectures,
 parameters, software versions, and configurations are documented in
 Chapter~\ref{chap:implementation}; quantitative outcomes and their
@@ -33,12 +33,10 @@ examined in relation to missed relevant content, additional review workload,
 and unstable behavior on inputs that differ from the expected operational
 distribution.
 
-The protocol integrates two complementary evaluation levels. The first uses
-white-box proxy classification models as controlled experimental
-references. Here, \textit{proxy} denotes the experimental reference role and
-\textit{white-box} denotes access to model internals; these models are not
-treated as replicas or functionally equivalent
-substitutes for proprietary systems. The second evaluates selected
+The protocol uses three white-box classifiers as controlled experimental
+references. Their architectures and checkpoints are available to the experimenter;
+the classifiers are not intended to reproduce the proprietary systems.
+The second part of the protocol evaluates selected
 \gls{ai}-based software systems under black-box or near-black-box access
 conditions, using only their observable inputs and outputs and making no
 assumptions about inaccessible architectures, training data, calibration
@@ -56,9 +54,8 @@ experimental conditions.
 
 Quantitative metrics characterize classification performance, robustness
 degradation, error direction, and \gls{ood} behavior. Explainability provides
-qualitative diagnostic information for selected cases
-involving an inspectable proxy model and is not extended to the selected
-black-box systems.
+qualitative diagnostic information for selected \gls{efficientnetb0} predictions;
+it does not explain the outputs of the black-box systems.
 Traceability controls preserve the relationships among source samples, derived
 artifacts, experimental conditions, observable outputs, and reported results.
 
@@ -204,7 +201,7 @@ draw=black!75
 % -------------------------------------------------------------------------
 \node[eval] (proxy) at (-4.3,-14.1)
 {\shortstack{
-\textbf{White-box proxy-model evaluation}\\[1mm]
+\textbf{White-box model evaluation}\\[1mm]
 \scriptsize inspectable models under reproducible conditions
 }};
 
@@ -220,7 +217,7 @@ draw=black!75
 \node[output] (analysis) at (0,-17.0)
 {\shortstack{
 \textbf{Operational robustness analysis}\\[1mm]
-\scriptsize metrics, proxy-model explainability, traceability, and comparative assessment
+\scriptsize metrics, attributions on \gls{efficientnetb0}, traceability, and comparative assessment
 }};
 
 % -------------------------------------------------------------------------
@@ -254,8 +251,8 @@ draw=black!75
 \caption[FAIRLab experimental protocol]{FAIRLab experimental protocol. The
 frozen corpus is divided into a binary in-domain component and a separate clean
 \gls{ood} branch. Perturbations are applied only to the binary component, and
-the resulting common bundle is evaluated through complementary proxy-model and
-black-box software analyses}
+the resulting bundle is used to evaluate both the white-box models and the
+black-box software}
 \label{fig:methodology-fairlab-overview}
 \end{figure}
 
@@ -712,7 +709,7 @@ or modification introduced after freezing must be explicitly documented and
 treated as a new version of the experimental dataset.
 
 The frozen dataset provides the common source corpus for the controlled
-proxy-model evaluation and the black-box evaluation of the selected
+model evaluation and the black-box evaluation of the selected
 \gls{ai}-based software systems. Its subsequent separation into the binary
 evaluation subset and the clean \gls{ood} branch is defined in
 Section~\ref{sec:methodology-split-generation}.
@@ -744,7 +741,7 @@ corpus.
 
 After dataset freezing, the experimental corpus is divided into two distinct
 branches: an in-domain binary subset and a separate clean \gls{ood} evaluation
-set. The binary subset supports proxy-model training, clean evaluation, and
+set. The binary subset supports model training, clean evaluation, and
 robustness testing, whereas the \gls{ood} branch examines system behavior on
 borderline, semantically atypical, or distributionally different inputs.
 
@@ -760,12 +757,12 @@ sufficient detail to permit regeneration.
 Within this protocol, folds are not introduced primarily as a conventional
 cross-validation mechanism for hyperparameter selection or general performance
 estimation. Instead, they define controlled experimental holdout units. For
-each target fold, the corresponding proxy-model instance is trained on the
+each target fold, the corresponding model instance is trained on the
 remaining folds and evaluated on the held-out samples, thereby preventing
 overlap between model fitting and clean or robustness evaluation.
 
 The fold-aware organization also preserves the relationship among each
-held-out sample, the corresponding proxy-model checkpoint, and any
+held-out sample, the corresponding model checkpoint, and any
 model-dependent adversarial artifact generated from that sample. Such an
 artifact must be produced using a checkpoint that was not trained on its source
 sample. Model-agnostic adversarial-style conditions and anti-forensic
@@ -773,7 +770,7 @@ transformations remain associated with the originating sample and its fold but
 do not depend on a specific checkpoint.
 
 The clean \gls{ood} set remains outside the binary folds, is not used for
-proxy-model training, and is not treated as a third supervised class. No
+model training, and is not treated as a third supervised class. No
 experimental adversarial perturbation or anti-forensic transformation is
 applied to these samples. This separation allows the study to examine how
 automated systems assign inputs that do not constitute ordinary
@@ -781,7 +778,7 @@ automated systems assign inputs that do not constitute ordinary
 distributional mismatch with deliberate or incidental input manipulation.
 
 The partitioning records must associate each sample with its evaluation branch
-and, where applicable, its fold and corresponding proxy-model checkpoint. They
+and, where applicable, its fold and corresponding model checkpoint. They
 must also preserve the relationship between each original image and any
 derived experimental artifact, consistently with the traceability requirements
 defined in Section~\ref{sec:methodology-traceability-controls}.
@@ -876,7 +873,7 @@ draw=black!75
 
 \node[process] (training) at (-4.2,-7.8)
 {\shortstack{
-\textbf{Fold-aware proxy-model evaluation}\\[1mm]
+\textbf{Fold-aware model evaluation}\\[1mm]
 \scriptsize train on the remaining folds and evaluate on the held-out fold
 }};
 
@@ -911,33 +908,24 @@ folds for fold-aware training and held-out evaluation, while the clean
 \end{figure}
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{White-Box Proxy-Model Evaluation Methodology}
+\section{Evaluation of White-Box Models}
 \label{sec:methodology-models-classification}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The controlled component of the methodology relies on fully inspectable
-classification models, hereafter referred to as \textit{white-box proxy
-classification models}. The proxy role concerns their use as experimental
-references, while white-box access concerns the experimenter's ability to
-inspect architectures, checkpoints, scores, and gradients. The access actually
-used during attack generation must be specified separately. These models
-provide experimental references for analyzing classification behavior,
-robustness degradation, maximum predicted-class
-probability patterns, error direction, and transferability under reproducible
-conditions. They are not
-replicas, functionally equivalent substitutes, reverse-engineered
-reconstructions, or architectural reproductions of the selected black-box
-software systems.
+The three binary classifiers serve as controlled references. White-box access
+allows the experimenter to inspect their architectures, checkpoints, scores,
+and gradients. Which information an attack actually uses is specified for each
+method. The classifiers are not replicas of the commercial systems.
 
-The proxy-model evaluation methodology serves three methodological
-objectives. First, it provides a transparent reference for measuring
-classification performance and robustness degradation. Second, it enables the
-generation of model-dependent adversarial examples under explicit white-box or
-score-based access assumptions. Third, it supports the evaluation of whether
-perturbations generated against one controlled model transfer to other proxy
-architectures or to the selected black-box software systems.
+Evaluating the classifiers serves three purposes. First, their predictions
+allow us to measure classification performance, error direction, and changes
+in maximum predicted-class probability under controlled conditions. Second,
+the fold-specific \gls{efficientnetb0} checkpoints provide a common source for
+model-dependent adversarial examples. Third, evaluating those same artifacts on
+\gls{resnet18}, the \gls{clip}-based classifier, and the commercial systems
+shows whether and how the effects transfer.
 
-The proxy models implement the binary classification task defined in
+The classifiers implement the binary classification task defined in
 Section~\ref{sec:methodology-research-design}. The mapping between
 \texttt{weapon}, \texttt{non\_weapon}, and their numerical encodings must
 remain explicit and consistent throughout training, evaluation, and metric
@@ -955,7 +943,7 @@ configuration, and resulting checkpoints must be documented. The concrete
 architectures and configurations adopted in this thesis are reported in
 Chapter~\ref{chap:implementation}.
 
-Proxy-model training follows the fold-aware strategy defined in
+Model training follows the fold-aware strategy defined in
 Section~\ref{sec:methodology-split-generation}. For each target fold, the
 corresponding model instance is trained exclusively on the remaining folds and
 evaluated on the held-out samples. Training conditions must remain consistent
@@ -985,11 +973,11 @@ resulting model-dependent artifacts are evaluated under three conditions:
 
 \begin{enumerate}
 \item \textit{direct source-model evaluation}, in which adversarial artifacts
-are assessed against the fold-specific proxy-model checkpoint used to generate
+are assessed on the same fold-specific \gls{efficientnetb0} checkpoint used to generate
 them under the corresponding access assumptions;
 
 \item \textit{cross-model transfer evaluation}, in which the same artifacts
-are assessed against different proxy architectures;
+are assessed on \gls{resnet18} and the \gls{clip}-based classifier without reoptimization;
 
 \item \textit{black-box transfer evaluation}, in which the same artifacts are
 submitted to the selected black-box software systems.
@@ -997,16 +985,15 @@ submitted to the selected black-box software systems.
 
 Model-agnostic adversarial-style conditions and anti-forensic transformations
 are generated independently of a designated source model. Their evaluation
-across proxy architectures and black-box systems therefore measures response
+across architectures and black-box systems therefore measures response
 stability under shared manipulated conditions rather than transferability from
 a source model. The corresponding access assumptions and operational rationale
 are detailed in
 Section~\ref{sec:methodology-perturbation-selection-rationale}.
 
-The proxy-model and black-box evaluation levels must remain analytically
-distinct. Proxy models are inspectable and configurable components whose
-training conditions, checkpoints, and internal behavior are available for
-controlled analysis. The selected software systems are evaluated only through
+The white-box and black-box evaluations must remain analytically distinct.
+The experimenter can inspect the classifiers' training conditions,
+checkpoints, and internal behavior. The selected software systems are evaluated only through
 their observable inputs and outputs. Exposing both levels to the same clean
 samples, clean \gls{ood} inputs, adversarial artifacts, and anti-forensic
 artifacts enables comparative assessment without assuming architectural or
@@ -1050,7 +1037,7 @@ source model.
 
 Model-agnostic adversarial-style conditions require neither access to internal
 model properties nor interaction with observable scores. Their application
-across proxy architectures and black-box software systems therefore supports
+across the three classifiers and black-box software systems therefore supports
 comparison under a shared manipulated condition rather than transferability
 analysis from a designated source model.
 
@@ -1163,8 +1150,8 @@ Each generated artifact must remain associated with its source image,
 perturbation category, configuration, and evaluation condition. For
 model-dependent attacks, this association must also preserve the source-model
 checkpoint and the corresponding access assumption. These records support
-reproducibility and allow the same artifacts to be evaluated across proxy
-models and selected black-box software systems.
+reproducibility and allow the same artifacts to be evaluated across
+the white-box models and selected black-box software systems.
 
 Figure~\ref{fig:methodology-perturbation-workflow} summarizes the resulting
 workflow.
@@ -1386,8 +1373,8 @@ Section~\ref{sec:methodology-models-classification}. The black-box condition
 measures only observable transfer behavior and does not imply access to the
 internal properties of the selected software systems.
 
-Model-agnostic adversarial-style artifacts are evaluated across the proxy
-models and selected black-box software systems under the same manipulated
+Model-agnostic adversarial-style artifacts are evaluated across the
+classifiers and selected black-box software systems under the same manipulated
 condition. Because they are generated independently of a designated source
 model, differences in system behavior are interpreted as response variation
 under a shared condition rather than as adversarial transferability.
@@ -1409,7 +1396,7 @@ Section~\ref{sec:methodology-adversarial-attacks}, these transformations are
 not optimized against the gradients, loss function, observable scores, or
 decision boundary of a specific classifier. They are applied through
 predefined image-processing rules and can therefore be evaluated consistently
-across proxy models and selected black-box software systems.
+across white-box models and selected black-box software systems.
 
 The term \textit{anti-forensic} is used here in an experimental and operational
 sense and does not necessarily imply malicious intent or deliberate evidence
@@ -1504,7 +1491,7 @@ that the intended artifacts were produced correctly, but do not demonstrate
 robustness degradation. Their impact must be determined through subsequent
 evaluation using the common metric and comparison framework.
 
-The generated artifacts are evaluated on both the proxy classification models
+The generated artifacts are evaluated on both the white-box models
 and the selected black-box software systems. This common evaluation supports a
 structured comparison between controlled model behavior and the observable
 operational behavior of the selected software systems under the same
@@ -1542,7 +1529,7 @@ experimental condition, provenance, and integrity information.
 
 Files in the blind input view must use neutral identifiers and must not expose
 the reference operational class, fold, attack family, transformation type,
-proxy model, or other experimental descriptors through filenames, directory
+source model, or other experimental descriptors through filenames, directory
 names, or paths. The corresponding mapping remains available only within the
 separate control records.
 
@@ -1646,7 +1633,7 @@ and metric computation.
 The operational component of the \gls{fairlab} methodology evaluates software
 systems that provide automated or \gls{ai}-assisted functionality for image
 classification, semantic retrieval, multimedia triage, or forensic review.
-Unlike the proxy classification models described in
+Unlike the white-box models described in
 Section~\ref{sec:methodology-models-classification}, these systems are evaluated
 under black-box or near-black-box access conditions. No access is assumed to
 their internal architectures, training data, model weights, decision
@@ -1959,7 +1946,7 @@ direction. The \gls{ood} branch is evaluated through separate behavioral
 indicators and is not incorporated into the binary confusion matrix.
 
 The protocol does not adopt \gls{auroc} as a central cross-system metric.
-Although score-based measures are applicable to proxy models, the selected
+Although score-based measures are applicable to white-box models, the selected
 black-box systems may expose only categories, semantic tags, bookmarks,
 retrieval results, or system-specific scores whose meaning and calibration
 cannot be independently verified. The protocol therefore prioritizes measures
@@ -2106,13 +2093,13 @@ content. The reverse transition:
 is also measured because it may increase the volume of non-target content
 prioritized for human review.
 
-When continuous proxy-model outputs are available, the analysis also considers
+When continuous model outputs are available, the analysis also considers
 the mean maximum predicted-class probability and its variation relative to the
 corresponding clean condition. These quantities are diagnostic intra-model
 indicators and must not be interpreted as calibrated probabilities or compared
-directly across proxy architectures.
+directly across architectures.
 
-For each proxy model and manipulated condition, the maximum-probability shift
+For each model and manipulated condition, the maximum-probability shift
 is defined as:
 
 \begin{equation}
@@ -2137,8 +2124,8 @@ operational classes through:
 \item the proportion of \gls{ood} inputs assigned to \texttt{weapon};
 \item the proportion of \gls{ood} inputs assigned to
 \texttt{non\_weapon};
-\item the mean maximum predicted-class probability for proxy models;
-\item the proportion of proxy-model predictions whose maximum probability
+\item the mean maximum predicted-class probability for white-box models;
+\item the proportion of model predictions whose maximum probability
 meets or exceeds a predefined high-Max-P threshold;
 \item the proportion of unknown outputs exposed after normalization of
 black-box software outputs.
@@ -2162,8 +2149,8 @@ false-positive rate because \gls{ood} inputs do not belong to the supervised
 negative class, nor does it establish that an individual assignment is
 semantically correct, incorrect, relevant, or irrelevant.
 
-Maximum-probability-based \gls{ood} indicators are available only for proxy
-models. They remain diagnostic intra-model quantities because the selected
+In this study, maximum-probability-based \gls{ood} indicators are available
+only for the white-box models. They are interpreted within each model because the selected
 black-box systems do not expose homogeneous numerical outputs suitable for an
 equivalent cross-system probability analysis.
 
@@ -2258,7 +2245,7 @@ on forensic prioritization and review workload. \\
 
 \gls{ood} behavior
 &
-Weapon flag rate, in-domain assignment distribution, and proxy-model
+Weapon flag rate, in-domain assignment distribution, and model
 maximum-probability indicators. The branch remains excluded from binary
 classification metrics. \\
 
@@ -2284,7 +2271,7 @@ negatives. \\
 \end{table}
 
 Figure~\ref{fig:methodology-metric-layers} summarizes the metric structure
-across the proxy-model and black-box evaluation levels.
+across the white-box and black-box evaluation levels.
 
 \begin{figure}[H]
 \centering
@@ -2348,7 +2335,7 @@ draw=black!75
 
 \node[eval] (proxy) at (-4.5,-2.7)
 {\shortstack{
-\textbf{Proxy-model evaluation}\\[1mm]
+\textbf{White-box evaluation}\\[1mm]
 \scriptsize binary predictions and intra-model Max-P diagnostics
 }};
 
@@ -2369,7 +2356,7 @@ draw=black!75
 {\shortstack{
 \textbf{\gls{ood} and coverage indicators}\\[1mm]
 \scriptsize weapon flag rate, in-domain assignments, matching rate,\\
-\scriptsize unknown outcomes, and proxy-only Max-P indicators
+\scriptsize unknown outcomes, and Max-P for classifiers only
 }};
 
 \node[output] (interpretation) at (0,-8.4)
@@ -2395,7 +2382,7 @@ draw=black!75
 }
 \caption[Metric structure]{Metric structure. Condition-specific binary,
 robustness, \gls{ood}, and coverage indicators are computed across the
-proxy-model and black-box evaluation levels and integrated only during the
+white-box and black-box evaluation levels and integrated only during the
 operational interpretation}
 \label{fig:methodology-metric-layers}
 \end{figure}
@@ -2415,15 +2402,15 @@ inputs.
 
 The \gls{xai} component of the \gls{fairlab} methodology serves an exclusively
 diagnostic and qualitative function. It complements the quantitative robustness
-metrics by supporting the examination of selected cases involving an
-inspectable proxy classification model. Explainability outputs are not treated
+metrics by supporting the examination of selected \gls{efficientnetb0}
+predictions. Explainability outputs are not treated
 as stand-alone evidence, definitive explanations of algorithmic decisions, or
 demonstrations of model reliability. They are used to characterize attribution
 patterns and formulate hypotheses regarding changes in model behavior across
 clean, adversarial, anti-forensic, and \gls{ood} conditions.
 
-The explainability analysis is restricted to one selected fully inspectable
-proxy model. The adopted technique must be compatible with its architecture,
+The explainability analysis is restricted to \gls{efficientnetb0}.
+The adopted technique must be compatible with its architecture,
 weights, preprocessing procedure, and inference pipeline and may require access
 to gradients, intermediate activations, or other internal components. The same
 internal attribution analysis cannot be applied to the selected black-box or
@@ -2438,7 +2425,7 @@ predefined diagnostic criteria to examine behaviors that cannot be fully
 characterized through corpus-level metrics. The selected cases are not used to
 estimate general model performance.
 
-High-Max-P criteria are applied only within the selected proxy model and serve
+High-Max-P criteria are applied only within \gls{efficientnetb0} and serve
 exclusively as case-selection indicators. They must not be interpreted as
 calibrated probabilities or compared directly with numerical outputs from
 other architectures or software systems.
@@ -2502,8 +2489,8 @@ when their assumptions and limitations are compatible with the selected model
 and research questions. The specific technique and configuration adopted in
 this thesis are documented in Chapter~\ref{chap:implementation}.
 
-The adopted procedure should be compatible with the selected inspectable proxy
-model and should explicitly document the attribution target and reference
+The attribution method should be compatible with the selected classifier and
+should explicitly document the attribution target and reference
 baseline whenever required by the chosen method. The attribution process must
 be reproducible, applied consistently across the selected clean and manipulated
 cases, and traceable to the corresponding model checkpoint, input sample, and
@@ -2539,7 +2526,7 @@ robustness evaluation, and evidentiary assessment by a human forensic analyst.
 
 Traceability is a cross-cutting requirement of the entire \gls{fairlab}
 protocol. It applies to technical preparation, human-in-the-loop review,
-dataset freezing, partition generation, proxy-model training, perturbation
+dataset freezing, partition generation, model training, perturbation
 generation, bundle construction, black-box software evaluation, metric
 computation, and \gls{xai} analysis.
 
@@ -2629,15 +2616,14 @@ operational assignment, experimental condition, and integrity information. \\
 
 Prediction and normalization records
 &
-Connect proxy-model predictions and observable software outputs to the evaluated
+Connect model predictions and observable software outputs to the evaluated
 input and document any matching, recoding, or mapping decision. \\
 
 Metric and explainability records
 &
 Associate quantitative results and qualitative case studies with the underlying
 samples, model checkpoints, software configurations, and experimental
-conditions. Explainability records refer only to the selected inspectable proxy
-model. \\
+conditions. Explainability records refer only to \gls{efficientnetb0}. \\
 
 \bottomrule
 \end{tabularx}

@@ -19,16 +19,15 @@ receive appropriate priority, whereas an incorrect positive assignment may
 increase the analyst's review workload.
 
 The study therefore treated clean, adversarial, anti-forensic, and \gls{ood}
-inputs as separate evaluation conditions. It combined three white-box proxy
-models---\gls{efficientnetb0}, \gls{resnet18}, and a \gls{clip}-based
-proxy---with six frozen configurations of four selected black-box software
+inputs as separate evaluation conditions. It combined three white-box models---\gls{efficientnetb0}, \gls{resnet18}, and a \gls{clip}-based
+classifier---with six frozen configurations of four selected black-box software
 systems: \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{griffeye}/\gls{t3kcore}, \gls{excirefoto2025}, and
-\gls{cellebriteinseyets}. The proxy models provided inspectable predictions,
+\gls{cellebriteinseyets}. The classifiers provided inspectable predictions,
 maximum predicted-class probabilities, matched error transitions, and
 gradients. The black-box systems were assessed only through outputs observable
-to the analyst and explicitly documented normalization rules; no equivalence
-with the proxy architectures was assumed.
+to the analyst and explicitly documented normalization rules. No assumption
+was made about the commercial systems' internal architectures.
 
 Both evaluation levels used the same frozen source population of 1\,500
 images: 500 \texttt{weapon}, 500 \texttt{non\_weapon}, and 500 reserved for a
@@ -42,7 +41,7 @@ images and were not treated as independent cases.
 The complete procedure was formalized as the \gls{fairlab} protocol. FAIRLab
 is neither a classifier nor a standalone software platform; it is a
 task-specific methodological procedure linking human-validated dataset
-construction, deterministic partitioning, proxy-model analysis, controlled
+construction, deterministic partitioning, model analysis, controlled
 perturbation, blind-bundle preparation, black-box normalization, quantitative
 and qualitative analysis, and traceability controls.
 
@@ -64,14 +63,14 @@ and subordinate to expert assessment
 \label{sec:conclusions-research-questions}
 % ─────────────────────────────────────────────────────────────────────────────
 
-\paragraph{\textbf{RQ1. To what extent do the white-box proxy models retain
+\paragraph{\textbf{RQ1. To what extent do the three white-box models retain
 their clean-baseline performance under adversarial and anti-forensic
 conditions, and how do they assign inputs from the separate \gls{ood}
 population?}}
 
 Only to a condition-dependent extent. Clean accuracies are 0.978 for
 \gls{efficientnetb0}, 0.964 for \gls{resnet18}, and 0.927 for the
-\gls{clip}-based proxy, but these values do not remain uniformly representative
+\gls{clip}-based classifier, but these values do not remain uniformly representative
 outside the clean branch.
 
 The five anti-forensic transformations generally cause smaller aggregate
@@ -86,13 +85,13 @@ under \gls{fgsm} and to 0.015 under \gls{sigmazero}.
 The separate \gls{ood} branch reveals a further behavior that clean binary
 accuracy cannot predict. Fold-aggregated weapon assignment rates are 0.3696,
 0.4376, and 0.8356 for \gls{efficientnetb0}, \gls{resnet18}, and the
-\gls{clip}-based proxy, respectively. These are forced closed-set assignments,
+\gls{clip}-based classifier, respectively. These are forced closed-set assignments,
 not supervised correctness measures. Clean performance, anti-forensic
 sensitivity, direct adversarial vulnerability, and \gls{ood} behavior must
 therefore be evaluated as distinct dimensions
 (Sections~\ref{sec:results-clean-baseline}--\ref{sec:results-adversarial}).
 
-\paragraph{\textbf{RQ2. How do white-box proxy-model responses differ between
+\paragraph{\textbf{RQ2. How do the classifiers' responses differ between
 source-model evaluation, empirical cross-model transfer, and the
 model-agnostic \gls{colorshift} condition?}}
 
@@ -100,7 +99,7 @@ Source-model evaluation shows substantially larger effects than the observed
 cross-model transfer. The four model-dependent attacks were generated
 against fold-specific \gls{efficientnetb0} checkpoints, so their evaluation on
 that architecture is direct-target, whereas results for \gls{resnet18} and the
-\gls{clip}-based proxy measure empirical transfer.
+\gls{clip}-based classifier measure empirical transfer.
 
 The clearest direct-target failure is \gls{sigmazero}: accuracy falls to 0.015
 and 963 of 978 clean-correct samples become incorrect. \gls{fgsm} reduces
@@ -108,7 +107,7 @@ accuracy to 0.575 and introduces 406 errors, mainly in the
 \texttt{weapon}-to-\texttt{non\_weapon} direction. On the non-target models,
 the largest transferred degradation occurs under \gls{fgsm}, with accuracy
 decreasing from 0.964 to 0.918 for \gls{resnet18} and from 0.927 to 0.914 for
-the \gls{clip}-based proxy. Transferred \gls{sigmazero} artifacts do not
+the \gls{clip}-based classifier. Transferred \gls{sigmazero} artifacts do not
 reproduce the direct-target collapse.
 
 Transferability must therefore be measured rather than assumed. Its limited
@@ -164,7 +163,7 @@ the commercial configurations.
 
 The \gls{ood} branch creates a separate operational concern. A
 \texttt{weapon} assignment on an \gls{ood} input is not a supervised false
-positive, but it can still alter prioritization; every evaluated proxy and
+positive, but it can still alter prioritization; every evaluated classifier and
 black-box configuration produces a non-zero rate. Maximum predicted-class
 probability must also remain separate from reliability: the representative
 \gls{sigmazero} failure reaches 1.000 despite being incorrect.
@@ -193,7 +192,7 @@ The thesis makes four connected contributions.
 It formalizes \gls{fairlab} as a methodological procedure for evaluating
 \gls{ai}-based image analysis beyond clean accuracy. The protocol coordinates
 human-validated data construction, deterministic partitioning, white-box
-proxy analysis, perturbation generation, a separate \gls{ood} branch,
+model analysis, perturbation generation, a separate \gls{ood} branch,
 black-box evaluation, output normalization, explainability, and traceability.
 Its contribution is the integration of these components into one reproducible
 and auditable process, not the proposal of a new classifier or defensive
@@ -208,7 +207,7 @@ ensure that the 10\,000 perturbed artifacts remain identifiable as derived
 source--condition combinations rather than independent cases.
 
 \item \textbf{A parallel white-box and black-box evaluation.}
-The proxy models provide inspectable checkpoints, predictions, matched error
+The classifiers provide inspectable checkpoints, predictions, matched error
 transitions, maximum predicted-class probabilities, and gradients. The
 commercial systems expose heterogeneous tags, bookmarks, classification
 labels, and semantic-query results. Explicit mappings normalize these outputs
@@ -224,8 +223,8 @@ image to its experimental outcomes. The analysis emphasizes missed-target risk,
 false-positive review workload, \gls{ood} assignment behavior, configuration
 sensitivity, and residual metadata limitations rather than reducing robustness
 to one score. Five purposively selected \gls{ig} cases add qualitative
-proxy-model diagnostics without being treated as quantitative evidence or as
-explanations of the black-box systems.
+diagnostic information about \gls{efficientnetb0}. They are not quantitative
+evidence of robustness and do not explain the black-box systems.
 
 \end{enumerate}
 
@@ -278,7 +277,7 @@ their forensic relevance.
 
 Clean baseline
 &
-\gls{efficientnetb0} achieves the highest clean accuracy among the proxy models, at
+\gls{efficientnetb0} achieves the highest clean accuracy among the classifiers, at
 0.978. Under the adopted conservative mapping,
 \gls{griffeye}/\gls{t3kcore} achieves the highest clean accuracy among the
 selected black-box configurations, also at 0.978.
@@ -291,7 +290,7 @@ configuration-dependent conditions. \\
 
 \gls{ood}
 &
-The \gls{clip}-based proxy assigns 0.8356 of its fold-specific \gls{ood}
+The \gls{clip}-based classifier assigns 0.8356 of its fold-specific \gls{ood}
 responses to \texttt{weapon}. \gls{efficientnetb0} and \gls{resnet18} produce lower weapon
 assignment rates but substantially higher proportions of maximum predicted-class
 probabilities above 0.90. The black-box weapon assignment rates range from
@@ -321,7 +320,7 @@ Adversarial
 \gls{efficientnetb0} undergoes severe direct-target degradation under
 \gls{sigmazero}, with accuracy decreasing to 0.015, and under \gls{fgsm}, with
 accuracy decreasing to 0.575. The same artifacts produce more limited and
-heterogeneous transfer effects on \gls{resnet18}, the \gls{clip}-based proxy, and the
+heterogeneous transfer effects on \gls{resnet18}, the \gls{clip}-based classifier, and the
 selected black-box configurations.
 &
 High clean accuracy does not guarantee direct adversarial robustness. Transfer
@@ -360,7 +359,7 @@ supervised failure cases, and one \gls{ood} closed-set assignment. The cases
 include incorrect outputs associated with maximum predicted-class probabilities
 of up to 1.000.
 &
-Explainability supports qualitative diagnosis of selected proxy-model outputs
+Explainability supports qualitative diagnosis of selected \gls{efficientnetb0} outputs
 but does not establish prediction correctness, calibrated certainty, causal
 feature relevance, or black-box system behavior. \\
 
@@ -368,16 +367,16 @@ feature relevance, or black-box system behavior. \\
 \endgroup
 
 The clean results already expose different error tradeoffs. Although
-\gls{efficientnetb0} makes the fewest clean errors among the proxy models, the
-\gls{clip}-based proxy combines the lowest clean \gls{fnr} (0.012) with the
+\gls{efficientnetb0} makes the fewest clean errors among the classifiers, the
+\gls{clip}-based classifier combines the lowest clean \gls{fnr} (0.012) with the
 highest clean \gls{fpr} (0.134). Reducing missed targets can therefore increase
 the quantity of material presented for review.
 
 The separate \gls{ood} analysis adds a dimension that clean binary results do
-not capture. Both proxy models and black-box configurations assign some
+not capture. Both white-box models and black-box configurations assign some
 out-of-task inputs to the firearm-oriented state, but these assignments are not
 ordinary false positives. Assignment frequency and maximum predicted-class
-probability also describe different phenomena: the \gls{clip}-based proxy has
+probability also describe different phenomena: the \gls{clip}-based classifier has
 the highest \gls{ood} weapon assignment rate without any fold-specific response
 above 0.90, whereas \gls{resnet18} produces fewer weapon assignments but the
 highest high-maximum-probability rate.
@@ -444,7 +443,7 @@ reference assignment and is not an ordinary false positive, but it can still
 trigger a flag or increase review workload. Anomalous, ambiguous, degraded,
 synthetic, and semantically adjacent content should consequently be reported
 separately and, where supported, exposed through rejection or unknown states.
-Likewise, proxy-model maximum predicted-class probabilities are
+Likewise, the classifiers' maximum predicted-class probabilities are
 architecture-specific diagnostic values, not cross-model measures of
 correctness. Tags, bookmarks, exported percentages, labels, and retrieval
 membership from commercial systems have different semantics and must not be
@@ -519,7 +518,7 @@ traceable but remain dependent on the adopted criteria and reviewer judgment.
 The \gls{ood} branch intentionally combines borderline, degraded, synthetic,
 non-firearm weapon, and semantically external content. It is neither a
 homogeneous supervised class nor a universal representation of distributional
-shift. Proxy rates aggregate 2\,500 fold-specific responses---five checkpoints
+shift. White-box rates aggregate 2\,500 fold-specific responses---five checkpoints
 for each of 500 images---whereas each black-box configuration produces one
 decision per image. The reported proportions are parallel operating tendencies,
 not identical prediction units.
@@ -538,7 +537,7 @@ full reproduction of the published iterative method.
 \item \textbf{Direct-target scope and artifact representation.}
 The four model-dependent attacks were optimized only against fold-specific
 \gls{efficientnetb0} checkpoints. Results for \gls{resnet18}, the
-\gls{clip}-based proxy, and the black-box systems measure transfer and do not
+\gls{clip}-based classifier, and the black-box systems measure transfer and do not
 establish direct robustness. In addition, \gls{fgsm}, \gls{sigmazero}, and
 \gls{superdeepfool} were exported as \(224 \times 224\) \texttt{PNG} files,
 while clean sources retained heterogeneous formats and dimensions;
@@ -552,8 +551,8 @@ use reloaded serialized files; the diagnostic generation flags are not
 interchangeable with these outcomes. A matched-stage rerun would be required
 to isolate the causes of any discrepancy.
 
-\item \textbf{Proxy and black-box comparability.}
-The white-box proxy models are controlled experimental references, not validated
+\item \textbf{Comparability of white-box models and black-box systems.}
+The white-box models serve as controlled experimental references, not validated
 surrogates for proprietary internal models. Their gradients, probabilities,
 and attributions cannot explain black-box behavior. Conversely, black-box
 tags, bookmarks, labels, percentages, and retrieval membership have
@@ -631,7 +630,7 @@ the quality of human review.
 
 \paragraph{Matched adversarial evaluation and representation controls.}
 Direct-target attacks should be generated independently against
-\gls{resnet18} and the \gls{clip}-based proxy, using harmonized access
+\gls{resnet18} and the \gls{clip}-based classifier, using harmonized access
 assumptions and perturbation budgets where technically meaningful. This would
 permit a clearer comparison of direct vulnerability and transferability.
 Black-box transfer studies should also include clean controls matched to each
@@ -701,7 +700,7 @@ content, increase false-positive workload, assign \gls{ood} inputs to a closed
 operational category, respond differently after manipulation, or change
 materially with configuration.
 
-The parallel evaluation of white-box proxy models and selected black-box
+The parallel evaluation of white-box models and selected black-box
 configurations on the same frozen source population makes these differences
 observable without conflating inspectable model behavior with proprietary
 outputs. The \gls{fairlab} protocol provides the traceable structure needed to

@@ -11,14 +11,14 @@ content, their operational value depends on whether their behavior remains
 stable when inputs are degraded, distributionally different, or deliberately
 manipulated.
 
-This thesis evaluates the operational robustness of white-box proxy models
+This thesis evaluates the operational robustness of three white-box models
 and selected black-box software configurations used for automated image
 classification and semantic retrieval in forensic contexts. Rather than
 proposing a new classifier or ranking commercial products, the study examines
 how heterogeneous systems behave under clean, \gls{ood}, adversarial, and
 anti-forensic conditions. The evaluation is organized through \gls{fairlab}, a
 task-specific methodological protocol connecting human-validated dataset
-construction, deterministic partitioning, white-box proxy-model evaluation,
+construction, deterministic partitioning, evaluation of the white-box models,
 perturbation generation, blind-bundle preparation, black-box output
 normalization, quantitative analysis, qualitative explainability, and integrity
 controls. Its outcome is a task- and protocol-specific validation profile,
@@ -41,13 +41,12 @@ these derived populations form an 11\,500-item forensic evaluation bundle. The
 10\,000 manipulated artifacts remain source--condition variants of the same
 1\,000 binary images and do not represent independent underlying cases.
 
-The white-box level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
-\gls{clip}-based proxy. Here, \textit{proxy} identifies their controlled
-experimental role, whereas \textit{white-box} identifies the experimenter's
-access to architectures, checkpoints, scores, and gradients; it does not imply
-that every attack uses all of this information. The black-box level comprises
-four software systems
-evaluated through six frozen configurations:
+We evaluated three binary classifiers with white-box access: \gls{efficientnetb0},
+\gls{resnet18}, and a \gls{clip}-based classifier. They served as controlled
+experimental references and were not trained to reproduce the commercial
+systems' decisions. The experimenter had access to their architectures,
+checkpoints, scores, and gradients; individual attacks used only the information
+they required. Four black-box software systems were evaluated in six configurations:
 \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{griffeye}/\gls{t3kcore},
 \gls{excirefoto2025} at \texttt{D20}, \texttt{D50}, and \texttt{D80}, and
@@ -58,8 +57,8 @@ rules without assuming architectural or semantic equivalence.
 Four model-dependent attacks---\gls{fgsm}, \gls{onepixel}, \gls{sigmazero},
 and an internal \gls{superdeepfool} adapter---were generated against fold-specific
 \gls{efficientnetb0} checkpoints. Their evaluation on \gls{efficientnetb0}
-constitutes source-model evaluation, whereas their application to the other
-proxies measures empirical cross-model transfer. Commercial results describe
+constitutes source-model evaluation; using the same artifacts on the other two
+classifiers measures empirical cross-model transfer. Commercial results describe
 empirical responses to transferred artifacts and may also reflect resizing
 and serialization differences from the native clean inputs. The
 model-agnostic \gls{colorshift} condition and five anti-forensic transformations
@@ -70,9 +69,9 @@ qualitative \gls{ig} case studies. Probability and explainability outputs are
 used only as model-specific diagnostic evidence.
 
 The results show that strong clean performance does not imply uniform
-operational robustness. Clean proxy-model accuracies are 0.978 for
+operational robustness. Clean accuracy is 0.978 for
 \gls{efficientnetb0}, 0.964 for \gls{resnet18}, and 0.927 for the
-\gls{clip}-based proxy. Under direct-target evaluation,
+\gls{clip}-based classifier. Under direct-target evaluation,
 \gls{efficientnetb0} accuracy decreases to 0.575 under \gls{fgsm} and to 0.015
 under \gls{sigmazero}. The same artifacts produce more limited and
 heterogeneous effects on the non-target systems, demonstrating that empirical
@@ -81,9 +80,9 @@ generally produce smaller aggregate variations than the strongest direct-target
 attacks but still introduce operationally relevant sample-level errors.
 
 The separate \gls{ood} analysis further shows that out-of-task inputs may still
-be assigned to the firearm-oriented operational state. At the proxy level, the
-fold-aggregated weapon assignment rates are 0.3696 for \gls{efficientnetb0},
-0.4376 for \gls{resnet18}, and 0.8356 for the \gls{clip}-based proxy. These
+be assigned to the firearm-oriented operational state. The fold-aggregated
+weapon assignment rates are 0.3696 for \gls{efficientnetb0},
+0.4376 for \gls{resnet18}, and 0.8356 for the \gls{clip}-based classifier. These
 values represent closed-set assignment behavior rather than supervised
 correctness.
 
@@ -103,7 +102,7 @@ task-specific validation, explicit threat modeling, documented versions and
 configurations, separate analysis of \gls{ood} behavior, source-to-output
 traceability, and continued expert verification. \gls{fairlab} contributes a
 unified and auditable procedure for making these requirements experimentally
-observable across white-box proxy models and selected black-box software
+observable across white-box models and selected black-box software
 configurations evaluated on the same frozen experimental basis.
 
 \vfill

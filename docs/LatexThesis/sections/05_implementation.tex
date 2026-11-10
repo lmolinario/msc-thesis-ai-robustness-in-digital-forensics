@@ -6,7 +6,7 @@
 This chapter documents the concrete implementation of the \gls{fairlab}
 methodology introduced in Chapter~\ref{chap:methodology}. It describes the
 preparation and freezing of the image corpus, deterministic data partitioning,
-fold-aware proxy-model training, adversarial and anti-forensic artifact
+fold-aware model training, adversarial and anti-forensic artifact
 generation, construction of the forensic evaluation bundle, normalization of
 black-box software outputs, explainability analysis, and the controls used to
 preserve artifact identity, provenance, integrity, and reproducibility.
@@ -20,7 +20,7 @@ procedures from being conflated with measured robustness.
 Both evaluation levels operate on the same frozen source population. The
 1\,000 clean binary images and 500 clean \gls{ood} images constitute the source
 corpus, while 10\,000 adversarial and anti-forensic artifacts are derived
-exclusively from the binary subset. The proxy models process manifest-linked
+exclusively from the binary subset. The classifiers process manifest-linked
 inputs and derived artifacts, whereas the selected black-box software systems
 receive neutrally identified, byte-identical copies through the forensic
 evaluation bundle. Equivalence between these views is verified through
@@ -83,7 +83,7 @@ Dataset partitioning
 Deterministic clean folds, the separate \gls{ood} evaluation manifest, and the
 split-generation summary. \\
 
-Proxy-model training
+Model training
 &
 \codepath{models/scripts/12_train_proxy_models.py}
 &
@@ -99,13 +99,13 @@ and
 Anti-forensic and adversarial artifacts, generation manifests, perturbation
 parameters, source-image references, and integrity information. \\
 
-Proxy-model evaluation and bundle construction
+Model evaluation and bundle construction
 &
 \codepath{evaluation/scripts/15_evaluate_proxy_models.py}
 and
 \codepath{datasets/scripts/bundle/16_build_forensic_evaluation_bundle.py}
 &
-Proxy-model predictions, evaluation metrics, and the blind and auditable
+Model predictions, evaluation metrics, and the blind and auditable
 11\,500-file forensic evaluation bundle. \\
 
 Explainability and black-box normalization
@@ -142,8 +142,8 @@ and reporting-asset usage audits. \\
 At the repository level, the implementation is divided into functional
 components. Dataset preparation, split generation, and bundle construction are
 maintained under \codepath{datasets/}; perturbation manifests and reports under
-\codepath{attacks/}; proxy architectures, checkpoints, and training records
-under \codepath{models/}; proxy predictions and normalized black-box outputs
+\codepath{attacks/}; architectures, checkpoints, and training records
+under \codepath{models/}; model predictions and normalized black-box outputs
 under \codepath{evaluation/}; commercial-tool documentation and sanitized
 extracts under \codepath{forensic_tools/}; explainability scripts and artifacts
 under \codepath{explainability/}; and consolidated metrics, reporting assets,
@@ -155,15 +155,15 @@ across Windows PowerShell and Linux/Kali environments according to the
 requirements of each stage. Black-box processing additionally required licensed
 installations of the selected software systems. The repository-level
 \codepath{requirements.txt} file defines the Python dependency set, including
-the libraries used for data processing, image manipulation, proxy-model
+the libraries used for data processing, image manipulation, model
 training and inference, adversarial generation, source acquisition,
 visualization, and explainability. PyTorch and Torchvision provide the
 deep-learning framework, \texttt{open\_clip\_torch} supports the
-\gls{clip}-based proxy model, and Captum supports the \gls{ig} workflow.
+\gls{clip}-based classifier, and Captum supports the \gls{ig} workflow.
 
 The code supports CPU and CUDA-enabled execution. Manifest inspection, output
 normalization, metric validation, and reporting audits can be performed without
-dedicated acceleration, whereas proxy-model training, iterative adversarial
+dedicated acceleration, whereas model training, iterative adversarial
 generation, and explainability regeneration constitute the most computationally
 demanding stages.
 
@@ -731,11 +731,10 @@ which contains only the 500 \texttt{weapon} and 500
 \texttt{non\_weapon} samples.
 
 This balanced 1\,000-image subset provides the source population for clean-fold
-generation, proxy-model training, clean binary evaluation, and adversarial and
+generation, model training, clean binary evaluation, and adversarial and
 anti-forensic artifact generation. The 500 \gls{ood} samples are excluded from
 training and perturbation generation and remain available as clean evaluation
-inputs for both the proxy architectures and the selected black-box software
-systems.
+inputs for both the three classifiers and the selected black-box systems.
 
 Table~\ref{tab:implementation-frozen-manifests} summarizes the canonical
 manifests produced by the freezing stage.
@@ -765,7 +764,7 @@ Canonical definition of the complete frozen dataset, including the
 &
 1\,000
 &
-Balanced binary subset used for fold generation, proxy-model training, clean
+Balanced binary subset used for fold generation, model training, clean
 evaluation, and generation of adversarial and anti-forensic artifacts. \\
 
 \codepath{datasets/final/manifests/manual_selection_removed.csv}
@@ -999,13 +998,13 @@ generated from different versions of the frozen dataset from being combined
 unintentionally.
 
 The resulting folds define the common partitioning structure used by the
-fold-aware proxy-model implementation described in
+fold-aware model implementation described in
 Section~\ref{sec:implementation-proxy-models}. The separate \gls{ood} branch
 remains outside binary model training and perturbation generation and is
 retained for its dedicated behavioral evaluation.
 
 % ─────────────────────────────────────────────────────────────────────────────
-\section{White-Box Proxy-Model Implementation}
+\section{Implementation of White-Box Models}
 \label{sec:implementation-proxy-models}
 % ─────────────────────────────────────────────────────────────────────────────
 
@@ -1014,20 +1013,15 @@ retained for its dedicated behavioral evaluation.
 \label{subsec:implementation-architectures}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The white-box proxy-model layer was implemented through three fully inspectable
-binary classifiers: \gls{resnet18}, \gls{efficientnetb0}, and a \gls{clip}-based classifier built
-on a ViT-B/32 visual encoder. The two convolutional architectures were adapted
-through supervised fine-tuning, whereas the \gls{clip} proxy uses frozen
-pretrained visual representations and a trainable binary head. This
-implementation provides three controlled architectural references without
-assuming equivalence with the selected black-box software systems.
-All three proxies are white-box models with respect to the experimenter:
-architectures, checkpoints, scores, and gradients are accessible. The
-information actually used during attack generation is a separate choice.
-Only \gls{efficientnetb0} was designated as the white-box source model for
-the model-dependent adversarial artifacts. \gls{resnet18} and the
-\gls{clip}-based proxy retain white-box access but serve as receiving
-architectures for empirical transfer, rather than as directly attacked models.
+Three binary classifiers were evaluated with white-box access: \gls{resnet18},
+\gls{efficientnetb0}, and a \gls{clip}-based classifier built on a ViT-B/32
+visual encoder. The two convolutional networks were fine-tuned on the binary
+task. For the \gls{clip}-based classifier, the pretrained encoder was frozen
+and only a linear binary head was trained. The experimenter had access to all
+three architectures, checkpoints, scores, and gradients.
+Only \gls{efficientnetb0} was used to generate model-dependent perturbations.
+The same artifacts were evaluated on \gls{resnet18} and the \gls{clip}-based
+classifier to measure transfer; neither was used to optimize the attacks.
 
 All three models use the same class-to-index mapping:
 
@@ -1038,7 +1032,7 @@ All three models use the same class-to-index mapping:
 \]
 
 The \gls{ood} branch is not represented as a third output and is excluded from
-proxy-model training. Its images are processed only during the dedicated
+model training. Its images are processed only during the dedicated
 \gls{ood} evaluation stage.
 
 The model suite is implemented in
@@ -1054,11 +1048,11 @@ architectures and their adaptation to the binary task.
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{4pt}
-\caption{Proxy-model architectures implemented for the binary classification task}
+\caption{Model architectures implemented for the binary classification task}
 \label{tab:implementation-proxy-architectures}
 \begin{tabularx}{\textwidth}{@{}p{0.20\textwidth} p{0.30\textwidth} X@{}}
 \toprule
-\textbf{Proxy model} &
+\textbf{Model} &
 \textbf{Implementation} &
 \textbf{Binary adaptation} \\
 \midrule
@@ -1088,8 +1082,8 @@ white-box source model for model-dependent adversarial generation
 \texttt{openai} weights
 &
 The visual encoder is frozen and connected to a trainable linear head with two
-outputs. The resulting proxy classifies pretrained visual representations
-rather than using the original image--text similarity interface
+outputs. The binary head predicts the class from the encoder's visual
+representation rather than using the original image--text similarity interface
 \cite{radford2021learning}. \\
 
 \bottomrule
@@ -1101,7 +1095,7 @@ corresponding \texttt{IMAGENET1K\_V1} weight definitions exposed by
 Torchvision. Training terminates if these definitions are unavailable rather
 than silently falling back to random initialization.
 
-The \gls{clip}-based proxy is constructed from the
+The \gls{clip}-based classifier is constructed from the
 \texttt{open\_clip} ViT-B/32 visual encoder with the
 \texttt{openai} pretrained weights. All encoder parameters are frozen. For
 each image, the encoder produces a visual feature vector that is normalized to
@@ -1109,7 +1103,7 @@ unit length and passed to a trainable linear layer with two outputs.
 
 The fold-specific \gls{clip} checkpoints store the parameters of the binary
 head rather than a complete copy of the pretrained visual encoder.
-Reconstructing the full proxy therefore requires the external ViT-B/32 model
+Reconstructing the full classifier therefore requires the external ViT-B/32 model
 and pretrained weights identified in the model registry.
 
 A common image-loading procedure is used for all three architectures. Each file
@@ -1140,7 +1134,7 @@ normalization values used by the implemented models.
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{5pt}
-\caption{Input normalization used by the proxy models}
+\caption{Input normalization used by the classifiers}
 \label{tab:implementation-proxy-normalization}
 \begin{tabularx}{\textwidth}{@{}p{0.25\textwidth} p{0.33\textwidth} X@{}}
 \toprule
@@ -1170,7 +1164,7 @@ evaluation. A shared normalization scheme is not applied because the
 ImageNet-initialized convolutional models and the \gls{clip} visual encoder
 were pretrained under different input-normalization conventions.
 
-Each proxy exposes two output logits corresponding to the fixed binary mapping.
+Each classifier exposes two output logits corresponding to the fixed binary mapping.
 Prediction probabilities are derived from these logits by the evaluation
 pipeline and are not stored in the dataset or preprocessing manifests.
 Training, held-out-fold handling, checkpoint selection, and model-integrity
@@ -1192,7 +1186,7 @@ Section~\ref{subsec:implementation-training}.
 \label{subsec:implementation-training}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The proxy models were trained through a fold-aware leave-one-fold-out
+The classifiers were trained through a fold-aware leave-one-fold-out
 procedure. For each architecture and target fold, the target fold was reserved
 as the held-out evaluation partition, while the remaining four folds were used
 to construct the training and internal validation sets. No checkpoint was
@@ -1225,7 +1219,7 @@ training configuration implemented by
 \small
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{5pt}
-\caption{Proxy-model training configuration}
+\caption{Model training configuration}
 \label{tab:implementation-proxy-training-configuration}
 \begin{tabularx}{0.92\textwidth}{@{}l X@{}}
 \toprule
@@ -1290,7 +1284,7 @@ classification layers were optimized. The script also exposes a
 \texttt{--freeze-backbone} option for alternative or diagnostic runs, but this
 option is not part of the frozen CNN configuration.
 
-For the \gls{clip}-based proxy, the pretrained visual encoder remained frozen
+For the \gls{clip}-based classifier, the pretrained visual encoder remained frozen
 and only the binary linear head was optimized. The effective training
 configuration, including the batch size and backbone-freezing state, is stored
 inside each fold-specific checkpoint.
@@ -1345,7 +1339,7 @@ Fold-specific checkpoints are stored according to the pattern
 contains:
 
 \begin{equation}
-3\ \text{proxy architectures}
+3\ \text{architectures}
 \times
 5\ \text{held-out folds}
 =
@@ -1355,7 +1349,7 @@ contains:
 For \gls{resnet18} and \gls{efficientnetb0}, each checkpoint contains the trained model
 state, class mapping, held-out-fold identifier, input size, training
 configuration, creation timestamp, and metric history available when the
-checkpoint was saved. For the \gls{clip}-based proxy, the checkpoint stores the
+checkpoint was saved. For the \gls{clip}-based classifier, the checkpoint stores the
 trained binary-head parameters and identifies the external ViT-B/32
 architecture and pretrained weights required to reconstruct the frozen visual
 encoder.
@@ -1368,7 +1362,7 @@ principal outputs of the training stage.
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{4pt}
-\caption{Outputs produced by the proxy-model training stage}
+\caption{Outputs produced by the model training stage}
 \label{tab:implementation-proxy-checkpoint-artifacts}
 \begin{tabularx}{\textwidth}{@{}p{0.44\textwidth} X@{}}
 \toprule
@@ -1404,7 +1398,7 @@ and fold-specific \gls{sha256} digests. \\
 \codepath{models/reports/train_all_proxy_models.log}
 &
 Raw execution log containing the epoch-level training and validation progression
-of the complete proxy-model suite. \\
+of the complete model suite. \\
 
 \bottomrule
 \end{tabularx}
@@ -1457,8 +1451,8 @@ clean binary images for every selected condition.
 The frozen suite comprises four model-dependent attacks---\gls{fgsm}, One
 Pixel, Sigma-Zero, and SuperDeepFool---and the model-agnostic Color Shift
 condition. FGSM, Sigma-Zero, and SuperDeepFool require white-box access to
-gradients or decision-boundary information. One Pixel uses score-based access
-to the output probabilities of the target proxy model. Color Shift does not
+gradients or decision-boundary information. One Pixel uses only the output
+probabilities of the source model, \gls{efficientnetb0}. Color Shift does not
 query a model and is therefore recorded as an adversarial-style condition
 rather than as a white-box or score-based attack.
 
@@ -2058,7 +2052,7 @@ transformed \gls{sha256} values.
 The script supports optional immediate evaluation of generated artifacts against
 an \gls{efficientnetb0} checkpoint and an evaluation-only mode for an existing
 anti-forensic manifest. These modes are auxiliary to the generation stage. The
-canonical comparative proxy-model evaluation is performed separately through
+canonical comparative model evaluation is performed separately through
 the common evaluation pipeline described in
 Section~\ref{subsec:implementation-metrics}.
 
@@ -2214,8 +2208,8 @@ No adversarial or anti-forensic generation};
 + 5\,000 anti-forensic};
 
 \node[box, fill=orange!10] (proxy) at (-4.2,-14.1)
-{\textbf{White-box proxy-model evaluation}\\
-\gls{efficientnetb0}, \gls{resnet18}, and \gls{clip}-based proxy};
+{\textbf{White-box evaluation}\\
+\gls{efficientnetb0}, \gls{resnet18}, and the \gls{clip}-based classifier};
 
 \node[box, fill=orange!10] (blackbox) at (4.2,-14.1)
 {\textbf{Black-box software evaluation}\\
@@ -2223,7 +2217,7 @@ Magnet AXIOM/Magnet.AI; Griffeye/T3K CORE;\\
 Excire Foto 2025; Cellebrite Inseyets};
 
 \node[box, fill=green!10] (proxout) at (-4.2,-16.8)
-{\textbf{Proxy outputs}\\
+{\textbf{Model outputs}\\
 Predictions, metrics, directional errors, Max-P indicators,
 and five-case Integrated Gradients analysis};
 
@@ -2265,8 +2259,8 @@ integrity controls, audit records, and human-review implications};
 in this thesis. The 1\,500-image frozen dataset is divided into a 1\,000-image
 binary branch and a separate 500-image clean \gls{ood} branch. Adversarial and
 anti-forensic artifacts are generated only from the binary subset. The resulting
-11\,500-item bundle supports parallel proxy-model and black-box software
-evaluation, followed by output normalization, metrics, qualitative
+11\,500-item bundle is used to evaluate both the white-box models and the black-box
+software, followed by output normalization, metrics, qualitative
 explainability for \gls{efficientnetb0}, and traceability controls}
 \label{fig:implementation-fairlab-instantiation}
 \end{figure}
@@ -2365,7 +2359,7 @@ their byte content.
 
 Blind file names are checked against a list of forbidden semantic and
 experimental tokens, including binary assignment values, \gls{ood}
-indicators, perturbation names, fold identifiers, and proxy-model names. The
+indicators, perturbation names, fold identifiers, and model names. The
 file stem must also correspond exactly to the assigned bundle identifier.
 
 The structured audit view reproduces the experimental hierarchy separately.
@@ -2379,8 +2373,8 @@ into the black-box software systems.
 The canonical mapping is stored in
 \codepath{datasets/forensic_evaluation_bundle/metadata/bundle_manifest.csv}.
 For each logical item, it records the assigned \texttt{bundle\_id}, the blind
-input file name, the sample type, the perturbation family and name, the target
-proxy model when applicable, the experimental fold, the reference operational
+input file name, the sample type, the perturbation family and name, the source
+model when applicable, the experimental fold, the reference operational
 assignment, and the source dataset.
 
 The manifest also preserves the original and generated image identifiers, the
@@ -2474,7 +2468,7 @@ Neither the bundle metadata nor the structured audit view was included in the
 software input. The evaluated systems therefore received neutrally identified
 files following the \texttt{bundle\_XXXXXX} convention, without reference
 operational assignments, perturbation families or conditions, fold
-identifiers, proxy-model information, source provenance, or explicit
+identifiers, model information, source provenance, or explicit
 \gls{ood} indicators in the imported paths or file names.
 
 The same interpretive and distribution boundary applies to all four systems.
@@ -3599,13 +3593,13 @@ Section~\ref{subsec:implementation-metrics}.
 \label{subsec:implementation-metrics}
 % ─────────────────────────────────────────────────────────────────────────────
 
-Proxy-model outputs and normalized black-box software decisions were processed
+Model outputs and normalized black-box software decisions were processed
 through two separate computational pipelines. This separation preserves the
 distinction between predictions obtained from fully accessible models and
 operational decisions reconstructed from observable commercial-software
 exports.
 
-Proxy-model predictions and metrics were generated through
+Model predictions and metrics were generated through
 \codepath{evaluation/scripts/15_evaluate_proxy_models.py}. Black-box software
 metrics were generated as part of the normalization pipeline implemented
 through
@@ -3627,12 +3621,12 @@ The \gls{ood} branch is handled separately and does not contribute to the
 denominators of binary accuracy, precision, recall, F1-score, \gls{fpr}, or
 \gls{fnr}.
 
-\paragraph{Proxy-model prediction generation.}
+\paragraph{Model prediction generation.}
 
-The proxy-model evaluation pipeline consumes the clean-fold manifest, the
+The model evaluation pipeline consumes the clean-fold manifest, the
 separate \gls{ood} evaluation manifest, the five canonical
 adversarial-generation manifests, the anti-forensic transformation manifest,
-and the 15 fold-specific proxy-model checkpoints.
+and the 15 fold-specific model checkpoints.
 
 The public evaluation entry point wraps the preserved implementation with
 additional integrity controls. Before inference, it verifies that the loaded
@@ -3688,7 +3682,7 @@ The evaluation population contains 11\,500 distinct experimental inputs:
 \end{equation}
 
 Clean and perturbed binary samples are evaluated once by each of the three
-proxy architectures, using the checkpoint associated with their assigned fold:
+architectures, using the checkpoint associated with their assigned fold:
 
 \begin{equation}
 1\,000
@@ -3722,7 +3716,7 @@ architecture:
 7\,500\ \text{\gls{ood} prediction rows}.
 \end{equation}
 
-The complete proxy-model prediction table therefore contains:
+The complete model prediction table therefore contains:
 
 \begin{equation}
 3\,000
@@ -3783,14 +3777,14 @@ The \gls{fpr} and \gls{fnr} are implemented as:
 {\mathrm{FN}+\mathrm{TP}}.
 \end{equation}
 
-Clean metrics are grouped by proxy architecture. Adversarial-stage metrics are
+Clean metrics are grouped by architecture. Adversarial-stage metrics are
 grouped by evaluated architecture, perturbation condition, and attack target
 model. Anti-forensic metrics are grouped by evaluated architecture and
 transformation condition.
 
 The attack-target field is retained because the model-dependent adversarial
 artifacts were generated against fold-aware \gls{efficientnetb0} checkpoints but
-were subsequently evaluated by all three proxy architectures. This distinction
+were subsequently evaluated by all three architectures. This distinction
 supports separate analysis of direct target-model behavior and cross-model
 transfer. Color Shift remains marked as model-agnostic and is not interpreted
 as a transfer attack.
@@ -3799,7 +3793,7 @@ The maximum predicted-class probabilities stored by the evaluation pipeline are
 used only as intra-model diagnostic values. They are not assumed to be
 calibrated across architectures and are not used as directly comparable
 confidence measures between \gls{resnet18}, \gls{efficientnetb0}, and the
-\gls{clip}-based proxy.
+\gls{clip}-based classifier.
 
 \paragraph{Clean-to-perturbed comparison.}
 
@@ -3818,7 +3812,7 @@ The perturbed prediction record is enriched with the clean prediction, clean
 correctness state, clean class probabilities, clean maximum predicted-class
 probability, and probability difference relative to the perturbed input.
 
-For each proxy architecture and perturbation condition, the comparative layer
+For each architecture and perturbation condition, the comparative layer
 records clean and perturbed accuracy, the schema field
 \texttt{robust\_accuracy}, and the corresponding accuracy drop. The stored
 value of \texttt{robust\_accuracy} is identical to the perturbed-condition
@@ -3899,9 +3893,9 @@ perturbation. If the predicted class changes, it does not compare the
 probability assigned to the same semantic class. It is therefore retained only
 as an intra-model diagnostic.
 
-\paragraph{Proxy-model \gls{ood} metrics.}
+\paragraph{Model \gls{ood} metrics.}
 
-The \gls{ood} branch is summarized independently for each proxy architecture.
+The \gls{ood} branch is summarized independently for each architecture.
 The resulting records report the fold-aggregated number of checkpoint responses,
 the number and rate of predictions assigned to \texttt{weapon}, and the number
 assigned to \texttt{non\_weapon}. They also preserve the mean maximum
@@ -3925,20 +3919,20 @@ tendency to flag \gls{ood} content as firearm-related.
 Neither quantity represents supervised correctness because the \gls{ood}
 branch has no positive or negative binary reference assignment. The associated
 probabilities remain architecture-specific diagnostic outputs and are not
-treated as calibrated across proxy models.
+treated as calibrated across white-box models.
 
 
-\paragraph{Proxy-model evaluation artifacts.}
+\paragraph{Model evaluation artifacts.}
 
 Table~\ref{tab:implementation-proxy-metric-artifacts} lists the principal
-prediction and metric records generated by the proxy-model evaluation stage.
+prediction and metric records generated by the model evaluation stage.
 
 \begin{table}[H]
 \centering
 \scriptsize
 \renewcommand{\arraystretch}{1.15}
 \setlength{\tabcolsep}{4pt}
-\caption{Proxy-model prediction records and metric outputs}
+\caption{Model prediction records and metric outputs}
 \label{tab:implementation-proxy-metric-artifacts}
 \begin{tabularx}{\textwidth}{@{}p{0.47\textwidth} X@{}}
 \toprule
@@ -4020,7 +4014,7 @@ The robustness table contains:
 
 The confusion-matrix table contains one record for each of the 33 binary
 condition rows, while the final \gls{ood} table contains one record for each of
-the three proxy architectures. The frozen evaluation completed all 40\,500
+the three architectures. The frozen evaluation completed all 40\,500
 prediction operations without recorded inference errors.
 
 \paragraph{Black-box software metric computation.}
@@ -4083,7 +4077,7 @@ records rather than edited manually.
 
 The downstream reporting entry point is
 \codepath{results/scripts/20_generate_experimental_reporting_assets.py}. It
-reads the consolidated proxy-model and black-box metric files and generates
+reads the metric files for the white-box models and black-box systems and generates
 presentation-layer assets without recreating datasets, perturbations,
 predictions, or metrics.
 
@@ -4111,7 +4105,7 @@ Chapter~\ref{chap:results}.
 The complete metric layer therefore preserves three distinct levels:
 
 \begin{enumerate}
-\item sample-level proxy-model predictions or normalized black-box software
+\item sample-level model predictions or normalized black-box software
 decisions;
 \item condition-level and comparative metric records;
 \item presentation-layer figures and thesis-ready tables.
@@ -4140,8 +4134,8 @@ identifiers, and run-specific output cleanup. Interactive manual review uses a
 graphical backend, whereas noninteractive attribution generation uses a
 headless-safe backend.
 
-The \gls{xai} workflow is restricted to white-box proxy models. It is not
-used to explain \gls{magnetai}, \gls{t3kcore},
+The \gls{xai} workflow examines only \gls{efficientnetb0}. It is not used
+to explain \gls{magnetai}, \gls{t3kcore},
 \gls{excirefoto2025}, or \gls{cellebriteinseyets}, because the gradients,
 internal representations, and model parameters required by \gls{ig} are not
 accessible for these black-box software systems.
@@ -4154,9 +4148,8 @@ and input path required to identify diagnostically relevant cases.
 
 The frozen thesis workflow applies \gls{ig} exclusively to \gls{efficientnetb0},
 which was also the designated white-box source model used for model-dependent
-adversarial generation. The corresponding attribution maps must therefore be interpreted
-as evidence concerning the white-box \gls{efficientnetb0} proxy rather than as
-explanations of the selected black-box software systems.
+adversarial generation. The attribution maps therefore characterize this
+classifier's predictions, not the decisions of the selected black-box systems.
 
 For each selected case, the implementation loads the checkpoint associated with
 the input's assigned fold. The hardened entry point computes the checkpoint
@@ -4168,7 +4161,7 @@ computed and recorded digests differ.
 The input-image SHA-256 value is also verified whenever an expected digest is
 available in the prediction or perturbation metadata. The image is then opened
 through the common EXIF-aware RGB-loading procedure and processed using the
-same \gls{efficientnetb0} transformation applied during proxy-model evaluation.
+same \gls{efficientnetb0} transformation applied during model evaluation.
 
 The resulting model-input tensor is passed to the Captum implementation of
 \gls{ig}. The baseline is generated as a tensor of zeros having the same shape
@@ -4185,7 +4178,7 @@ as the preprocessed input:
 This baseline does not represent an independently stored reference image and
 must not be interpreted as a black RGB image in the original pixel space.
 
-The frozen thesis cases use the proxy model's predicted class as the attribution
+The frozen thesis cases use the class predicted by \gls{efficientnetb0} as the attribution
 target. This configuration produces an attribution map for the output actually
 selected by the model, including incorrect binary predictions and
 \gls{ood} assignments. The implementation also supports attribution to the
@@ -4208,7 +4201,7 @@ configuration used to generate the historical thesis figures.
 \textbf{Frozen value} \\
 \midrule
 
-Proxy architecture
+Classifier analyzed
 &
 \gls{efficientnetb0} \\
 
@@ -4518,8 +4511,8 @@ identifier. \\
 The explainability layer is intentionally qualitative and diagnostic. The
 generated maps are not semantic segmentations, causal demonstrations,
 calibrated reliability estimates, or explanations of the selected black-box
-software systems. They provide evidence concerning the attribution behavior of
-the white-box \gls{efficientnetb0} proxy for the selected cases and complement,
+software systems. For the selected cases, the maps show how
+\gls{efficientnetb0} attributes its predictions to the input; they complement,
 rather than replace, the quantitative robustness metrics.
 
 The integrity and provenance controls shared across the complete experimental
@@ -4535,7 +4528,7 @@ Section~\ref{sec:implementation-traceability}.
 Traceability, integrity, and controlled reproducibility were implemented as
 cross-cutting properties of the experimental workflow rather than as controls
 introduced only after evaluation. The resulting protocol links the frozen
-dataset, deterministic partitions, proxy-model checkpoints, derived
+dataset, deterministic partitions, model checkpoints, derived
 perturbations, black-box inputs, normalized software outputs, metric tables,
 explainability cases, and reporting assets through stable identifiers,
 cryptographic digests, manifests, registries, and version-controlled metadata.
@@ -4561,7 +4554,7 @@ Stable identifiers are assigned at successive processing stages. Prepared
 source images receive an \texttt{image\_id}; generated perturbations receive a
 \texttt{generated\_image\_id}; black-box inputs receive a semantically neutral
 \texttt{bundle\_id}; and selected explainability cases receive a
-\texttt{case\_id}. Proxy-model checkpoints are identified through the
+\texttt{case\_id}. Model checkpoints are identified through the
 combination of architecture and held-out fold.
 
 The principal provenance chain is:
@@ -4655,9 +4648,9 @@ digest and fail on mismatch. Thesis-level explainability images are checked
 through their manifest paths, case metadata, and asset audits.
 
 The checkpoint digests stored in
-\codepath{models/model_registry.json} bind every proxy architecture and
+\codepath{models/model_registry.json} bind every architecture and
 held-out fold to its serialized checkpoint. They are checked before canonical
-proxy evaluation, model-dependent adversarial generation, and hardened
+model evaluation, model-dependent adversarial generation, and hardened
 explainability generation.
 
 Archive-level integrity is maintained separately from per-file integrity. The
@@ -4717,11 +4710,11 @@ prediction.
 The principal frozen invariants comprise 1\,500 records in the final dataset,
 including 1\,000 binary samples and 500 \gls{ood} inputs. The binary subset is
 partitioned into five clean folds containing 200 images each and is associated
-with 15 fold-aware proxy-model checkpoints. The experimental pipeline also
+with 15 fold-aware model checkpoints. The experimental pipeline also
 produces 5\,000 adversarial and 5\,000 anti-forensic artifacts, resulting in
 11\,500 unique items in the forensic evaluation bundle.
 
-At the evaluation level, the frozen outputs include 40\,500 proxy-model
+At the evaluation level, the frozen outputs include 40\,500 model
 prediction rows, 69\,000 canonical sanitized black-box software decisions, and
 186 black-box software metric rows. The explainability branch retains five
 canonical thesis-level cases and 20 associated visual assets.
@@ -4776,7 +4769,7 @@ together with source and extract digests. \\
 \codepath{results/scripts/23_validate_results_artifacts.py}
 &
 Canonical commercial prediction schema and counts, commercial metric counts and
-equivalence status, proxy-evaluation summary counts, fold-aggregated
+equivalence status, model-evaluation summary counts, fold-aggregated
 \gls{ood} accounting, reporting-manifest counts, generated-output availability,
 and metadata-sensitivity counts. \\
 
@@ -4839,7 +4832,7 @@ Table~\ref{tab:implementation-reproducibility-boundary}.
 
 Public
 &
-Inspection of source code, manifests, proxy checkpoints, prediction and metric
+Inspection of source code, manifests, model checkpoints, prediction and metric
 tables, sanitized black-box decisions, explainability metadata, thesis-ready
 assets, validation utilities, documentation, and LaTeX sources; reconstruction
 of the canonical normalized black-box prediction table; and recomputation of
@@ -4849,7 +4842,7 @@ Controlled
 &
 Restoration of the heterogeneous source corpora; regeneration of the prepared
 and frozen image pipeline; restoration of the exact 11\,500-file black-box
-input bundle; proxy-model retraining; perturbation regeneration; and selected
+input bundle; model retraining; perturbation regeneration; and selected
 image-level validation, subject to approved data access and the applicable
 source restrictions. \\
 
@@ -4885,7 +4878,7 @@ byte-identical images used in the frozen evaluation.
 
 Source code, manifests, registries, sanitized decisions, metric tables,
 documentation, and thesis sources are maintained through Git version control.
-Large proxy-model checkpoints are managed through Git LFS, while their
+Large model checkpoints are managed through Git LFS, while their
 SHA-256 values remain recorded independently in the model registry.
 
 For historical provenance, the repository preserves the pre-cleanup state
@@ -4913,7 +4906,7 @@ and preserve the information required to audit the evaluation within them.
 
 Chapter~\ref{chap:results} presents the quantitative outcomes obtained from the
 frozen implementation and analyzes their implications for the operational
-robustness of the evaluated proxy models and selected black-box software
+robustness of the evaluated white-box models and selected black-box software
 systems.
 
 

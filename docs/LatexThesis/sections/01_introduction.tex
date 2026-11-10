@@ -13,7 +13,7 @@ inputs may prevent relevant content from receiving appropriate review priority
 or may increase the amount of irrelevant material presented to the analyst.
 
 Against this background, the present thesis evaluates the operational
-robustness of white-box proxy models and selected black-box software
+robustness of white-box models and selected black-box software
 configurations used for automated image classification or semantic retrieval of
 images depicting firearms and related visual content. The evaluation compares
 behavior across clean binary inputs, a separate \gls{ood} branch, adversarial
@@ -221,16 +221,14 @@ inputs that do not conform to the nominal binary task
 Adversarial and anti-forensic artifacts are generated exclusively from the
 binary subset, preserving the distinction among supervised correctness,
 clean-to-perturbed error transitions, and behavior on the separate \gls{ood}
-branch. The evaluation combines white-box proxy models with selected
-black-box software configurations on the same frozen source population and
-derived perturbation suite. The proxy models provide an inspectable
-experimental reference, whereas the proprietary systems are assessed through
-outputs observable to the analyst. No assumption is made that the proxy models
-reproduce or explain their inaccessible internal components. The term
-\textit{proxy} describes this controlled experimental role, whereas
-\textit{white-box} describes the experimenter's access to architectures,
-checkpoints, scores, and gradients. It does not mean that the proxies are
-surrogates of the proprietary systems or that every attack uses gradients.
+branch. The same source images and perturbations are used to evaluate three
+binary classifiers and selected commercial software configurations.
+The classifiers serve as controlled experimental references. The experimenter
+has \textit{white-box} access to their architectures, checkpoints, scores, and
+gradients; this does not mean that every attack uses gradients. The commercial
+systems are evaluated only through observable outputs. The three classifiers
+were not trained to reproduce the commercial systems' decisions, and their
+internals cannot explain those decisions.
 
 Within this framework, a \texttt{weapon}-to-\texttt{non\_weapon} transition may
 prevent potentially relevant content from being prioritized, while the opposite
@@ -252,7 +250,7 @@ used to support evidence analysis
 % ─────────────────────────────────────────────────────────────────────────────
 
 This thesis aims to evaluate systematically the operational robustness of
-white-box proxy models and selected black-box software configurations used for
+white-box models and selected black-box software configurations used for
 the automated classification or semantic retrieval of images of potential
 investigative interest in \gls{df}. The general objective is to determine
 whether behavior observed under clean reference conditions remains stable when
@@ -276,13 +274,13 @@ The first objective is to define a rigorous, documented, and reproducible
 methodological protocol for evaluating operational robustness under controlled
 but operationally relevant forensic image-analysis conditions. The protocol
 connects human-validated dataset construction, deterministic partitioning,
-proxy-model evaluation, perturbation generation, blind-bundle preparation,
+model evaluation, perturbation generation, blind-bundle preparation,
 black-box output normalization, quantitative and qualitative analysis, and
 traceability controls.
 
 The second objective is to evaluate heterogeneous systems on the same frozen
 source population and derived perturbation suite. The white-box level
-comprises \gls{efficientnetb0}, \gls{resnet18}, and a \gls{clip}-based proxy consisting of
+comprises \gls{efficientnetb0}, \gls{resnet18}, and a \gls{clip}-based classifier consisting of
 a frozen visual encoder and a supervised binary classification head. The
 black-box level comprises the selected software configurations evaluated
 exclusively through observable outputs and explicitly documented normalization
@@ -294,7 +292,7 @@ clean-to-perturbed error transitions, \gls{ood} weapon assignment rates,
 architecture-specific maximum predicted-class probabilities, and
 configuration-dependent changes in recall and selectivity. Direct attacks
 against fold-specific \gls{efficientnetb0} source models are distinguished from
-empirical transfer to \gls{resnet18}, the \gls{clip}-based proxy, and the selected
+empirical transfer to \gls{resnet18}, the \gls{clip}-based classifier, and the selected
 black-box configurations. A complementary qualitative \gls{xai} analysis of
 selected \gls{efficientnetb0} cases supports case-level diagnostic inspection but is
 not treated as quantitative robustness evidence or as an explanation of the
@@ -317,12 +315,12 @@ a \textit{human-in-the-loop} forensic workflow
 The experimental design addresses the following research questions:
 
 \begin{enumerate}
-    \item[\textbf{RQ1.}] To what extent do the white-box proxy models retain
+    \item[\textbf{RQ1.}] To what extent do the three white-box models retain
     their clean-baseline performance under adversarial and anti-forensic
     conditions, and how do they assign inputs from the separate \gls{ood}
     population?
 
-    \item[\textbf{RQ2.}] How do white-box proxy-model responses differ between
+    \item[\textbf{RQ2.}] How do the classifiers' responses differ between
     source-model evaluation, empirical cross-model transfer, and the
     model-agnostic \gls{colorshift} condition?
 
@@ -342,7 +340,7 @@ The experimental design addresses the following research questions:
 
 The main contribution of this thesis lies in the definition and application of
 a methodological protocol for evaluating the operational robustness of
-white-box proxy models and selected black-box software configurations used for
+white-box models and selected black-box software configurations used for
 automated image classification or semantic retrieval in \gls{df}. Unlike
 evaluations focused exclusively on standard \textit{computer vision} benchmarks
 or aggregate clean-condition performance, the study adopts a forensic and
@@ -354,7 +352,7 @@ The contribution is articulated across four interconnected dimensions.
 
 The first contribution is the formalization of the \textbf{\gls{fairlab}}
 protocol. \gls{fairlab} coordinates human-validated dataset construction,
-deterministic partitioning, white-box proxy-model evaluation, controlled
+deterministic partitioning, white-box model evaluation, controlled
 perturbation generation, blind-bundle preparation, black-box output
 normalization, error-oriented metrics, qualitative explainability, and
 traceability controls. It is not proposed as a new classifier, defensive
@@ -385,7 +383,7 @@ Each derived artifact remains linked to its source, partition, perturbation
 condition, and reported decision. \\
 Direct attack vs transfer &
 Effects on the designated source model are separated from empirical transfer
-to other white-box proxy models or black-box configurations. \\
+to other white-box models or black-box configurations. \\
 \glsentryshort{ood} behavior &
 Out-of-task inputs are evaluated separately from supervised binary correctness
 and interpreted as closed-set operating behavior. \\
@@ -422,10 +420,10 @@ adopted criteria, reviewer decisions, and associated limitations remain
 traceable
 \cite{sambasivan2021data}.
 
-The third contribution is the parallel evaluation of white-box proxy models
+The third contribution is the parallel evaluation of white-box models
 and selected black-box software configurations on the same frozen experimental
 basis. The white-box level comprises \gls{efficientnetb0}, \gls{resnet18}, and a
-\gls{clip}-based proxy. The black-box level comprises four software systems
+\gls{clip}-based classifier. The black-box level comprises four software systems
 evaluated through six frozen configurations:
 \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{griffeye}/\gls{t3kcore},
@@ -434,10 +432,10 @@ evaluated through six frozen configurations:
 semantic-query results are normalized through explicit operational rules without
 assuming equivalent internal taxonomies or decision mechanisms.
 
-The proxy models provide an inspectable reference and the controlled generation
-layer for model-dependent adversarial artifacts. The protocol distinguishes
-direct-target attacks generated against fold-specific \gls{efficientnetb0}
-checkpoints from empirical transfer to \gls{resnet18}, the \gls{clip}-based proxy,
+All three classifiers provide an inspectable reference, but only
+\gls{efficientnetb0} was used to generate model-dependent adversarial artifacts.
+The protocol distinguishes evaluation on the generating checkpoint from
+empirical transfer to \gls{resnet18}, the \gls{clip}-based classifier,
 and the selected black-box configurations. The deterministic and model-agnostic
 \gls{colorshift} condition remains separate, preventing transfer results from
 being interpreted as direct robustness evaluations of systems against which no

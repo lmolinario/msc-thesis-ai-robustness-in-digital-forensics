@@ -11,7 +11,7 @@ robustness of \gls{ai}-based systems for automated image classification and
 triage in forensic contexts.
 
 A central feature of the evaluation is the parallel analysis of two
-complementary system levels. The first comprises the white-box proxy models
+complementary system levels. The first comprises the white-box models
 defined in Section~\ref{subsec:implementation-architectures}, for which
 predictions, maximum predicted-class probabilities, confusion matrices, and
 internal attribution information are available. The second comprises the
@@ -66,12 +66,12 @@ N_{\mathrm{bundle}}
 \end{aligned}
 \end{equation}
 
-The proxy-model and black-box evaluations use different output
+The white-box and black-box evaluations use different output
 representations but cover the same experimental conditions. Each clean binary
-input or perturbed binary artifact is evaluated by all three proxy
+input or perturbed binary artifact is evaluated by all three
 architectures through the checkpoint associated with its assigned fold.
 
-The \gls{ood} branch follows a different proxy-model evaluation protocol. Each
+The \gls{ood} branch follows a different model evaluation protocol. Each
 of the 500 unique \gls{ood} images is evaluated by all five fold-specific
 checkpoints of each architecture. The resulting 7\,500 prediction rows
 therefore represent repeated checkpoint responses to 500 unique images and
@@ -101,7 +101,7 @@ the result population.
 \textbf{Coverage} \\
 \midrule
 
-Proxy-model predictions
+Model predictions
 &
 40\,500
 &
@@ -116,25 +116,25 @@ Normalized black-box decisions
 Six normalized configurations evaluated on all 11\,500 bundle items, with no
 missing bundle-level decision. \\
 
-Proxy binary-condition metrics
+White-box binary-condition metrics
 &
 33
 &
 Three clean architecture-level rows and 30 architecture--perturbation
 combinations. \\
 
-Proxy robustness comparisons
+White-box robustness comparisons
 &
 30
 &
 Clean-to-perturbed comparisons for three architectures and ten perturbation
 conditions. \\
 
-Proxy \gls{ood} summaries
+White-box \gls{ood} summaries
 &
 3
 &
-One fold-aggregated \gls{ood} record for each proxy architecture. \\
+One fold-aggregated \gls{ood} record for each architecture. \\
 
 Black-box software metrics
 &
@@ -158,7 +158,7 @@ Binary accuracy, precision, recall, F1-score, \gls{fpr}, and \gls{fnr} are
 computed exclusively on samples whose reference operational assignment is
 \texttt{weapon} or \texttt{non\_weapon}. The \gls{ood} branch remains
 separate and is analyzed through the proportion of inputs assigned to the
-\texttt{weapon} class and, for the proxy models, through architecture-specific
+\texttt{weapon} class and, for the classifiers, through architecture-specific
 maximum-probability indicators.
 
 Accuracy drop, induced-error counts, directional error transitions, and the
@@ -175,7 +175,7 @@ anti-forensic transformations, the same numerical transition is interpreted as
 an induced-error rate rather than as adversarial or transfer success.
 
 Maximum predicted-class probabilities are available only for the white-box
-proxy models. They are retained as intra-model diagnostic indicators and are
+models. They are retained as intra-model diagnostic indicators and are
 not interpreted as calibrated probabilities directly comparable across
 architectures. The selected black-box software systems do not expose
 homogeneous numerical uncertainty measures; consequently, their comparison is
@@ -193,7 +193,7 @@ apply throughout the chapter.
 
 Evaluation on clean inputs establishes the nominal baseline against which
 behavior under \gls{ood}, adversarial, and anti-forensic conditions is
-subsequently assessed. The three proxy architectures were evaluated on the
+subsequently assessed. The three architectures were evaluated on the
 frozen binary subset of 1\,000 images, comprising 500
 \texttt{weapon} and 500 \texttt{non\_weapon} samples.
 
@@ -212,7 +212,7 @@ probability defined in Section~\ref{sec:results-scope}.
 \scriptsize
 \setlength{\tabcolsep}{2.3pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Clean performance of the white-box proxy models on the binary subset}
+\caption{Clean performance of the white-box models on the binary subset}
 \label{tab:results-clean-baseline-metrics}
 \begin{tabularx}{\textwidth}{@{}l *{11}{>{\centering\arraybackslash}X}@{}}
 \toprule
@@ -286,7 +286,7 @@ Among the two fully fine-tuned \glspl{cnn}, \gls{efficientnetb0} provides the
 strongest overall balance, with 0.978 accuracy and macro-F1, an \gls{fnr} of
 0.016, and an \gls{fpr} of 0.028.
 \gls{resnet18} follows at 0.964 accuracy and macro-F1, with an \gls{fnr} of
-0.030 and an \gls{fpr} of 0.042. The \gls{clip}-based proxy has lower overall
+0.030 and an \gls{fpr} of 0.042. The \gls{clip}-based classifier has lower overall
 accuracy (0.927) but the highest weapon recall (0.988) and lowest \gls{fnr}
 (0.012), at the cost of the highest \gls{fpr} (0.134). Its lower model-specific
 Max-P value (0.559) accompanies this positive-class tendency but is not a
@@ -300,7 +300,7 @@ combination of the pretrained visual representation and the learned binary
 decision head rather than to the original image--text similarity interface.
 
 Table~\ref{tab:results-clean-confusion-matrices} reports the aggregate
-confusion-matrix components for the three proxy models. The layout is:
+confusion-matrix components for the three classifiers. The layout is:
 
 \[
 \mathbf{C}
@@ -313,7 +313,7 @@ confusion-matrix components for the three proxy models. The layout is:
 
 \begin{table}[H]
 \centering
-\caption{Clean confusion matrices of the white-box proxy models}
+\caption{Clean confusion matrices of the white-box models}
 \label{tab:results-clean-confusion-matrices}
 \begin{tabular}{@{}l r r r r@{}}
 \toprule
@@ -381,7 +381,7 @@ Figure~\ref{fig:results-clean-confusion-matrices}.
 {images/fig_clean_confusion_matrix_clip.pdf}
 \end{minipage}
 
-\caption{Clean confusion matrices of the three white-box proxy models on the binary
+\caption{Clean confusion matrices of the three white-box models on the binary
 subset}
 \label{fig:results-clean-confusion-matrices}
 \end{figure}
@@ -389,7 +389,7 @@ subset}
 The direction of error is operationally decisive: the three models respectively
 produce 8/14, 15/21, and 6/67 false negatives/false positives, for 22, 36, and
 73 errors in total. Thus, the
-\gls{clip}-based proxy minimizes missed targets while substantially increasing
+\gls{clip}-based classifier minimizes missed targets while substantially increasing
 review workload, whereas \gls{efficientnetb0} offers the strongest balance.
 These distinct clean profiles form the baseline for the following robustness
 analyses.
@@ -399,7 +399,7 @@ analyses.
 \label{sec:results-ood}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The \gls{ood} evaluation examines the behavior of the three proxy architectures
+The \gls{ood} evaluation examines the behavior of the three architectures
 on the separate 500-image \gls{ood} branch. As established in
 Chapter~\ref{chap:methodology}, these images are not treated as a third
 supervised class and do not contribute to binary accuracy, precision, recall,
@@ -411,7 +411,7 @@ classes
 \cite{hendrycks2017baseline,liang2018odin,fort2021exploring}.
 
 Each of the 500 unique \gls{ood} images was evaluated by all five
-fold-specific checkpoints of each proxy architecture:
+fold-specific checkpoints of each architecture:
 
 \begin{equation}
 500\ \text{unique \glsentryshort{ood} images}
@@ -442,7 +442,7 @@ Table~\ref{tab:results-ood-behavior} reports the fold-aggregated results.
 \scriptsize
 \setlength{\tabcolsep}{3.5pt}
 \renewcommand{\arraystretch}{1.15}
-\caption{Fold-aggregated behavior of the white-box proxy models on \gls{ood} inputs}
+\caption{Fold-aggregated behavior of the white-box models on \gls{ood} inputs}
 \label{tab:results-ood-behavior}
 \begin{tabular}{@{}l r r r r r r r@{}}
 \toprule
@@ -497,7 +497,7 @@ comprises five checkpoint responses for each of the 500 unique \gls{ood}
 images.
 \end{table}
 
-The \gls{clip}-based proxy assigns 0.8356 of the responses to \texttt{weapon},
+The \gls{clip}-based classifier assigns 0.8356 of the responses to \texttt{weapon},
 far more than \gls{efficientnetb0} (0.3696) or \gls{resnet18} (0.4376), yet none
 of its responses reaches Max-P 0.90. Conversely, \gls{efficientnetb0} and
 \gls{resnet18} produce high-Max-P rates of 0.5008 and 0.6468. Assignment
@@ -529,7 +529,7 @@ architectures.
 \includegraphics[width=0.95\textwidth]
 {images/fig_ood_confidence_distribution.pdf}
 \caption{Distribution of maximum predicted-class probabilities on
-\gls{ood} inputs for each proxy architecture}
+\gls{ood} inputs for each architecture}
 \label{fig:results-ood-confidence-distribution}
 \end{figure}
 
@@ -544,7 +544,7 @@ supervised correctness or stand-alone evidence, and both require human review
 \label{sec:results-antiforensic}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The anti-forensic evaluation examines the stability of the proxy models under
+The anti-forensic evaluation examines the stability of the classifiers under
 five deterministic, model-agnostic image transformations. These conditions do
 not require access to model parameters, gradients, logits, or decision
 thresholds. They represent operations compatible with ordinary image
@@ -661,7 +661,7 @@ comparison as a heatmap.
 \centering
 \includegraphics[width=0.88\textwidth]
 {images/fig_anti_forensic_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop of the white-box proxy models under anti-forensic transformations}
+\caption{Accuracy drop of the white-box models under anti-forensic transformations}
 \label{fig:results-antiforensic-accuracy-drop-heatmap}
 \end{figure}
 
@@ -683,7 +683,7 @@ observed across the three architectures, at 0.030. Gaussian Blur produces a
 smaller reduction to 0.959, corresponding to a drop of 0.005. JPEG
 Recompression leaves aggregate accuracy unchanged at 0.964.
 
-The \gls{clip}-based proxy exhibits small aggregate variations across the five
+The \gls{clip}-based classifier exhibits small aggregate variations across the five
 conditions. JPEG Recompression and Histogram Modification reduce accuracy by
 0.002, Contrast Stretching leaves it unchanged, and Resample Resize increases
 it by 0.002. Gaussian Blur increases aggregate accuracy from 0.927 to 0.934.
@@ -761,7 +761,7 @@ occur from \texttt{weapon} to \texttt{non\_weapon}, while 16 occur from
 \texttt{non\_weapon} to \texttt{weapon}. The condition therefore increases
 both missed-target risk and false-positive review workload.
 
-For the \gls{clip}-based proxy, Histogram Modification introduces 13 errors
+For the \gls{clip}-based classifier, Histogram Modification introduces 13 errors
 among clean-correct samples, corresponding to an induced-error rate of 0.0140.
 Six transitions occur from \texttt{weapon} to \texttt{non\_weapon}, and seven
 occur in the opposite direction. Although the aggregate accuracy drop is only
@@ -777,7 +777,7 @@ architecture- and transformation-specific failure modes rather than a uniform
 degradation pattern. Gaussian Blur primarily affects \gls{efficientnetb0} through
 new \texttt{weapon}-to-\texttt{non\_weapon} transitions, whereas Histogram
 Modification produces the largest effects for \gls{resnet18} and the most relevant
-transition burden for the \gls{clip}-based proxy.
+transition burden for the \gls{clip}-based classifier.
 
 These findings are important because the evaluated transformations do not
 require model access and may arise during routine handling, conversion,
@@ -795,8 +795,7 @@ general robustness claim.
 \label{sec:results-adversarial}
 % ─────────────────────────────────────────────────────────────────────────────
 
-The adversarial evaluation examines the response of the white-box proxy
-models to perturbations generated to alter classifier behavior
+The adversarial evaluation examines the response of the white-box models to perturbations generated to alter classifier behavior
 \cite{szegedy2014intriguing,goodfellow2015explaining,biggio2018wild}. These
 conditions are used to assess operational robustness in a controlled forensic
 evaluation rather than to construct an independent \gls{advml} benchmark.
@@ -809,7 +808,7 @@ Evaluation of these artifacts on \gls{efficientnetb0} constitutes direct-target
 assessment.
 
 The same artifacts were subsequently evaluated on \gls{resnet18} and the
-\gls{clip}-based proxy to measure empirical transfer behavior. Their effects on
+\gls{clip}-based classifier to measure empirical transfer behavior. Their effects on
 these architectures must therefore not be interpreted as white-box attacks
 against \gls{resnet18} or \gls{clip}
 \cite{biggio2018wild,nowroozi2021survey,barni2018cf}.
@@ -939,7 +938,7 @@ conditions}
 \footnotesize
 \textit{Note.} The first four conditions were generated against fold-specific
 \gls{efficientnetb0} checkpoints. Their evaluation on \gls{resnet18} and the
-\acrshort{clip}-based proxy measures transfer behavior. Color Shift is
+\acrshort{clip}-based classifier measures transfer behavior. Color Shift is
 model-agnostic. Drop is computed as clean accuracy minus perturbed accuracy;
 negative values indicate a condition-specific aggregate increase and do not
 establish the absence of newly induced errors.
@@ -957,7 +956,7 @@ were generated against this architecture.
 \centering
 \includegraphics[width=0.88\textwidth]
 {images/fig_adversarial_accuracy_drop_heatmap.pdf}
-\caption{Accuracy drop of the white-box proxy models under adversarial and
+\caption{Accuracy drop of the white-box models under adversarial and
 adversarial-style conditions}
 \label{fig:results-adversarial-accuracy-drop-heatmap}
 \end{figure}
@@ -1094,19 +1093,19 @@ change of a fixed class and does not constitute a calibrated uncertainty
 estimate.
 
 The transfer assessment shows that perturbations optimized against
-\gls{efficientnetb0} do not produce equivalent effects on the other proxy
-architectures. The largest transferred degradation occurs under FGSM.
+\gls{efficientnetb0} do not produce equivalent effects on the other two
+classifiers. The largest transferred degradation occurs under FGSM.
 \gls{resnet18} accuracy decreases from 0.964 to 0.918, corresponding to a drop of
 0.046, 47 induced errors, and an ASR of 0.0488. Twenty-seven of these errors are
 \texttt{weapon}-to-\texttt{non\_weapon} transitions.
 
-For the \gls{clip}-based proxy, FGSM decreases accuracy from 0.927 to 0.914,
+For the \gls{clip}-based classifier, FGSM decreases accuracy from 0.927 to 0.914,
 corresponding to a drop of 0.013. It induces 23 errors and reaches an ASR of
 0.0248. Eight transitions occur from \texttt{weapon} to
 \texttt{non\_weapon}, while 15 occur in the opposite direction.
 
 Transferred Sigma-Zero artifacts do not reproduce the direct-target collapse.
-\gls{resnet18} accuracy increases by 0.004 and the \gls{clip}-based proxy accuracy
+\gls{resnet18} accuracy increases by 0.004 and the accuracy of the \gls{clip}-based classifier
 increases by 0.017. These aggregate increases nevertheless coexist with three
 induced errors for \gls{resnet18} and eight for \gls{clip}. The result again confirms
 that aggregate improvement does not establish sample-level invariance.
@@ -1127,13 +1126,13 @@ relationship between the perturbation-generation model and the evaluated
 architecture. \gls{efficientnetb0} achieves the highest clean accuracy but undergoes
 the most severe degradation when the attacks are optimized directly against
 its fold-specific checkpoints. The same artifacts transfer only partially to
-\gls{resnet18} and the \gls{clip}-based proxy.
+\gls{resnet18} and the \gls{clip}-based classifier.
 
 This limited transferability must not be interpreted as general robustness of
 the non-target architectures. It establishes only that the frozen
 \gls{efficientnetb0}-oriented perturbations were less effective against the other
-proxy models. A direct attack generated against \gls{resnet18} or the
-\gls{clip}-based proxy could produce a different result and was outside the
+white-box models. A direct attack generated against \gls{resnet18} or the
+\gls{clip}-based classifier could produce a different result and was outside the
 experimental scope.
 
 From a forensic perspective, the findings demonstrate that high clean accuracy
@@ -3411,13 +3410,13 @@ residual limitation of bundle blindness rather than removed retrospectively.
 % ─────────────────────────────────────────────────────────────────────────────
 
 The common frozen source population enables a parallel comparison between the
-white-box proxy models and the selected black-box software configurations.
+white-box models and the selected black-box software configurations.
 The comparison is operational rather than architectural: all outputs are
 interpreted through the common \texttt{weapon}/\texttt{non\_weapon} decision
 space, but the mechanisms producing those outputs remain fundamentally
 different.
 
-The proxy models expose fold-specific checkpoints, predicted classes, maximum
+The classifiers expose fold-specific checkpoints, predicted classes, maximum
 predicted-class probabilities, and internal attribution information. They also
 permit matched clean-to-perturbed transition analysis. The black-box software
 systems instead expose heterogeneous observable outputs, including tags,
@@ -3434,7 +3433,7 @@ operational assignments, and explicit normalization rules.
 A further distinction concerns the structure of the evaluated populations. The
 1\,000 clean binary images are common unique inputs. The 10\,000 perturbed
 artifacts are derived from those same source images and must not be interpreted
-as independent real-world cases. On the \gls{ood} branch, each proxy-model rate
+as independent real-world cases. On the \gls{ood} branch, each model rate
 is computed over 2\,500 fold-specific responses:
 
 \begin{equation}
@@ -3442,7 +3441,7 @@ is computed over 2\,500 fold-specific responses:
 \times
 5\ \text{checkpoints}
 =
-2\,500\ \text{responses per proxy architecture},
+2\,500\ \text{responses per architecture},
 \end{equation}
 
 whereas each black-box rate is computed over one normalized decision for each
@@ -3462,7 +3461,7 @@ reference assignment are routed to the operational \texttt{weapon} state.
 
 \begin{table}[!htbp]
 \centering
-\caption{Clean performance and \gls{ood} behavior of the white-box proxy models and
+\caption{Clean performance and \gls{ood} behavior of the white-box models and
 selected black-box reference configurations}
 \label{tab:results-comparative-clean-ood}
 
@@ -3486,28 +3485,28 @@ c c c
 \midrule
 
 \gls{efficientnetb0}
-& Proxy
+& White-box
 & 0.978
 & 0.016
 & 0.370
-& Highest clean accuracy among the proxy models, with eight clean false
+& Highest clean accuracy among the classifiers, with eight clean false
 negatives. Its \gls{ood} rate represents fold-specific checkpoint responses,
 not unique-image-level decisions. \\
 
 \gls{resnet18}
-& Proxy
+& White-box
 & 0.964
 & 0.030
 & 0.438
-& Intermediate clean profile among the proxy models, with 15 clean false
+& Intermediate clean profile among the classifiers, with 15 clean false
 negatives and a higher \gls{ood} weapon assignment rate than \gls{efficientnetb0}. \\
 
 \gls{clip}
-& Proxy
+& White-box
 & 0.927
 & 0.012
 & 0.836
-& Lowest clean accuracy but lowest clean \gls{fnr} among the proxies. The main
+& Lowest clean accuracy but lowest clean \gls{fnr} among the three classifiers. The main
 distinctive behavior is the high proportion of \gls{ood} checkpoint responses
 assigned to \texttt{weapon}. \\
 
@@ -3549,7 +3548,7 @@ those of Magnet.AI and Excire \texttt{D50}. \\
 
 \vspace{0.4em}
 \footnotesize
-\textit{Note.} Proxy-model \gls{ood} rates use 2\,500 fold-specific responses
+\textit{Note.} Model \gls{ood} rates use 2\,500 fold-specific responses
 per architecture. Black-box rates use 500 unique-image-level normalized
 decisions per configuration. The proportions therefore support descriptive
 operational comparison but do not constitute identical statistical
@@ -3557,7 +3556,7 @@ observations.
 \end{table}
 
 Similar clean accuracies do not imply equivalent operating profiles because the
-systems, mappings, and prediction units differ. The \gls{clip}-based proxy most
+systems, mappings, and prediction units differ. The \gls{clip}-based classifier most
 clearly separates nominal accuracy from \gls{ood} behavior: it has only six
 clean false negatives but assigns 0.836 of fold-specific \gls{ood} responses to
 \texttt{weapon}, as discussed in Section~\ref{sec:results-ood}. Black-box
@@ -3581,7 +3580,7 @@ family-level drop is defined as:
 \mathrm{Acc}_{\mathrm{anti\mbox{-}forensic}}.
 \end{equation}
 
-The proxy rows additionally report clean-correct-to-incorrect transitions for
+The white-box rows additionally report clean-correct-to-incorrect transitions for
 the most relevant condition. The black-box rows report condition-level false
 negative or false positive counts because their normalized evaluation does not
 provide an equivalent white-box attack-success interpretation.
@@ -3666,7 +3665,7 @@ target images under histogram modification. \\
 \footnotesize
 \textit{Note.} Family accuracy is computed over the five anti-forensic
 conditions. The reported drop is relative to the corresponding clean accuracy.
-For proxy models, the error burden uses matched induced-error transitions. For
+For white-box models, the error burden uses matched induced-error transitions. For
 black-box configurations, it reports condition-level confusion counts under the
 adopted normalized mapping.
 \end{table}
@@ -3754,7 +3753,7 @@ not a direct white-box assessment of \gls{resnet18}. \\
 & \gls{fgsm}; accuracy 0.914
 & 23 induced errors: 8 W\(\rightarrow\)NW and 15 NW\(\rightarrow\)W
 & Aggregate stability coexists with transferred errors and does not establish
-robustness against attacks optimized directly against the \gls{clip}-based proxy. \\
+robustness against attacks optimized directly against the \gls{clip}-based classifier. \\
 
 \gls{magnetaxiomtool}/\gls{magnetai}
 & 0.9232 / 0.0268
@@ -3792,7 +3791,7 @@ missed target images under FGSM. \\
 \textit{Note.} The adversarial family contains four \gls{efficientnetb0}-oriented
 model-dependent artifact populations and the model-agnostic Color Shift
 condition. Only the \gls{efficientnetb0} rows represent direct-target evaluation for
-the model-dependent attacks. Proxy error burdens use matched induced-error
+the model-dependent attacks. White-box error burdens use matched induced-error
 transitions; black-box rows use condition-level confusion counts.
 \end{table}
 
@@ -3839,7 +3838,7 @@ export, and mapping to remain recorded.
 % ─────────────────────────────────────────────────────────────────────────────
 
 Figure~\ref{fig:results-operational-risk-summary} summarizes seven quantitative
-dimensions for the three proxy models and four black-box reference
+dimensions for the three classifiers and four black-box reference
 configurations. These comprise the clean \gls{fnr}, the bundle-level
 \gls{fpr}, the \gls{ood} weapon-assignment rate, and the adversarial- and
 anti-forensic-family \gls{fnr} values. The figure also reports the degradation
@@ -3847,8 +3846,7 @@ in accuracy produced by adversarial and anti-forensic conditions relative to the
 corresponding clean baseline.
 
 The figure does not encode explainability, auditability, or system
-interpretability as numerical values. The distinction between white-box proxy
-models and black-box software is a methodological property rather than an
+interpretability as numerical values. The distinction between white-box models and black-box software is a methodological property rather than an
 experimentally measured risk score.
 
 \begin{figure}[H]
@@ -3856,7 +3854,7 @@ experimentally measured risk score.
 \includegraphics[width=\textwidth]
 {images/fig_results_operational_risk_summary.pdf}
 \caption[Operational behavior summary across evaluated systems]{Quantitative
-operational-risk indicators across the white-box proxy models and selected black-box
+operational-risk indicators across the white-box models and selected black-box
 reference configurations}
 \label{fig:results-operational-risk-summary}
 \end{figure}
@@ -3867,7 +3865,7 @@ reference configurations}
 binary inputs. Bundle-level \acrshort{fpr} is computed on the complete
 11\,000-item binary population. Adversarial and anti-forensic \acrshort{fnr}
 values are computed over the corresponding 5\,000-item family populations.
-Proxy \acrshort{ood} rates use 2\,500 checkpoint responses, whereas black-box
+Model \acrshort{ood} rates use 2\,500 checkpoint responses, whereas black-box
 rates use 500 unique-image-level decisions. In the two degradation columns,
 negative raw drops are displayed as zero because the figure represents
 non-negative operational degradation; the original signed values remain
@@ -3921,13 +3919,13 @@ individual \gls{efficientnetb0} outputs. It is not treated as a primary robustne
 metric, a quantitative validation of model reliability, or an evidentiary
 interpretation of the analyzed images.
 
-The analysis is limited to the white-box \gls{efficientnetb0} proxy. It does not
+The analysis is limited to \gls{efficientnetb0}. It does not
 explain the behavior of \gls{magnetaxiomtool}/\gls{magnetai},
 \gls{griffeye}/\gls{t3kcore},
 \gls{excirefoto2025}, or
 \gls{cellebriteinseyets}. These systems remain black-box within the
-experimental protocol, and their observable outputs cannot be attributed using
-the proxy model's internal gradients.
+experimental protocol; the gradients of \gls{efficientnetb0} cannot explain
+their observable outputs.
 
 The retained visualizations were generated using \gls{ig}. For each case, the
 model-predicted class, recorded as \texttt{predicted\_label}, was used as the
@@ -4130,8 +4128,8 @@ probability}
 
 Figure~\ref{fig:xai-case3-ood-as-weapon} presents an input from the separate
 \gls{ood} branch. The sample has no supervised
-\texttt{weapon}/\texttt{non\_weapon} reference assignment, but the closed-set
-proxy assigns it to \texttt{weapon} with a maximum predicted-class probability
+\texttt{weapon}/\texttt{non\_weapon} reference assignment, but
+\gls{efficientnetb0} assigns it to \texttt{weapon} with a maximum predicted-class probability
 of 0.999.
 
 The output is not a supervised false positive; it shows how an out-of-task
@@ -4236,12 +4234,12 @@ baselines, attribution targets, checkpoints, integration-step counts, or
 explanation methods. A different attribution configuration could produce a
 different visualization for the same model output.
 
-The principal contribution of the \gls{xai} layer is therefore diagnostic
-transparency at the proxy-model level. It preserves a traceable connection
+The \gls{xai} analysis makes individual \gls{efficientnetb0} predictions
+easier to examine. It preserves a traceable connection
 among the input, predicted class, maximum predicted-class probability,
 attribution target, and selected visualization.
 
-This transparency does not convert the proxy prediction into evidence and does
+This traceability does not turn the classifier's prediction into evidence and does
 not extend to the selected black-box software systems. Within a \gls{df}
 workflow, the figures support critical review of the purposively selected cases
 while preserving the central role of the human analyst in the final
@@ -4267,7 +4265,7 @@ their direction or distribution. Second, a \texttt{weapon} assignment on an
 population has no binary reference assignment. Third, the four model-dependent
 adversarial attacks were optimized against fold-specific
 \gls{efficientnetb0} checkpoints; their effects on \gls{resnet18}, the
-\gls{clip}-based proxy, and the selected black-box configurations therefore
+\gls{clip}-based classifier, and the selected black-box configurations therefore
 represent empirical transfer rather than matched direct-target robustness.
 
 The black-box results must likewise be interpreted as properties of the frozen
@@ -4276,11 +4274,11 @@ families. Tags, bookmarks, semantic retrieval results, and exported
 classification labels were normalized through explicit operational mappings,
 and alternative defensible mappings or future software versions could produce
 different operating profiles. Maximum predicted-class probabilities available
-for the proxy models are also architecture-specific diagnostic outputs and are
+for the classifiers are also architecture-specific diagnostic outputs and are
 not treated as calibrated or directly comparable measures of correctness.
 
 Finally, the manipulated populations are derived from the same 1\,000 binary
-source images, and the proxy-model and black-box \gls{ood} rates use different
+source images, and the white-box and black-box \gls{ood} rates use different
 prediction units. These properties constrain the statistical interpretation of
 the reported aggregate values and reinforce the protocol-specific nature of the
 comparison.

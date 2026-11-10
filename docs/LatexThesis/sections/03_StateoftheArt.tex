@@ -14,7 +14,7 @@ technical background.
 The objective is to identify the specific research gap that motivates the
 experimental approach adopted in this thesis: the limited availability of
 integrated and operationally oriented protocols for evaluating white-box
-proxy models and selected black-box software configurations on a common,
+models and selected black-box software configurations on a common,
 task-specific experimental basis under clean, \gls{ood}, adversarial, and
 anti-forensic conditions.
 
@@ -127,7 +127,7 @@ most directly relevant prior contributions for the present thesis. The
 preliminary study already included weapon-related visual content. The present
 work uses a controlled \texttt{weapon}/\texttt{non\_weapon} task, a separate
 \texttt{ood} branch, and paired, traceable evaluation across white-box
-proxies and commercial configurations.
+models and commercial configurations.
 
 
 % ─────────────────────────────────────────────────────────────────────────────
@@ -291,8 +291,10 @@ evaluating, through a reproducible experimental protocol, the operational
 robustness of observable outputs in the presence of clean images,
 out-of-distribution content, adversarial perturbations, and anti-forensic
 transformations. This approach extends the prior literature to a different
-visual task of investigative interest and to a comparison between controllable
-proxy models and \gls{ai}-based software evaluated in a black-box setting.
+visual task of investigative interest. The three white-box models provide a
+controlled reference for comparison with the \gls{ai}-based forensic tools.
+For those tools, only the decisions returned on the same images are observable;
+the comparison does not establish which models produced them.
 
 \begin{table}[htbp]
     \centering
@@ -841,11 +843,10 @@ limitation, with respect to the problem addressed in the present thesis, is
 that these contributions were not designed to evaluate the operational
 robustness of proprietary \gls{ai}-based software in forensic contexts, nor to
 establish whether an explanation remains diagnostically useful in the presence
-of manipulated inputs. For this reason, the explainability analysis included in
-the experimental protocol is applied to controllable proxy models and used as
-qualitative support for interpreting failure cases, rather than as a primary
-metric or as an equivalent explanation of the software evaluated in a
-black-box setting.
+of manipulated inputs. This thesis therefore uses \gls{ig} on five selected
+\gls{efficientnetb0} cases to help interpret individual predictions. These
+attributions are neither a robustness metric nor explanations of the decisions
+of the black-box software.
 
 In the case of forensic image classification, this type of analysis is useful
 primarily for verifying whether, after a manipulation, local attributions remain
@@ -1115,7 +1116,7 @@ works.
 The specific gap identified by the present thesis therefore concerns the limited
 availability of integrated experimental protocols that combine, within the same
 evaluation design, automated image classification or semantic image retrieval,
-\textit{human-in-the-loop} dataset validation, heterogeneous proxy models,
+\textit{human-in-the-loop} dataset validation, heterogeneous white-box models,
 AI-based software selected for operational evaluation in a forensic context,
 adversarial perturbations, anti-forensic transformations, quantitative metrics,
 and explainability-based analysis of model behavior. The relevance of this
@@ -1128,7 +1129,7 @@ that potential errors may have on triage and evidence selection.
 
 The present thesis is positioned precisely within this gap. Its contribution
 consists of conducting an experimental evaluation of the operational robustness
-of proxy models and AI-based software employed, in the context of \gls{df}, for
+of white-box models and AI-based software employed, in the context of \gls{df}, for
 the automated classification or semantic retrieval of images of potential
 investigative interest, jointly considering the algorithmic and
 operational-investigative dimensions. The objective is not only to measure
