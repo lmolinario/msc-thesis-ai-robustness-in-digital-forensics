@@ -593,7 +593,7 @@ def generate_ood_summary_figure(
     ax.set_ylim(0, 1.08)
     set_axis_percent(ax)
     ax.set_ylabel("Rate / confidence")
-    ax.set_title("Out-of-distribution behavior by proxy model")
+    ax.set_title("Out-of-distribution behavior by classifier")
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.12), ncol=3, frameon=False)
     ax.grid(axis="y", linestyle="--", linewidth=0.5, alpha=0.6)
     fig.tight_layout()
@@ -671,7 +671,7 @@ def generate_optional_ood_confidence_distribution(
     ax.set_ylim(0, 1.02)
     set_axis_percent(ax)
     ax.set_ylabel("Prediction confidence")
-    ax.set_title("OOD confidence distribution by proxy model")
+    ax.set_title("Maximum predicted-class probability on OOD inputs by classifier")
     ax.grid(axis="y", linestyle="--", linewidth=0.5, alpha=0.6)
     fig.tight_layout()
 
